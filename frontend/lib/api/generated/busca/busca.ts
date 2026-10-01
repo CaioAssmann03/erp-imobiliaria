@@ -48,8 +48,8 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 /**
  * Busca global: poucos resultados de cada cadastro, em uma única requisição.
  *
- * Cada consulta usa os índices trigram (`UPPER(coluna) LIKE`) e é limitada a
- * `LIMIT_PER_TYPE` linhas, então o custo não cresce com o tamanho das tabelas.
+ * Cada consulta usa os índices trigram (`UPPER(coluna) LIKE` e dígitos do documento) e é
+ * limitada a `LIMIT_PER_TYPE` linhas. Quem começa com o termo vem primeiro.
  */
 export const buscaRetrieve = (
     params: BuscaRetrieveParams,

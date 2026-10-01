@@ -11,7 +11,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
     >
       <table
         data-slot="table"
-        className={cn("w-full border-separate border-spacing-y-1 text-body", className)}
+        className={cn("w-full border-separate border-spacing-0 text-body", className)}
         {...props}
       />
     </div>
@@ -22,7 +22,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
-      className={cn("[&_th:first-child]:rounded-l-panel [&_th:last-child]:rounded-r-panel", className)}
+      className={cn(className)}
       {...props}
     />
   )
@@ -56,7 +56,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "transition-colors hover:bg-surface-muted/70 data-[state=selected]:bg-surface-muted [&>td:first-child]:rounded-l-panel [&>td:last-child]:rounded-r-panel",
+        "group/row relative transition-colors hover:bg-surface-muted/60 data-[state=selected]:bg-surface-muted [&>td:first-child]:rounded-l-panel [&>td:last-child]:rounded-r-panel",
         className
       )}
       {...props}
@@ -69,7 +69,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "h-8 bg-surface-muted px-3 text-left align-middle text-caption font-medium whitespace-nowrap text-ink-soft",
+        "h-9 border-b border-border px-3 text-left align-middle text-caption font-normal whitespace-nowrap text-ink-faint",
         className
       )}
       {...props}
@@ -82,7 +82,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     <td
       data-slot="table-cell"
       className={cn(
-        "px-3 py-2 align-middle whitespace-nowrap",
+        "px-3 py-3 align-middle whitespace-nowrap",
         className
       )}
       {...props}

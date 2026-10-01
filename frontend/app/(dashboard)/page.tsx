@@ -3,16 +3,29 @@ import { FocusModal } from "@/components/FocusModal";
 import { Greeting } from "@/components/Greeting";
 import { PageHeader } from "@/components/PageHeader";
 import { RecentList } from "@/components/RecentList";
+import { WidgetCard } from "@/components/WidgetCard";
 import { SeeAllLink } from "@/components/SeeAllLink";
-import { Card } from "@/components/ui/card";
-import {
-  getCondominiosListQueryOptions,
-  getDashboardRetrieveQueryOptions,
-  getPessoasListQueryOptions,
-} from "@/lib/api/generated";
+import { getDashboardRetrieveQueryOptions } from "@/lib/api/generated";
 import { getServerQueryClient } from "@/lib/query/server";
 
-const LIST_SIZE = 6;
+const DAY = 86_400_000;
+
+function formatDate(iso: string) {
+  return iso.split("-").reverse().join("/");
+}
+
+/** "em 9 dias" / "hoje" / "há 12 dias", a partir de uma data ISO (AAAA-MM-DD). */
+function relativeDays(iso: string) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days = Math.round((new Date(`${iso}T00:00:00`).getTime() - today.getTime()) / DAY);
+  if (days === 0) return "hoje";
+  return days > 0 ? `em ${days} dia${days > 1 ? "s" : ""}` : `há ${-days} dia${days < -1 ? "s" : ""}`;
+}
+
+function Late({ children }: { children: React.ReactNode }) {
+  return <span className="text-danger">{children}</span>;
+}
 
 export default async function DashboardHomePage({
   searchParams,
@@ -21,14 +34,9 @@ export default async function DashboardHomePage({
 }) {
   const { foco } = await searchParams;
   const queryClient = getServerQueryClient();
-  const load = <T,>(promise: Promise<T>) => promise.catch(() => undefined);
 
-  // Buscas no servidor via TanStack Query. Falhas degradam para "–".
-  const [dash, condominios, pessoas] = await Promise.all([
-    load(queryClient.fetchQuery(getDashboardRetrieveQueryOptions())),
-    load(queryClient.fetchQuery(getCondominiosListQueryOptions({}))),
-    load(queryClient.fetchQuery(getPessoasListQueryOptions({}))),
-  ]);
+  // Busca no servidor via TanStack Query. Falha degrada para "–" em vez de derrubar o painel.
+  const dash = await queryClient.fetchQuery(getDashboardRetrieveQueryOptions()).catch(() => undefined);
 
   const widgets = buildWidgets(dash);
   const focused = WIDGET_IDS.includes(foco as WidgetId) ? widgets[foco as WidgetId] : undefined;
@@ -37,7 +45,7 @@ export default async function DashboardHomePage({
     <div>
       <PageHeader
         title={<Greeting />}
-        description="Visão geral da administração de condomínios, locações, vendas e financeiro."
+        description="O que pede atenção na administração de condomínios, locações, vendas e financeiro."
       />
 
       {focused && (
@@ -50,51 +58,46 @@ export default async function DashboardHomePage({
         {WIDGET_IDS.map((id) => {
           const widget = widgets[id];
           return (
-            <Card key={id} id={id} className={`gap-4 ${widget.className}`}>
+            <WidgetCard key={id} id={id} className={`gap-4 ${widget.className}`}>
               {widget.showHeader && (
                 <div className="flex items-start justify-between px-5">
-                  <div>
-                    <h2 className="text-heading">{widget.title}</h2>
-                    {widget.description && (
-                      <p className="text-caption text-ink-soft">{widget.description}</p>
-                    )}
-                  </div>
+                  <h2 className="text-heading">{widget.title}</h2>
                   {widget.seeAll && <SeeAllLink href={widget.seeAll.href} />}
                 </div>
               )}
               <div className="px-5">{widget.render(false)}</div>
-            </Card>
+            </WidgetCard>
           );
         })}
 
-        {/* Listas */}
         <div className="grid grid-cols-1 gap-4 lg:col-span-12 lg:grid-cols-2">
           <RecentList
-            title="Condomínios"
-            count={condominios?.count}
+            title="Próximos reajustes"
             allHref="/condominios"
-            metaLabel="Cidade"
-            items={(condominios?.results ?? []).slice(0, LIST_SIZE).map((c) => ({
-              id: c.id,
-              name: c.nome,
-              sub: c.cnpj,
-              meta: c.cidade ? `${c.cidade}/${c.uf}` : null,
-              ativo: c.ativo,
-              href: `/condominios/${c.id}`,
+            metaLabel="Data"
+            extraLabel="Prazo"
+            emptyText="Nenhum condomínio com reajuste configurado."
+            items={(dash?.proximos_reajustes ?? []).map((r) => ({
+              id: r.id,
+              name: r.nome,
+              meta: `${formatDate(r.data)}${r.indice ? ` · ${r.indice}` : ""}`,
+              extra: r.atrasado ? <Late>{relativeDays(r.data)}</Late> : relativeDays(r.data),
+              href: `/condominios/${r.id}`,
             }))}
           />
           <RecentList
-            title="Pessoas"
-            count={pessoas?.count}
-            allHref="/pessoas"
-            metaLabel="Celular"
-            items={(pessoas?.results ?? []).slice(0, LIST_SIZE).map((p) => ({
-              id: p.id,
-              name: p.nome,
-              sub: p.email || p.cpf_cnpj,
-              meta: p.celular,
-              ativo: p.ativo,
-              href: `/pessoas/${p.id}`,
+            title="Locações a vencer"
+            allHref="/condominios"
+            metaLabel="Locatário"
+            extraLabel="Fim"
+            emptyText="Nenhuma locação termina nos próximos 60 dias."
+            items={(dash?.locacoes ?? []).map((l) => ({
+              id: l.id,
+              name: `Unidade ${l.unidade} · ${l.condominio_nome}`,
+              meta: l.locatario,
+              // Já encerrada: só "há 12 dias" em vermelho (a cor já diz que passou do prazo).
+              extra: l.encerrada ? <Late>{relativeDays(l.data_fim)}</Late> : relativeDays(l.data_fim),
+              href: `/condominios/${l.condominio}/unidades/${l.id}`,
             }))}
           />
         </div>

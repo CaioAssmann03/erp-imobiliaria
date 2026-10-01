@@ -79,7 +79,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * CRUD de Pessoa + busca por nome ou CPF/CNPJ (?search=), reaproveitado
+ * CRUD de Pessoa + busca por nome ou CPF/CNPJ (?query=), reaproveitado
  * pelo cadastro de Unidade para vincular proprietário/locatário existente.
  */
 export const pessoasList = (
@@ -170,7 +170,7 @@ export function usePessoasList<TData = Awaited<ReturnType<typeof pessoasList>>, 
 
 
 /**
- * CRUD de Pessoa + busca por nome ou CPF/CNPJ (?search=), reaproveitado
+ * CRUD de Pessoa + busca por nome ou CPF/CNPJ (?query=), reaproveitado
  * pelo cadastro de Unidade para vincular proprietário/locatário existente.
  */
 export const pessoasCreate = (
@@ -235,7 +235,7 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getPessoasCreateMutationOptions(options), queryClient);
     }
     /**
- * CRUD de Pessoa + busca por nome ou CPF/CNPJ (?search=), reaproveitado
+ * CRUD de Pessoa + busca por nome ou CPF/CNPJ (?query=), reaproveitado
  * pelo cadastro de Unidade para vincular proprietário/locatário existente.
  */
 export const pessoasRetrieve = (
@@ -325,7 +325,7 @@ export function usePessoasRetrieve<TData = Awaited<ReturnType<typeof pessoasRetr
 
 
 /**
- * CRUD de Pessoa + busca por nome ou CPF/CNPJ (?search=), reaproveitado
+ * CRUD de Pessoa + busca por nome ou CPF/CNPJ (?query=), reaproveitado
  * pelo cadastro de Unidade para vincular proprietário/locatário existente.
  */
 export const pessoasUpdate = (
@@ -391,7 +391,7 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getPessoasUpdateMutationOptions(options), queryClient);
     }
     /**
- * CRUD de Pessoa + busca por nome ou CPF/CNPJ (?search=), reaproveitado
+ * CRUD de Pessoa + busca por nome ou CPF/CNPJ (?query=), reaproveitado
  * pelo cadastro de Unidade para vincular proprietário/locatário existente.
  */
 export const pessoasPartialUpdate = (
@@ -457,7 +457,7 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getPessoasPartialUpdateMutationOptions(options), queryClient);
     }
     /**
- * CRUD de Pessoa + busca por nome ou CPF/CNPJ (?search=), reaproveitado
+ * CRUD de Pessoa + busca por nome ou CPF/CNPJ (?query=), reaproveitado
  * pelo cadastro de Unidade para vincular proprietário/locatário existente.
  */
 export const pessoasDestroy = (

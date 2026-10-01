@@ -15,3 +15,4 @@ class PessoaViewSet(viewsets.ModelViewSet):
     serializer_class = PessoaSerializer
     filter_backends = [DjangoFilterBackend, QuerySearchFilter]
     search_fields = ["nome", "cpf_cnpj", "email"]
+    filterset_fields = ["ativo", "tipo_pessoa"]

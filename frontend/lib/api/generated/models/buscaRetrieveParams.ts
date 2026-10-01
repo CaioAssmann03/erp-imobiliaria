@@ -8,7 +8,7 @@
 
 export type BuscaRetrieveParams = {
 /**
- * Termo (mín. 2 caracteres)
+ * Termo: mín. 3 caracteres (2 se for numérico). CPF/CNPJ com ou sem pontuação.
  */
 q: string;
 };

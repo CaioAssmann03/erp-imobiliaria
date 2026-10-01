@@ -21,20 +21,23 @@
   --color-ink: #1c1b19;
   --color-ink-soft: #6e6d68;
   --color-ink-faint: #a5a49e;
+  --color-ink-foreground: #ffffff; /* texto sobre ink (botões escuros) */
 
   /* Marca (laranja) */
   --color-brand: #f05a28;
   --color-brand-strong: #d9481a;
   --color-brand-light: #ff7a45;
-  --color-brand-soft: #fde9df;
+  --color-brand-foreground: #ffffff; /* texto sobre brand */
+  --color-brand-soft: color-mix(in oklab, var(--color-brand) 12%, var(--color-surface));
 
   /* Semânticas (somente para status) */
   --color-success: #1d9a54;
-  --color-success-soft: #e5f5ec;
-  --color-danger: #e03e2b;
-  --color-danger-soft: #fdebe8;
+  --color-success-soft: color-mix(in oklab, var(--color-success) 12%, var(--color-surface));
+  /* Vermelho de verdade (matiz ~20): não pode se confundir com laranja/rosa de destaque. */
+  --color-danger: #d4243a;
+  --color-danger-soft: color-mix(in oklab, var(--color-danger) 11%, var(--color-surface));
   --color-warning: #c98a06;
-  --color-warning-soft: #fcf1d6;
+  --color-warning-soft: color-mix(in oklab, var(--color-warning) 14%, var(--color-surface));
 
   /* Tipografia */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
@@ -80,7 +83,7 @@
   --popover: var(--color-surface);
   --popover-foreground: var(--color-ink);
   --primary: var(--color-ink);
-  --primary-foreground: #ffffff;
+  --primary-foreground: var(--color-ink-foreground);
   --secondary: var(--color-surface-muted);
   --secondary-foreground: var(--color-ink);
   --muted: var(--color-surface-muted);
@@ -88,7 +91,7 @@
   --accent: var(--color-surface-sunken);
   --accent-foreground: var(--color-ink);
   --destructive: var(--color-danger);
-  --border: rgb(28 27 25 / 0.07);
+  --border: color-mix(in oklab, var(--color-ink) 8%, transparent);
   --input: transparent;
   --ring: var(--color-brand);
   --radius: 0.875rem;
@@ -143,24 +146,148 @@
 }
 
 /* Vidro (liquid glass): translúcido + blur + realce interno de 1px.
-   `glass-pill` para elementos pequenos (header), `glass` para painéis flutuantes. */
+   `glass-pill` para elementos pequenos (header), `glass` para painéis flutuantes.
+   As cores vêm de variáveis (claro/escuro em "Temas" abaixo). */
 @utility glass-pill {
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0.55));
+  background: linear-gradient(180deg, var(--glass-top), var(--glass-bottom));
   -webkit-backdrop-filter: blur(16px) saturate(1.5);
   backdrop-filter: blur(16px) saturate(1.5);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.9),
-    inset 0 0 0 1px rgb(255 255 255 / 0.55),
+    inset 0 1px 0 var(--glass-highlight),
+    inset 0 0 0 1px var(--glass-edge),
     0 1px 3px rgb(28 27 25 / 0.06);
 }
 
 @utility glass {
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.8), rgb(255 255 255 / 0.58));
+  background: linear-gradient(180deg, var(--glass-top), var(--glass-bottom));
   -webkit-backdrop-filter: blur(32px) saturate(1.7);
   backdrop-filter: blur(32px) saturate(1.7);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.95),
-    inset 0 0 0 1px rgb(255 255 255 / 0.6),
-    0 24px 64px rgb(28 27 25 / 0.18),
-    0 4px 12px rgb(28 27 25 / 0.06);
+    inset 0 1px 0 var(--glass-highlight),
+    inset 0 0 0 1px var(--glass-edge),
+    0 24px 64px rgb(0 0 0 / 0.2),
+    0 4px 12px rgb(0 0 0 / 0.06);
+}
+
+/* ==========================================================================
+   Temas (Configurações): o app define, no <html>, os atributos
+   data-mode (light | dark | system), data-accent e data-font.
+   Cada tema só sobrescreve variáveis; os componentes não mudam.
+   ========================================================================== */
+
+:root {
+  --glass-top: color-mix(in oklab, var(--color-surface) 82%, transparent);
+  --glass-bottom: color-mix(in oklab, var(--color-surface) 58%, transparent);
+  --glass-highlight: rgb(255 255 255 / 0.95);
+  --glass-edge: rgb(255 255 255 / 0.6);
+}
+
+/* Modo escuro (explícito) e modo "sistema" quando o SO está escuro. */
+html[data-mode="dark"] {
+  --color-canvas: #101010;
+  --color-shell: #181817;
+  --color-surface: #21211f;
+  --color-surface-muted: #2a2a27;
+  --color-surface-sunken: #353531;
+  --color-ink: #f2f2ef;
+  --color-ink-soft: #a4a39d;
+  --color-ink-faint: #706f6a;
+  --color-ink-foreground: #1c1b19;
+  --color-success: #3ecf7a;
+  --color-danger: #ff5d6e;
+  --color-warning: #e9b440;
+  --glass-top: rgb(60 60 56 / 0.72);
+  --glass-bottom: rgb(36 36 33 / 0.62);
+  --glass-highlight: rgb(255 255 255 / 0.12);
+  --glass-edge: rgb(255 255 255 / 0.08);
+  /* No escuro a sombra some: o contorno de 1px é o que separa painéis flutuantes. */
+  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.04);
+  --shadow-float: 0 12px 32px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.09);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-mode="system"] {
+    --color-canvas: #101010;
+    --color-shell: #181817;
+    --color-surface: #21211f;
+    --color-surface-muted: #2a2a27;
+    --color-surface-sunken: #353531;
+    --color-ink: #f2f2ef;
+    --color-ink-soft: #a4a39d;
+    --color-ink-faint: #706f6a;
+    --color-ink-foreground: #1c1b19;
+    --color-success: #3ecf7a;
+    --color-danger: #ff5d6e;
+    --color-warning: #e9b440;
+    --glass-top: rgb(60 60 56 / 0.72);
+    --glass-bottom: rgb(36 36 33 / 0.62);
+    --glass-highlight: rgb(255 255 255 / 0.12);
+    --glass-edge: rgb(255 255 255 / 0.08);
+    --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.04);
+    --shadow-float: 0 12px 32px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.09);
+    color-scheme: dark;
+  }
+}
+
+/* Cor de destaque (o laranja é o padrão, definido em @theme). Os fundos e cinzas não mudam
+   com a cor; só o destaque (e, no rosa, o vermelho de erro, para não se confundir com ele). */
+html[data-accent="blue"] {
+  --color-brand: #2f6bff;
+  --color-brand-strong: #1f55d6;
+  --color-brand-light: #5b8dff;
+}
+html[data-accent="green"] {
+  --color-brand: #1f9d6b;
+  --color-brand-strong: #17805a;
+  --color-brand-light: #3ec48d;
+}
+html[data-accent="violet"] {
+  --color-brand: #7a4dff;
+  --color-brand-strong: #6238e0;
+  --color-brand-light: #9b7bff;
+}
+html[data-accent="rose"] {
+  --color-brand: #e5457a;
+  --color-brand-strong: #c8346a;
+  --color-brand-light: #ff6f9f;
+  /* Rosa e vermelho se confundem: o alerta vira vermelho-alaranjado. */
+  --color-danger: #d8501a;
+}
+html[data-accent="graphite"] {
+  --color-brand: #3a3a38;
+  --color-brand-strong: #1c1b19;
+  --color-brand-light: #6b6a66;
+}
+html[data-mode="dark"][data-accent="rose"] {
+  --color-danger: #ff7a3d;
+}
+/* Grafite no escuro precisa ser claro para ter contraste. */
+html[data-mode="dark"][data-accent="graphite"] {
+  --color-brand: #c9c8c2;
+  --color-brand-strong: #e4e3de;
+  --color-brand-light: #a9a8a2;
+  --color-brand-foreground: #1c1b19;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-mode="system"][data-accent="rose"] {
+    --color-danger: #ff7a3d;
+  }
+  html[data-mode="system"][data-accent="graphite"] {
+    --color-brand: #c9c8c2;
+    --color-brand-strong: #e4e3de;
+    --color-brand-light: #a9a8a2;
+    --color-brand-foreground: #1c1b19;
+  }
+}
+
+/* Fonte (Inter é a padrão; as variáveis --font-* vêm do next/font em layout.tsx). */
+html[data-font="dm-sans"] {
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+}
+html[data-font="serif"] {
+  --font-sans: var(--font-source-serif), Georgia, "Times New Roman", serif;
+}
+html[data-font="system"] {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 }

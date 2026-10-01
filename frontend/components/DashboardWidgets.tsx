@@ -1,9 +1,6 @@
-
 import Link from "next/link";
 
-import { CadastrosMensaisChart } from "@/components/charts/CadastrosMensaisChart";
-import { PessoasPorTipoChart } from "@/components/charts/PessoasPorTipoChart";
-import { UnidadesPorTipoChart } from "@/components/charts/UnidadesPorTipoChart";
+import { SimpleBarChart } from "@/components/charts/SimpleBarChart";
 import { DotMatrix } from "@/components/DotMatrix";
 import { LinkButton } from "@/components/LinkButton";
 import { SeeAllLink } from "@/components/SeeAllLink";
@@ -11,10 +8,9 @@ import type { Dashboard } from "@/lib/api/generated/models";
 
 export const WIDGET_IDS = [
   "condominios",
-  "unidades-ativas",
-  "unidades-por-tipo",
-  "novos-cadastros",
-  "pessoas",
+  "responsaveis",
+  "reajustes",
+  "receita-fixa",
   "pendencias",
 ] as const;
 
@@ -33,6 +29,9 @@ export interface Widget {
   render: (large: boolean) => React.ReactNode;
 }
 
+const brl = (value: number | string) =>
+  Number(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
 function Caption({ children }: { children: React.ReactNode }) {
   return <p className="text-caption text-ink-soft">{children}</p>;
 }
@@ -50,9 +49,24 @@ function TypeList({ items }: { items: { rotulo: string; total: number }[] }) {
   );
 }
 
+function monthLabel(value: string) {
+  if (value === "atrasados") return "Atras.";
+  const [year, month] = value.split("-").map(Number);
+  return new Date(year, month - 1, 1)
+    .toLocaleDateString("pt-BR", { month: "short" })
+    .replace(".", "");
+}
+
+function monthLabelLong(value: string) {
+  if (value === "atrasados") return "Reajustes atrasados";
+  const [year, month] = value.split("-").map(Number);
+  return new Date(year, month - 1, 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+}
+
 export function buildWidgets(dash: Dashboard | undefined): Record<WidgetId, Widget> {
-  const fisica = dash?.pessoas.por_tipo.find((t) => t.tipo === "fisica")?.total ?? 0;
-  const juridica = dash?.pessoas.por_tipo.find((t) => t.tipo === "juridica")?.total ?? 0;
+  const resp = dash?.responsaveis;
+  const semResponsavel = resp ? resp.unidades_ativas - resp.com_responsavel : undefined;
+  const receita = dash?.receita_fixa;
 
   return {
     condominios: {
@@ -94,76 +108,83 @@ export function buildWidgets(dash: Dashboard | undefined): Record<WidgetId, Widg
       ),
     },
 
-    "unidades-ativas": {
-      title: "Unidades ativas",
-      description: "Proporção de unidades em operação.",
+    responsaveis: {
+      title: "Unidades com responsável",
+      description: "Unidades ativas com proprietário ou locatário vinculado.",
       className: "lg:col-span-4",
       showHeader: true,
       render: (large) => (
         <>
           <DotMatrix
-            filled={dash?.unidades.ativos ?? 0}
-            total={dash?.unidades.total ?? 0}
+            filled={resp?.com_responsavel ?? 0}
+            total={resp?.unidades_ativas ?? 0}
             columns={large ? 40 : 24}
             rows={large ? 10 : 6}
           />
           <div className="mt-4">
-            <Caption>{dash?.unidades.total ?? 0} unidades cadastradas</Caption>
+            <Caption>
+              {semResponsavel === undefined
+                ? "–"
+                : semResponsavel === 0
+                  ? "Todas as unidades têm responsável"
+                  : `${semResponsavel} sem ninguém para cobrar`}
+            </Caption>
             <div className="text-title tabular-nums">
-              {dash?.unidades.ativos ?? "–"}
-              <span className="text-heading font-normal text-ink-faint"> ativas</span>
+              {resp?.com_responsavel ?? "–"}
+              <span className="text-heading font-normal text-ink-faint"> de {resp?.unidades_ativas ?? "–"}</span>
             </div>
           </div>
         </>
       ),
     },
 
-    "unidades-por-tipo": {
-      title: "Unidades por tipo",
-      description: "Distribuição do cadastro",
+    reajustes: {
+      title: "Reajustes",
+      description: "Previstos nos próximos 6 meses",
       className: "lg:col-span-3",
       showHeader: true,
       render: (large) => (
-        <>
-          <UnidadesPorTipoChart
-            data={dash?.unidades.por_tipo ?? []}
-            className={large ? "h-72 w-full" : "h-40 w-full"}
-            fullLabels={large}
-          />
-          {large && (
-            <div className="mt-4 max-w-xs">
-              <TypeList items={dash?.unidades.por_tipo ?? []} />
-            </div>
-          )}
-        </>
-      ),
-    },
-
-    "novos-cadastros": {
-      title: "Novos cadastros",
-      description: "Últimos 6 meses",
-      className: "lg:col-span-6",
-      showHeader: true,
-      render: (large) => (
-        <CadastrosMensaisChart
-          data={dash?.cadastros_por_mes ?? []}
-          className={large ? "h-96 w-full" : "h-56 w-full"}
+        <SimpleBarChart
+          data={(dash?.reajustes_por_mes ?? []).map((item) => ({
+            label: monthLabel(item.mes),
+            tooltipLabel: monthLabelLong(item.mes),
+            value: item.total,
+          }))}
+          className={large ? "h-72 w-full" : "h-40 w-full"}
+          highlightFirst
         />
       ),
     },
 
-    pessoas: {
-      title: "Pessoas",
-      description: "Física × jurídica",
-      className: "lg:col-span-3",
+    "receita-fixa": {
+      title: "Receita fixa mensal",
+      description: "Taxa de administração dos condomínios com valor fixo",
+      className: "lg:col-span-6",
       showHeader: true,
-      seeAll: { href: "/pessoas" },
-      render: (large) => <PessoasPorTipoChart fisica={fisica} juridica={juridica} large={large} />,
+      render: (large) => (
+        <>
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div className="text-display tabular-nums">{receita ? brl(receita.total_mensal) : "–"}</div>
+            <Caption>
+              {receita
+                ? `${receita.condominios_fixos} com taxa fixa · ${receita.condominios_variaveis} com taxa variável (dependem do financeiro)`
+                : ""}
+            </Caption>
+          </div>
+          <SimpleBarChart
+            horizontal
+            data={(receita?.maiores ?? []).map((item) => ({ label: item.nome, value: Number(item.valor) }))}
+            className={large ? "h-96 w-full" : "h-52 w-full"}
+            format="currency"
+          />
+        </>
+      ),
     },
+
     pendencias: {
       title: "Pendências",
-      description: "Cadastros ativos que pedem atenção",
-      className: "lg:col-span-3",
+      description: "O que pede ação, da mais crítica para a menos",
+      className: "lg:col-span-6",
       showHeader: true,
       render: (large) => <Pendencias pendencias={dash?.pendencias} large={large} />,
     },
@@ -177,24 +198,49 @@ function Pendencias({
   pendencias: Dashboard["pendencias"] | undefined;
   large: boolean;
 }) {
+  // Ordem = criticidade para a cobrança: sem pagador e rateio errado quebram o boleto.
   const rows = [
     {
-      count: pendencias?.condominios_incompletos ?? 0,
-      label: "Condomínios incompletos",
-      detail: "Ativos, sem CNPJ ou sem CEP",
+      count: pendencias?.unidades_sem_responsavel ?? 0,
+      label: "Unidades sem responsável",
+      detail: "Ativas, sem proprietário ou locatário: não há a quem cobrar",
       href: "/condominios",
     },
     {
-      count: pendencias?.unidades_sem_vinculo ?? 0,
-      label: "Unidades sem vínculo",
-      detail: "Ativas, sem proprietário ou locatário",
+      count: pendencias?.rateio_inconsistente ?? 0,
+      label: "Rateio que não fecha 100%",
+      detail: "Condomínios cuja soma das frações ideais é diferente de 100%",
       href: "/condominios",
     },
     {
-      count: pendencias?.pessoas_sem_contato ?? 0,
-      label: "Pessoas sem contato",
-      detail: "Ativas, sem email nem celular",
-      href: "/pessoas",
+      count: pendencias?.reajustes_atrasados ?? 0,
+      label: "Reajustes atrasados",
+      detail: "A data do próximo reajuste já passou",
+      href: "/condominios",
+    },
+    {
+      count: pendencias?.reajustes_30_dias ?? 0,
+      label: "Reajustes em 30 dias",
+      detail: "Condomínios com reajuste previsto no próximo mês",
+      href: "/condominios",
+    },
+    {
+      count: pendencias?.locacoes_terminando ?? 0,
+      label: "Locações terminando",
+      detail: "Vínculos de locatário que terminam em até 60 dias (ou já encerraram)",
+      href: "/condominios",
+    },
+    {
+      count: pendencias?.sem_plano_contas ?? 0,
+      label: "Sem plano de contas",
+      detail: "Condomínios sem sub-contas: bloqueiam o financeiro",
+      href: "/condominios",
+    },
+    {
+      count: pendencias?.lancamentos_bloqueados ?? 0,
+      label: "Lançamentos bloqueados",
+      detail: "Unidades com bloqueio de lançamentos",
+      href: "/condominios",
     },
   ];
   const total = rows.reduce((sum, row) => sum + row.count, 0);
@@ -204,15 +250,17 @@ function Pendencias({
   }
 
   return (
-    <ul className="-mx-2 space-y-1">
+    <ul className="-mx-2 space-y-0.5">
       {rows.map((row) => (
         <li key={row.label}>
           <Link
             href={row.href}
-            className="flex items-center justify-between gap-3 rounded-panel px-3 py-2.5 transition-colors hover:bg-surface-muted"
+            className="flex items-center justify-between gap-3 rounded-panel px-3 py-2 transition-colors hover:bg-surface-muted"
           >
             <div className="min-w-0">
-              <div className="truncate font-medium">{row.label}</div>
+              <div className={`truncate ${row.count > 0 ? "font-medium" : "text-ink-faint"}`}>
+                {row.label}
+              </div>
               {large && <div className="text-caption text-ink-soft">{row.detail}</div>}
             </div>
             <span

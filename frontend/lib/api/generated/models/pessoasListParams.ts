@@ -5,8 +5,10 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { PessoasListTipoPessoa } from './pessoasListTipoPessoa';
 
 export type PessoasListParams = {
+ativo?: boolean;
 /**
  * Número de resultados a serem retornados por página.
  */
@@ -19,4 +21,9 @@ page?: number;
  * Termo de busca (nome, documento…).
  */
 query?: string;
+/**
+ * * `fisica` - Física
+ * * `juridica` - Jurídica
+ */
+tipo_pessoa?: PessoasListTipoPessoa;
 };

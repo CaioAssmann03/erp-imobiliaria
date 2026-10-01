@@ -1,11 +1,17 @@
 "use client";
 
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
-import { ListState, NameCell, SearchField, Toolbar } from "@/components/DataList";
+import { FilterMenu } from "@/components/FilterMenu";
+import {
+  ListState,
+  RowActions,
+  RowLink,
+  SearchField,
+  Toolbar,
+} from "@/components/DataList";
 import { Pagination } from "@/components/Pagination";
 import { LinkButton } from "@/components/LinkButton";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -25,14 +31,27 @@ import {
   useCondominiosList,
 } from "@/lib/api/generated";
 
+const STATUS_OPTIONS = [
+  { value: "ativo", label: "Ativos" },
+  { value: "inativo", label: "Inativos" },
+];
+
 /** Client Component: busca, cache e exclusão. A 1ª página vem hidratada do servidor. */
 export function CondominiosTable() {
   const queryClient = useQueryClient();
-  const { search, setSearch, page, setPage, limit, setLimit, params } = useListParams();
+  const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
+    useListParams({ filterKeys: ["status", "tipo"] });
 
-  const { data, isLoading, isPlaceholderData } = useCondominiosList(params, {
-    query: { placeholderData: keepPreviousData },
-  });
+  const { data, isLoading, isPlaceholderData } = useCondominiosList(
+    {
+      ...params,
+      ...(filters.status ? { ativo: filters.status === "ativo" } : {}),
+      ...(filters.tipo ? { tipo: filters.tipo as "residencial" | "comercial" } : {}),
+    },
+    {
+      query: { placeholderData: keepPreviousData },
+    }
+  );
   const destroyMutation = useCondominiosDestroy();
 
   const handleDelete = (id: number) => {
@@ -62,65 +81,85 @@ export function CondominiosTable() {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
+        <FilterMenu
+          onClear={clearFilters}
+          groups={[
+            {
+              key: "status",
+              label: "Status",
+              value: filters.status,
+              onChange: (value) => setFilter("status", value),
+              options: STATUS_OPTIONS,
+            },
+            {
+              key: "tipo",
+              label: "Tipo",
+              value: filters.tipo,
+              onChange: (value) => setFilter("tipo", value),
+              options: [
+                { value: "residencial", label: "Residencial" },
+                { value: "comercial", label: "Comercial" },
+              ],
+            },
+          ]}
+        />
       </Toolbar>
 
       <ListState
         isLoading={isLoading}
         isEmpty={results.length === 0}
         emptyTitle="Nenhum condomínio encontrado"
-        emptyText="Cadastre um novo condomínio ou ajuste a busca."
+        emptyText="Cadastre um novo condomínio ou ajuste a busca e os filtros."
       >
         <>
           <div className={isPlaceholderData ? "opacity-60 transition-opacity" : "transition-opacity"}>
           <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead>Nome</TableHead>
-              <TableHead>Cidade</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {results.map((condominio) => (
-              <TableRow key={condominio.id}>
-                <TableCell>
-                  <Link href={`/condominios/${condominio.id}`} className="block hover:opacity-70">
-                    <NameCell name={condominio.nome} sub={condominio.cnpj} />
-                  </Link>
-                </TableCell>
-                <TableCell className="text-ink-soft">
-                  {condominio.cidade ? `${condominio.cidade}/${condominio.uf}` : "—"}
-                </TableCell>
-                <TableCell>
-                  <StatusBadge ativo={condominio.ativo} />
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center justify-end gap-1">
-                    <LinkButton
-                      variant="secondary"
-                      size="sm"
-                      href={`/condominios/${condominio.id}/unidades`}
-                    >
-                      Unidades
-                    </LinkButton>
-                    <LinkButton
-                      variant="secondary"
-                      size="sm"
-                      href={`/condominios/${condominio.id}`}
-                    >
-                      Editar
-                    </LinkButton>
-                    <ConfirmDeleteButton
-                      title="Excluir condomínio?"
-                      description={`O condomínio "${condominio.nome}" será excluído. Esta ação não pode ser desfeita.`}
-                      onConfirm={() => handleDelete(condominio.id)}
-                    />
-                  </div>
-                </TableCell>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Nome</TableHead>
+                <TableHead>CNPJ</TableHead>
+                <TableHead>Cidade</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead />
               </TableRow>
-            ))}
-          </TableBody>
+            </TableHeader>
+            <TableBody>
+              {results.map((condominio) => (
+                <TableRow key={condominio.id}>
+                  <TableCell>
+                    <RowLink href={`/condominios/${condominio.id}`}>{condominio.nome}</RowLink>
+                  </TableCell>
+                  <TableCell className="text-ink-soft tabular-nums">{condominio.cnpj || "—"}</TableCell>
+                  <TableCell className="text-ink-soft">
+                    {condominio.cidade ? `${condominio.cidade}/${condominio.uf}` : "—"}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge ativo={condominio.ativo} />
+                  </TableCell>
+                  <TableCell>
+                    <div className="relative z-10 flex items-center justify-end gap-1">
+                      <LinkButton
+                        variant="secondary"
+                        size="sm"
+                        href={`/condominios/${condominio.id}/unidades`}
+                      >
+                        Unidades
+                      </LinkButton>
+                      <RowActions>
+                        <LinkButton variant="ghost" size="sm" href={`/condominios/${condominio.id}`}>
+                          Editar
+                        </LinkButton>
+                        <ConfirmDeleteButton
+                          title="Excluir condomínio?"
+                          description={`O condomínio "${condominio.nome}" será excluído. Esta ação não pode ser desfeita.`}
+                          onConfirm={() => handleDelete(condominio.id)}
+                        />
+                      </RowActions>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
           </Table>
           </div>
           <Pagination

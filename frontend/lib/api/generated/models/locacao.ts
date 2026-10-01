@@ -6,10 +6,13 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface CadastroMensal {
-  /** AAAA-MM */
-  mes: string;
-  condominios: number;
-  unidades: number;
-  pessoas: number;
+export interface Locacao {
+  /** ID da unidade */
+  id: number;
+  condominio: number;
+  condominio_nome: string;
+  unidade: string;
+  locatario: string;
+  data_fim: string;
+  encerrada: boolean;
 }

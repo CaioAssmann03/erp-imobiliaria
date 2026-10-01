@@ -5,6 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { UnidadesListTipo } from './unidadesListTipo';
 
 export type UnidadesListParams = {
 ativo?: boolean;
@@ -22,4 +23,14 @@ page?: number;
  * Termo de busca (nome, documento…).
  */
 query?: string;
+/**
+ * * `apartamento` - Apartamento
+ * * `sala` - Sala
+ * * `loja` - Loja
+ * * `casa` - Casa
+ * * `conjunto` - Conjunto
+ * * `box` - Box
+ * * `outros` - Outros
+ */
+tipo?: UnidadesListTipo;
 };

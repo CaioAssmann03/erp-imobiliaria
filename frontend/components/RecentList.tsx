@@ -1,8 +1,6 @@
 import Link from "next/link";
 
-import { NameCell } from "@/components/DataList";
 import { SeeAllLink } from "@/components/SeeAllLink";
-import { StatusBadge } from "@/components/StatusBadge";
 import { Card } from "@/components/ui/card";
 
 export interface RecentItem {
@@ -10,7 +8,8 @@ export interface RecentItem {
   name: string;
   sub?: string | null;
   meta?: string | null;
-  ativo?: boolean;
+  /** Terceira coluna (texto ou elemento). */
+  extra?: React.ReactNode;
   href: string;
 }
 
@@ -20,12 +19,16 @@ export function RecentList({
   count,
   allHref,
   metaLabel,
+  extraLabel,
+  emptyText = "Nada cadastrado ainda.",
   items,
 }: {
   title: string;
   count?: number;
   allHref: string;
   metaLabel: string;
+  extraLabel: string;
+  emptyText?: string;
   items: RecentItem[];
 }) {
   return (
@@ -41,28 +44,28 @@ export function RecentList({
       </div>
 
       {items.length === 0 ? (
-        <p className="px-5 py-8 text-ink-soft">Nada cadastrado ainda.</p>
+        <p className="px-5 py-8 text-ink-soft">{emptyText}</p>
       ) : (
         <div className="px-2">
-          <div className="grid grid-cols-[minmax(0,1fr)_8rem_6rem] gap-3 rounded-panel bg-surface-muted px-3 py-1.5 text-caption font-medium text-ink-soft">
+          <div className="grid grid-cols-[minmax(0,1fr)_9rem_8rem] gap-3 border-b border-border px-3 pb-1.5 text-caption text-ink-faint">
             <span>Nome</span>
             <span>{metaLabel}</span>
-            <span>Status</span>
+            <span>{extraLabel}</span>
           </div>
           <ul className="mt-1">
             {items.map((item) => (
               <li key={item.id}>
                 <Link
                   href={item.href}
-                  className="grid grid-cols-[minmax(0,1fr)_8rem_6rem] items-center gap-3 rounded-panel px-3 py-1.5 transition-colors hover:bg-surface-muted"
+                  className="grid grid-cols-[minmax(0,1fr)_9rem_8rem] items-center gap-3 rounded-panel px-3 py-2.5 transition-colors hover:bg-surface-muted/60"
                 >
-                  <NameCell name={item.name} sub={item.sub} />
+                  <span className="truncate font-medium" title={item.name}>
+                    {item.name}
+                  </span>
                   <span className="truncate text-ink-soft" title={item.meta ?? undefined}>
                     {item.meta || "—"}
                   </span>
-                  <span>
-                    <StatusBadge ativo={item.ativo} />
-                  </span>
+                  <span className="truncate">{item.extra}</span>
                 </Link>
               </li>
             ))}

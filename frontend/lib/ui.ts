@@ -19,7 +19,7 @@ export const sectionClass = "space-y-4 rounded-card bg-card p-5 shadow-card";
 export const sectionTitleClass = "text-heading";
 
 export const buttonPrimaryClass =
-  "inline-flex h-8 items-center justify-center gap-2 rounded-full bg-ink px-4 text-body font-medium text-white transition-colors hover:bg-ink/85 disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex h-8 items-center justify-center gap-2 rounded-full bg-ink px-4 text-body font-medium text-ink-foreground transition-colors hover:bg-ink/85 disabled:pointer-events-none disabled:opacity-50";
 
 export const buttonSecondaryClass =
   "inline-flex h-8 items-center justify-center gap-2 rounded-full bg-surface-muted px-4 text-body font-medium text-ink transition-colors hover:bg-surface-sunken disabled:pointer-events-none disabled:opacity-50";

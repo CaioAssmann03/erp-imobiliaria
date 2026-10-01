@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { Sidebar } from "@/components/Sidebar";
+import { parseAppearance } from "@/lib/appearance";
 import { SIDEBAR_COOKIE } from "@/lib/auth";
 
 /**
@@ -11,12 +12,14 @@ import { SIDEBAR_COOKIE } from "@/lib/auth";
  * Em telas estreitas a lateral vira uma faixa acima da moldura.
  */
 export async function AppShell({ children }: { children: React.ReactNode }) {
-  const sidebarOpen = (await cookies()).get(SIDEBAR_COOKIE)?.value !== "0";
+  const cookieStore = await cookies();
+  const sidebarOpen = cookieStore.get(SIDEBAR_COOKIE)?.value !== "0";
+  const appearance = parseAppearance((name) => cookieStore.get(name)?.value);
 
   return (
     <div className="min-h-screen p-2 md:p-4">
       <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-[96rem] flex-col gap-3 lg:flex-row lg:gap-4">
-        <Sidebar defaultOpen={sidebarOpen} />
+        <Sidebar defaultOpen={sidebarOpen} appearance={appearance} />
 
         <div className="min-w-0 flex-1 rounded-shell bg-shell p-3 md:p-5">
           <header className="mb-6 flex justify-center">

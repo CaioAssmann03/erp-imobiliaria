@@ -1,7 +1,9 @@
+import Link from "next/link";
+
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Barra acima de uma listagem (fixa no topo ao rolar): busca à esquerda, contagem à direita. */
+/** Barra acima de uma listagem (fixa no topo ao rolar): busca e filtros à esquerda, contagem à direita. */
 export function Toolbar({
   children,
   right,
@@ -11,8 +13,8 @@ export function Toolbar({
 }) {
   return (
     <div className="sticky top-2 z-20 -mx-2 mb-2 flex items-center justify-between gap-4 rounded-full bg-shell/95 px-2 py-2 backdrop-blur-md">
-      {children}
-      {right && <span className="text-body text-ink-soft">{right}</span>}
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">{children}</div>
+      {right && <span className="shrink-0 text-body text-ink-soft">{right}</span>}
     </div>
   );
 }
@@ -21,41 +23,29 @@ export function SearchField(props: React.ComponentProps<"input">) {
   return (
     <input
       type="search"
-      className="h-9 w-full max-w-xs rounded-full bg-surface px-4 text-body shadow-card outline-none transition-shadow placeholder:text-ink-faint focus:ring-2 focus:ring-brand/50"
+      className="h-9 w-72 max-w-full shrink-0 rounded-full bg-surface px-4 text-body shadow-card outline-none transition-shadow placeholder:text-ink-faint focus:ring-2 focus:ring-brand/50"
       {...props}
     />
   );
 }
 
-export function Avatar({ name }: { name: string }) {
-  const initials = name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
+/** Nome da linha: link que cobre a linha inteira (clicar em qualquer ponto abre o registro). */
+export function RowLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-surface-muted text-caption font-semibold text-ink-soft">
-      {initials || "?"}
-    </span>
+    <Link
+      href={href}
+      className="block max-w-[22rem] truncate font-medium after:absolute after:inset-0"
+    >
+      {children}
+    </Link>
   );
 }
 
-export function NameCell({ name, sub }: { name: string; sub?: string | null }) {
+/** Ações secundárias da linha: aparecem ao passar o mouse ou focar (sempre visíveis no toque). */
+export function RowActions({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex max-w-[18rem] min-w-0 items-center gap-3">
-      <Avatar name={name} />
-      {/* Altura mínima de duas linhas: linhas sem `sub` não ficam menores que as outras. */}
-      <div className="flex min-h-9 min-w-0 flex-col justify-center">
-        <div className="truncate font-medium" title={name}>
-          {name}
-        </div>
-        {sub && (
-          <div className="truncate text-caption text-ink-soft" title={sub}>
-            {sub}
-          </div>
-        )}
-      </div>
+    <div className="relative z-10 flex items-center justify-end gap-1 opacity-0 transition-opacity group-focus-within/row:opacity-100 group-hover/row:opacity-100 [@media(hover:none)]:opacity-100">
+      {children}
     </div>
   );
 }
@@ -79,9 +69,10 @@ export function ListState({
       {isLoading ? (
         <div className="space-y-1">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-3 px-3 py-2">
-              <Skeleton className="size-8 rounded-full" />
-              <Skeleton className="h-4 w-48" />
+            <div key={i} className="flex items-center gap-6 px-3 py-3">
+              <Skeleton className="h-4 w-56" />
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-4 w-20" />
             </div>
           ))}
         </div>

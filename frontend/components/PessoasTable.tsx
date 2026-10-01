@@ -1,11 +1,17 @@
 "use client";
 
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
-import { ListState, NameCell, SearchField, Toolbar } from "@/components/DataList";
+import { FilterMenu } from "@/components/FilterMenu";
+import {
+  ListState,
+  RowActions,
+  RowLink,
+  SearchField,
+  Toolbar,
+} from "@/components/DataList";
 import { Pagination } from "@/components/Pagination";
 import { LinkButton } from "@/components/LinkButton";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -25,14 +31,25 @@ import {
   usePessoasList,
 } from "@/lib/api/generated";
 
+const STATUS_OPTIONS = [
+  { value: "ativo", label: "Ativos" },
+  { value: "inativo", label: "Inativos" },
+];
+
 /** Client Component: busca, cache e exclusão. A 1ª página vem hidratada do servidor. */
 export function PessoasTable() {
   const queryClient = useQueryClient();
-  const { search, setSearch, page, setPage, limit, setLimit, params } = useListParams();
+  const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
+    useListParams({ filterKeys: ["status", "tipo"] });
 
-  const { data, isLoading, isPlaceholderData } = usePessoasList(params, {
-    query: { placeholderData: keepPreviousData },
-  });
+  const { data, isLoading, isPlaceholderData } = usePessoasList(
+    {
+      ...params,
+      ...(filters.status ? { ativo: filters.status === "ativo" } : {}),
+      ...(filters.tipo ? { tipo_pessoa: filters.tipo as "fisica" | "juridica" } : {}),
+    },
+    { query: { placeholderData: keepPreviousData } }
+  );
   const destroyMutation = usePessoasDestroy();
 
   const handleDelete = (id: number) => {
@@ -62,54 +79,78 @@ export function PessoasTable() {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
+        <FilterMenu
+          onClear={clearFilters}
+          groups={[
+            {
+              key: "status",
+              label: "Status",
+              value: filters.status,
+              onChange: (value) => setFilter("status", value),
+              options: STATUS_OPTIONS,
+            },
+            {
+              key: "tipo",
+              label: "Tipo de pessoa",
+              value: filters.tipo,
+              onChange: (value) => setFilter("tipo", value),
+              options: [
+                { value: "fisica", label: "Física" },
+                { value: "juridica", label: "Jurídica" },
+              ],
+            },
+          ]}
+        />
       </Toolbar>
 
       <ListState
         isLoading={isLoading}
         isEmpty={results.length === 0}
         emptyTitle="Nenhuma pessoa encontrada"
-        emptyText="Cadastre uma nova pessoa ou ajuste a busca."
+        emptyText="Cadastre uma nova pessoa ou ajuste a busca e os filtros."
       >
         <>
           <div className={isPlaceholderData ? "opacity-60 transition-opacity" : "transition-opacity"}>
           <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead>Nome</TableHead>
-              <TableHead>CPF/CNPJ</TableHead>
-              <TableHead>Celular</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {results.map((pessoa) => (
-              <TableRow key={pessoa.id}>
-                <TableCell>
-                  <Link href={`/pessoas/${pessoa.id}`} className="block hover:opacity-70">
-                    <NameCell name={pessoa.nome} sub={pessoa.email} />
-                  </Link>
-                </TableCell>
-                <TableCell className="text-ink-soft">{pessoa.cpf_cnpj}</TableCell>
-                <TableCell className="text-ink-soft">{pessoa.celular || "—"}</TableCell>
-                <TableCell>
-                  <StatusBadge ativo={pessoa.ativo} />
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center justify-end gap-1">
-                    <LinkButton variant="secondary" size="sm" href={`/pessoas/${pessoa.id}`}>
-                      Editar
-                    </LinkButton>
-                    <ConfirmDeleteButton
-                      title="Excluir pessoa?"
-                      description={`"${pessoa.nome}" será excluída. Esta ação não pode ser desfeita.`}
-                      onConfirm={() => handleDelete(pessoa.id)}
-                    />
-                  </div>
-                </TableCell>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Nome</TableHead>
+                <TableHead>CPF/CNPJ</TableHead>
+                <TableHead>Celular</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead />
               </TableRow>
-            ))}
-          </TableBody>
+            </TableHeader>
+            <TableBody>
+              {results.map((pessoa) => (
+                <TableRow key={pessoa.id}>
+                  <TableCell>
+                    <RowLink href={`/pessoas/${pessoa.id}`}>{pessoa.nome}</RowLink>
+                  </TableCell>
+                  <TableCell className="text-ink-soft tabular-nums">{pessoa.cpf_cnpj}</TableCell>
+                  <TableCell className="text-ink-soft tabular-nums">{pessoa.celular || "—"}</TableCell>
+                  <TableCell className="max-w-[14rem] truncate text-ink-soft" title={pessoa.email || undefined}>
+                    {pessoa.email || "—"}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge ativo={pessoa.ativo} />
+                  </TableCell>
+                  <TableCell>
+                    <RowActions>
+                      <LinkButton variant="ghost" size="sm" href={`/pessoas/${pessoa.id}`}>
+                        Editar
+                      </LinkButton>
+                      <ConfirmDeleteButton
+                        title="Excluir pessoa?"
+                        description={`"${pessoa.nome}" será excluída. Esta ação não pode ser desfeita.`}
+                        onConfirm={() => handleDelete(pessoa.id)}
+                      />
+                    </RowActions>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
           </Table>
           </div>
           <Pagination

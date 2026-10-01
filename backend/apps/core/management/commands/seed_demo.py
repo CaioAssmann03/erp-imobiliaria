@@ -11,7 +11,9 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
 
-from apps.condominios.models import Bloco, Condominio, Unidade, UnidadeParte
+from dateutil.relativedelta import relativedelta
+
+from apps.condominios.models import Bloco, Condominio, SubConta, Unidade, UnidadeParte
 from apps.core.models import Empresa
 from apps.pessoas.models import Pessoa
 
@@ -46,6 +48,15 @@ TIPOS_UNIDADE = {
     "comercial": ["sala"] * 4 + ["loja", "conjunto"],
 }
 RUAS_NUM = range(101, 120)
+
+# Dias até o próximo reajuste de cada condomínio (negativo = atrasado; None = sem base).
+REAJUSTE_EM_DIAS = [-20, 18, 40, 75, 110, 150, 240, None]
+# Condomínios (índice) deixados de propósito com rateio fora de 100% e sem plano de contas.
+RATEIO_ERRADO = {4, 6}
+SEM_PLANO_CONTAS = {4, 6}
+SUBCONTAS = ["Fundo de Reserva", "Fundo de Obras", "Água e Esgoto"]
+# Dias até o fim de cada locação sorteada (negativo = já encerrada).
+LOCACAO_FIM_EM_DIAS = [-12, 9, 25, 48, 90, None]
 
 
 def _cpf(seed: int) -> str:
@@ -102,6 +113,32 @@ class Command(BaseCommand):
         pessoas, _ = Pessoa.objects.filter(cpf_cnpj__in=docs).delete()
         self.stdout.write(self.style.SUCCESS(f"Removidos: {condos} registros de condomínios (com unidades/vínculos) e {pessoas} de pessoas."))
 
+    def _finalizar(self, rng):
+        """Rateio (frações somando 100%), plano de contas e bloqueios dos condomínios de exemplo."""
+        for index, definicao in enumerate(CONDOMINIOS):
+            condominio = Condominio.objects.filter(nome=definicao[0]).first()
+            if condominio is None or condominio.unidades.filter(fracao_ideal__gt=0).exists():
+                continue  # inexistente ou já finalizado (execução repetida)
+
+            ativas = list(condominio.unidades.filter(ativo=True))
+            pesos = [rng.uniform(0.8, 1.4) for _ in ativas]
+            fator = Decimal("0.9") if index in RATEIO_ERRADO else Decimal("1")
+            total_pesos = sum(pesos)
+            fracoes = [Decimal(f"{peso / total_pesos * 100:.5f}") * fator for peso in pesos]
+            if ativas and index not in RATEIO_ERRADO:
+                fracoes[-1] += Decimal("100") - sum(fracoes)  # fecha exatamente em 100
+            for unidade, fracao in zip(ativas, fracoes):
+                Unidade.objects.filter(pk=unidade.pk).update(fracao_ideal=fracao.quantize(Decimal("0.00001")))
+
+            if index not in SEM_PLANO_CONTAS:
+                for nome in SUBCONTAS:
+                    SubConta.objects.get_or_create(condominio=condominio, nome=nome)
+
+        # Um condomínio com uma unidade de lançamentos bloqueados.
+        alvo = Unidade.objects.filter(condominio__nome=CONDOMINIOS[0][0], ativo=True).first()
+        if alvo:
+            Unidade.objects.filter(pk=alvo.pk).update(bloqueio_lancamentos=True)
+
     def _create(self):
         rng = random.Random(42)
         empresa = Empresa.objects.first()
@@ -151,6 +188,12 @@ class Command(BaseCommand):
                     "percentual_taxa_administracao": Decimal(valor) if tipo_taxa == "variavel" else None,
                     "dia_vencimento_documento": rng.choice([5, 10, 15]),
                     "indice_reajuste": "IGPM",
+                    "periodicidade_reajuste_meses": 12,
+                    "base_reajuste": (
+                        timezone.localdate() + timedelta(days=REAJUSTE_EM_DIAS[index]) - relativedelta(months=12)
+                        if REAJUSTE_EM_DIAS[index] is not None
+                        else None
+                    ),
                     "ativo": ativo,
                 },
             )
@@ -167,7 +210,6 @@ class Command(BaseCommand):
                     nome_unidade=str(RUAS_NUM[numero] + (numero // 4) * 100),
                     tipo=rng.choice(TIPOS_UNIDADE[tipo]),
                     numero_moradores=rng.randint(0, 5) if tipo == "residencial" else 0,
-                    fracao_ideal=Decimal(f"{rng.uniform(0.5, 3.5):.5f}"),
                     valor_gas=Decimal(f"{rng.uniform(0, 60):.2f}") if rng.random() < 0.4 else Decimal("0"),
                     valor_agua=Decimal(f"{rng.uniform(0, 90):.2f}") if rng.random() < 0.5 else Decimal("0"),
                     esta_alugada=rng.random() < 0.3,
@@ -184,8 +226,17 @@ class Command(BaseCommand):
                 total_partes += 1
                 if unidade.esta_alugada:
                     inquilino = rng.choice([p for p in ativas if p.pk != dono.pk])
-                    UnidadeParte.objects.create(unidade=unidade, pessoa=inquilino, papel="locatario")
+                    dias_fim = rng.choice(LOCACAO_FIM_EM_DIAS)
+                    UnidadeParte.objects.create(
+                        unidade=unidade,
+                        pessoa=inquilino,
+                        papel="locatario",
+                        data_inicio=timezone.localdate() - timedelta(days=rng.randint(200, 700)),
+                        data_fim=timezone.localdate() + timedelta(days=dias_fim) if dias_fim is not None else None,
+                    )
                     total_partes += 1
+
+        self._finalizar(rng)
 
         self.stdout.write(self.style.SUCCESS(
             f"Dados de exemplo prontos: {len(pessoas)} pessoas, {len(CONDOMINIOS)} condomínios, "

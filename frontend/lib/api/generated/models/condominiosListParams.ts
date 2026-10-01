@@ -5,6 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { CondominiosListTipo } from './condominiosListTipo';
 
 export type CondominiosListParams = {
 ativo?: boolean;
@@ -21,4 +22,10 @@ page?: number;
  * Termo de busca (nome, documento…).
  */
 query?: string;
+/**
+ * * `residencial` - Residencial
+ * * `comercial` - Comercial
+ */
+tipo?: CondominiosListTipo;
+uf?: string;
 };

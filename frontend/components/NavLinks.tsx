@@ -33,7 +33,7 @@ export function NavLinks() {
             className={cn(
               "flex h-9 items-center rounded-control px-3 text-body font-medium whitespace-nowrap transition-colors lg:group-data-[collapsed]/sidebar:justify-center lg:group-data-[collapsed]/sidebar:px-0",
               isActive(item.href)
-                ? "bg-ink text-white"
+                ? "bg-ink text-ink-foreground"
                 : "text-ink-soft hover:bg-surface hover:text-ink"
             )}
           >

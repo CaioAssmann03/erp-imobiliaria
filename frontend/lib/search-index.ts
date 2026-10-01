@@ -12,12 +12,11 @@ export const STATIC_SEARCH_ITEMS: StaticSearchItem[] = [
   { title: "Pessoas", subtitle: "Página", href: "/pessoas", keywords: "lista cadastro proprietarios locatarios" },
   { title: "Novo condomínio", subtitle: "Cadastro", href: "/condominios/novo", keywords: "criar adicionar cadastrar" },
   { title: "Nova pessoa", subtitle: "Cadastro", href: "/pessoas/novo", keywords: "criar adicionar cadastrar" },
+  { title: "Unidades com responsável", subtitle: "Painel · gráfico", href: "/?foco=responsaveis", keywords: "pontos proprietario locatario cobrar vinculo grafico" },
+  { title: "Reajustes", subtitle: "Painel · gráfico", href: "/?foco=reajustes", keywords: "barras atrasados proximos meses igpm incc contrato grafico" },
+  { title: "Receita fixa mensal", subtitle: "Painel · gráfico", href: "/?foco=receita-fixa", keywords: "taxa administracao dinheiro faturamento grafico" },
+  { title: "Pendências", subtitle: "Painel", href: "/?foco=pendencias", keywords: "sem responsavel rateio fracao ideal reajuste locacao plano de contas bloqueio atencao" },
   { title: "Condomínios administrados", subtitle: "Painel", href: "/?foco=condominios", keywords: "total ativos grafico" },
-  { title: "Unidades ativas", subtitle: "Painel · gráfico", href: "/?foco=unidades-ativas", keywords: "pontos ocupacao grafico" },
-  { title: "Unidades por tipo", subtitle: "Painel · gráfico", href: "/?foco=unidades-por-tipo", keywords: "barras apartamento sala loja casa box grafico" },
-  { title: "Novos cadastros", subtitle: "Painel · gráfico", href: "/?foco=novos-cadastros", keywords: "mensal meses areas evolucao grafico" },
-  { title: "Pendências", subtitle: "Painel", href: "/?foco=pendencias", keywords: "cadastro incompleto sem contato sem vinculo atencao notificacoes" },
-  { title: "Pessoas por tipo", subtitle: "Painel · gráfico", href: "/?foco=pessoas", keywords: "pizza fisica juridica grafico" },
 ];
 
 export function normalize(text: string) {

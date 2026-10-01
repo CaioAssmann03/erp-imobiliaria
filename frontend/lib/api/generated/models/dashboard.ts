@@ -5,14 +5,22 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { CadastroMensal } from './cadastroMensal';
+import type { Locacao } from './locacao';
 import type { Pendencias } from './pendencias';
+import type { ProximoReajuste } from './proximoReajuste';
+import type { ReajustePorMes } from './reajustePorMes';
+import type { ReceitaFixa } from './receitaFixa';
+import type { Responsaveis } from './responsaveis';
 import type { Resumo } from './resumo';
 
 export interface Dashboard {
-  pendencias: Pendencias;
   condominios: Resumo;
   unidades: Resumo;
   pessoas: Resumo;
-  cadastros_por_mes: CadastroMensal[];
+  responsaveis: Responsaveis;
+  reajustes_por_mes: ReajustePorMes[];
+  proximos_reajustes: ProximoReajuste[];
+  receita_fixa: ReceitaFixa;
+  locacoes: Locacao[];
+  pendencias: Pendencias;
 }

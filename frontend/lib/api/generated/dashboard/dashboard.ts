@@ -45,7 +45,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * Agregados exatos para o painel inicial.
+ * Indicadores do painel inicial: o que pede ação (não apenas totais de cadastro).
  */
 export const dashboardRetrieve = (
 

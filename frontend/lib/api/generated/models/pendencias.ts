@@ -7,10 +7,14 @@
  */
 
 export interface Pendencias {
-  /** Condomínios ativos sem CNPJ ou sem CEP */
-  condominios_incompletos: number;
-  /** Unidades ativas sem proprietário/locatário vinculado */
-  unidades_sem_vinculo: number;
-  /** Pessoas ativas sem email nem celular */
-  pessoas_sem_contato: number;
+  /** Unidades ativas sem proprietário/locatário: não há a quem cobrar */
+  unidades_sem_responsavel: number;
+  /** Condomínios ativos cuja soma das frações ideais não fecha 100% */
+  rateio_inconsistente: number;
+  reajustes_atrasados: number;
+  reajustes_30_dias: number;
+  locacoes_terminando: number;
+  /** Condomínios ativos sem sub-contas */
+  sem_plano_contas: number;
+  lancamentos_bloqueados: number;
 }

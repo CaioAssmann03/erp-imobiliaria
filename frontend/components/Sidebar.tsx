@@ -7,6 +7,8 @@ import { useState } from "react";
 import { Brand } from "@/components/Brand";
 import { LogoutButton } from "@/components/LogoutButton";
 import { NavLinks } from "@/components/NavLinks";
+import { SettingsDialog } from "@/components/SettingsDialog";
+import type { Appearance } from "@/lib/appearance";
 import { SIDEBAR_COOKIE } from "@/lib/auth";
 
 /**
@@ -14,7 +16,13 @@ import { SIDEBAR_COOKIE } from "@/lib/auth";
  * só textos. A marca fica sempre visível e o botão de alternar logo abaixo dela. O estado vai para um
  * cookie, lido no servidor (AppShell) para não piscar ao carregar. Padrão: aberta.
  */
-export function Sidebar({ defaultOpen }: { defaultOpen: boolean }) {
+export function Sidebar({
+  defaultOpen,
+  appearance,
+}: {
+  defaultOpen: boolean;
+  appearance: Appearance;
+}) {
   const [open, setOpen] = useState(defaultOpen);
 
   const toggle = () => {
@@ -35,7 +43,8 @@ export function Sidebar({ defaultOpen }: { defaultOpen: boolean }) {
         >
           <Brand />
         </Link>
-        <div className="lg:hidden">
+        <div className="flex items-center gap-1 lg:hidden">
+          <SettingsDialog initial={appearance} />
           <LogoutButton />
         </div>
       </div>
@@ -54,7 +63,8 @@ export function Sidebar({ defaultOpen }: { defaultOpen: boolean }) {
 
       <NavLinks />
 
-      <div className="mt-auto hidden lg:block">
+      <div className="mt-auto hidden flex-col gap-1 lg:flex">
+        <SettingsDialog initial={appearance} />
         <LogoutButton />
       </div>
     </aside>

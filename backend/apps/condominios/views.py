@@ -19,7 +19,7 @@ class CondominioViewSet(viewsets.ModelViewSet):
     serializer_class = CondominioSerializer
     filter_backends = [DjangoFilterBackend, QuerySearchFilter]
     search_fields = ["nome", "cnpj"]
-    filterset_fields = ["empresa", "ativo"]
+    filterset_fields = ["empresa", "ativo", "tipo", "uf"]
 
 
 class BlocoViewSet(viewsets.ModelViewSet):
@@ -34,7 +34,7 @@ class UnidadeViewSet(viewsets.ModelViewSet):
     serializer_class = UnidadeSerializer
     filter_backends = [DjangoFilterBackend, QuerySearchFilter]
     search_fields = ["nome_unidade"]
-    filterset_fields = ["condominio", "bloco", "ativo"]
+    filterset_fields = ["condominio", "bloco", "ativo", "tipo"]
 
 
 class UnidadeParteViewSet(viewsets.ModelViewSet):
