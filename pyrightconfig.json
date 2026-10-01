@@ -1,0 +1,7 @@
+{
+  "include": ["backend"],
+  "exclude": ["**/venv", "**/migrations"],
+  "venvPath": "backend",
+  "venv": "venv",
+  "extraPaths": ["backend"]
+}

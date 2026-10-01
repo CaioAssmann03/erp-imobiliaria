@@ -1,12 +1,24 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+import { useEffect, useMemo, useState } from "react";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { toast } from "sonner";
 
+import { CheckboxField, SelectField, TextField } from "@/components/form/fields";
+import { FormActions } from "@/components/form/FormActions";
+import { FieldRow, FormSection } from "@/components/form/FormSection";
+import { FormField } from "@/components/form/FormField";
+import { FormSkeleton } from "@/components/form/FormSkeleton";
+import { PessoaPicker } from "@/components/PessoaPicker";
+import { Button } from "@/components/ui/button";
+import { useCepLookup } from "@/hooks/use-cep-lookup";
 import {
+  getDashboardRetrieveQueryKey,
+  getCondominiosListQueryKey,
+  getCondominiosRetrieveQueryKey,
   useCondominiosCreate,
   useCondominiosPartialUpdate,
   useCondominiosRetrieve,
@@ -14,83 +26,20 @@ import {
   usePessoasRetrieve,
 } from "@/lib/api/generated";
 import type { Condominio } from "@/lib/api/generated/models";
-import { cleanPayload, toOptionalInt } from "@/lib/clean-payload";
+import { buildPayload } from "@/lib/clean-payload";
+import { applyServerErrors } from "@/lib/form-errors";
+import { maskCep, maskCnpj, maskDecimal, maskMoney } from "@/lib/masks";
 import {
-  buttonPrimaryClass,
-  buttonSecondaryClass,
-  checkboxLabelClass,
-  errorTextClass,
-  fieldWrapClass,
-  inputClass,
-  labelClass,
-  sectionClass,
-  sectionTitleClass,
-} from "@/lib/ui";
-import { PessoaPicker } from "./PessoaPicker";
+  CONDOMINIO_DEFAULTS,
+  condominioSchema,
+  condominioToForm,
+  type CondominioFormInput,
+  type CondominioFormOutput,
+} from "@/lib/schemas/condominio";
 
-const schema = z.object({
-  nome: z.string().min(1, "Informe o nome"),
-  cnpj: z.string().optional(),
-  inscricao_municipal: z.string().optional(),
-  empresa: z.string().min(1, "Selecione a empresa"),
-  cep: z.string().optional(),
-  logradouro: z.string().optional(),
-  bairro: z.string().optional(),
-  cidade: z.string().optional(),
-  uf: z.string().optional(),
-  hidrometro: z.string().optional(),
-  relogio_luz: z.string().optional(),
-  tipo: z.enum(["residencial", "comercial"]),
-  data_inicio_administracao: z.string().optional(),
-  base_reajuste: z.string().optional(),
-  periodicidade_reajuste_meses: z.string().optional(),
-  indice_reajuste: z.string().optional(),
-  tipo_taxa_administracao: z.enum(["fixa", "variavel"]),
-  valor_taxa_administracao: z.string().optional(),
-  percentual_taxa_administracao: z.string().optional(),
-  cobra_iss_sobre_taxa: z.boolean(),
-  dia_vencimento_documento: z.string().optional(),
-  vencimento_por_dia_util: z.boolean(),
-  competencia_calculo: z.enum(["referencia", "posterior"]),
-  percentual_desconto_pagamento_dia: z.string().optional(),
-  dias_antes_vencimento_desconto: z.string().optional(),
-  limite_credito: z.string().optional(),
-  ativo: z.boolean(),
-  assessor: z.number().nullable(),
-});
-
-type FormValues = z.infer<typeof schema>;
-
-const DEFAULT_VALUES: FormValues = {
-  nome: "",
-  cnpj: "",
-  inscricao_municipal: "",
-  empresa: "",
-  cep: "",
-  logradouro: "",
-  bairro: "",
-  cidade: "",
-  uf: "",
-  hidrometro: "",
-  relogio_luz: "",
-  tipo: "residencial",
-  data_inicio_administracao: "",
-  base_reajuste: "",
-  periodicidade_reajuste_meses: "12",
-  indice_reajuste: "",
-  tipo_taxa_administracao: "fixa",
-  valor_taxa_administracao: "",
-  percentual_taxa_administracao: "",
-  cobra_iss_sobre_taxa: false,
-  dia_vencimento_documento: "10",
-  vencimento_por_dia_util: false,
-  competencia_calculo: "referencia",
-  percentual_desconto_pagamento_dia: "",
-  dias_antes_vencimento_desconto: "0",
-  limite_credito: "",
-  ativo: true,
-  assessor: null,
-};
+const money = (value: string) => maskMoney(value, 10);
+const percent = (value: string) => maskDecimal(value, 2, 3);
+const digitsOnly = (value: string) => value.replace(/\D/g, "");
 
 interface CondominioFormProps {
   condominioId?: number;
@@ -98,358 +47,336 @@ interface CondominioFormProps {
 
 export function CondominioForm({ condominioId }: CondominioFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const isEdit = condominioId !== undefined;
 
   const { data: condominio, isLoading } = useCondominiosRetrieve(condominioId ?? 0, {
     query: { enabled: isEdit },
   });
-  const { data: empresasData } = useEmpresasList({});
+  const { data: empresasData } = useEmpresasList({ limit: 100 });
+  const empresas = useMemo(() => empresasData?.results ?? [], [empresasData]);
 
   const createMutation = useCondominiosCreate();
   const updateMutation = useCondominiosPartialUpdate();
-  const mutation = isEdit ? updateMutation : createMutation;
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    control,
-    setValue,
-    formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: DEFAULT_VALUES,
+  const methods = useForm<CondominioFormInput, unknown, CondominioFormOutput>({
+    resolver: zodResolver(condominioSchema),
+    defaultValues: CONDOMINIO_DEFAULTS,
+    mode: "onTouched",
   });
+  const { handleSubmit, reset, control, setValue, getValues, setError, clearErrors } = methods;
 
+  const tipoTaxa = useWatch({ control, name: "tipo_taxa_administracao" });
+  // CEP digitado pelo usuário (não muda ao carregar/resetar o formulário). Assim a
+  // busca dispara assim que o 8º dígito é digitado e nunca sobrescreve endereço salvo.
+  const [typedCep, setTypedCep] = useState("");
+  const cepLookup = useCepLookup(typedCep);
   const assessorId = useWatch({ control, name: "assessor" });
   const { data: assessorPessoa } = usePessoasRetrieve(assessorId ?? 0, {
     query: { enabled: !!assessorId },
   });
 
   useEffect(() => {
-    if (condominio) {
-      reset({
-        nome: condominio.nome,
-        cnpj: condominio.cnpj ?? "",
-        inscricao_municipal: condominio.inscricao_municipal ?? "",
-        empresa: String(condominio.empresa),
-        cep: condominio.cep ?? "",
-        logradouro: condominio.logradouro ?? "",
-        bairro: condominio.bairro ?? "",
-        cidade: condominio.cidade ?? "",
-        uf: condominio.uf ?? "",
-        hidrometro: condominio.hidrometro ?? "",
-        relogio_luz: condominio.relogio_luz ?? "",
-        tipo: condominio.tipo ?? "residencial",
-        data_inicio_administracao: condominio.data_inicio_administracao ?? "",
-        base_reajuste: condominio.base_reajuste ?? "",
-        periodicidade_reajuste_meses: String(
-          condominio.periodicidade_reajuste_meses ?? 12
-        ),
-        indice_reajuste: condominio.indice_reajuste ?? "",
-        tipo_taxa_administracao: condominio.tipo_taxa_administracao ?? "fixa",
-        valor_taxa_administracao: condominio.valor_taxa_administracao ?? "",
-        percentual_taxa_administracao: condominio.percentual_taxa_administracao ?? "",
-        cobra_iss_sobre_taxa: condominio.cobra_iss_sobre_taxa ?? false,
-        dia_vencimento_documento: String(
-          condominio.dia_vencimento_documento ?? 10
-        ),
-        vencimento_por_dia_util: condominio.vencimento_por_dia_util ?? false,
-        competencia_calculo: condominio.competencia_calculo ?? "referencia",
-        percentual_desconto_pagamento_dia:
-          condominio.percentual_desconto_pagamento_dia ?? "",
-        dias_antes_vencimento_desconto: String(
-          condominio.dias_antes_vencimento_desconto ?? 0
-        ),
-        limite_credito: condominio.limite_credito ?? "",
-        ativo: condominio.ativo ?? true,
-        assessor: condominio.assessor ?? null,
-      });
-    }
+    if (condominio) reset(condominioToForm(condominio));
   }, [condominio, reset]);
 
-  const onSubmit = (values: FormValues) => {
-    const payload = {
-      ...cleanPayload(values),
-      empresa: Number(values.empresa),
-      periodicidade_reajuste_meses: toOptionalInt(values.periodicidade_reajuste_meses),
-      dia_vencimento_documento: toOptionalInt(values.dia_vencimento_documento),
-      dias_antes_vencimento_desconto: toOptionalInt(
-        values.dias_antes_vencimento_desconto
-      ),
-    };
+  // Preenche o endereço quando a consulta do CEP digitado responde.
+  const cepAddress = cepLookup.data;
+  useEffect(() => {
+    if (cepAddress === null) {
+      setError("cep", { type: "lookup", message: "CEP não encontrado" });
+      return;
+    }
+    if (!cepAddress) return;
+    clearErrors("cep");
+    const fields = ["logradouro", "bairro", "cidade", "uf"] as const;
+    for (const field of fields) {
+      // CEPs genéricos não trazem logradouro/bairro: mantém o que o usuário digitou.
+      if (cepAddress[field]) {
+        setValue(field, cepAddress[field], { shouldDirty: true, shouldValidate: true });
+      }
+    }
+  }, [cepAddress, typedCep, setValue, setError, clearErrors]);
+
+  // Cadastro novo com uma única empresa: já seleciona.
+  useEffect(() => {
+    if (!isEdit && empresas.length === 1 && !getValues("empresa")) {
+      setValue("empresa", String(empresas[0].id));
+    }
+  }, [isEdit, empresas, getValues, setValue]);
+
+  const invalidate = (id: number) =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: getCondominiosListQueryKey() }),
+      queryClient.invalidateQueries({ queryKey: getDashboardRetrieveQueryKey() }),
+      queryClient.invalidateQueries({ queryKey: getCondominiosRetrieveQueryKey(id) }),
+    ]);
+
+  const onError = (error: unknown) => toast.error(applyServerErrors(error, setError));
+
+  const onSubmit = (values: CondominioFormOutput) => {
+    const payload = buildPayload(values, {
+      isEdit,
+      blankKeys: [
+        "cnpj",
+        "inscricao_municipal",
+        "cep",
+        "logradouro",
+        "bairro",
+        "cidade",
+        "uf",
+        "hidrometro",
+        "relogio_luz",
+        "indice_reajuste",
+      ],
+      nullKeys: [
+        "data_inicio_administracao",
+        "base_reajuste",
+        "percentual_taxa_administracao",
+      ],
+    });
 
     if (isEdit) {
       updateMutation.mutate(
-        { id: condominioId!, data: payload },
-        { onSuccess: () => router.push("/condominios") }
+        { id: condominioId!, data: payload as Partial<Condominio> },
+        {
+          onSuccess: () => {
+            invalidate(condominioId!);
+            toast.success("Condomínio salvo.");
+            router.push("/condominios");
+          },
+          onError,
+        }
       );
     } else {
       createMutation.mutate(
+        { data: payload as unknown as Condominio },
         {
-          data: payload as unknown as Condominio,
-        },
-        { onSuccess: (created) => router.push(`/condominios/${created.id}`) }
+          onSuccess: (created) => {
+            invalidate(created.id);
+            toast.success("Condomínio cadastrado.");
+            router.push(`/condominios/${created.id}/unidades`);
+          },
+          onError,
+        }
       );
     }
   };
 
-  if (isEdit && isLoading) {
-    return <p className="text-sm text-zinc-500">Carregando...</p>;
-  }
+  if (isEdit && isLoading) return <FormSkeleton sections={3} />;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl space-y-6">
-      <div className={sectionClass}>
-        <h2 className={sectionTitleClass}>Identificação</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Nome</label>
-            <input className={inputClass} {...register("nome")} />
-            {errors.nome && (
-              <span className={errorTextClass}>{errors.nome.message}</span>
-            )}
-          </div>
+    <FormProvider {...methods}>
+      <form
+        noValidate
+        onSubmit={handleSubmit(onSubmit, () => toast.error("Corrija os campos destacados."))}
+        className="space-y-4"
+      >
+        <FormSection title="Identificação">
+          <FieldRow template="3fr 2fr">
+            <TextField name="nome" label="Nome do condomínio" required autoComplete="off" />
+            <SelectField
+              name="empresa"
+              label="Empresa administradora"
+              required
+              placeholder="Selecione…"
+              options={empresas.map((empresa) => ({
+                value: empresa.id,
+                label: empresa.nome_fantasia || empresa.razao_social,
+              }))}
+            />
+          </FieldRow>
+          <FieldRow columns={3}>
+            <TextField
+              name="cnpj"
+              label="CNPJ"
+              mask={maskCnpj}
+              inputMode="numeric"
+              placeholder="00.000.000/0000-00"
+            />
+            <TextField name="inscricao_municipal" label="Inscrição municipal" maxLength={30} />
+            <SelectField
+              name="tipo"
+              label="Tipo"
+              options={[
+                { value: "residencial", label: "Residencial" },
+                { value: "comercial", label: "Comercial" },
+              ]}
+            />
+          </FieldRow>
+          <FieldRow>
+            <FormField id="assessor" label="Assessor">
+              {assessorId ? (
+                <div className="flex h-9 items-center justify-between rounded-control bg-surface-muted px-3 text-body">
+                  <span className="truncate">{assessorPessoa?.nome ?? "Carregando…"}</span>
+                  <button
+                    type="button"
+                    className="text-caption text-ink-soft hover:text-danger"
+                    onClick={() => setValue("assessor", null)}
+                  >
+                    Remover
+                  </button>
+                </div>
+              ) : (
+                <PessoaPicker onSelect={(pessoa) => setValue("assessor", pessoa.id)} />
+              )}
+            </FormField>
+            <CheckboxField name="ativo" label="Cadastro ativo" />
+          </FieldRow>
+        </FormSection>
 
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Empresa administradora</label>
-            <select className={inputClass} {...register("empresa")}>
-              <option value="" disabled>
-                Selecione...
-              </option>
-              {empresasData?.results.map((empresa) => (
-                <option key={empresa.id} value={empresa.id}>
-                  {empresa.nome_fantasia || empresa.razao_social}
-                </option>
-              ))}
-            </select>
-            {errors.empresa && (
-              <span className={errorTextClass}>{errors.empresa.message}</span>
-            )}
-          </div>
+        <FormSection title="Endereço">
+          <FieldRow template="1fr 2fr">
+            <TextField
+              name="cep"
+              label="CEP"
+              mask={maskCep}
+              onValueChange={setTypedCep}
+              inputMode="numeric"
+              placeholder="00000-000"
+              hint={
+                cepLookup.isFetching
+                  ? "Buscando endereço…"
+                  : cepLookup.isError
+                    ? "Não foi possível buscar. Preencha manualmente."
+                    : undefined
+              }
+            />
+            <TextField name="logradouro" label="Logradouro" maxLength={255} />
+          </FieldRow>
+          <FieldRow template="2fr 2fr 1fr">
+            <TextField name="bairro" label="Bairro" maxLength={120} />
+            <TextField name="cidade" label="Cidade" maxLength={120} />
+            <TextField
+              name="uf"
+              label="UF"
+              maxLength={2}
+              mask={(value) => value.toUpperCase().replace(/[^A-Z]/g, "")}
+              placeholder="SP"
+            />
+          </FieldRow>
+          <FieldRow>
+            <TextField name="hidrometro" label="Hidrômetro" maxLength={30} />
+            <TextField name="relogio_luz" label="Relógio de luz" maxLength={30} />
+          </FieldRow>
+        </FormSection>
 
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>CNPJ</label>
-            <input className={inputClass} {...register("cnpj")} />
-          </div>
-
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Inscrição municipal</label>
-            <input className={inputClass} {...register("inscricao_municipal")} />
-          </div>
-
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Tipo</label>
-            <select className={inputClass} {...register("tipo")}>
-              <option value="residencial">Residencial</option>
-              <option value="comercial">Comercial</option>
-            </select>
-          </div>
-
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Assessor</label>
-            {assessorId ? (
-              <div className="flex items-center justify-between rounded border border-zinc-300 px-3 py-1.5 text-sm dark:border-zinc-700">
-                <span>{assessorPessoa?.nome ?? "Carregando..."}</span>
-                <button
-                  type="button"
-                  className="text-xs text-red-600 hover:underline dark:text-red-400"
-                  onClick={() => setValue("assessor", null)}
-                >
-                  Remover
-                </button>
-              </div>
+        <FormSection
+          title="Taxa de administração"
+          description="Fixa em reais ou variável em percentual."
+        >
+          <FieldRow>
+            <SelectField
+              name="tipo_taxa_administracao"
+              label="Tipo de taxa"
+              options={[
+                { value: "fixa", label: "Fixa (valor)" },
+                { value: "variavel", label: "Variável (percentual)" },
+              ]}
+            />
+            {tipoTaxa === "fixa" ? (
+              <TextField
+                name="valor_taxa_administracao"
+                label="Valor da taxa (R$)"
+                mask={money}
+                inputMode="numeric"
+                placeholder="0,00"
+              />
             ) : (
-              <PessoaPicker
-                onSelect={(pessoa) => setValue("assessor", pessoa.id)}
+              <TextField
+                name="percentual_taxa_administracao"
+                label="Percentual da taxa (%)"
+                required
+                mask={percent}
+                inputMode="decimal"
+                placeholder="0,00"
               />
             )}
-          </div>
+          </FieldRow>
+          <CheckboxField name="cobra_iss_sobre_taxa" label="Cobra ISS sobre a taxa" />
+        </FormSection>
 
-          <label className={`${checkboxLabelClass} self-end pb-1.5`}>
-            <input type="checkbox" {...register("ativo")} />
-            Ativo
-          </label>
-        </div>
-      </div>
-
-      <div className={sectionClass}>
-        <h2 className={sectionTitleClass}>Endereço</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>CEP</label>
-            <input className={inputClass} {...register("cep")} />
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Logradouro</label>
-            <input className={inputClass} {...register("logradouro")} />
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Bairro</label>
-            <input className={inputClass} {...register("bairro")} />
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Cidade</label>
-            <input className={inputClass} {...register("cidade")} />
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>UF</label>
-            <input className={inputClass} maxLength={2} {...register("uf")} />
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Hidrômetro</label>
-            <input className={inputClass} {...register("hidrometro")} />
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Relógio de luz</label>
-            <input className={inputClass} {...register("relogio_luz")} />
-          </div>
-        </div>
-      </div>
-
-      <div className={sectionClass}>
-        <h2 className={sectionTitleClass}>Taxa de administração</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Tipo de taxa</label>
-            <select className={inputClass} {...register("tipo_taxa_administracao")}>
-              <option value="fixa">Fixa</option>
-              <option value="variavel">Variável</option>
-            </select>
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Valor da taxa (R$)</label>
-            <input
-              className={inputClass}
+        <FormSection title="Cobrança">
+          <FieldRow>
+            <TextField
+              name="dia_vencimento_documento"
+              label="Dia de vencimento"
+              mask={(value) => digitsOnly(value).slice(0, 2)}
+              inputMode="numeric"
+              hint="De 1 a 31."
+            />
+            <SelectField
+              name="competencia_calculo"
+              label="Competência de cálculo"
+              options={[
+                { value: "referencia", label: "Referência do cálculo" },
+                { value: "posterior", label: "Posterior à referência" },
+              ]}
+            />
+          </FieldRow>
+          <CheckboxField name="vencimento_por_dia_util" label="Vencimento por dia útil" />
+          <FieldRow columns={3}>
+            <TextField
+              name="limite_credito"
+              label="Limite de crédito (R$)"
+              mask={money}
+              inputMode="numeric"
+              placeholder="0,00"
+            />
+            <TextField
+              name="percentual_desconto_pagamento_dia"
+              label="Desconto em dia (%)"
+              mask={percent}
               inputMode="decimal"
-              {...register("valor_taxa_administracao")}
+              placeholder="0,00"
             />
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Percentual da taxa (%)</label>
-            <input
-              className={inputClass}
-              inputMode="decimal"
-              {...register("percentual_taxa_administracao")}
+            <TextField
+              name="dias_antes_vencimento_desconto"
+              label="Dias antes do venc."
+              mask={(value) => digitsOnly(value).slice(0, 2)}
+              inputMode="numeric"
+              hint="Prazo do desconto."
             />
-          </div>
-          <label className={`${checkboxLabelClass} self-end pb-1.5`}>
-            <input type="checkbox" {...register("cobra_iss_sobre_taxa")} />
-            Cobra ISS sobre a taxa
-          </label>
-        </div>
-      </div>
+          </FieldRow>
+        </FormSection>
 
-      <div className={sectionClass}>
-        <h2 className={sectionTitleClass}>Cobrança</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Dia de vencimento do documento</label>
-            <input
-              type="number"
-              className={inputClass}
-              {...register("dia_vencimento_documento")}
+        <FormSection title="Reajuste">
+          <FieldRow>
+            <TextField name="data_inicio_administracao" label="Início da administração" type="date" />
+            <TextField name="base_reajuste" label="Base do reajuste" type="date" />
+          </FieldRow>
+          <FieldRow>
+            <TextField
+              name="periodicidade_reajuste_meses"
+              label="Periodicidade (meses)"
+              mask={(value) => digitsOnly(value).slice(0, 3)}
+              inputMode="numeric"
             />
-          </div>
-          <label className={`${checkboxLabelClass} self-end pb-1.5`}>
-            <input type="checkbox" {...register("vencimento_por_dia_util")} />
-            Vencimento por dia útil
-          </label>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Competência de cálculo</label>
-            <select className={inputClass} {...register("competencia_calculo")}>
-              <option value="referencia">Referência do cálculo</option>
-              <option value="posterior">Posterior à referência</option>
-            </select>
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Limite de crédito (R$)</label>
-            <input
-              className={inputClass}
-              inputMode="decimal"
-              {...register("limite_credito")}
+            <TextField
+              name="indice_reajuste"
+              label="Índice de reajuste"
+              maxLength={30}
+              placeholder="IGPM, INCC…"
             />
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Desconto por pagamento em dia (%)</label>
-            <input
-              className={inputClass}
-              inputMode="decimal"
-              {...register("percentual_desconto_pagamento_dia")}
-            />
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Dias antes do vencimento p/ desconto</label>
-            <input
-              type="number"
-              className={inputClass}
-              {...register("dias_antes_vencimento_desconto")}
-            />
-          </div>
-        </div>
-      </div>
+          </FieldRow>
+        </FormSection>
 
-      <div className={sectionClass}>
-        <h2 className={sectionTitleClass}>Reajuste</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Início da administração</label>
-            <input
-              type="date"
-              className={inputClass}
-              {...register("data_inicio_administracao")}
-            />
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Base do reajuste</label>
-            <input type="date" className={inputClass} {...register("base_reajuste")} />
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Periodicidade do reajuste (meses)</label>
-            <input
-              type="number"
-              className={inputClass}
-              {...register("periodicidade_reajuste_meses")}
-            />
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Índice de reajuste</label>
-            <input
-              className={inputClass}
-              placeholder="Ex.: IGPM, INCC"
-              {...register("indice_reajuste")}
-            />
-          </div>
-        </div>
-      </div>
-
-      {mutation.isError && (
-        <p className={errorTextClass}>
-          Não foi possível salvar. Confira os campos e tente novamente.
-        </p>
-      )}
-
-      <div className="flex gap-3">
-        <button type="submit" disabled={mutation.isPending} className={buttonPrimaryClass}>
-          {mutation.isPending ? "Salvando..." : "Salvar"}
-        </button>
-        <button
-          type="button"
-          className={buttonSecondaryClass}
-          onClick={() => router.push("/condominios")}
-        >
-          Cancelar
-        </button>
-        {isEdit && (
-          <button
-            type="button"
-            className={buttonSecondaryClass}
-            onClick={() => router.push(`/condominios/${condominioId}/unidades`)}
-          >
-            Ver unidades
-          </button>
-        )}
-      </div>
-    </form>
+        <FormActions isSubmitting={isSubmitting}>
+          <Button type="button" variant="secondary" onClick={() => router.push("/condominios")}>
+            Cancelar
+          </Button>
+          {isEdit && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => router.push(`/condominios/${condominioId}/unidades`)}
+            >
+              Ver unidades
+            </Button>
+          )}
+        </FormActions>
+      </form>
+    </FormProvider>
   );
 }

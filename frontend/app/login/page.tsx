@@ -5,16 +5,22 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useAuthLoginCreate } from "@/lib/api/generated";
-import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/lib/api-client";
-import { setCookie } from "@/lib/cookies";
+import { Brand } from "@/components/Brand";
+import { ShellFrame } from "@/components/ShellFrame";
+import { Button } from "@/components/ui/button";
 import {
-  buttonPrimaryClass,
-  errorTextClass,
-  fieldWrapClass,
-  inputClass,
-  labelClass,
-} from "@/lib/ui";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuthLoginCreate } from "@/lib/api/generated";
+import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/lib/auth";
+import { setCookie } from "@/lib/cookies";
+import { errorTextClass } from "@/lib/ui";
 
 const schema = z.object({
   username: z.string().min(1, "Informe o usuário"),
@@ -49,63 +55,60 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 px-4 dark:bg-black">
-      <div className="w-full max-w-sm rounded-lg border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-        <h1 className="mb-1 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          ERP Imobiliária
-        </h1>
-        <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
-          Entre com seu usuário e senha.
-        </p>
+    <ShellFrame className="flex items-center justify-center">
+      <Card className="w-full max-w-sm gap-5 py-6">
+        <CardHeader className="items-center text-center">
+          <Brand />
+          <CardTitle className="mt-4 text-title">Bem-vindo de volta</CardTitle>
+          <CardDescription className="text-body text-ink-soft">Entre com seu usuário e senha.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="username">Usuário</Label>
+              <Input
+                id="username"
+                type="text"
+                autoComplete="username"
+                aria-invalid={!!errors.username}
+                {...register("username")}
+              />
+              {errors.username && (
+                <span className={errorTextClass}>{errors.username.message}</span>
+              )}
+            </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className={fieldWrapClass}>
-            <label htmlFor="username" className={labelClass}>
-              Usuário
-            </label>
-            <input
-              id="username"
-              type="text"
-              autoComplete="username"
-              className={inputClass}
-              {...register("username")}
-            />
-            {errors.username && (
-              <span className={errorTextClass}>{errors.username.message}</span>
+            <div className="space-y-1.5">
+              <Label htmlFor="password">Senha</Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                aria-invalid={!!errors.password}
+                {...register("password")}
+              />
+              {errors.password && (
+                <span className={errorTextClass}>{errors.password.message}</span>
+              )}
+            </div>
+
+            {loginMutation.isError && (
+              <p className={errorTextClass}>
+                Usuário ou senha inválidos. Tente novamente.
+              </p>
             )}
-          </div>
 
-          <div className={fieldWrapClass}>
-            <label htmlFor="password" className={labelClass}>
-              Senha
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              className={inputClass}
-              {...register("password")}
-            />
-            {errors.password && (
-              <span className={errorTextClass}>{errors.password.message}</span>
-            )}
-          </div>
-
-          {loginMutation.isError && (
-            <p className={errorTextClass}>
-              Usuário ou senha inválidos. Tente novamente.
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loginMutation.isPending}
-            className={`${buttonPrimaryClass} w-full`}
-          >
-            {loginMutation.isPending ? "Entrando..." : "Entrar"}
-          </button>
-        </form>
-      </div>
-    </div>
+            <Button
+              type="submit"
+              size="lg"
+              disabled={loginMutation.isPending}
+              className="w-full"
+            >
+              {loginMutation.isPending ? "Entrando..." : "Entrar"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </ShellFrame>
   );
 }

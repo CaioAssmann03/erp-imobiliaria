@@ -4,67 +4,45 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
+import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
+import { CheckboxField, SelectField, TextField } from "@/components/form/fields";
+import { FormActions } from "@/components/form/FormActions";
+import { FormField } from "@/components/form/FormField";
+import { FieldRow, FormSection } from "@/components/form/FormSection";
+import { FormSkeleton } from "@/components/form/FormSkeleton";
+import { PessoaPicker } from "@/components/PessoaPicker";
+import { Button } from "@/components/ui/button";
 import {
+  getDashboardRetrieveQueryKey,
+  getUnidadesListQueryKey,
   getUnidadesRetrieveQueryKey,
   useBlocosList,
+  useUnidadePartesCreate,
+  useUnidadePartesDestroy,
   useUnidadesCreate,
   useUnidadesPartialUpdate,
   useUnidadesRetrieve,
-  useUnidadePartesCreate,
-  useUnidadePartesDestroy,
 } from "@/lib/api/generated";
 import type { Pessoa, Unidade } from "@/lib/api/generated/models";
-import { cleanPayload, toOptionalInt } from "@/lib/clean-payload";
+import { buildPayload } from "@/lib/clean-payload";
+import { applyServerErrors } from "@/lib/form-errors";
+import { maskDecimal, maskMoney } from "@/lib/masks";
+import { dateField, decimalField } from "@/lib/schemas/fields";
 import {
-  buttonDangerClass,
-  buttonPrimaryClass,
-  buttonSecondaryClass,
-  checkboxLabelClass,
-  errorTextClass,
-  fieldWrapClass,
-  inputClass,
-  labelClass,
-  sectionClass,
-  sectionTitleClass,
-} from "@/lib/ui";
-import { PessoaPicker } from "./PessoaPicker";
+  UNIDADE_DEFAULTS,
+  UNIDADE_TIPOS,
+  unidadeSchema,
+  unidadeToForm,
+  type UnidadeFormInput,
+  type UnidadeFormOutput,
+} from "@/lib/schemas/unidade";
 
-const schema = z.object({
-  nome_unidade: z.string().min(1, "Informe a unidade"),
-  tipo: z.enum(["apartamento", "sala", "loja", "casa", "conjunto", "box", "outros"]),
-  numero_moradores: z.string().optional(),
-  fracao_ideal: z.string().optional(),
-  eh_unidade_sindico: z.boolean(),
-  esta_alugada: z.boolean(),
-  matricula_imovel: z.string().optional(),
-  valor_gas: z.string().optional(),
-  valor_agua: z.string().optional(),
-  valor_energia: z.string().optional(),
-  bloqueio_lancamentos: z.boolean(),
-  ativo: z.boolean(),
-  bloco: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof schema>;
-
-const DEFAULT_VALUES: FormValues = {
-  nome_unidade: "",
-  tipo: "apartamento",
-  numero_moradores: "0",
-  fracao_ideal: "",
-  eh_unidade_sindico: false,
-  esta_alugada: false,
-  matricula_imovel: "",
-  valor_gas: "",
-  valor_agua: "",
-  valor_energia: "",
-  bloqueio_lancamentos: false,
-  ativo: true,
-  bloco: "",
-};
+const money = (value: string) => maskMoney(value, 8);
+const digitsOnly = (value: string) => value.replace(/\D/g, "");
 
 interface UnidadeFormProps {
   condominioId: number;
@@ -79,215 +57,188 @@ export function UnidadeForm({ condominioId, unidadeId }: UnidadeFormProps) {
   const { data: unidade, isLoading } = useUnidadesRetrieve(unidadeId ?? 0, {
     query: { enabled: isEdit },
   });
-  const { data: blocos } = useBlocosList({ condominio: condominioId });
+  const { data: blocos } = useBlocosList({ condominio: condominioId, limit: 100 });
 
   const createMutation = useUnidadesCreate();
   const updateMutation = useUnidadesPartialUpdate();
-  const mutation = isEdit ? updateMutation : createMutation;
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: DEFAULT_VALUES,
+  const methods = useForm<UnidadeFormInput, unknown, UnidadeFormOutput>({
+    resolver: zodResolver(unidadeSchema),
+    defaultValues: UNIDADE_DEFAULTS,
+    mode: "onTouched",
   });
+  const { handleSubmit, reset, setError } = methods;
 
   useEffect(() => {
-    if (unidade) {
-      reset({
-        nome_unidade: unidade.nome_unidade,
-        tipo: unidade.tipo ?? "apartamento",
-        numero_moradores: String(unidade.numero_moradores ?? 0),
-        fracao_ideal: unidade.fracao_ideal ?? "",
-        eh_unidade_sindico: unidade.eh_unidade_sindico ?? false,
-        esta_alugada: unidade.esta_alugada ?? false,
-        matricula_imovel: unidade.matricula_imovel ?? "",
-        valor_gas: unidade.valor_gas ?? "",
-        valor_agua: unidade.valor_agua ?? "",
-        valor_energia: unidade.valor_energia ?? "",
-        bloqueio_lancamentos: unidade.bloqueio_lancamentos ?? false,
-        ativo: unidade.ativo ?? true,
-        bloco: unidade.bloco ? String(unidade.bloco) : "",
-      });
-    }
+    if (unidade) reset(unidadeToForm(unidade));
   }, [unidade, reset]);
 
-  const onSubmit = (values: FormValues) => {
-    const { bloco, numero_moradores, ...rest } = values;
+  const invalidate = (id: number) =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: getUnidadesListQueryKey() }),
+      queryClient.invalidateQueries({ queryKey: getDashboardRetrieveQueryKey() }),
+      queryClient.invalidateQueries({ queryKey: getUnidadesRetrieveQueryKey(id) }),
+    ]);
+
+  const onError = (error: unknown) => toast.error(applyServerErrors(error, setError));
+
+  const onSubmit = (values: UnidadeFormOutput) => {
     const payload = {
-      ...cleanPayload(rest),
+      ...buildPayload(values, {
+        isEdit,
+        blankKeys: ["matricula_imovel"],
+      }),
       condominio: condominioId,
-      bloco: bloco ? Number(bloco) : null,
-      numero_moradores: toOptionalInt(numero_moradores),
+      bloco: values.bloco,
     };
 
     if (isEdit) {
       updateMutation.mutate(
-        { id: unidadeId!, data: payload },
+        { id: unidadeId!, data: payload as Partial<Unidade> },
         {
-          onSuccess: () =>
-            router.push(`/condominios/${condominioId}/unidades`),
+          onSuccess: () => {
+            invalidate(unidadeId!);
+            toast.success("Unidade salva.");
+            router.push(`/condominios/${condominioId}/unidades`);
+          },
+          onError,
         }
       );
     } else {
       createMutation.mutate(
         { data: payload as unknown as Unidade },
         {
-          onSuccess: (created) =>
-            router.push(`/condominios/${condominioId}/unidades/${created.id}`),
+          onSuccess: (created) => {
+            invalidate(created.id);
+            toast.success("Unidade cadastrada. Agora você pode vincular proprietários e locatários.");
+            router.push(`/condominios/${condominioId}/unidades/${created.id}`);
+          },
+          onError,
         }
       );
     }
   };
 
-  if (isEdit && isLoading) {
-    return <p className="text-sm text-zinc-500">Carregando...</p>;
-  }
+  if (isEdit && isLoading) return <FormSkeleton sections={2} />;
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className={sectionClass}>
-          <h2 className={sectionTitleClass}>Identificação</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className={fieldWrapClass}>
-              <label className={labelClass}>Unidade</label>
-              <input
-                className={inputClass}
+    <div className="space-y-4">
+      <FormProvider {...methods}>
+        <form
+          noValidate
+          onSubmit={handleSubmit(onSubmit, () => toast.error("Corrija os campos destacados."))}
+          className="space-y-4"
+        >
+          <FormSection title="Identificação">
+            <FieldRow columns={3}>
+              <TextField
+                name="nome_unidade"
+                label="Unidade"
+                required
+                maxLength={30}
                 placeholder="Ex.: 101"
-                {...register("nome_unidade")}
+                autoComplete="off"
               />
-              {errors.nome_unidade && (
-                <span className={errorTextClass}>{errors.nome_unidade.message}</span>
-              )}
-            </div>
-
-            <div className={fieldWrapClass}>
-              <label className={labelClass}>Bloco</label>
-              <select className={inputClass} {...register("bloco")}>
-                <option value="">— Sem bloco —</option>
-                {blocos?.results.map((bloco) => (
-                  <option key={bloco.id} value={bloco.id}>
-                    {bloco.nome}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={fieldWrapClass}>
-              <label className={labelClass}>Tipo</label>
-              <select className={inputClass} {...register("tipo")}>
-                <option value="apartamento">Apartamento</option>
-                <option value="sala">Sala</option>
-                <option value="loja">Loja</option>
-                <option value="casa">Casa</option>
-                <option value="conjunto">Conjunto</option>
-                <option value="box">Box</option>
-                <option value="outros">Outros</option>
-              </select>
-            </div>
-
-            <div className={fieldWrapClass}>
-              <label className={labelClass}>Matrícula do imóvel</label>
-              <input className={inputClass} {...register("matricula_imovel")} />
-            </div>
-
-            <div className={fieldWrapClass}>
-              <label className={labelClass}>Nº de moradores</label>
-              <input
-                type="number"
-                className={inputClass}
-                {...register("numero_moradores")}
+              <SelectField
+                name="bloco"
+                label="Bloco"
+                placeholder="Sem bloco"
+                options={(blocos?.results ?? []).map((bloco) => ({
+                  value: bloco.id,
+                  label: bloco.nome,
+                }))}
               />
-            </div>
-
-            <div className={fieldWrapClass}>
-              <label className={labelClass}>Fração ideal (rateio)</label>
-              <input
-                className={inputClass}
+              <SelectField name="tipo" label="Tipo" options={UNIDADE_TIPOS} />
+            </FieldRow>
+            <FieldRow columns={3}>
+              <TextField name="matricula_imovel" label="Matrícula do imóvel" maxLength={60} />
+              <TextField
+                name="numero_moradores"
+                label="Nº de moradores"
+                mask={(value) => digitsOnly(value).slice(0, 3)}
+                inputMode="numeric"
+              />
+              <TextField
+                name="fracao_ideal"
+                label="Fração ideal"
+                mask={(value) => maskDecimal(value, 5, 3)}
                 inputMode="decimal"
-                {...register("fracao_ideal")}
+                placeholder="0,00000"
+                hint="Usada no rateio."
               />
-            </div>
+            </FieldRow>
+            <FieldRow>
+              <CheckboxField name="eh_unidade_sindico" label="Unidade do síndico" />
+              <CheckboxField name="esta_alugada" label="Está alugada" />
+            </FieldRow>
+            <FieldRow>
+              <CheckboxField name="bloqueio_lancamentos" label="Bloquear lançamentos" />
+              <CheckboxField name="ativo" label="Cadastro ativo" />
+            </FieldRow>
+          </FormSection>
 
-            <label className={checkboxLabelClass}>
-              <input type="checkbox" {...register("eh_unidade_sindico")} />
-              Unidade do síndico
-            </label>
-            <label className={checkboxLabelClass}>
-              <input type="checkbox" {...register("esta_alugada")} />
-              Está alugada
-            </label>
-            <label className={checkboxLabelClass}>
-              <input type="checkbox" {...register("bloqueio_lancamentos")} />
-              Bloquear lançamentos
-            </label>
-            <label className={checkboxLabelClass}>
-              <input type="checkbox" {...register("ativo")} />
-              Ativo
-            </label>
-          </div>
-        </div>
-
-        <div className={sectionClass}>
-          <h2 className={sectionTitleClass}>Medidores individuais</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className={fieldWrapClass}>
-              <label className={labelClass}>Valor gás (R$)</label>
-              <input className={inputClass} inputMode="decimal" {...register("valor_gas")} />
-            </div>
-            <div className={fieldWrapClass}>
-              <label className={labelClass}>Valor água (R$)</label>
-              <input className={inputClass} inputMode="decimal" {...register("valor_agua")} />
-            </div>
-            <div className={fieldWrapClass}>
-              <label className={labelClass}>Valor energia (R$)</label>
-              <input
-                className={inputClass}
-                inputMode="decimal"
-                {...register("valor_energia")}
+          <FormSection title="Medidores individuais" description="Valores fixos cobrados da unidade.">
+            <FieldRow columns={3}>
+              <TextField
+                name="valor_gas"
+                label="Gás (R$)"
+                mask={money}
+                inputMode="numeric"
+                placeholder="0,00"
               />
-            </div>
-          </div>
-        </div>
+              <TextField
+                name="valor_agua"
+                label="Água (R$)"
+                mask={money}
+                inputMode="numeric"
+                placeholder="0,00"
+              />
+              <TextField
+                name="valor_energia"
+                label="Energia (R$)"
+                mask={money}
+                inputMode="numeric"
+                placeholder="0,00"
+              />
+            </FieldRow>
+          </FormSection>
 
-        {mutation.isError && (
-          <p className={errorTextClass}>
-            Não foi possível salvar. Confira os campos e tente novamente.
-          </p>
-        )}
-
-        <div className="flex gap-3">
-          <button type="submit" disabled={mutation.isPending} className={buttonPrimaryClass}>
-            {mutation.isPending ? "Salvando..." : "Salvar"}
-          </button>
-          <button
-            type="button"
-            className={buttonSecondaryClass}
-            onClick={() => router.push(`/condominios/${condominioId}/unidades`)}
-          >
-            Cancelar
-          </button>
-        </div>
-      </form>
+          <FormActions isSubmitting={isSubmitting}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => router.push(`/condominios/${condominioId}/unidades`)}
+            >
+              Cancelar
+            </Button>
+          </FormActions>
+        </form>
+      </FormProvider>
 
       {isEdit && unidade && (
         <PartesSection
           unidadeId={unidade.id}
           partes={unidade.partes}
-          onChanged={() =>
+          onChanged={() => {
             queryClient.invalidateQueries({
               queryKey: getUnidadesRetrieveQueryKey(unidadeId!),
-            })
-          }
+            });
+            queryClient.invalidateQueries({ queryKey: getDashboardRetrieveQueryKey() });
+          }}
         />
       )}
     </div>
   );
 }
+
+const parteSchema = z.object({
+  papel: z.enum(["proprietario", "locatario"], { error: "Selecione o papel" }),
+  percentual_participacao: decimalField("Percentual", { max: 100 }),
+  data_inicio: dateField("Início da vigência", { min: "1900-01-01", max: "2100-12-31" }),
+});
+type ParteInput = z.input<typeof parteSchema>;
+type ParteOutput = z.output<typeof parteSchema>;
 
 interface PartesSectionProps {
   unidadeId: number;
@@ -304,139 +255,150 @@ interface PartesSectionProps {
 
 function PartesSection({ unidadeId, partes, onChanged }: PartesSectionProps) {
   const [pessoa, setPessoa] = useState<Pessoa | null>(null);
-  const [papel, setPapel] = useState<"proprietario" | "locatario">("proprietario");
-  const [percentual, setPercentual] = useState("");
-  const [dataInicio, setDataInicio] = useState("");
+  const [pessoaError, setPessoaError] = useState<string>();
 
   const createMutation = useUnidadePartesCreate();
   const destroyMutation = useUnidadePartesDestroy();
 
-  const handleAdd = () => {
-    if (!pessoa) return;
+  const methods = useForm<ParteInput, unknown, ParteOutput>({
+    resolver: zodResolver(parteSchema),
+    defaultValues: { papel: "proprietario", percentual_participacao: "", data_inicio: "" },
+    mode: "onTouched",
+  });
+  const { handleSubmit, reset, setError } = methods;
+
+  const onSubmit = (values: ParteOutput) => {
+    if (!pessoa) {
+      setPessoaError("Selecione uma pessoa");
+      return;
+    }
     createMutation.mutate(
       {
         data: {
           unidade: unidadeId,
           pessoa: pessoa.id,
-          papel,
-          ...(percentual ? { percentual_participacao: percentual } : {}),
-          ...(dataInicio ? { data_inicio: dataInicio } : {}),
+          papel: values.papel,
+          ...(values.percentual_participacao
+            ? { percentual_participacao: values.percentual_participacao }
+            : {}),
+          ...(values.data_inicio ? { data_inicio: values.data_inicio } : {}),
         },
       },
       {
         onSuccess: () => {
           setPessoa(null);
-          setPercentual("");
-          setDataInicio("");
+          reset();
+          toast.success("Vínculo adicionado.");
           onChanged();
         },
+        onError: (error) => toast.error(applyServerErrors(error, setError)),
       }
     );
   };
 
   const handleRemove = (parteId: number) => {
-    if (!window.confirm("Remover este vínculo?")) return;
-    destroyMutation.mutate({ id: parteId }, { onSuccess: onChanged });
+    destroyMutation.mutate(
+      { id: parteId },
+      {
+        onSuccess: () => {
+          toast.success("Vínculo removido.");
+          onChanged();
+        },
+        onError: () => toast.error("Não foi possível remover o vínculo."),
+      }
+    );
   };
 
   return (
-    <div className={sectionClass}>
-      <h2 className={sectionTitleClass}>Proprietários e locatários</h2>
-
-      {partes.length === 0 && (
-        <p className="text-sm text-zinc-500">Nenhum vínculo cadastrado ainda.</p>
-      )}
-
-      {partes.length > 0 && (
-        <ul className="divide-y divide-zinc-100 dark:divide-zinc-900">
+    <FormSection
+      title="Proprietários e locatários"
+      description="Pessoas vinculadas a esta unidade."
+    >
+      {partes.length === 0 ? (
+        <p className="text-body text-ink-soft">Nenhum vínculo cadastrado ainda.</p>
+      ) : (
+        <ul className="space-y-1">
           {partes.map((parte) => (
-            <li key={parte.id} className="flex items-center justify-between py-2">
-              <div>
-                <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                  {parte.pessoa_detalhe.nome}
-                </span>{" "}
-                <span className="text-sm text-zinc-500">
-                  ({parte.papel === "proprietario" ? "Proprietário" : "Locatário"}
+            <li
+              key={parte.id}
+              className="flex items-center justify-between rounded-panel bg-surface-muted px-4 py-2.5"
+            >
+              <div className="min-w-0">
+                <div className="truncate font-medium">{parte.pessoa_detalhe.nome}</div>
+                <div className="text-caption text-ink-soft">
+                  {parte.papel === "proprietario" ? "Proprietário" : "Locatário"}
                   {parte.percentual_participacao
-                    ? ` — ${parte.percentual_participacao}%`
+                    ? ` · ${Number(parte.percentual_participacao).toLocaleString("pt-BR")}%`
                     : ""}
-                  )
-                </span>
+                </div>
               </div>
-              <button
-                type="button"
-                className={buttonDangerClass}
-                onClick={() => handleRemove(parte.id)}
-              >
-                Remover
-              </button>
+              <ConfirmDeleteButton
+                label="Remover"
+                title="Remover vínculo?"
+                description={`${parte.pessoa_detalhe.nome} deixará de estar vinculado(a) a esta unidade.`}
+                onConfirm={() => handleRemove(parte.id)}
+              />
             </li>
           ))}
         </ul>
       )}
 
-      <div className="space-y-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
-        <p className={labelClass}>Adicionar vínculo</p>
-        {pessoa ? (
-          <div className="flex items-center justify-between rounded border border-zinc-300 px-3 py-1.5 text-sm dark:border-zinc-700">
-            <span>
-              {pessoa.nome} ({pessoa.cpf_cnpj})
-            </span>
-            <button
-              type="button"
-              className="text-xs text-red-600 hover:underline dark:text-red-400"
-              onClick={() => setPessoa(null)}
-            >
-              Trocar
-            </button>
-          </div>
-        ) : (
-          <PessoaPicker onSelect={setPessoa} />
-        )}
+      <FormProvider {...methods}>
+        <div className="space-y-1 rounded-panel bg-surface-muted p-4">
+          <p className="mb-2 text-body font-medium">Adicionar vínculo</p>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Papel</label>
-            <select
-              className={inputClass}
-              value={papel}
-              onChange={(event) =>
-                setPapel(event.target.value as "proprietario" | "locatario")
-              }
-            >
-              <option value="proprietario">Proprietário</option>
-              <option value="locatario">Locatário</option>
-            </select>
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Percentual (%)</label>
-            <input
-              className={inputClass}
+          <FormField id="parte-pessoa" label="Pessoa" required error={pessoaError}>
+            {pessoa ? (
+              <div className="flex h-9 items-center justify-between rounded-control bg-surface px-3 text-body">
+                <span className="truncate">
+                  {pessoa.nome} · {pessoa.cpf_cnpj}
+                </span>
+                <button
+                  type="button"
+                  className="text-caption text-ink-soft hover:text-danger"
+                  onClick={() => setPessoa(null)}
+                >
+                  Trocar
+                </button>
+              </div>
+            ) : (
+              <PessoaPicker
+                onSelect={(selected) => {
+                  setPessoa(selected);
+                  setPessoaError(undefined);
+                }}
+              />
+            )}
+          </FormField>
+
+          <FieldRow columns={3}>
+            <SelectField
+              name="papel"
+              label="Papel"
+              options={[
+                { value: "proprietario", label: "Proprietário" },
+                { value: "locatario", label: "Locatário" },
+              ]}
+            />
+            <TextField
+              name="percentual_participacao"
+              label="Participação (%)"
+              mask={(value) => maskDecimal(value, 2, 3)}
               inputMode="decimal"
-              value={percentual}
-              onChange={(event) => setPercentual(event.target.value)}
+              placeholder="100,00"
             />
-          </div>
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Início da vigência</label>
-            <input
-              type="date"
-              className={inputClass}
-              value={dataInicio}
-              onChange={(event) => setDataInicio(event.target.value)}
-            />
-          </div>
-        </div>
+            <TextField name="data_inicio" label="Início da vigência" type="date" />
+          </FieldRow>
 
-        <button
-          type="button"
-          disabled={!pessoa || createMutation.isPending}
-          className={buttonPrimaryClass}
-          onClick={handleAdd}
-        >
-          {createMutation.isPending ? "Adicionando..." : "Adicionar vínculo"}
-        </button>
-      </div>
-    </div>
+          <Button
+            type="button"
+            disabled={createMutation.isPending}
+            onClick={handleSubmit(onSubmit)}
+          >
+            {createMutation.isPending ? "Adicionando…" : "Adicionar vínculo"}
+          </Button>
+        </div>
+      </FormProvider>
+    </FormSection>
   );
 }

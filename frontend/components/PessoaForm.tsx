@@ -1,59 +1,38 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { toast } from "sonner";
 
+import { CheckboxField, SelectField, TextField } from "@/components/form/fields";
+import { FormActions } from "@/components/form/FormActions";
+import { FormSection, FieldRow } from "@/components/form/FormSection";
+import { FormSkeleton } from "@/components/form/FormSkeleton";
+import { Button } from "@/components/ui/button";
 import {
+  getDashboardRetrieveQueryKey,
+  getPessoasListQueryKey,
+  getPessoasRetrieveQueryKey,
   usePessoasCreate,
   usePessoasPartialUpdate,
   usePessoasRetrieve,
 } from "@/lib/api/generated";
-import { cleanPayload } from "@/lib/clean-payload";
+import type { Pessoa } from "@/lib/api/generated/models";
+import { buildPayload } from "@/lib/clean-payload";
+import { applyServerErrors } from "@/lib/form-errors";
+import { maskCnpj, maskCpf, maskPhone } from "@/lib/masks";
 import {
-  buttonPrimaryClass,
-  buttonSecondaryClass,
-  checkboxLabelClass,
-  errorTextClass,
-  fieldWrapClass,
-  inputClass,
-  labelClass,
-  sectionClass,
-} from "@/lib/ui";
+  PESSOA_DEFAULTS,
+  pessoaSchema,
+  pessoaToForm,
+  type PessoaFormInput,
+  type PessoaFormOutput,
+} from "@/lib/schemas/pessoa";
 
-const schema = z.object({
-  tipo_pessoa: z.enum(["fisica", "juridica"]),
-  nome: z.string().min(1, "Informe o nome"),
-  cpf_cnpj: z.string().min(1, "Informe o CPF/CNPJ"),
-  rg_ie: z.string().optional(),
-  data_nascimento: z.string().optional(),
-  estado_civil: z.string().optional(),
-  profissao: z.string().optional(),
-  telefone_residencial: z.string().optional(),
-  telefone_comercial: z.string().optional(),
-  celular: z.string().optional(),
-  email: z.union([z.literal(""), z.string().email("Email inválido")]).optional(),
-  ativo: z.boolean(),
-});
-
-type FormValues = z.infer<typeof schema>;
-
-const DEFAULT_VALUES: FormValues = {
-  tipo_pessoa: "fisica",
-  nome: "",
-  cpf_cnpj: "",
-  rg_ie: "",
-  data_nascimento: "",
-  estado_civil: "",
-  profissao: "",
-  telefone_residencial: "",
-  telefone_comercial: "",
-  celular: "",
-  email: "",
-  ativo: true,
-};
+const ESTADOS_CIVIS = ["Solteiro(a)", "Casado(a)", "Divorciado(a)", "Viúvo(a)", "União estável"];
 
 interface PessoaFormProps {
   pessoaId?: number;
@@ -61,172 +40,183 @@ interface PessoaFormProps {
 
 export function PessoaForm({ pessoaId }: PessoaFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const isEdit = pessoaId !== undefined;
 
   const { data: pessoa, isLoading } = usePessoasRetrieve(pessoaId ?? 0, {
     query: { enabled: isEdit },
   });
-
   const createMutation = usePessoasCreate();
   const updateMutation = usePessoasPartialUpdate();
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: DEFAULT_VALUES,
+  const methods = useForm<PessoaFormInput, unknown, PessoaFormOutput>({
+    resolver: zodResolver(pessoaSchema),
+    defaultValues: PESSOA_DEFAULTS,
+    mode: "onTouched",
   });
+  const { handleSubmit, reset, control, getValues, setValue, setError } = methods;
+
+  const tipo = useWatch({ control, name: "tipo_pessoa" });
+  const isFisica = tipo === "fisica";
 
   useEffect(() => {
-    if (pessoa) {
-      reset({
-        tipo_pessoa: pessoa.tipo_pessoa ?? "fisica",
-        nome: pessoa.nome,
-        cpf_cnpj: pessoa.cpf_cnpj,
-        rg_ie: pessoa.rg_ie ?? "",
-        data_nascimento: pessoa.data_nascimento ?? "",
-        estado_civil: pessoa.estado_civil ?? "",
-        profissao: pessoa.profissao ?? "",
-        telefone_residencial: pessoa.telefone_residencial ?? "",
-        telefone_comercial: pessoa.telefone_comercial ?? "",
-        celular: pessoa.celular ?? "",
-        email: pessoa.email ?? "",
-        ativo: pessoa.ativo ?? true,
-      });
-    }
+    if (pessoa) reset(pessoaToForm(pessoa));
   }, [pessoa, reset]);
 
-  const mutation = isEdit ? updateMutation : createMutation;
+  // Ao trocar entre física/jurídica, reaplica a máscara do documento.
+  useEffect(() => {
+    const current = getValues("cpf_cnpj");
+    if (current) setValue("cpf_cnpj", isFisica ? maskCpf(current) : maskCnpj(current));
+  }, [isFisica, getValues, setValue]);
 
-  const onSubmit = (values: FormValues) => {
-    const payload = cleanPayload(values);
+  const invalidate = (id: number) =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: getPessoasListQueryKey() }),
+      queryClient.invalidateQueries({ queryKey: getDashboardRetrieveQueryKey() }),
+      queryClient.invalidateQueries({ queryKey: getPessoasRetrieveQueryKey(id) }),
+    ]);
+
+  const onError = (error: unknown) => toast.error(applyServerErrors(error, setError));
+
+  const onSubmit = (values: PessoaFormOutput) => {
+    const payload = buildPayload(values, {
+      isEdit,
+      blankKeys: [
+        "rg_ie",
+        "estado_civil",
+        "profissao",
+        "telefone_residencial",
+        "telefone_comercial",
+        "celular",
+        "email",
+      ],
+      nullKeys: ["data_nascimento"],
+    });
 
     if (isEdit) {
       updateMutation.mutate(
-        { id: pessoaId!, data: payload },
-        { onSuccess: () => router.push("/pessoas") }
+        { id: pessoaId!, data: payload as Partial<Pessoa> },
+        {
+          onSuccess: () => {
+            invalidate(pessoaId!);
+            toast.success("Pessoa salva.");
+            router.push("/pessoas");
+          },
+          onError,
+        }
       );
     } else {
       createMutation.mutate(
-        { data: payload as FormValues & { nome: string; cpf_cnpj: string } },
+        { data: payload as unknown as Pessoa },
         {
-          onSuccess: (created) => router.push(`/pessoas/${created.id}`),
+          onSuccess: (created) => {
+            invalidate(created.id);
+            toast.success("Pessoa cadastrada.");
+            router.push("/pessoas");
+          },
+          onError,
         }
       );
     }
   };
 
-  if (isEdit && isLoading) {
-    return <p className="text-sm text-zinc-500">Carregando...</p>;
-  }
+  if (isEdit && isLoading) return <FormSkeleton sections={2} />;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl space-y-6">
-      <div className={sectionClass}>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Tipo de pessoa</label>
-            <select className={inputClass} {...register("tipo_pessoa")}>
-              <option value="fisica">Física</option>
-              <option value="juridica">Jurídica</option>
-            </select>
-          </div>
+    <FormProvider {...methods}>
+      <form
+        noValidate
+        onSubmit={handleSubmit(onSubmit, () => toast.error("Corrija os campos destacados."))}
+        className="space-y-4"
+      >
+        <FormSection title="Identificação">
+          <FieldRow template="2fr 1fr">
+            <TextField
+              name="nome"
+              label={isFisica ? "Nome completo" : "Razão social"}
+              required
+              autoComplete="off"
+            />
+            <SelectField
+              name="tipo_pessoa"
+              label="Tipo de pessoa"
+              options={[
+                { value: "fisica", label: "Pessoa física" },
+                { value: "juridica", label: "Pessoa jurídica" },
+              ]}
+            />
+          </FieldRow>
+          <FieldRow columns={3}>
+            <TextField
+              name="cpf_cnpj"
+              label={isFisica ? "CPF" : "CNPJ"}
+              required
+              mask={isFisica ? maskCpf : maskCnpj}
+              inputMode="numeric"
+              placeholder={isFisica ? "000.000.000-00" : "00.000.000/0000-00"}
+            />
+            <TextField
+              name="rg_ie"
+              label={isFisica ? "RG" : "Inscrição estadual"}
+              maxLength={20}
+            />
+            <CheckboxField name="ativo" label="Cadastro ativo" />
+          </FieldRow>
+          {isFisica && (
+            <FieldRow columns={3}>
+              <TextField name="data_nascimento" label="Data de nascimento" type="date" />
+              <TextField
+                name="estado_civil"
+                label="Estado civil"
+                suggestions={ESTADOS_CIVIS}
+                maxLength={30}
+              />
+              <TextField name="profissao" label="Profissão" maxLength={120} />
+            </FieldRow>
+          )}
+        </FormSection>
 
-          <label className={`${checkboxLabelClass} self-end pb-1.5`}>
-            <input type="checkbox" {...register("ativo")} />
-            Ativo
-          </label>
+        <FormSection title="Contato" description="Informe ao menos uma forma de contato quando possível.">
+          <TextField
+            name="email"
+            label="Email"
+            type="email"
+            inputMode="email"
+            autoComplete="off"
+            placeholder="nome@dominio.com"
+          />
+          <FieldRow columns={3}>
+            <TextField
+              name="celular"
+              label="Celular"
+              mask={maskPhone}
+              inputMode="tel"
+              placeholder="(00) 00000-0000"
+            />
+            <TextField
+              name="telefone_residencial"
+              label="Residencial"
+              mask={maskPhone}
+              inputMode="tel"
+              placeholder="(00) 0000-0000"
+            />
+            <TextField
+              name="telefone_comercial"
+              label="Comercial"
+              mask={maskPhone}
+              inputMode="tel"
+              placeholder="(00) 0000-0000"
+            />
+          </FieldRow>
+        </FormSection>
 
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Nome</label>
-            <input className={inputClass} {...register("nome")} />
-            {errors.nome && (
-              <span className={errorTextClass}>{errors.nome.message}</span>
-            )}
-          </div>
-
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>CPF/CNPJ</label>
-            <input className={inputClass} {...register("cpf_cnpj")} />
-            {errors.cpf_cnpj && (
-              <span className={errorTextClass}>{errors.cpf_cnpj.message}</span>
-            )}
-          </div>
-
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>RG/Inscrição Estadual</label>
-            <input className={inputClass} {...register("rg_ie")} />
-          </div>
-
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Data de nascimento</label>
-            <input type="date" className={inputClass} {...register("data_nascimento")} />
-          </div>
-
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Estado civil</label>
-            <input className={inputClass} {...register("estado_civil")} />
-          </div>
-
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Profissão</label>
-            <input className={inputClass} {...register("profissao")} />
-          </div>
-        </div>
-      </div>
-
-      <div className={sectionClass}>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Celular</label>
-            <input className={inputClass} {...register("celular")} />
-          </div>
-
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Email</label>
-            <input type="email" className={inputClass} {...register("email")} />
-            {errors.email && (
-              <span className={errorTextClass}>{errors.email.message}</span>
-            )}
-          </div>
-
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Telefone residencial</label>
-            <input className={inputClass} {...register("telefone_residencial")} />
-          </div>
-
-          <div className={fieldWrapClass}>
-            <label className={labelClass}>Telefone comercial</label>
-            <input className={inputClass} {...register("telefone_comercial")} />
-          </div>
-        </div>
-      </div>
-
-      {mutation.isError && (
-        <p className={errorTextClass}>
-          Não foi possível salvar. Confira os campos e tente novamente.
-        </p>
-      )}
-
-      <div className="flex gap-3">
-        <button
-          type="submit"
-          disabled={mutation.isPending}
-          className={buttonPrimaryClass}
-        >
-          {mutation.isPending ? "Salvando..." : "Salvar"}
-        </button>
-        <button
-          type="button"
-          className={buttonSecondaryClass}
-          onClick={() => router.push("/pessoas")}
-        >
-          Cancelar
-        </button>
-      </div>
-    </form>
+        <FormActions isSubmitting={isSubmitting}>
+          <Button type="button" variant="secondary" onClick={() => router.push("/pessoas")}>
+            Cancelar
+          </Button>
+        </FormActions>
+      </form>
+    </FormProvider>
   );
 }

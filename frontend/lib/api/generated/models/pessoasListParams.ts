@@ -8,11 +8,15 @@
 
 export type PessoasListParams = {
 /**
+ * Número de resultados a serem retornados por página.
+ */
+limit?: number;
+/**
  * Um número de página dentro do conjunto de resultados paginado.
  */
 page?: number;
 /**
- * Um termo de busca.
+ * Termo de busca (nome, documento…).
  */
-search?: string;
+query?: string;
 };

@@ -38,7 +38,7 @@ export interface Condominio {
   base_reajuste?: string | null;
   /**
      * @minimum 0
-     * @maximum 9223372036854776000
+     * @maximum 32767
      */
   periodicidade_reajuste_meses?: number;
   /**
@@ -57,7 +57,7 @@ export interface Condominio {
   cobra_iss_sobre_taxa?: boolean;
   /**
      * @minimum 0
-     * @maximum 9223372036854776000
+     * @maximum 32767
      */
   dia_vencimento_documento?: number;
   vencimento_por_dia_util?: boolean;
@@ -66,7 +66,7 @@ export interface Condominio {
   percentual_desconto_pagamento_dia?: string;
   /**
      * @minimum 0
-     * @maximum 9223372036854776000
+     * @maximum 32767
      */
   dias_antes_vencimento_desconto?: number;
   /** @pattern ^-?\d{0,8}(?:\.\d{0,2})?$ */

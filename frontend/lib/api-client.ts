@@ -2,15 +2,28 @@ import axios from "axios";
 
 import { getCookie, removeCookie, setCookie } from "./cookies";
 
-export const ACCESS_COOKIE = "access_token";
-export const REFRESH_COOKIE = "refresh_token";
+import { ACCESS_COOKIE, REFRESH_COOKIE } from "./auth";
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+export { ACCESS_COOKIE, REFRESH_COOKIE };
+
+const isServer = typeof window === "undefined";
+const publicURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// No servidor (SSR) o backend é alcançado pela rede interna do Docker.
+const baseURL = isServer ? process.env.API_INTERNAL_URL || publicURL : publicURL;
 
 export const apiClient = axios.create({ baseURL });
 
-apiClient.interceptors.request.use((config) => {
-  const token = getCookie(ACCESS_COOKIE);
+async function readAccessToken(): Promise<string | undefined> {
+  if (isServer) {
+    // Import dinâmico: `next/headers` só existe no servidor.
+    const { cookies } = await import("next/headers");
+    return (await cookies()).get(ACCESS_COOKIE)?.value;
+  }
+  return getCookie(ACCESS_COOKIE);
+}
+
+apiClient.interceptors.request.use(async (config) => {
+  const token = await readAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -25,6 +38,7 @@ async function refreshAccessToken(): Promise<string | null> {
 
   const { data } = await axios.post(`${baseURL}/api/auth/refresh/`, { refresh });
   setCookie(ACCESS_COOKIE, data.access, 1);
+  if (data.refresh) setCookie(REFRESH_COOKIE, data.refresh, 7);
   return data.access as string;
 }
 
@@ -32,6 +46,9 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const original = error.config;
+    // No servidor não dá para gravar cookies; o proxy.ts renova o token antes
+    // da renderização e o cliente refaz a requisição se ainda falhar.
+    if (isServer) return Promise.reject(error);
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
       try {

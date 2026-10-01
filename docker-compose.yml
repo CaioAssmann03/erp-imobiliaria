@@ -24,6 +24,7 @@ services:
     environment:
       POSTGRES_HOST: db
       REDIS_URL: redis://redis:6379/0
+      ALLOWED_HOSTS: localhost,127.0.0.1,backend
     volumes:
       - ./backend:/app
     ports:
@@ -66,6 +67,8 @@ services:
     restart: unless-stopped
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      # URL usada pelo SSR (dentro do container, "localhost" não é o backend)
+      API_INTERNAL_URL: http://backend:8000
     volumes:
       - ./frontend:/app
       - /app/node_modules

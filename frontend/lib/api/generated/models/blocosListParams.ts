@@ -9,6 +9,10 @@
 export type BlocosListParams = {
 condominio?: number;
 /**
+ * Número de resultados a serem retornados por página.
+ */
+limit?: number;
+/**
  * Um número de página dentro do conjunto de resultados paginado.
  */
 page?: number;

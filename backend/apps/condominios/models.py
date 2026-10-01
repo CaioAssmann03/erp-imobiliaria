@@ -1,6 +1,9 @@
+from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.db import models
+from django.db.models.functions import Upper
 
 from apps.core.models import Empresa
+from apps.core.sql import so_digitos
 from apps.pessoas.models import Pessoa
 
 
@@ -59,6 +62,12 @@ class Condominio(models.Model):
         verbose_name = "Condomínio"
         verbose_name_plural = "Condomínios"
         ordering = ["nome"]
+        indexes = [
+            # Busca por trecho (icontains) sem varrer a tabela — ver apps/core/search.py
+            GinIndex(OpClass(Upper("nome"), name="gin_trgm_ops"), name="condominio_nome_trgm"),
+            GinIndex(OpClass(Upper("cnpj"), name="gin_trgm_ops"), name="condominio_cnpj_trgm"),
+            GinIndex(OpClass(so_digitos("cnpj"), name="gin_trgm_ops"), name="condominio_cnpj_digitos_trgm"),
+        ]
 
     def __str__(self):
         return self.nome
@@ -112,6 +121,9 @@ class Unidade(models.Model):
         verbose_name_plural = "Unidades"
         unique_together = ["condominio", "nome_unidade"]
         ordering = ["condominio", "nome_unidade"]
+        indexes = [
+            GinIndex(OpClass(Upper("nome_unidade"), name="gin_trgm_ops"), name="unidade_nome_trgm"),
+        ]
 
     def __str__(self):
         return f"{self.condominio.nome} — {self.nome_unidade}"

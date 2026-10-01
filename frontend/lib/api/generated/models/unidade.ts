@@ -19,7 +19,7 @@ export interface Unidade {
   tipo?: UnidadeTipoEnum;
   /**
      * @minimum 0
-     * @maximum 9223372036854776000
+     * @maximum 32767
      */
   numero_moradores?: number;
   /**

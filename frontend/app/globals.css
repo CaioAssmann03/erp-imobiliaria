@@ -1,26 +1,166 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
+/* ==========================================================================
+   Design system — ERP Imobiliária
+   Fonte única de verdade para cores, tipografia, raios e sombras.
+   Documentação: frontend/DESIGN.md
+   ========================================================================== */
+
+/* 1. Tokens primitivos (geram utilitários: bg-canvas, text-ink, rounded-card…) */
+@theme {
+  /* Superfícies */
+  --color-canvas: #e9e9e8; /* fundo da página */
+  --color-shell: #f6f6f5; /* moldura que contém o app */
+  --color-surface: #ffffff; /* cards */
+  --color-surface-muted: #f2f2f0; /* painéis internos, inputs */
+  --color-surface-sunken: #ebebe9; /* hover, trilhos */
+
+  /* Tinta (texto e elementos escuros) */
+  --color-ink: #1c1b19;
+  --color-ink-soft: #6e6d68;
+  --color-ink-faint: #a5a49e;
+
+  /* Marca (laranja) */
+  --color-brand: #f05a28;
+  --color-brand-strong: #d9481a;
+  --color-brand-light: #ff7a45;
+  --color-brand-soft: #fde9df;
+
+  /* Semânticas (somente para status) */
+  --color-success: #1d9a54;
+  --color-success-soft: #e5f5ec;
+  --color-danger: #e03e2b;
+  --color-danger-soft: #fdebe8;
+  --color-warning: #c98a06;
+  --color-warning-soft: #fcf1d6;
+
+  /* Tipografia */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --text-display: 2.25rem;
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.035em;
+  --text-display--font-weight: 500;
+
+  --text-title: 1.5rem;
+  --text-title--line-height: 1.15;
+  --text-title--letter-spacing: -0.03em;
+  --text-title--font-weight: 500;
+
+  --text-heading: 1rem;
+  --text-heading--line-height: 1.35;
+  --text-heading--letter-spacing: -0.015em;
+  --text-heading--font-weight: 500;
+
+  --text-body: 0.8125rem;
+  --text-body--line-height: 1.45;
+
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+
+  /* Raios */
+  --radius-shell: 1.75rem;
+  --radius-card: 1.25rem;
+  --radius-panel: 0.875rem;
+  --radius-control: 0.75rem;
+
+  /* Sombras */
+  --shadow-card: 0 1px 2px rgb(28 27 25 / 0.04);
+  --shadow-float: 0 8px 24px rgb(28 27 25 / 0.08);
+}
+
+/* 2. Mapeamento para os tokens semânticos do shadcn */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--color-canvas);
+  --foreground: var(--color-ink);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-ink);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-surface-muted);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-surface-muted);
+  --muted-foreground: var(--color-ink-soft);
+  --accent: var(--color-surface-sunken);
+  --accent-foreground: var(--color-ink);
+  --destructive: var(--color-danger);
+  --border: rgb(28 27 25 / 0.07);
+  --input: transparent;
+  --ring: var(--color-brand);
+  --radius: 0.875rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* 3. Base */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans antialiased;
+  }
+  body {
+    @apply bg-canvas text-body text-ink;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* 4. Utilitários do sistema */
+@utility bg-brand-gradient {
+  background-image: linear-gradient(
+    145deg,
+    var(--color-brand-light),
+    var(--color-brand)
+  );
+}
+
+/* Vidro (liquid glass): translúcido + blur + realce interno de 1px.
+   `glass-pill` para elementos pequenos (header), `glass` para painéis flutuantes. */
+@utility glass-pill {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0.55));
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  backdrop-filter: blur(16px) saturate(1.5);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    inset 0 0 0 1px rgb(255 255 255 / 0.55),
+    0 1px 3px rgb(28 27 25 / 0.06);
+}
+
+@utility glass {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.8), rgb(255 255 255 / 0.58));
+  -webkit-backdrop-filter: blur(32px) saturate(1.7);
+  backdrop-filter: blur(32px) saturate(1.7);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    inset 0 0 0 1px rgb(255 255 255 / 0.6),
+    0 24px 64px rgb(28 27 25 / 0.18),
+    0 4px 12px rgb(28 27 25 / 0.06);
 }

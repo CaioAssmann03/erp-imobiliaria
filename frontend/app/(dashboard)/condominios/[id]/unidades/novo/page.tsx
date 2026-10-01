@@ -1,3 +1,5 @@
+import { FormPage } from "@/components/form/FormPage";
+import { PageHeader } from "@/components/PageHeader";
 import { UnidadeForm } from "@/components/UnidadeForm";
 
 export default async function NovaUnidadePage({
@@ -8,11 +10,12 @@ export default async function NovaUnidadePage({
   const { id } = await params;
 
   return (
-    <div>
-      <h1 className="mb-6 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-        Nova unidade
-      </h1>
+    <FormPage>
+      <PageHeader
+        back={{ href: `/condominios/${id}/unidades`, label: "Unidades" }}
+        title="Nova unidade"
+      />
       <UnidadeForm condominioId={Number(id)} />
-    </div>
+    </FormPage>
   );
 }

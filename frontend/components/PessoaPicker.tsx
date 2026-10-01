@@ -22,7 +22,7 @@ export function PessoaPicker({ onSelect, placeholder }: PessoaPickerProps) {
   }, [query]);
 
   const { data, isFetching } = usePessoasList(
-    { search: debounced },
+    { query: debounced, limit: 8 },
     { query: { enabled: debounced.length >= 2 } }
   );
 
@@ -43,12 +43,12 @@ export function PessoaPicker({ onSelect, placeholder }: PessoaPickerProps) {
         onBlur={() => setTimeout(() => setOpen(false), 150)}
       />
       {open && debounced.length >= 2 && (
-        <div className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+        <div className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-panel bg-surface p-1 text-ink shadow-float">
           {isFetching && (
-            <div className="px-3 py-2 text-sm text-zinc-500">Buscando...</div>
+            <div className="px-3 py-2 text-body text-ink-soft">Buscando...</div>
           )}
           {!isFetching && results.length === 0 && (
-            <div className="px-3 py-2 text-sm text-zinc-500">
+            <div className="px-3 py-2 text-body text-ink-soft">
               Nenhuma pessoa encontrada.
             </div>
           )}
@@ -56,7 +56,7 @@ export function PessoaPicker({ onSelect, placeholder }: PessoaPickerProps) {
             <button
               type="button"
               key={pessoa.id}
-              className="block w-full px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              className="block w-full rounded-control px-3 py-2 text-left text-body hover:bg-surface-muted"
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => {
                 onSelect(pessoa);
@@ -64,10 +64,10 @@ export function PessoaPicker({ onSelect, placeholder }: PessoaPickerProps) {
                 setOpen(false);
               }}
             >
-              <div className="font-medium text-zinc-900 dark:text-zinc-100">
+              <div className="font-medium text-ink">
                 {pessoa.nome}
               </div>
-              <div className="text-xs text-zinc-500">{pessoa.cpf_cnpj}</div>
+              <div className="text-caption text-ink-soft">{pessoa.cpf_cnpj}</div>
             </button>
           ))}
         </div>

@@ -1,4 +1,13 @@
+import { FormPage } from "@/components/form/FormPage";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+
+import { PageHeader } from "@/components/PageHeader";
 import { UnidadeForm } from "@/components/UnidadeForm";
+import {
+  getBlocosListQueryOptions,
+  getUnidadesRetrieveQueryOptions,
+} from "@/lib/api/generated";
+import { getServerQueryClient } from "@/lib/query/server";
 
 export default async function EditarUnidadePage({
   params,
@@ -6,13 +15,23 @@ export default async function EditarUnidadePage({
   params: Promise<{ id: string; unidadeId: string }>;
 }) {
   const { id, unidadeId } = await params;
+  const condominioId = Number(id);
+
+  const queryClient = getServerQueryClient();
+  await Promise.all([
+    queryClient.prefetchQuery(getUnidadesRetrieveQueryOptions(Number(unidadeId))),
+    queryClient.prefetchQuery(getBlocosListQueryOptions({ condominio: condominioId, limit: 100 })),
+  ]);
 
   return (
-    <div>
-      <h1 className="mb-6 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-        Editar unidade
-      </h1>
-      <UnidadeForm condominioId={Number(id)} unidadeId={Number(unidadeId)} />
-    </div>
+    <FormPage>
+      <PageHeader
+        back={{ href: `/condominios/${condominioId}/unidades`, label: "Unidades" }}
+        title="Editar unidade"
+      />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <UnidadeForm condominioId={condominioId} unidadeId={Number(unidadeId)} />
+      </HydrationBoundary>
+    </FormPage>
   );
 }
