@@ -12,9 +12,9 @@ export function Toolbar({
   right?: React.ReactNode;
 }) {
   return (
-    <div className="sticky top-2 z-20 -mx-2 mb-2 flex items-center justify-between gap-4 rounded-full bg-shell/95 px-2 py-2 backdrop-blur-md">
-      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">{children}</div>
-      {right && <span className="shrink-0 text-body text-ink-soft">{right}</span>}
+    <div className="sticky top-14 z-20 -mx-2 mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-2xl bg-shell/95 px-2 py-2 backdrop-blur-md lg:top-2 lg:rounded-full">
+      <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:flex-1">{children}</div>
+      {right && <span className="hidden shrink-0 text-body text-ink-soft sm:inline">{right}</span>}
     </div>
   );
 }
@@ -23,21 +23,39 @@ export function SearchField(props: React.ComponentProps<"input">) {
   return (
     <input
       type="search"
-      className="h-9 w-72 max-w-full shrink-0 rounded-full bg-surface px-4 text-body shadow-card outline-none transition-shadow placeholder:text-ink-faint focus:ring-2 focus:ring-brand/50"
+      className="h-10 w-full shrink-0 rounded-full bg-surface px-4 sm:h-9 sm:w-72 text-body shadow-card outline-none transition-shadow placeholder:text-ink-faint focus:ring-2 focus:ring-brand/50"
       {...props}
     />
   );
 }
 
 /** Nome da linha: link que cobre a linha inteira (clicar em qualquer ponto abre o registro). */
-export function RowLink({ href, children }: { href: string; children: React.ReactNode }) {
+export function RowLink({
+  href,
+  children,
+  sub,
+  compact = false,
+}: {
+  href: string;
+  children: React.ReactNode;
+  /** Linha de apoio, só no celular (onde as outras colunas ficam escondidas). */
+  sub?: React.ReactNode;
+  /** Nome mais estreito no celular, para linhas com mais de uma ação visível. */
+  compact?: boolean;
+}) {
+  const mobileWidth = compact ? "max-w-[8.5rem]" : "max-w-[13rem]";
   return (
-    <Link
-      href={href}
-      className="block max-w-[22rem] truncate font-medium after:absolute after:inset-0"
-    >
-      {children}
-    </Link>
+    <div className="min-w-0">
+      <Link
+        href={href}
+        className={`block ${mobileWidth} truncate font-medium after:absolute after:inset-0 sm:max-w-[22rem]`}
+      >
+        {children}
+      </Link>
+      {sub && (
+        <div className={`${mobileWidth} truncate text-caption text-ink-soft md:hidden`}>{sub}</div>
+      )}
+    </div>
   );
 }
 

@@ -115,10 +115,10 @@ export function PessoasTable() {
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead>Nome</TableHead>
-                <TableHead>CPF/CNPJ</TableHead>
-                <TableHead>Celular</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="hidden md:table-cell">CPF/CNPJ</TableHead>
+                <TableHead className="hidden md:table-cell">Celular</TableHead>
+                <TableHead className="hidden md:table-cell">Email</TableHead>
+                <TableHead className="hidden md:table-cell">Status</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -126,19 +126,31 @@ export function PessoasTable() {
               {results.map((pessoa) => (
                 <TableRow key={pessoa.id}>
                   <TableCell>
-                    <RowLink href={`/pessoas/${pessoa.id}`}>{pessoa.nome}</RowLink>
+                    <RowLink
+                      href={`/pessoas/${pessoa.id}`}
+                      sub={[pessoa.email || pessoa.cpf_cnpj, pessoa.ativo ? null : "Inativo"]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    >
+                      {pessoa.nome}
+                    </RowLink>
                   </TableCell>
-                  <TableCell className="text-ink-soft tabular-nums">{pessoa.cpf_cnpj}</TableCell>
-                  <TableCell className="text-ink-soft tabular-nums">{pessoa.celular || "—"}</TableCell>
-                  <TableCell className="max-w-[14rem] truncate text-ink-soft" title={pessoa.email || undefined}>
+                  <TableCell className="hidden md:table-cell text-ink-soft tabular-nums">{pessoa.cpf_cnpj}</TableCell>
+                  <TableCell className="hidden md:table-cell text-ink-soft tabular-nums">{pessoa.celular || "—"}</TableCell>
+                  <TableCell className="hidden md:table-cell max-w-[14rem] truncate text-ink-soft" title={pessoa.email || undefined}>
                     {pessoa.email || "—"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <StatusBadge ativo={pessoa.ativo} />
                   </TableCell>
                   <TableCell>
                     <RowActions>
-                      <LinkButton variant="ghost" size="sm" href={`/pessoas/${pessoa.id}`}>
+                      <LinkButton
+                        variant="ghost"
+                        size="sm"
+                        className="hidden md:inline-flex"
+                        href={`/pessoas/${pessoa.id}`}
+                      >
                         Editar
                       </LinkButton>
                       <ConfirmDeleteButton

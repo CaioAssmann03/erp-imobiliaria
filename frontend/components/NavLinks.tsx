@@ -14,8 +14,8 @@ const NAV_ITEMS = [
 
 /**
  * Client Component: precisa do pathname para marcar o item ativo.
- * Dentro de `<aside data-collapsed>` (lg+): recolhida = só ícone, aberta = só texto.
- * Abaixo de `lg` é uma faixa horizontal com os textos.
+ * Dentro de `<aside data-collapsed>`: recolhida = só ícone, aberta = só texto.
+ * Só desktop (no celular a navegação é o `MobileTabs`).
  */
 export function NavLinks() {
   const pathname = usePathname();
@@ -23,7 +23,7 @@ export function NavLinks() {
     href === "/" ? pathname === "/" : pathname?.startsWith(href);
 
   return (
-    <nav className="flex gap-1 overflow-x-auto lg:flex-col lg:overflow-visible">
+    <nav className="flex flex-col gap-1">
       {NAV_ITEMS.map((item) => (
           <Link
             key={item.href}

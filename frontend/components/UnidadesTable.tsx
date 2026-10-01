@@ -137,10 +137,10 @@ export function UnidadesTable({ condominioId }: UnidadesTableProps) {
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead>Unidade</TableHead>
-                <TableHead>Bloco</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Proprietário(s) / Locatário(s)</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="hidden md:table-cell">Bloco</TableHead>
+                <TableHead className="hidden md:table-cell">Tipo</TableHead>
+                <TableHead className="hidden md:table-cell">Proprietário(s) / Locatário(s)</TableHead>
+                <TableHead className="hidden md:table-cell">Status</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -148,13 +148,22 @@ export function UnidadesTable({ condominioId }: UnidadesTableProps) {
               {results.map((unidade) => (
                 <TableRow key={unidade.id}>
                   <TableCell>
-                    <RowLink href={`/condominios/${condominioId}/unidades/${unidade.id}`}>
+                    <RowLink
+                      href={`/condominios/${condominioId}/unidades/${unidade.id}`}
+                      sub={[
+                        blocoNome(unidade.bloco) !== "—" ? blocoNome(unidade.bloco) : null,
+                        unidade.tipo,
+                        unidade.ativo ? null : "Inativa",
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    >
                       {unidade.nome_unidade}
                     </RowLink>
                   </TableCell>
-                  <TableCell className="text-ink-soft">{blocoNome(unidade.bloco)}</TableCell>
-                  <TableCell className="text-ink-soft capitalize">{unidade.tipo}</TableCell>
-                  <TableCell className="max-w-[22rem] truncate text-ink-soft">
+                  <TableCell className="hidden md:table-cell text-ink-soft">{blocoNome(unidade.bloco)}</TableCell>
+                  <TableCell className="hidden md:table-cell text-ink-soft capitalize">{unidade.tipo}</TableCell>
+                  <TableCell className="hidden md:table-cell max-w-[22rem] truncate text-ink-soft">
                     {unidade.partes.length === 0
                       ? "—"
                       : unidade.partes
@@ -166,7 +175,7 @@ export function UnidadesTable({ condominioId }: UnidadesTableProps) {
                           )
                           .join(", ")}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <StatusBadge ativo={unidade.ativo} />
                   </TableCell>
                   <TableCell>
@@ -174,6 +183,7 @@ export function UnidadesTable({ condominioId }: UnidadesTableProps) {
                       <LinkButton
                         variant="ghost"
                         size="sm"
+                        className="hidden md:inline-flex"
                         href={`/condominios/${condominioId}/unidades/${unidade.id}`}
                       >
                         Editar

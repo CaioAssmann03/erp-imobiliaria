@@ -29,6 +29,16 @@ function applyAppearance(next: Appearance) {
   }
 }
 
+/** Lê o tema aplicado no <html> (fonte da verdade depois de qualquer mudança). */
+function readAppearance(fallback: Appearance): Appearance {
+  const { mode, accent, font } = document.documentElement.dataset;
+  return {
+    mode: (mode as Appearance["mode"]) ?? fallback.mode,
+    accent: (accent as Appearance["accent"]) ?? fallback.accent,
+    font: (font as Appearance["font"]) ?? fallback.font,
+  };
+}
+
 /** Seção com título à esquerda e o valor atual à direita. */
 function Section({
   title,
@@ -86,7 +96,14 @@ function ModePreview({ mode }: { mode: Mode }) {
  * Client Component: botão de engrenagem (no menu lateral) que abre as configurações de
  * aparência no centro da tela: modo (claro/escuro/sistema), cor de destaque e fonte.
  */
-export function SettingsDialog({ initial }: { initial: Appearance }) {
+export function SettingsDialog({
+  initial,
+  compact = false,
+}: {
+  initial: Appearance;
+  /** Botão só com o ícone (barra do topo no celular). */
+  compact?: boolean;
+}) {
   const [appearance, setAppearance] = useState(initial);
 
   const update = (patch: Partial<Appearance>) => {
@@ -99,19 +116,34 @@ export function SettingsDialog({ initial }: { initial: Appearance }) {
   const selectedRing = "ring-2 ring-brand";
 
   return (
-    <Dialog.Root>
+    <Dialog.Root
+      onOpenChange={(open) => {
+        // Há mais de um botão (lateral e topo): ao abrir, lê o tema atual do <html>.
+        if (open) setAppearance(readAppearance(initial));
+      }}
+    >
       <Dialog.Trigger
         title="Configurações"
         aria-label="Configurações"
-        className="flex h-9 w-full items-center rounded-control px-3 text-body font-medium whitespace-nowrap text-ink-soft transition-colors hover:bg-surface hover:text-ink lg:group-data-[collapsed]/sidebar:justify-center lg:group-data-[collapsed]/sidebar:px-0"
+        className={
+          compact
+            ? "flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink"
+            : "flex h-9 w-full items-center rounded-control px-3 text-body font-medium whitespace-nowrap text-ink-soft transition-colors hover:bg-surface hover:text-ink lg:group-data-[collapsed]/sidebar:justify-center lg:group-data-[collapsed]/sidebar:px-0"
+        }
       >
-        <Settings className="hidden size-[1.125rem] lg:group-data-[collapsed]/sidebar:block" />
-        <span className="lg:group-data-[collapsed]/sidebar:hidden">Configurações</span>
+        {compact ? (
+          <Settings className="size-5" />
+        ) : (
+          <>
+            <Settings className="hidden size-[1.125rem] lg:group-data-[collapsed]/sidebar:block" />
+            <span className="lg:group-data-[collapsed]/sidebar:hidden">Configurações</span>
+          </>
+        )}
       </Dialog.Trigger>
 
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-40 bg-ink/25 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 max-h-[90vh] w-[min(32rem,94vw)] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-card bg-surface p-7 shadow-float outline-none transition duration-200 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
+        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 max-h-[90vh] w-[min(32rem,94vw)] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-card bg-surface p-5 sm:p-7 shadow-float outline-none transition duration-200 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
           <header className="mb-7">
             <Dialog.Title className="text-title">Configurações</Dialog.Title>
             <Dialog.Description className="mt-1 text-body text-ink-soft">

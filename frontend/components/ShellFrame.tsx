@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/** Moldura do app (canvas cinza + shell arredondado). Usada pelo app e pelo login. */
+/** Moldura do login: tela inteira no celular; no desktop, canvas cinza + shell arredondado. */
 export function ShellFrame({
   children,
   className,
@@ -9,10 +9,10 @@ export function ShellFrame({
   className?: string;
 }) {
   return (
-    <div className="min-h-screen p-2 md:p-4">
+    <div className="min-h-screen bg-shell lg:bg-transparent lg:p-4">
       <div
         className={cn(
-          "mx-auto min-h-[calc(100vh-2rem)] max-w-[90rem] rounded-shell bg-shell p-3 md:p-5",
+          "mx-auto min-h-screen max-w-[90rem] bg-shell p-4 lg:min-h-[calc(100vh-2rem)] lg:rounded-shell lg:p-5",
           className
         )}
       >

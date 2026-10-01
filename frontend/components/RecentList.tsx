@@ -47,9 +47,9 @@ export function RecentList({
         <p className="px-5 py-8 text-ink-soft">{emptyText}</p>
       ) : (
         <div className="px-2">
-          <div className="grid grid-cols-[minmax(0,1fr)_9rem_8rem] gap-3 border-b border-border px-3 pb-1.5 text-caption text-ink-faint">
+          <div className="grid grid-cols-[minmax(0,1fr)_6.5rem] gap-3 border-b border-border px-3 pb-1.5 text-caption text-ink-faint md:grid-cols-[minmax(0,1fr)_9rem_8rem]">
             <span>Nome</span>
-            <span>{metaLabel}</span>
+            <span className="hidden md:block">{metaLabel}</span>
             <span>{extraLabel}</span>
           </div>
           <ul className="mt-1">
@@ -57,12 +57,12 @@ export function RecentList({
               <li key={item.id}>
                 <Link
                   href={item.href}
-                  className="grid grid-cols-[minmax(0,1fr)_9rem_8rem] items-center gap-3 rounded-panel px-3 py-2.5 transition-colors hover:bg-surface-muted/60"
+                  className="grid grid-cols-[minmax(0,1fr)_6.5rem] items-center gap-3 rounded-panel px-3 py-2.5 md:grid-cols-[minmax(0,1fr)_9rem_8rem] transition-colors hover:bg-surface-muted/60"
                 >
                   <span className="truncate font-medium" title={item.name}>
                     {item.name}
                   </span>
-                  <span className="truncate text-ink-soft" title={item.meta ?? undefined}>
+                  <span className="hidden truncate text-ink-soft md:block" title={item.meta ?? undefined}>
                     {item.meta || "—"}
                   </span>
                   <span className="truncate">{item.extra}</span>

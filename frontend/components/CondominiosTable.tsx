@@ -117,9 +117,9 @@ export function CondominiosTable() {
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead>Nome</TableHead>
-                <TableHead>CNPJ</TableHead>
-                <TableHead>Cidade</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="hidden md:table-cell">CNPJ</TableHead>
+                <TableHead className="hidden md:table-cell">Cidade</TableHead>
+                <TableHead className="hidden md:table-cell">Status</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -127,13 +127,24 @@ export function CondominiosTable() {
               {results.map((condominio) => (
                 <TableRow key={condominio.id}>
                   <TableCell>
-                    <RowLink href={`/condominios/${condominio.id}`}>{condominio.nome}</RowLink>
+                    <RowLink
+                      compact
+                      href={`/condominios/${condominio.id}`}
+                      sub={[
+                        condominio.cidade ? `${condominio.cidade}/${condominio.uf}` : null,
+                        condominio.ativo ? null : "Inativo",
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    >
+                      {condominio.nome}
+                    </RowLink>
                   </TableCell>
-                  <TableCell className="text-ink-soft tabular-nums">{condominio.cnpj || "—"}</TableCell>
-                  <TableCell className="text-ink-soft">
+                  <TableCell className="hidden md:table-cell text-ink-soft tabular-nums">{condominio.cnpj || "—"}</TableCell>
+                  <TableCell className="hidden md:table-cell text-ink-soft">
                     {condominio.cidade ? `${condominio.cidade}/${condominio.uf}` : "—"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <StatusBadge ativo={condominio.ativo} />
                   </TableCell>
                   <TableCell>
@@ -146,7 +157,12 @@ export function CondominiosTable() {
                         Unidades
                       </LinkButton>
                       <RowActions>
-                        <LinkButton variant="ghost" size="sm" href={`/condominios/${condominio.id}`}>
+                        <LinkButton
+                          variant="ghost"
+                          size="sm"
+                          className="hidden md:inline-flex"
+                          href={`/condominios/${condominio.id}`}
+                        >
                           Editar
                         </LinkButton>
                         <ConfirmDeleteButton

@@ -11,7 +11,7 @@ export function FormActions({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="sticky bottom-4 z-10 flex items-center gap-2 rounded-card bg-card p-3 shadow-float">
+    <div className="sticky bottom-[4.75rem] z-10 lg:bottom-4 flex items-center gap-2 rounded-card bg-card p-3 shadow-float">
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Salvando…" : submitLabel}
       </Button>

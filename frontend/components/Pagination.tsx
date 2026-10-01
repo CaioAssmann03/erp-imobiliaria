@@ -18,7 +18,7 @@ export function Pagination({ page, limit, count, onPageChange, onLimitChange }: 
   const last = Math.min(page * limit, count);
 
   return (
-    <div className="mt-2 flex items-center justify-between gap-3 px-3 pb-1 text-caption text-ink-soft">
+    <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3 pb-1 text-caption text-ink-soft">
       <span className="tabular-nums">
         {first}–{last} de {count}
       </span>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { Bar, BarChart, Cell, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
@@ -12,6 +13,19 @@ import {
 const config = {
   value: { label: "Valor", color: "var(--color-brand)" },
 } satisfies ChartConfig;
+
+const NARROW = "(max-width: 640px)";
+function useNarrow() {
+  return useSyncExternalStore(
+    (notify) => {
+      const query = window.matchMedia(NARROW);
+      query.addEventListener("change", notify);
+      return () => query.removeEventListener("change", notify);
+    },
+    () => window.matchMedia(NARROW).matches,
+    () => false
+  );
+}
 
 function formatValue(value: number, format: "number" | "currency") {
   return format === "currency"
@@ -45,6 +59,8 @@ export function SimpleBarChart({
   /** Destaca a 1ª barra (ex.: "atrasados") com a cor do texto: contrasta com qualquer cor de destaque. */
   highlightFirst?: boolean;
 }) {
+  const narrow = useNarrow();
+
   return (
     <ChartContainer config={config} className={className}>
       <BarChart
@@ -65,9 +81,9 @@ export function SimpleBarChart({
               dataKey="label"
               tickLine={false}
               axisLine={false}
-              width={190}
+              width={narrow ? 105 : 190}
               tick={{ fontSize: 11, fill: "var(--color-ink-soft)" }}
-              tickFormatter={(value: string) => (value.length > 30 ? `${value.slice(0, 29)}…` : value)}
+              tickFormatter={(value: string) => (value.length > (narrow ? 16 : 30) ? `${value.slice(0, narrow ? 15 : 29)}…` : value)}
             />
           </>
         ) : (

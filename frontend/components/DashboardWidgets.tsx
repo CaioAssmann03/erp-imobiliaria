@@ -163,7 +163,7 @@ export function buildWidgets(dash: Dashboard | undefined): Record<WidgetId, Widg
       showHeader: true,
       render: (large) => (
         <>
-          <div className="mb-4 flex items-end justify-between gap-4">
+          <div className="mb-4 flex flex-col items-start gap-1 md:flex-row md:items-end md:justify-between md:gap-4">
             <div className="text-display tabular-nums">{receita ? brl(receita.total_mensal) : "–"}</div>
             <Caption>
               {receita

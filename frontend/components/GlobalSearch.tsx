@@ -2,6 +2,7 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import { keepPreviousData } from "@tanstack/react-query";
+import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -123,17 +124,18 @@ export function GlobalSearch() {
       }}
     >
       <Dialog.Trigger
-        className="glass-pill flex h-11 w-full items-center justify-between rounded-full px-5 text-left text-[0.9375rem] text-ink-soft transition-colors hover:text-ink"
+        className="flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink lg:glass-pill lg:h-11 lg:w-full lg:justify-between lg:px-5 lg:text-left lg:text-[0.9375rem]"
         aria-label="Abrir busca"
       >
-        <span className="truncate">Buscar…</span>
-        <kbd className="rounded-md bg-ink/5 px-1.5 py-0.5 text-caption">⌘K</kbd>
+        <Search className="size-5 lg:hidden" />
+        <span className="hidden truncate lg:inline">Buscar…</span>
+        <kbd className="hidden rounded-md bg-ink/5 px-1.5 py-0.5 text-caption lg:inline">⌘K</kbd>
       </Dialog.Trigger>
 
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-40 bg-ink/15 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
         <Dialog.Popup
-          className="glass fixed top-[14vh] left-1/2 z-50 w-[min(40rem,92vw)] -translate-x-1/2 overflow-hidden rounded-[1.75rem] outline-none transition duration-200 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0"
+          className="glass fixed top-[8vh] left-1/2 z-50 w-[min(40rem,94vw)] sm:top-[14vh] -translate-x-1/2 overflow-hidden rounded-[1.75rem] outline-none transition duration-200 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0"
         >
           <Dialog.Title className="sr-only">Busca</Dialog.Title>
           <input

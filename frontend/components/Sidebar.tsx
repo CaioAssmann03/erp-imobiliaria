@@ -12,7 +12,7 @@ import type { Appearance } from "@/lib/appearance";
 import { SIDEBAR_COOKIE } from "@/lib/auth";
 
 /**
- * Client Component: lateral recolhível (lg+). Recolhida mostra só ícones; aberta,
+ * Client Component: lateral recolhível (só em telas grandes; no celular há a barra do topo e as abas de baixo). Recolhida mostra só ícones; aberta,
  * só textos. A marca fica sempre visível e o botão de alternar logo abaixo dela. O estado vai para um
  * cookie, lido no servidor (AppShell) para não piscar ao carregar. Padrão: aberta.
  */
@@ -34,19 +34,15 @@ export function Sidebar({
   return (
     <aside
       data-collapsed={open ? undefined : ""}
-      className="group/sidebar flex shrink-0 flex-col gap-4 px-1 transition-[width] duration-200 lg:px-0 lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:w-44 lg:gap-3 lg:py-2 lg:data-[collapsed]:w-12"
+      className="group/sidebar sticky top-4 hidden h-[calc(100vh-2rem)] w-44 shrink-0 flex-col gap-3 py-2 transition-[width] duration-200 data-[collapsed]:w-12 lg:flex"
     >
-      <div className="flex items-center justify-between gap-3 lg:mb-4">
+      <div className="mb-4 flex items-center justify-between gap-3">
         <Link
           href="/"
           className="flex px-1 py-1 lg:group-data-[collapsed]/sidebar:w-full lg:group-data-[collapsed]/sidebar:justify-center lg:group-data-[collapsed]/sidebar:px-0"
         >
           <Brand />
         </Link>
-        <div className="flex items-center gap-1 lg:hidden">
-          <SettingsDialog initial={appearance} />
-          <LogoutButton />
-        </div>
       </div>
 
       <button
@@ -55,7 +51,7 @@ export function Sidebar({
         aria-label={open ? "Recolher menu" : "Abrir menu"}
         aria-expanded={open}
         title={open ? "Recolher" : "Abrir menu"}
-        className="hidden h-9 items-center gap-2 rounded-control px-3 text-body font-medium text-ink-soft transition-colors hover:bg-surface hover:text-ink lg:flex lg:group-data-[collapsed]/sidebar:justify-center lg:group-data-[collapsed]/sidebar:px-0"
+        className="flex h-9 items-center gap-2 rounded-control px-3 text-body font-medium text-ink-soft transition-colors hover:bg-surface hover:text-ink lg:group-data-[collapsed]/sidebar:justify-center lg:group-data-[collapsed]/sidebar:px-0"
       >
         <PanelLeft className="size-[1.125rem] shrink-0" />
         <span className="lg:group-data-[collapsed]/sidebar:hidden">Recolher</span>
@@ -63,7 +59,7 @@ export function Sidebar({
 
       <NavLinks />
 
-      <div className="mt-auto hidden flex-col gap-1 lg:flex">
+      <div className="mt-auto flex flex-col gap-1">
         <SettingsDialog initial={appearance} />
         <LogoutButton />
       </div>
