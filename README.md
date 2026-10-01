@@ -36,7 +36,7 @@ O frontend não chama a API manualmente: os hooks React Query em `frontend/lib/a
 
 ```bash
 cd frontend
-npx orval
+npm run generate:api
 ```
 
 ## Estrutura
