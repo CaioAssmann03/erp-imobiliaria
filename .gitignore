@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+*.sqlite3
+.env
+
+# Django
+staticfiles/
+media/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+frontend/.env*.local
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Docker
+*.log
+
+# Claude Code session-local state (not project config)
+.claude/scheduled_tasks.lock
