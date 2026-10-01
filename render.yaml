@@ -51,14 +51,25 @@ services:
     dockerContext: ./backend
     plan: free
     healthCheckPath: /api/schema/
-    preDeployCommand: python manage.py migrate
+    # migrate + collectstatic + gunicorn rodam em backend/entrypoint.sh (CMD do Dockerfile).
+    # (preDeployCommand não existe no plano free, por isso não é usado.)
     envVarGroups:
       - erp-imobiliaria-shared
     envVars:
+      # Se o Render acrescentar um sufixo ao nome (nome já em uso), ajuste os 3 domínios
+      # deste arquivo (ALLOWED_HOSTS, CORS_ALLOWED_ORIGINS, NEXT_PUBLIC_API_URL/API_INTERNAL_URL).
       - key: ALLOWED_HOSTS
         value: erp-imobiliaria-backend.onrender.com
       - key: CORS_ALLOWED_ORIGINS
         value: https://erp-imobiliaria-frontend.onrender.com
+      # Administrador criado na 1ª subida (o Render pede os valores ao criar o Blueprint).
+      # Depois do primeiro deploy pode apagar DJANGO_SUPERUSER_PASSWORD.
+      - key: DJANGO_SUPERUSER_USERNAME
+        sync: false
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
       # Fill in after the Santander credentialing step (see architecture doc).
       - key: SANTANDER_CLIENT_ID
         sync: false
@@ -69,25 +80,28 @@ services:
       - key: RESEND_API_KEY
         sync: false
 
-  - type: worker
-    name: erp-imobiliaria-celery-worker
-    runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
-    dockerCommand: celery -A config worker --loglevel=info
-    plan: free
-    envVarGroups:
-      - erp-imobiliaria-shared
-
-  - type: worker
-    name: erp-imobiliaria-celery-beat
-    runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
-    dockerCommand: celery -A config beat --loglevel=info
-    plan: free
-    envVarGroups:
-      - erp-imobiliaria-shared
+  # Celery (worker e beat): ainda não há tarefas e workers não existem no plano free do Render.
+  # Quando precisar, descomente (plano pago) — o Redis acima já está pronto.
+  #
+  # - type: worker
+  #   name: erp-imobiliaria-celery-worker
+  #   runtime: docker
+  #   dockerfilePath: ./backend/Dockerfile
+  #   dockerContext: ./backend
+  #   dockerCommand: celery -A config worker --loglevel=info
+  #   plan: starter
+  #   envVarGroups:
+  #     - erp-imobiliaria-shared
+  #
+  # - type: worker
+  #   name: erp-imobiliaria-celery-beat
+  #   runtime: docker
+  #   dockerfilePath: ./backend/Dockerfile
+  #   dockerContext: ./backend
+  #   dockerCommand: celery -A config beat --loglevel=info
+  #   plan: starter
+  #   envVarGroups:
+  #     - erp-imobiliaria-shared
 
   - type: web
     name: erp-imobiliaria-frontend
@@ -95,6 +109,13 @@ services:
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
     plan: free
+    # Usa o último estágio do frontend/Dockerfile (build de produção + next start).
+    healthCheckPath: /login
     envVars:
+      # Navegador -> API. Embutida no JavaScript no build (ARG no Dockerfile).
       - key: NEXT_PUBLIC_API_URL
+        value: https://erp-imobiliaria-backend.onrender.com
+      # Servidor Next (SSR e proxy de renovação de token) -> API. Pela URL pública não é
+      # preciso incluir hosts internos no ALLOWED_HOSTS do backend.
+      - key: API_INTERNAL_URL
         value: https://erp-imobiliaria-backend.onrender.com

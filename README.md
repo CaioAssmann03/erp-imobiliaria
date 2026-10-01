@@ -30,6 +30,27 @@ docker-compose exec backend python manage.py createsuperuser
 - Admin: http://localhost:8000/admin/
 - Frontend: http://localhost:3000 (login com o usuário criado acima)
 
+## Deploy no Render (repositório privado)
+
+O Render não aceita upload de arquivos: o deploy vem de um repositório Git (privado funciona: ao
+conectar o GitHub, dê acesso só a este repositório) ou de uma imagem Docker.
+
+**Jeito rápido (Blueprint):** New > Blueprint > escolha o repositório. O Render lê o `render.yaml`
+e cria Postgres, Redis, backend e frontend. Ele pergunta `DJANGO_SUPERUSER_USERNAME`,
+`DJANGO_SUPERUSER_EMAIL` e `DJANGO_SUPERUSER_PASSWORD` (usuário do primeiro login).
+
+**Jeito manual:** crie um PostgreSQL e dois Web Services Docker (`backend` e `frontend`, cada um com
+seu *root directory*) com as variáveis do `render.yaml`. Pontos importantes:
+
+- O backend sobe pelo `backend/entrypoint.sh`: roda `migrate`, `collectstatic`, cria o admin (se
+  `DJANGO_SUPERUSER_*` estiverem definidos) e inicia o gunicorn na porta de `PORT`.
+- O frontend usa o último estágio do `frontend/Dockerfile` (produção). `NEXT_PUBLIC_API_URL` é
+  embutida no build; `API_INTERNAL_URL` é lida em tempo de execução pelo servidor Next.
+- `ALLOWED_HOSTS` (backend) = domínio do backend; `CORS_ALLOWED_ORIGINS` = URL do frontend.
+- Plano free: serviços dormem sem uso, o Postgres gratuito expira em 30 dias e não há workers
+  (Celery fica de fora até haver tarefas).
+- Opcional: `python manage.py seed_demo` (no Shell do Render, só planos pagos) cria dados de exemplo.
+
 ## Client da API no frontend
 
 O frontend não chama a API manualmente: os hooks React Query em `frontend/lib/api/generated/` são gerados a partir do schema OpenAPI do backend pelo [orval](https://orval.dev). Sempre que um endpoint for criado/alterado no backend, regenere o client com o backend rodando:
