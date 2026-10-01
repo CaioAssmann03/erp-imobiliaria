@@ -49,6 +49,9 @@ apiClient.interceptors.response.use(
     // No servidor não dá para gravar cookies; o proxy.ts renova o token antes
     // da renderização e o cliente refaz a requisição se ainda falhar.
     if (isServer) return Promise.reject(error);
+    // Login/refresh: um 401 aqui é "credenciais inválidas", não sessão expirada. Não tenta
+    // renovar nem redireciona (senão a tela de login recarregaria e o erro sumiria).
+    if (String(original?.url ?? "").includes("/api/auth/")) return Promise.reject(error);
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
       try {

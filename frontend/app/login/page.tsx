@@ -1,26 +1,20 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
-import { Brand } from "@/components/Brand";
+import { AsciiBuilding } from "@/components/AsciiBuilding";
 import { ShellFrame } from "@/components/ShellFrame";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthLoginCreate } from "@/lib/api/generated";
 import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/lib/auth";
 import { setCookie } from "@/lib/cookies";
-import { errorTextClass } from "@/lib/ui";
 
 const schema = z.object({
   username: z.string().min(1, "Informe o usuário"),
@@ -29,6 +23,26 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+/** Rótulo do campo com a mensagem de erro à direita, na mesma linha (não ocupa espaço extra). */
+function FieldLabel({
+  htmlFor,
+  error,
+  children,
+}: {
+  htmlFor: string;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex h-4 items-center justify-between gap-3 px-1">
+      <Label htmlFor={htmlFor}>{children}</Label>
+      <span role="alert" className="text-caption leading-4 text-danger">
+        {error}
+      </span>
+    </div>
+  );
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const loginMutation = useAuthLoginCreate();
@@ -36,6 +50,7 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
+    setFocus,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
@@ -50,65 +65,76 @@ export default function LoginPage() {
           router.push(next || "/");
           router.refresh();
         },
+        onError: (error) => {
+          // Volta o foco para a senha (selecionada) para digitar de novo.
+          setFocus("password", { shouldSelect: true });
+          if (!(isAxiosError(error) && error.response?.status === 401)) {
+            toast.error("Não foi possível entrar agora. Tente novamente em instantes.");
+          }
+        },
       }
     );
   };
 
+  // 401 = credenciais erradas; qualquer outra falha é do servidor ou da conexão (também vai em toast).
+  const loginError = loginMutation.error;
+  const credentialError =
+    loginMutation.isError && isAxiosError(loginError) && loginError.response?.status === 401;
+  const loginErrorLabel = !loginMutation.isError
+    ? undefined
+    : credentialError
+      ? "Usuário ou senha inválidos"
+      : "Falha ao entrar";
+
   return (
-    <ShellFrame className="flex items-center justify-center">
-      <Card className="w-full max-w-sm gap-5 py-6">
-        <CardHeader className="items-center text-center">
-          <Brand />
-          <CardTitle className="mt-4 text-title">Bem-vindo de volta</CardTitle>
-          <CardDescription className="text-body text-ink-soft">Entre com seu usuário e senha.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="username">Usuário</Label>
-              <Input
-                id="username"
-                type="text"
-                autoComplete="username"
-                aria-invalid={!!errors.username}
-                {...register("username")}
-              />
-              {errors.username && (
-                <span className={errorTextClass}>{errors.username.message}</span>
-              )}
-            </div>
+    <ShellFrame className="flex flex-col items-center justify-center">
+      <main className="w-full max-w-xs">
+        <AsciiBuilding className="mx-auto mb-8 w-fit" />
 
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                aria-invalid={!!errors.password}
-                {...register("password")}
-              />
-              {errors.password && (
-                <span className={errorTextClass}>{errors.password.message}</span>
-              )}
-            </div>
+        <header className="text-center">
+          <h1 className="text-title">ERP Imobiliária</h1>
+          <p className="mt-1.5 text-body text-ink-soft">Entre para continuar.</p>
+        </header>
 
-            {loginMutation.isError && (
-              <p className={errorTextClass}>
-                Usuário ou senha inválidos. Tente novamente.
-              </p>
-            )}
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-8 space-y-4">
+          <div className="space-y-1.5">
+            <FieldLabel htmlFor="username" error={errors.username?.message}>
+              Usuário
+            </FieldLabel>
+            <Input
+              id="username"
+              type="text"
+              autoComplete="username"
+              autoFocus
+              className="h-11 rounded-full px-5"
+              aria-invalid={!!errors.username || credentialError}
+              {...register("username")}
+            />
+          </div>
 
-            <Button
-              type="submit"
-              size="lg"
-              disabled={loginMutation.isPending}
-              className="w-full"
-            >
-              {loginMutation.isPending ? "Entrando..." : "Entrar"}
+          <div className="space-y-1.5">
+            <FieldLabel htmlFor="password" error={errors.password?.message ?? loginErrorLabel}>
+              Senha
+            </FieldLabel>
+            <Input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              className="h-11 rounded-full px-5"
+              aria-invalid={!!errors.password || loginMutation.isError}
+              {...register("password")}
+            />
+          </div>
+
+          <div className="pt-2">
+            <Button type="submit" size="lg" disabled={loginMutation.isPending} className="w-full">
+              {loginMutation.isPending ? "Entrando…" : "Entrar"}
             </Button>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+        </form>
+      </main>
+
+      <p className="mt-12 text-center text-caption text-ink-faint">EVE Administradora de Imóveis</p>
     </ShellFrame>
   );
 }
