@@ -2,18 +2,18 @@ from django.contrib import admin
 from typing_extensions import final
 from unfold.admin import ModelAdmin, StackedInline
 
-from .models import PeopleIndividual, PeopleLegal, Person
+from .models import Person, people_individual, people_legal
 
 
 @final
 class PeopleIndividualInline(StackedInline):
-    model = PeopleIndividual
+    model = people_individual
     extra = 0
 
 
 @final
 class PeopleLegalInline(StackedInline):
-    model = PeopleLegal
+    model = people_legal
     extra = 0
 
 

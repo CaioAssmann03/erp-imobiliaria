@@ -4,7 +4,7 @@ from django.urls import reverse
 from rest_framework.response import Response
 from rest_framework.test import APITestCase
 
-from apps.persons.models import PeopleIndividual, PeopleLegal, Person
+from apps.persons.models import Person, people_individual, people_legal
 
 
 def body(response: Response) -> dict[str, object]:
@@ -16,13 +16,13 @@ def make_individual(
     name: str = "Maria", cpf: str = "12345678901", job: str | None = None
 ) -> Person:
     person = Person.objects.create(name=name)
-    _ = PeopleIndividual.objects.create(person=person, cpf=cpf, job=job)
+    _ = people_individual.objects.create(person=person, cpf=cpf, job=job)
     return person
 
 
 def make_legal(name: str = "Empresa LTDA", cnpj: str = "12345678000199") -> Person:
     person = Person.objects.create(name=name)
-    _ = PeopleLegal.objects.create(person=person, cnpj=cnpj)
+    _ = people_legal.objects.create(person=person, cnpj=cnpj)
     return person
 
 
