@@ -9,6 +9,7 @@ click-repl==0.4.0
 click==8.5.0
 django-cors-headers==4.9.0
 django-filter==26.1
+django-stubs-ext==6.1.1
 django-unfold==0.108.0
 Django==6.1.1
 djangorestframework==3.18.1

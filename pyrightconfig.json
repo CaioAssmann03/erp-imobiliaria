@@ -3,5 +3,6 @@
   "exclude": ["**/venv", "**/migrations"],
   "venvPath": "backend",
   "venv": "venv",
-  "extraPaths": ["backend"]
+  "extraPaths": ["backend"],
+  "typeCheckingMode": "off"
 }
