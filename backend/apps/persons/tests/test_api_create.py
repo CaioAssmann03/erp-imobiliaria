@@ -1,39 +1,44 @@
+import pytest
 from rest_framework import status
-from typing_extensions import final
+from rest_framework.test import APIClient
 
 from apps.persons.models import Person
 
-from .base import PersonAPITestCase, body, make_individual
+from .base import body, make_individual
+
+pytestmark = pytest.mark.django_db
 
 
-@final
-class PersonCreateTests(PersonAPITestCase):
-    def test_create_individual(self) -> None:
-        payload = {
-            "name": "Maria Silva",
-            "people_individual": {"cpf": "12345678901", "job": "Engenheira"},
-        }
+def test_create_individual(api_client: APIClient, list_url: str) -> None:
+    payload = {
+        "name": "Maria Silva",
+        "people_individual": {"cpf": "12345678901", "job": "Engenheira"},
+    }
 
-        response = self.client.post(self.list_url, payload, format="json")
+    response = api_client.post(list_url, payload, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        person = Person.objects.get(name="Maria Silva")
-        self.assertEqual(person.people_individual.cpf, "12345678901")
+    assert response.status_code == status.HTTP_201_CREATED
+    person = Person.objects.get(name="Maria Silva")
+    assert person.people_individual.cpf == "12345678901"
 
-    def test_create_requires_name(self) -> None:
-        response = self.client.post(self.list_url, {"email": "a@b.com"}, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("name", body(response))
+def test_create_requires_name(api_client: APIClient, list_url: str) -> None:
+    response = api_client.post(list_url, {"email": "a@b.com"}, format="json")
 
-    def test_create_duplicate_cpf_is_rejected(self) -> None:
-        _ = make_individual(cpf="12345678901")
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "name" in body(response)
 
-        response = self.client.post(
-            self.list_url,
-            {"name": "Outra", "people_individual": {"cpf": "12345678901"}},
-            format="json",
-        )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(Person.objects.count(), 1)
+def test_create_duplicate_cpf_is_rejected(
+    api_client: APIClient, list_url: str
+) -> None:
+    _ = make_individual(cpf="12345678901")
+
+    response = api_client.post(
+        list_url,
+        {"name": "Outra", "people_individual": {"cpf": "12345678901"}},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert Person.objects.count() == 1

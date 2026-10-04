@@ -9,8 +9,8 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.condominios.models import Condominio, Unidade, UnidadeParte
-from apps.pessoas.models import Pessoa
+from apps.condominiums.models import Condominio, Unidade, UnidadeParte
+from apps.persons.models import Pessoa
 
 MESES_REAJUSTE = 6  # meses futuros exibidos no gráfico de reajustes
 LOCACAO_ANTES = 30  # dias: locações já encerradas ainda exibidas (renovação pendente)
@@ -37,7 +37,9 @@ class ResumoSerializer(serializers.Serializer):
 
 class ResponsaveisSerializer(serializers.Serializer):
     unidades_ativas = serializers.IntegerField()
-    com_responsavel = serializers.IntegerField(help_text="Unidades ativas com proprietário/locatário")
+    com_responsavel = serializers.IntegerField(
+        help_text="Unidades ativas com proprietário/locatário"
+    )
 
 
 class ReajustePorMesSerializer(serializers.Serializer):
@@ -62,7 +64,9 @@ class ReceitaCondominioSerializer(serializers.Serializer):
 class ReceitaFixaSerializer(serializers.Serializer):
     total_mensal = serializers.DecimalField(max_digits=12, decimal_places=2)
     condominios_fixos = serializers.IntegerField()
-    condominios_variaveis = serializers.IntegerField(help_text="Taxa em %: dependem do financeiro")
+    condominios_variaveis = serializers.IntegerField(
+        help_text="Taxa em %: dependem do financeiro"
+    )
     maiores = ReceitaCondominioSerializer(many=True)
 
 
@@ -86,7 +90,9 @@ class PendenciasSerializer(serializers.Serializer):
     reajustes_atrasados = serializers.IntegerField()
     reajustes_30_dias = serializers.IntegerField()
     locacoes_terminando = serializers.IntegerField()
-    sem_plano_contas = serializers.IntegerField(help_text="Condomínios ativos sem sub-contas")
+    sem_plano_contas = serializers.IntegerField(
+        help_text="Condomínios ativos sem sub-contas"
+    )
     lancamentos_bloqueados = serializers.IntegerField()
 
 
@@ -107,7 +113,9 @@ class DashboardSerializer(serializers.Serializer):
 
 def _resumo(model, campo_tipo, tipos):
     """Total, ativos e contagem por tipo (todos os tipos aparecem, mesmo com 0)."""
-    agregado = model.objects.aggregate(total=Count("id"), ativos=Count("id", filter=Q(ativo=True)))
+    agregado = model.objects.aggregate(
+        total=Count("id"), ativos=Count("id", filter=Q(ativo=True))
+    )
     contagem = dict(model.objects.values_list(campo_tipo).annotate(n=Count("id")))
     return {
         **agregado,
@@ -127,11 +135,15 @@ def _somar_meses(origem: date, meses: int) -> date:
 def _reajustes(hoje: date):
     """Próximo reajuste de cada condomínio ativo: base + periodicidade (ordenado por data)."""
     itens = []
-    condominios = Condominio.objects.filter(ativo=True, base_reajuste__isnull=False).only(
+    condominios = Condominio.objects.filter(
+        ativo=True, base_reajuste__isnull=False
+    ).only(
         "id", "nome", "base_reajuste", "periodicidade_reajuste_meses", "indice_reajuste"
     )
     for condominio in condominios:
-        data = _somar_meses(condominio.base_reajuste, condominio.periodicidade_reajuste_meses)
+        data = _somar_meses(
+            condominio.base_reajuste, condominio.periodicidade_reajuste_meses
+        )
         itens.append(
             {
                 "id": condominio.id,
@@ -160,8 +172,12 @@ def _reajustes_por_mes(reajustes, hoje: date):
 
 def _receita_fixa():
     fixos = Condominio.objects.filter(ativo=True, tipo_taxa_administracao="fixa")
-    total = fixos.aggregate(soma=Sum("valor_taxa_administracao"))["soma"] or Decimal("0")
-    maiores = fixos.filter(valor_taxa_administracao__gt=0).order_by("-valor_taxa_administracao")[:8]
+    total = fixos.aggregate(soma=Sum("valor_taxa_administracao"))["soma"] or Decimal(
+        "0"
+    )
+    maiores = fixos.filter(valor_taxa_administracao__gt=0).order_by(
+        "-valor_taxa_administracao"
+    )[:8]
     return {
         "total_mensal": total,
         "condominios_fixos": fixos.count(),
@@ -169,7 +185,8 @@ def _receita_fixa():
             ativo=True, tipo_taxa_administracao="variavel"
         ).count(),
         "maiores": [
-            {"id": c.id, "nome": c.nome, "valor": c.valor_taxa_administracao} for c in maiores
+            {"id": c.id, "nome": c.nome, "valor": c.valor_taxa_administracao}
+            for c in maiores
         ],
     }
 
@@ -194,7 +211,9 @@ def _rateio_inconsistente() -> int:
         .values("condominio")
         .annotate(soma=Sum("fracao_ideal"))
     )
-    return sum(1 for linha in somas if abs(linha["soma"] - RATEIO_TOTAL) > RATEIO_TOLERANCIA)
+    return sum(
+        1 for linha in somas if abs(linha["soma"] - RATEIO_TOTAL) > RATEIO_TOLERANCIA
+    )
 
 
 class DashboardView(APIView):
@@ -213,7 +232,9 @@ class DashboardView(APIView):
             "pessoas": _resumo(Pessoa, "tipo_pessoa", Pessoa.TipoPessoa),
             "responsaveis": {
                 "unidades_ativas": unidades_ativas.count(),
-                "com_responsavel": unidades_ativas.filter(partes__isnull=False).distinct().count(),
+                "com_responsavel": unidades_ativas.filter(partes__isnull=False)
+                .distinct()
+                .count(),
             },
             "reajustes_por_mes": _reajustes_por_mes(reajustes, hoje),
             "proximos_reajustes": reajustes[:TOP_LISTAS],
@@ -231,17 +252,23 @@ class DashboardView(APIView):
                 for parte in locacoes[:TOP_LISTAS]
             ],
             "pendencias": {
-                "unidades_sem_responsavel": unidades_ativas.filter(partes__isnull=True).count(),
+                "unidades_sem_responsavel": unidades_ativas.filter(
+                    partes__isnull=True
+                ).count(),
                 "rateio_inconsistente": _rateio_inconsistente(),
                 "reajustes_atrasados": sum(1 for r in reajustes if r["atrasado"]),
                 "reajustes_30_dias": sum(
-                    1 for r in reajustes if hoje <= r["data"] <= hoje + timedelta(days=30)
+                    1
+                    for r in reajustes
+                    if hoje <= r["data"] <= hoje + timedelta(days=30)
                 ),
                 "locacoes_terminando": locacoes.count(),
                 "sem_plano_contas": Condominio.objects.filter(
                     ativo=True, subcontas__isnull=True
                 ).count(),
-                "lancamentos_bloqueados": unidades_ativas.filter(bloqueio_lancamentos=True).count(),
+                "lancamentos_bloqueados": unidades_ativas.filter(
+                    bloqueio_lancamentos=True
+                ).count(),
             },
         }
         return Response(DashboardSerializer(data).data)

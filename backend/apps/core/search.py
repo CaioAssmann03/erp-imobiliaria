@@ -6,9 +6,9 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.condominios.models import Condominio, Unidade
+from apps.condominiums.models import Condominio, Unidade
 from apps.core.sql import so_digitos
-from apps.pessoas.models import Pessoa
+from apps.persons.models import Pessoa
 
 MIN_TEXT_LENGTH = 3  # o índice trigram só é eficiente a partir de 3 caracteres
 MIN_NUMERIC_LENGTH = 2  # números curtos (ex.: unidade "12") são válidos
@@ -31,7 +31,9 @@ def _relevancia(*condicoes: Q):
     criterio = condicoes[0]
     for condicao in condicoes[1:]:
         criterio |= condicao
-    return Case(When(criterio, then=Value(0)), default=Value(1), output_field=IntegerField())
+    return Case(
+        When(criterio, then=Value(0)), default=Value(1), output_field=IntegerField()
+    )
 
 
 class PessoaBuscaSerializer(serializers.Serializer):
@@ -84,7 +86,9 @@ class BuscaView(APIView):
         termo = request.query_params.get("q", "").strip()
         valido, digitos = _classificar(termo)
         if not valido:
-            return Response(BuscaSerializer({"pessoas": [], "condominios": [], "unidades": []}).data)
+            return Response(
+                BuscaSerializer({"pessoas": [], "condominios": [], "unidades": []}).data
+            )
 
         # Termo numérico: compara os dígitos do documento (aceita com ou sem pontuação).
         # O índice dos dígitos é trigram, então só vale a partir de 3 dígitos.
@@ -121,6 +125,8 @@ class BuscaView(APIView):
             .annotate(rank=_relevancia(Q(nome_unidade__istartswith=termo)))
             .order_by("rank", "nome_unidade")
             .select_related("condominio")
-            .only("id", "nome_unidade", "condominio__id", "condominio__nome")[:LIMIT_PER_TYPE],
+            .only("id", "nome_unidade", "condominio__id", "condominio__nome")[
+                :LIMIT_PER_TYPE
+            ],
         }
         return Response(BuscaSerializer(data).data)

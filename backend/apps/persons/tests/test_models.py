@@ -1,17 +1,17 @@
-from django.test import TestCase
-from typing_extensions import final
+import pytest
 
-from apps.persons.models import PeopleIndividual
+from apps.persons.models import people_individual
 
 from .base import make_individual
 
+pytestmark = pytest.mark.django_db
 
-@final
-class PersonModelTests(TestCase):
-    def test_str_returns_name(self) -> None:
-        self.assertEqual(str(make_individual(name="Maria")), "Maria")
 
-    def test_delete_person_cascades(self) -> None:
-        person = make_individual()
-        _ = person.delete()
-        self.assertFalse(PeopleIndividual.objects.exists())
+def test_str_returns_name() -> None:
+    assert str(make_individual(name="Maria")) == "Maria"
+
+
+def test_delete_person_cascades() -> None:
+    person = make_individual()
+    _ = person.delete()
+    assert not people_individual.objects.exists()

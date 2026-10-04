@@ -1,6 +1,8 @@
 from django.db import models
 from typing_extensions import final, override
 
+from apps.core.validators import validate_cpf
+
 from .person import Person
 
 
@@ -13,7 +15,7 @@ class PeopleIndividual(models.Model):
         related_name="people_individual",
     )
 
-    cpf = models.CharField(max_length=11, unique=True)
+    cpf = models.CharField(max_length=11, nique=True, validators=[validate_cpf])
     rg = models.CharField(max_length=10, unique=True, blank=True, null=True)
 
     birthday = models.DateField(blank=True, null=True)

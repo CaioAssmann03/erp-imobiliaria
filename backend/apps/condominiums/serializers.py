@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.pessoas.serializers import PessoaSerializer
+from apps.persons.serializers import PessoaSerializer
 
 from .models import Bloco, Condominio, Historico, SubConta, Unidade, UnidadeParte
 

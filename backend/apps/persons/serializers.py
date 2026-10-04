@@ -10,14 +10,14 @@ from .models import Person, people_individual, people_legal
 
 class PeopleIndividualSerializer(serializers.ModelSerializer):
     @final
-    class Meta(serializers.ModelSerializer.Meta):
+    class Meta:
         model = people_individual
         fields = ("cpf", "rg", "birthday", "marital_status", "job")
 
 
 class PeopleLegalSerializer(serializers.ModelSerializer):
     @final
-    class Meta(serializers.ModelSerializer.Meta):
+    class Meta:
         model = people_legal
         fields = ("cnpj", "ie")
 
@@ -28,7 +28,7 @@ class PersonSerializer(serializers.ModelSerializer):
     people_legal = PeopleLegalSerializer(required=False)
 
     @final
-    class Meta(serializers.ModelSerializer.Meta):
+    class Meta:
         model = Person
         fields = (
             "id",

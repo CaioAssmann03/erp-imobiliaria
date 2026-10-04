@@ -4,7 +4,7 @@ from django.db.models.functions import Upper
 
 from apps.core.models import Empresa
 from apps.core.sql import so_digitos
-from apps.pessoas.models import Pessoa
+from apps.persons.models import Pessoa
 
 
 class Condominio(models.Model):
@@ -20,9 +20,17 @@ class Condominio(models.Model):
         REFERENCIA = "referencia", "Referência do cálculo"
         POSTERIOR = "posterior", "Posterior à referência"
 
-    empresa = models.ForeignKey(Empresa, on_delete=models.PROTECT, related_name="condominios")
+    empresa = models.ForeignKey(
+        Empresa, on_delete=models.PROTECT, related_name="condominios"
+    )
     nome = models.CharField(max_length=255)
-    assessor = models.ForeignKey(Pessoa, on_delete=models.SET_NULL, null=True, blank=True, related_name="condominios_assessorados")
+    assessor = models.ForeignKey(
+        Pessoa,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="condominios_assessorados",
+    )
 
     cnpj = models.CharField(max_length=18, blank=True)
     inscricao_municipal = models.CharField(max_length=30, blank=True)
@@ -35,23 +43,43 @@ class Condominio(models.Model):
 
     hidrometro = models.CharField(max_length=30, blank=True)
     relogio_luz = models.CharField(max_length=30, blank=True)
-    tipo = models.CharField(max_length=20, choices=TipoCondominio.choices, default=TipoCondominio.RESIDENCIAL)
+    tipo = models.CharField(
+        max_length=20,
+        choices=TipoCondominio.choices,
+        default=TipoCondominio.RESIDENCIAL,
+    )
 
     data_inicio_administracao = models.DateField(null=True, blank=True)
     base_reajuste = models.DateField(null=True, blank=True)
     periodicidade_reajuste_meses = models.PositiveSmallIntegerField(default=12)
-    indice_reajuste = models.CharField(max_length=30, blank=True, help_text="Ex.: IGPM, INCC")
+    indice_reajuste = models.CharField(
+        max_length=30, blank=True, help_text="Ex.: IGPM, INCC"
+    )
 
-    tipo_taxa_administracao = models.CharField(max_length=10, choices=TipoTaxaAdministracao.choices, default=TipoTaxaAdministracao.FIXA)
-    valor_taxa_administracao = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    percentual_taxa_administracao = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    tipo_taxa_administracao = models.CharField(
+        max_length=10,
+        choices=TipoTaxaAdministracao.choices,
+        default=TipoTaxaAdministracao.FIXA,
+    )
+    valor_taxa_administracao = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0
+    )
+    percentual_taxa_administracao = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True
+    )
     cobra_iss_sobre_taxa = models.BooleanField(default=False)
 
     dia_vencimento_documento = models.PositiveSmallIntegerField(default=10)
     vencimento_por_dia_util = models.BooleanField(default=False)
-    competencia_calculo = models.CharField(max_length=12, choices=CompetenciaCalculo.choices, default=CompetenciaCalculo.REFERENCIA)
+    competencia_calculo = models.CharField(
+        max_length=12,
+        choices=CompetenciaCalculo.choices,
+        default=CompetenciaCalculo.REFERENCIA,
+    )
 
-    percentual_desconto_pagamento_dia = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    percentual_desconto_pagamento_dia = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0
+    )
     dias_antes_vencimento_desconto = models.PositiveSmallIntegerField(default=0)
 
     limite_credito = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -64,9 +92,16 @@ class Condominio(models.Model):
         ordering = ["nome"]
         indexes = [
             # Busca por trecho (icontains) sem varrer a tabela — ver apps/core/search.py
-            GinIndex(OpClass(Upper("nome"), name="gin_trgm_ops"), name="condominio_nome_trgm"),
-            GinIndex(OpClass(Upper("cnpj"), name="gin_trgm_ops"), name="condominio_cnpj_trgm"),
-            GinIndex(OpClass(so_digitos("cnpj"), name="gin_trgm_ops"), name="condominio_cnpj_digitos_trgm"),
+            GinIndex(
+                OpClass(Upper("nome"), name="gin_trgm_ops"), name="condominio_nome_trgm"
+            ),
+            GinIndex(
+                OpClass(Upper("cnpj"), name="gin_trgm_ops"), name="condominio_cnpj_trgm"
+            ),
+            GinIndex(
+                OpClass(so_digitos("cnpj"), name="gin_trgm_ops"),
+                name="condominio_cnpj_digitos_trgm",
+            ),
         ]
 
     def __str__(self):
@@ -74,7 +109,9 @@ class Condominio(models.Model):
 
 
 class Bloco(models.Model):
-    condominio = models.ForeignKey(Condominio, on_delete=models.CASCADE, related_name="blocos")
+    condominio = models.ForeignKey(
+        Condominio, on_delete=models.CASCADE, related_name="blocos"
+    )
     nome = models.CharField(max_length=60)
 
     class Meta:
@@ -96,13 +133,21 @@ class Unidade(models.Model):
         BOX = "box", "Box"
         OUTROS = "outros", "Outros"
 
-    condominio = models.ForeignKey(Condominio, on_delete=models.CASCADE, related_name="unidades")
-    bloco = models.ForeignKey(Bloco, on_delete=models.SET_NULL, null=True, blank=True, related_name="unidades")
+    condominio = models.ForeignKey(
+        Condominio, on_delete=models.CASCADE, related_name="unidades"
+    )
+    bloco = models.ForeignKey(
+        Bloco, on_delete=models.SET_NULL, null=True, blank=True, related_name="unidades"
+    )
     nome_unidade = models.CharField(max_length=30, help_text="Ex.: 101")
 
-    tipo = models.CharField(max_length=20, choices=TipoUnidade.choices, default=TipoUnidade.APARTAMENTO)
+    tipo = models.CharField(
+        max_length=20, choices=TipoUnidade.choices, default=TipoUnidade.APARTAMENTO
+    )
     numero_moradores = models.PositiveSmallIntegerField(default=0)
-    fracao_ideal = models.DecimalField(max_digits=8, decimal_places=5, default=0, help_text="Usada no rateio")
+    fracao_ideal = models.DecimalField(
+        max_digits=8, decimal_places=5, default=0, help_text="Usada no rateio"
+    )
 
     eh_unidade_sindico = models.BooleanField(default=False)
     esta_alugada = models.BooleanField(default=False)
@@ -122,7 +167,10 @@ class Unidade(models.Model):
         unique_together = ["condominio", "nome_unidade"]
         ordering = ["condominio", "nome_unidade"]
         indexes = [
-            GinIndex(OpClass(Upper("nome_unidade"), name="gin_trgm_ops"), name="unidade_nome_trgm"),
+            GinIndex(
+                OpClass(Upper("nome_unidade"), name="gin_trgm_ops"),
+                name="unidade_nome_trgm",
+            ),
         ]
 
     def __str__(self):
@@ -137,10 +185,16 @@ class UnidadeParte(models.Model):
         PROPRIETARIO = "proprietario", "Proprietário"
         LOCATARIO = "locatario", "Locatário"
 
-    unidade = models.ForeignKey(Unidade, on_delete=models.CASCADE, related_name="partes")
-    pessoa = models.ForeignKey(Pessoa, on_delete=models.PROTECT, related_name="unidades_vinculadas")
+    unidade = models.ForeignKey(
+        Unidade, on_delete=models.CASCADE, related_name="partes"
+    )
+    pessoa = models.ForeignKey(
+        Pessoa, on_delete=models.PROTECT, related_name="unidades_vinculadas"
+    )
     papel = models.CharField(max_length=20, choices=Papel.choices)
-    percentual_participacao = models.DecimalField(max_digits=5, decimal_places=2, default=100)
+    percentual_participacao = models.DecimalField(
+        max_digits=5, decimal_places=2, default=100
+    )
 
     senha_portal_hash = models.CharField(max_length=255, blank=True)
     bloqueado_portal = models.BooleanField(default=False)
@@ -160,7 +214,9 @@ class SubConta(models.Model):
     """Plano de contas do condomínio (ex.: Fundo de Obras, Garagem) — usado
     como centro de custo em ContaPagar e nos itens de cobrança."""
 
-    condominio = models.ForeignKey(Condominio, on_delete=models.CASCADE, related_name="subcontas")
+    condominio = models.ForeignKey(
+        Condominio, on_delete=models.CASCADE, related_name="subcontas"
+    )
     nome = models.CharField(max_length=120)
 
     class Meta:
@@ -177,12 +233,16 @@ class Historico(models.Model):
     '0052-CONDOMINIO'); cada Histórico aponta para uma SubConta por padrão."""
 
     nome = models.CharField(max_length=120)
-    subconta = models.ForeignKey(SubConta, on_delete=models.PROTECT, related_name="historicos")
+    subconta = models.ForeignKey(
+        SubConta, on_delete=models.PROTECT, related_name="historicos"
+    )
     ativo = models.BooleanField(default=True)
     historico_de_acumulo = models.BooleanField(default=False)
     acumula_para_balanco = models.BooleanField(default=True)
     incide_previdencia = models.BooleanField(default=False)
-    percentual_incidencia_taxa_adm = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    percentual_incidencia_taxa_adm = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0
+    )
 
     class Meta:
         verbose_name = "Histórico"

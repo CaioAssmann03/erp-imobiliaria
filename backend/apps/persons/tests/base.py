@@ -1,8 +1,6 @@
 from typing import cast
 
-from django.urls import reverse
 from rest_framework.response import Response
-from rest_framework.test import APITestCase
 
 from apps.persons.models import Person, people_individual, people_legal
 
@@ -24,12 +22,3 @@ def make_legal(name: str = "Empresa LTDA", cnpj: str = "12345678000199") -> Pers
     person = Person.objects.create(name=name)
     _ = people_legal.objects.create(person=person, cnpj=cnpj)
     return person
-
-
-class PersonAPITestCase(APITestCase):
-    @property
-    def list_url(self) -> str:
-        return reverse("person-list")
-
-    def detail_url(self, person: Person) -> str:
-        return reverse("person-detail", args=[person.pk])
