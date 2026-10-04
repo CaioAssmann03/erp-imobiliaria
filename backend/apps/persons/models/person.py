@@ -6,8 +6,9 @@ from django.db import models
 from django.db.models.functions import Upper
 from typing_extensions import final, override
 
-from .people_individual import PeopleIndividual
-from .people_legal import PeopleLegal
+if TYPE_CHECKING:
+    from .people_individual import PeopleIndividual
+    from .people_legal import PeopleLegal
 
 
 @final

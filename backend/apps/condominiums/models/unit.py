@@ -1,10 +1,12 @@
+import uuid
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
-from rest_framework.exceptions import ValidationError
 from typing_extensions import final, override
 
-from apps.condominiums.models import Condominium
 from apps.condominiums.models.block import Block
+from apps.condominiums.models.condominium import Condominium
 
 
 @final
@@ -18,6 +20,7 @@ class Unit(models.Model):
         PARKING_SPACE = "parking_space", "Parking Space"
         OTHER = "other", "Other"
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     condominium = models.ForeignKey(
         Condominium, on_delete=models.CASCADE, related_name="units"
     )
@@ -60,7 +63,7 @@ class Unit(models.Model):
             models.CheckConstraint(
                 name="unit_ideal_fraction_0_1",
                 condition=Q(ideal_fraction__isnull=True)
-                | (Q(ideal_fraction__lte=0) & Q(ideal_fraction__gte=1)),
+                | (Q(ideal_fraction__gt=0) & Q(ideal_fraction__lte=1)),
                 violation_error_message="Ideal fraction must be greater than 0 and at most 1",
             ),
             models.UniqueConstraint(
@@ -81,10 +84,10 @@ class Unit(models.Model):
 
     @override
     def clean(self) -> None:
-        if self.block is not None and self.block.condominium_id != self.condominium.id:
+        if self.block is not None and self.block.condominium_id != self.condominium_id:
             raise ValidationError({"block": "Block belong to another condominium"})
 
     @override
     def __str__(self) -> str:
         block = f" - Block {self.block.name}" if self.block else ""
-        return f"{self.condominium} -{self.nam}{block}"
+        return f"{self.condominium} - {self.name}{block}"

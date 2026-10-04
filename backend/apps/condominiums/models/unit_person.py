@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models import F, Q
 from typing_extensions import final, override
 
-from apps.condominiums.models import Unit
+from apps.condominiums.models.unit import Unit
 from apps.persons.models import Person
 
 
@@ -52,7 +52,7 @@ class UnitPerson(models.Model):
                 violation_error_message="Tenant cannot have an ownership percentage",
             ),
             models.UniqueConstraint(
-                fields=("unit", "person", "name"),
+                fields=("unit", "person", "role"),
                 condition=Q(end_date__isnull=True),
                 name="unit_person_unique_active_link",
                 violation_error_message="This person already has an active link with this role",

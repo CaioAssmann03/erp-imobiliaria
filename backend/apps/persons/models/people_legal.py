@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models.functions import Upper
 from typing_extensions import final, override
 
-from apps.core.validators import validate_cpf
+from apps.core.validators import validate_cnpj
 
 from .person import Person
 
@@ -14,7 +14,7 @@ class PeopleLegal(models.Model):
         Person, on_delete=models.CASCADE, primary_key=True, related_name="people_legal"
     )
 
-    cnpj = models.CharField(max_length=14, unique=True, validators=[validate_cpf])
+    cnpj = models.CharField(max_length=14, unique=True, validators=[validate_cnpj])
     ie = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:

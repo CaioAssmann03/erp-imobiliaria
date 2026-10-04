@@ -19,10 +19,12 @@ class Block(models.Model):
         verbose_name = "Block"
         verbose_name_plural = "Blocks"
         ordering = ("name",)
-        constraints = models.UniqueConstraint(
-            fields=("condominium", "name"),
-            name="block_unique_name_per_condominium",
-            violation_error_message="This condominium already has a block with this name",
+        constraints = (
+            models.UniqueConstraint(
+                fields=("condominium", "name"),
+                name="block_unique_name_per_condominium",
+                violation_error_message="This condominium already has a block with this name",
+            ),
         )
 
     @override

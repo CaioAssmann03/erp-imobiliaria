@@ -5,20 +5,20 @@ from typing_extensions import final
 
 from apps.persons.types import PersonValidatedData
 
-from .models import Person, people_individual, people_legal
+from .models import PeopleIndividual, PeopleLegal, Person
 
 
 class PeopleIndividualSerializer(serializers.ModelSerializer):
     @final
     class Meta:
-        model = people_individual
+        model = PeopleIndividual
         fields = ("cpf", "rg", "birthday", "marital_status", "job")
 
 
 class PeopleLegalSerializer(serializers.ModelSerializer):
     @final
     class Meta:
-        model = people_legal
+        model = PeopleLegal
         fields = ("cnpj", "ie")
 
 
@@ -35,7 +35,7 @@ class PersonSerializer(serializers.ModelSerializer):
             "name",
             "home_phone",
             "business_phone",
-            "cell_phone",
+            "cell_number",
             "email",
             "active",
             "people_individual",
@@ -56,10 +56,10 @@ class PersonSerializer(serializers.ModelSerializer):
         person = Person.objects.create(**validated_data)
 
         if individual_data:
-            _ = people_individual.objects.create(person=person, **individual_data)
+            _ = PeopleIndividual.objects.create(person=person, **individual_data)
 
         if legal_data:
-            _ = people_legal.objects.create(person=person, **legal_data)
+            _ = PeopleLegal.objects.create(person=person, **legal_data)
 
         return person
 
@@ -76,10 +76,10 @@ class PersonSerializer(serializers.ModelSerializer):
         instance.save()
 
         if individual_data:
-            _ = people_individual.objects.update_or_create(
+            _ = PeopleIndividual.objects.update_or_create(
                 person=instance, **individual_data
             )
         if legal_data:
-            _ = people_legal.objects.update_or_create(person=instance, **legal_data)
+            _ = PeopleLegal.objects.update_or_create(person=instance, **legal_data)
 
         return instance

@@ -1,44 +1,56 @@
-from unfold.admin import ModelAdmin, TabularInline
 from django.contrib import admin
+from unfold.admin import ModelAdmin, TabularInline
 
-from .models import Bloco, Condominio, Historico, SubConta, Unidade, UnidadeParte
+from .models import (
+    Address,
+    AdministrationContract,
+    BillingRules,
+    Block,
+    Condominium,
+    Unit,
+    UnitPerson,
+)
 
 
-class BlocoInline(TabularInline):
-    model = Bloco
+class BlockInline(TabularInline):
+    model = Block
     extra = 0
 
 
-@admin.register(Condominio)
-class CondominioAdmin(ModelAdmin):
-    list_display = ("nome", "empresa", "cidade", "uf", "tipo", "ativo")
-    search_fields = ("nome", "cnpj")
-    list_filter = ("empresa", "tipo", "ativo")
-    inlines = [BlocoInline]
-
-
-class UnidadeParteInline(TabularInline):
-    model = UnidadeParte
+class AdministrationContractInline(TabularInline):
+    model = AdministrationContract
     extra = 0
-    autocomplete_fields = ["pessoa"]
 
 
-@admin.register(Unidade)
-class UnidadeAdmin(ModelAdmin):
-    list_display = ("condominio", "bloco", "nome_unidade", "tipo", "esta_alugada", "ativo")
-    search_fields = ("nome_unidade", "matricula_imovel")
-    list_filter = ("condominio", "tipo", "ativo")
-    inlines = [UnidadeParteInline]
+class BillingRulesInline(TabularInline):
+    model = BillingRules
+    extra = 0
 
 
-@admin.register(SubConta)
-class SubContaAdmin(ModelAdmin):
-    list_display = ("nome", "condominio")
-    list_filter = ("condominio",)
+@admin.register(Address)
+class AddressAdmin(ModelAdmin):
+    list_display = ("street", "number", "city", "state", "zip_code")
+    search_fields = ("street", "city", "zip_code")
 
 
-@admin.register(Historico)
-class HistoricoAdmin(ModelAdmin):
-    list_display = ("nome", "subconta", "ativo", "incide_previdencia")
-    search_fields = ("nome",)
-    list_filter = ("subconta", "ativo")
+@admin.register(Condominium)
+class CondominiumAdmin(ModelAdmin):
+    list_display = ("name", "company", "type", "active")
+    search_fields = ("name", "cnpj")
+    list_filter = ("company", "type", "active")
+    raw_id_fields = ("advisor", "address")
+    inlines = (BlockInline, AdministrationContractInline, BillingRulesInline)
+
+
+class UnitPersonInline(TabularInline):
+    model = UnitPerson
+    extra = 0
+    raw_id_fields = ("person",)
+
+
+@admin.register(Unit)
+class UnitAdmin(ModelAdmin):
+    list_display = ("condominium", "block", "name", "type", "active")
+    search_fields = ("name", "registration_number")
+    list_filter = ("condominium", "type", "active")
+    inlines = (UnitPersonInline,)

@@ -52,6 +52,6 @@ class Condominium(models.Model):
         verbose_name_plural = "Condominiums"
         ordering = ("name",)
 
-        @override
-        def __str__(self) -> str:
-            return self.name
+    @override
+    def __str__(self) -> str:
+        return self.name

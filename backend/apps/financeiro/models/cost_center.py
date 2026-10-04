@@ -20,12 +20,14 @@ class CostCenter(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = ("Cost Center",)
+        verbose_name = "Cost Center"
         verbose_name_plural = "Cost Centers"
-        constraints = models.UniqueConstraint(
-            fields=("condominium", "name"),
-            name="cost_center_unique_name_per_condominium",
-            violation_error_message="This condominium already has a cost center with this name",
+        constraints = (
+            models.UniqueConstraint(
+                fields=("condominium", "name"),
+                name="cost_center_unique_name_per_condominium",
+                violation_error_message="This condominium already has a cost center with this name",
+            ),
         )
 
     @override

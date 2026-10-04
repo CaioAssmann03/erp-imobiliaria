@@ -11,7 +11,7 @@ from .serializers import PersonSerializer
 
 @final
 class PersonViewSet(viewsets.ModelViewSet[Person]):
-    permission_classes = IsAuthenticated
+    permission_classes = (IsAuthenticated,)
     queryset = Person.objects.select_related("people_individual", "people_legal")
     serializer_class = PersonSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)

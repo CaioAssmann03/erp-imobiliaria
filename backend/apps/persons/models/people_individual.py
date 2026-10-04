@@ -15,7 +15,7 @@ class PeopleIndividual(models.Model):
         related_name="people_individual",
     )
 
-    cpf = models.CharField(max_length=11, nique=True, validators=[validate_cpf])
+    cpf = models.CharField(max_length=11, unique=True, validators=[validate_cpf])
     rg = models.CharField(max_length=10, unique=True, blank=True, null=True)
 
     birthday = models.DateField(blank=True, null=True)
