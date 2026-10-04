@@ -1,6 +1,7 @@
 ---
-read-when: you touch forms, tables or payloads of any resource; you need field names, enums or rules
-size: medium
+summary: Entities, fields, enums, business rules and the dashboard summary as the UI sees them.
+read-when: you touch forms, tables or payloads of a resource
+skip-if: how to build the form → norms/forms.md; product scope → requirements/product-scope.md
 ---
 # Domain model (E — Entities)
 

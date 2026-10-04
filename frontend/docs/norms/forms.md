@@ -1,6 +1,7 @@
 ---
-read-when: you build or change a form, validation, masks, payloads or server-error handling
-size: medium
+summary: Form flow (schema → toForm → toPayload → server errors), react-hook-form and Zod usage, masks.
+read-when: you build or change a form
+skip-if: form file layout → structure/component-patterns.md; field names/rules → entities/domain-model.md
 ---
 # Forms (N — Norms)
 

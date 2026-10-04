@@ -1,6 +1,7 @@
 ---
+summary: Commands and pre-finish checklist (tsc, eslint, build, review questions).
 read-when: you are about to finish any change
-size: small
+skip-if: you need a how-to → docs/README.md routing table
 ---
 # Quality checklist (S — Safeguards)
 

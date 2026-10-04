@@ -1,6 +1,7 @@
 ---
-read-when: you call the API, prefetch, hydrate, invalidate, paginate, or tune cache freshness
-size: medium
+summary: Generated API client, request path, QueryClient, hydration, lists, invalidation rules.
+read-when: you call the API, prefetch, hydrate or invalidate
+skip-if: advanced query/mutation usage → norms/tanstack-query.md; auth in requests → safeguards/auth-and-tokens.md
 ---
 # Data, API client and cache (N — Norms)
 

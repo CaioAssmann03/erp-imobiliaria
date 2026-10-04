@@ -1,6 +1,7 @@
 ---
-read-when: you handle user input, URLs, redirects, secrets, personal data or third-party calls
-size: small
+summary: Rules for secrets, authorization trust, XSS, redirects, PII, validation, dependencies.
+read-when: you handle input, URLs, redirects, PII or third-party calls
+skip-if: token/cookie details → safeguards/auth-and-tokens.md
 ---
 # Secure coding (S — Safeguards)
 

@@ -1,6 +1,7 @@
 ---
-read-when: you use Tailwind, shadcn/Base UI, icons, toasts or charts
-size: small
+summary: Rules for Tailwind, shadcn/Base UI, lucide, sonner and recharts.
+read-when: you use one of those libraries
+skip-if: tokens and theme → norms/design-system.md
 ---
 # UI libraries (N — Norms)
 

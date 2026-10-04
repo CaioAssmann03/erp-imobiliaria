@@ -1,6 +1,7 @@
 ---
-read-when: you write TypeScript/React code or imports
-size: small
+summary: TypeScript, React and import conventions.
+read-when: you write or review code
+skip-if: naming → norms/language-and-naming.md; component rules → norms/components.md
 ---
 # Code style (N — Norms)
 

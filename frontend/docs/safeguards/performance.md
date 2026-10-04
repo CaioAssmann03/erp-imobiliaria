@@ -1,6 +1,7 @@
 ---
-read-when: you care about speed, bundle size, re-renders, fonts or images
-size: small
+summary: Performance techniques: rendering, data, bundle, re-renders, assets, audit list.
+read-when: you care about speed, bundle size or re-renders
+skip-if: cache rules → norms/data-and-cache.md
 ---
 # Performance (S — Safeguards)
 

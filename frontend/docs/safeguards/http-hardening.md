@@ -1,6 +1,7 @@
 ---
-read-when: you touch security headers, CSP, cookie flags, CORS or next.config.ts
-size: small
+summary: Security headers, CSP, cookie flags and CORS (recommended, not implemented).
+read-when: you touch next.config headers, CSP or cookie flags
+skip-if: token storage design → safeguards/auth-and-tokens.md
 ---
 # HTTP hardening (S — Safeguards)
 

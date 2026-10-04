@@ -1,6 +1,7 @@
 ---
-read-when: you name anything, or write text the user will read
-size: small
+summary: English-code / Portuguese-UI rule and the naming table.
+read-when: you name anything or write user-facing text
+skip-if: code formatting → norms/code-style.md
 ---
 # Language and naming (N — Norms)
 

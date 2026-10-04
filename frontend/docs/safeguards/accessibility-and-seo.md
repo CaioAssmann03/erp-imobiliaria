@@ -1,6 +1,7 @@
 ---
-read-when: you build interactive UI, forms, dialogs, charts, or touch titles and metadata
-size: small
+summary: Accessibility rules and page metadata/SEO.
+read-when: you build interactive UI or touch titles/metadata
+skip-if: component rules → norms/components.md
 ---
 # Accessibility and SEO (S — Safeguards)
 

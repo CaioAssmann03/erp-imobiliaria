@@ -1,6 +1,7 @@
 ---
-read-when: you need the stack, the chosen approach and why; before changing how data or auth flows
-size: medium
+summary: Stack, key decisions with reasons, list-page data flow, rendering and proxy.ts behavior.
+read-when: you need the big picture or the reason for a decision
+skip-if: folders and routes → structure/folders-and-routes.md; cache details → norms/data-and-cache.md; auth details → safeguards/auth-and-tokens.md
 ---
 # Architecture and approach (A — Approach)
 

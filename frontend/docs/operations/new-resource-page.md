@@ -1,6 +1,7 @@
 ---
-read-when: you add a new CRUD resource (list + create + edit) end to end
-size: small
+summary: End-to-end recipe to add a CRUD resource (generate client, schema, route files, components, cache, nav).
+read-when: you add a new resource page
+skip-if: a small task (field, widget, accent) → operations/recipes.md
 ---
 # Recipe: add a resource (O — Operations)
 

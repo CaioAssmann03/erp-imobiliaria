@@ -1,6 +1,7 @@
 ---
-read-when: you create or change a component, or decide Server vs Client
-size: medium
+summary: Server vs Client rules, placement, size, composition and styling of components.
+read-when: you create or change a component or choose server vs client
+skip-if: anatomy of lists/forms → structure/component-patterns.md; styling tokens → norms/design-system.md
 ---
 # Components (N — Norms)
 

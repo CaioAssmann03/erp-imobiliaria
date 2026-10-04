@@ -1,6 +1,7 @@
 ---
-read-when: you need to know where a file lives, where new code goes, or which URL maps to which file
-size: small
+summary: Folder tree, route table and where new code goes.
+read-when: you need to know where a file lives or where to put new code
+skip-if: component anatomy → structure/component-patterns.md; naming → norms/language-and-naming.md
 ---
 # Folders and routes (S — Structure)
 

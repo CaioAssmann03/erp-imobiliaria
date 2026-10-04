@@ -16,10 +16,11 @@ organized by the SPDD REASONS canvas.
 ## How to work
 
 1. **Do not explore the project on your own** (no folder listing, no code search, no inferring conventions from existing files).
-2. Open [`docs/README.md`](docs/README.md), find your task in its **Task → files** table and read **only those files** (usually 2–3).
-3. Read source files only when a doc gives the path or you are already changing that file.
-4. Not in the docs? **Ask the user**, then record the answer in the right doc.
-5. Changed something a doc describes? **Update that doc in the same change.**
+2. **Read headers first**: every doc starts with a 5-line header (`summary`, `read-when`, `skip-if`); read only its first 6 lines to decide, and follow `skip-if` redirects instead of reading further (see the root `AGENTS.md`).
+3. Open [`docs/README.md`](docs/README.md), find your task in its **Task → files** table and read **only those files** (usually 2–3).
+4. Read source files only when a doc gives the path or you are already changing that file.
+5. Not in the docs? **Ask the user**, then record the answer in the right doc.
+6. Changed something a doc describes? **Update that doc in the same change.**
 
 ## Always true
 

@@ -1,6 +1,7 @@
 ---
-read-when: you touch login, logout, tokens, cookies or proxy.ts; or evaluate auth risk
-size: medium
+summary: Cookie-based auth today, where tokens may live, known limits and the HttpOnly hardening plan.
+read-when: you touch login, logout, tokens, cookies or proxy.ts
+skip-if: headers/CSP → safeguards/http-hardening.md; general secure coding → safeguards/secure-coding.md
 ---
 # Authentication and token storage (S — Safeguards)
 

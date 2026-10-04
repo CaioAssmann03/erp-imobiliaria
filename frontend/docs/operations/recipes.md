@@ -1,6 +1,7 @@
 ---
-read-when: you do one of the small recurring tasks below (regenerate client, add field, widget, accent, nav item)
-size: small
+summary: Short recipes: regenerate client, add form field, widget, accent color, nav item, shared component, auth change.
+read-when: you do a small recurring task
+skip-if: a whole new resource → operations/new-resource-page.md
 ---
 # Recipes (O — Operations)
 

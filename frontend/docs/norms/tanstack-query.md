@@ -1,6 +1,7 @@
 ---
+summary: Detailed TanStack Query usage: queries, server prefetch, mutations, cancelation, pitfalls.
 read-when: you write or review query/mutation code beyond the standard patterns
-size: small
+skip-if: the basic data flow and invalidation table → norms/data-and-cache.md
 ---
 # TanStack Query usage (N — Norms)
 

@@ -1,6 +1,7 @@
 ---
-read-when: you need to know what the app must do, for whom, and what is out of scope
-size: small
+summary: Frontend modules, out-of-scope items and non-functional requirements.
+read-when: you need to know what the app must do or for whom
+skip-if: entity fields → entities/domain-model.md; stack → approach/architecture.md
 ---
 # Product scope (R — Requirements)
 

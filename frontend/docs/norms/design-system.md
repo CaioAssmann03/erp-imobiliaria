@@ -1,6 +1,7 @@
 ---
-read-when: you touch colors, type, spacing, radii, shadows, themes or the settings dialog
-size: medium
+summary: Design tokens, density, glass, components and theming (mode, accent, font).
+read-when: you touch styling, colors, themes or settings
+skip-if: component structure → norms/components.md
 ---
 # Design system and theming (N — Norms)
 

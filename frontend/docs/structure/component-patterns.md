@@ -1,6 +1,7 @@
 ---
-read-when: you build a list, a form, a related-records section or a dashboard widget
-size: small
+summary: Anatomy of a list, a form, related-records section and dashboard widget.
+read-when: you build a list, form or widget
+skip-if: step-by-step for a whole resource → operations/new-resource-page.md; component rules → norms/components.md
 ---
 # Component patterns (S — Structure)
 
