@@ -1,4 +1,5 @@
 import uuid
+from typing import TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -19,6 +20,9 @@ class Unit(models.Model):
         SUITE = "suite", "Suite"
         PARKING_SPACE = "parking_space", "Parking Space"
         OTHER = "other", "Other"
+
+    if TYPE_CHECKING:
+        condominium_id: uuid.UUID
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     condominium = models.ForeignKey(

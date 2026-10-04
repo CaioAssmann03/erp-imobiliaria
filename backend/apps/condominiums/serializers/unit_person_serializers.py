@@ -1,4 +1,4 @@
-from typing import override
+from typing import Any, override
 
 from rest_framework import serializers
 from typing_extensions import final
@@ -8,7 +8,7 @@ from apps.persons.serializers import PersonSerializer
 from ..models import UnitPerson
 
 
-class UnitPersonSerializer(serializers.ModelSerializer):
+class UnitPersonSerializer(serializers.ModelSerializer[UnitPerson]):
     person_detail = PersonSerializer(source="person", read_only=True)
 
     @final
@@ -29,7 +29,7 @@ class UnitPersonSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "created_at", "updated_at")
 
     @override
-    def validate(self, attrs: dict[str, object]) -> dict[str, object]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         data = {**getattr(self.instance, "__dict__", {}), **attrs}
         role = data.get("role")
         percentage = data.get("ownership_percentage")

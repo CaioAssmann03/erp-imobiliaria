@@ -1,4 +1,5 @@
 import pytest
+from apps.accounts.models import User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -6,6 +7,7 @@ from rest_framework.test import APIClient
 from apps.core.models import Company
 
 from ..models import Block, Condominium, Unit
+from .base import body, results
 
 pytestmark = pytest.mark.django_db
 
@@ -14,10 +16,8 @@ LIST_ROUTES = ("condominium-list", "block-list", "unit-list", "unit-person-list"
 
 @pytest.fixture
 def client(db: None) -> APIClient:
-    from django.contrib.auth import get_user_model
-
     api = APIClient()
-    api.force_authenticate(user=get_user_model().objects.create_user("tester", password="x"))
+    api.force_authenticate(user=User.objects.create_user("tester", password="x"))
     return api
 
 
@@ -26,7 +26,7 @@ def test_list_is_paginated(client: APIClient, route: str) -> None:
     response = client.get(reverse(route))
 
     assert response.status_code == status.HTTP_200_OK
-    assert set(response.data) == {"count", "next", "previous", "results"}  # pyright: ignore
+    assert set(body(response)) == {"count", "next", "previous", "results"}
 
 
 @pytest.mark.parametrize("route", LIST_ROUTES)
@@ -38,9 +38,9 @@ def test_page_size_and_limit(client: APIClient, condominium: Condominium) -> Non
     for number in range(25):
         _ = Unit.objects.create(condominium=condominium, name=str(number))
 
-    default = client.get(reverse("unit-list")).data  # pyright: ignore
-    limited = client.get(reverse("unit-list"), {"limit": 5, "page": 2}).data  # pyright: ignore
-    capped = client.get(reverse("unit-list"), {"limit": 1000}).data  # pyright: ignore
+    default = body(client.get(reverse("unit-list")))
+    limited = body(client.get(reverse("unit-list"), {"limit": 5, "page": 2}))
+    capped = body(client.get(reverse("unit-list"), {"limit": 1000}))
 
     assert default["count"] == 25
     assert len(default["results"]) == 20
@@ -57,10 +57,10 @@ def test_filters_and_search(client: APIClient, company: Company, condominium: Co
     _ = Unit.objects.create(condominium=condominium, block=block, name="101")
     _ = Unit.objects.create(condominium=other, name="202")
 
-    by_active = client.get(reverse("condominium-list"), {"active": "false"}).data  # pyright: ignore
-    by_search = client.get(reverse("condominium-list"), {"query": "sol"}).data  # pyright: ignore
-    by_condominium = client.get(reverse("unit-list"), {"condominium": other.pk}).data  # pyright: ignore
-    blocks = client.get(reverse("block-list"), {"condominium": condominium.pk}).data  # pyright: ignore
+    by_active = body(client.get(reverse("condominium-list"), {"active": "false"}))
+    by_search = body(client.get(reverse("condominium-list"), {"query": "sol"}))
+    by_condominium = body(client.get(reverse("unit-list"), {"condominium": other.pk}))
+    blocks = body(client.get(reverse("block-list"), {"condominium": condominium.pk}))
 
     assert [c["name"] for c in by_active["results"]] == ["Outro Prédio"]
     assert [c["name"] for c in by_search["results"]] == ["Residencial Sol"]

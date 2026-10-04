@@ -1,4 +1,4 @@
-from typing import override
+from typing import Any, override
 
 from rest_framework import serializers
 from typing_extensions import final
@@ -6,7 +6,7 @@ from typing_extensions import final
 from ..models import AdministrationContract
 
 
-class AdministrationContractSerializer(serializers.ModelSerializer):
+class AdministrationContractSerializer(serializers.ModelSerializer[AdministrationContract]):
     @final
     class Meta:
         model = AdministrationContract
@@ -14,7 +14,7 @@ class AdministrationContractSerializer(serializers.ModelSerializer):
         read_only_fields = ("id",)
 
     @override
-    def validate(self, attrs: dict[str, object]) -> dict[str, object]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         data = {**getattr(self.instance, "__dict__", {}), **attrs}
         fee_type = data.get("fee_type", "fixed")
         if fee_type == "fixed" and data.get("fee_amount") is None:

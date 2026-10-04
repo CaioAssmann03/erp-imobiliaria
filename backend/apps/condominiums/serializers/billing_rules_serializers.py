@@ -6,7 +6,7 @@ from typing_extensions import final
 from ..models import BillingRules
 
 
-class BillingRulesSerializer(serializers.ModelSerializer):
+class BillingRulesSerializer(serializers.ModelSerializer[BillingRules]):
     @final
     class Meta:
         model = BillingRules

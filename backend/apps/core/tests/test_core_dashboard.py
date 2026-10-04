@@ -16,6 +16,8 @@ from apps.core.models import Company
 from apps.financeiro.models import CostCenter
 from apps.persons.models import PeopleIndividual, Person
 
+from .base import JsonObject, body
+
 pytestmark = pytest.mark.django_db
 
 today = timezone.localdate
@@ -30,8 +32,8 @@ def make_condominium(company: Company, name: str, cnpj: str, **kw: object) -> Co
     return Condominium.objects.create(company=company, name=name, cnpj=cnpj, **kw)
 
 
-def dashboard(client: APIClient) -> dict[str, dict[str, object]]:
-    return client.get(reverse("dashboard")).data  # pyright: ignore
+def dashboard(client: APIClient) -> JsonObject:
+    return body(client.get(reverse("dashboard")))
 
 
 def test_empty_dashboard(api_client: APIClient) -> None:
@@ -39,7 +41,7 @@ def test_empty_dashboard(api_client: APIClient) -> None:
 
     assert data["condominiums"]["total"] == 0
     assert data["fixed_revenue"]["monthly_total"] == "0.00"
-    assert [m["month"] for m in data["adjustments_by_month"]][0] == "overdue"  # pyright: ignore
+    assert [m["month"] for m in data["adjustments_by_month"]][0] == "overdue"
 
 
 def test_summaries_count_by_type(api_client: APIClient, company: Company) -> None:
@@ -52,9 +54,9 @@ def test_summaries_count_by_type(api_client: APIClient, company: Company) -> Non
 
     assert data["condominiums"]["total"] == 2
     assert data["condominiums"]["active"] == 1
-    by_type = {t["type"]: t["total"] for t in data["condominiums"]["by_type"]}  # pyright: ignore
+    by_type = {t["type"]: t["total"] for t in data["condominiums"]["by_type"]}
     assert by_type == {"residential": 1, "commercial": 1}
-    persons = {t["type"]: t["total"] for t in data["persons"]["by_type"]}  # pyright: ignore
+    persons = {t["type"]: t["total"] for t in data["persons"]["by_type"]}
     assert persons == {"individual": 1, "legal": 0}
 
 
@@ -82,7 +84,7 @@ def test_fixed_revenue_ignores_variable_and_inactive(
     assert revenue["monthly_total"] == "500.00"
     assert revenue["fixed_condominiums"] == 1
     assert revenue["variable_condominiums"] == 1
-    assert [c["name"] for c in revenue["largest"]] == ["Fixo"]  # pyright: ignore
+    assert [c["name"] for c in revenue["largest"]] == ["Fixo"]
 
 
 def test_adjustments_overdue_and_upcoming(
@@ -102,8 +104,8 @@ def test_adjustments_overdue_and_upcoming(
 
     assert data["pending"]["overdue_adjustments"] == 1
     assert data["pending"]["adjustments_next_30_days"] == 1
-    assert data["upcoming_adjustments"][0]["overdue"] is True  # pyright: ignore
-    assert data["adjustments_by_month"][0]["total"] == 1  # pyright: ignore
+    assert data["upcoming_adjustments"][0]["overdue"] is True
+    assert data["adjustments_by_month"][0]["total"] == 1
 
 
 def test_units_without_responsible(api_client: APIClient, company: Company) -> None:
@@ -151,11 +153,11 @@ def test_leases_ending_soon(api_client: APIClient, company: Company) -> None:
     data = dashboard(api_client)
 
     assert data["pending"]["leases_ending"] == 2
-    assert [(lease["unit"], lease["ended"]) for lease in data["leases"]] == [  # pyright: ignore
+    assert [(lease["unit"], lease["ended"]) for lease in data["leases"]] == [
         ("102", True),
         ("101", False),
     ]
-    assert data["leases"][0]["tenant"] == "Inquilino"  # pyright: ignore
+    assert data["leases"][0]["tenant"] == "Inquilino"
 
 
 def test_apportionment_must_sum_to_one(api_client: APIClient, company: Company) -> None:

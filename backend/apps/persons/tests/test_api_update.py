@@ -116,3 +116,28 @@ def test_patch_without_nested_keeps_documents(
 
     assert response.status_code == status.HTTP_200_OK
     assert PeopleIndividual.objects.get(person=person).cpf == CPF_A
+
+
+def test_patch_clearing_optional_fields_like_the_form_does(
+    api_client: APIClient, detail_url: Callable[[Person], str]
+) -> None:
+    person = make_individual(cpf=CPF_A, job="Engenheira")
+    person.cell_number = "(41) 99999-9999"
+    person.email = "maria@exemplo.com"
+    person.save()
+
+    response = api_client.patch(
+        detail_url(person),
+        {
+            "cell_number": None,
+            "email": "",
+            "people_individual": {"cpf": CPF_A, "rg": None, "birthday": None, "job": None},
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK, response.data
+    person.refresh_from_db()
+    assert person.cell_number is None
+    assert person.email == ""
+    assert person.people_individual.job is None

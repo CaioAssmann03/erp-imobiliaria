@@ -5,6 +5,8 @@ from rest_framework.test import APIClient
 
 from apps.core.models import Company
 
+from .base import results
+
 pytestmark = pytest.mark.django_db
 
 CNPJ = "11222333000181"
@@ -45,7 +47,7 @@ def test_search_by_trade_name(api_client: APIClient) -> None:
 
     response = api_client.get(reverse("company-list"), {"query": "alpha"})
 
-    assert [c["legal_name"] for c in response.data["results"]] == ["Alpha LTDA"]  # pyright: ignore
+    assert [c["legal_name"] for c in results(response)] == ["Alpha LTDA"]
 
 
 def test_str_prefers_trade_name() -> None:

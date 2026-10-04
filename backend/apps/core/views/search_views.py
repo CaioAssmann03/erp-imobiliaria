@@ -1,4 +1,5 @@
 import re
+from typing import Any
 
 from django.db.models import Case, IntegerField, Q, Value, When
 from django.db.models.functions import Coalesce
@@ -6,7 +7,7 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from typing_extensions import final, override
+from typing_extensions import final
 
 from apps.condominiums.models import Condominium, Unit
 from apps.persons.models import Person
@@ -46,7 +47,6 @@ class SearchView(APIView):
     Cada consulta é limitada a `LIMIT_PER_TYPE` linhas. Quem começa com o termo vem primeiro.
     """
 
-    @override
     @extend_schema(
         parameters=[
             OpenApiParameter(
@@ -88,7 +88,7 @@ class SearchView(APIView):
             condominium_filter |= Q(cnpj__contains=digits)
             condominium_rank.append(Q(cnpj__startswith=digits))
 
-        data = {
+        data: dict[str, Any] = {
             "persons": Person.objects.filter(person_filter)
             .annotate(
                 rank=_relevance(*person_rank),

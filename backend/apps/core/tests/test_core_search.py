@@ -7,6 +7,8 @@ from apps.condominiums.models import Address, Condominium, Unit
 from apps.core.models import Company
 from apps.persons.models import PeopleIndividual, Person
 
+from .base import JsonObject, body
+
 pytestmark = pytest.mark.django_db
 
 CPF = "52998224725"
@@ -25,8 +27,8 @@ def data() -> None:
     _ = PeopleIndividual.objects.create(person=person, cpf=CPF)
 
 
-def search(client: APIClient, term: str) -> dict[str, list[dict[str, object]]]:
-    return client.get(reverse("search"), {"q": term}).data  # pyright: ignore
+def search(client: APIClient, term: str) -> JsonObject:
+    return body(client.get(reverse("search"), {"q": term}))
 
 
 def test_short_term_returns_nothing(api_client: APIClient, data: None) -> None:

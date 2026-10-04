@@ -1,4 +1,5 @@
 import uuid
+from typing import TYPE_CHECKING
 
 from django.db import models
 from django.db.models import F, Q
@@ -10,6 +11,11 @@ from apps.persons.models import Person
 
 @final
 class UnitPerson(models.Model):
+    if TYPE_CHECKING:
+        unit_id: uuid.UUID
+
+        def get_role_display(self) -> str: ...
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     class Role(models.TextChoices):

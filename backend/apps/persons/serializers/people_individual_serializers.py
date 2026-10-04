@@ -9,7 +9,7 @@ from apps.core.validators.cpf import validate_cpf
 from ..models import PeopleIndividual
 
 
-class PeopleIndividualSerializer(serializers.ModelSerializer):
+class PeopleIndividualSerializer(serializers.ModelSerializer[PeopleIndividual]):
     @final
     class Meta:
         model = PeopleIndividual

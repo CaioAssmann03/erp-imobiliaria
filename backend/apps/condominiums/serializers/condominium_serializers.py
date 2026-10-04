@@ -1,4 +1,4 @@
-from typing import override
+from typing import Any, override
 
 from django.db import transaction
 from rest_framework import serializers
@@ -11,7 +11,7 @@ from .billing_rules_serializers import BillingRulesSerializer
 
 
 @final
-class CondominiumSerializer(serializers.ModelSerializer):
+class CondominiumSerializer(serializers.ModelSerializer[Condominium]):
     address = AddressSerializer(required=False, allow_null=True)
     administration_contract = AdministrationContractSerializer(required=False)
     billing_rules = BillingRulesSerializer(required=False)
@@ -41,7 +41,7 @@ class CondominiumSerializer(serializers.ModelSerializer):
 
     @override
     @transaction.atomic
-    def create(self, validated_data: dict[str, object]) -> Condominium:
+    def create(self, validated_data: dict[str, Any]) -> Condominium:
         address_data = validated_data.pop("address", None)
         contract_data = validated_data.pop("administration_contract", None)
         rules_data = validated_data.pop("billing_rules", None)
@@ -63,7 +63,7 @@ class CondominiumSerializer(serializers.ModelSerializer):
     @override
     @transaction.atomic
     def update(
-        self, instance: Condominium, validated_data: dict[str, object]
+        self, instance: Condominium, validated_data: dict[str, Any]
     ) -> Condominium:
         address_data = validated_data.pop("address", None)
         contract_data = validated_data.pop("administration_contract", None)

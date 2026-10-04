@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 class TotalByTypeSerializer(serializers.Serializer[dict[str, object]]):
     type = serializers.CharField()
-    label = serializers.CharField()
+    title = serializers.CharField()
     total = serializers.IntegerField()
 
 

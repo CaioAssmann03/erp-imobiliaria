@@ -5,13 +5,9 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from ..models import Person
-from .base import CNPJ_A, CPF_A, make_individual, make_legal
+from .base import CNPJ_A, CPF_A, body, make_individual, make_legal, results
 
 pytestmark = pytest.mark.django_db
-
-
-def results(response: object) -> list[dict[str, object]]:
-    return response.data["results"]  # pyright: ignore
 
 
 def test_list_returns_nested_documents(api_client: APIClient, list_url: str) -> None:
@@ -20,7 +16,7 @@ def test_list_returns_nested_documents(api_client: APIClient, list_url: str) -> 
     response = api_client.get(list_url)
 
     assert response.status_code == status.HTTP_200_OK
-    assert results(response)[0]["people_individual"]["cpf"] == CPF_A  # pyright: ignore
+    assert results(response)[0]["people_individual"]["cpf"] == CPF_A
 
 
 def test_retrieve(api_client: APIClient, detail_url: Callable[[Person], str]) -> None:
@@ -29,7 +25,7 @@ def test_retrieve(api_client: APIClient, detail_url: Callable[[Person], str]) ->
     response = api_client.get(detail_url(person))
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.data["people_legal"]["cnpj"] == CNPJ_A  # pyright: ignore
+    assert body(response)["people_legal"]["cnpj"] == CNPJ_A
 
 
 def test_search_by_name(api_client: APIClient, list_url: str) -> None:
@@ -68,3 +64,21 @@ def test_delete(api_client: APIClient, detail_url: Callable[[Person], str]) -> N
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert not Person.objects.exists()
+
+
+def test_filter_by_type(api_client: APIClient, list_url: str) -> None:
+    _ = make_individual(name="Maria", cpf=CPF_A)
+    _ = make_legal(name="Empresa", cnpj=CNPJ_A)
+    _ = Person.objects.create(name="Sem documento")
+
+    individuals = api_client.get(list_url, {"type": "individual"})
+    legals = api_client.get(list_url, {"type": "legal"})
+
+    assert [p["name"] for p in results(individuals)] == ["Maria"]
+    assert [p["name"] for p in results(legals)] == ["Empresa"]
+
+
+def test_filter_by_invalid_type_is_rejected(api_client: APIClient, list_url: str) -> None:
+    response = api_client.get(list_url, {"type": "outro"})
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST

@@ -1,4 +1,4 @@
-from typing import cast, override
+from typing import Any, cast, override
 
 from django.db import transaction
 from rest_framework import serializers
@@ -10,7 +10,7 @@ from .people_legal_serializers import PeopleLegalSerializer
 
 
 @final
-class PersonSerializer(serializers.ModelSerializer):
+class PersonSerializer(serializers.ModelSerializer[Person]):
     people_individual = PeopleIndividualSerializer(required=False)
     people_legal = PeopleLegalSerializer(required=False)
 
@@ -57,7 +57,7 @@ class PersonSerializer(serializers.ModelSerializer):
 
     @override
     @transaction.atomic
-    def create(self, validated_data: dict[str, object]) -> Person:
+    def create(self, validated_data: dict[str, Any]) -> Person:
         individual_data = validated_data.pop("people_individual", None)
         legal_data = validated_data.pop("people_legal", None)
 
@@ -74,7 +74,7 @@ class PersonSerializer(serializers.ModelSerializer):
     @override
     @transaction.atomic
     def update(
-        self, instance: Person, validated_data: dict[str, object]
+        self, instance: Person, validated_data: dict[str, Any]
     ) -> Person:
         individual_data = validated_data.pop("people_individual", None)
         legal_data = validated_data.pop("people_legal", None)

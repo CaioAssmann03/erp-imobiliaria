@@ -11,7 +11,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from typing_extensions import final, override
+from typing_extensions import final
 
 from apps.condominiums.models import (
     AdministrationContract,
@@ -53,8 +53,8 @@ def _summary(
     return {
         **aggregate,
         "by_type": [
-            {"type": value, "label": label, "total": counts.get(value, 0)}
-            for value, label in types.choices
+            {"type": value, "title": title, "total": counts.get(value, 0)}
+            for value, title in types.choices
         ],
     }
 
@@ -73,10 +73,10 @@ def _persons_summary() -> dict[str, object]:
         "by_type": [
             {
                 "type": "individual",
-                "label": "Individual",
+                "title": "Individual",
                 "total": aggregate["individual"],
             },
-            {"type": "legal", "label": "Legal", "total": aggregate["legal"]},
+            {"type": "legal", "title": "Legal", "total": aggregate["legal"]},
         ],
     }
 
@@ -112,7 +112,7 @@ def _adjustments(today: date) -> list[Adjustment]:
 
 def _adjustments_by_month(
     adjustments: list[Adjustment], today: date
-) -> list[dict[str, object]]:
+) -> list[dict[str, Any]]:
     months = [_add_months(today.replace(day=1), i) for i in range(ADJUSTMENT_MONTHS)]
     counts = {month.strftime("%Y-%m"): 0 for month in months}
     overdue = 0
@@ -184,7 +184,6 @@ def _inconsistent_apportionment() -> int:
 class DashboardView(APIView):
     """Indicadores do painel inicial: o que pede ação (não apenas totais de cadastro)."""
 
-    @override
     @extend_schema(responses=DashboardSerializer, operation_id="dashboard_retrieve")
     def get(self, request: Request) -> Response:
         today = timezone.localdate()
@@ -199,7 +198,7 @@ class DashboardView(APIView):
             )
         )
 
-        data = {
+        data: dict[str, Any] = {
             "condominiums": _summary(
                 Condominium.objects.all(), "type", Condominium.CondominiumType
             ),

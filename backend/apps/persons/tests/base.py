@@ -1,4 +1,4 @@
-from typing import cast
+from typing import Any, cast
 
 from rest_framework.response import Response
 
@@ -10,9 +10,17 @@ CNPJ_A = "11222333000181"
 CNPJ_B = "45723174000110"
 
 
-def body(response: Response) -> dict[str, object]:
+JsonObject = dict[str, Any]
+
+
+def body(response: Response) -> JsonObject:
     """`response.data` vem como Any; o cast fica concentrado aqui."""
-    return cast(dict[str, object], response.data)  # pyright: ignore[reportAny]
+    return cast(JsonObject, response.data)  # pyright: ignore[reportAny]
+
+
+def results(response: Response) -> list[JsonObject]:
+    """Itens da página de uma listagem paginada."""
+    return cast(list[JsonObject], body(response)["results"])
 
 
 def make_individual(

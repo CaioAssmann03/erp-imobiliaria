@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "corsheaders",
     "django_filters",
+    "apps.accounts",
     "apps.core",
     "apps.persons",
     "apps.condominiums",
@@ -96,6 +97,8 @@ else:
         }
     }
 
+
+AUTH_USER_MODEL = "accounts.User"
 
 AUTH_PASSWORD_VALIDATORS = [
     {

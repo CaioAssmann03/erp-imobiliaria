@@ -6,7 +6,7 @@ from ..models import (
 )
 
 
-class AddressSerializer(serializers.ModelSerializer):
+class AddressSerializer(serializers.ModelSerializer[Address]):
     @final
     class Meta:
         model = Address

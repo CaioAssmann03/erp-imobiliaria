@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from decimal import Decimal
 
 import pytest
@@ -7,7 +8,7 @@ from ..models import AdministrationContract, Condominium
 from ..serializers import AdministrationContractSerializer
 
 
-def errors(data: dict[str, object]) -> dict[str, object] | None:
+def errors(data: Mapping[str, object]) -> dict[str, object] | None:
     serializer = AdministrationContractSerializer(data=data)
     return None if serializer.is_valid() else dict(serializer.errors)
 

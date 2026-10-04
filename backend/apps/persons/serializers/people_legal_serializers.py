@@ -9,7 +9,7 @@ from apps.core.validators.cnpj import validate_cnpj
 from ..models import PeopleLegal
 
 
-class PeopleLegalSerializer(serializers.ModelSerializer):
+class PeopleLegalSerializer(serializers.ModelSerializer[PeopleLegal]):
     @final
     class Meta:
         model = PeopleLegal

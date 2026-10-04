@@ -1,4 +1,5 @@
 import uuid
+from typing import TYPE_CHECKING
 
 from django.db import models
 from django.db.models import F, Q
@@ -16,6 +17,9 @@ class AdministrationContract(models.Model):
     class FeeBasis(models.TextChoices):
         REVENUE = "revenue", "Revenue"
         EXPENSE = "expense", "Expense"
+
+    if TYPE_CHECKING:
+        condominium_id: uuid.UUID
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     condominium = models.OneToOneField(

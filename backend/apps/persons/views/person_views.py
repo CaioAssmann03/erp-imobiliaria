@@ -4,6 +4,7 @@ from typing_extensions import final
 
 from apps.core.filters import QuerySearchFilter
 
+from ..filters import PersonFilter
 from ..models import Person
 from ..serializers import PersonSerializer
 
@@ -14,4 +15,4 @@ class PersonViewSet(viewsets.ModelViewSet[Person]):
     serializer_class = PersonSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)
     search_fields = ("name", "email", "people_individual__cpf", "people_legal__cnpj")
-    filterset_fields = ("active",)
+    filterset_class = PersonFilter
