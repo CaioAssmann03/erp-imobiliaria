@@ -22,7 +22,6 @@ class PeopleIndividual(models.Model):
     marital_status = models.CharField(max_length=30, blank=True, null=True)
     job = models.CharField(max_length=120, blank=True, null=True)
 
-    @final
     class Meta:
         verbose_name = "Individual"
         verbose_name_plural = "Individuals"

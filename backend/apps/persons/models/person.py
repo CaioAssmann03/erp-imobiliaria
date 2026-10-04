@@ -29,7 +29,6 @@ class Person(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    @final
     class Meta:
         verbose_name = "Person"
         verbose_name_plural = "Persons"

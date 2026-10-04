@@ -17,7 +17,6 @@ class PeopleLegal(models.Model):
     cnpj = models.CharField(max_length=14, unique=True, validators=[validate_cpf])
     ie = models.CharField(max_length=20, blank=True, null=True)
 
-    @final
     class Meta:
         verbose_name = "Legal"
         verbose_name_plural = "Legals"

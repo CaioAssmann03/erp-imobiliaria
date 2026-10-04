@@ -1,9 +1,10 @@
 import uuid
 
-from apps.condominiums.models.condominium import Condominium
 from django.db import models
 from django.db.models import F, Q
 from typing_extensions import final, override
+
+from apps.condominiums.models.condominium import Condominium
 
 
 @final
@@ -48,11 +49,13 @@ class AdministrationContract(models.Model):
         max_length=30, blank=True, default="", help_text="Ex: IGPM, INCC"
     )
 
-    @final
     class Meta:
         verbose_name = "Administration contract"
         verbose_name_plural = "Administration contracts"
         constraints = (
+            # If type != fixed -> True
+            # If fee_amount != null -> True
+            # else: Error message
             models.CheckConstraint(
                 name="contract_fixed_needs_amount",
                 condition=~Q(fee_type="fixed") | Q(fee_amount__isnull=False),
