@@ -33,7 +33,7 @@ INSTALLED_APPS = [
     "django_filters",
     "apps.core",
     "apps.persons",
-    "apps.condominios",
+    "apps.condominiums",
     "apps.financeiro",
     "apps.cobranca",
     "apps.locacoes",

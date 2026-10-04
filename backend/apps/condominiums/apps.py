@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class CondominiosConfig(AppConfig):
-    name = 'apps.condominios'
+class CondominiumsConfig(AppConfig):
+    name = "apps.condominiums"

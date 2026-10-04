@@ -11,7 +11,7 @@ from apps.persons.models import Person
 
 @final
 class Condominium(models.Model):
-    class TypeCondominium(models.TextChoices):
+    class CondominiumType(models.TextChoices):
         RESIDENTIAL = ("residential", "Residential")
         COMMERCIAL = ("commercial", "Commercial")
 
@@ -30,7 +30,7 @@ class Condominium(models.Model):
         Address, on_delete=models.SET_NULL, blank=True, null=True
     )
     type = models.CharField(
-        choices=TypeCondominium.choices, default=TypeCondominium.RESIDENTIAL
+        choices=CondominiumType.choices, default=CondominiumType.RESIDENTIAL
     )
 
     name = models.CharField(max_length=255)
