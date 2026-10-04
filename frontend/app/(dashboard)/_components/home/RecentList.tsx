@@ -1,10 +1,10 @@
 import Link from "next/link";
 
-import { SeeAllLink } from "@/components/SeeAllLink";
+import { SeeAllLink } from "./SeeAllLink";
 import { Card } from "@/components/ui/card";
 
 export interface RecentItem {
-  id: number;
+  id: string;
   name: string;
   sub?: string | null;
   meta?: string | null;

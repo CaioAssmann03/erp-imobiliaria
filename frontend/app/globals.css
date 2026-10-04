@@ -5,7 +5,7 @@
 /* ==========================================================================
    Design system — ERP Imobiliária
    Fonte única de verdade para cores, tipografia, raios e sombras.
-   Documentação: frontend/DESIGN.md
+   Documentação: frontend/docs/norms/design-system.md
    ========================================================================== */
 
 /* 1. Tokens primitivos (geram utilitários: bg-canvas, text-ink, rounded-card…) */
@@ -231,7 +231,7 @@ html[data-mode="dark"] {
 }
 
 /* Cor de destaque (o laranja é o padrão, definido em @theme). Os fundos e cinzas não mudam
-   com a cor; só o destaque (e, no rosa, o vermelho de erro, para não se confundir com ele). */
+   com a cor; só o destaque (e, no rosa e no vermelho, o vermelho de erro, para não se confundir com ele). */
 html[data-accent="blue"] {
   --color-brand: #2f6bff;
   --color-brand-strong: #1f55d6;
@@ -254,12 +254,20 @@ html[data-accent="rose"] {
   /* Rosa e vermelho se confundem: o alerta vira vermelho-alaranjado. */
   --color-danger: #d8501a;
 }
+html[data-accent="red"] {
+  --color-brand: #e0243c;
+  --color-brand-strong: #bf1a30;
+  --color-brand-light: #ff4f64;
+  /* Destaque vermelho e alerta vermelho se confundem: o alerta vira vermelho-alaranjado. */
+  --color-danger: #d8501a;
+}
 html[data-accent="graphite"] {
   --color-brand: #3a3a38;
   --color-brand-strong: #1c1b19;
   --color-brand-light: #6b6a66;
 }
-html[data-mode="dark"][data-accent="rose"] {
+html[data-mode="dark"][data-accent="rose"],
+html[data-mode="dark"][data-accent="red"] {
   --color-danger: #ff7a3d;
 }
 /* Grafite no escuro precisa ser claro para ter contraste. */
@@ -270,7 +278,8 @@ html[data-mode="dark"][data-accent="graphite"] {
   --color-brand-foreground: #1c1b19;
 }
 @media (prefers-color-scheme: dark) {
-  html[data-mode="system"][data-accent="rose"] {
+  html[data-mode="system"][data-accent="rose"],
+  html[data-mode="system"][data-accent="red"] {
     --color-danger: #ff7a3d;
   }
   html[data-mode="system"][data-accent="graphite"] {

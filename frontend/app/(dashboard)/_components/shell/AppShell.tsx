@@ -2,11 +2,11 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 
 import { Brand } from "@/components/Brand";
-import { GlobalSearch } from "@/components/GlobalSearch";
-import { LogoutButton } from "@/components/LogoutButton";
-import { MobileTabs } from "@/components/MobileTabs";
-import { SettingsDialog } from "@/components/SettingsDialog";
-import { Sidebar } from "@/components/Sidebar";
+import { GlobalSearch } from "./GlobalSearch";
+import { LogoutButton } from "./LogoutButton";
+import { MobileTabs } from "./MobileTabs";
+import { SettingsDialog } from "./SettingsDialog";
+import { Sidebar } from "./Sidebar";
 import { parseAppearance } from "@/lib/appearance";
 import { SIDEBAR_COOKIE } from "@/lib/auth";
 

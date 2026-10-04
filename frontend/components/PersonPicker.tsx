@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from "react";
 
-import { usePessoasList } from "@/lib/api/generated";
-import type { Pessoa } from "@/lib/api/generated/models";
+import { usePersonsList } from "@/lib/api/generated";
+import type { Person } from "@/lib/api/generated/models";
+import { formattedPersonDocument } from "@/lib/person-document";
 import { inputClass } from "@/lib/ui";
 
-interface PessoaPickerProps {
-  onSelect: (pessoa: Pessoa) => void;
+interface PersonPickerProps {
+  onSelect: (person: Person) => void;
   placeholder?: string;
 }
 
-export function PessoaPicker({ onSelect, placeholder }: PessoaPickerProps) {
+export function PersonPicker({ onSelect, placeholder }: PersonPickerProps) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
   const [open, setOpen] = useState(false);
@@ -21,7 +22,7 @@ export function PessoaPicker({ onSelect, placeholder }: PessoaPickerProps) {
     return () => clearTimeout(timer);
   }, [query]);
 
-  const { data, isFetching } = usePessoasList(
+  const { data, isFetching } = usePersonsList(
     { query: debounced, limit: 8 },
     { query: { enabled: debounced.length >= 2 } }
   );
@@ -52,22 +53,22 @@ export function PessoaPicker({ onSelect, placeholder }: PessoaPickerProps) {
               Nenhuma pessoa encontrada.
             </div>
           )}
-          {results.map((pessoa) => (
+          {results.map((person) => (
             <button
               type="button"
-              key={pessoa.id}
+              key={person.id}
               className="block w-full rounded-control px-3 py-2 text-left text-body hover:bg-surface-muted"
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => {
-                onSelect(pessoa);
+                onSelect(person);
                 setQuery("");
                 setOpen(false);
               }}
             >
               <div className="font-medium text-ink">
-                {pessoa.nome}
+                {person.name}
               </div>
-              <div className="text-caption text-ink-soft">{pessoa.cpf_cnpj}</div>
+              <div className="text-caption text-ink-soft">{formattedPersonDocument(person)}</div>
             </button>
           ))}
         </div>

@@ -1,45 +1,32 @@
-import { buildWidgets, WIDGET_IDS, type WidgetId } from "@/components/DashboardWidgets";
-import { FocusModal } from "@/components/FocusModal";
-import { Greeting } from "@/components/Greeting";
-import { PageHeader } from "@/components/PageHeader";
-import { RecentList } from "@/components/RecentList";
-import { WidgetCard } from "@/components/WidgetCard";
-import { SeeAllLink } from "@/components/SeeAllLink";
+import type { Metadata } from "next";
+
 import { getDashboardRetrieveQueryOptions } from "@/lib/api/generated";
+import { PageHeader } from "@/components/PageHeader";
 import { getServerQueryClient } from "@/lib/query/server";
 
-const DAY = 86_400_000;
+import { EndingLeases } from "./_components/home/EndingLeases";
+import { FocusModal } from "./_components/home/FocusModal";
+import { Greeting } from "./_components/home/Greeting";
+import { SeeAllLink } from "./_components/home/SeeAllLink";
+import { UpcomingAdjustments } from "./_components/home/UpcomingAdjustments";
+import { WidgetCard } from "./_components/home/WidgetCard";
+import { buildWidgets, WIDGET_IDS, type WidgetId } from "./_components/home/widgets";
 
-function formatDate(iso: string) {
-  return iso.split("-").reverse().join("/");
-}
-
-/** "em 9 dias" / "hoje" / "há 12 dias", a partir de uma data ISO (AAAA-MM-DD). */
-function relativeDays(iso: string) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const days = Math.round((new Date(`${iso}T00:00:00`).getTime() - today.getTime()) / DAY);
-  if (days === 0) return "hoje";
-  return days > 0 ? `em ${days} dia${days > 1 ? "s" : ""}` : `há ${-days} dia${days < -1 ? "s" : ""}`;
-}
-
-function Late({ children }: { children: React.ReactNode }) {
-  return <span className="text-danger">{children}</span>;
-}
+export const metadata: Metadata = { title: "Painel" };
 
 export default async function DashboardHomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ foco?: string }>;
+  searchParams: Promise<{ focus?: string }>;
 }) {
-  const { foco } = await searchParams;
+  const { focus } = await searchParams;
   const queryClient = getServerQueryClient();
 
   // Busca no servidor via TanStack Query. Falha degrada para "–" em vez de derrubar o painel.
   const dash = await queryClient.fetchQuery(getDashboardRetrieveQueryOptions()).catch(() => undefined);
 
   const widgets = buildWidgets(dash);
-  const focused = WIDGET_IDS.includes(foco as WidgetId) ? widgets[foco as WidgetId] : undefined;
+  const focused = WIDGET_IDS.includes(focus as WidgetId) ? widgets[focus as WidgetId] : undefined;
 
   return (
     <div>
@@ -71,35 +58,8 @@ export default async function DashboardHomePage({
         })}
 
         <div className="grid grid-cols-1 gap-4 lg:col-span-12 lg:grid-cols-2">
-          <RecentList
-            title="Próximos reajustes"
-            allHref="/condominios"
-            metaLabel="Data"
-            extraLabel="Prazo"
-            emptyText="Nenhum condomínio com reajuste configurado."
-            items={(dash?.proximos_reajustes ?? []).map((r) => ({
-              id: r.id,
-              name: r.nome,
-              meta: `${formatDate(r.data)}${r.indice ? ` · ${r.indice}` : ""}`,
-              extra: r.atrasado ? <Late>{relativeDays(r.data)}</Late> : relativeDays(r.data),
-              href: `/condominios/${r.id}`,
-            }))}
-          />
-          <RecentList
-            title="Locações a vencer"
-            allHref="/condominios"
-            metaLabel="Locatário"
-            extraLabel="Fim"
-            emptyText="Nenhuma locação termina nos próximos 60 dias."
-            items={(dash?.locacoes ?? []).map((l) => ({
-              id: l.id,
-              name: `Unidade ${l.unidade} · ${l.condominio_nome}`,
-              meta: l.locatario,
-              // Já encerrada: só "há 12 dias" em vermelho (a cor já diz que passou do prazo).
-              extra: l.encerrada ? <Late>{relativeDays(l.data_fim)}</Late> : relativeDays(l.data_fim),
-              href: `/condominios/${l.condominio}/unidades/${l.id}`,
-            }))}
-          />
+          <UpcomingAdjustments adjustments={dash?.upcoming_adjustments ?? []} />
+          <EndingLeases leases={dash?.leases ?? []} />
         </div>
       </div>
     </div>

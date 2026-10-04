@@ -1,36 +1,39 @@
+import type { Metadata } from "next";
 import { FormPage } from "@/components/form/FormPage";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 import { PageHeader } from "@/components/PageHeader";
-import { UnidadeForm } from "@/components/UnidadeForm";
+import { UnitForm } from "../_components/UnitForm";
 import {
-  getBlocosListQueryOptions,
-  getUnidadesRetrieveQueryOptions,
+  getBlocksListQueryOptions,
+  getUnitsRetrieveQueryOptions,
 } from "@/lib/api/generated";
 import { getServerQueryClient } from "@/lib/query/server";
 
-export default async function EditarUnidadePage({
+export const metadata: Metadata = { title: "Editar unidade" };
+
+export default async function EditUnitPage({
   params,
 }: {
-  params: Promise<{ id: string; unidadeId: string }>;
+  params: Promise<{ id: string; unitId: string }>;
 }) {
-  const { id, unidadeId } = await params;
-  const condominioId = Number(id);
+  const { id, unitId } = await params;
+  const condominiumId = id;
 
   const queryClient = getServerQueryClient();
   await Promise.all([
-    queryClient.prefetchQuery(getUnidadesRetrieveQueryOptions(Number(unidadeId))),
-    queryClient.prefetchQuery(getBlocosListQueryOptions({ condominio: condominioId, limit: 100 })),
+    queryClient.prefetchQuery(getUnitsRetrieveQueryOptions(unitId)),
+    queryClient.prefetchQuery(getBlocksListQueryOptions({ condominium: condominiumId, limit: 100 })),
   ]);
 
   return (
     <FormPage>
       <PageHeader
-        back={{ href: `/condominios/${condominioId}/unidades`, label: "Unidades" }}
+        back={{ href: `/condominiums/${condominiumId}/units`, label: "Unidades" }}
         title="Editar unidade"
       />
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <UnidadeForm condominioId={condominioId} unidadeId={Number(unidadeId)} />
+        <UnitForm condominiumId={condominiumId} unitId={unitId} />
       </HydrationBoundary>
     </FormPage>
   );

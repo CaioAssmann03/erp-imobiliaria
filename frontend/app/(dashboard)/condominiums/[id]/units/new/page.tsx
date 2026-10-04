@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { FormPage } from "@/components/form/FormPage";
 import { PageHeader } from "@/components/PageHeader";
-import { UnidadeForm } from "@/components/UnidadeForm";
+import { UnitForm } from "../_components/UnitForm";
 
-export default async function NovaUnidadePage({
+export const metadata: Metadata = { title: "Nova unidade" };
+
+export default async function NewUnitPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -12,10 +15,10 @@ export default async function NovaUnidadePage({
   return (
     <FormPage>
       <PageHeader
-        back={{ href: `/condominios/${id}/unidades`, label: "Unidades" }}
+        back={{ href: `/condominiums/${id}/units`, label: "Unidades" }}
         title="Nova unidade"
       />
-      <UnidadeForm condominioId={Number(id)} />
+      <UnitForm condominiumId={id} />
     </FormPage>
   );
 }

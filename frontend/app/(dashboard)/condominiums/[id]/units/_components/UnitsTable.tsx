@@ -1,79 +1,58 @@
 "use client";
 
-
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { ListState, Toolbar } from "@/components/data-list";
+import { Pagination } from "@/components/Pagination";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useListParams } from "@/hooks/use-list-params";
-import { UNIDADE_TIPOS } from "@/lib/schemas/unidade";
 import {
   getDashboardRetrieveQueryKey,
-  getUnidadesListQueryKey,
-  useBlocosList,
-  useUnidadesDestroy,
-  useUnidadesList,
+  getUnitsListQueryKey,
+  useBlocksList,
+  useUnitsDestroy,
+  useUnitsList,
 } from "@/lib/api/generated";
+import type { UNIT_TYPES } from "@/lib/schemas/unit";
 
-import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
-import { FilterMenu } from "@/components/FilterMenu";
-import {
-  ListState,
-  RowActions,
-  RowLink,
-  Toolbar,
-} from "@/components/DataList";
-import { Pagination } from "@/components/Pagination";
-import { LinkButton } from "@/components/LinkButton";
-import { StatusBadge } from "@/components/StatusBadge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { UnitRow } from "./UnitRow";
+import { UnitsFilters } from "./UnitsFilters";
 
-interface UnidadesTableProps {
-  condominioId: number;
-}
-
-/** Client Component: lista de unidades (hidratada do servidor) com exclusão. */
-export function UnidadesTable({ condominioId }: UnidadesTableProps) {
+/** Client Component: lista de unidades (hidratada do servidor) com filtros e exclusão. */
+export function UnitsTable({ condominiumId }: { condominiumId: string }) {
   const queryClient = useQueryClient();
-  const { data: blocos } = useBlocosList({ condominio: condominioId, limit: 100 });
-  const { page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
-    useListParams({ searchable: false, filterKeys: ["status", "tipo", "bloco"] });
-  const {
-    data: unidades,
-    isLoading,
-    isPlaceholderData,
-  } = useUnidadesList(
+  const { data: blocksData } = useBlocksList({ condominium: condominiumId, limit: 100 });
+  const blocks = blocksData?.results ?? [];
+  const { page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } = useListParams({
+    searchable: false,
+    filterKeys: ["status", "type", "block"],
+  });
+
+  const { data, isLoading, isPlaceholderData } = useUnitsList(
     {
-      condominio: condominioId,
+      condominium: condominiumId,
       ...params,
-      ...(filters.status ? { ativo: filters.status === "ativo" } : {}),
-      ...(filters.tipo ? { tipo: filters.tipo as (typeof UNIDADE_TIPOS)[number]["value"] } : {}),
-      ...(filters.bloco ? { bloco: Number(filters.bloco) } : {}),
+      ...(filters.status ? { active: filters.status === "active" } : {}),
+      ...(filters.type ? { type: filters.type as (typeof UNIT_TYPES)[number]["value"] } : {}),
+      ...(filters.block ? { block: filters.block } : {}),
     },
     { query: { placeholderData: keepPreviousData } }
   );
-  const destroyMutation = useUnidadesDestroy();
+  const destroyMutation = useUnitsDestroy();
 
-  const blocoNome = (blocoId: number | null | undefined) => {
-    if (!blocoId) return "—";
-    return blocos?.results.find((bloco) => bloco.id === blocoId)?.nome ?? "—";
-  };
+  const blockName = (blockId: string | null | undefined) =>
+    blocks.find((block) => block.id === blockId)?.name ?? null;
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     // Excluindo o único item da última página: volta uma página.
-    const goBack = (unidades?.results.length ?? 0) === 1 && page > 1;
+    const goBack = (data?.results.length ?? 0) === 1 && page > 1;
     destroyMutation.mutate(
       { id },
       {
         onSuccess: () => {
           if (goBack) setPage(page - 1);
-          queryClient.invalidateQueries({ queryKey: getUnidadesListQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getUnitsListQueryKey() });
           queryClient.invalidateQueries({ queryKey: getDashboardRetrieveQueryKey() });
           toast.success("Unidade excluída.");
         },
@@ -82,50 +61,15 @@ export function UnidadesTable({ condominioId }: UnidadesTableProps) {
     );
   };
 
-  const results = unidades?.results ?? [];
+  const results = data?.results ?? [];
 
   return (
     <>
-      <Toolbar right={unidades ? `${unidades.count} no total` : undefined}>
-        <FilterMenu
-          onClear={clearFilters}
-          groups={[
-            {
-              key: "status",
-              label: "Status",
-              value: filters.status,
-              onChange: (value) => setFilter("status", value),
-              options: [
-                { value: "ativo", label: "Ativas" },
-                { value: "inativo", label: "Inativas" },
-              ],
-            },
-            {
-              key: "tipo",
-              label: "Tipo",
-              value: filters.tipo,
-              onChange: (value) => setFilter("tipo", value),
-              options: UNIDADE_TIPOS,
-            },
-            ...((blocos?.results.length ?? 0) > 0
-              ? [
-                  {
-                    key: "bloco",
-                    label: "Bloco",
-                    value: filters.bloco,
-                    onChange: (value: string) => setFilter("bloco", value),
-                    options: (blocos?.results ?? []).map((bloco) => ({
-                      value: String(bloco.id),
-                      label: bloco.nome,
-                    })),
-                  },
-                ]
-              : []),
-          ]}
-        />
+      <Toolbar right={data ? `${data.count} no total` : undefined}>
+        <UnitsFilters blocks={blocks} filters={filters} onFilterChange={setFilter} onClear={clearFilters} />
       </Toolbar>
 
-    <ListState
+      <ListState
         isLoading={isLoading}
         isEmpty={results.length === 0}
         emptyTitle="Nenhuma unidade cadastrada"
@@ -133,77 +77,34 @@ export function UnidadesTable({ condominioId }: UnidadesTableProps) {
       >
         <>
           <div className={isPlaceholderData ? "opacity-60 transition-opacity" : "transition-opacity"}>
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead>Unidade</TableHead>
-                <TableHead className="hidden md:table-cell">Bloco</TableHead>
-                <TableHead className="hidden md:table-cell">Tipo</TableHead>
-                <TableHead className="hidden md:table-cell">Proprietário(s) / Locatário(s)</TableHead>
-                <TableHead className="hidden md:table-cell">Status</TableHead>
-                <TableHead />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {results.map((unidade) => (
-                <TableRow key={unidade.id}>
-                  <TableCell>
-                    <RowLink
-                      href={`/condominios/${condominioId}/unidades/${unidade.id}`}
-                      sub={[
-                        blocoNome(unidade.bloco) !== "—" ? blocoNome(unidade.bloco) : null,
-                        unidade.tipo,
-                        unidade.ativo ? null : "Inativa",
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    >
-                      {unidade.nome_unidade}
-                    </RowLink>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-ink-soft">{blocoNome(unidade.bloco)}</TableCell>
-                  <TableCell className="hidden md:table-cell text-ink-soft capitalize">{unidade.tipo}</TableCell>
-                  <TableCell className="hidden md:table-cell max-w-[22rem] truncate text-ink-soft">
-                    {unidade.partes.length === 0
-                      ? "—"
-                      : unidade.partes
-                          .map(
-                            (parte) =>
-                              `${parte.pessoa_detalhe.nome} (${
-                                parte.papel === "proprietario" ? "Prop." : "Loc."
-                              })`
-                          )
-                          .join(", ")}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <StatusBadge ativo={unidade.ativo} />
-                  </TableCell>
-                  <TableCell>
-                    <RowActions>
-                      <LinkButton
-                        variant="ghost"
-                        size="sm"
-                        className="hidden md:inline-flex"
-                        href={`/condominios/${condominioId}/unidades/${unidade.id}`}
-                      >
-                        Editar
-                      </LinkButton>
-                      <ConfirmDeleteButton
-                        title="Excluir unidade?"
-                        description={`A unidade "${unidade.nome_unidade}" será excluída. Esta ação não pode ser desfeita.`}
-                        onConfirm={() => handleDelete(unidade.id)}
-                      />
-                    </RowActions>
-                  </TableCell>
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead>Unidade</TableHead>
+                  <TableHead className="hidden md:table-cell">Bloco</TableHead>
+                  <TableHead className="hidden md:table-cell">Tipo</TableHead>
+                  <TableHead className="hidden md:table-cell">Proprietário(s) / Locatário(s)</TableHead>
+                  <TableHead className="hidden md:table-cell">Status</TableHead>
+                  <TableHead />
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {results.map((unit) => (
+                  <UnitRow
+                    key={unit.id}
+                    unit={unit}
+                    condominiumId={condominiumId}
+                    blockName={blockName(unit.block)}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </TableBody>
+            </Table>
           </div>
           <Pagination
             page={page}
             limit={limit}
-            count={unidades?.count ?? 0}
+            count={data?.count ?? 0}
             onPageChange={setPage}
             onLimitChange={setLimit}
           />

@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 
 const TABS = [
   { href: "/", label: "Painel", icon: LayoutDashboard },
-  { href: "/condominios", label: "Condomínios", icon: Building2 },
-  { href: "/pessoas", label: "Pessoas", icon: Users },
+  { href: "/condominiums", label: "Condomínios", icon: Building2 },
+  { href: "/persons", label: "Pessoas", icon: Users },
 ];
 
 /** Client Component: navegação em abas fixa na parte de baixo, só em telas pequenas. */

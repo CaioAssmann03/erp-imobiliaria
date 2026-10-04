@@ -21,7 +21,7 @@ const sourceSerif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: "ERP Imobiliária",
+  title: { default: "ERP Imobiliária", template: "%s · ERP Imobiliária" },
   description: "Administração de condomínios, locações, vendas e financeiro.",
 };
 

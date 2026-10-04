@@ -1,6 +1,6 @@
 /**
  * Classes compartilhadas pelos formulários. Usam apenas tokens do design
- * system (ver app/globals.css e DESIGN.md) — não use cores ou tamanhos soltos.
+ * system (ver app/globals.css e docs/norms/design-system.md) — não use cores ou tamanhos soltos.
  */
 
 export const inputClass =

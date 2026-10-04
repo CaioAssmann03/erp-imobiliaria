@@ -8,15 +8,15 @@ export interface StaticSearchItem {
 
 export const STATIC_SEARCH_ITEMS: StaticSearchItem[] = [
   { title: "Painel", subtitle: "Página", href: "/", keywords: "inicio home visao geral" },
-  { title: "Condomínios", subtitle: "Página", href: "/condominios", keywords: "lista cadastro" },
-  { title: "Pessoas", subtitle: "Página", href: "/pessoas", keywords: "lista cadastro proprietarios locatarios" },
-  { title: "Novo condomínio", subtitle: "Cadastro", href: "/condominios/novo", keywords: "criar adicionar cadastrar" },
-  { title: "Nova pessoa", subtitle: "Cadastro", href: "/pessoas/novo", keywords: "criar adicionar cadastrar" },
-  { title: "Unidades com responsável", subtitle: "Painel · gráfico", href: "/?foco=responsaveis", keywords: "pontos proprietario locatario cobrar vinculo grafico" },
-  { title: "Reajustes", subtitle: "Painel · gráfico", href: "/?foco=reajustes", keywords: "barras atrasados proximos meses igpm incc contrato grafico" },
-  { title: "Receita fixa mensal", subtitle: "Painel · gráfico", href: "/?foco=receita-fixa", keywords: "taxa administracao dinheiro faturamento grafico" },
-  { title: "Pendências", subtitle: "Painel", href: "/?foco=pendencias", keywords: "sem responsavel rateio fracao ideal reajuste locacao plano de contas bloqueio atencao" },
-  { title: "Condomínios administrados", subtitle: "Painel", href: "/?foco=condominios", keywords: "total ativos grafico" },
+  { title: "Condomínios", subtitle: "Página", href: "/condominiums", keywords: "lista cadastro" },
+  { title: "Pessoas", subtitle: "Página", href: "/persons", keywords: "lista cadastro proprietarios locatarios" },
+  { title: "Novo condomínio", subtitle: "Cadastro", href: "/condominiums/new", keywords: "criar adicionar cadastrar" },
+  { title: "Nova pessoa", subtitle: "Cadastro", href: "/persons/new", keywords: "criar adicionar cadastrar" },
+  { title: "Unidades com responsável", subtitle: "Painel · gráfico", href: "/?focus=responsibles", keywords: "pontos proprietario locatario cobrar vinculo grafico" },
+  { title: "Reajustes", subtitle: "Painel · gráfico", href: "/?focus=adjustments", keywords: "barras atrasados proximos meses igpm incc contrato grafico" },
+  { title: "Receita fixa mensal", subtitle: "Painel · gráfico", href: "/?focus=revenue-fixa", keywords: "taxa administracao dinheiro faturamento grafico" },
+  { title: "Pendências", subtitle: "Painel", href: "/?focus=pending", keywords: "sem responsavel rateio fracao ideal reajuste locacao centros de custo plano de contas bloqueio atencao" },
+  { title: "Condomínios administrados", subtitle: "Painel", href: "/?focus=condominiums", keywords: "total ativos grafico" },
 ];
 
 export function normalize(text: string) {
@@ -34,7 +34,7 @@ export function searchStatic(term: string): StaticSearchItem[] {
   ).slice(0, 5);
 }
 
-/** Mesma regra do backend (apps/core/search.py): 3 caracteres, ou 2 se for numérico. */
+/** Mesma regra do backend (apps/core/views/search_views.py): 3 caracteres, ou 2 se for numérico. */
 const NUMERIC_TERM = /^[\d.\-/\s]+$/;
 export const MIN_TEXT_LENGTH = 3;
 export const MIN_NUMERIC_LENGTH = 2;

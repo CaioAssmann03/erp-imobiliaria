@@ -5,6 +5,9 @@
 
 export const onlyDigits = (value: string) => value.replace(/\D/g, "");
 
+/** Só dígitos, limitados a `maxDigits` (dias, quantidades, periodicidade). */
+export const maskInteger = (value: string, maxDigits: number) => onlyDigits(value).slice(0, maxDigits);
+
 /** Aplica um padrão ("###.###.###-##") aos dígitos, sem literais sobrando no fim. */
 function applyPattern(digits: string, pattern: string) {
   let result = "";

@@ -3,58 +3,37 @@
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
-import { FilterMenu } from "@/components/FilterMenu";
-import {
-  ListState,
-  RowActions,
-  RowLink,
-  SearchField,
-  Toolbar,
-} from "@/components/DataList";
+import { ListState, Toolbar } from "@/components/data-list";
 import { Pagination } from "@/components/Pagination";
-import { LinkButton } from "@/components/LinkButton";
-import { StatusBadge } from "@/components/StatusBadge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useListParams } from "@/hooks/use-list-params";
 import {
+  getCondominiumsListQueryKey,
   getDashboardRetrieveQueryKey,
-  getCondominiosListQueryKey,
-  useCondominiosDestroy,
-  useCondominiosList,
+  useCondominiumsDestroy,
+  useCondominiumsList,
 } from "@/lib/api/generated";
 
-const STATUS_OPTIONS = [
-  { value: "ativo", label: "Ativos" },
-  { value: "inativo", label: "Inativos" },
-];
+import { CondominiumRow } from "./CondominiumRow";
+import { CondominiumsFilters } from "./CondominiumsFilters";
 
 /** Client Component: busca, cache e exclusão. A 1ª página vem hidratada do servidor. */
-export function CondominiosTable() {
+export function CondominiumsTable() {
   const queryClient = useQueryClient();
   const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
-    useListParams({ filterKeys: ["status", "tipo"] });
+    useListParams({ filterKeys: ["status", "type"] });
 
-  const { data, isLoading, isPlaceholderData } = useCondominiosList(
+  const { data, isLoading, isPlaceholderData } = useCondominiumsList(
     {
       ...params,
-      ...(filters.status ? { ativo: filters.status === "ativo" } : {}),
-      ...(filters.tipo ? { tipo: filters.tipo as "residencial" | "comercial" } : {}),
+      ...(filters.status ? { active: filters.status === "active" } : {}),
+      ...(filters.type ? { type: filters.type as "residential" | "commercial" } : {}),
     },
-    {
-      query: { placeholderData: keepPreviousData },
-    }
+    { query: { placeholderData: keepPreviousData } }
   );
-  const destroyMutation = useCondominiosDestroy();
+  const destroyMutation = useCondominiumsDestroy();
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     // Excluindo o único item da última página: volta uma página.
     const goBack = (data?.results.length ?? 0) === 1 && page > 1;
     destroyMutation.mutate(
@@ -62,7 +41,7 @@ export function CondominiosTable() {
       {
         onSuccess: () => {
           if (goBack) setPage(page - 1);
-          queryClient.invalidateQueries({ queryKey: getCondominiosListQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getCondominiumsListQueryKey() });
           queryClient.invalidateQueries({ queryKey: getDashboardRetrieveQueryKey() });
           toast.success("Condomínio excluído.");
         },
@@ -76,32 +55,12 @@ export function CondominiosTable() {
   return (
     <>
       <Toolbar right={data ? `${data.count} no total` : undefined}>
-        <SearchField
-          placeholder="Buscar por nome ou CNPJ"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
-        <FilterMenu
+        <CondominiumsFilters
+          search={search}
+          onSearchChange={setSearch}
+          filters={filters}
+          onFilterChange={setFilter}
           onClear={clearFilters}
-          groups={[
-            {
-              key: "status",
-              label: "Status",
-              value: filters.status,
-              onChange: (value) => setFilter("status", value),
-              options: STATUS_OPTIONS,
-            },
-            {
-              key: "tipo",
-              label: "Tipo",
-              value: filters.tipo,
-              onChange: (value) => setFilter("tipo", value),
-              options: [
-                { value: "residencial", label: "Residencial" },
-                { value: "comercial", label: "Comercial" },
-              ],
-            },
-          ]}
         />
       </Toolbar>
 
@@ -113,70 +72,22 @@ export function CondominiosTable() {
       >
         <>
           <div className={isPlaceholderData ? "opacity-60 transition-opacity" : "transition-opacity"}>
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead>Nome</TableHead>
-                <TableHead className="hidden md:table-cell">CNPJ</TableHead>
-                <TableHead className="hidden md:table-cell">Cidade</TableHead>
-                <TableHead className="hidden md:table-cell">Status</TableHead>
-                <TableHead />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {results.map((condominio) => (
-                <TableRow key={condominio.id}>
-                  <TableCell>
-                    <RowLink
-                      compact
-                      href={`/condominios/${condominio.id}`}
-                      sub={[
-                        condominio.cidade ? `${condominio.cidade}/${condominio.uf}` : null,
-                        condominio.ativo ? null : "Inativo",
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    >
-                      {condominio.nome}
-                    </RowLink>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-ink-soft tabular-nums">{condominio.cnpj || "—"}</TableCell>
-                  <TableCell className="hidden md:table-cell text-ink-soft">
-                    {condominio.cidade ? `${condominio.cidade}/${condominio.uf}` : "—"}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <StatusBadge ativo={condominio.ativo} />
-                  </TableCell>
-                  <TableCell>
-                    <div className="relative z-10 flex items-center justify-end gap-1">
-                      <LinkButton
-                        variant="secondary"
-                        size="sm"
-                        href={`/condominios/${condominio.id}/unidades`}
-                      >
-                        Unidades
-                      </LinkButton>
-                      <RowActions>
-                        <LinkButton
-                          variant="ghost"
-                          size="sm"
-                          className="hidden md:inline-flex"
-                          href={`/condominios/${condominio.id}`}
-                        >
-                          Editar
-                        </LinkButton>
-                        <ConfirmDeleteButton
-                          title="Excluir condomínio?"
-                          description={`O condomínio "${condominio.nome}" será excluído. Esta ação não pode ser desfeita.`}
-                          onConfirm={() => handleDelete(condominio.id)}
-                        />
-                      </RowActions>
-                    </div>
-                  </TableCell>
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead>Nome</TableHead>
+                  <TableHead className="hidden md:table-cell">CNPJ</TableHead>
+                  <TableHead className="hidden md:table-cell">Cidade</TableHead>
+                  <TableHead className="hidden md:table-cell">Status</TableHead>
+                  <TableHead />
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {results.map((condominium) => (
+                  <CondominiumRow key={condominium.id} condominium={condominium} onDelete={handleDelete} />
+                ))}
+              </TableBody>
+            </Table>
           </div>
           <Pagination
             page={page}

@@ -1,15 +1,18 @@
+import type { Metadata } from "next";
 import { FormPage } from "@/components/form/FormPage";
 import { PageHeader } from "@/components/PageHeader";
-import { CondominioForm } from "@/components/CondominioForm";
+import { CondominiumForm } from "../_components/CondominiumForm";
 
-export default function NovoCondominioPage() {
+export const metadata: Metadata = { title: "Novo condomínio" };
+
+export default function NewCondominiumPage() {
   return (
     <FormPage>
       <PageHeader
-        back={{ href: "/condominios", label: "Condomínios" }}
+        back={{ href: "/condominiums", label: "Condomínios" }}
         title="Novo condomínio"
       />
-      <CondominioForm />
+      <CondominiumForm />
     </FormPage>
   );
 }

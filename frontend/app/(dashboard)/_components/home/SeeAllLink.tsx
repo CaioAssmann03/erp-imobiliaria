@@ -2,7 +2,7 @@ import Link from "next/link";
 
 /**
  * Link "Ver todos" dos cards: cinza, só aparece quando o card (`group/card`) recebe
- * hover ou foco. Em telas sem hover (touch) fica sempre visível.
+ * hover ou focus. Em telas sem hover (touch) fica sempre visível.
  */
 export function SeeAllLink({
   href,

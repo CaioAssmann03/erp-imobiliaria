@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Brand } from "@/components/Brand";
-import { LogoutButton } from "@/components/LogoutButton";
-import { NavLinks } from "@/components/NavLinks";
-import { SettingsDialog } from "@/components/SettingsDialog";
+import { LogoutButton } from "./LogoutButton";
+import { NavLinks } from "./NavLinks";
+import { SettingsDialog } from "./SettingsDialog";
 import type { Appearance } from "@/lib/appearance";
 import { SIDEBAR_COOKIE } from "@/lib/auth";
 

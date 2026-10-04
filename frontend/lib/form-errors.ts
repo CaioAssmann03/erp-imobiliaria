@@ -22,6 +22,22 @@ function translate(message: string) {
 }
 
 /**
+ * O DRF aninha os erros de serializers aninhados (`{address: {city: ["..."]}}`). Os campos
+ * do formulário são planos e usam o nome do campo da API, então só o último nível importa.
+ */
+function flattenErrors(data: Record<string, unknown>): [string, string][] {
+  const result: [string, string][] = [];
+  for (const [field, value] of Object.entries(data)) {
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      result.push(...flattenErrors(value as Record<string, unknown>));
+    } else {
+      result.push([field, String(Array.isArray(value) ? value[0] : value)]);
+    }
+  }
+  return result;
+}
+
+/**
  * Aplica os erros de validação do backend (DRF: `{campo: ["mensagem"]}`) nos campos
  * do formulário. Retorna uma mensagem geral para exibir em toast.
  */
@@ -38,8 +54,8 @@ export function applyServerErrors<T extends FieldValues>(
     let applied = 0;
     let general: string | undefined;
 
-    for (const [field, messages] of Object.entries(data as Record<string, unknown>)) {
-      const message = translate(String(Array.isArray(messages) ? messages[0] : messages));
+    for (const [field, messages] of flattenErrors(data as Record<string, unknown>)) {
+      const message = translate(messages);
       if (field === "non_field_errors" || field === "detail") {
         general = message;
         continue;

@@ -1,51 +1,54 @@
+import type { Metadata } from "next";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 import { LinkButton } from "@/components/LinkButton";
 import { PageHeader } from "@/components/PageHeader";
-import { UnidadesTable } from "@/components/UnidadesTable";
+import { UnitsTable } from "./_components/UnitsTable";
 import {
-  getBlocosListQueryOptions,
-  getCondominiosRetrieveQueryOptions,
-  getUnidadesListQueryOptions,
+  getBlocksListQueryOptions,
+  getCondominiumsRetrieveQueryOptions,
+  getUnitsListQueryOptions,
 } from "@/lib/api/generated";
 import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 import { getServerQueryClient } from "@/lib/query/server";
 
-export default async function UnidadesPage({
+export const metadata: Metadata = { title: "Unidades" };
+
+export default async function UnitsPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const condominioId = Number(id);
+  const condominiumId = id;
 
   const queryClient = getServerQueryClient();
-  const [condominio] = await Promise.all([
+  const [condominium] = await Promise.all([
     queryClient
-      .fetchQuery(getCondominiosRetrieveQueryOptions(condominioId))
+      .fetchQuery(getCondominiumsRetrieveQueryOptions(condominiumId))
       .catch(() => undefined),
-    queryClient.prefetchQuery(getBlocosListQueryOptions({ condominio: condominioId, limit: 100 })),
-    queryClient.prefetchQuery(getUnidadesListQueryOptions({ condominio: condominioId, limit: DEFAULT_PAGE_SIZE })),
+    queryClient.prefetchQuery(getBlocksListQueryOptions({ condominium: condominiumId, limit: 100 })),
+    queryClient.prefetchQuery(getUnitsListQueryOptions({ condominium: condominiumId, limit: DEFAULT_PAGE_SIZE })),
   ]);
 
   return (
     <div>
       <PageHeader
-        back={{ href: "/condominios", label: "Condomínios" }}
-        title={condominio ? `Unidades · ${condominio.nome}` : "Unidades"}
+        back={{ href: "/condominiums", label: "Condomínios" }}
+        title={condominium ? `Unidades · ${condominium.name}` : "Unidades"}
         actions={
           <>
-            <LinkButton variant="secondary" href={`/condominios/${condominioId}`}>
+            <LinkButton variant="secondary" href={`/condominiums/${condominiumId}`}>
               Editar condomínio
             </LinkButton>
-            <LinkButton href={`/condominios/${condominioId}/unidades/novo`}>
+            <LinkButton href={`/condominiums/${condominiumId}/units/new`}>
               Nova unidade
             </LinkButton>
           </>
         }
       />
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <UnidadesTable condominioId={condominioId} />
+        <UnitsTable condominiumId={condominiumId} />
       </HydrationBoundary>
     </div>
   );

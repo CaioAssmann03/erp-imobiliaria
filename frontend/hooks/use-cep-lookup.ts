@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { onlyDigits } from "@/lib/masks";
 
 export interface CepAddress {
-  logradouro: string;
-  bairro: string;
-  cidade: string;
-  uf: string;
+  street: string;
+  district: string;
+  city: string;
+  state: string;
 }
 
 /**
@@ -28,10 +28,11 @@ export function useCepLookup(cep: string | undefined) {
       const data = await response.json();
       if (data.erro) return null;
       return {
-        logradouro: data.logradouro ?? "",
-        bairro: data.bairro ?? "",
-        cidade: data.localidade ?? "",
-        uf: data.uf ?? "",
+        // O ViaCEP responde em português; aqui já convertemos para os nomes do formulário.
+        street: data.logradouro ?? "",
+        district: data.bairro ?? "",
+        city: data.localidade ?? "",
+        state: data.uf ?? "",
       };
     },
   });

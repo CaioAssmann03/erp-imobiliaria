@@ -15,6 +15,7 @@ export const ACCENTS = [
   { value: "blue", label: "Azul", color: "#2f6bff" },
   { value: "green", label: "Verde", color: "#1f9d6b" },
   { value: "violet", label: "Violeta", color: "#7a4dff" },
+  { value: "red", label: "Vermelho", color: "#e0243c" },
   { value: "rose", label: "Rosa", color: "#e5457a" },
   { value: "graphite", label: "Grafite", color: "#3a3a38" },
 ] as const;
@@ -36,7 +37,7 @@ export interface Appearance {
   font: Font;
 }
 
-export const DEFAULT_APPEARANCE: Appearance = { mode: "light", accent: "orange", font: "inter" };
+export const DEFAULT_APPEARANCE: Appearance = { mode: "dark", accent: "orange", font: "inter" };
 
 export const APPEARANCE_COOKIES = {
   mode: "ui_mode",
