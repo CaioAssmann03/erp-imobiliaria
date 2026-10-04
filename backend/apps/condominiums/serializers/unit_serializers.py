@@ -38,14 +38,19 @@ class UnitSerializer(serializers.ModelSerializer):
     def validate(self, attrs: dict[str, object]) -> dict[str, object]:
         block = attrs.get("block")
         condominium = attrs.get("condominium")
-        if block is not None and condominium is not None:
-            if block.condominium_id != condominium.id:
-                raise serializers.ValidationError(
-                    {"block": "Block belongs to another condominium"}
-                )
+        if (
+            block is not None
+            and condominium is not None
+            and block.condominium_id != condominium.id
+        ):
+            raise serializers.ValidationError(
+                {"block": "Block belongs to another condominium"}
+            )
         fraction = attrs.get("ideal_fraction")
         if fraction is not None and not 0 < fraction <= 1:
             raise serializers.ValidationError(
-                {"ideal_fraction": "Ideal fraction must be greater than 0 and at most 1."}
+                {
+                    "ideal_fraction": "Ideal fraction must be greater than 0 and at most 1."
+                }
             )
         return attrs

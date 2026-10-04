@@ -7,25 +7,37 @@ Idempotente: rodar de novo não duplica. Só mexe nos registros criados por este
 import random
 from datetime import timedelta
 from decimal import Decimal
+from typing import Any
 
 from dateutil.relativedelta import relativedelta
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandParser
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
+from typing_extensions import final, override
 
-from apps.condominios.models import Bloco, Condominio, SubConta, Unidade, UnidadeParte
-from apps.core.models import Empresa
-from apps.persons.models import Pessoa
+from apps.condominiums.models import (
+    Address,
+    AdministrationContract,
+    BillingRules,
+    Block,
+    Condominium,
+    Unit,
+    UnitPerson,
+)
+from apps.core.models import Company
+from apps.financeiro.models import CostCenter
+from apps.persons.models import PeopleIndividual, PeopleLegal, Person
 
-CONDOMINIOS = [
-    # nome, cidade, uf, cep, tipo, taxa(fixa|%), completo?, ativo?, blocos
+CONDOMINIUMS = [
+    # name, city, state, zip, type, fee(fixed|%), complete?, active?, blocks
     (
         "Residencial Jardim das Acácias",
         "São Paulo",
         "SP",
         "01310-100",
-        "residencial",
-        ("fixa", "1850.00"),
+        "residential",
+        ("fixed", "1850.00"),
         True,
         True,
         ["A", "B"],
@@ -35,8 +47,8 @@ CONDOMINIOS = [
         "Santos",
         "SP",
         "11060-001",
-        "residencial",
-        ("variavel", "4.50"),
+        "residential",
+        ("variable", "4.50"),
         True,
         True,
         [],
@@ -46,8 +58,8 @@ CONDOMINIOS = [
         "São Paulo",
         "SP",
         "04094-050",
-        "residencial",
-        ("fixa", "2200.00"),
+        "residential",
+        ("fixed", "2200.00"),
         True,
         True,
         ["Torre 1", "Torre 2"],
@@ -57,8 +69,8 @@ CONDOMINIOS = [
         "São Paulo",
         "SP",
         "01452-000",
-        "comercial",
-        ("variavel", "5.00"),
+        "commercial",
+        ("variable", "5.00"),
         True,
         True,
         [],
@@ -68,8 +80,8 @@ CONDOMINIOS = [
         "Campinas",
         "SP",
         "13015-100",
-        "residencial",
-        ("fixa", "1500.00"),
+        "residential",
+        ("fixed", "1500.00"),
         False,
         True,
         [],
@@ -79,8 +91,8 @@ CONDOMINIOS = [
         "Curitiba",
         "PR",
         "80010-000",
-        "residencial",
-        ("fixa", "1700.00"),
+        "residential",
+        ("fixed", "1700.00"),
         True,
         True,
         ["A"],
@@ -90,8 +102,8 @@ CONDOMINIOS = [
         "Belo Horizonte",
         "MG",
         "",
-        "comercial",
-        ("fixa", "2600.00"),
+        "commercial",
+        ("fixed", "2600.00"),
         True,
         True,
         [],
@@ -101,15 +113,15 @@ CONDOMINIOS = [
         "Florianópolis",
         "SC",
         "88010-400",
-        "residencial",
-        ("fixa", "1300.00"),
+        "residential",
+        ("fixed", "1300.00"),
         True,
         False,
         [],
     ),
 ]
 
-LOGRADOUROS = [
+STREETS = [
     "Av. Paulista",
     "Rua das Flores",
     "Av. Brasil",
@@ -117,9 +129,9 @@ LOGRADOUROS = [
     "Rua XV de Novembro",
     "Av. Atlântica",
 ]
-BAIRROS = ["Centro", "Jardim América", "Vila Nova", "Bela Vista", "Boa Viagem", "Moema"]
+DISTRICTS = ["Centro", "Jardim América", "Vila Nova", "Bela Vista", "Boa Viagem", "Moema"]
 
-NOMES = [
+NAMES = [
     "Ana Beatriz Lima",
     "Carlos Eduardo Souza",
     "Mariana Costa Ribeiro",
@@ -141,7 +153,7 @@ NOMES = [
     "Vanessa Monteiro Batista",
     "Diego Fonseca Campos",
 ]
-EMPRESAS = [
+COMPANIES = [
     "Construtora Horizonte Ltda",
     "Investimentos Alvorada S.A.",
     "Grupo Pinheiro Participações",
@@ -149,20 +161,21 @@ EMPRESAS = [
     "Holding Santa Clara Ltda",
     "Lojas Aurora Comércio Ltda",
 ]
-TIPOS_UNIDADE = {
-    "residencial": ["apartamento"] * 6 + ["casa", "box"],
-    "comercial": ["sala"] * 4 + ["loja", "conjunto"],
+UNIT_TYPES = {
+    "residential": ["apartment"] * 6 + ["house", "parking_space"],
+    "commercial": ["office"] * 4 + ["store", "suite"],
 }
-RUAS_NUM = range(101, 120)
+UNIT_NUMBERS = range(101, 120)
 
 # Dias até o próximo reajuste de cada condomínio (negativo = atrasado; None = sem base).
-REAJUSTE_EM_DIAS = [-20, 18, 40, 75, 110, 150, 240, None]
-# Condomínios (índice) deixados de propósito com rateio fora de 100% e sem plano de contas.
-RATEIO_ERRADO = {4, 6}
-SEM_PLANO_CONTAS = {4, 6}
-SUBCONTAS = ["Fundo de Reserva", "Fundo de Obras", "Água e Esgoto"]
+ADJUSTMENT_IN_DAYS = [-20, 18, 40, 75, 110, 150, 240, None]
+# Condomínios (índice) deixados de propósito com rateio fora de 1 e sem centros de custo.
+WRONG_APPORTIONMENT = {4, 6}
+WITHOUT_COST_CENTERS = {4, 6}
+COST_CENTERS = ["Fundo de Reserva", "Fundo de Obras", "Água e Esgoto"]
 # Dias até o fim de cada locação sorteada (negativo = já encerrada).
-LOCACAO_FIM_EM_DIAS = [-12, 9, 25, 48, 90, None]
+LEASE_END_IN_DAYS = [-12, 9, 25, 48, 90, None]
+
 
 
 def _cpf(seed: int) -> str:
@@ -170,8 +183,7 @@ def _cpf(seed: int) -> str:
     for length in (9, 10):
         total = sum(d * (length + 1 - i) for i, d in enumerate(digits[:length]))
         digits.append((total * 10 % 11) % 10)
-    n = "".join(map(str, digits))
-    return f"{n[:3]}.{n[3:6]}.{n[6:9]}-{n[9:]}"
+    return "".join(map(str, digits))
 
 
 def _cnpj(seed: int) -> str:
@@ -183,14 +195,13 @@ def _cnpj(seed: int) -> str:
         total = sum(d * w for d, w in zip(digits, weights))
         rest = total % 11
         digits.append(0 if rest < 2 else 11 - rest)
-    n = "".join(map(str, digits))
-    return f"{n[:2]}.{n[2:5]}.{n[5:8]}/{n[8:12]}-{n[12:]}"
+    return "".join(map(str, digits))
 
 
-def _pessoas_demo():
-    """(nome, tipo, documento) determinísticos."""
-    items = [(n, "fisica", _cpf(i + 1)) for i, n in enumerate(NOMES)]
-    items += [(n, "juridica", _cnpj(i + 1)) for i, n in enumerate(EMPRESAS)]
+def _demo_persons() -> list[tuple[str, str, str]]:
+    """(name, kind, document) determinísticos."""
+    items = [(n, "individual", _cpf(i + 1)) for i, n in enumerate(NAMES)]
+    items += [(n, "legal", _cnpj(i + 1)) for i, n in enumerate(COMPANIES)]
     return items
 
 
@@ -198,102 +209,108 @@ def _phone(rng: random.Random) -> str:
     return f"(11) 9{rng.randint(1000, 9999)}-{rng.randint(1000, 9999)}"
 
 
-def _when(rng: random.Random, max_days: int):
+def _when(rng: random.Random, max_days: int):  # noqa: ANN202
     return timezone.now() - timedelta(
         days=rng.randint(1, max_days), hours=rng.randint(0, 23)
     )
 
 
+@final
 class Command(BaseCommand):
     help = "Cria (ou remove, com --clear) dados de exemplo: condomínios, unidades, pessoas e vínculos."
 
-    def add_arguments(self, parser):
-        parser.add_argument(
+    @override
+    def add_arguments(self, parser: CommandParser) -> None:
+        _ = parser.add_argument(
             "--clear", action="store_true", help="Remove os dados de exemplo."
         )
 
+    @override
     @transaction.atomic
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         if options["clear"]:
             self._clear()
             return
         self._create()
 
-    def _clear(self):
-        nomes = [c[0] for c in CONDOMINIOS]
-        condos, _ = Condominio.objects.filter(nome__in=nomes).delete()
-        docs = [p[2] for p in _pessoas_demo()]
-        pessoas, _ = Pessoa.objects.filter(cpf_cnpj__in=docs).delete()
+    def _clear(self) -> None:
+        names = [c[0] for c in CONDOMINIUMS]
+        condominiums = Condominium.objects.filter(name__in=names)
+        # Address é OneToOne com SET_NULL: apagar o condomínio deixaria o endereço órfão.
+        _ = Address.objects.filter(condominium__in=condominiums).delete()
+        condos, _ = condominiums.delete()
+        docs = [p[2] for p in _demo_persons()]
+        persons, _ = Person.objects.filter(
+            Q(people_individual__cpf__in=docs) | Q(people_legal__cnpj__in=docs)
+        ).delete()
         self.stdout.write(
             self.style.SUCCESS(
-                f"Removidos: {condos} registros de condomínios (com unidades/vínculos) e {pessoas} de pessoas."
+                f"Removidos: {condos} registros de condomínios (com unidades/vínculos) e {persons} de pessoas."
             )
         )
 
-    def _finalizar(self, rng):
-        """Rateio (frações somando 100%), plano de contas e bloqueios dos condomínios de exemplo."""
-        for index, definicao in enumerate(CONDOMINIOS):
-            condominio = Condominio.objects.filter(nome=definicao[0]).first()
+    def _finalize(self, rng: random.Random) -> None:
+        """Rateio (frações somando 1), centros de custo e bloqueios dos condomínios de exemplo."""
+        for index, definition in enumerate(CONDOMINIUMS):
+            condominium = Condominium.objects.filter(name=definition[0]).first()
             if (
-                condominio is None
-                or condominio.unidades.filter(fracao_ideal__gt=0).exists()
+                condominium is None
+                or condominium.units.filter(ideal_fraction__gt=0).exists()
             ):
                 continue  # inexistente ou já finalizado (execução repetida)
 
-            ativas = list(condominio.unidades.filter(ativo=True))
-            pesos = [rng.uniform(0.8, 1.4) for _ in ativas]
-            fator = Decimal("0.9") if index in RATEIO_ERRADO else Decimal("1")
-            total_pesos = sum(pesos)
-            fracoes = [
-                Decimal(f"{peso / total_pesos * 100:.5f}") * fator for peso in pesos
+            active_units = list(condominium.units.filter(active=True))
+            weights = [rng.uniform(0.8, 1.4) for _ in active_units]
+            factor = Decimal("0.9") if index in WRONG_APPORTIONMENT else Decimal("1")
+            total_weights = sum(weights)
+            fractions = [
+                Decimal(f"{weight / total_weights:.8f}") * factor for weight in weights
             ]
-            if ativas and index not in RATEIO_ERRADO:
-                fracoes[-1] += Decimal("100") - sum(fracoes)  # fecha exatamente em 100
-            for unidade, fracao in zip(ativas, fracoes):
-                Unidade.objects.filter(pk=unidade.pk).update(
-                    fracao_ideal=fracao.quantize(Decimal("0.00001"))
+            if active_units and index not in WRONG_APPORTIONMENT:
+                fractions[-1] += Decimal("1") - sum(fractions)  # fecha exatamente em 1
+            for unit, fraction in zip(active_units, fractions):
+                _ = Unit.objects.filter(pk=unit.pk).update(
+                    ideal_fraction=fraction.quantize(Decimal("0.00000001"))
                 )
 
-            if index not in SEM_PLANO_CONTAS:
-                for nome in SUBCONTAS:
-                    SubConta.objects.get_or_create(condominio=condominio, nome=nome)
-
-        # Um condomínio com uma unidade de lançamentos bloqueados.
-        alvo = Unidade.objects.filter(
-            condominio__nome=CONDOMINIOS[0][0], ativo=True
-        ).first()
-        if alvo:
-            Unidade.objects.filter(pk=alvo.pk).update(bloqueio_lancamentos=True)
-
-    def _create(self):
-        rng = random.Random(42)
-        empresa = Empresa.objects.first()
-        if empresa is None:
-            self.stderr.write("Nenhuma Empresa cadastrada; crie uma antes.")
-            return
-
-        # Pessoas
-        pessoas, sem_contato = [], 0
-        for index, (nome, tipo, doc) in enumerate(_pessoas_demo()):
-            contato_faltando = (
-                index % 7 == 3
-            )  # algumas pessoas sem email/celular (gera pendência)
-            slug = (
-                nome.lower().replace(" ", ".").replace(".ltda", "").replace(".s.a.", "")
-            )
-            pessoa, created = Pessoa.objects.get_or_create(
-                cpf_cnpj=doc,
-                defaults={
-                    "nome": nome,
-                    "tipo_pessoa": tipo,
-                    "celular": "" if contato_faltando else _phone(rng),
-                    "email": "" if contato_faltando else f"{slug[:24]}@exemplo.com.br",
-                    "estado_civil": rng.choice(
-                        ["Solteiro(a)", "Casado(a)", "Divorciado(a)"]
+            if index not in WITHOUT_COST_CENTERS:
+                for name in COST_CENTERS:
+                    _ = CostCenter.objects.get_or_create(
+                        condominium=condominium, name=name
                     )
-                    if tipo == "fisica"
-                    else "",
-                    "profissao": rng.choice(
+
+        # Um condomínio com uma unidade de cobrança bloqueada.
+        target = Unit.objects.filter(
+            condominium__name=CONDOMINIUMS[0][0], active=True
+        ).first()
+        if target:
+            _ = Unit.objects.filter(pk=target.pk).update(is_billing_blocked=True)
+
+    def _create_persons(self, rng: random.Random) -> list[Person]:
+        persons: list[Person] = []
+        for index, (name, kind, document) in enumerate(_demo_persons()):
+            missing_contact = index % 7 == 3  # algumas pessoas sem email/celular
+            slug = name.lower().replace(" ", ".").replace(".ltda", "").replace(".s.a.", "")
+            existing = Person.objects.filter(
+                Q(people_individual__cpf=document) | Q(people_legal__cnpj=document)
+            ).first()
+            if existing is not None:
+                persons.append(existing)
+                continue
+            person = Person.objects.create(
+                name=name,
+                cell_number=None if missing_contact else _phone(rng),
+                email="" if missing_contact else f"{slug[:24]}@exemplo.com.br",
+                active=index % 11 != 10,
+            )
+            if kind == "individual":
+                _ = PeopleIndividual.objects.create(
+                    person=person,
+                    cpf=document,
+                    marital_status=rng.choice(
+                        ["Solteiro(a)", "Casado(a)", "Divorciado(a)"]
+                    ),
+                    job=rng.choice(
                         [
                             "Engenheiro(a)",
                             "Médico(a)",
@@ -301,119 +318,137 @@ class Command(BaseCommand):
                             "Professor(a)",
                             "Empresário(a)",
                         ]
-                    )
-                    if tipo == "fisica"
-                    else "",
-                    "ativo": index % 11 != 10,
-                },
-            )
-            sem_contato += contato_faltando
-            if created:
-                Pessoa.objects.filter(pk=pessoa.pk).update(criado_em=_when(rng, 170))
-            pessoas.append(pessoa)
-        ativas = [p for p in pessoas if p.ativo] or pessoas
-
-        # Condomínios, blocos, unidades e vínculos
-        total_unidades = total_partes = 0
-        for index, (
-            nome,
-            cidade,
-            uf,
-            cep,
-            tipo,
-            (tipo_taxa, valor),
-            completo,
-            ativo,
-            blocos,
-        ) in enumerate(CONDOMINIOS):
-            condominio, created = Condominio.objects.get_or_create(
-                nome=nome,
-                defaults={
-                    "empresa": empresa,
-                    "cnpj": _cnpj(100 + index) if completo else "",
-                    "cep": cep,
-                    "logradouro": f"{LOGRADOUROS[index % len(LOGRADOUROS)]}, {rng.randint(100, 2500)}",
-                    "bairro": BAIRROS[index % len(BAIRROS)],
-                    "cidade": cidade,
-                    "uf": uf,
-                    "tipo": tipo,
-                    "tipo_taxa_administracao": tipo_taxa,
-                    "valor_taxa_administracao": Decimal(valor)
-                    if tipo_taxa == "fixa"
-                    else Decimal("0"),
-                    "percentual_taxa_administracao": Decimal(valor)
-                    if tipo_taxa == "variavel"
-                    else None,
-                    "dia_vencimento_documento": rng.choice([5, 10, 15]),
-                    "indice_reajuste": "IGPM",
-                    "periodicidade_reajuste_meses": 12,
-                    "base_reajuste": (
-                        timezone.localdate()
-                        + timedelta(days=REAJUSTE_EM_DIAS[index])
-                        - relativedelta(months=12)
-                        if REAJUSTE_EM_DIAS[index] is not None
-                        else None
                     ),
-                    "ativo": ativo,
-                },
+                )
+            else:
+                _ = PeopleLegal.objects.create(person=person, cnpj=document)
+            _ = Person.objects.filter(pk=person.pk).update(
+                created_at=_when(rng, 170)
             )
-            if not created:
+            persons.append(person)
+        return persons
+
+    def _create(self) -> None:
+        rng = random.Random(42)
+        company = Company.objects.first()
+        if company is None:
+            _ = self.stderr.write("Nenhuma Company cadastrada; crie uma antes.")
+            return
+
+        persons = self._create_persons(rng)
+        active_persons = [p for p in persons if p.active] or persons
+
+        total_units = total_links = 0
+        for index, (
+            name,
+            city,
+            state,
+            zip_code,
+            kind,
+            (fee_type, value),
+            complete,
+            active,
+            blocks,
+        ) in enumerate(CONDOMINIUMS):
+            if Condominium.objects.filter(name=name).exists():
                 continue
-            Condominio.objects.filter(pk=condominio.pk).update(
-                criado_em=_when(rng, 175)
+
+            today = timezone.localdate()
+            address = (
+                Address.objects.create(
+                    zip_code=zip_code.replace("-", "") or None,
+                    street=STREETS[index % len(STREETS)],
+                    number=str(rng.randint(100, 2500)),
+                    district=DISTRICTS[index % len(DISTRICTS)],
+                    city=city,
+                    state=state,
+                )
+                if complete
+                else None
+            )
+            condominium = Condominium.objects.create(
+                company=company,
+                address=address,
+                name=name,
+                cnpj=_cnpj(100 + index),
+                type=kind,
+                active=active,
+            )
+            _ = Condominium.objects.filter(pk=condominium.pk).update(
+                created_at=_when(rng, 175)
             )
 
-            blocos_obj = [
-                Bloco.objects.create(condominio=condominio, nome=b) for b in blocos
+            adjustment_in = ADJUSTMENT_IN_DAYS[index]
+            _ = AdministrationContract.objects.create(
+                condominium=condominium,
+                fee_type=fee_type,
+                fee_amount=Decimal(value) if fee_type == "fixed" else None,
+                fee_percentage=Decimal(value) if fee_type == "variable" else None,
+                fee_basis="revenue" if fee_type == "variable" else None,
+                adjustment_index="IGPM",
+                adjustment_period_months=12,
+                adjustment_base_date=(
+                    today + timedelta(days=adjustment_in) - relativedelta(months=12)
+                    if adjustment_in is not None
+                    else None
+                ),
+            )
+            _ = BillingRules.objects.create(
+                condominium=condominium, due_day=rng.choice([5, 10, 15])
+            )
+
+            block_objs = [
+                Block.objects.create(condominium=condominium, name=b) for b in blocks
             ]
-            quantidade = rng.randint(5, 8)
-            for numero in range(quantidade):
-                unidade = Unidade.objects.create(
-                    condominio=condominio,
-                    bloco=blocos_obj[numero % len(blocos_obj)] if blocos_obj else None,
-                    nome_unidade=str(RUAS_NUM[numero] + (numero // 4) * 100),
-                    tipo=rng.choice(TIPOS_UNIDADE[tipo]),
-                    numero_moradores=rng.randint(0, 5) if tipo == "residencial" else 0,
-                    valor_gas=Decimal(f"{rng.uniform(0, 60):.2f}")
+            for number in range(rng.randint(5, 8)):
+                unit = Unit.objects.create(
+                    condominium=condominium,
+                    block=block_objs[number % len(block_objs)] if block_objs else None,
+                    name=str(UNIT_NUMBERS[number] + (number // 4) * 100),
+                    type=rng.choice(UNIT_TYPES[kind]),
+                    resident_count=rng.randint(0, 5) if kind == "residential" else 0,
+                    gas_value=Decimal(f"{rng.uniform(0, 60):.2f}")
                     if rng.random() < 0.4
                     else Decimal("0"),
-                    valor_agua=Decimal(f"{rng.uniform(0, 90):.2f}")
+                    water_value=Decimal(f"{rng.uniform(0, 90):.2f}")
                     if rng.random() < 0.5
                     else Decimal("0"),
-                    esta_alugada=rng.random() < 0.3,
-                    ativo=rng.random() > 0.08,
+                    active=rng.random() > 0.08,
                 )
-                Unidade.objects.filter(pk=unidade.pk).update(criado_em=_when(rng, 170))
-                total_unidades += 1
+                _ = Unit.objects.filter(pk=unit.pk).update(created_at=_when(rng, 170))
+                total_units += 1
 
                 # ~12% das unidades ativas ficam sem vínculo (gera pendência).
-                if unidade.ativo and rng.random() < 0.12:
+                if unit.active and rng.random() < 0.12:
                     continue
-                dono = rng.choice(ativas)
-                UnidadeParte.objects.create(
-                    unidade=unidade, pessoa=dono, papel="proprietario"
+                owner = rng.choice(active_persons)
+                _ = UnitPerson.objects.create(
+                    unit=unit,
+                    person=owner,
+                    role=UnitPerson.Role.OWNER,
+                    ownership_percentage=Decimal("100"),
+                    start_date=today - timedelta(days=rng.randint(700, 2000)),
                 )
-                total_partes += 1
-                if unidade.esta_alugada:
-                    inquilino = rng.choice([p for p in ativas if p.pk != dono.pk])
-                    dias_fim = rng.choice(LOCACAO_FIM_EM_DIAS)
-                    UnidadeParte.objects.create(
-                        unidade=unidade,
-                        pessoa=inquilino,
-                        papel="locatario",
-                        data_inicio=timezone.localdate()
-                        - timedelta(days=rng.randint(200, 700)),
-                        data_fim=timezone.localdate() + timedelta(days=dias_fim)
-                        if dias_fim is not None
+                total_links += 1
+                if rng.random() < 0.3:
+                    tenant = rng.choice([p for p in active_persons if p.pk != owner.pk])
+                    days_to_end = rng.choice(LEASE_END_IN_DAYS)
+                    _ = UnitPerson.objects.create(
+                        unit=unit,
+                        person=tenant,
+                        role=UnitPerson.Role.TENANT,
+                        start_date=today - timedelta(days=rng.randint(200, 700)),
+                        end_date=today + timedelta(days=days_to_end)
+                        if days_to_end is not None
                         else None,
                     )
-                    total_partes += 1
+                    total_links += 1
 
-        self._finalizar(rng)
+        self._finalize(rng)
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Dados de exemplo prontos: {len(pessoas)} pessoas, {len(CONDOMINIOS)} condomínios, "
-                f"{total_unidades} unidades e {total_partes} vínculos criados agora."
+                f"Dados de exemplo prontos: {len(persons)} pessoas, {len(CONDOMINIUMS)} condomínios, "
+                f"{total_units} unidades e {total_links} vínculos."
             )
         )

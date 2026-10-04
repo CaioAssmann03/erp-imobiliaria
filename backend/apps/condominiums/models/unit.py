@@ -25,7 +25,7 @@ class Unit(models.Model):
         Condominium, on_delete=models.CASCADE, related_name="units"
     )
     block = models.ForeignKey(
-        Block, on_delete=models.PROTECT, related_name="units", blank=True, null=True
+        Block, on_delete=models.RESTRICT, related_name="units", blank=True, null=True
     )
 
     name = models.CharField(max_length=30, help_text="Ex.: 101")

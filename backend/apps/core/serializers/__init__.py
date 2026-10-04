@@ -1,0 +1,3 @@
+from .company_serializers import CompanySerializer as CompanySerializer
+from .dashboard_serializers import DashboardSerializer as DashboardSerializer
+from .search_serializers import SearchSerializer as SearchSerializer

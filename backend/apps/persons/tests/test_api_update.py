@@ -4,9 +4,8 @@ import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from apps.persons.models import Person
-
-from .base import make_individual
+from ..models import PeopleIndividual, PeopleLegal, Person
+from .base import CNPJ_A, CNPJ_B, CPF_A, CPF_B, make_individual, make_legal
 
 pytestmark = pytest.mark.django_db
 
@@ -26,17 +25,94 @@ def test_patch_updates_person_and_nested(
     person.refresh_from_db()
     assert person.name == "Novo"
     assert person.people_individual.job == "B"
+    assert person.people_individual.cpf == CPF_A
 
 
 def test_patch_same_cpf_does_not_fail(
     api_client: APIClient, detail_url: Callable[[Person], str]
 ) -> None:
-    person = make_individual(cpf="12345678901")
+    person = make_individual(cpf=CPF_A)
 
     response = api_client.patch(
-        detail_url(person),
-        {"people_individual": {"cpf": "12345678901"}},
-        format="json",
+        detail_url(person), {"people_individual": {"cpf": CPF_A}}, format="json"
     )
 
     assert response.status_code == status.HTTP_200_OK
+
+
+def test_patch_cpf_of_another_person_is_rejected(
+    api_client: APIClient, detail_url: Callable[[Person], str]
+) -> None:
+    _ = make_individual(name="Outra", cpf=CPF_B)
+    person = make_individual(cpf=CPF_A)
+
+    response = api_client.patch(
+        detail_url(person), {"people_individual": {"cpf": CPF_B}}, format="json"
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert person.people_individual.cpf == CPF_A
+
+
+def test_patch_changes_cpf_of_same_person(
+    api_client: APIClient, detail_url: Callable[[Person], str]
+) -> None:
+    person = make_individual(cpf=CPF_A)
+
+    response = api_client.patch(
+        detail_url(person), {"people_individual": {"cpf": CPF_B}}, format="json"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert PeopleIndividual.objects.get(person=person).cpf == CPF_B
+    assert PeopleIndividual.objects.count() == 1
+
+
+def test_patch_same_cnpj_does_not_fail(
+    api_client: APIClient, detail_url: Callable[[Person], str]
+) -> None:
+    person = make_legal(cnpj=CNPJ_A)
+
+    response = api_client.patch(
+        detail_url(person), {"people_legal": {"cnpj": CNPJ_A, "ie": "9"}}, format="json"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert PeopleLegal.objects.get(person=person).ie == "9"
+
+
+def test_patch_cnpj_of_another_person_is_rejected(
+    api_client: APIClient, detail_url: Callable[[Person], str]
+) -> None:
+    _ = make_legal(name="Outra", cnpj=CNPJ_B)
+    person = make_legal(cnpj=CNPJ_A)
+
+    response = api_client.patch(
+        detail_url(person), {"people_legal": {"cnpj": CNPJ_B}}, format="json"
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_patch_adds_document_to_person_without_one(
+    api_client: APIClient, detail_url: Callable[[Person], str]
+) -> None:
+    person = Person.objects.create(name="Sem doc")
+
+    response = api_client.patch(
+        detail_url(person), {"people_individual": {"cpf": CPF_A}}, format="json"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert PeopleIndividual.objects.get(person=person).cpf == CPF_A
+
+
+def test_patch_without_nested_keeps_documents(
+    api_client: APIClient, detail_url: Callable[[Person], str]
+) -> None:
+    person = make_individual(cpf=CPF_A)
+
+    response = api_client.patch(detail_url(person), {"name": "Novo"}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert PeopleIndividual.objects.get(person=person).cpf == CPF_A

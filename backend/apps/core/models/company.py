@@ -1,26 +1,38 @@
+import uuid
+
 from django.db import models
+from typing_extensions import final, override
+
+from apps.core.validators.cnpj import validate_cnpj
 
 
+@final
 class Company(models.Model):
-    """Administradora (multiempresa desde o início — ver 'Vinculado a: Matriz' no Sami)."""
+    """Administradora (multiempresa desde o início)."""
 
-    razao_social = models.CharField(max_length=255)
-    nome_fantasia = models.CharField(max_length=255, blank=True)
-    cnpj = models.CharField(max_length=18, unique=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    legal_name = models.CharField(max_length=255)
+    trade_name = models.CharField(max_length=255, blank=True)
+    cnpj = models.CharField(max_length=14, unique=True, validators=[validate_cnpj])
     logo_url = models.URLField(blank=True)
 
-    cep = models.CharField(max_length=9, blank=True)
-    logradouro = models.CharField(max_length=255, blank=True)
-    bairro = models.CharField(max_length=120, blank=True)
-    cidade = models.CharField(max_length=120, blank=True)
-    uf = models.CharField(max_length=2, blank=True)
+    zip_code = models.CharField(max_length=8, blank=True)
+    street = models.CharField(max_length=255, blank=True)
+    district = models.CharField(max_length=120, blank=True)
+    city = models.CharField(max_length=120, blank=True)
+    state = models.CharField(max_length=2, blank=True)
 
-    ativo = models.BooleanField(default=True)
-    criado_em = models.DateTimeField(auto_now_add=True)
+    active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Company"
-        verbose_name_plural = "Company"
+        verbose_name_plural = "Companies"
+        ordering = ("legal_name",)
 
-    def __str__(self):
-        return self.nome_fantasia or self.razao_social
+    @override
+    def __str__(self) -> str:
+        return self.trade_name or self.legal_name

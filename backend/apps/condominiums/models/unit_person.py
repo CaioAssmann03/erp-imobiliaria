@@ -34,6 +34,7 @@ class UnitPerson(models.Model):
     class Meta:
         verbose_name = "Unit Person"
         verbose_name_plural = "Unit People"
+        ordering = ("-start_date", "id")
         constraints = (
             models.CheckConstraint(
                 name="unit_person_and_gte_start",
@@ -43,7 +44,11 @@ class UnitPerson(models.Model):
             models.CheckConstraint(
                 name="unit_person_owner_percentage",
                 condition=~Q(role="owner")
-                | (Q(ownership_percentage__gte=0) & Q(ownership_percentage__lte=100)),
+                | (
+                    Q(ownership_percentage__isnull=False)
+                    & Q(ownership_percentage__gte=0)
+                    & Q(ownership_percentage__lte=100)
+                ),
                 violation_error_message="Owner needs a percentage between 0 and 100",
             ),
             models.CheckConstraint(
