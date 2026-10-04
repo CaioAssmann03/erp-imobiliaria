@@ -1,0 +1,28 @@
+---
+read-when: you are about to finish any change
+size: small
+---
+# Quality checklist (S — Safeguards)
+
+```bash
+cd frontend
+npx tsc --noEmit    # types
+npx eslint .        # lint (generated code ignored)
+npm run build       # validates pages, routes, server/client boundaries
+```
+API changed → backend running → `npm run generate:api` first. Stale type errors after renaming routes → delete `.next/` and rebuild.
+
+- [ ] Code English, user text Portuguese (norms/language-and-naming.md)
+- [ ] File in the right place; ≤ ~100 lines; logic outside JSX (norms/components.md)
+- [ ] Server by default; `"use client"` only on interactive leaves
+- [ ] Tokens only; works in dark + light and at mobile width (norms/design-system.md)
+- [ ] Generated hooks only; prefetch params = client params; invalidations cover dependents (norms/data-and-cache.md)
+- [ ] Schema + `toForm`/`toPayload`; server errors handled (norms/forms.md)
+- [ ] No token/PII in logs, storage, props, toasts; links/redirects validated (safeguards/secure-coding.md)
+- [ ] Labels, keyboard, focus, `metadata.title` (safeguards/accessibility-and-seo.md)
+- [ ] Loading, empty, error, success states handled
+- [ ] The doc describing what you changed is updated
+
+Manual: create, edit, delete; client and server validation errors; reload a filtered list; sign out/in; dark/light; narrow viewport.
+Review: anything fetched on the client that the server could prefetch? client boundary higher than needed? loose color/size, `any`, `@ts-ignore`,
+`console.log`? duplicated logic that belongs in `lib/` or a hook?
