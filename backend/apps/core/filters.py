@@ -1,4 +1,5 @@
 from rest_framework import filters
+from rest_framework.request import Request
 
 
 class QuerySearchFilter(filters.SearchFilter):
@@ -12,7 +13,7 @@ class QuerySearchFilter(filters.SearchFilter):
     search_title = "Busca"
     search_description = "Termo de busca (nome, documento…)."
 
-    def get_search_terms(self, request):
+    def get_search_terms(self, request: Request) -> list[str]:
         raw_query = request.query_params.get(self.search_param) or request.query_params.get(
             "search", ""
         )

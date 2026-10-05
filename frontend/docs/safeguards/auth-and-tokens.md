@@ -1,45 +1,47 @@
 ---
-summary: Cookie-based auth today, where tokens may live, known limits and the HttpOnly hardening plan.
-read-when: you touch login, logout, tokens, cookies or proxy.ts
-skip-if: headers/CSP → safeguards/http-hardening.md; general secure coding → safeguards/secure-coding.md
+summary: HttpOnly-cookie auth through the Next API proxy: who holds the tokens, the flow of login, requests, renewal and logout, and its limits.
+read-when: you touch login, logout, tokens, cookies, proxy.ts or the /api route handler
+skip-if: headers/CSP → safeguards/http-hardening.md; general secure coding → safeguards/secure-coding.md; the backend side (blacklist, throttle) → backend/docs/features/007-auth-hardening.md
 ---
 # Authentication and token storage (S — Safeguards)
 
-## Current implementation
-| Piece | Where | Behavior |
+The browser never sees a token. The Next server holds them in `HttpOnly` cookies and talks to Django (spec 007).
+
+## The flow
+| Step | Where | Behavior |
 |---|---|---|
-| Login | `POST /api/auth/login/` | `access` (30 min) + `refresh` (7 days, rotating) |
-| Storage | cookies `access_token`, `refresh_token` | written by `lib/cookies.ts` (`document.cookie`) at login and by `proxy.ts` on refresh; `path=/`, `SameSite=Lax` |
-| Protection | `proxy.ts` | no token → `/login?next=`; expiring (< 30 s) → refresh before render; refresh fails → clear + `/login` |
-| Sending | `lib/api-client.ts` | `Authorization: Bearer` (cookie in browser, `next/headers` on server) |
-| Browser refresh | `lib/api-client.ts` | 401 → one shared refresh + retry; failure → clear + hard navigate to `/login` |
-| Logout | `LogoutButton` | removes cookies, `queryClient.clear()`, `/login` |
+| Login | `LoginForm` → `POST /api/auth/login/` (same origin) | `app/api/[...path]/route.ts` posts to Django, then sets the cookies and answers `204` (no token in the body) |
+| Cookies | `lib/auth-cookies.ts` | `access_token` (Max-Age 30 min = the JWT life) and `refresh_token` (7 days): `HttpOnly`, `Secure` in production, `SameSite=Lax`, `Path=/`; written only on the server |
+| API calls | browser → `/api/...` (same origin) → handler → Django | the handler reads the cookie, adds `Authorization: Bearer`, relays status and JSON unchanged; the browser never calls Django |
+| SSR | `lib/api-client.ts` (server branch) | Server Components read the cookie with `next/headers` and call Django directly |
+| Renewal | handler (API calls) and `proxy.ts` (page loads) | access missing/expiring (< 30 s) or refused with 401 → one refresh with the refresh cookie, new cookies on the response; a failed refresh clears the cookies (API: `401`, page: redirect to `/login`) |
+| Logout | `LogoutButton` → `POST /api/auth/logout/` | the handler sends the refresh token to Django (`POST /api/auth/logout/`, which blacklists it) and clears both cookies |
+| Browser 401 | `lib/api-client.ts` | the handler already tried to renew: the session ended → hard navigation to `/login` (`/api/auth/*` is excluded: 401 there is bad credentials) |
 | `?next=` | `LoginForm` | `safeNextPath()` (internal paths only) |
 
-`/api/auth/*` is excluded from refresh/redirect logic (401 = invalid credentials).
+`/api/auth/refresh/` is **not** reachable from the browser (the handler answers 404): renewal is internal.
+
+## What the handler guarantees
+- **JSON only.** A body that is not JSON answers `415`; files (receipts, boleto PDFs) will not go through it (the platform caps request bodies near 4.5 MB): they will use signed bucket URLs.
+- **No browser state forwarded.** The `Cookie` header is not sent to Django; only the content type comes back.
+- **CSRF.** Besides `SameSite=Lax`, a non-GET whose `Origin` is not this server's own origin answers `403` (own origin = `x-forwarded-host`/`host` + `x-forwarded-proto`).
+- **Real client address for the rate limit.** Django only sees this server, so the handler (and `proxy.ts`) send `X-Forwarded-For` (the client address from the platform) plus `X-Internal-Key` (`INTERNAL_API_KEY`); Django trusts the address only when the key matches.
+- **One refresh at a time.** The refresh token rotates and the old one is revoked, but the screen fires several requests with the same expired cookie; `lib/backend.ts` shares one in-flight refresh per token and keeps its result for 30 s, so the late ones do not log the user out.
+- **Errors in the API's own shape** (`{errors: [{field, code, message}]}`): `401` session ended, `403` blocked origin, `404`, `415`, `502` (`bad_gateway`, Django unreachable).
 
 ## Where a token may live
-Cookie: yes (current; the server needs it for first paint and refresh). `localStorage`/`sessionStorage`: **never** (any script reads it, server cannot).
-React state/query cache, URL, logs, toasts, error text: never.
+Only in the `HttpOnly` cookies and in server memory for the length of one request. `localStorage`/`sessionStorage`, React state/query cache, URL, logs, toasts and error text: **never**. `lib/cookies.ts` is for preference cookies only (sidebar, appearance), never tokens.
 
-## Known limits (today)
-| Item | Risk |
+## Known limits
+| Item | Risk / note |
 |---|---|
-| cookies not `HttpOnly` (JS reads/writes them) | an XSS can steal tokens |
-| cookies not `Secure` | tokens could cross plain HTTP |
-| access cookie lives 1 day, JWT 30 min | harmless but misleading |
-| logout only clears cookies | refresh token valid on the server until expiry (no blacklist) |
+| XSS can still act as the user while the page is open | it cannot steal the tokens; CSP and no unreviewed scripts remain the first defense |
+| The shared refresh result lives in the memory of one server instance | with several instances (serverless) a race between instances can still log a user out; rare, accepted |
+| `Secure` is off outside production | local `http://localhost` works; production must be HTTPS |
+| `x-forwarded-for` comes from the platform in front of Next | on a platform that does not set it, the rate limit sees the Next server's address (all users share it) |
 
-## Hardening target (not implemented): `HttpOnly; Secure; SameSite=Lax` cookies JS cannot read
-1. Server-issued cookies: a Next Route Handler/Server Action does login against Django and sets them with
-   `cookies().set(name, value, { httpOnly: true, secure: production, sameSite: "lax", path: "/", maxAge })`; `LoginForm` posts to it.
-2. The browser can no longer send `Authorization`: route API calls through a Next proxy (Route Handler or `rewrites` + handler) that reads the
-   cookie on the server and forwards to Django with `Bearer`; `lib/api-client.ts` loses its cookie read and in-browser refresh.
-3. Keep refreshing in `proxy.ts` with the same flags. 4. Real logout: handler clears cookies and **blacklists the refresh token**
-   (enable `rest_framework_simplejwt.token_blacklist`). 5. CSRF: keep `SameSite=Lax`, mutate only with POST/PATCH/DELETE, check `Origin` in handlers.
-
-Until then treat XSS as the main risk (no `dangerouslySetInnerHTML`, strict CSP, no unreviewed third-party scripts).
+## Environment
+`API_INTERNAL_URL` (the Django address, **server only**, never `NEXT_PUBLIC_*`) and `INTERNAL_API_KEY` (same value as the backend).
 
 ## Code rules
-Cookie names from `lib/auth.ts` (`ACCESS_COOKIE`, `REFRESH_COOKIE`), never literals. Read/write tokens only in `lib/cookies.ts`, `lib/api-client.ts`,
-`proxy.ts`, login and logout. Never log, pass as props, or send a token to a third party. Authorization is the backend's job.
+Cookie names from `lib/auth.ts` (`ACCESS_COOKIE`, `REFRESH_COOKIE`), never literals. Read/write token cookies only in `lib/auth-cookies.ts`, `app/api/[...path]/route.ts`, `proxy.ts` and the server branch of `lib/api-client.ts`. Never log, pass as props, or send a token to a third party. Authorization is the backend's job.

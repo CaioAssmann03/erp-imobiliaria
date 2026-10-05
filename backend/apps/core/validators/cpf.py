@@ -2,6 +2,8 @@ import re
 
 from django.core.exceptions import ValidationError
 
+from apps.core.error_codes import CoreErrorCode
+
 
 def _check_digit(leading_digits: str) -> int:
     weights = range(len(leading_digits) + 1, 1, -1)
@@ -12,10 +14,13 @@ def _check_digit(leading_digits: str) -> int:
 
 def validate_cpf(cpf: str) -> None:
     if not re.fullmatch(r"[0-9]{11}", cpf):
-        raise ValidationError("CPF deve ter 11 dígitos, sem pontuação.")
+        raise ValidationError(
+            "CPF must have 11 digits, without punctuation.",
+            code=CoreErrorCode.CPF_INVALID_LENGTH.value,
+        )
     if len(set(cpf)) == 1:  # 00000000000, 11111111111...
-        raise ValidationError("CPF inválido.")
+        raise ValidationError("Invalid CPF.", code=CoreErrorCode.CPF_INVALID_CHECK_DIGITS.value)
     first_check_digit = _check_digit(cpf[:9])
     second_check_digit = _check_digit(cpf[:10])
     if cpf[9:] != f"{first_check_digit}{second_check_digit}":
-        raise ValidationError("CPF inválido.")
+        raise ValidationError("Invalid CPF.", code=CoreErrorCode.CPF_INVALID_CHECK_DIGITS.value)

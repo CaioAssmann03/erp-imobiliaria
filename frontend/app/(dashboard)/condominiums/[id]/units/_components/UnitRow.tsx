@@ -14,10 +14,12 @@ interface UnitRowProps {
   unit: Unit;
   condominiumId: string;
   blockName: string | null;
+  /** Só na visão geral de unidades; `null` na lista de um condomínio. */
+  condominiumName?: string | null;
   onDelete: (id: string) => void;
 }
 
-export function UnitRow({ unit, condominiumId, blockName, onDelete }: UnitRowProps) {
+export function UnitRow({ unit, condominiumId, blockName, condominiumName = null, onDelete }: UnitRowProps) {
   const href = `/condominiums/${condominiumId}/units/${unit.id}`;
   const links = currentLinks(unit);
 
@@ -26,13 +28,18 @@ export function UnitRow({ unit, condominiumId, blockName, onDelete }: UnitRowPro
       <TableCell>
         <RowLink
           href={href}
-          sub={[blockName, unitTypeLabel(unit.type), unit.active ? null : "Inativa"]
+          sub={[condominiumName, blockName, unitTypeLabel(unit.type), unit.active ? null : "Inativa"]
             .filter(Boolean)
             .join(" · ")}
         >
           {unit.name}
         </RowLink>
       </TableCell>
+      {condominiumName !== null && (
+        <TableCell className="hidden max-w-[16rem] truncate text-ink-soft md:table-cell">
+          {condominiumName}
+        </TableCell>
+      )}
       <TableCell className="hidden md:table-cell text-ink-soft">{blockName ?? "—"}</TableCell>
       <TableCell className="hidden md:table-cell text-ink-soft">{unitTypeLabel(unit.type)}</TableCell>
       <TableCell className="hidden md:table-cell max-w-[22rem] truncate text-ink-soft">

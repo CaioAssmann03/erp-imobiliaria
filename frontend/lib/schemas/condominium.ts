@@ -60,7 +60,6 @@ function feeError(values: FeeInput): { path: "fee_amount" | "fee_percentage"; me
 export const condominiumSchema = z
   .object({
     name: requiredText("o nome", { min: 2, max: 255 }),
-    company: z.string().min(1, "Selecione a empresa administradora"),
     cnpj: cnpjField,
     municipal_registration: optionalText("Inscrição municipal", 30),
     type: enumField(["residential", "commercial"]),
@@ -113,7 +112,6 @@ export type CondominiumFormOutput = z.output<typeof condominiumSchema>;
 
 export const CONDOMINIUM_DEFAULTS: CondominiumFormInput = {
   name: "",
-  company: "",
   cnpj: "",
   municipal_registration: "",
   type: "residential",
@@ -151,7 +149,6 @@ export function condominiumToForm(c: Condominium): CondominiumFormInput {
   const billing = c.billing_rules;
   return {
     name: c.name,
-    company: c.company,
     cnpj: c.cnpj ? maskCnpj(c.cnpj) : "",
     municipal_registration: c.municipal_registration ?? "",
     type: c.type ?? "residential",
@@ -216,7 +213,6 @@ export function condominiumToPayload(
   const isFixed = values.fee_type === "fixed";
 
   return {
-    company: values.company,
     advisor: values.advisor,
     type: values.type,
     name: values.name,

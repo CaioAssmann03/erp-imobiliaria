@@ -9,7 +9,7 @@ export const buildFixedRevenueWidget: WidgetBuilder = (dash) => {
   return {
     title: "Receita fixa mensal",
     description: "Taxa de administração dos condomínios com valor fixo",
-    className: "lg:col-span-6",
+    className: "lg:col-span-4",
     showHeader: true,
     render: (large) => (
       <>

@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from typing_extensions import final
 
 from apps.condominiums.models import Condominium, Unit
+from apps.core.scoping import scope_to_company
 from apps.persons.models import Person
 
 from ..serializers import SearchSerializer
@@ -44,7 +45,9 @@ def _relevance_rank(*conditions: Q) -> Case:
     )
 
 
-def _search_persons(term: str, digits: str, should_search_document: bool) -> list[Person]:
+def _search_persons(
+    user: Any, term: str, digits: str, should_search_document: bool
+) -> list[Person]:
     name_filter = Q(name__icontains=term)
     ranking = [Q(name__istartswith=term)]
     if should_search_document:
@@ -56,7 +59,8 @@ def _search_persons(term: str, digits: str, should_search_document: bool) -> lis
             Q(people_legal__cnpj__startswith=digits),
         ]
     return list(
-        Person.objects.filter(name_filter)
+        scope_to_company(Person.objects.all(), user)
+        .filter(name_filter)
         .annotate(
             rank=_relevance_rank(*ranking),
             document=Coalesce("people_individual__cpf", "people_legal__cnpj", Value("")),
@@ -66,7 +70,7 @@ def _search_persons(term: str, digits: str, should_search_document: bool) -> lis
 
 
 def _search_condominiums(
-    term: str, digits: str, should_search_document: bool
+    user: Any, term: str, digits: str, should_search_document: bool
 ) -> list[Condominium]:
     name_filter = Q(name__icontains=term)
     ranking = [Q(name__istartswith=term)]
@@ -74,16 +78,18 @@ def _search_condominiums(
         name_filter |= Q(cnpj__contains=digits)
         ranking.append(Q(cnpj__startswith=digits))
     return list(
-        Condominium.objects.filter(name_filter)
+        scope_to_company(Condominium.objects.all(), user)
+        .filter(name_filter)
         .annotate(rank=_relevance_rank(*ranking))
         .select_related("address")
         .order_by("rank", "name")[:LIMIT_PER_TYPE]
     )
 
 
-def _search_units(term: str) -> list[Unit]:
+def _search_units(user: Any, term: str) -> list[Unit]:
     return list(
-        Unit.objects.filter(name__icontains=term)
+        scope_to_company(Unit.objects.all(), user)
+        .filter(name__icontains=term)
         .annotate(rank=_relevance_rank(Q(name__istartswith=term)))
         .select_related("condominium")
         .order_by("rank", "name")[:LIMIT_PER_TYPE]
@@ -123,8 +129,10 @@ class SearchView(APIView):
         should_search_document = len(digits) >= MIN_TEXT_LENGTH
 
         results: dict[str, Any] = {
-            "persons": _search_persons(term, digits, should_search_document),
-            "condominiums": _search_condominiums(term, digits, should_search_document),
-            "units": _search_units(term),
+            "persons": _search_persons(request.user, term, digits, should_search_document),
+            "condominiums": _search_condominiums(
+                request.user, term, digits, should_search_document
+            ),
+            "units": _search_units(request.user, term),
         }
         return Response(SearchSerializer(results).data)

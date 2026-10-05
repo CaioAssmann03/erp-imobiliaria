@@ -4,6 +4,7 @@ from django.db import transaction
 from rest_framework import serializers
 from typing_extensions import final
 
+from apps.core.scoping import request_company
 from apps.core.serializers import ModelRulesMixin
 
 from ..models import Address, AdministrationContract, BillingRules, Condominium
@@ -39,7 +40,7 @@ class CondominiumSerializer(ModelRulesMixin, serializers.ModelSerializer[Condomi
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "created_at", "updated_at")
+        read_only_fields = ("id", "company", "created_at", "updated_at")
 
     @override
     @transaction.atomic
@@ -51,7 +52,7 @@ class CondominiumSerializer(ModelRulesMixin, serializers.ModelSerializer[Condomi
         if address_data:
             validated_data["address"] = Address.objects.create(**address_data)
 
-        condominium = Condominium.objects.create(**validated_data)
+        condominium = Condominium.objects.create(company=request_company(self), **validated_data)
 
         if contract_data:
             _ = AdministrationContract.objects.create(

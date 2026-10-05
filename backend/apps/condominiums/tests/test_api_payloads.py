@@ -6,12 +6,13 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from apps.core.testing import seeded_company
 from apps.accounts.models import User
 from apps.core.models import Company
 from apps.persons.models import Person
 
 from ..models import AdministrationContract, BillingRules, Condominium, Unit, UnitPerson
-from .base import body
+from .base import body, error_codes
 
 pytestmark = pytest.mark.django_db
 
@@ -19,11 +20,8 @@ CNPJ = "11222333000181"
 
 
 @pytest.fixture
-def client(db: None) -> APIClient:
-    api = APIClient()
-    user: AbstractBaseUser = User.objects.create_user("tester", password="x")
-    api.force_authenticate(user=user)
-    return api
+def client(api_client: APIClient) -> APIClient:
+    return api_client
 
 
 def create_payload(company: Company, **overrides: object) -> dict[str, object]:
@@ -56,11 +54,6 @@ def create_payload(company: Company, **overrides: object) -> dict[str, object]:
         },
         **overrides,
     }
-
-
-@pytest.fixture
-def company() -> Company:
-    return Company.objects.create(legal_name="Adm", cnpj="00000000000191")
 
 
 class TestCondominiumForm:
@@ -150,7 +143,9 @@ class TestCondominiumForm:
         response = client.post(reverse("condominium-list"), payload, format="json")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "administration_contract" in body(response)
+        assert error_codes(response, "administration_contract.fee_basis") == [
+            "administration_contract.variable_fee.requires_percentage_and_basis"
+        ]
         assert not Condominium.objects.exists()
         assert not BillingRules.objects.exists()
 
@@ -163,7 +158,7 @@ class TestCondominiumForm:
         response = client.post(reverse("condominium-list"), payload, format="json")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "due_day" in body(response)["billing_rules"]
+        assert error_codes(response, "billing_rules.due_day") == ["due_day.out_of_range"]
 
 
 class TestUnitForm:
@@ -205,7 +200,7 @@ class TestUnitForm:
 
     def test_owner_and_tenant_links(self, client: APIClient, condominium: Condominium) -> None:
         unit = Unit.objects.create(condominium=condominium, name="101")
-        person = Person.objects.create(name="Maria")
+        person = Person.objects.create(company=seeded_company(), name="Maria")
         owner = {
             "unit": str(unit.pk),
             "person": str(person.pk),
@@ -236,7 +231,7 @@ class TestUnitForm:
         self, client: APIClient, condominium: Condominium
     ) -> None:
         unit = Unit.objects.create(condominium=condominium, name="101")
-        person = Person.objects.create(name="Maria")
+        person = Person.objects.create(company=seeded_company(), name="Maria")
 
         response = client.post(
             reverse("unit-person-list"),

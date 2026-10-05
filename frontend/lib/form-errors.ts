@@ -1,45 +1,29 @@
 import { isAxiosError } from "axios";
 import type { FieldValues, Path, UseFormSetError } from "react-hook-form";
 
-/** Traduz mensagens padrão do DRF para o usuário. */
-function translate(message: string) {
-  const text = message.toLowerCase();
-  if (
-    text.includes("already exists") ||
-    text.includes("must make a unique set") ||
-    text.includes("já existe")
-  ) {
-    return "Já existe um cadastro com este valor.";
-  }
-  if (text.includes("may not be blank") || text.includes("may not be null") || text.includes("required")) {
-    return "Campo obrigatório.";
-  }
-  if (text.includes("valid email")) return "Email inválido.";
-  if (text.includes("no more than") && text.includes("characters")) return "Texto muito longo.";
-  if (text.includes("valid integer") || text.includes("a valid number")) return "Número inválido.";
-  if (text.includes("invalid pk") || text.includes("does not exist")) return "Seleção inválida.";
-  return message;
+import type { ErrorItem, ErrorResponse } from "@/lib/api/generated/models";
+
+import { errorMessage } from "./error-messages";
+
+/** Os erros do backend: `{errors: [{field, code, message}]}` (spec 006). */
+function readErrors(data: unknown): ErrorItem[] | null {
+  if (!data || typeof data !== "object") return null;
+  const errors = (data as Partial<ErrorResponse>).errors;
+  return Array.isArray(errors) ? errors : null;
 }
 
 /**
- * O DRF aninha os erros de serializers aninhados (`{address: {city: ["..."]}}`). Os campos
- * do formulário são planos e usam o nome do campo da API, então só o último nível importa.
+ * Os campos do formulário são planos e usam o nome do campo da API; um erro aninhado
+ * (`address.city`, `unit_people.0.person`) vale para o último nome do caminho.
  */
-function flattenErrors(data: Record<string, unknown>): [string, string][] {
-  const result: [string, string][] = [];
-  for (const [field, value] of Object.entries(data)) {
-    if (value && typeof value === "object" && !Array.isArray(value)) {
-      result.push(...flattenErrors(value as Record<string, unknown>));
-    } else {
-      result.push([field, String(Array.isArray(value) ? value[0] : value)]);
-    }
-  }
-  return result;
+function formFieldName(path: string): string {
+  const names = path.split(".").filter((name) => !/^\d+$/.test(name));
+  return names[names.length - 1] ?? path;
 }
 
 /**
- * Aplica os erros de validação do backend (DRF: `{campo: ["mensagem"]}`) nos campos
- * do formulário. Retorna uma mensagem geral para exibir em toast.
+ * Aplica os erros de validação do backend nos campos do formulário, traduzidos pelo
+ * código. Retorna uma mensagem geral para exibir em toast.
  */
 export function applyServerErrors<T extends FieldValues>(
   error: unknown,
@@ -50,21 +34,30 @@ export function applyServerErrors<T extends FieldValues>(
   }
 
   const { status, data } = error.response;
-  if (status === 400 && data && typeof data === "object") {
+  const errors = readErrors(data);
+  if (status === 400 && errors) {
     let applied = 0;
     let general: string | undefined;
 
-    for (const [field, messages] of flattenErrors(data as Record<string, unknown>)) {
-      const message = translate(messages);
-      if (field === "non_field_errors" || field === "detail") {
-        general = message;
+    for (const { field, code, message } of errors) {
+      const translated = errorMessage(code, message);
+      if (field === null) {
+        general = translated;
         continue;
       }
-      setError(field as Path<T>, { type: "server", message }, { shouldFocus: applied === 0 });
+      setError(
+        formFieldName(field) as Path<T>,
+        { type: "server", message: translated },
+        { shouldFocus: applied === 0 }
+      );
       applied += 1;
     }
 
-    if (general) return general;
+    if (general) {
+      // Erro que não é de um campo: o resumo do formulário o exibe (além do toast).
+      setError("root.server" as Path<T>, { type: "server", message: general });
+      return general;
+    }
     if (applied > 0) return "Corrija os campos destacados.";
   }
 

@@ -27,6 +27,7 @@ import type {
 import type {
   Condominium,
   CondominiumsListParams,
+  ErrorResponse,
   PaginatedCondominiumList,
   PatchedCondominium
 } from '../models';
@@ -78,6 +79,11 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+/**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
 export const condominiumsList = (
     params?: CondominiumsListParams,
  signal?: AbortSignal
@@ -101,7 +107,7 @@ export const getCondominiumsListQueryKey = (params?: CondominiumsListParams,) =>
     }
 
 
-export const getCondominiumsListQueryOptions = <TData = Awaited<ReturnType<typeof condominiumsList>>, TError = unknown>(params?: CondominiumsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsList>>, TError, TData>>, }
+export const getCondominiumsListQueryOptions = <TData = Awaited<ReturnType<typeof condominiumsList>>, TError = ErrorResponse>(params?: CondominiumsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsList>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -120,10 +126,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type CondominiumsListQueryResult = NonNullable<Awaited<ReturnType<typeof condominiumsList>>>
-export type CondominiumsListQueryError = unknown
+export type CondominiumsListQueryError = ErrorResponse
 
 
-export function useCondominiumsList<TData = Awaited<ReturnType<typeof condominiumsList>>, TError = unknown>(
+export function useCondominiumsList<TData = Awaited<ReturnType<typeof condominiumsList>>, TError = ErrorResponse>(
  params: undefined |  CondominiumsListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsList>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof condominiumsList>>,
@@ -133,7 +139,7 @@ export function useCondominiumsList<TData = Awaited<ReturnType<typeof condominiu
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCondominiumsList<TData = Awaited<ReturnType<typeof condominiumsList>>, TError = unknown>(
+export function useCondominiumsList<TData = Awaited<ReturnType<typeof condominiumsList>>, TError = ErrorResponse>(
  params?: CondominiumsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsList>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof condominiumsList>>,
@@ -143,12 +149,12 @@ export function useCondominiumsList<TData = Awaited<ReturnType<typeof condominiu
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCondominiumsList<TData = Awaited<ReturnType<typeof condominiumsList>>, TError = unknown>(
+export function useCondominiumsList<TData = Awaited<ReturnType<typeof condominiumsList>>, TError = ErrorResponse>(
  params?: CondominiumsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsList>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCondominiumsList<TData = Awaited<ReturnType<typeof condominiumsList>>, TError = unknown>(
+export function useCondominiumsList<TData = Awaited<ReturnType<typeof condominiumsList>>, TError = ErrorResponse>(
  params?: CondominiumsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsList>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -165,6 +171,11 @@ export function useCondominiumsList<TData = Awaited<ReturnType<typeof condominiu
 
 
 
+/**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
 export const condominiumsCreate = (
     condominium: NonReadonly<Condominium>,
  signal?: AbortSignal
@@ -184,7 +195,7 @@ export const condominiumsCreate = (
 
 export const getCondominiumsCreateMutationKey = () => ['condominiumsCreate'] as const;
 
-export const getCondominiumsCreateMutationOptions = <TError = unknown,
+export const getCondominiumsCreateMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof condominiumsCreate>>, TError,CondominiumsCreateMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof condominiumsCreate>>, TError,CondominiumsCreateMutationVariables, TContext> => {
 
@@ -213,10 +224,10 @@ const {mutation: mutationOptions} = options ?
 
     export type CondominiumsCreateMutationResult = NonNullable<Awaited<ReturnType<typeof condominiumsCreate>>>
     export type CondominiumsCreateMutationBody = NonReadonly<Condominium>
-    export type CondominiumsCreateMutationError = unknown
+    export type CondominiumsCreateMutationError = ErrorResponse
     export type CondominiumsCreateMutationVariables = {data: NonReadonly<Condominium>}
 
-    export const useCondominiumsCreate = <TError = unknown,
+    export const useCondominiumsCreate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof condominiumsCreate>>, TError,CondominiumsCreateMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof condominiumsCreate>>,
@@ -226,7 +237,12 @@ const {mutation: mutationOptions} = options ?
       > => {
       return useMutation(getCondominiumsCreateMutationOptions(options), queryClient);
     }
-    export const condominiumsRetrieve = (
+    /**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
+export const condominiumsRetrieve = (
     id: string,
  signal?: AbortSignal
 ) => {
@@ -248,7 +264,7 @@ export const getCondominiumsRetrieveQueryKey = (id: string,) => {
     }
 
 
-export const getCondominiumsRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof condominiumsRetrieve>>, TError = unknown>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsRetrieve>>, TError, TData>>, }
+export const getCondominiumsRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof condominiumsRetrieve>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsRetrieve>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -267,10 +283,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type CondominiumsRetrieveQueryResult = NonNullable<Awaited<ReturnType<typeof condominiumsRetrieve>>>
-export type CondominiumsRetrieveQueryError = unknown
+export type CondominiumsRetrieveQueryError = ErrorResponse
 
 
-export function useCondominiumsRetrieve<TData = Awaited<ReturnType<typeof condominiumsRetrieve>>, TError = unknown>(
+export function useCondominiumsRetrieve<TData = Awaited<ReturnType<typeof condominiumsRetrieve>>, TError = ErrorResponse>(
  id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsRetrieve>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof condominiumsRetrieve>>,
@@ -280,7 +296,7 @@ export function useCondominiumsRetrieve<TData = Awaited<ReturnType<typeof condom
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCondominiumsRetrieve<TData = Awaited<ReturnType<typeof condominiumsRetrieve>>, TError = unknown>(
+export function useCondominiumsRetrieve<TData = Awaited<ReturnType<typeof condominiumsRetrieve>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsRetrieve>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof condominiumsRetrieve>>,
@@ -290,12 +306,12 @@ export function useCondominiumsRetrieve<TData = Awaited<ReturnType<typeof condom
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCondominiumsRetrieve<TData = Awaited<ReturnType<typeof condominiumsRetrieve>>, TError = unknown>(
+export function useCondominiumsRetrieve<TData = Awaited<ReturnType<typeof condominiumsRetrieve>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsRetrieve>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCondominiumsRetrieve<TData = Awaited<ReturnType<typeof condominiumsRetrieve>>, TError = unknown>(
+export function useCondominiumsRetrieve<TData = Awaited<ReturnType<typeof condominiumsRetrieve>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsRetrieve>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -312,6 +328,11 @@ export function useCondominiumsRetrieve<TData = Awaited<ReturnType<typeof condom
 
 
 
+/**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
 export const condominiumsUpdate = (
     id: string,
     condominium: NonReadonly<Condominium>,
@@ -332,7 +353,7 @@ export const condominiumsUpdate = (
 
 export const getCondominiumsUpdateMutationKey = () => ['condominiumsUpdate'] as const;
 
-export const getCondominiumsUpdateMutationOptions = <TError = unknown,
+export const getCondominiumsUpdateMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof condominiumsUpdate>>, TError,CondominiumsUpdateMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof condominiumsUpdate>>, TError,CondominiumsUpdateMutationVariables, TContext> => {
 
@@ -361,10 +382,10 @@ const {mutation: mutationOptions} = options ?
 
     export type CondominiumsUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof condominiumsUpdate>>>
     export type CondominiumsUpdateMutationBody = NonReadonly<Condominium>
-    export type CondominiumsUpdateMutationError = unknown
+    export type CondominiumsUpdateMutationError = ErrorResponse
     export type CondominiumsUpdateMutationVariables = {id: string;data: NonReadonly<Condominium>}
 
-    export const useCondominiumsUpdate = <TError = unknown,
+    export const useCondominiumsUpdate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof condominiumsUpdate>>, TError,CondominiumsUpdateMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof condominiumsUpdate>>,
@@ -374,7 +395,12 @@ const {mutation: mutationOptions} = options ?
       > => {
       return useMutation(getCondominiumsUpdateMutationOptions(options), queryClient);
     }
-    export const condominiumsPartialUpdate = (
+    /**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
+export const condominiumsPartialUpdate = (
     id: string,
     patchedCondominium?: NonReadonly<PatchedCondominium>,
  signal?: AbortSignal
@@ -394,7 +420,7 @@ const {mutation: mutationOptions} = options ?
 
 export const getCondominiumsPartialUpdateMutationKey = () => ['condominiumsPartialUpdate'] as const;
 
-export const getCondominiumsPartialUpdateMutationOptions = <TError = unknown,
+export const getCondominiumsPartialUpdateMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof condominiumsPartialUpdate>>, TError,CondominiumsPartialUpdateMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof condominiumsPartialUpdate>>, TError,CondominiumsPartialUpdateMutationVariables, TContext> => {
 
@@ -423,10 +449,10 @@ const {mutation: mutationOptions} = options ?
 
     export type CondominiumsPartialUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof condominiumsPartialUpdate>>>
     export type CondominiumsPartialUpdateMutationBody = NonReadonly<PatchedCondominium> | undefined
-    export type CondominiumsPartialUpdateMutationError = unknown
+    export type CondominiumsPartialUpdateMutationError = ErrorResponse
     export type CondominiumsPartialUpdateMutationVariables = {id: string;data?: NonReadonly<PatchedCondominium>}
 
-    export const useCondominiumsPartialUpdate = <TError = unknown,
+    export const useCondominiumsPartialUpdate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof condominiumsPartialUpdate>>, TError,CondominiumsPartialUpdateMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof condominiumsPartialUpdate>>,
@@ -436,7 +462,12 @@ const {mutation: mutationOptions} = options ?
       > => {
       return useMutation(getCondominiumsPartialUpdateMutationOptions(options), queryClient);
     }
-    export const condominiumsDestroy = (
+    /**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
+export const condominiumsDestroy = (
     id: string,
  signal?: AbortSignal
 ) => {
@@ -453,7 +484,7 @@ const {mutation: mutationOptions} = options ?
 
 export const getCondominiumsDestroyMutationKey = () => ['condominiumsDestroy'] as const;
 
-export const getCondominiumsDestroyMutationOptions = <TError = unknown,
+export const getCondominiumsDestroyMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof condominiumsDestroy>>, TError,CondominiumsDestroyMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof condominiumsDestroy>>, TError,CondominiumsDestroyMutationVariables, TContext> => {
 
@@ -482,10 +513,10 @@ const {mutation: mutationOptions} = options ?
 
     export type CondominiumsDestroyMutationResult = NonNullable<Awaited<ReturnType<typeof condominiumsDestroy>>>
 
-    export type CondominiumsDestroyMutationError = unknown
+    export type CondominiumsDestroyMutationError = ErrorResponse
     export type CondominiumsDestroyMutationVariables = {id: string}
 
-    export const useCondominiumsDestroy = <TError = unknown,
+    export const useCondominiumsDestroy = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof condominiumsDestroy>>, TError,CondominiumsDestroyMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof condominiumsDestroy>>,

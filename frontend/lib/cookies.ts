@@ -1,3 +1,5 @@
+// Cookies de preferência (barra lateral, aparência). Tokens NUNCA passam por aqui: ficam em
+// cookies HttpOnly, gravados só pelo servidor (`lib/auth-cookies.ts`).
 export function setCookie(name: string, value: string, days: number) {
   const expires = new Date(Date.now() + days * 86400000).toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; samesite=lax`;

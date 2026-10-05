@@ -4,6 +4,7 @@ from django.db import transaction
 from rest_framework import serializers
 from typing_extensions import final
 
+from apps.core.scoping import request_company, request_company_or_none
 from apps.core.serializers import ModelRulesMixin, build_candidate, run_model_rules
 
 from ..models import PeopleIndividual, PeopleLegal, Person
@@ -21,6 +22,7 @@ class PersonSerializer(ModelRulesMixin, serializers.ModelSerializer[Person]):
         model = Person
         fields = (
             "id",
+            "company",
             "name",
             "home_phone",
             "business_phone",
@@ -32,7 +34,7 @@ class PersonSerializer(ModelRulesMixin, serializers.ModelSerializer[Person]):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("created_at", "updated_at")
+        read_only_fields = ("company", "created_at", "updated_at")
 
     @override
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
@@ -58,7 +60,10 @@ class PersonSerializer(ModelRulesMixin, serializers.ModelSerializer[Person]):
         existing_document = (
             document_model.objects.filter(person=self.instance).first() if self.instance else None
         )
-        candidate = build_candidate(document_model, document_data, existing_document)
+        company = self.instance.company if self.instance else request_company_or_none(self)
+        candidate = build_candidate(
+            document_model, {**document_data, "company": company}, existing_document
+        )
         try:
             run_model_rules(candidate, excluded_fields=["person"])
         except serializers.ValidationError as error:
@@ -70,13 +75,15 @@ class PersonSerializer(ModelRulesMixin, serializers.ModelSerializer[Person]):
         individual_data = validated_data.pop("people_individual", None)
         legal_data = validated_data.pop("people_legal", None)
 
-        person = Person.objects.create(**validated_data)
+        person = Person.objects.create(company=request_company(self), **validated_data)
 
         if individual_data:
-            _ = PeopleIndividual.objects.create(person=person, **individual_data)
+            _ = PeopleIndividual.objects.create(
+                person=person, company=person.company, **individual_data
+            )
 
         if legal_data:
-            _ = PeopleLegal.objects.create(person=person, **legal_data)
+            _ = PeopleLegal.objects.create(person=person, company=person.company, **legal_data)
 
         return person
 
@@ -94,11 +101,11 @@ class PersonSerializer(ModelRulesMixin, serializers.ModelSerializer[Person]):
 
         if individual_data:
             _ = PeopleIndividual.objects.update_or_create(
-                person=instance, defaults=individual_data
+                person=instance, defaults={**individual_data, "company": instance.company}
             )
         if legal_data:
             _ = PeopleLegal.objects.update_or_create(
-                person=instance, defaults=legal_data
+                person=instance, defaults={**legal_data, "company": instance.company}
             )
 
         return instance

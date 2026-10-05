@@ -14,7 +14,8 @@ react-hook-form + Zod. File layout: structure/component-patterns.md.
 3. `xxxToPayload(values, isEdit)`: form → API body, including nested objects (`address`, `administration_contract`,
    `people_individual`...). Create: omit empty fields. Edit (PATCH): cleared field → `null` (or `""` for non-null text).
 4. `use-xxx-submit.ts`: `useXxxCreate`/`useXxxPartialUpdate`, invalidate caches, `toast`, navigate.
-5. `applyServerErrors(error, setError)` (`lib/form-errors.ts`) puts DRF errors (nested too) on fields; returns the toast message.
+5. `applyServerErrors(error, setError)` (`lib/form-errors.ts`) puts DRF errors (nested too) on fields; a non-field error also goes to `root.server`. Returns the toast message.
+6. Errors show in three places: under each field (icon + red message), in `FormErrorSummary` (rendered by `FormActions`, above the sticky bar: the general server error and one clickable line per invalid field, after a save attempt), and in a toast.
 
 ## react-hook-form
 ```tsx

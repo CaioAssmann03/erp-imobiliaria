@@ -5,6 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { CondominiumsListPending } from './condominiumsListPending';
 import type { CondominiumsListType } from './condominiumsListType';
 
 export type CondominiumsListParams = {
@@ -20,6 +21,13 @@ limit?: number;
  * Um número de página dentro do conjunto de resultados paginado.
  */
 page?: number;
+/**
+ * * `without_cost_centers` - Without cost centers
+ * * `inconsistent_apportionment` - Apportionment not 100%
+ * * `overdue_adjustment` - Overdue adjustment
+ * * `upcoming_adjustment` - Adjustment in 30 days
+ */
+pending?: CondominiumsListPending;
 /**
  * Termo de busca (nome, documento…).
  */

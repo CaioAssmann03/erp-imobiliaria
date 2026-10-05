@@ -6,6 +6,13 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * Serializer mixin: input is validated by the model's rules, never by rules written here.
+ *
+ * Put it **before** `ModelSerializer` in the bases. Relations that are absent from the input
+ * (for example the parent FK of a nested serializer) are excluded from validation.
+ * Relations are limited to the user's company (spec 004).
+ */
 export interface Block {
   readonly id: string;
   condominium: string;

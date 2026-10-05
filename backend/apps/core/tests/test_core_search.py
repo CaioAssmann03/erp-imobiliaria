@@ -3,6 +3,7 @@ import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+from apps.core.testing import seeded_company
 from apps.condominiums.models import Address, Condominium, Unit
 from apps.core.models import Company
 from apps.persons.models import PeopleIndividual, Person
@@ -17,14 +18,14 @@ CNPJ = "11222333000181"
 
 @pytest.fixture
 def data() -> None:
-    company = Company.objects.create(legal_name="Adm", cnpj="00000000000191")
+    company = seeded_company()
     address = Address.objects.create(city="Curitiba", state="PR")
     condominium = Condominium.objects.create(
         company=company, address=address, name="Residencial Sol", cnpj=CNPJ
     )
     _ = Unit.objects.create(condominium=condominium, name="101")
-    person = Person.objects.create(name="Maria Silva")
-    _ = PeopleIndividual.objects.create(person=person, cpf=CPF)
+    person = Person.objects.create(company=seeded_company(), name="Maria Silva")
+    _ = PeopleIndividual.objects.create(person=person, company=person.company, cpf=CPF)
 
 
 def search(client: APIClient, term: str) -> JsonObject:
@@ -65,7 +66,7 @@ def test_finds_unit_by_name(api_client: APIClient, data: None) -> None:
 
 
 def test_condominium_without_address(api_client: APIClient) -> None:
-    company = Company.objects.create(legal_name="Adm", cnpj="00000000000191")
+    company = seeded_company()
     _ = Condominium.objects.create(company=company, name="Sem Endereço", cnpj=CNPJ)
 
     search_results = search(api_client, "sem")

@@ -1,14 +1,19 @@
 ---
 summary: Spec of the change that moved every business rule into the models (validators, clean(), constraints) and made serializers run them via ModelRulesMixin.
 read-when: you wonder how business rules are enforced or how the model-rules mixin was designed
-skip-if: you need the day-to-day pattern → practices.md; you need the process → features/README.md
+skip-if: you need the day-to-day pattern → conventions/practices.md; you need the process → features/README.md
 ---
 # 002 — Business rules only in models
 
-**Status:** done · **Apps:** core, condominiums, persons, financeiro · **Frontend impact:** none
+**Status:** done · **Level:** full · **Roadmap:** none (retro-spec) · **Apps:** core, condominiums, persons, finance · **Frontend impact:** none
 
 ## Open questions
 (none)
+
+## Decisions
+| Date | Decision | Decided by |
+|---|---|---|
+| - | Retro-spec: decisions are described in *Approach* | - |
 
 ## R — Requirements
 Business rules were split between constraints (database) and hand-written `validate` methods in serializers (duplicated logic, two places to change). Rule: **every business rule is
@@ -26,7 +31,7 @@ written in the model**; serializers, views and services only call it.
 | `Unit` | validators `validate_ideal_fraction`, `validate_non_negative`; `clean()` block belongs to condominium; `UnitQuerySet.inconsistent_apportionment_condominium_ids()` |
 | `UnitPerson` | validator `validate_percentage`; `clean()` (owner needs percentage, tenant none, dates); `UnitPersonQuerySet.current(reference_date)`, `is_current(reference_date)` |
 | `EntryTemplate` | validator `validate_percentage` |
-No schema change (migrations only record the new validators: `condominiums.0002`, `financeiro.0002`).
+No schema change (migrations only record the new validators: `condominiums.0002`, `finance.0002`).
 
 ## A — Approach
 - Field-level rules → validators; multi-field/multi-record rules → `clean()` raising `ValidationError({field: msg})`; constraints stay as the database guard.
@@ -36,7 +41,7 @@ No schema change (migrations only record the new validators: `condominiums.0002`
 - Rejected: keeping duplicated rules in serializers (drift); validating only in `save()` (DRF would need to catch it anyway).
 
 ## S — Structure
-`apps/core/serializers/model_rules.py`, `apps/core/validators/percentage.py`, `apps/core/dates.py`, `apps/condominiums/validators.py`; model files in `condominiums` and `financeiro`;
+`apps/core/serializers/model_rules.py`, `apps/core/validators/percentage.py`, `apps/core/dates.py`, `apps/condominiums/validators.py`; model files in `condominiums` and `finance`;
 all `*_serializers.py` of `condominiums`, `persons/serializers/person_serializers.py`, `core/serializers/company_serializers.py`; `core/views/dashboard_views.py` (calls model methods).
 
 ## O — Operations
@@ -44,7 +49,7 @@ all `*_serializers.py` of `condominiums`, `persons/serializers/person_serializer
 5. Migrations (validators). 6. Tests rewritten per layer. 7. Docs.
 
 ## N — Norms
-New norm in `practices.md` §2–3 and `AGENTS.md`: business rules only in models.
+New norm in `conventions/practices.md` §2–3 and `AGENTS.md`: business rules only in models.
 
 ## S — Safeguards
 Extra queries per write (uniqueness checks); acceptable. Writers that bypass serializers must call `full_clean()` (known-gaps.md #21). Nested objects validate as complete records (#22).
@@ -54,4 +59,4 @@ Model rule tests without database (`clean()`, validators); serializer tests prov
 API payload tests unchanged and passing; full suite on PostgreSQL (179 tests).
 
 ## Docs updated
-`AGENTS.md`, `practices.md`, `api-conventions.md`, `data-model.md`, `domain-rules.md`, `decisions.md` (#6), `extending.md`, `testing.md`, `apps/core|condominiums|persons.md`, `known-gaps.md`.
+`AGENTS.md`, `conventions/practices.md`, `architecture/api.md`, `architecture/data.md`, `architecture/overview.md` (decisions), `architecture/structure.md`, `architecture/quality.md`, `apps/core|condominiums|persons.md`, `known-gaps.md`.

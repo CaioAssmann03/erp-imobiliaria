@@ -5,19 +5,25 @@ skip-if: you need the blank template → features/_template.md; you need the per
 ---
 # 001 — Filter persons by kind
 
-**Status:** done · **Apps:** persons · **Frontend impact:** client regeneration
+**Status:** done · **Level:** full · **Roadmap:** none (retro-spec) · **Apps:** persons · **Frontend impact:** client regeneration
 
 > Retro-spec of a finished feature, kept as a **worked example** of the template.
 
 ## Open questions
 (none)
 
+## Decisions
+| Date | Decision | Decided by |
+|---|---|---|
+| - | Retro-spec: decisions are described in *Approach* | - |
+
 ## R — Requirements
 The persons list screen filters by "Física"/"Jurídica". The old API had a `tipo_pessoa` column; the new model stores the kind as the presence of a related
 record, so the filter must be derived.
-- [x] `GET /api/persons/?type=individual` returns only persons with a `PeopleIndividual`
-- [x] `?type=legal` returns only persons with a `PeopleLegal`
-- [x] any other value → 400; no `type` → all persons
+- [x] R1 — `GET /api/persons/?type=individual` returns only persons with a `PeopleIndividual`
+- [x] R2 — `?type=legal` returns only persons with a `PeopleLegal`
+- [x] R3 — any other value → 400
+- [x] R4 — no `type` → all persons
 
 ## E — Entities
 No schema change. Uses reverse one-to-one accessors `people_individual` and `people_legal`.
@@ -41,13 +47,17 @@ duplicated state that could disagree with the related records.
 1. Add `PersonFilter`. 2. Point the view at it. 3. Tests. 4. Regenerate the frontend client; use `type` in the persons list filter.
 
 ## N — Norms
-`practices.md` §4 (derived filters live in `filters.py`); English values for query params (`api-conventions.md`).
+`conventions/practices.md` §4 (derived filters live in `filters.py`); English values for query params (`architecture/api.md`).
 
 ## S — Safeguards
 Read-only; no new personal data; `select_related` already covers both relations; invalid values rejected by the `ChoiceFilter` (400).
 
 ## Test plan
-- API: `type=individual` and `type=legal` return the right persons (a person with no document appears in neither); invalid `type` → 400.
+| Criterion | Test |
+|---|---|
+| R1, R2 | `apps/persons/tests/test_api_read.py::test_filter_by_type` (a person with no document appears in neither list) |
+| R3 | `apps/persons/tests/test_api_read.py::test_filter_by_invalid_type_is_rejected` |
+| R4 | gap: no dedicated test for the unfiltered list (the default list is only exercised indirectly) |
 
 ## Docs updated
 `docs/apps/persons.md` (filters section).

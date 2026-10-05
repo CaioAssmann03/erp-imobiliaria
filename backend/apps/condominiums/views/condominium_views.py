@@ -4,12 +4,15 @@ from typing_extensions import final
 
 from apps.core.filters import QuerySearchFilter
 
+from apps.core.scoping import CompanyScopedViewSetMixin
+
+from ..filters import CondominiumFilter
 from ..models import Condominium
 from ..serializers import CondominiumSerializer
 
 
 @final
-class CondominiumViewSet(viewsets.ModelViewSet[Condominium]):
+class CondominiumViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Condominium]):
     queryset = Condominium.objects.select_related(
         "company",
         "advisor",
@@ -20,4 +23,4 @@ class CondominiumViewSet(viewsets.ModelViewSet[Condominium]):
     serializer_class = CondominiumSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)
     search_fields = ("name", "cnpj", "address__city")
-    filterset_fields = ("company", "advisor", "active", "type", "address__state")
+    filterset_class = CondominiumFilter

@@ -35,20 +35,24 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "corsheaders",
     "django_filters",
+    "auditlog",
     "apps.accounts",
     "apps.core",
     "apps.persons",
     "apps.condominiums",
-    "apps.financeiro",
-    "apps.cobranca",
-    "apps.locacoes",
-    "apps.vendas",
+    "apps.finance",
+    "apps.billing",
+    "apps.rentals",
+    "apps.sales",
 ]
 
 MIDDLEWARE = [
+    # First: the host's health probe is answered before the HTTPS redirect and the host check.
+    "apps.core.middleware.HealthCheckMiddleware",
     "django.middleware.security.SecurityMiddleware",
     # Serve os arquivos estáticos (admin) em produção, sem nginx/CDN.
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -57,6 +61,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "auditlog.middleware.AuditlogMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -87,7 +92,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 if not os.environ.get("POSTGRES_DB"):
     raise ImproperlyConfigured(
         "POSTGRES_DB is not set. The project runs on PostgreSQL only; "
-        "see docs/architecture/operations/local-dev.md."
+        "see docs/architecture/operations.md."
     )
 
 DATABASES = {
@@ -138,30 +143,65 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "EXCEPTION_HANDLER": "apps.core.exception_handler.api_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "apps.accounts.authentication.AuditedJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_PAGINATION_CLASS": "apps.core.pagination.StandardPagination",
     "PAGE_SIZE": 20,
+    "DEFAULT_THROTTLE_RATES": {
+        "auth_login": "5/min",
+        "auth_refresh": "30/min",
+        "auth_logout": "30/min",
+    },
 }
+
+# Change audit trail (spec 005): the client address is neither trusted (the header can be forged)
+# nor needed, and it is personal data; the actor and the changed fields are what matters.
+AUDITLOG_DISABLE_REMOTE_ADDR = True
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "ERP Imobiliária API",
     "DESCRIPTION": "API do sistema de administração de condomínios, locações, vendas e financeiro.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.hooks.postprocess_schema_enums",
+        "apps.core.schema.add_error_contract",
+    ],
 }
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
 
 # Atrás de proxy HTTPS (Render): confia no cabeçalho do proxy para saber que a requisição
 # é segura. Sem isso o login do admin falha por CSRF (origem https x requisição http).
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# Plain HTTP is redirected to HTTPS outside development; HSTS starts short (an hour, no
+# subdomains, no preload) so a wrong domain or certificate cannot trap browsers. Raise it to a year
+# once the final domain exists. The health probe is answered before the redirect (HealthCheckMiddleware).
+def _env_bool(name: str, default: bool) -> bool:
+    value = os.environ.get(name)
+    return default if value is None else value.strip().lower() in ("1", "true", "yes")
+
+
+SECURE_SSL_REDIRECT = _env_bool("SECURE_SSL_REDIRECT", default=not DEBUG)
+SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "0" if DEBUG else "3600"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
+
+# Where the Django Admin lives. The default is the well-known path; production sets a non-obvious one
+# (obscurity only: strong passwords and the login rate limit are the real protection).
+_admin_url = os.environ.get("ADMIN_URL", "admin/").strip()
+if not _admin_url.strip("/") or "://" in _admin_url or ".." in _admin_url:
+    raise ImproperlyConfigured("ADMIN_URL must be a relative path such as 'admin/'.")
+ADMIN_URL = _admin_url.strip("/") + "/"
+
 # Cookies only over HTTPS outside development.
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
@@ -176,6 +216,20 @@ CSRF_TRUSTED_ORIGINS = [
 CORS_ALLOWED_ORIGINS = os.environ.get(
     "CORS_ALLOWED_ORIGINS", "http://localhost:3000"
 ).split(",")
+
+# Shared cache (Redis): the login rate limit must hold across every gunicorn worker.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": os.environ.get("REDIS_URL", "redis://redis:6379/0"),
+    }
+}
+
+# Secret shared with the Next server (spec 007): only a request that carries it may tell Django the
+# real client address (`X-Forwarded-For`), which the login rate limit uses.
+INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY", "")
+if not INTERNAL_API_KEY and not DEBUG:
+    raise ImproperlyConfigured("INTERNAL_API_KEY must be set when DEBUG is false.")
 
 # Celery
 CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")

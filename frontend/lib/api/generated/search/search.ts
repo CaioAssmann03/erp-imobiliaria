@@ -21,6 +21,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ErrorResponse,
   Search,
   SearchRetrieveParams
 } from '../models';
@@ -73,7 +74,7 @@ export const getSearchRetrieveQueryKey = (params?: SearchRetrieveParams,) => {
     }
 
 
-export const getSearchRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof searchRetrieve>>, TError = unknown>(params: SearchRetrieveParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchRetrieve>>, TError, TData>>, }
+export const getSearchRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof searchRetrieve>>, TError = ErrorResponse>(params: SearchRetrieveParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchRetrieve>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -92,10 +93,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type SearchRetrieveQueryResult = NonNullable<Awaited<ReturnType<typeof searchRetrieve>>>
-export type SearchRetrieveQueryError = unknown
+export type SearchRetrieveQueryError = ErrorResponse
 
 
-export function useSearchRetrieve<TData = Awaited<ReturnType<typeof searchRetrieve>>, TError = unknown>(
+export function useSearchRetrieve<TData = Awaited<ReturnType<typeof searchRetrieve>>, TError = ErrorResponse>(
  params: SearchRetrieveParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchRetrieve>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof searchRetrieve>>,
@@ -105,7 +106,7 @@ export function useSearchRetrieve<TData = Awaited<ReturnType<typeof searchRetrie
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSearchRetrieve<TData = Awaited<ReturnType<typeof searchRetrieve>>, TError = unknown>(
+export function useSearchRetrieve<TData = Awaited<ReturnType<typeof searchRetrieve>>, TError = ErrorResponse>(
  params: SearchRetrieveParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchRetrieve>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof searchRetrieve>>,
@@ -115,12 +116,12 @@ export function useSearchRetrieve<TData = Awaited<ReturnType<typeof searchRetrie
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSearchRetrieve<TData = Awaited<ReturnType<typeof searchRetrieve>>, TError = unknown>(
+export function useSearchRetrieve<TData = Awaited<ReturnType<typeof searchRetrieve>>, TError = ErrorResponse>(
  params: SearchRetrieveParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchRetrieve>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useSearchRetrieve<TData = Awaited<ReturnType<typeof searchRetrieve>>, TError = unknown>(
+export function useSearchRetrieve<TData = Awaited<ReturnType<typeof searchRetrieve>>, TError = ErrorResponse>(
  params: SearchRetrieveParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchRetrieve>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

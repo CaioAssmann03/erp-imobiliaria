@@ -12,8 +12,8 @@ pytestmark = pytest.mark.django_db
 CNPJ = "11222333000181"
 
 
-def test_create_company(api_client: APIClient) -> None:
-    response = api_client.post(
+def test_create_company(superuser_client: APIClient) -> None:
+    response = superuser_client.post(
         reverse("company-list"), {"legal_name": "ACME", "cnpj": CNPJ}, format="json"
     )
 
@@ -21,8 +21,8 @@ def test_create_company(api_client: APIClient) -> None:
     assert Company.objects.get(cnpj=CNPJ).legal_name == "ACME"
 
 
-def test_invalid_cnpj_is_rejected(api_client: APIClient) -> None:
-    response = api_client.post(
+def test_invalid_cnpj_is_rejected(superuser_client: APIClient) -> None:
+    response = superuser_client.post(
         reverse("company-list"),
         {"legal_name": "ACME", "cnpj": "11222333000180"},
         format="json",
@@ -31,21 +31,21 @@ def test_invalid_cnpj_is_rejected(api_client: APIClient) -> None:
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
-def test_cnpj_is_unique(api_client: APIClient) -> None:
+def test_cnpj_is_unique(superuser_client: APIClient) -> None:
     _ = Company.objects.create(legal_name="A", cnpj=CNPJ)
 
-    response = api_client.post(
+    response = superuser_client.post(
         reverse("company-list"), {"legal_name": "B", "cnpj": CNPJ}, format="json"
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
-def test_search_by_trade_name(api_client: APIClient) -> None:
+def test_search_by_trade_name(superuser_client: APIClient) -> None:
     _ = Company.objects.create(legal_name="Alpha LTDA", trade_name="Alpha", cnpj=CNPJ)
     _ = Company.objects.create(legal_name="Beta LTDA", cnpj="45723174000110")
 
-    response = api_client.get(reverse("company-list"), {"query": "alpha"})
+    response = superuser_client.get(reverse("company-list"), {"query": "alpha"})
 
     assert [company["legal_name"] for company in results(response)] == ["Alpha LTDA"]
 

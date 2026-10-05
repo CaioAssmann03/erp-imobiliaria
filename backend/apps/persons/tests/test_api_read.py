@@ -4,6 +4,7 @@ import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from apps.core.testing import seeded_company
 from ..models import Person
 from .base import CNPJ_A, CPF_A, body, make_individual, make_legal, results
 
@@ -49,8 +50,8 @@ def test_search_by_cpf_and_cnpj(api_client: APIClient, list_url: str) -> None:
 
 
 def test_filter_by_active(api_client: APIClient, list_url: str) -> None:
-    _ = Person.objects.create(name="Ativa", active=True)
-    _ = Person.objects.create(name="Inativa", active=False)
+    _ = Person.objects.create(company=seeded_company(), name="Ativa", active=True)
+    _ = Person.objects.create(company=seeded_company(), name="Inativa", active=False)
 
     response = api_client.get(list_url, {"active": "false"})
 
@@ -69,7 +70,7 @@ def test_delete(api_client: APIClient, detail_url: Callable[[Person], str]) -> N
 def test_filter_by_type(api_client: APIClient, list_url: str) -> None:
     _ = make_individual(name="Maria", cpf=CPF_A)
     _ = make_legal(name="Empresa", cnpj=CNPJ_A)
-    _ = Person.objects.create(name="Sem documento")
+    _ = Person.objects.create(company=seeded_company(), name="Sem documento")
 
     individuals = api_client.get(list_url, {"type": "individual"})
     legals = api_client.get(list_url, {"type": "legal"})

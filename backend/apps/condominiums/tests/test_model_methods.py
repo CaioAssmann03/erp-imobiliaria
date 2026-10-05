@@ -5,6 +5,7 @@ from decimal import Decimal
 
 import pytest
 
+from apps.core.testing import seeded_company
 from apps.persons.models import Person
 
 from ..models import AdministrationContract, Condominium, Unit, UnitPerson
@@ -44,7 +45,7 @@ class TestContractAdjustment:
 class TestCurrentLinks:
     def test_current_means_no_end_date_or_not_yet_ended(self, condominium: Condominium) -> None:
         unit = Unit.objects.create(condominium=condominium, name="101")
-        person = Person.objects.create(name="Maria")
+        person = Person.objects.create(company=seeded_company(), name="Maria")
         reference_date = date(2025, 6, 1)
         open_link = UnitPerson.objects.create(
             unit=unit, person=person, role="tenant", start_date=date(2024, 1, 1)

@@ -10,8 +10,6 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuthLoginCreate } from "@/lib/api/generated";
-import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/lib/auth";
-import { setCookie } from "@/lib/cookies";
 import { safeNextPath } from "@/lib/safe-redirect";
 
 import { FieldLabel } from "./FieldLabel";
@@ -23,7 +21,7 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-/** Formulário de login: guarda os tokens em cookie e segue para `?next=` ou para o painel. */
+/** Formulário de login: o servidor guarda os tokens em cookie HttpOnly; segue para `?next=` ou para o painel. */
 export function LoginForm() {
   const router = useRouter();
   const loginMutation = useAuthLoginCreate();
@@ -39,9 +37,8 @@ export function LoginForm() {
     loginMutation.mutate(
       { data: values },
       {
-        onSuccess: (tokens) => {
-          setCookie(ACCESS_COOKIE, tokens.access, 1);
-          setCookie(REFRESH_COOKIE, tokens.refresh, 7);
+        onSuccess: () => {
+          // Os tokens já foram para cookies HttpOnly (o handler do Next); o corpo não traz token.
           const next = new URLSearchParams(window.location.search).get("next");
           router.push(safeNextPath(next));
           router.refresh();

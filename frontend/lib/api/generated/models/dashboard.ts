@@ -5,6 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { AccountsPayable } from './accountsPayable';
 import type { AdjustmentByMonth } from './adjustmentByMonth';
 import type { FixedRevenue } from './fixedRevenue';
 import type { Lease } from './lease';
@@ -23,4 +24,5 @@ export interface Dashboard {
   fixed_revenue: FixedRevenue;
   leases: Lease[];
   pending: PendingItems;
+  accounts_payable: AccountsPayable;
 }

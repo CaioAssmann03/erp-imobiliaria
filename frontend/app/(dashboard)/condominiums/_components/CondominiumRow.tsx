@@ -18,6 +18,8 @@ export function CondominiumRow({ condominium, onDelete }: CondominiumRowProps) {
     ? `${condominium.address.city}/${condominium.address.state}`
     : null;
 
+  const details = [condominium.cnpj ? maskCnpj(condominium.cnpj) : null, city].filter(Boolean).join(" · ");
+
   return (
     <TableRow>
       <TableCell>
@@ -28,17 +30,17 @@ export function CondominiumRow({ condominium, onDelete }: CondominiumRowProps) {
         >
           {condominium.name}
         </RowLink>
+        {details && <div className="hidden text-caption text-ink-soft tabular-nums md:block">{details}</div>}
       </TableCell>
-      <TableCell className="hidden md:table-cell text-ink-soft tabular-nums">
-        {condominium.cnpj ? maskCnpj(condominium.cnpj) : "—"}
-      </TableCell>
-      <TableCell className="hidden md:table-cell text-ink-soft">{city ?? "—"}</TableCell>
       <TableCell className="hidden md:table-cell">
         <StatusBadge active={condominium.active} />
       </TableCell>
       <TableCell>
         <div className="relative z-10 flex items-center justify-end gap-1">
-          <LinkButton variant="secondary" size="sm" href={`/condominiums/${condominium.id}/units`}>
+          <LinkButton variant="ghost" size="sm" className="text-ink-soft" href={`/condominiums/blocks?condominium=${condominium.id}`}>
+            Blocos
+          </LinkButton>
+          <LinkButton variant="ghost" size="sm" className="text-ink-soft" href={`/condominiums/units?condominium=${condominium.id}`}>
             Unidades
           </LinkButton>
           <RowActions>

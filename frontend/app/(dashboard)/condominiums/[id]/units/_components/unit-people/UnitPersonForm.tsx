@@ -59,7 +59,8 @@ export function UnitPersonForm({ unitId, onCreated }: UnitPersonFormProps) {
           role: values.role,
           start_date: values.start_date!,
           end_date: values.end_date ?? null,
-          ownership_percentage: values.role === "owner" ? values.ownership_percentage : null,
+          ownership_percentage:
+            values.role === "owner" ? values.ownership_percentage : null,
         } as UnitPerson,
       },
       {
@@ -70,13 +71,13 @@ export function UnitPersonForm({ unitId, onCreated }: UnitPersonFormProps) {
           onCreated();
         },
         onError: (error) => toast.error(applyServerErrors(error, setError)),
-      }
+      },
     );
   };
 
   return (
     <FormProvider {...methods}>
-      <div className="space-y-1 rounded-panel bg-surface-muted p-4">
+      <div className="space-y-3 rounded-panel border border-border p-4">
         <p className="mb-2 text-body font-medium">Adicionar vínculo</p>
 
         <FormField id="link-person" label="Pessoa" required error={personError}>
@@ -103,7 +104,9 @@ export function UnitPersonForm({ unitId, onCreated }: UnitPersonFormProps) {
           )}
         </FormField>
 
-        <FieldRow columns={role === "owner" ? 3 : 2}>
+        <FieldRow
+          template={role === "owner" ? "1.2fr 1fr 1fr 1fr" : "1.2fr 1fr 1fr"}
+        >
           <SelectField
             name="role"
             label="Papel"
@@ -122,20 +125,24 @@ export function UnitPersonForm({ unitId, onCreated }: UnitPersonFormProps) {
               placeholder="100,00"
             />
           )}
-          <TextField name="start_date" label="Início da vigência" type="date" required />
-        </FieldRow>
-        <FieldRow>
+          <TextField name="start_date" label="Início" type="date" required />
           <TextField
             name="end_date"
-            label="Fim da vigência"
+            label="Fim"
             type="date"
-            hint="Deixe em branco enquanto o vínculo estiver ativo."
+            hint="Vazio: vínculo ativo"
           />
         </FieldRow>
 
-        <Button type="button" disabled={createMutation.isPending} onClick={handleSubmit(onSubmit)}>
-          {createMutation.isPending ? "Adicionando…" : "Adicionar vínculo"}
-        </Button>
+        <div className="flex justify-end pt-3">
+          <Button
+            type="button"
+            disabled={createMutation.isPending}
+            onClick={handleSubmit(onSubmit)}
+          >
+            {createMutation.isPending ? "Adicionando…" : "Adicionar vínculo"}
+          </Button>
+        </div>
       </div>
     </FormProvider>
   );

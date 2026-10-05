@@ -19,6 +19,9 @@ class Address(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Path from the model to its company (spec 004: company scoping).
+    company_lookup = "condominium__company"
+
     class Meta:
         verbose_name = "Address"
         verbose_name_plural = "Addresses"

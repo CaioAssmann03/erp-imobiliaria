@@ -4,6 +4,7 @@ import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from apps.core.testing import seeded_company
 from ..models import PeopleIndividual, PeopleLegal, Person
 from .base import CNPJ_A, CNPJ_B, CPF_A, CPF_B, make_individual, make_legal
 
@@ -97,7 +98,7 @@ def test_patch_cnpj_of_another_person_is_rejected(
 def test_patch_adds_document_to_person_without_one(
     api_client: APIClient, detail_url: Callable[[Person], str]
 ) -> None:
-    person = Person.objects.create(name="Sem doc")
+    person = Person.objects.create(company=seeded_company(), name="Sem doc")
 
     response = api_client.patch(
         detail_url(person), {"people_individual": {"cpf": CPF_A}}, format="json"

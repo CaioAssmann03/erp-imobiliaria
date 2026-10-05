@@ -4,6 +4,8 @@ from django.db import models
 from django.db.models import Q
 from typing_extensions import final, override
 
+from apps.condominiums.error_codes import CondominiumsErrorCode as Code
+
 from apps.condominiums.models.condominium import Condominium
 from apps.condominiums.validators import validate_due_day
 from apps.core.validators import validate_percentage
@@ -34,6 +36,9 @@ class BillingRules(models.Model):
 
     credit_limit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
+    # Path from the model to its company (spec 004: company scoping).
+    company_lookup = "condominium__company"
+
     class Meta:
         verbose_name = "Billing Rules"
         verbose_name_plural = "Billing Rules"
@@ -41,13 +46,15 @@ class BillingRules(models.Model):
             models.CheckConstraint(
                 name="billing_due_day_1_28",
                 condition=Q(due_day__gte=1) & Q(due_day__lte=28),
-                violation_error_message="Due day must be between 1 and 28",
+                violation_error_message="Due day must be between 1 and 28.",
+                violation_error_code=Code.BILLING_RULES_DUE_DAY_OUT_OF_RANGE.value,
             ),
             models.CheckConstraint(
                 name="billing_discount_pct_0_100",
                 condition=Q(early_payment_discount_percentage__gte=0)
                 & Q(early_payment_discount_percentage__lte=100),
-                violation_error_message="Discount must be between 0 and 100",
+                violation_error_message="Discount must be between 0 and 100.",
+                violation_error_code=Code.BILLING_RULES_DISCOUNT_OUT_OF_RANGE.value,
             ),
         )
 

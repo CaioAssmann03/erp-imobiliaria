@@ -11,7 +11,8 @@ import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 export function useListParams<F extends string = never>({
   searchable = true,
   filterKeys = [] as readonly F[],
-}: { searchable?: boolean; filterKeys?: readonly F[] } = {}) {
+  initialFilters,
+}: { searchable?: boolean; filterKeys?: readonly F[]; initialFilters?: Partial<Record<F, string>> } = {}) {
   const [search, setSearchState] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimitState] = useState(DEFAULT_PAGE_SIZE);
@@ -19,7 +20,7 @@ export function useListParams<F extends string = never>({
 
   // Filtros por campo (valor "" = sem filtro). O chamador converte para os params da API.
   const emptyFilters = Object.fromEntries(filterKeys.map((key) => [key, ""])) as Record<F, string>;
-  const [filters, setFilters] = useState<Record<F, string>>(emptyFilters);
+  const [filters, setFilters] = useState<Record<F, string>>({ ...emptyFilters, ...initialFilters });
   const hasFilters = Object.values(filters).some(Boolean);
 
   const setFilter = (key: F, value: string) => {

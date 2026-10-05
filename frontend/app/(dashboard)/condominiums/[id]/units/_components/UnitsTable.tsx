@@ -11,31 +11,61 @@ import {
   getDashboardRetrieveQueryKey,
   getUnitsListQueryKey,
   useBlocksList,
+  useCondominiumsList,
   useUnitsDestroy,
   useUnitsList,
 } from "@/lib/api/generated";
+import type { UnitsListPending } from "@/lib/api/generated/models";
 import type { UNIT_TYPES } from "@/lib/schemas/unit";
 
 import { UnitRow } from "./UnitRow";
 import { UnitsFilters } from "./UnitsFilters";
 
 /** Client Component: lista de unidades (hidratada do servidor) com filtros e exclusão. */
-export function UnitsTable({ condominiumId }: { condominiumId: string }) {
+export function UnitsTable({
+  condominiumId,
+  initialCondominium,
+  initialBlock,
+  initialPending,
+}: {
+  condominiumId?: string;
+  /** Filtros já aplicados ao abrir (vêm de "Unidades" / "Ver unidades" nas outras listas). */
+  initialCondominium?: string;
+  initialBlock?: string;
+  initialPending?: string;
+}) {
   const queryClient = useQueryClient();
-  const { data: blocksData } = useBlocksList({ condominium: condominiumId, limit: 100 });
-  const blocks = blocksData?.results ?? [];
   const { page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } = useListParams({
     searchable: false,
-    filterKeys: ["status", "type", "block"],
+    filterKeys: ["status", "type", "block", "condominium", "pending"],
+    initialFilters: {
+      condominium: initialCondominium ?? "",
+      block: initialBlock ?? "",
+      pending: initialPending ?? "",
+    },
   });
+  // Visão geral (sem condomínio fixo): o condomínio vira filtro e aparece em cada linha.
+  const isOverview = !condominiumId;
+  const scopedCondominium = condominiumId ?? (filters.condominium || undefined);
+  const { data: blocksData } = useBlocksList({ condominium: scopedCondominium, limit: 100 });
+  const blocks = blocksData?.results ?? [];
+  const { data: condominiumsData } = useCondominiumsList({ limit: 100 }, { query: { enabled: isOverview } });
+  const condominiums = condominiumsData?.results ?? [];
+  const condominiumName = (id: string) => condominiums.find((condominium) => condominium.id === id)?.name ?? null;
+
+  const handleFilterChange = (key: "status" | "type" | "block" | "condominium" | "pending", value: string) => {
+    setFilter(key, value);
+    if (key === "condominium") setFilter("block", ""); // o bloco pertence ao condomínio
+  };
 
   const { data, isLoading, isPlaceholderData } = useUnitsList(
     {
-      condominium: condominiumId,
+      condominium: scopedCondominium,
       ...params,
       ...(filters.status ? { active: filters.status === "active" } : {}),
       ...(filters.type ? { type: filters.type as (typeof UNIT_TYPES)[number]["value"] } : {}),
       ...(filters.block ? { block: filters.block } : {}),
+      ...(filters.pending ? { pending: filters.pending as UnitsListPending } : {}),
     },
     { query: { placeholderData: keepPreviousData } }
   );
@@ -66,7 +96,13 @@ export function UnitsTable({ condominiumId }: { condominiumId: string }) {
   return (
     <>
       <Toolbar right={data ? `${data.count} no total` : undefined}>
-        <UnitsFilters blocks={blocks} filters={filters} onFilterChange={setFilter} onClear={clearFilters} />
+        <UnitsFilters
+          blocks={blocks}
+          condominiums={isOverview ? condominiums : undefined}
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onClear={clearFilters}
+        />
       </Toolbar>
 
       <ListState
@@ -81,6 +117,7 @@ export function UnitsTable({ condominiumId }: { condominiumId: string }) {
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead>Unidade</TableHead>
+                  {isOverview && <TableHead className="hidden md:table-cell">Condomínio</TableHead>}
                   <TableHead className="hidden md:table-cell">Bloco</TableHead>
                   <TableHead className="hidden md:table-cell">Tipo</TableHead>
                   <TableHead className="hidden md:table-cell">Proprietário(s) / Locatário(s)</TableHead>
@@ -93,7 +130,8 @@ export function UnitsTable({ condominiumId }: { condominiumId: string }) {
                   <UnitRow
                     key={unit.id}
                     unit={unit}
-                    condominiumId={condominiumId}
+                    condominiumId={unit.condominium}
+                    condominiumName={isOverview ? (condominiumName(unit.condominium) ?? "—") : null}
                     blockName={blockName(unit.block)}
                     onDelete={handleDelete}
                   />

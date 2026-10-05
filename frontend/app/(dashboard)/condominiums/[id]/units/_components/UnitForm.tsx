@@ -31,10 +31,12 @@ import { UnitPeopleSection } from "./unit-people/UnitPeopleSection";
 interface UnitFormProps {
   condominiumId: string;
   unitId?: string;
+  /** Para onde voltar ao cancelar ou salvar; padrão: unidades do condomínio. */
+  listUrl?: string;
 }
 
 /** Cadastro e edição de unidade. Na edição, também gerencia proprietários e locatários. */
-export function UnitForm({ condominiumId, unitId }: UnitFormProps) {
+export function UnitForm({ condominiumId, unitId, listUrl }: UnitFormProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEdit = unitId !== undefined;
@@ -49,7 +51,7 @@ export function UnitForm({ condominiumId, unitId }: UnitFormProps) {
     mode: "onTouched",
   });
   const { handleSubmit, reset, setError } = methods;
-  const { submit, isSubmitting } = useUnitSubmit(condominiumId, unitId, setError);
+  const { submit, isSubmitting } = useUnitSubmit(condominiumId, unitId, setError, listUrl);
 
   useEffect(() => {
     if (unit) reset(unitToForm(unit));
@@ -76,7 +78,7 @@ export function UnitForm({ condominiumId, unitId }: UnitFormProps) {
             <Button
               type="button"
               variant="secondary"
-              onClick={() => router.push(`/condominiums/${condominiumId}/units`)}
+              onClick={() => router.push(listUrl ?? `/condominiums/${condominiumId}/units`)}
             >
               Cancelar
             </Button>

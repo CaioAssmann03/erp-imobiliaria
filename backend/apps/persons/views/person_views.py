@@ -3,6 +3,7 @@ from rest_framework import viewsets
 from typing_extensions import final
 
 from apps.core.filters import QuerySearchFilter
+from apps.core.scoping import CompanyScopedViewSetMixin
 
 from ..filters import PersonFilter
 from ..models import Person
@@ -10,7 +11,7 @@ from ..serializers import PersonSerializer
 
 
 @final
-class PersonViewSet(viewsets.ModelViewSet[Person]):
+class PersonViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Person]):
     queryset = Person.objects.select_related("people_individual", "people_legal")
     serializer_class = PersonSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)

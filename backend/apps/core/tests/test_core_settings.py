@@ -36,3 +36,18 @@ def test_development_defaults_boot() -> None:
     completed_process = import_settings(POSTGRES_DB="db")
 
     assert completed_process.returncode == 0, completed_process.stderr
+
+
+def test_internal_api_key_is_required_in_production() -> None:
+    completed_process = import_settings(DEBUG="false", POSTGRES_DB="db", SECRET_KEY="x" * 40)
+
+    assert completed_process.returncode != 0
+    assert "INTERNAL_API_KEY must be set" in completed_process.stderr
+
+
+def test_internal_api_key_in_production_boots() -> None:
+    completed_process = import_settings(
+        DEBUG="false", POSTGRES_DB="db", SECRET_KEY="x" * 40, INTERNAL_API_KEY="k" * 40
+    )
+
+    assert completed_process.returncode == 0, completed_process.stderr

@@ -10,6 +10,6 @@ export interface UpcomingAdjustment {
   id: string;
   name: string;
   date: string;
-  index: string;
+  adjustment_index: string;
   overdue: boolean;
 }

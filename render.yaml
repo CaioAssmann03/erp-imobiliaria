@@ -50,7 +50,7 @@ services:
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     plan: free
-    healthCheckPath: /api/schema/
+    healthCheckPath: /api/health/
     # migrate + collectstatic + gunicorn rodam em backend/entrypoint.sh (CMD do Dockerfile).
     # (preDeployCommand não existe no plano free, por isso não é usado.)
     envVarGroups:

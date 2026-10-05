@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 
 import pytest
@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APIClient
 
+from apps.core.testing import seeded_company
 from apps.condominiums.models import (
     AdministrationContract,
     Condominium,
@@ -13,7 +14,8 @@ from apps.condominiums.models import (
     UnitPerson,
 )
 from apps.core.models import Company
-from apps.financeiro.models import CostCenter
+from apps.core.dates import add_months
+from apps.finance.models import AccountPayable, CostCenter, Supplier
 from apps.persons.models import PeopleIndividual, Person
 
 from .base import JsonObject, body
@@ -21,11 +23,6 @@ from .base import JsonObject, body
 pytestmark = pytest.mark.django_db
 
 today = timezone.localdate
-
-
-@pytest.fixture
-def company() -> Company:
-    return Company.objects.create(legal_name="Adm", cnpj="00000000000191")
 
 
 def make_condominium(company: Company, name: str, cnpj: str, **kw: object) -> Condominium:
@@ -47,8 +44,8 @@ def test_empty_dashboard(api_client: APIClient) -> None:
 def test_summaries_count_by_type(api_client: APIClient, company: Company) -> None:
     _ = make_condominium(company, "A", "11222333000181", type="commercial")
     _ = make_condominium(company, "B", "45723174000110", active=False)
-    person = Person.objects.create(name="Maria")
-    _ = PeopleIndividual.objects.create(person=person, cpf="52998224725")
+    person = Person.objects.create(company=seeded_company(), name="Maria")
+    _ = PeopleIndividual.objects.create(person=person, company=person.company, cpf="52998224725")
 
     summary = dashboard(api_client)
 
@@ -114,7 +111,7 @@ def test_units_without_responsible(api_client: APIClient, company: Company) -> N
     ended = Unit.objects.create(condominium=condominium, name="102")
     _ = Unit.objects.create(condominium=condominium, name="103")
     _ = Unit.objects.create(condominium=condominium, name="104", active=False)
-    person = Person.objects.create(name="Maria")
+    person = Person.objects.create(company=seeded_company(), name="Maria")
     _ = UnitPerson.objects.create(
         unit=with_owner,
         person=person,
@@ -139,7 +136,7 @@ def test_units_without_responsible(api_client: APIClient, company: Company) -> N
 
 def test_leases_ending_soon(api_client: APIClient, company: Company) -> None:
     condominium = make_condominium(company, "A", "11222333000181")
-    person = Person.objects.create(name="Inquilino")
+    person = Person.objects.create(company=seeded_company(), name="Inquilino")
     for name, days in (("101", 25), ("102", -10), ("103", 200), ("104", None)):
         unit = Unit.objects.create(condominium=condominium, name=name)
         _ = UnitPerson.objects.create(
@@ -186,3 +183,100 @@ def test_cost_centers_and_billing_block(api_client: APIClient, company: Company)
 
     assert pending["without_cost_centers"] == 1
     assert pending["billing_blocked_units"] == 1
+
+
+def test_upcoming_adjustments_expose_adjustment_index(api_client: APIClient, company: Company) -> None:
+    condominium = make_condominium(company, "A", "11222333000181")
+    _ = AdministrationContract.objects.create(
+        condominium=condominium,
+        fee_type="fixed",
+        fee_amount=100,
+        adjustment_index="IGPM",
+        adjustment_period_months=12,
+        adjustment_base_date=today() - timedelta(days=300),
+    )
+
+    adjustment = dashboard(api_client)["upcoming_adjustments"][0]
+
+    assert adjustment["adjustment_index"] == "IGPM"
+    assert "index" not in adjustment
+
+
+
+# ----- spec 012: accounts payable section -----
+
+
+def make_payable(company: Company, due_date: date, **overrides: object) -> AccountPayable:
+    condominium = overrides.pop("condominium", None)
+    cost_center = (
+        CostCenter.objects.get_or_create(condominium=condominium, name="Geral")[0]
+        if isinstance(condominium, Condominium)
+        else None
+    )
+    person = Person.objects.create(company=company, name="Companhia de Energia")
+    fields = {
+        "company": company,
+        "condominium": condominium,
+        "cost_center": cost_center,
+        "supplier": Supplier.objects.create(person=person),
+        "description": "Energia elétrica",
+        "amount": Decimal("100.00"),
+        "due_date": due_date,
+    }
+    return AccountPayable.objects.create(**{**fields, **overrides})
+
+
+def test_accounts_payable_empty(api_client: APIClient) -> None:
+    payables = dashboard(api_client)["accounts_payable"]
+
+    assert payables["overdue"] == {"count": 0, "total": "0.00"}
+    assert payables["upcoming"] == []
+
+
+def test_accounts_payable_windows_and_totals(api_client: APIClient, company: Company) -> None:
+    reference = today()
+    condominium = make_condominium(company, "Residencial Sol", "11222333000181")
+    make_payable(company, reference - timedelta(days=3), condominium=condominium)
+    make_payable(company, reference, amount=Decimal("50.00"))  # company expense
+    make_payable(company, reference + timedelta(days=7))
+    make_payable(company, reference + timedelta(days=8))
+
+    payables = dashboard(api_client)["accounts_payable"]
+
+    assert payables["overdue"] == {"count": 1, "total": "100.00"}
+    assert payables["due_today"] == {"count": 1, "total": "50.00"}
+    assert payables["due_next_7_days"] == {"count": 1, "total": "100.00"}
+    assert [entry["overdue"] for entry in payables["upcoming"]] == [True, False, False, False]
+    assert payables["upcoming"][0]["condominium_name"] == "Residencial Sol"
+    assert payables["upcoming"][1]["condominium_name"] is None
+    assert payables["upcoming"][0]["supplier_name"] == "Companhia de Energia"
+
+
+def test_accounts_payable_this_month_counts_the_calendar_month(
+    api_client: APIClient, company: Company
+) -> None:
+    reference = today()
+    first_day = reference.replace(day=1)
+    next_month = add_months(first_day, 1)
+    make_payable(company, first_day)
+    make_payable(company, next_month)
+    make_payable(company, first_day - timedelta(days=1))  # last month: overdue, not "this month"
+
+    payables = dashboard(api_client)["accounts_payable"]
+
+    assert payables["due_this_month"] == {"count": 1, "total": "100.00"}
+
+
+def test_accounts_payable_ignores_paid_and_cancelled(
+    api_client: APIClient, company: Company
+) -> None:
+    reference = today()
+    paid = make_payable(company, reference - timedelta(days=1))
+    paid.settle(reference, Decimal("100.00"), AccountPayable.PaymentMethod.PIX)
+    cancelled = make_payable(company, reference - timedelta(days=1))
+    cancelled.cancel()
+
+    payables = dashboard(api_client)["accounts_payable"]
+
+    assert payables["overdue"]["count"] == 0
+    assert payables["upcoming"] == []

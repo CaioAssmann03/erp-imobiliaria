@@ -21,7 +21,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  Dashboard
+  Dashboard,
+  ErrorResponse
 } from '../models';
 
 import { customInstance } from '../../mutator';
@@ -69,7 +70,7 @@ export const getDashboardRetrieveQueryKey = () => {
     }
 
 
-export const getDashboardRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof dashboardRetrieve>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardRetrieve>>, TError, TData>>, }
+export const getDashboardRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof dashboardRetrieve>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardRetrieve>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -88,10 +89,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type DashboardRetrieveQueryResult = NonNullable<Awaited<ReturnType<typeof dashboardRetrieve>>>
-export type DashboardRetrieveQueryError = unknown
+export type DashboardRetrieveQueryError = ErrorResponse
 
 
-export function useDashboardRetrieve<TData = Awaited<ReturnType<typeof dashboardRetrieve>>, TError = unknown>(
+export function useDashboardRetrieve<TData = Awaited<ReturnType<typeof dashboardRetrieve>>, TError = ErrorResponse>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardRetrieve>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof dashboardRetrieve>>,
@@ -101,7 +102,7 @@ export function useDashboardRetrieve<TData = Awaited<ReturnType<typeof dashboard
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useDashboardRetrieve<TData = Awaited<ReturnType<typeof dashboardRetrieve>>, TError = unknown>(
+export function useDashboardRetrieve<TData = Awaited<ReturnType<typeof dashboardRetrieve>>, TError = ErrorResponse>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardRetrieve>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof dashboardRetrieve>>,
@@ -111,12 +112,12 @@ export function useDashboardRetrieve<TData = Awaited<ReturnType<typeof dashboard
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useDashboardRetrieve<TData = Awaited<ReturnType<typeof dashboardRetrieve>>, TError = unknown>(
+export function useDashboardRetrieve<TData = Awaited<ReturnType<typeof dashboardRetrieve>>, TError = ErrorResponse>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardRetrieve>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useDashboardRetrieve<TData = Awaited<ReturnType<typeof dashboardRetrieve>>, TError = unknown>(
+export function useDashboardRetrieve<TData = Awaited<ReturnType<typeof dashboardRetrieve>>, TError = ErrorResponse>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardRetrieve>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

@@ -5,7 +5,7 @@ import type { WidgetBuilder } from "./types";
 export const buildAdjustmentsWidget: WidgetBuilder = (dash) => ({
   title: "Reajustes",
   description: "Previstos nos próximos 6 meses",
-  className: "lg:col-span-3",
+  className: "lg:col-span-4",
   showHeader: true,
   render: (large) => (
     <SimpleBarChart

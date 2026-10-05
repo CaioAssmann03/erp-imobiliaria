@@ -27,6 +27,7 @@ import type {
 import type {
   CompaniesListParams,
   Company,
+  ErrorResponse,
   PaginatedCompanyList,
   PatchedCompany
 } from '../models';
@@ -79,7 +80,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * CRUD de Company (administradora) — base do modelo multiempresa.
+ * Company (administradora): staff sees and edits only their own; creating or deleting is superuser-only.
  */
 export const companiesList = (
     params?: CompaniesListParams,
@@ -104,7 +105,7 @@ export const getCompaniesListQueryKey = (params?: CompaniesListParams,) => {
     }
 
 
-export const getCompaniesListQueryOptions = <TData = Awaited<ReturnType<typeof companiesList>>, TError = unknown>(params?: CompaniesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof companiesList>>, TError, TData>>, }
+export const getCompaniesListQueryOptions = <TData = Awaited<ReturnType<typeof companiesList>>, TError = ErrorResponse>(params?: CompaniesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof companiesList>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -123,10 +124,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type CompaniesListQueryResult = NonNullable<Awaited<ReturnType<typeof companiesList>>>
-export type CompaniesListQueryError = unknown
+export type CompaniesListQueryError = ErrorResponse
 
 
-export function useCompaniesList<TData = Awaited<ReturnType<typeof companiesList>>, TError = unknown>(
+export function useCompaniesList<TData = Awaited<ReturnType<typeof companiesList>>, TError = ErrorResponse>(
  params: undefined |  CompaniesListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof companiesList>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof companiesList>>,
@@ -136,7 +137,7 @@ export function useCompaniesList<TData = Awaited<ReturnType<typeof companiesList
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCompaniesList<TData = Awaited<ReturnType<typeof companiesList>>, TError = unknown>(
+export function useCompaniesList<TData = Awaited<ReturnType<typeof companiesList>>, TError = ErrorResponse>(
  params?: CompaniesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof companiesList>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof companiesList>>,
@@ -146,12 +147,12 @@ export function useCompaniesList<TData = Awaited<ReturnType<typeof companiesList
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCompaniesList<TData = Awaited<ReturnType<typeof companiesList>>, TError = unknown>(
+export function useCompaniesList<TData = Awaited<ReturnType<typeof companiesList>>, TError = ErrorResponse>(
  params?: CompaniesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof companiesList>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCompaniesList<TData = Awaited<ReturnType<typeof companiesList>>, TError = unknown>(
+export function useCompaniesList<TData = Awaited<ReturnType<typeof companiesList>>, TError = ErrorResponse>(
  params?: CompaniesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof companiesList>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -169,7 +170,7 @@ export function useCompaniesList<TData = Awaited<ReturnType<typeof companiesList
 
 
 /**
- * CRUD de Company (administradora) — base do modelo multiempresa.
+ * Company (administradora): staff sees and edits only their own; creating or deleting is superuser-only.
  */
 export const companiesCreate = (
     company: NonReadonly<Company>,
@@ -190,7 +191,7 @@ export const companiesCreate = (
 
 export const getCompaniesCreateMutationKey = () => ['companiesCreate'] as const;
 
-export const getCompaniesCreateMutationOptions = <TError = unknown,
+export const getCompaniesCreateMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof companiesCreate>>, TError,CompaniesCreateMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof companiesCreate>>, TError,CompaniesCreateMutationVariables, TContext> => {
 
@@ -219,10 +220,10 @@ const {mutation: mutationOptions} = options ?
 
     export type CompaniesCreateMutationResult = NonNullable<Awaited<ReturnType<typeof companiesCreate>>>
     export type CompaniesCreateMutationBody = NonReadonly<Company>
-    export type CompaniesCreateMutationError = unknown
+    export type CompaniesCreateMutationError = ErrorResponse
     export type CompaniesCreateMutationVariables = {data: NonReadonly<Company>}
 
-    export const useCompaniesCreate = <TError = unknown,
+    export const useCompaniesCreate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof companiesCreate>>, TError,CompaniesCreateMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof companiesCreate>>,
@@ -233,7 +234,7 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getCompaniesCreateMutationOptions(options), queryClient);
     }
     /**
- * CRUD de Company (administradora) — base do modelo multiempresa.
+ * Company (administradora): staff sees and edits only their own; creating or deleting is superuser-only.
  */
 export const companiesRetrieve = (
     id: string,
@@ -257,7 +258,7 @@ export const getCompaniesRetrieveQueryKey = (id: string,) => {
     }
 
 
-export const getCompaniesRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof companiesRetrieve>>, TError = unknown>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof companiesRetrieve>>, TError, TData>>, }
+export const getCompaniesRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof companiesRetrieve>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof companiesRetrieve>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -276,10 +277,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type CompaniesRetrieveQueryResult = NonNullable<Awaited<ReturnType<typeof companiesRetrieve>>>
-export type CompaniesRetrieveQueryError = unknown
+export type CompaniesRetrieveQueryError = ErrorResponse
 
 
-export function useCompaniesRetrieve<TData = Awaited<ReturnType<typeof companiesRetrieve>>, TError = unknown>(
+export function useCompaniesRetrieve<TData = Awaited<ReturnType<typeof companiesRetrieve>>, TError = ErrorResponse>(
  id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof companiesRetrieve>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof companiesRetrieve>>,
@@ -289,7 +290,7 @@ export function useCompaniesRetrieve<TData = Awaited<ReturnType<typeof companies
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCompaniesRetrieve<TData = Awaited<ReturnType<typeof companiesRetrieve>>, TError = unknown>(
+export function useCompaniesRetrieve<TData = Awaited<ReturnType<typeof companiesRetrieve>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof companiesRetrieve>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof companiesRetrieve>>,
@@ -299,12 +300,12 @@ export function useCompaniesRetrieve<TData = Awaited<ReturnType<typeof companies
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCompaniesRetrieve<TData = Awaited<ReturnType<typeof companiesRetrieve>>, TError = unknown>(
+export function useCompaniesRetrieve<TData = Awaited<ReturnType<typeof companiesRetrieve>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof companiesRetrieve>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCompaniesRetrieve<TData = Awaited<ReturnType<typeof companiesRetrieve>>, TError = unknown>(
+export function useCompaniesRetrieve<TData = Awaited<ReturnType<typeof companiesRetrieve>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof companiesRetrieve>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -322,7 +323,7 @@ export function useCompaniesRetrieve<TData = Awaited<ReturnType<typeof companies
 
 
 /**
- * CRUD de Company (administradora) — base do modelo multiempresa.
+ * Company (administradora): staff sees and edits only their own; creating or deleting is superuser-only.
  */
 export const companiesUpdate = (
     id: string,
@@ -344,7 +345,7 @@ export const companiesUpdate = (
 
 export const getCompaniesUpdateMutationKey = () => ['companiesUpdate'] as const;
 
-export const getCompaniesUpdateMutationOptions = <TError = unknown,
+export const getCompaniesUpdateMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof companiesUpdate>>, TError,CompaniesUpdateMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof companiesUpdate>>, TError,CompaniesUpdateMutationVariables, TContext> => {
 
@@ -373,10 +374,10 @@ const {mutation: mutationOptions} = options ?
 
     export type CompaniesUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof companiesUpdate>>>
     export type CompaniesUpdateMutationBody = NonReadonly<Company>
-    export type CompaniesUpdateMutationError = unknown
+    export type CompaniesUpdateMutationError = ErrorResponse
     export type CompaniesUpdateMutationVariables = {id: string;data: NonReadonly<Company>}
 
-    export const useCompaniesUpdate = <TError = unknown,
+    export const useCompaniesUpdate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof companiesUpdate>>, TError,CompaniesUpdateMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof companiesUpdate>>,
@@ -387,7 +388,7 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getCompaniesUpdateMutationOptions(options), queryClient);
     }
     /**
- * CRUD de Company (administradora) — base do modelo multiempresa.
+ * Company (administradora): staff sees and edits only their own; creating or deleting is superuser-only.
  */
 export const companiesPartialUpdate = (
     id: string,
@@ -409,7 +410,7 @@ export const companiesPartialUpdate = (
 
 export const getCompaniesPartialUpdateMutationKey = () => ['companiesPartialUpdate'] as const;
 
-export const getCompaniesPartialUpdateMutationOptions = <TError = unknown,
+export const getCompaniesPartialUpdateMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof companiesPartialUpdate>>, TError,CompaniesPartialUpdateMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof companiesPartialUpdate>>, TError,CompaniesPartialUpdateMutationVariables, TContext> => {
 
@@ -438,10 +439,10 @@ const {mutation: mutationOptions} = options ?
 
     export type CompaniesPartialUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof companiesPartialUpdate>>>
     export type CompaniesPartialUpdateMutationBody = NonReadonly<PatchedCompany> | undefined
-    export type CompaniesPartialUpdateMutationError = unknown
+    export type CompaniesPartialUpdateMutationError = ErrorResponse
     export type CompaniesPartialUpdateMutationVariables = {id: string;data?: NonReadonly<PatchedCompany>}
 
-    export const useCompaniesPartialUpdate = <TError = unknown,
+    export const useCompaniesPartialUpdate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof companiesPartialUpdate>>, TError,CompaniesPartialUpdateMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof companiesPartialUpdate>>,
@@ -452,7 +453,7 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getCompaniesPartialUpdateMutationOptions(options), queryClient);
     }
     /**
- * CRUD de Company (administradora) — base do modelo multiempresa.
+ * Company (administradora): staff sees and edits only their own; creating or deleting is superuser-only.
  */
 export const companiesDestroy = (
     id: string,
@@ -471,7 +472,7 @@ export const companiesDestroy = (
 
 export const getCompaniesDestroyMutationKey = () => ['companiesDestroy'] as const;
 
-export const getCompaniesDestroyMutationOptions = <TError = unknown,
+export const getCompaniesDestroyMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof companiesDestroy>>, TError,CompaniesDestroyMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof companiesDestroy>>, TError,CompaniesDestroyMutationVariables, TContext> => {
 
@@ -500,10 +501,10 @@ const {mutation: mutationOptions} = options ?
 
     export type CompaniesDestroyMutationResult = NonNullable<Awaited<ReturnType<typeof companiesDestroy>>>
 
-    export type CompaniesDestroyMutationError = unknown
+    export type CompaniesDestroyMutationError = ErrorResponse
     export type CompaniesDestroyMutationVariables = {id: string}
 
-    export const useCompaniesDestroy = <TError = unknown,
+    export const useCompaniesDestroy = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof companiesDestroy>>, TError,CompaniesDestroyMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof companiesDestroy>>,

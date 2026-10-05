@@ -1,5 +1,7 @@
 import pytest
+from rest_framework.test import APIRequestFactory, force_authenticate
 
+from apps.accounts.models import User
 from apps.core.models import Company
 
 from ..models import Address, AdministrationContract, BillingRules, Condominium
@@ -13,14 +15,28 @@ def payload(company: Company, **extra: object) -> dict[str, object]:
     return {"company": company.pk, "name": "Residencial Sol", "cnpj": VALID_CNPJ, **extra}
 
 
-def save(data: dict[str, object], instance: Condominium | None = None) -> Condominium:
-    serializer = CondominiumSerializer(instance, data=data, partial=instance is not None)
+def request_context(company: Company) -> dict[str, object]:
+    """The serializer reads the user's company from the request (spec 004)."""
+    user = User.objects.create_user(f"user-{User.objects.count()}", password="x", company=company)
+    request = APIRequestFactory().post("/")
+    force_authenticate(request, user=user)
+    request.user = user
+    return {"request": request}
+
+
+def save(
+    company: Company, data: dict[str, object], instance: Condominium | None = None
+) -> Condominium:
+    serializer = CondominiumSerializer(
+        instance, data=data, partial=instance is not None, context=request_context(company)
+    )
     serializer.is_valid(raise_exception=True)
     return serializer.save()
 
 
 def test_create_with_all_nested_parts(company: Company) -> None:
     condominium = save(
+        company,
         payload(
             company,
             address={"street": "Rua A", "city": "Curitiba", "state": "PR"},
@@ -36,7 +52,7 @@ def test_create_with_all_nested_parts(company: Company) -> None:
 
 
 def test_create_without_nested_parts(company: Company) -> None:
-    condominium = save(payload(company))
+    condominium = save(company, payload(company))
 
     assert condominium.address is None
     assert not AdministrationContract.objects.exists()
@@ -67,7 +83,7 @@ def test_cnpj_must_be_unique(condominium: Condominium) -> None:
 
 
 def test_update_creates_address_when_missing(condominium: Condominium) -> None:
-    updated = save({"address": {"city": "Curitiba"}}, condominium)
+    updated = save(condominium.company, {"address": {"city": "Curitiba"}}, condominium)
 
     assert updated.address is not None
     assert updated.address.city == "Curitiba"
@@ -78,7 +94,7 @@ def test_update_changes_existing_address_in_place(condominium: Condominium) -> N
     condominium.save()
     address_id = condominium.address.pk
 
-    updated = save({"address": {"city": "Londrina"}}, condominium)
+    updated = save(condominium.company, {"address": {"city": "Londrina"}}, condominium)
 
     assert updated.address is not None
     assert updated.address.pk == address_id
@@ -88,10 +104,10 @@ def test_update_changes_existing_address_in_place(condominium: Condominium) -> N
 
 
 def test_update_upserts_contract_and_billing_rules(condominium: Condominium) -> None:
-    _ = save({"administration_contract": {"fee_amount": "500"}}, condominium)
-    _ = save({"administration_contract": {"fee_amount": "700"}}, condominium)
-    _ = save({"billing_rules": {"due_day": 7}}, condominium)
-    _ = save({"billing_rules": {"due_day": 9}}, condominium)
+    _ = save(condominium.company, {"administration_contract": {"fee_amount": "500"}}, condominium)
+    _ = save(condominium.company, {"administration_contract": {"fee_amount": "700"}}, condominium)
+    _ = save(condominium.company, {"billing_rules": {"due_day": 7}}, condominium)
+    _ = save(condominium.company, {"billing_rules": {"due_day": 9}}, condominium)
 
     assert AdministrationContract.objects.count() == 1
     assert AdministrationContract.objects.get().fee_amount == 700
@@ -100,8 +116,8 @@ def test_update_upserts_contract_and_billing_rules(condominium: Condominium) -> 
 
 
 def test_update_without_nested_parts_keeps_them(condominium: Condominium) -> None:
-    _ = save({"billing_rules": {"due_day": 7}}, condominium)
+    _ = save(condominium.company, {"billing_rules": {"due_day": 7}}, condominium)
 
-    _ = save({"name": "Novo Nome"}, condominium)
+    _ = save(condominium.company, {"name": "Novo Nome"}, condominium)
 
     assert BillingRules.objects.get().due_day == 7

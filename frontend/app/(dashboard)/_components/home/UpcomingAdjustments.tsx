@@ -16,7 +16,7 @@ export function UpcomingAdjustments({ adjustments }: { adjustments: UpcomingAdju
       items={adjustments.map((adjustment) => ({
         id: adjustment.id,
         name: adjustment.name,
-        meta: `${formatDate(adjustment.date)}${adjustment.index ? ` · ${adjustment.index}` : ""}`,
+        meta: `${formatDate(adjustment.date)}${adjustment.adjustment_index ? ` · ${adjustment.adjustment_index}` : ""}`,
         extra: adjustment.overdue ? (
           <Late>{relativeDays(adjustment.date)}</Late>
         ) : (

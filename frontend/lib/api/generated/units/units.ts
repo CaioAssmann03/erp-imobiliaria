@@ -25,6 +25,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ErrorResponse,
   PaginatedUnitList,
   PatchedUnit,
   Unit,
@@ -78,6 +79,11 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+/**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
 export const unitsList = (
     params?: UnitsListParams,
  signal?: AbortSignal
@@ -101,7 +107,7 @@ export const getUnitsListQueryKey = (params?: UnitsListParams,) => {
     }
 
 
-export const getUnitsListQueryOptions = <TData = Awaited<ReturnType<typeof unitsList>>, TError = unknown>(params?: UnitsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof unitsList>>, TError, TData>>, }
+export const getUnitsListQueryOptions = <TData = Awaited<ReturnType<typeof unitsList>>, TError = ErrorResponse>(params?: UnitsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof unitsList>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -120,10 +126,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type UnitsListQueryResult = NonNullable<Awaited<ReturnType<typeof unitsList>>>
-export type UnitsListQueryError = unknown
+export type UnitsListQueryError = ErrorResponse
 
 
-export function useUnitsList<TData = Awaited<ReturnType<typeof unitsList>>, TError = unknown>(
+export function useUnitsList<TData = Awaited<ReturnType<typeof unitsList>>, TError = ErrorResponse>(
  params: undefined |  UnitsListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof unitsList>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof unitsList>>,
@@ -133,7 +139,7 @@ export function useUnitsList<TData = Awaited<ReturnType<typeof unitsList>>, TErr
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUnitsList<TData = Awaited<ReturnType<typeof unitsList>>, TError = unknown>(
+export function useUnitsList<TData = Awaited<ReturnType<typeof unitsList>>, TError = ErrorResponse>(
  params?: UnitsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof unitsList>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof unitsList>>,
@@ -143,12 +149,12 @@ export function useUnitsList<TData = Awaited<ReturnType<typeof unitsList>>, TErr
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUnitsList<TData = Awaited<ReturnType<typeof unitsList>>, TError = unknown>(
+export function useUnitsList<TData = Awaited<ReturnType<typeof unitsList>>, TError = ErrorResponse>(
  params?: UnitsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof unitsList>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useUnitsList<TData = Awaited<ReturnType<typeof unitsList>>, TError = unknown>(
+export function useUnitsList<TData = Awaited<ReturnType<typeof unitsList>>, TError = ErrorResponse>(
  params?: UnitsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof unitsList>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -165,6 +171,11 @@ export function useUnitsList<TData = Awaited<ReturnType<typeof unitsList>>, TErr
 
 
 
+/**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
 export const unitsCreate = (
     unit: NonReadonly<Unit>,
  signal?: AbortSignal
@@ -184,7 +195,7 @@ export const unitsCreate = (
 
 export const getUnitsCreateMutationKey = () => ['unitsCreate'] as const;
 
-export const getUnitsCreateMutationOptions = <TError = unknown,
+export const getUnitsCreateMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unitsCreate>>, TError,UnitsCreateMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof unitsCreate>>, TError,UnitsCreateMutationVariables, TContext> => {
 
@@ -213,10 +224,10 @@ const {mutation: mutationOptions} = options ?
 
     export type UnitsCreateMutationResult = NonNullable<Awaited<ReturnType<typeof unitsCreate>>>
     export type UnitsCreateMutationBody = NonReadonly<Unit>
-    export type UnitsCreateMutationError = unknown
+    export type UnitsCreateMutationError = ErrorResponse
     export type UnitsCreateMutationVariables = {data: NonReadonly<Unit>}
 
-    export const useUnitsCreate = <TError = unknown,
+    export const useUnitsCreate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unitsCreate>>, TError,UnitsCreateMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof unitsCreate>>,
@@ -226,7 +237,12 @@ const {mutation: mutationOptions} = options ?
       > => {
       return useMutation(getUnitsCreateMutationOptions(options), queryClient);
     }
-    export const unitsRetrieve = (
+    /**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
+export const unitsRetrieve = (
     id: string,
  signal?: AbortSignal
 ) => {
@@ -248,7 +264,7 @@ export const getUnitsRetrieveQueryKey = (id: string,) => {
     }
 
 
-export const getUnitsRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof unitsRetrieve>>, TError = unknown>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof unitsRetrieve>>, TError, TData>>, }
+export const getUnitsRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof unitsRetrieve>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof unitsRetrieve>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -267,10 +283,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type UnitsRetrieveQueryResult = NonNullable<Awaited<ReturnType<typeof unitsRetrieve>>>
-export type UnitsRetrieveQueryError = unknown
+export type UnitsRetrieveQueryError = ErrorResponse
 
 
-export function useUnitsRetrieve<TData = Awaited<ReturnType<typeof unitsRetrieve>>, TError = unknown>(
+export function useUnitsRetrieve<TData = Awaited<ReturnType<typeof unitsRetrieve>>, TError = ErrorResponse>(
  id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof unitsRetrieve>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof unitsRetrieve>>,
@@ -280,7 +296,7 @@ export function useUnitsRetrieve<TData = Awaited<ReturnType<typeof unitsRetrieve
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUnitsRetrieve<TData = Awaited<ReturnType<typeof unitsRetrieve>>, TError = unknown>(
+export function useUnitsRetrieve<TData = Awaited<ReturnType<typeof unitsRetrieve>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof unitsRetrieve>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof unitsRetrieve>>,
@@ -290,12 +306,12 @@ export function useUnitsRetrieve<TData = Awaited<ReturnType<typeof unitsRetrieve
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUnitsRetrieve<TData = Awaited<ReturnType<typeof unitsRetrieve>>, TError = unknown>(
+export function useUnitsRetrieve<TData = Awaited<ReturnType<typeof unitsRetrieve>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof unitsRetrieve>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useUnitsRetrieve<TData = Awaited<ReturnType<typeof unitsRetrieve>>, TError = unknown>(
+export function useUnitsRetrieve<TData = Awaited<ReturnType<typeof unitsRetrieve>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof unitsRetrieve>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -312,6 +328,11 @@ export function useUnitsRetrieve<TData = Awaited<ReturnType<typeof unitsRetrieve
 
 
 
+/**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
 export const unitsUpdate = (
     id: string,
     unit: NonReadonly<Unit>,
@@ -332,7 +353,7 @@ export const unitsUpdate = (
 
 export const getUnitsUpdateMutationKey = () => ['unitsUpdate'] as const;
 
-export const getUnitsUpdateMutationOptions = <TError = unknown,
+export const getUnitsUpdateMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unitsUpdate>>, TError,UnitsUpdateMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof unitsUpdate>>, TError,UnitsUpdateMutationVariables, TContext> => {
 
@@ -361,10 +382,10 @@ const {mutation: mutationOptions} = options ?
 
     export type UnitsUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof unitsUpdate>>>
     export type UnitsUpdateMutationBody = NonReadonly<Unit>
-    export type UnitsUpdateMutationError = unknown
+    export type UnitsUpdateMutationError = ErrorResponse
     export type UnitsUpdateMutationVariables = {id: string;data: NonReadonly<Unit>}
 
-    export const useUnitsUpdate = <TError = unknown,
+    export const useUnitsUpdate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unitsUpdate>>, TError,UnitsUpdateMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof unitsUpdate>>,
@@ -374,7 +395,12 @@ const {mutation: mutationOptions} = options ?
       > => {
       return useMutation(getUnitsUpdateMutationOptions(options), queryClient);
     }
-    export const unitsPartialUpdate = (
+    /**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
+export const unitsPartialUpdate = (
     id: string,
     patchedUnit?: NonReadonly<PatchedUnit>,
  signal?: AbortSignal
@@ -394,7 +420,7 @@ const {mutation: mutationOptions} = options ?
 
 export const getUnitsPartialUpdateMutationKey = () => ['unitsPartialUpdate'] as const;
 
-export const getUnitsPartialUpdateMutationOptions = <TError = unknown,
+export const getUnitsPartialUpdateMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unitsPartialUpdate>>, TError,UnitsPartialUpdateMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof unitsPartialUpdate>>, TError,UnitsPartialUpdateMutationVariables, TContext> => {
 
@@ -423,10 +449,10 @@ const {mutation: mutationOptions} = options ?
 
     export type UnitsPartialUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof unitsPartialUpdate>>>
     export type UnitsPartialUpdateMutationBody = NonReadonly<PatchedUnit> | undefined
-    export type UnitsPartialUpdateMutationError = unknown
+    export type UnitsPartialUpdateMutationError = ErrorResponse
     export type UnitsPartialUpdateMutationVariables = {id: string;data?: NonReadonly<PatchedUnit>}
 
-    export const useUnitsPartialUpdate = <TError = unknown,
+    export const useUnitsPartialUpdate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unitsPartialUpdate>>, TError,UnitsPartialUpdateMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof unitsPartialUpdate>>,
@@ -436,7 +462,12 @@ const {mutation: mutationOptions} = options ?
       > => {
       return useMutation(getUnitsPartialUpdateMutationOptions(options), queryClient);
     }
-    export const unitsDestroy = (
+    /**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
+export const unitsDestroy = (
     id: string,
  signal?: AbortSignal
 ) => {
@@ -453,7 +484,7 @@ const {mutation: mutationOptions} = options ?
 
 export const getUnitsDestroyMutationKey = () => ['unitsDestroy'] as const;
 
-export const getUnitsDestroyMutationOptions = <TError = unknown,
+export const getUnitsDestroyMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unitsDestroy>>, TError,UnitsDestroyMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof unitsDestroy>>, TError,UnitsDestroyMutationVariables, TContext> => {
 
@@ -482,10 +513,10 @@ const {mutation: mutationOptions} = options ?
 
     export type UnitsDestroyMutationResult = NonNullable<Awaited<ReturnType<typeof unitsDestroy>>>
 
-    export type UnitsDestroyMutationError = unknown
+    export type UnitsDestroyMutationError = ErrorResponse
     export type UnitsDestroyMutationVariables = {id: string}
 
-    export const useUnitsDestroy = <TError = unknown,
+    export const useUnitsDestroy = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unitsDestroy>>, TError,UnitsDestroyMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof unitsDestroy>>,

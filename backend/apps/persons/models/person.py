@@ -6,6 +6,8 @@ from django.db import models
 from django.db.models.functions import Upper
 from typing_extensions import final, override
 
+from apps.core.models import Company
+
 if TYPE_CHECKING:
     from .people_individual import PeopleIndividual
     from .people_legal import PeopleLegal
@@ -17,7 +19,11 @@ class Person(models.Model):
         people_individual: "PeopleIndividual"
         people_legal: "PeopleLegal"
 
+    # Path from the model to its company (spec 004: company scoping).
+    company_lookup = "company"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name="people")
     name = models.CharField(max_length=255)
 
     home_phone = models.CharField(max_length=20, blank=True, null=True)

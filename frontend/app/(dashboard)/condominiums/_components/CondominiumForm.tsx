@@ -55,7 +55,7 @@ export function CondominiumForm({ condominiumId }: { condominiumId?: string }) {
         onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))}
         className="space-y-4"
       >
-        <IdentificationSection isEdit={isEdit} />
+        <IdentificationSection />
         <AddressSection />
         <FeeSection />
         <BillingSection />

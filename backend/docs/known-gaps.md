@@ -1,7 +1,7 @@
 ---
-summary: 18 known gaps and inconsistencies in the current code, with severity and a suggested direction.
+summary: Known gaps and inconsistencies in the current code, with severity, the decision taken (if any) and a suggested direction.
 read-when: something looks wrong or missing; before proposing cleanup or infra work
-skip-if: you need how things work today → practices.md; the reason behind a choice → architecture/foundation/decisions.md
+skip-if: you need how things work today → conventions/practices.md; the reason behind a choice → architecture/overview.md
 ---
 # Known gaps (found while documenting the current code)
 
@@ -9,23 +9,14 @@ Treat each as a **question for the user** before acting; most need a feature spe
 
 | # | Sev | Gap | Suggested direction |
 |---|---|---|---|
-| 2 | H | Authorization is only `IsAuthenticated`: no roles, no per-company scoping (any admin sees every company) | spec for permissions + queryset scoping (`architecture/structure/extending.md`) |
-| 3 | M | Refresh tokens are not blacklisted on logout; frontend keeps tokens in non-HttpOnly cookies | enable `token_blacklist`; see frontend `docs/safeguards/auth-and-tokens.md` |
-| 4 | M | `mypy` is configured (strict + plugins) but not enforced and reports errors (untyped `unfold` admin classes, missing annotations, e.g. `core/filters.py`) | decide scope, fix, add to CI |
-| 6 | M | API error messages are English while `LANGUAGE_CODE="pt-br"` makes Django/DRF built-in messages Portuguese; the frontend maps only known English strings | decide the language policy for errors (error codes?) |
-| 7 | M | `financeiro` has models but no API/admin; `cobranca`, `locacoes`, `vendas` are empty stubs with the old flat layout | feature specs per module; restructure when started |
-| 8 | L | `Person` has no DB/API rule that it is *either* individual *or* legal | decide whether to enforce |
-| 9 | L | `Address` cannot be cleared via the API (`address: null` is ignored) | decide semantics (delete address vs keep) |
-| 13 | L | `DEFAULT_AUTO_FIELD` is `BigAutoField` while all models use UUID pks | set to a UUID-friendly default or document |
-| 15 | L | No rate limiting or lockout on `/api/auth/login/`; no health endpoint; no structured logging | spec for operational hardening |
-| 16 | L | `fee_floor`/`fee_ceiling` and Block CRUD exist in the API but have no UI | confirm intent with the frontend |
-| 17 | L | Dashboard adjustments are computed in Python over all active contracts | fine now; move to SQL if the volume grows |
-| 18 | M | HSTS and HTTPS redirect are not configured (cookies are already Secure when `DEBUG=false`; `SECRET_KEY` is now mandatory in production) | enable `SECURE_HSTS_SECONDS` / `SECURE_SSL_REDIRECT` once the domain is final (check Render's health check first) |
-| 19 | L | No automated database backup/restore policy; Render free Postgres expires | backup spec before go-live |
-| 20 | L | `/admin/` uses the default public path and there is no audit trail of changes | restrict/rename; audit log spec |
-| 21 | L | The sum caps (`clean()` reads the DB before saving) can be passed by two simultaneous writes, and writers that bypass serializers (commands, tasks, shell) must call `full_clean()` themselves; `seed_demo` creates rows directly (it relies on the DB constraints only) | call `full_clean()` in new commands/tasks; decide for the seed |
-| 22 | L | Nested serializers validate a nested object as a complete record (a partial nested PATCH must send the fields its rules depend on) | acceptable today (the UI sends full objects); document in the spec of any new nested part |
-| 23 | L | API names that are vague but are contracts: `upcoming_adjustments[].index` (really the adjustment index) | rename to `adjustment_index` through a spec (backend + frontend + client regeneration), see `naming.md` §14 |
-| 24 | L | Two functions remain around 30 lines (`seed_demo._create`, `_create_unit_links`), above the ~20-line target of `naming.md` §11 | split when next touched |
+| 8 | L | `Person` has no DB/API rule that it is *either* individual *or* legal | **Decided:** at most one of the two, enforced in `PeopleIndividual.clean()` / `PeopleLegal.clean()` (400 in the API); a person with neither stays allowed. Lite spec |
+| 9 | L | `Address` cannot be cleared via the API (`address: null` is ignored) | **Decided:** `address: null` unlinks and deletes the `Address` row (it is 1:1 and owned by the condominium); an omitted field changes nothing. Lite spec, no schema or client change |
+| 15 | L | No structured logging | JSON logs with a request id and no personal data, before go-live (the health endpoint and the login rate limit are done: specs 008 and 007) |
+| 16 | L | `fee_floor`/`fee_ceiling` and Block CRUD exist in the API but have no UI | **Decided:** Block screen (lite frontend spec) together with the unit registry screen, no API change; `fee_floor`/`fee_ceiling` stay `Stored` and get their screen in the spec that implements the variable fee |
+| 19 | L | No automated database backup/restore policy; Render free Postgres expires | **Deferred by the user (2026-10-05):** policy left out for now, to be decided before real data enters; the database moved to Supabase, so the Render-free-Postgres-expires part no longer applies (check Supabase's plan/backups when deciding) |
+| 21 | L | The sum caps (`clean()` reads the DB before saving) can be passed by two simultaneous writes | **Accepted risk** (few admin writers); revisit with bulk import or a writing portal. Writers outside the serializers call `full_clean()` (`conventions/practices.md`); `seed_demo` does since phase 3a part 04 |
+| 25 | L | django-unfold (latest 0.108) triggers `RemovedInDjango70Warning` (`get_action_choices` signature); silenced in `pytest.ini` | **Decided:** keep the filter and read the unfold changelog on every dependency upgrade; upgrade unfold when a fixed release exists, before moving to Django 7.0, then drop the filter |
+| 26 | L | The Django Admin login (`/admin/login/`) has no rate limit or lockout; the login throttle of spec 007 covers only `/api/auth/*` | decide later (e.g. `django-axes` or restrict the admin by network); found while writing spec 007 (roadmap: phase 3a part 08) |
 
 When a gap is closed, delete its row in the same change.
+| 27 | L | Deleting a record that `PROTECT` forbids (a condominium with cost centers that have templates or with bank accounts or accounts payable, a supplier with accounts payable, a person with links or that is a supplier...) answers 500: only `CostCenter` has a model delete rule so far | give each such delete a model rule with a code (as `CostCenter.delete()` does, spec 009) or map `ProtectedError` to a 400 in `api_exception_handler`; found while writing spec 009 |

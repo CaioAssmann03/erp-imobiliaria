@@ -31,6 +31,6 @@ the UI shows Portuguese labels.
 
 ## Dashboard summary (`dashboard`)
 
-Read-only aggregate: `condominiums`, `units`, `persons` summaries, `responsibles`, `adjustments_by_month`,
+Read-only aggregate: `condominiums`, `units`, `persons` summaries, `responsibles`, `accounts_payable` (open accounts by due window + the oldest), `adjustments_by_month`,
 `upcoming_adjustments`, `fixed_revenue`, `leases`, `pending` (units without responsible, inconsistent
 apportionment, overdue/next-30-day adjustments, ending leases, condominiums without cost centers, billing-blocked units).

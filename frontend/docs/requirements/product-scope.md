@@ -13,7 +13,7 @@ authenticated with a Django user (admins only for now).
 | Module | URL | What it does |
 |---|---|---|
 | Login | `/login` | username/password → JWT |
-| Dashboard | `/` | pending items, fixed revenue, adjustments, leases, responsibles; global search (⌘K) |
+| Dashboard | `/` | summary strip (condominiums, units, persons), accounts payable by due window, pending items, adjustments, responsibles, fixed revenue, leases; global search (⌘K) |
 | Condominiums | `/condominiums` | CRUD: identification, address, fee contract, billing rules, adjustment |
 | Units | `/condominiums/[id]/units` | CRUD per condominium; owners/tenants linked to each unit |
 | Persons | `/persons` | CRUD of individuals (CPF) and legal entities (CNPJ) |

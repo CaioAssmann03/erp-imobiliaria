@@ -78,7 +78,7 @@ class TestUnitSerializerUsesTheModelRules:
 
 
 @pytest.mark.django_db
-class TestUnitModelRules:
+class TestUnitDatabaseRules:
     def test_clean_rejects_block_of_another_condominium(
         self, condominium: Condominium
     ) -> None:
@@ -149,7 +149,7 @@ class TestApportionmentCap:
         )
 
     def test_sum_over_the_total_is_rejected(self, condominium: Condominium) -> None:
-        _ = self.unit(condominium, "1", "0.6").save()
+        self.unit(condominium, "1", "0.6").save()
 
         with pytest.raises(ValidationError) as exc:
             self.unit(condominium, "2", "0.5").clean()
@@ -157,17 +157,17 @@ class TestApportionmentCap:
         assert "ideal_fraction" in exc.value.message_dict
 
     def test_reaching_exactly_one_is_accepted(self, condominium: Condominium) -> None:
-        _ = self.unit(condominium, "1", "0.6").save()
+        self.unit(condominium, "1", "0.6").save()
 
         self.unit(condominium, "2", "0.4").clean()
 
     def test_inactive_units_do_not_count(self, condominium: Condominium) -> None:
-        _ = self.unit(condominium, "1", "0.9", active=False).save()
+        self.unit(condominium, "1", "0.9", active=False).save()
 
         self.unit(condominium, "2", "0.9").clean()
 
     def test_an_inactive_unit_is_not_checked(self, condominium: Condominium) -> None:
-        _ = self.unit(condominium, "1", "0.9").save()
+        self.unit(condominium, "1", "0.9").save()
 
         self.unit(condominium, "2", "0.9", active=False).clean()
 
@@ -182,12 +182,12 @@ class TestApportionmentCap:
         other = Condominium.objects.create(
             company=condominium.company, name="Outro", cnpj="45723174000110"
         )
-        _ = self.unit(other, "1", "0.9").save()
+        self.unit(other, "1", "0.9").save()
 
         self.unit(condominium, "1", "0.9").clean()
 
     def test_api_answers_400_on_the_field(self, condominium: Condominium) -> None:
-        _ = self.unit(condominium, "1", "0.6").save()
+        self.unit(condominium, "1", "0.6").save()
         serializer = UnitSerializer(
             data={"condominium": condominium.pk, "name": "2", "ideal_fraction": "0.5"}
         )

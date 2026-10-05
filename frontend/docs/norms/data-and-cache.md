@@ -21,9 +21,7 @@ Never write loose `fetch`/`axios` for API endpoints; never redeclare response ty
 ask the backend for new fields and regenerate.
 
 ## Request path (`lib/api/mutator.ts`, `lib/api-client.ts`)
-axios via `customInstance`; the query `signal` aborts stale requests. Base URL: browser `NEXT_PUBLIC_API_URL`, server
-`API_INTERNAL_URL`. Interceptor adds `Authorization: Bearer`. Browser 401 → one deduplicated refresh + retry, else clear cookies
-and go to `/login`; server renewal happens in `proxy.ts`. `/api/auth/*` is excluded (401 = bad credentials).
+axios via `customInstance`; the query `signal` aborts stale requests. Base URL: browser = its own origin (`/api/...`, served by the Next handler that holds the HttpOnly token), server `API_INTERNAL_URL` (SSR adds `Authorization: Bearer` from the cookie). Browser 401 → the session ended: go to `/login` (the handler already tried to renew); page renewal happens in `proxy.ts`. `/api/auth/*` is excluded (401 = bad credentials). See safeguards/auth-and-tokens.md.
 
 ## QueryClient (`lib/query/`)
 Server: `getServerQueryClient()` (React `cache`, **one per request**, never shared). Browser: `getBrowserQueryClient()` singleton.

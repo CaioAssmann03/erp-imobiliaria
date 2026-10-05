@@ -13,7 +13,14 @@ const TYPE_OPTIONS = [
   { value: "commercial", label: "Comercial" },
 ];
 
-type FilterKey = "status" | "type";
+const PENDING_OPTIONS = [
+  { value: "without_cost_centers", label: "Sem sub-contas" },
+  { value: "inconsistent_apportionment", label: "Rateio não fecha 100%" },
+  { value: "overdue_adjustment", label: "Reajuste atrasado" },
+  { value: "upcoming_adjustment", label: "Reajuste em 30 dias" },
+];
+
+type FilterKey = "status" | "type" | "pending";
 
 interface CondominiumsFiltersProps {
   search: string;
@@ -54,6 +61,13 @@ export function CondominiumsFilters({
             value: filters.type,
             onChange: (value) => onFilterChange("type", value),
             options: TYPE_OPTIONS,
+          },
+          {
+            key: "pending",
+            label: "Pendência",
+            value: filters.pending,
+            onChange: (value) => onFilterChange("pending", value),
+            options: PENDING_OPTIONS,
           },
         ]}
       />

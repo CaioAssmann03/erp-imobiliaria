@@ -5,14 +5,16 @@ Idempotente: rodar de novo não duplica. Só mexe nos registros criados por este
 """
 
 import random
+import re
+import unicodedata
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from decimal import Decimal
-from typing import Any
+from typing import Any, TypeVar
 
 from dateutil.relativedelta import relativedelta
 from django.core.management.base import BaseCommand, CommandParser
-from django.db import transaction
+from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 from typing_extensions import final, override
@@ -27,10 +29,26 @@ from apps.condominiums.models import (
     UnitPerson,
 )
 from apps.core.models import Company
-from apps.financeiro.models import CostCenter
+from apps.finance.models import CostCenter
 from apps.persons.models import PeopleIndividual, PeopleLegal, Person
 
 WRONG_APPORTIONMENT_TOTAL = Decimal("0.9")  # fractions that do not close at 1 (shows the pendency)
+
+ModelT = TypeVar("ModelT", bound=models.Model)
+
+
+def _create_validated(model_class: type[ModelT], **fields: Any) -> ModelT:
+    """Create a record only after the model's own rules (`full_clean()`) accept it."""
+    record = model_class(**fields)
+    record.full_clean()
+    record.save()
+    return record
+
+
+def _save_validated(record: models.Model) -> None:
+    """Save a changed record only after the model's own rules accept it."""
+    record.full_clean()
+    record.save()
 
 
 @dataclass(frozen=True)
@@ -252,7 +270,7 @@ def _random_phone(random_generator: random.Random) -> str:
     return f"(11) 9{random_generator.randint(1000, 9999)}-{random_generator.randint(1000, 9999)}"
 
 
-def _random_past_datetime(random_generator: random.Random, max_days_ago: int):  # noqa: ANN202
+def _random_past_datetime(random_generator: random.Random, max_days_ago: int) -> datetime:
     return timezone.now() - timedelta(
         days=random_generator.randint(1, max_days_ago), hours=random_generator.randint(0, 23)
     )
@@ -292,7 +310,8 @@ def _random_unit_fields(context: SeedContext, condominium_kind: str) -> dict[str
 def _create_address(context: SeedContext, position: int, demo: DemoCondominium) -> Address | None:
     if not demo.has_address:
         return None
-    return Address.objects.create(
+    return _create_validated(
+        Address,
         zip_code=demo.zip_code.replace("-", "") or None,
         street=STREETS[position % len(STREETS)],
         number=str(context.random_generator.randint(100, 2500)),
@@ -312,7 +331,8 @@ def _create_administration_contract(
         if days_until_adjustment is not None
         else None
     )
-    _ = AdministrationContract.objects.create(
+    _ = _create_validated(
+        AdministrationContract,
         condominium=condominium,
         fee_type=demo.fee_type,
         fee_amount=Decimal(demo.fee_value) if is_fixed else None,
@@ -324,24 +344,26 @@ def _create_administration_contract(
     )
 
 
-def _create_unit_links(context: SeedContext, unit: Unit) -> int:
-    """An owner (always) and, sometimes, a tenant. Returns how many links were created."""
+def _create_owner_link(context: SeedContext, unit: Unit) -> UnitPerson:
     random_generator = context.random_generator
-    owner = random_generator.choice(context.active_persons)
-    _ = UnitPerson.objects.create(
+    return _create_validated(
+        UnitPerson,
         unit=unit,
-        person=owner,
+        person=random_generator.choice(context.active_persons),
         role=UnitPerson.Role.OWNER,
         ownership_percentage=Decimal("100"),
         start_date=context.today - timedelta(days=random_generator.randint(700, 2000)),
     )
-    if random_generator.random() >= 0.3:
-        return 1
+
+
+def _create_tenant_link(context: SeedContext, unit: Unit, owner: UnitPerson) -> UnitPerson:
+    random_generator = context.random_generator
     tenant = random_generator.choice(
-        [person for person in context.active_persons if person.pk != owner.pk]
+        [person for person in context.active_persons if person.pk != owner.person_id]
     )
     days_until_lease_end = random_generator.choice(DAYS_UNTIL_LEASE_END)
-    _ = UnitPerson.objects.create(
+    return _create_validated(
+        UnitPerson,
         unit=unit,
         person=tenant,
         role=UnitPerson.Role.TENANT,
@@ -352,6 +374,14 @@ def _create_unit_links(context: SeedContext, unit: Unit) -> int:
             else None
         ),
     )
+
+
+def _create_unit_links(context: SeedContext, unit: Unit) -> int:
+    """An owner (always) and, sometimes, a tenant. Returns how many links were created."""
+    owner = _create_owner_link(context, unit)
+    if context.random_generator.random() >= 0.3:
+        return 1
+    _ = _create_tenant_link(context, unit, owner)
     return 2
 
 
@@ -361,17 +391,19 @@ def _create_units(
     """Blocks, units and their links. Returns (units created, links created)."""
     random_generator = context.random_generator
     blocks = [
-        Block.objects.create(condominium=condominium, name=block_name)
+        _create_validated(Block, condominium=condominium, name=block_name)
         for block_name in demo.block_names
     ]
     units_created = links_created = 0
     for number in range(random_generator.randint(5, 8)):
-        unit = Unit.objects.create(
+        unit = _create_validated(
+            Unit,
             condominium=condominium,
             block=blocks[number % len(blocks)] if blocks else None,
             name=str(UNIT_NUMBERS[number] + (number // 4) * 100),
             **_random_unit_fields(context, demo.kind),
         )
+        # `created_at` is auto_now_add: only a queryset update can backdate it (no rule involved).
         _ = Unit.objects.filter(pk=unit.pk).update(
             created_at=_random_past_datetime(random_generator, 170)
         )
@@ -386,7 +418,8 @@ def _create_condominium(
     context: SeedContext, position: int, demo: DemoCondominium
 ) -> tuple[int, int]:
     """One demo condominium with its address, contract, billing rules and units."""
-    condominium = Condominium.objects.create(
+    condominium = _create_validated(
+        Condominium,
         company=context.company,
         address=_create_address(context, position, demo),
         name=demo.name,
@@ -398,35 +431,49 @@ def _create_condominium(
         created_at=_random_past_datetime(context.random_generator, 175)
     )
     _create_administration_contract(context, condominium, demo)
-    _ = BillingRules.objects.create(
-        condominium=condominium, due_day=context.random_generator.choice([5, 10, 15])
+    _ = _create_validated(
+        BillingRules,
+        condominium=condominium,
+        due_day=context.random_generator.choice([5, 10, 15]),
     )
     return _create_units(context, condominium, demo)
+
+
+def _email_slug(name: str) -> str:
+    """ASCII, dot-separated, at most 24 characters: always a valid e-mail local part."""
+    ascii_name = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode().lower()
+    without_suffix = re.sub(r"\b(ltda|s\.a\.)", "", ascii_name)
+    words = [word for word in re.split(r"[^a-z0-9]+", without_suffix) if word]
+    return ".".join(words)[:24].strip(".")
 
 
 def _random_person_fields(
     random_generator: random.Random, position: int, name: str
 ) -> dict[str, Any]:
     has_missing_contact = position % 7 == 3  # some people have no email/cell (pending item)
-    slug = name.lower().replace(" ", ".").replace(".ltda", "").replace(".s.a.", "")
     return {
         "name": name,
         "cell_number": None if has_missing_contact else _random_phone(random_generator),
-        "email": "" if has_missing_contact else f"{slug[:24]}@exemplo.com.br",
+        "email": "" if has_missing_contact else f"{_email_slug(name)}@exemplo.com.br",
         "active": position % 11 != 10,
     }
 
 
 def _create_person(
-    random_generator: random.Random, position: int, definition: tuple[str, str, str]
+    company: Company,
+    random_generator: random.Random,
+    position: int,
+    definition: tuple[str, str, str],
 ) -> Person:
     name, kind, document = definition
-    person = Person.objects.create(
-        **_random_person_fields(random_generator, position, name)
+    person = _create_validated(
+        Person, company=company, **_random_person_fields(random_generator, position, name)
     )
     if kind == "individual":
-        _ = PeopleIndividual.objects.create(
+        _ = _create_validated(
+            PeopleIndividual,
             person=person,
+            company=company,
             cpf=document,
             marital_status=random_generator.choice(
                 ["Solteiro(a)", "Casado(a)", "Divorciado(a)"]
@@ -436,7 +483,7 @@ def _create_person(
             ),
         )
     else:
-        _ = PeopleLegal.objects.create(person=person, cnpj=document)
+        _ = _create_validated(PeopleLegal, person=person, company=company, cnpj=document)
     _ = Person.objects.filter(pk=person.pk).update(
         created_at=_random_past_datetime(random_generator, 170)
     )
@@ -452,9 +499,20 @@ def _assign_ideal_fractions(
     if units:
         fractions[-1] += target_total - sum(fractions)  # rounding: close exactly at the target
     for unit, fraction in zip(units, fractions):
-        _ = Unit.objects.filter(pk=unit.pk).update(
-            ideal_fraction=fraction.quantize(Decimal("0.00000001"))
-        )
+        unit.ideal_fraction = fraction.quantize(Decimal("0.00000001"))
+        _save_validated(unit)
+
+
+def _create_demo_condominiums(context: SeedContext) -> tuple[int, int]:
+    """Create the demo condominiums that do not exist yet. Returns (units, links) created."""
+    units_created = links_created = 0
+    for position, demo in enumerate(DEMO_CONDOMINIUMS):
+        if Condominium.objects.filter(name=demo.name).exists():
+            continue
+        new_units, new_links = _create_condominium(context, position, demo)
+        units_created += new_units
+        links_created += new_links
+    return units_created, links_created
 
 
 class Command(BaseCommand):
@@ -507,16 +565,18 @@ class Command(BaseCommand):
             )
             if demo.has_cost_centers:
                 for name in COST_CENTERS:
-                    _ = CostCenter.objects.get_or_create(condominium=condominium, name=name)
+                    if not CostCenter.objects.filter(condominium=condominium, name=name).exists():
+                        _ = _create_validated(CostCenter, condominium=condominium, name=name)
 
         # Um condomínio com uma unidade de cobrança bloqueada.
         blocked_unit = Unit.objects.filter(
             condominium__name=DEMO_CONDOMINIUMS[0].name, active=True
         ).first()
         if blocked_unit:
-            _ = Unit.objects.filter(pk=blocked_unit.pk).update(is_billing_blocked=True)
+            blocked_unit.is_billing_blocked = True
+            _save_validated(blocked_unit)
 
-    def _create_persons(self, random_generator: random.Random) -> list[Person]:
+    def _create_persons(self, company: Company, random_generator: random.Random) -> list[Person]:
         persons: list[Person] = []
         for position, definition in enumerate(_demo_person_definitions()):
             document = definition[2]
@@ -524,7 +584,7 @@ class Command(BaseCommand):
                 Q(people_individual__cpf=document) | Q(people_legal__cnpj=document)
             ).first()
             persons.append(
-                existing_person or _create_person(random_generator, position, definition)
+                existing_person or _create_person(company, random_generator, position, definition)
             )
         return persons
 
@@ -535,27 +595,21 @@ class Command(BaseCommand):
             return
 
         random_generator = random.Random(42)
-        persons = self._create_persons(random_generator)
+        persons = self._create_persons(company, random_generator)
         context = SeedContext(
             random_generator=random_generator,
             company=company,
             active_persons=[person for person in persons if person.active] or persons,
             today=timezone.localdate(),
         )
-
-        units_created = links_created = 0
-        for position, demo in enumerate(DEMO_CONDOMINIUMS):
-            if Condominium.objects.filter(name=demo.name).exists():
-                continue
-            new_units, new_links = _create_condominium(context, position, demo)
-            units_created += new_units
-            links_created += new_links
-
+        units_created, links_created = _create_demo_condominiums(context)
         self._finalize(random_generator)
+        self._report(len(persons), units_created, links_created)
 
+    def _report(self, persons_count: int, units_created: int, links_created: int) -> None:
         self.stdout.write(
             self.style.SUCCESS(
-                f"Dados de exemplo prontos: {len(persons)} pessoas, {len(DEMO_CONDOMINIUMS)} condomínios, "
+                f"Dados de exemplo prontos: {persons_count} pessoas, {len(DEMO_CONDOMINIUMS)} condomínios, "
                 f"{units_created} unidades e {links_created} vínculos."
             )
         )

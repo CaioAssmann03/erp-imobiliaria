@@ -5,6 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { UnitsListPending } from './unitsListPending';
 import type { UnitsListType } from './unitsListType';
 
 export type UnitsListParams = {
@@ -20,6 +21,12 @@ limit?: number;
  * Um número de página dentro do conjunto de resultados paginado.
  */
 page?: number;
+/**
+ * * `without_responsible` - Without responsible
+ * * `lease_ending` - Lease ending
+ * * `billing_blocked` - Billing blocked
+ */
+pending?: UnitsListPending;
 /**
  * Termo de busca (nome, documento…).
  */

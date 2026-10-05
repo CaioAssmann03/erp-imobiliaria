@@ -5,6 +5,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
+from apps.core.testing import seeded_company
 from apps.persons.models import Person
 
 from ..models import Condominium, Unit, UnitPerson
@@ -64,7 +65,7 @@ def unit(condominium: Condominium) -> Unit:
 
 @pytest.fixture
 def person() -> Person:
-    return Person.objects.create(name="Maria")
+    return Person.objects.create(company=seeded_company(), name="Maria")
 
 
 @pytest.mark.django_db
@@ -185,7 +186,7 @@ class TestOwnersCap:
         )
 
     def other_person(self, name: str) -> Person:
-        return Person.objects.create(name=name)
+        return Person.objects.create(company=seeded_company(), name=name)
 
     def test_overlapping_owners_over_100_are_rejected(self, unit: Unit, person: Person) -> None:
         self.owner(unit, person, "60", date(2024, 1, 1)).save()

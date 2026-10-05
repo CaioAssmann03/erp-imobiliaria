@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from ..models import PeopleIndividual, PeopleLegal, Person
-from .base import CNPJ_A, CPF_A, body, make_individual, make_legal
+from .base import CNPJ_A, CPF_A, body, error_codes, make_individual, make_legal
 
 pytestmark = pytest.mark.django_db
 
@@ -43,7 +43,7 @@ def test_create_requires_name(api_client: APIClient, list_url: str) -> None:
     response = api_client.post(list_url, {"email": "a@b.com"}, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "name" in body(response)
+    assert error_codes(response, "name") == ["required"]
 
 
 def test_create_rejects_invalid_cpf(api_client: APIClient, list_url: str) -> None:
@@ -100,7 +100,7 @@ def test_create_rejects_invalid_email(api_client: APIClient, list_url: str) -> N
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "email" in body(response)
+    assert error_codes(response, "email") == ["invalid"]
 
 
 def test_requires_authentication(list_url: str) -> None:

@@ -1,6 +1,5 @@
 import { Caption } from "./Caption";
 import { LinkButton } from "@/components/LinkButton";
-import { SeeAllLink } from "../SeeAllLink";
 
 import type { WidgetBuilder } from "./types";
 
@@ -17,41 +16,54 @@ function TypeList({ items }: { items: { title: string; total: number }[] }) {
   );
 }
 
+function Stat({ label, total, active }: { label: string; total: number | undefined; active: number | undefined }) {
+  return (
+    <div>
+      <Caption>{label}</Caption>
+      <div className="text-heading tabular-nums">
+        {total ?? "–"}
+        <span className="text-caption font-normal text-ink-faint"> · {active ?? "–"} ativos</span>
+      </div>
+    </div>
+  );
+}
+
+/** Faixa de números do topo: cadastros em uma linha, com os atalhos de cadastro. */
 export const buildCondominiumsWidget: WidgetBuilder = (dash) => ({
-  title: "Condomínios administrados",
-  className: "lg:col-span-5",
+  title: "Resumo dos cadastros",
+  className: "lg:col-span-12",
   showHeader: false,
   render: (large) => (
     <>
-      <div className="rounded-panel bg-surface-muted p-4">
-        <Caption>Condomínios administrados</Caption>
-        <div className="mt-1 text-display tabular-nums">{dash?.condominiums.total ?? "–"}</div>
-        <div className="mt-4 flex rounded-full bg-surface p-0.5">
-          <LinkButton className="flex-1" href="/condominiums/new">
-            Novo condomínio
-          </LinkButton>
-          <LinkButton className="flex-1" variant="ghost" href="/persons/new">
+      <div className="flex flex-wrap items-center justify-between gap-x-10 gap-y-4">
+        <div className="flex flex-wrap gap-x-10 gap-y-3">
+          <Stat label="Condomínios" total={dash?.condominiums.total} active={dash?.condominiums.active} />
+          <Stat label="Unidades" total={dash?.units.total} active={dash?.units.active} />
+          <Stat label="Pessoas" total={dash?.persons.total} active={dash?.persons.active} />
+        </div>
+        <div className="flex gap-2">
+          <LinkButton variant="secondary" href="/persons/new">
             Nova pessoa
           </LinkButton>
+          <LinkButton href="/condominiums/new">Novo condomínio</LinkButton>
         </div>
       </div>
-      <div className="mt-4 flex items-start justify-between gap-6 px-1">
-        <div>
-          <Caption>Em operação</Caption>
-          <div className="text-heading tabular-nums">
-            {dash?.condominiums.active ?? "–"}
-            <span className="font-normal text-ink-faint"> de {dash?.condominiums.total ?? "–"}</span>
-          </div>
-        </div>
-        {large ? (
-          <div className="min-w-40">
-            <Caption>Por tipo</Caption>
+      {large && (
+        <div className="mt-6 grid gap-6 sm:grid-cols-3">
+          <div>
+            <Caption>Condomínios por tipo</Caption>
             <TypeList items={dash?.condominiums.by_type ?? []} />
           </div>
-        ) : (
-          <SeeAllLink href="/condominiums" />
-        )}
-      </div>
+          <div>
+            <Caption>Unidades por tipo</Caption>
+            <TypeList items={dash?.units.by_type ?? []} />
+          </div>
+          <div>
+            <Caption>Pessoas por tipo</Caption>
+            <TypeList items={dash?.persons.by_type ?? []} />
+          </div>
+        </div>
+      )}
     </>
   ),
 });

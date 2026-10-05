@@ -44,8 +44,9 @@ seu *root directory*) com as variáveis do `render.yaml`. Pontos importantes:
 
 - O backend sobe pelo `backend/entrypoint.sh`: roda `migrate`, `collectstatic`, cria o admin (se
   `DJANGO_SUPERUSER_*` estiverem definidos) e inicia o gunicorn na porta de `PORT`.
-- O frontend usa o último estágio do `frontend/Dockerfile` (produção). `NEXT_PUBLIC_API_URL` é
-  embutida no build; `API_INTERNAL_URL` é lida em tempo de execução pelo servidor Next.
+- O frontend usa o último estágio do `frontend/Dockerfile` (produção). O navegador só fala com o Next
+  (mesma origem); o servidor Next chama o Django por `API_INTERNAL_URL` (variável só do servidor, em tempo de
+  execução) e `INTERNAL_API_KEY` (a mesma do backend) identifica essas chamadas.
 - `ALLOWED_HOSTS` (backend) = domínio do backend; `CORS_ALLOWED_ORIGINS` = URL do frontend.
 - Plano free: serviços dormem sem uso, o Postgres gratuito expira em 30 dias e não há workers
   (Celery fica de fora até haver tarefas).

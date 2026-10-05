@@ -1,5 +1,4 @@
 import pytest
-from apps.accounts.models import User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -15,10 +14,8 @@ LIST_ROUTES = ("condominium-list", "block-list", "unit-list", "unit-person-list"
 
 
 @pytest.fixture
-def client(db: None) -> APIClient:
-    api = APIClient()
-    api.force_authenticate(user=User.objects.create_user("tester", password="x"))
-    return api
+def client(api_client: APIClient) -> APIClient:
+    return api_client
 
 
 @pytest.mark.parametrize("route", LIST_ROUTES)
@@ -59,8 +56,8 @@ def test_filters_and_search(client: APIClient, company: Company, condominium: Co
 
     by_active = body(client.get(reverse("condominium-list"), {"active": "false"}))
     by_search = body(client.get(reverse("condominium-list"), {"query": "sol"}))
-    by_condominium = body(client.get(reverse("unit-list"), {"condominium": other.pk}))
-    blocks = body(client.get(reverse("block-list"), {"condominium": condominium.pk}))
+    by_condominium = body(client.get(reverse("unit-list"), {"condominium": str(other.pk)}))
+    blocks = body(client.get(reverse("block-list"), {"condominium": str(condominium.pk)}))
 
     assert [condominium["name"] for condominium in by_active["results"]] == ["Outro Prédio"]
     assert [condominium["name"] for condominium in by_search["results"]] == ["Residencial Sol"]

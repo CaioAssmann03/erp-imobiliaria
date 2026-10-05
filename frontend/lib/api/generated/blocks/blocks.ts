@@ -27,6 +27,7 @@ import type {
 import type {
   Block,
   BlocksListParams,
+  ErrorResponse,
   PaginatedBlockList,
   PatchedBlock
 } from '../models';
@@ -78,6 +79,11 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+/**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
 export const blocksList = (
     params?: BlocksListParams,
  signal?: AbortSignal
@@ -101,7 +107,7 @@ export const getBlocksListQueryKey = (params?: BlocksListParams,) => {
     }
 
 
-export const getBlocksListQueryOptions = <TData = Awaited<ReturnType<typeof blocksList>>, TError = unknown>(params?: BlocksListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof blocksList>>, TError, TData>>, }
+export const getBlocksListQueryOptions = <TData = Awaited<ReturnType<typeof blocksList>>, TError = ErrorResponse>(params?: BlocksListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof blocksList>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -120,10 +126,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type BlocksListQueryResult = NonNullable<Awaited<ReturnType<typeof blocksList>>>
-export type BlocksListQueryError = unknown
+export type BlocksListQueryError = ErrorResponse
 
 
-export function useBlocksList<TData = Awaited<ReturnType<typeof blocksList>>, TError = unknown>(
+export function useBlocksList<TData = Awaited<ReturnType<typeof blocksList>>, TError = ErrorResponse>(
  params: undefined |  BlocksListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof blocksList>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof blocksList>>,
@@ -133,7 +139,7 @@ export function useBlocksList<TData = Awaited<ReturnType<typeof blocksList>>, TE
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useBlocksList<TData = Awaited<ReturnType<typeof blocksList>>, TError = unknown>(
+export function useBlocksList<TData = Awaited<ReturnType<typeof blocksList>>, TError = ErrorResponse>(
  params?: BlocksListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof blocksList>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof blocksList>>,
@@ -143,12 +149,12 @@ export function useBlocksList<TData = Awaited<ReturnType<typeof blocksList>>, TE
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useBlocksList<TData = Awaited<ReturnType<typeof blocksList>>, TError = unknown>(
+export function useBlocksList<TData = Awaited<ReturnType<typeof blocksList>>, TError = ErrorResponse>(
  params?: BlocksListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof blocksList>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useBlocksList<TData = Awaited<ReturnType<typeof blocksList>>, TError = unknown>(
+export function useBlocksList<TData = Awaited<ReturnType<typeof blocksList>>, TError = ErrorResponse>(
  params?: BlocksListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof blocksList>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -165,6 +171,11 @@ export function useBlocksList<TData = Awaited<ReturnType<typeof blocksList>>, TE
 
 
 
+/**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
 export const blocksCreate = (
     block: NonReadonly<Block>,
  signal?: AbortSignal
@@ -184,7 +195,7 @@ export const blocksCreate = (
 
 export const getBlocksCreateMutationKey = () => ['blocksCreate'] as const;
 
-export const getBlocksCreateMutationOptions = <TError = unknown,
+export const getBlocksCreateMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof blocksCreate>>, TError,BlocksCreateMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof blocksCreate>>, TError,BlocksCreateMutationVariables, TContext> => {
 
@@ -213,10 +224,10 @@ const {mutation: mutationOptions} = options ?
 
     export type BlocksCreateMutationResult = NonNullable<Awaited<ReturnType<typeof blocksCreate>>>
     export type BlocksCreateMutationBody = NonReadonly<Block>
-    export type BlocksCreateMutationError = unknown
+    export type BlocksCreateMutationError = ErrorResponse
     export type BlocksCreateMutationVariables = {data: NonReadonly<Block>}
 
-    export const useBlocksCreate = <TError = unknown,
+    export const useBlocksCreate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof blocksCreate>>, TError,BlocksCreateMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof blocksCreate>>,
@@ -226,7 +237,12 @@ const {mutation: mutationOptions} = options ?
       > => {
       return useMutation(getBlocksCreateMutationOptions(options), queryClient);
     }
-    export const blocksRetrieve = (
+    /**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
+export const blocksRetrieve = (
     id: string,
  signal?: AbortSignal
 ) => {
@@ -248,7 +264,7 @@ export const getBlocksRetrieveQueryKey = (id: string,) => {
     }
 
 
-export const getBlocksRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof blocksRetrieve>>, TError = unknown>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof blocksRetrieve>>, TError, TData>>, }
+export const getBlocksRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof blocksRetrieve>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof blocksRetrieve>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -267,10 +283,10 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type BlocksRetrieveQueryResult = NonNullable<Awaited<ReturnType<typeof blocksRetrieve>>>
-export type BlocksRetrieveQueryError = unknown
+export type BlocksRetrieveQueryError = ErrorResponse
 
 
-export function useBlocksRetrieve<TData = Awaited<ReturnType<typeof blocksRetrieve>>, TError = unknown>(
+export function useBlocksRetrieve<TData = Awaited<ReturnType<typeof blocksRetrieve>>, TError = ErrorResponse>(
  id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof blocksRetrieve>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof blocksRetrieve>>,
@@ -280,7 +296,7 @@ export function useBlocksRetrieve<TData = Awaited<ReturnType<typeof blocksRetrie
       >, }
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useBlocksRetrieve<TData = Awaited<ReturnType<typeof blocksRetrieve>>, TError = unknown>(
+export function useBlocksRetrieve<TData = Awaited<ReturnType<typeof blocksRetrieve>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof blocksRetrieve>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof blocksRetrieve>>,
@@ -290,12 +306,12 @@ export function useBlocksRetrieve<TData = Awaited<ReturnType<typeof blocksRetrie
       >, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useBlocksRetrieve<TData = Awaited<ReturnType<typeof blocksRetrieve>>, TError = unknown>(
+export function useBlocksRetrieve<TData = Awaited<ReturnType<typeof blocksRetrieve>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof blocksRetrieve>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useBlocksRetrieve<TData = Awaited<ReturnType<typeof blocksRetrieve>>, TError = unknown>(
+export function useBlocksRetrieve<TData = Awaited<ReturnType<typeof blocksRetrieve>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof blocksRetrieve>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -312,6 +328,11 @@ export function useBlocksRetrieve<TData = Awaited<ReturnType<typeof blocksRetrie
 
 
 
+/**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
 export const blocksUpdate = (
     id: string,
     block: NonReadonly<Block>,
@@ -332,7 +353,7 @@ export const blocksUpdate = (
 
 export const getBlocksUpdateMutationKey = () => ['blocksUpdate'] as const;
 
-export const getBlocksUpdateMutationOptions = <TError = unknown,
+export const getBlocksUpdateMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof blocksUpdate>>, TError,BlocksUpdateMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof blocksUpdate>>, TError,BlocksUpdateMutationVariables, TContext> => {
 
@@ -361,10 +382,10 @@ const {mutation: mutationOptions} = options ?
 
     export type BlocksUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof blocksUpdate>>>
     export type BlocksUpdateMutationBody = NonReadonly<Block>
-    export type BlocksUpdateMutationError = unknown
+    export type BlocksUpdateMutationError = ErrorResponse
     export type BlocksUpdateMutationVariables = {id: string;data: NonReadonly<Block>}
 
-    export const useBlocksUpdate = <TError = unknown,
+    export const useBlocksUpdate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof blocksUpdate>>, TError,BlocksUpdateMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof blocksUpdate>>,
@@ -374,7 +395,12 @@ const {mutation: mutationOptions} = options ?
       > => {
       return useMutation(getBlocksUpdateMutationOptions(options), queryClient);
     }
-    export const blocksPartialUpdate = (
+    /**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
+export const blocksPartialUpdate = (
     id: string,
     patchedBlock?: NonReadonly<PatchedBlock>,
  signal?: AbortSignal
@@ -394,7 +420,7 @@ const {mutation: mutationOptions} = options ?
 
 export const getBlocksPartialUpdateMutationKey = () => ['blocksPartialUpdate'] as const;
 
-export const getBlocksPartialUpdateMutationOptions = <TError = unknown,
+export const getBlocksPartialUpdateMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof blocksPartialUpdate>>, TError,BlocksPartialUpdateMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof blocksPartialUpdate>>, TError,BlocksPartialUpdateMutationVariables, TContext> => {
 
@@ -423,10 +449,10 @@ const {mutation: mutationOptions} = options ?
 
     export type BlocksPartialUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof blocksPartialUpdate>>>
     export type BlocksPartialUpdateMutationBody = NonReadonly<PatchedBlock> | undefined
-    export type BlocksPartialUpdateMutationError = unknown
+    export type BlocksPartialUpdateMutationError = ErrorResponse
     export type BlocksPartialUpdateMutationVariables = {id: string;data?: NonReadonly<PatchedBlock>}
 
-    export const useBlocksPartialUpdate = <TError = unknown,
+    export const useBlocksPartialUpdate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof blocksPartialUpdate>>, TError,BlocksPartialUpdateMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof blocksPartialUpdate>>,
@@ -436,7 +462,12 @@ const {mutation: mutationOptions} = options ?
       > => {
       return useMutation(getBlocksPartialUpdateMutationOptions(options), queryClient);
     }
-    export const blocksDestroy = (
+    /**
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
+ */
+export const blocksDestroy = (
     id: string,
  signal?: AbortSignal
 ) => {
@@ -453,7 +484,7 @@ const {mutation: mutationOptions} = options ?
 
 export const getBlocksDestroyMutationKey = () => ['blocksDestroy'] as const;
 
-export const getBlocksDestroyMutationOptions = <TError = unknown,
+export const getBlocksDestroyMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof blocksDestroy>>, TError,BlocksDestroyMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof blocksDestroy>>, TError,BlocksDestroyMutationVariables, TContext> => {
 
@@ -482,10 +513,10 @@ const {mutation: mutationOptions} = options ?
 
     export type BlocksDestroyMutationResult = NonNullable<Awaited<ReturnType<typeof blocksDestroy>>>
 
-    export type BlocksDestroyMutationError = unknown
+    export type BlocksDestroyMutationError = ErrorResponse
     export type BlocksDestroyMutationVariables = {id: string}
 
-    export const useBlocksDestroy = <TError = unknown,
+    export const useBlocksDestroy = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof blocksDestroy>>, TError,BlocksDestroyMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof blocksDestroy>>,

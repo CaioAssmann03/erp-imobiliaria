@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
-from typing import Any, TypedDict
+from typing import Any, TypedDict, cast
 
 from django.db import models
 from django.db.models import Count, Exists, OuterRef, Q, Sum, TextChoices
@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from typing_extensions import final
 
+from apps.condominiums.models.unit_person import UnitPersonQuerySet
 from apps.condominiums.models import (
     AdministrationContract,
     Condominium,
@@ -19,22 +20,48 @@ from apps.condominiums.models import (
     UnitPerson,
 )
 from apps.core.dates import add_months
+from apps.core.scoping import scope_to_company
+from apps.finance.models import AccountPayable
+from apps.finance.models.account_payable import AccountPayableQuerySet
 from apps.persons.models import Person
 
 from ..serializers import DashboardSerializer
 
 ADJUSTMENT_MONTHS = 6  # meses futuros exibidos no gráfico de reajustes
-LEASE_DAYS_BEFORE = 30  # dias: locações já encerradas ainda exibidas (renovação pendente)
-LEASE_DAYS_AFTER = 60  # dias: locações que terminam em breve
-NEXT_ADJUSTMENTS_ALERT_DAYS = 30  # dias: janela do contador "reajustes em 30 dias"
 TOP_LIST = 6
+PAYABLE_DAYS_AHEAD = 7  # dias: janela de "vencem nos próximos dias"
+
+
+@dataclass(frozen=True)
+class ScopedData:
+    """The records the dashboard reads, already limited to the user's company (spec 004)."""
+
+    condominiums: models.QuerySet[Condominium]
+    units: models.QuerySet[Unit]
+    persons: models.QuerySet[Person]
+    contracts: models.QuerySet[AdministrationContract]
+    unit_people: models.QuerySet[UnitPerson]
+    accounts_payable: AccountPayableQuerySet
+
+    @classmethod
+    def for_user(cls, user: Any) -> "ScopedData":
+        return cls(
+            condominiums=scope_to_company(Condominium.objects.all(), user),
+            units=scope_to_company(Unit.objects.all(), user),
+            persons=scope_to_company(Person.objects.all(), user),
+            contracts=scope_to_company(AdministrationContract.objects.all(), user),
+            unit_people=scope_to_company(UnitPerson.objects.all(), user),
+            accounts_payable=cast(
+                AccountPayableQuerySet, scope_to_company(AccountPayable.objects.all(), user)
+            ),
+        )
 
 
 class Adjustment(TypedDict):
     id: object
     name: str
     date: date
-    index: str
+    adjustment_index: str
     overdue: bool
 
 
@@ -58,8 +85,7 @@ def _summary(
     }
 
 
-def _persons_summary() -> dict[str, object]:
-    persons = Person.objects.all()
+def _persons_summary(persons: models.QuerySet[Person]) -> dict[str, object]:
     aggregate = persons.aggregate(
         total=Count("pk"),
         active=Count("pk", filter=Q(active=True)),
@@ -80,9 +106,11 @@ def _persons_summary() -> dict[str, object]:
     }
 
 
-def _upcoming_adjustments(reference_date: date) -> list[Adjustment]:
+def _upcoming_adjustments(
+    reference_date: date, all_contracts: models.QuerySet[AdministrationContract]
+) -> list[Adjustment]:
     """Próximo reajuste de cada condomínio ativo: base + periodicidade (ordenado por data)."""
-    contracts = AdministrationContract.objects.filter(
+    contracts = all_contracts.filter(
         condominium__active=True, adjustment_base_date__isnull=False
     ).select_related("condominium")
     adjustments: list[Adjustment] = []
@@ -94,7 +122,7 @@ def _upcoming_adjustments(reference_date: date) -> list[Adjustment]:
                 "id": contract.condominium_id,
                 "name": contract.condominium.name,
                 "date": next_date,
-                "index": contract.adjustment_index,
+                "adjustment_index": contract.adjustment_index,
                 "overdue": contract.is_adjustment_overdue(reference_date),
             }
         )
@@ -119,8 +147,10 @@ def _adjustments_by_month(
     ]
 
 
-def _fixed_revenue() -> dict[str, object]:
-    contracts = AdministrationContract.objects.filter(condominium__active=True)
+def _fixed_revenue(
+    all_contracts: models.QuerySet[AdministrationContract],
+) -> dict[str, object]:
+    contracts = all_contracts.filter(condominium__active=True)
     fixed = contracts.filter(fee_type=AdministrationContract.FeeType.FIXED)
     total = fixed.aggregate(total=Sum("fee_amount"))["total"] or Decimal("0")
     largest = fixed.filter(fee_amount__gt=0).select_related("condominium")
@@ -141,18 +171,11 @@ def _fixed_revenue() -> dict[str, object]:
     }
 
 
-def _leases_ending_soon(reference_date: date):  # noqa: ANN202
-    return (
-        UnitPerson.objects.filter(
-            role=UnitPerson.Role.TENANT,
-            unit__active=True,
-            end_date__isnull=False,
-            end_date__gte=reference_date - timedelta(days=LEASE_DAYS_BEFORE),
-            end_date__lte=reference_date + timedelta(days=LEASE_DAYS_AFTER),
-        )
-        .select_related("unit__condominium", "person")
-        .order_by("end_date")
-    )
+def _leases_ending_soon(
+    reference_date: date, unit_people: models.QuerySet[UnitPerson]
+) -> models.QuerySet[UnitPerson]:
+    ending = cast(UnitPersonQuerySet, unit_people).leases_ending_soon(reference_date)
+    return ending.select_related("unit__condominium", "person").order_by("end_date")
 
 
 @dataclass(frozen=True)
@@ -162,27 +185,30 @@ class DashboardContext:
     reference_date: date
     adjustments: list[Adjustment]
     leases: models.QuerySet[UnitPerson]
-    active_units: models.QuerySet[Unit]  # annotated with `has_responsible`
+    active_units: models.QuerySet[Unit]
+    units_with_responsible: models.QuerySet[Unit]
+    units_without_responsible: models.QuerySet[Unit]
 
     @classmethod
-    def for_date(cls, reference_date: date) -> "DashboardContext":
-        active_units = Unit.objects.filter(active=True).annotate(
-            has_responsible=Exists(
-                UnitPerson.objects.current(reference_date).filter(unit=OuterRef("pk"))
-            )
+    def for_date(cls, reference_date: date, data: ScopedData) -> "DashboardContext":
+        has_current_link = Exists(
+            UnitPerson.objects.current(reference_date).filter(unit=OuterRef("pk"))
         )
+        active_units = data.units.filter(active=True)
         return cls(
             reference_date=reference_date,
-            adjustments=_upcoming_adjustments(reference_date),
-            leases=_leases_ending_soon(reference_date),
+            adjustments=_upcoming_adjustments(reference_date, data.contracts),
+            leases=_leases_ending_soon(reference_date, data.unit_people),
             active_units=active_units,
+            units_with_responsible=active_units.filter(has_current_link),
+            units_without_responsible=data.units.without_responsible(reference_date),  # type: ignore[attr-defined]
         )
 
 
 def _responsibles(context: DashboardContext) -> dict[str, int]:
     return {
         "active_units": context.active_units.count(),
-        "with_responsible": context.active_units.filter(has_responsible=True).count(),
+        "with_responsible": context.units_with_responsible.count(),
     }
 
 
@@ -201,32 +227,67 @@ def _lease_entries(context: DashboardContext) -> list[dict[str, Any]]:
     ]
 
 
-def _adjustments_due_within_alert_window(context: DashboardContext) -> int:
-    window_end = context.reference_date + timedelta(days=NEXT_ADJUSTMENTS_ALERT_DAYS)
-    return sum(
-        1
-        for adjustment in context.adjustments
-        if context.reference_date <= adjustment["date"] <= window_end
-    )
-
-
-def _pending_counters(context: DashboardContext) -> dict[str, int]:
+def _pending_counters(context: DashboardContext, data: ScopedData) -> dict[str, int]:
+    inconsistent_ids = Unit.objects.inconsistent_apportionment_condominium_ids()
     return {
-        "units_without_responsible": context.active_units.filter(has_responsible=False).count(),
-        "inconsistent_apportionment": len(
-            Unit.objects.inconsistent_apportionment_condominium_ids()
-        ),
-        "overdue_adjustments": sum(
-            1 for adjustment in context.adjustments if adjustment["overdue"]
-        ),
-        "adjustments_next_30_days": _adjustments_due_within_alert_window(context),
-        "leases_ending": context.leases.count(),
-        "without_cost_centers": Condominium.objects.filter(
-            active=True, cost_centers__isnull=True
+        "units_without_responsible": context.units_without_responsible.count(),
+        "inconsistent_apportionment": data.condominiums.filter(
+            pk__in=inconsistent_ids
         ).count(),
-        "billing_blocked_units": Unit.objects.filter(
+        "overdue_adjustments": len(
+            data.contracts.overdue_adjustment_condominium_ids(context.reference_date)  # type: ignore[attr-defined]
+        ),
+        "adjustments_next_30_days": len(
+            data.contracts.upcoming_adjustment_condominium_ids(context.reference_date)  # type: ignore[attr-defined]
+        ),
+        "leases_ending": context.leases.count(),
+        "without_cost_centers": data.condominiums.without_cost_centers().count(),  # type: ignore[attr-defined]
+        "billing_blocked_units": data.units.filter(
             active=True, is_billing_blocked=True
         ).count(),
+    }
+
+
+def _payable_total(accounts: AccountPayableQuerySet) -> dict[str, object]:
+    aggregate = accounts.aggregate(count=Count("pk"), total=Sum("amount"))
+    return {"count": aggregate["count"], "total": aggregate["total"] or Decimal("0")}
+
+
+def _accounts_payable(
+    reference_date: date, accounts: AccountPayableQuerySet
+) -> dict[str, Any]:
+    """Open accounts to pay by due window (company expenses included) and the oldest ones."""
+    month_start = reference_date.replace(day=1)
+    month_end = add_months(month_start, 1) - timedelta(days=1)
+    upcoming = (
+        accounts.open()
+        .select_related("supplier__person", "condominium")
+        .order_by("due_date", "created_at")[:TOP_LIST]
+    )
+    return {
+        "overdue": _payable_total(accounts.overdue(reference_date)),
+        "due_today": _payable_total(accounts.due_between(reference_date, reference_date)),
+        "due_next_7_days": _payable_total(
+            accounts.due_between(
+                reference_date + timedelta(days=1),
+                reference_date + timedelta(days=PAYABLE_DAYS_AHEAD),
+            )
+        ),
+        "due_this_month": _payable_total(accounts.due_between(month_start, month_end)),
+        "upcoming": [
+            {
+                "id": account.pk,
+                "description": account.description,
+                "supplier_name": account.supplier.person.name,
+                "condominium_name": (
+                    account.condominium.name if account.condominium is not None else None
+                ),
+                "due_date": account.due_date,
+                "amount": account.amount,
+                "overdue": account.due_date < reference_date,
+            }
+            for account in upcoming
+        ],
     }
 
 
@@ -236,21 +297,23 @@ class DashboardView(APIView):
 
     @extend_schema(responses=DashboardSerializer, operation_id="dashboard_retrieve")
     def get(self, request: Request) -> Response:
-        context = DashboardContext.for_date(timezone.localdate())
+        data = ScopedData.for_user(request.user)
+        context = DashboardContext.for_date(timezone.localdate(), data)
 
         dashboard: dict[str, Any] = {
-            "condominiums": _summary(
-                Condominium.objects.all(), "type", Condominium.CondominiumType
-            ),
-            "units": _summary(Unit.objects.all(), "type", Unit.UnitType),
-            "persons": _persons_summary(),
+            "condominiums": _summary(data.condominiums, "type", Condominium.CondominiumType),
+            "units": _summary(data.units, "type", Unit.UnitType),
+            "persons": _persons_summary(data.persons),
             "responsibles": _responsibles(context),
             "adjustments_by_month": _adjustments_by_month(
                 context.adjustments, context.reference_date
             ),
             "upcoming_adjustments": context.adjustments[:TOP_LIST],
-            "fixed_revenue": _fixed_revenue(),
+            "fixed_revenue": _fixed_revenue(data.contracts),
             "leases": _lease_entries(context),
-            "pending": _pending_counters(context),
+            "pending": _pending_counters(context, data),
+            "accounts_payable": _accounts_payable(
+                context.reference_date, data.accounts_payable
+            ),
         }
         return Response(DashboardSerializer(dashboard).data)

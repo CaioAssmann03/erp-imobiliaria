@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 
-/** Barra de ações fixa no rodapé: Salvar (com estado de envio) + extras (Cancelar…). */
+import { FormErrorSummary } from "./FormErrorSummary";
+
+/** Barra de ações fixa no rodapé: Salvar (com estado de envio) + extras (Cancelar…), com o resumo de erros acima. */
 export function FormActions({
   isSubmitting,
   submitLabel = "Salvar",
@@ -11,11 +13,14 @@ export function FormActions({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="sticky bottom-[4.75rem] z-10 lg:bottom-4 flex items-center gap-2 rounded-card bg-card p-3 shadow-float">
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Salvando…" : submitLabel}
-      </Button>
-      {children}
-    </div>
+    <>
+      <FormErrorSummary />
+      <div className="sticky bottom-[4.75rem] z-10 lg:bottom-4 flex items-center gap-2 rounded-card bg-card p-3 shadow-float">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Salvando…" : submitLabel}
+        </Button>
+        {children}
+      </div>
+    </>
   );
 }

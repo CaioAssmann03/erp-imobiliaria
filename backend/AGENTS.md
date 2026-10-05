@@ -12,11 +12,12 @@ This file is only the **index**; knowledge lives in [`docs/`](docs/README.md).
 5. **Any doubt, ambiguity or gap you find — in the request, the docs or the code — you must ask the user before going on.**
    Do not guess, do not pick a default silently. Ask short, concrete questions (with your recommended answer), then record the
    answer in the right doc.
-6. **Before any feature, write a feature spec first**, then implement it:
+6. **Before any feature, write a feature spec first**, then implement it. Planned work is in the **roadmap**: open
+   [`docs/roadmap/README.md`](docs/roadmap/README.md), pick the next `todo` part (respect *Depends on*), answer its *Open questions*, then:
    - create `docs/features/NNN-<slug>.md` from [`docs/features/_template.md`](docs/features/_template.md) (process in
      [`docs/features/README.md`](docs/features/README.md));
    - resolve every open question with the user; implement only when the spec has no open questions;
-   - after implementing, update the spec status and the docs of the affected apps.
+   - link the spec in the roadmap part; after implementing, update the spec status, the docs of the affected apps, the part (`Status`, scope checklist, *Result*) and the phase table in the roadmap.
    Bug fixes and small refactors that change no behavior do not need a spec; say so when you skip it.
 7. Changed something a doc describes? **Update that doc in the same change.**
 
@@ -25,8 +26,8 @@ This file is only the **index**; knowledge lives in [`docs/`](docs/README.md).
 - Code, comments and docs in English. API field names are English; user-facing Portuguese texts belong to the frontend.
 - Every model: UUID primary key, `created_at`/`updated_at`, `@final`.
 - **Business rules live ONLY in the models**: field validators (one field), `clean()` (several fields or models), constraints (database guard). Serializers, views and
-  services hold no business rule: serializers inherit `ModelRulesMixin` (it runs the model's rules and returns a 400). See `docs/practices.md` §2.
-- **Names follow Clean Code** (`docs/naming.md`): intention-revealing, no abbreviations or one-letter names, verbs for methods, `is_/has_/should_` for booleans, `reference_date` (not `on`), named constants,
+  services hold no business rule: serializers inherit `ModelRulesMixin` (it runs the model's rules and returns a 400). See `docs/conventions/practices.md` §2.
+- **Names follow Clean Code** (`docs/conventions/naming.md`): intention-revealing, no abbreviations or one-letter names, verbs for methods, `is_/has_/should_` for booleans, `reference_date` (not `on`), named constants,
   no flag arguments, ≤ 3 parameters. Read it before naming anything; contracts (API fields, columns) are renamed only through a spec.
 - App layout is packages (`models/`, `serializers/`, `views/`), one entity per file. Never edit migrations already applied; add new ones.
 - Tests live in each app's `tests/`; they need PostgreSQL (trigram indexes). Run `pytest` before finishing.
@@ -36,17 +37,16 @@ This file is only the **index**; knowledge lives in [`docs/`](docs/README.md).
 
 | Area | Docs |
 |---|---|
-| Product and stack | [architecture/foundation/product-context.md](docs/architecture/foundation/product-context.md) · [architecture/foundation/overview.md](docs/architecture/foundation/overview.md) |
-| How an app is built | [architecture/structure/app-anatomy.md](docs/architecture/structure/app-anatomy.md) · [practices.md](docs/practices.md) |
-| Naming (Clean Code) | [naming.md](docs/naming.md) |
-| API rules | [architecture/api/api-conventions.md](docs/architecture/api/api-conventions.md) |
-| Data | [architecture/data/data-model.md](docs/architecture/data/data-model.md) |
-| Testing · local commands | [architecture/quality/testing.md](docs/architecture/quality/testing.md) · [architecture/operations/local-dev.md](docs/architecture/operations/local-dev.md) |
-| Security · personal data | [architecture/quality/security.md](docs/architecture/quality/security.md) |
-| Deploy · production · runbook | [architecture/operations/operations.md](docs/architecture/operations/operations.md) |
-| Business rules and formulas | [architecture/data/domain-rules.md](docs/architecture/data/domain-rules.md) |
-| Why it is built this way | [architecture/foundation/decisions.md](docs/architecture/foundation/decisions.md) |
-| Doing X in the future | [architecture/structure/extending.md](docs/architecture/structure/extending.md) |
-| Each app | [apps/](docs/apps/) — `accounts`, `core`, `persons`, `condominiums`, `financeiro` (apps with no code yet get their doc when they start) |
+| **Roadmap: what is done, what is next** (8 phases, parts, status, backlog) | [roadmap/README.md](docs/roadmap/README.md) |
+| Product, stack, vocabulary, decisions | [architecture/overview.md](docs/architecture/overview.md) |
+| How an app is built · recurring recipes | [architecture/structure.md](docs/architecture/structure.md) · [conventions/practices.md](docs/conventions/practices.md) |
+| Naming (Clean Code) | [conventions/naming.md](docs/conventions/naming.md) |
+| API rules | [architecture/api.md](docs/architecture/api.md) |
+| Data | [architecture/data.md](docs/architecture/data.md) |
+| Testing · local commands | [architecture/quality.md](docs/architecture/quality.md) · [architecture/operations.md](docs/architecture/operations.md) |
+| Security · personal data | [architecture/quality.md](docs/architecture/quality.md) |
+| Deploy · production · runbook | [architecture/operations.md](docs/architecture/operations.md) |
+| Business rules and formulas | [architecture/data.md](docs/architecture/data.md) |
+| Each app | [apps/](docs/apps/) — `accounts`, `core`, `persons`, `condominiums`, `finance` (apps with no code yet get their doc when they start) |
 | New feature process | [features/README.md](docs/features/README.md) |
 | Known gaps | [known-gaps.md](docs/known-gaps.md) |

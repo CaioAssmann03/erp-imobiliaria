@@ -14,20 +14,26 @@ import {
   useCondominiumsList,
 } from "@/lib/api/generated";
 
+import type { CondominiumsListPending } from "@/lib/api/generated/models";
+
 import { CondominiumRow } from "./CondominiumRow";
 import { CondominiumsFilters } from "./CondominiumsFilters";
 
 /** Client Component: busca, cache e exclusão. A 1ª página vem hidratada do servidor. */
-export function CondominiumsTable() {
+export function CondominiumsTable({ initialPending }: { initialPending?: string }) {
   const queryClient = useQueryClient();
   const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
-    useListParams({ filterKeys: ["status", "type"] });
+    useListParams({
+      filterKeys: ["status", "type", "pending"],
+      initialFilters: { pending: initialPending ?? "" },
+    });
 
   const { data, isLoading, isPlaceholderData } = useCondominiumsList(
     {
       ...params,
       ...(filters.status ? { active: filters.status === "active" } : {}),
       ...(filters.type ? { type: filters.type as "residential" | "commercial" } : {}),
+      ...(filters.pending ? { pending: filters.pending as CondominiumsListPending } : {}),
     },
     { query: { placeholderData: keepPreviousData } }
   );
@@ -75,9 +81,7 @@ export function CondominiumsTable() {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead>Nome</TableHead>
-                  <TableHead className="hidden md:table-cell">CNPJ</TableHead>
-                  <TableHead className="hidden md:table-cell">Cidade</TableHead>
+                  <TableHead>Condomínio</TableHead>
                   <TableHead className="hidden md:table-cell">Status</TableHead>
                   <TableHead />
                 </TableRow>

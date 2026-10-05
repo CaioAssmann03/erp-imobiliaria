@@ -8,6 +8,13 @@
 import type { Person } from './person';
 import type { RoleEnum } from './roleEnum';
 
+/**
+ * Serializer mixin: input is validated by the model's rules, never by rules written here.
+ *
+ * Put it **before** `ModelSerializer` in the bases. Relations that are absent from the input
+ * (for example the parent FK of a nested serializer) are excluded from validation.
+ * Relations are limited to the user's company (spec 004).
+ */
 export interface UnitPerson {
   readonly id: string;
   unit: string;

@@ -1,79 +1,37 @@
 import axios from "axios";
 
-import { getCookie, removeCookie, setCookie } from "./cookies";
-
-import { ACCESS_COOKIE, REFRESH_COOKIE } from "./auth";
-
-export { ACCESS_COOKIE, REFRESH_COOKIE };
+import { ACCESS_COOKIE } from "./auth";
 
 const isServer = typeof window === "undefined";
-const publicURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-// No servidor (SSR) o backend é alcançado pela rede interna do Docker.
-const baseURL = isServer ? process.env.API_INTERNAL_URL || publicURL : publicURL;
+
+// Navegador: só a própria origem (`/api/...`, atendida pelo handler do Next, que guarda o token em
+// cookie HttpOnly). Servidor (SSR): chama o Django direto, na rede interna, com o token do cookie.
+const baseURL = isServer ? process.env.API_INTERNAL_URL || "http://localhost:8000" : "";
 
 export const apiClient = axios.create({ baseURL });
 
-async function readAccessToken(): Promise<string | undefined> {
+apiClient.interceptors.request.use(async (config) => {
   if (isServer) {
     // Import dinâmico: `next/headers` só existe no servidor.
     const { cookies } = await import("next/headers");
-    return (await cookies()).get(ACCESS_COOKIE)?.value;
-  }
-  return getCookie(ACCESS_COOKIE);
-}
-
-apiClient.interceptors.request.use(async (config) => {
-  const token = await readAccessToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    const token = (await cookies()).get(ACCESS_COOKIE)?.value;
+    if (token) config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-let refreshing: Promise<string | null> | null = null;
-
-async function refreshAccessToken(): Promise<string | null> {
-  const refresh = getCookie(REFRESH_COOKIE);
-  if (!refresh) return null;
-
-  const { data } = await axios.post(`${baseURL}/api/auth/refresh/`, { refresh });
-  setCookie(ACCESS_COOKIE, data.access, 1);
-  if (data.refresh) setCookie(REFRESH_COOKIE, data.refresh, 7);
-  return data.access as string;
-}
-
 apiClient.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const original = error.config;
-    // No servidor não dá para gravar cookies; o proxy.ts renova o token antes
-    // da renderização e o cliente refaz a requisição se ainda falhar.
+  (error) => {
+    // No servidor não dá para gravar cookies; o proxy.ts renova o token antes da renderização.
     if (isServer) return Promise.reject(error);
-    // Login/refresh: um 401 aqui é "credenciais inválidas", não sessão expirada. Não tenta
-    // renovar nem redireciona (senão a tela de login recarregaria e o erro sumiria).
-    if (String(original?.url ?? "").includes("/api/auth/")) return Promise.reject(error);
-    if (error.response?.status === 401 && !original._retry) {
-      original._retry = true;
-      try {
-        refreshing = refreshing || refreshAccessToken();
-        const newAccess = await refreshing;
-        refreshing = null;
-        if (newAccess) {
-          original.headers.Authorization = `Bearer ${newAccess}`;
-          return apiClient(original);
-        }
-      } catch {
-        // refresh failed — fall through to logout below
-      }
-      removeCookie(ACCESS_COOKIE);
-      removeCookie(REFRESH_COOKIE);
-      if (typeof window !== "undefined") {
-        // Hard navigation (not router.push): this runs outside React, and a full
-        // reload guarantees no stale authenticated state (query cache, component
-        // state) survives the redirect.
-        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-        window.location.href = "/login";
-      }
+    // Login: um 401 aqui é "credenciais inválidas", não sessão expirada.
+    if (String(error.config?.url ?? "").includes("/api/auth/")) return Promise.reject(error);
+    if (error.response?.status === 401) {
+      // O handler do Next já tentou renovar o token: a sessão acabou. Navegação completa (não
+      // router.push): roda fora do React e garante que nenhum estado autenticado sobreviva.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }

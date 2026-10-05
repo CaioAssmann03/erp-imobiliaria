@@ -16,7 +16,7 @@ export function FormSection({
           {description && <p className="mt-0.5 text-caption text-ink-soft">{description}</p>}
         </header>
       )}
-      <div className="flex flex-col gap-1">{children}</div>
+      <div className="flex flex-col gap-3">{children}</div>
     </section>
   );
 }
@@ -42,7 +42,7 @@ export function FieldRow({
 }) {
   return (
     <div
-      className={`grid grid-cols-1 gap-x-4 gap-y-1 ${template ? "sm:[grid-template-columns:var(--row)]" : ROW_COLUMNS[columns]}`}
+      className={`grid grid-cols-1 gap-x-4 gap-y-3 ${template ? "sm:[grid-template-columns:var(--row)]" : ROW_COLUMNS[columns]}`}
       style={template ? ({ "--row": template } as React.CSSProperties) : undefined}
     >
       {children}

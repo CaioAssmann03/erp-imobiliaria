@@ -2,6 +2,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
+from apps.core.testing import seeded_company
 from ..models import PeopleIndividual, PeopleLegal, Person
 from .base import CNPJ_A, CPF_A, CPF_B, make_individual, make_legal
 
@@ -48,16 +49,16 @@ def test_cnpj_is_unique() -> None:
 
 
 def test_person_is_ordered_by_name() -> None:
-    _ = Person.objects.create(name="Zeca")
-    _ = Person.objects.create(name="Ana")
+    _ = Person.objects.create(company=seeded_company(), name="Zeca")
+    _ = Person.objects.create(company=seeded_company(), name="Ana")
 
     assert [person.name for person in Person.objects.all()] == ["Ana", "Zeca"]
 
 
 @pytest.mark.parametrize("cpf", ["123", "11111111111", "52998224720", "abcdefghijk"])
 def test_invalid_cpf_fails_full_clean(cpf: str) -> None:
-    person = Person.objects.create(name="Maria")
-    individual = PeopleIndividual(person=person, cpf=cpf)
+    person = Person.objects.create(company=seeded_company(), name="Maria")
+    individual = PeopleIndividual(person=person, company=person.company, cpf=cpf)
 
     with pytest.raises(ValidationError) as exc:
         individual.full_clean()
@@ -66,15 +67,15 @@ def test_invalid_cpf_fails_full_clean(cpf: str) -> None:
 
 
 def test_valid_cpf_passes_full_clean() -> None:
-    person = Person.objects.create(name="Maria")
+    person = Person.objects.create(company=seeded_company(), name="Maria")
 
-    PeopleIndividual(person=person, cpf=CPF_B).full_clean()
+    PeopleIndividual(person=person, company=person.company, cpf=CPF_B).full_clean()
 
 
 @pytest.mark.parametrize("cnpj", ["123", "00000000000000", "11222333000180"])
 def test_invalid_cnpj_fails_full_clean(cnpj: str) -> None:
-    person = Person.objects.create(name="Empresa")
-    legal = PeopleLegal(person=person, cnpj=cnpj)
+    person = Person.objects.create(company=seeded_company(), name="Empresa")
+    legal = PeopleLegal(person=person, company=person.company, cnpj=cnpj)
 
     with pytest.raises(ValidationError) as exc:
         legal.full_clean()

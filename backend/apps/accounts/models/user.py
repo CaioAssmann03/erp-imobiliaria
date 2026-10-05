@@ -1,8 +1,13 @@
 import uuid
+from typing import ClassVar
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from typing_extensions import final, override
+
+from apps.core.models import Company
+
+from .user_manager import UserManager
 
 
 @final
@@ -15,7 +20,13 @@ class User(AbstractUser):
     on_delete=SET_NULL, related_name="person")`. Assim o `accounts` não depende do domínio.
     """
 
+    # Path from the model to its company (spec 004: company scoping).
+    company_lookup = "company"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name="users")
+
+    objects: ClassVar[UserManager] = UserManager()
 
     class Meta:
         verbose_name = "User"

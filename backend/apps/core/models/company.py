@@ -10,6 +10,9 @@ from apps.core.validators.cnpj import validate_cnpj
 class Company(models.Model):
     """Administradora (multiempresa desde o início)."""
 
+    # Path from the model to its company (spec 004: company scoping): the company itself.
+    company_lookup = "id"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     legal_name = models.CharField(max_length=255)

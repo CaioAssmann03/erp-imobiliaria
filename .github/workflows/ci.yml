@@ -35,7 +35,8 @@ jobs:
           --health-retries 5
 
     env:
-      SECRET_KEY: ci-test-secret-key
+      SECRET_KEY: ci-test-secret-key-not-for-production-0123456789
+      INTERNAL_API_KEY: ci-internal-api-key-not-for-production-0123456789
       DEBUG: "false"
       POSTGRES_DB: erp_imobiliaria
       POSTGRES_USER: postgres
@@ -46,6 +47,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check docs (headers, links, roadmap and spec statuses)
+        run: python backend/docs/tools/check_docs.py
 
       - uses: actions/setup-python@v5
         with:
@@ -70,6 +74,10 @@ jobs:
       - name: Django system check
         working-directory: backend
         run: python manage.py check
+
+      - name: Type check (mypy)
+        working-directory: backend
+        run: mypy apps config
 
       - name: Run tests
         working-directory: backend

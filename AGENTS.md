@@ -11,7 +11,7 @@ Monorepo for a condominium administration ERP (EVE Administradora de Imóveis).
 
 1. **Do not explore the repository on your own.** Open the `AGENTS.md` of the part you are changing and follow its docs index.
 2. Task touches only one part → read only that part's `AGENTS.md`. Task touches both (an API change that reaches the UI) → read both, backend first.
-3. Any doubt or gap: **ask the user**. Features start with a spec in `backend/docs/features/` (see the backend index); UI-only work follows `frontend/docs/`.
+3. Any doubt or gap: **ask the user**. What is done and what comes next is in `backend/docs/roadmap/`; features start with a spec in `backend/docs/features/` (see the backend index); UI-only work follows `frontend/docs/`.
 
 ## Header-first reading (saves context)
 

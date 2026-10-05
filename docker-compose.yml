@@ -25,6 +25,7 @@ services:
       POSTGRES_HOST: db
       REDIS_URL: redis://redis:6379/0
       ALLOWED_HOSTS: localhost,127.0.0.1,backend
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
     volumes:
       - ./backend:/app
     ports:
@@ -68,9 +69,10 @@ services:
       target: dev
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
-      # URL usada pelo SSR (dentro do container, "localhost" não é o backend)
+      # O navegador só fala com o Next (mesma origem); o servidor do Next chama o Django por aqui
+      # (dentro do container, "localhost" não é o backend). Variável só do servidor.
       API_INTERNAL_URL: http://backend:8000
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
     volumes:
       - ./frontend:/app
       - /app/node_modules

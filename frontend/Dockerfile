@@ -15,10 +15,8 @@ CMD ["npm", "run", "dev"]
 
 # ---- build de produção ----
 FROM base AS build
-# NEXT_PUBLIC_* é embutido no JavaScript do navegador na hora do build: precisa ser ARG.
-# (O Render repassa as variáveis de ambiente do serviço como build args.)
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# O navegador não conhece o endereço do Django (só o servidor do Next, em tempo de execução,
+# por API_INTERNAL_URL): nada de NEXT_PUBLIC_* da API é embutido no build.
 RUN npm ci
 COPY . .
 RUN npm run build

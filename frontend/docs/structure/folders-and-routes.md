@@ -29,8 +29,12 @@ docs/         REASONS documentation
 |---|---|
 | `/` | `app/(dashboard)/page.tsx` |
 | `/login` | `app/login/page.tsx` |
-| `/condominiums`, `/new`, `/[id]` | `app/(dashboard)/condominiums/...` |
+| `/condominiums`, `/new`, `/[id]` (`/condominiums?pending=<value>` and `/condominiums/units?pending=<value>` open the lists filtered by a dashboard pendency, linked from *Pendências*) | `app/(dashboard)/condominiums/...` |
+| `/condominiums/blocks`, `/new`, `/[id]` | `app/(dashboard)/condominiums/blocks/...` (block CRUD; `condominiums/layout.tsx` renders the sub-header `CondominiumsSubNav`: Condomínios · Blocos · Unidades) |
+| `/condominiums/units`, `/new` | `app/(dashboard)/condominiums/units/...` (all units; `new` picks the condominium first via `NewUnitForm`; editing reuses `/condominiums/[id]/units/[unitId]`) |
 | `/condominiums/[id]/units`, `/new`, `/[unitId]` | `app/(dashboard)/condominiums/[id]/units/...` |
+| `/condominiums/[id]/blocks`, `/condominiums/[id]/units` | redirect to `/condominiums/blocks?condominium=<id>` / `/condominiums/units?condominium=<id>`: a condominium's lists are the global lists with the condominium filter applied (`?block=<id>` also pre-filters units) |
+| `/condominiums/cost-centers`, `/new`, `/[id]` | `app/(dashboard)/condominiums/cost-centers/...` ("Sub-contas": cost center CRUD; name and active only, no code; condominium chosen on create; `?condominium=<id>` pre-filters) |
 | `/persons`, `/new`, `/[id]` | `app/(dashboard)/persons/...` |
 
 ## Where new code goes

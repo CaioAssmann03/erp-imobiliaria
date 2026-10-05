@@ -1,14 +1,19 @@
 ---
 summary: Spec: enforce the unit apportionment cap and the owners' percentage cap in the models, remove the SQLite settings fallback, clean unused imports.
 read-when: you touch ideal_fraction / ownership_percentage rules, database settings or want the reasoning behind the sum caps
-skip-if: you need the general rule placement → practices.md; you need the formulas → architecture/data/domain-rules.md
+skip-if: you need the general rule placement → conventions/practices.md; you need the formulas → architecture/data.md
 ---
 # 003 — Enforce sum caps, drop the SQLite fallback, clean imports
 
-**Status:** done · **Apps:** condominiums, config (settings), financeiro, stub apps · **Frontend impact:** none (new 400 messages on existing fields)
+**Status:** done · **Level:** full · **Roadmap:** none (retro-spec) · **Apps:** condominiums, config (settings), finance, stub apps · **Frontend impact:** none (new 400 messages on existing fields)
 
 ## Open questions
-(none) — decisions below were taken by the agent from the request ("implement the rules, the fallback, the imports"); each is reversible and listed so the user can overrule.
+(none)
+
+## Decisions
+| Date | Decision | Decided by |
+|---|---|---|
+| - | Cap (≤) instead of equality for the apportionment; owners checked by interval sweep; SQLite fallback removed instead of guarded; unused stub imports removed (details in *Approach*) | agent, from the request "implement the rules, the fallback, the imports" (retro-spec; no separate confirmation recorded) |
 
 ## R — Requirements
 - [x] Unit `ideal_fraction`: the **active units of a condominium cannot sum more than 1**. Reaching exactly 1 stays a *pendency* (dashboard), because units are created one by one.
@@ -24,17 +29,17 @@ skip-if: you need the general rule placement → practices.md; you need the form
 No schema change, no migration.
 
 ## A — Approach
-- Rules in the models (`clean()`), as per `practices.md` §2; serializers and the admin get them through `full_clean()`.
+- Rules in the models (`clean()`), as per `conventions/practices.md` §2; serializers and the admin get them through `full_clean()`.
 - Cap instead of equality for the apportionment: equality cannot hold while units are being registered; the dashboard keeps reporting condominiums that do not sum to 1.
 - Owners use an interval sweep (concurrent sum at each start date), so a past owner (ended link) does not block a new owner.
 - Known limit: `clean()` reads the database before saving, so two simultaneous writes can both pass (no row locking). Acceptable for the current admin-only usage.
 - SQLite fallback removed instead of guarded: the schema (trigram indexes, `pg_trgm`) cannot run there.
 
 ## S — Structure
-`apps/condominiums/models/unit.py`, `apps/condominiums/models/unit_person.py`, `config/settings.py`; stub cleanup in `apps/{cobranca,locacoes,vendas,financeiro}`; tests in `apps/condominiums/tests/`; docs.
+`apps/condominiums/models/unit.py`, `apps/condominiums/models/unit_person.py`, `config/settings.py`; stub cleanup in `apps/{billing,rentals,sales,finance}`; tests in `apps/condominiums/tests/`; docs.
 
 ## O — Operations
-1. Spec. 2. Model rules. 3. Settings. 4. Imports. 5. Tests. 6. Docs (`domain-rules`, `known-gaps`, `overview`, `local-dev`, `testing`).
+1. Spec. 2. Model rules. 3. Settings. 4. Imports. 5. Tests. 6. Docs (`data`, `known-gaps`, `overview`, `operations`, `quality`).
 
 ## N — Norms
 Rules in models only; messages in English identical in code and docs; one error key per field.
@@ -49,4 +54,4 @@ Direct ORM writes (`seed_demo`, shell) bypass `clean()` and can break the caps (
 - Settings: missing `POSTGRES_DB` raises `ImproperlyConfigured`.
 
 ## Docs updated
-`domain-rules.md`, `known-gaps.md`, `foundation/overview.md`, `operations/local-dev.md`, `quality/testing.md`, `features/README.md`.
+`architecture/data.md`, `known-gaps.md`, `architecture/overview.md`, `architecture/operations.md`, `architecture/quality.md`, `features/README.md`.
