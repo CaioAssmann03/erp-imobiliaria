@@ -2,25 +2,27 @@ import re
 
 from django.core.exceptions import ValidationError
 
-_WEIGHTS_1 = (5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2)
-_WEIGHTS_2 = (6, *_WEIGHTS_1)
+_FIRST_DIGIT_WEIGHTS = (5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2)
+_SECOND_DIGIT_WEIGHTS = (6, *_FIRST_DIGIT_WEIGHTS)
+_ASCII_ZERO = 48  # alphanumeric CNPJ: each character counts as its ASCII code minus this
 
 
-def _check_digit(base: str, weights: tuple[int, ...]) -> int:
-    total = sum((ord(c) - 48) * w for c, w in zip(base, weights))
-    rest = total % 11
-    return 0 if rest < 2 else 11 - rest
+def _check_digit(leading_characters: str, weights: tuple[int, ...]) -> int:
+    weighted_sum = sum(
+        (ord(character) - _ASCII_ZERO) * weight
+        for character, weight in zip(leading_characters, weights)
+    )
+    remainder = weighted_sum % 11
+    return 0 if remainder < 2 else 11 - remainder
 
 
-"""Cnpj também aceita alfa numéricos"""
-
-
-def validate_cnpj(value: str) -> None:
-    if not re.fullmatch(r"[0-9A-Z]{12}[0-9]{2}", value):
+def validate_cnpj(cnpj: str) -> None:
+    """Validate a CNPJ without punctuation (letters are accepted: the alphanumeric CNPJ)."""
+    if not re.fullmatch(r"[0-9A-Z]{12}[0-9]{2}", cnpj):
         raise ValidationError("CNPJ deve ter 14 caracteres, sem pontuação.")
-    if len(set(value)) == 1:  # 00000000000000, 11111111111111...
+    if len(set(cnpj)) == 1:  # 00000000000000, 11111111111111...
         raise ValidationError("CNPJ inválido.")
-    d1 = _check_digit(value[:12], _WEIGHTS_1)
-    d2 = _check_digit(value[:13], _WEIGHTS_2)
-    if value[12:] != f"{d1}{d2}":
+    first_check_digit = _check_digit(cnpj[:12], _FIRST_DIGIT_WEIGHTS)
+    second_check_digit = _check_digit(cnpj[:13], _SECOND_DIGIT_WEIGHTS)
+    if cnpj[12:] != f"{first_check_digit}{second_check_digit}":
         raise ValidationError("CNPJ inválido.")

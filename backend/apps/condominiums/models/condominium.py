@@ -12,7 +12,7 @@ from apps.persons.models import Person
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
 
-    from .admnistration_contract import AdministrationContract
+    from .administration_contract import AdministrationContract
     from .billing_rules import BillingRules
     from .unit import Unit
 

@@ -34,7 +34,7 @@ def test_search_by_name(api_client: APIClient, list_url: str) -> None:
 
     response = api_client.get(list_url, {"query": "maria"})
 
-    assert [p["name"] for p in results(response)] == ["Maria Silva"]
+    assert [person["name"] for person in results(response)] == ["Maria Silva"]
 
 
 def test_search_by_cpf_and_cnpj(api_client: APIClient, list_url: str) -> None:
@@ -44,8 +44,8 @@ def test_search_by_cpf_and_cnpj(api_client: APIClient, list_url: str) -> None:
     by_cpf = api_client.get(list_url, {"query": CPF_A})
     by_cnpj = api_client.get(list_url, {"query": CNPJ_A})
 
-    assert [p["name"] for p in results(by_cpf)] == ["Maria"]
-    assert [p["name"] for p in results(by_cnpj)] == ["Empresa"]
+    assert [person["name"] for person in results(by_cpf)] == ["Maria"]
+    assert [person["name"] for person in results(by_cnpj)] == ["Empresa"]
 
 
 def test_filter_by_active(api_client: APIClient, list_url: str) -> None:
@@ -54,7 +54,7 @@ def test_filter_by_active(api_client: APIClient, list_url: str) -> None:
 
     response = api_client.get(list_url, {"active": "false"})
 
-    assert [p["name"] for p in results(response)] == ["Inativa"]
+    assert [person["name"] for person in results(response)] == ["Inativa"]
 
 
 def test_delete(api_client: APIClient, detail_url: Callable[[Person], str]) -> None:
@@ -74,8 +74,8 @@ def test_filter_by_type(api_client: APIClient, list_url: str) -> None:
     individuals = api_client.get(list_url, {"type": "individual"})
     legals = api_client.get(list_url, {"type": "legal"})
 
-    assert [p["name"] for p in results(individuals)] == ["Maria"]
-    assert [p["name"] for p in results(legals)] == ["Empresa"]
+    assert [person["name"] for person in results(individuals)] == ["Maria"]
+    assert [person["name"] for person in results(legals)] == ["Empresa"]
 
 
 def test_filter_by_invalid_type_is_rejected(api_client: APIClient, list_url: str) -> None:

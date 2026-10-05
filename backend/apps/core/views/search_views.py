@@ -1,5 +1,5 @@
 import re
-from typing import Any
+from typing import Any, NamedTuple
 
 from django.db.models import Case, IntegerField, Q, Value, When
 from django.db.models.functions import Coalesce
@@ -22,21 +22,71 @@ LIMIT_PER_TYPE = 5
 NUMERIC_TERM = re.compile(r"^[\d.\-/\s]+$")
 
 
-def _classify(term: str) -> tuple[bool, str]:
-    """Retorna (termo_valido, digitos). `digitos` só quando o termo é numérico."""
+class ClassifiedTerm(NamedTuple):
+    is_searchable: bool
+    digits: str  # só quando o termo é numérico; vazio caso contrário
+
+
+def _classify_term(term: str) -> ClassifiedTerm:
     if NUMERIC_TERM.match(term):
         digits = re.sub(r"\D", "", term)
-        return len(digits) >= MIN_NUMERIC_LENGTH, digits
-    return len(term) >= MIN_TEXT_LENGTH, ""
+        return ClassifiedTerm(len(digits) >= MIN_NUMERIC_LENGTH, digits)
+    return ClassifiedTerm(len(term) >= MIN_TEXT_LENGTH, "")
 
 
-def _relevance(*conditions: Q) -> Case:
+def _relevance_rank(*conditions: Q) -> Case:
     """0 para quem começa com o termo (ou casa pelo início do documento), 1 para o resto."""
     criteria = conditions[0]
     for condition in conditions[1:]:
         criteria |= condition
     return Case(
         When(criteria, then=Value(0)), default=Value(1), output_field=IntegerField()
+    )
+
+
+def _search_persons(term: str, digits: str, should_search_document: bool) -> list[Person]:
+    name_filter = Q(name__icontains=term)
+    ranking = [Q(name__istartswith=term)]
+    if should_search_document:
+        name_filter |= Q(people_individual__cpf__contains=digits) | Q(
+            people_legal__cnpj__contains=digits
+        )
+        ranking += [
+            Q(people_individual__cpf__startswith=digits),
+            Q(people_legal__cnpj__startswith=digits),
+        ]
+    return list(
+        Person.objects.filter(name_filter)
+        .annotate(
+            rank=_relevance_rank(*ranking),
+            document=Coalesce("people_individual__cpf", "people_legal__cnpj", Value("")),
+        )
+        .order_by("rank", "name")[:LIMIT_PER_TYPE]
+    )
+
+
+def _search_condominiums(
+    term: str, digits: str, should_search_document: bool
+) -> list[Condominium]:
+    name_filter = Q(name__icontains=term)
+    ranking = [Q(name__istartswith=term)]
+    if should_search_document:
+        name_filter |= Q(cnpj__contains=digits)
+        ranking.append(Q(cnpj__startswith=digits))
+    return list(
+        Condominium.objects.filter(name_filter)
+        .annotate(rank=_relevance_rank(*ranking))
+        .select_related("address")
+        .order_by("rank", "name")[:LIMIT_PER_TYPE]
+    )
+
+
+def _search_units(term: str) -> list[Unit]:
+    return list(
+        Unit.objects.filter(name__icontains=term)
+        .annotate(rank=_relevance_rank(Q(name__istartswith=term)))
+        .select_related("condominium")
+        .order_by("rank", "name")[:LIMIT_PER_TYPE]
     )
 
 
@@ -61,49 +111,20 @@ class SearchView(APIView):
     )
     def get(self, request: Request) -> Response:
         term = request.query_params.get("q", "").strip()
-        valid, digits = _classify(term)
-        if not valid:
+        classified = _classify_term(term)
+        if not classified.is_searchable:
             return Response(
-                SearchSerializer(
-                    {"persons": [], "condominiums": [], "units": []}
-                ).data
+                SearchSerializer({"persons": [], "condominiums": [], "units": []}).data
             )
 
         # Termo numérico: documentos são guardados só com dígitos, então a pontuação digitada
-        # é descartada antes de comparar.
-        search_document = len(digits) >= MIN_TEXT_LENGTH
+        # é descartada antes de comparar. Abaixo de 3 dígitos só o nome é pesquisado.
+        digits = classified.digits
+        should_search_document = len(digits) >= MIN_TEXT_LENGTH
 
-        person_filter = Q(name__icontains=term)
-        person_rank = [Q(name__istartswith=term)]
-        condominium_filter = Q(name__icontains=term)
-        condominium_rank = [Q(name__istartswith=term)]
-        if search_document:
-            person_filter |= Q(people_individual__cpf__contains=digits) | Q(
-                people_legal__cnpj__contains=digits
-            )
-            person_rank += [
-                Q(people_individual__cpf__startswith=digits),
-                Q(people_legal__cnpj__startswith=digits),
-            ]
-            condominium_filter |= Q(cnpj__contains=digits)
-            condominium_rank.append(Q(cnpj__startswith=digits))
-
-        data: dict[str, Any] = {
-            "persons": Person.objects.filter(person_filter)
-            .annotate(
-                rank=_relevance(*person_rank),
-                document=Coalesce(
-                    "people_individual__cpf", "people_legal__cnpj", Value("")
-                ),
-            )
-            .order_by("rank", "name")[:LIMIT_PER_TYPE],
-            "condominiums": Condominium.objects.filter(condominium_filter)
-            .annotate(rank=_relevance(*condominium_rank))
-            .select_related("address")
-            .order_by("rank", "name")[:LIMIT_PER_TYPE],
-            "units": Unit.objects.filter(name__icontains=term)
-            .annotate(rank=_relevance(Q(name__istartswith=term)))
-            .select_related("condominium")
-            .order_by("rank", "name")[:LIMIT_PER_TYPE],
+        results: dict[str, Any] = {
+            "persons": _search_persons(term, digits, should_search_document),
+            "condominiums": _search_condominiums(term, digits, should_search_document),
+            "units": _search_units(term),
         }
-        return Response(SearchSerializer(data).data)
+        return Response(SearchSerializer(results).data)

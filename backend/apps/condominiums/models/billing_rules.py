@@ -5,6 +5,8 @@ from django.db.models import Q
 from typing_extensions import final, override
 
 from apps.condominiums.models.condominium import Condominium
+from apps.condominiums.validators import validate_due_day
+from apps.core.validators import validate_percentage
 
 
 @final
@@ -18,7 +20,7 @@ class BillingRules(models.Model):
         Condominium, on_delete=models.CASCADE, related_name="billing_rules"
     )
 
-    due_day = models.PositiveSmallIntegerField(default=10)
+    due_day = models.PositiveSmallIntegerField(default=10, validators=[validate_due_day])
     due_on_business_day = models.BooleanField(default=False)
 
     calculation_period = models.CharField(
@@ -26,7 +28,7 @@ class BillingRules(models.Model):
     )
 
     early_payment_discount_percentage = models.DecimalField(
-        max_digits=5, decimal_places=2, default=0
+        max_digits=5, decimal_places=2, default=0, validators=[validate_percentage]
     )
     early_payment_discount_days = models.PositiveSmallIntegerField(default=0)
 

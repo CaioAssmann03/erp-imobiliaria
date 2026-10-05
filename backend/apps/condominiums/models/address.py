@@ -25,4 +25,4 @@ class Address(models.Model):
 
     @override
     def __str__(self) -> str:
-        return ", ".join(p for p in (self.street, self.number, self.city) if p)
+        return ", ".join(part for part in (self.street, self.number, self.city) if part)

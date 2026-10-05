@@ -5,6 +5,7 @@ skip-if: schema and constraints → architecture/data/data-model.md
 ---
 # Domain rules
 
+**Rules live in the models** (validators, `clean()`, constraints, model/queryset methods); the dashboard and API only call them.
 Status per rule: **Implemented** (where), **Stored** (data kept, no calculation yet), **Planned**. Where a meaning is inferred, it says *confirm*:
 ask the user before building on it.
 
@@ -19,13 +20,14 @@ ask the user before building on it.
 ## Adjustment (reajuste)
 | Rule | Status |
 |---|---|
-| Next adjustment date = `adjustment_base_date` + `adjustment_period_months` (adding months clamps the day to the month's last day) | Implemented (dashboard) |
-| Overdue when that date is before today; "next 30 days" when within `[today, today+30]`; chart groups the next 6 months plus overdue | Implemented (dashboard) |
+| Next adjustment date = `adjustment_base_date` + `adjustment_period_months` (adding months clamps the day to the month's last day) | Implemented (`AdministrationContract.next_adjustment_date()`; dashboard calls it) |
+| Overdue when that date is before today (`is_adjustment_overdue`); "next 30 days" when within `[today, today+30]`; chart groups the next 6 months plus overdue | Implemented (dashboard) |
 | `adjustment_index` (IGPM, INCC...) is free text; no index values, no recalculated fee, the base date is not advanced after an adjustment | Stored / Planned — *confirm* |
 
 ## Apportionment (rateio) and `ideal_fraction`
 - `ideal_fraction` is the unit's share of common areas, `0 < x ≤ 1`, 8 decimals. **Implemented** (constraint + serializer).
-- Expected: the active units of an active condominium sum to **1**. The dashboard counts condominiums where `|sum − 1| > 0.0001`. Reported, **not enforced**.
+- The active units of a condominium **cannot sum more than 1** (+ tolerance `0.0001`): `Unit.clean()` rejects the write (error on `ideal_fraction`). **Implemented.**
+- Reaching exactly **1** is a *pendency*, not a write rule (units are registered one by one): the dashboard counts condominiums where `|sum − 1| > 0.0001`, via `Unit.objects.inconsistent_apportionment_condominium_ids()`.
 - Used later to split expenses among units. **Planned.**
 
 ## Billing rules (`BillingRules`)
@@ -44,10 +46,10 @@ ask the user before building on it.
 
 ## People and links (`UnitPerson`)
 - Role `owner` needs `ownership_percentage` 0–100; `tenant` has none; `end_date ≥ start_date`; one open link per `(unit, person, role)`. **Implemented.**
-- A link is **current** when `end_date` is empty or ≥ today. **Responsible** for a unit = at least one current link; units without one are "without responsible"
+- A link is **current** when `end_date` is empty or ≥ today (`UnitPerson.objects.current(reference_date)` / `is_current(reference_date)`). **Responsible** for a unit = at least one current link; units without one are "without responsible"
   (nobody to bill). **Implemented** (dashboard).
 - Lease ending: tenant link with `end_date` between today−30 and today+60 days. **Implemented** (dashboard).
-- Owners' percentages summing ≤ 100 per unit is **not enforced** — *confirm*.
+- Owners' percentages: at no date may the owner links of a unit sum more than 100 % (`UnitPerson.clean()`, checked at every start date, so ended owners do not block new ones; tenants ignored). **Implemented** (error on `ownership_percentage`). Reaching exactly 100 is not required.
 - A person is either individual (CPF) or legal (CNPJ); the kind cannot change after creation (UI rule). Documents are digits-only, validated by check digits.
 
 ## Finance (`financeiro`, models only)

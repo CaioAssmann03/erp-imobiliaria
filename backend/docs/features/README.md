@@ -12,11 +12,11 @@ skip-if: you only need the blank template → features/_template.md; you want an
 
 1. **Understand** the request. List what is unclear (rules, fields, permissions, edge cases, frontend impact).
 2. **Ask the user** every open question — short and concrete, each with your recommended answer. Do not guess.
-3. **Create the spec**: copy [`_template.md`](_template.md) to `docs/features/NNN-<slug>.md` (next free number, kebab-case slug) and fill
-   every section. Unknown items go in *Open questions*, never in silent assumptions.
+3. **Create the spec**: copy [`_template.md`](_template.md) to `docs/features/NNN-<slug>.md` (next free number, kebab-case slug), **rewrite its 5-line header** for the feature
+   (summary, read-when, skip-if) and fill every section. Unknown items go in *Open questions*, never in silent assumptions.
 4. **Resolve** the open questions with the user and move the answers into the proper sections.
 5. **Implement** only when *Open questions* is empty. Follow `practices.md`; write tests listed in the spec.
-6. **Close**: set `status: done`, check the acceptance list, update the docs of every affected app (`docs/apps/*.md`) and
+6. **Close**: set `Status: done` in the spec, check the acceptance list, update the docs of every affected app (`docs/apps/*.md`) and
    `known-gaps.md` if a gap was closed. Tell the user if the frontend client must be regenerated.
 
 ## Status values
@@ -30,4 +30,6 @@ Bug fixes and refactors that change no behavior or contract. Say explicitly that
 
 ## Index of specs
 - `001` · [Filter persons by kind](001-person-type-filter.md) · done — worked example of a filled spec
+- `002` · [Business rules live only in the models](002-business-rules-in-models.md) · done
+- `003` · [Enforce sum caps, drop the SQLite fallback, clean imports](003-enforce-sums-and-cleanup.md) · done
 (add a line per new spec: `NNN` · title · status)

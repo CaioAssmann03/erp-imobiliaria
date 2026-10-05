@@ -40,8 +40,8 @@ The system stores CPF, CNPJ, name, e-mail, phone numbers, birth date, marital st
 - Retention/erasure: no policy yet. A person linked to units cannot be deleted (`PROTECT`); a request to erase data needs a spec (anonymize vs delete).
 
 ## Authentication hardening backlog (needs specs)
-Token blacklist on logout; login rate limiting/lockout; HTTPS settings in production (`SECURE_SSL_REDIRECT`, `SECURE_HSTS_SECONDS`, `SESSION_COOKIE_SECURE`,
-`CSRF_COOKIE_SECURE`); no insecure default `SECRET_KEY` (fail if unset when `DEBUG=false`); roles and company scoping; audit trail of who changed what;
+Token blacklist on logout; login rate limiting/lockout; `SECURE_SSL_REDIRECT` and `SECURE_HSTS_SECONDS` in production (session/CSRF cookies are already Secure and `SECRET_KEY`
+is mandatory when `DEBUG=false`); roles and company scoping; audit trail of who changed what;
 HttpOnly cookie flow with the frontend (see frontend `docs/safeguards/auth-and-tokens.md`).
 
 ## Review checklist

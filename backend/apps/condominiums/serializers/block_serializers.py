@@ -1,10 +1,12 @@
 from rest_framework import serializers
 from typing_extensions import final
 
+from apps.core.serializers import ModelRulesMixin
+
 from ..models import Block
 
 
-class BlockSerializer(serializers.ModelSerializer[Block]):
+class BlockSerializer(ModelRulesMixin, serializers.ModelSerializer[Block]):
     @final
     class Meta:
         model = Block

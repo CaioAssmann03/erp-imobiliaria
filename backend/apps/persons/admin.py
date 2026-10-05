@@ -27,11 +27,11 @@ class PersonAdmin(ModelAdmin):
     inlines = (PeopleIndividualInline, PeopleLegalInline)
 
     @admin.display(description="CPF")
-    def get_cpf(self, obj: Person) -> str:
-        individual = getattr(obj, "people_individual", None)
+    def get_cpf(self, person: Person) -> str:
+        individual = getattr(person, "people_individual", None)
         return individual.cpf if individual else "-"
 
     @admin.display(description="CNPJ")
-    def get_cnpj(self, obj: Person) -> str:
-        legal = getattr(obj, "people_legal", None)
+    def get_cnpj(self, person: Person) -> str:
+        legal = getattr(person, "people_legal", None)
         return legal.cnpj if legal else "-"

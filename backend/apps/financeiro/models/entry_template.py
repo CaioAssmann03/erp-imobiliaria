@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import Q
 from typing_extensions import final, override
 
+from apps.core.validators import validate_percentage
 from apps.financeiro.models.cost_center import CostCenter
 
 
@@ -13,7 +14,7 @@ class EntryTemplate(models.Model):
 
     name = models.CharField(max_length=120)
     cost_center = models.ForeignKey(
-        CostCenter, on_delete=models.PROTECT, related_name="cost_center"
+        CostCenter, on_delete=models.PROTECT, related_name="entry_templates"
     )
     active = models.BooleanField(default=True)
 
@@ -21,7 +22,7 @@ class EntryTemplate(models.Model):
     accumulate_to_balance = models.BooleanField(default=True)
     is_subject_to_social_security = models.BooleanField(default=False)
     admin_fee_incidence_percentage = models.DecimalField(
-        max_digits=5, decimal_places=2, default=0
+        max_digits=5, decimal_places=2, default=0, validators=[validate_percentage]
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

@@ -6,11 +6,18 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-change-me-in-production")
-
 DEBUG = os.environ.get("DEBUG", "true").lower() == "true"
+
+# The insecure fallback exists only for local development; production must provide SECRET_KEY.
+SECRET_KEY = os.environ.get("SECRET_KEY") or (
+    "django-insecure-change-me-in-production" if DEBUG else None
+)
+if SECRET_KEY is None:
+    raise ImproperlyConfigured("SECRET_KEY must be set when DEBUG is false.")
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
@@ -74,28 +81,25 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 
-# Database
-# Reads POSTGRES_* vars (matching the docker-compose postgres service);
-# falls back to sqlite so `manage.py` works outside Docker too.
+# Database: PostgreSQL only (trigram indexes need the pg_trgm extension).
+# Reads the POSTGRES_* variables (same names as the docker-compose postgres service).
 
-if os.environ.get("POSTGRES_DB"):
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ["POSTGRES_DB"],
-            "USER": os.environ.get("POSTGRES_USER", "postgres"),
-            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
-            "HOST": os.environ.get("POSTGRES_HOST", "db"),
-            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
-        }
+if not os.environ.get("POSTGRES_DB"):
+    raise ImproperlyConfigured(
+        "POSTGRES_DB is not set. The project runs on PostgreSQL only; "
+        "see docs/architecture/operations/local-dev.md."
+    )
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ["POSTGRES_DB"],
+        "USER": os.environ.get("POSTGRES_USER", "postgres"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
+        "HOST": os.environ.get("POSTGRES_HOST", "db"),
+        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+}
 
 
 AUTH_USER_MODEL = "accounts.User"
@@ -158,6 +162,9 @@ SIMPLE_JWT = {
 # Atrás de proxy HTTPS (Render): confia no cabeçalho do proxy para saber que a requisição
 # é segura. Sem isso o login do admin falha por CSRF (origem https x requisição http).
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# Cookies only over HTTPS outside development.
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 _LOCAL_HOSTS = {"localhost", "127.0.0.1", "backend"}
 CSRF_TRUSTED_ORIGINS = [
     f"https://{host.strip()}"

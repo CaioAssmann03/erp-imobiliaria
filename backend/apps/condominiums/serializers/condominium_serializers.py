@@ -4,6 +4,8 @@ from django.db import transaction
 from rest_framework import serializers
 from typing_extensions import final
 
+from apps.core.serializers import ModelRulesMixin
+
 from ..models import Address, AdministrationContract, BillingRules, Condominium
 from .address_serializers import AddressSerializer
 from .administration_contract_serializers import AdministrationContractSerializer
@@ -11,7 +13,7 @@ from .billing_rules_serializers import BillingRulesSerializer
 
 
 @final
-class CondominiumSerializer(serializers.ModelSerializer[Condominium]):
+class CondominiumSerializer(ModelRulesMixin, serializers.ModelSerializer[Condominium]):
     address = AddressSerializer(required=False, allow_null=True)
     administration_contract = AdministrationContractSerializer(required=False)
     billing_rules = BillingRulesSerializer(required=False)
@@ -60,6 +62,16 @@ class CondominiumSerializer(serializers.ModelSerializer[Condominium]):
 
         return condominium
 
+    @staticmethod
+    def _save_address(condominium: Condominium, address_data: dict[str, Any]) -> None:
+        """Create the address, or update the existing one in place (never replace it)."""
+        if condominium.address is None:
+            condominium.address = Address.objects.create(**address_data)
+            return
+        for field_name, field_value in address_data.items():
+            setattr(condominium.address, field_name, field_value)
+        condominium.address.save()
+
     @override
     @transaction.atomic
     def update(
@@ -70,15 +82,10 @@ class CondominiumSerializer(serializers.ModelSerializer[Condominium]):
         rules_data = validated_data.pop("billing_rules", None)
 
         if address_data:
-            if instance.address is None:
-                instance.address = Address.objects.create(**address_data)
-            else:
-                for attr, value in address_data.items():
-                    setattr(instance.address, attr, value)
-                instance.address.save()
+            self._save_address(instance, address_data)
 
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+        for field_name, field_value in validated_data.items():
+            setattr(instance, field_name, field_value)
         instance.save()
 
         if contract_data:

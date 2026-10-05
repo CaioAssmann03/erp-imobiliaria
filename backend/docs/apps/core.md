@@ -13,8 +13,9 @@ skip-if: persons → apps/persons.md; condominium data → apps/condominiums.md;
 | `Company` model | `models/company.py` | `legal_name`, `trade_name`, `cnpj` (14 digits, unique, `validate_cnpj`), address fields, `active`; UUID id; ordering `legal_name` |
 | Pagination | `pagination.py` | `StandardPagination`: `?page`, `?limit` (default 20, max 100) |
 | Search filter | `filters.py` | `QuerySearchFilter`: `?query=` (also `?search=`), terms split by space |
-| Validators | `validators/cpf.py`, `cnpj.py` | `validate_cpf`, `validate_cnpj`; used by `persons` and `condominiums`, tested in `tests/validators/` |
-| Seed command | `management/commands/seed_demo.py` | deterministic demo data; idempotent; `--clear` removes only what it created |
+| Validators | `validators/cpf.py`, `cnpj.py`, `percentage.py` | `validate_cpf`, `validate_cnpj`, `validate_percentage`; used as model field validators, tested in `tests/validators/` |
+| Model-rules mixin | `serializers/model_rules.py` | `ModelRulesMixin` (serializers run the model's `full_clean()` → 400), `build_candidate`, `run_model_rules` |
+| Seed command | `management/commands/seed_demo.py` | deterministic demo data; idempotent; `--clear` removes only what it created; demo condominiums are `DemoCondominium` dataclasses; a `SeedContext` carries the random generator, company and persons through small `_create_*` functions |
 | Trigram extension | `migrations/0001_initial.py` | `TrigramExtension()` runs first; `persons.0001` depends on it |
 | Initial company | `migrations/0002_seed_company.py` | creates EVE Administradora (CNPJ `03136483000144`); reversible |
 
@@ -30,7 +31,7 @@ Returns `condominiums`/`units`/`persons` summaries (total, active, by type), `re
 (next 6 months + `overdue`), `upcoming_adjustments`, `fixed_revenue` (active condominiums with fixed fee; top 8), `leases` (tenant links ending
 from −30 to +60 days), `pending` counters. Rules: next adjustment = `adjustment_base_date + adjustment_period_months`; a link is **current** when
 `end_date` is null or ≥ today; apportionment is inconsistent when the sum of `ideal_fraction` of active units differs from 1 by more than `0.0001`;
-cost centers come from `financeiro` through `cost_centers`. Response keys are English and documented by `serializers/dashboard_serializers.py`.
+cost centers come from `financeiro` through `cost_centers`. The dashboard holds **no business rule**: it calls model/queryset methods (`next_adjustment_date`, `UnitPerson.objects.current`, `inconsistent_apportionment_condominium_ids`) and `core.dates.add_months`. Response keys are English and documented by `serializers/dashboard_serializers.py`. Structure: a `DashboardContext` dataclass (reference date, adjustments, leases, active units) is built once and small `_responsibles` / `_lease_entries` / `_pending_counters` functions read it; `DashboardView.get` only composes them.
 
 ### Global search (`views/search_views.py`)
 `q` valid when ≥ 3 characters (≥ 2 if numeric); documents match on digits (punctuation stripped); results limited to 5 per type, "starts with"

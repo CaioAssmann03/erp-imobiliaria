@@ -39,8 +39,8 @@ declares a UUID primary key explicitly.
 ## Environment variables
 | Variable | Purpose |
 |---|---|
-| `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS` | Django basics |
-| `POSTGRES_DB/USER/PASSWORD/HOST/PORT` | database (if `POSTGRES_DB` is unset, settings fall back to SQLite, which **cannot run** the project: trigram indexes) |
+| `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS` | Django basics; **`SECRET_KEY` is mandatory when `DEBUG=false`** (startup fails otherwise); session/CSRF cookies are `Secure` when `DEBUG=false` |
+| `POSTGRES_DB/USER/PASSWORD/HOST/PORT` | database. **`POSTGRES_DB` is mandatory**: settings raise `ImproperlyConfigured` without it (the project runs on PostgreSQL only; there is no SQLite fallback) |
 | `REDIS_URL` | Celery broker/result backend |
 | `CORS_ALLOWED_ORIGINS` | frontend origin(s) |
 | `DJANGO_SUPERUSER_USERNAME/PASSWORD/EMAIL` | first admin created by `entrypoint.sh` |

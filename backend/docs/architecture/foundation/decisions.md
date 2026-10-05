@@ -14,8 +14,8 @@ One line each: decision → reason → consequence. Changing one needs a feature
 | 3 | Apps are packages (`models/`, `serializers/`, `views/`), one entity per file | small files, easy navigation, AI-friendly | re-export in `__init__.py`; empty stub apps still use the old layout |
 | 4 | 1:1 parts (address, contract, billing, person documents) are written through the parent serializer | one request per screen; atomic | `create`/`update` pop nested data in `transaction.atomic` |
 | 5 | Child collections (unit people) have their own endpoint | they change independently and are many | parent exposes them read-only |
-| 6 | Rules live in model constraints **and** serializers | DRF does not run `CheckConstraint`; API must answer 400 | every rule is written twice and tested twice |
-| 7 | PostgreSQL only (trigram search) | fast `icontains`-style search on names/e-mails | tests and dev need Postgres; SQLite fallback is not viable |
+| 6 | Business rules live only in the models (validators, `clean()`, constraints); serializers run them through `ModelRulesMixin` | one source of truth; API, admin, commands and tasks enforce the same rules; no duplicated logic | rules are written once per kind (+ the constraint as DB guard); new write paths must call `full_clean()` |
+| 7 | PostgreSQL only (trigram search) | fast `icontains`-style search on names/e-mails | tests and dev need Postgres; settings refuse to load without `POSTGRES_DB` (no SQLite fallback) |
 | 8 | Documents stored digits-only | one canonical form; simple equality/prefix search | masks are UI-only |
 | 9 | `accounts.User` is separate from `persons.Person` | login ≠ business entity; most people never log in | a future `Person.user` 1:1 lives in `persons` |
 | 10 | Search param `?query=`, pagination `?page=&limit=` | one consistent contract for all lists | `QuerySearchFilter`, `StandardPagination` in `core` |

@@ -23,8 +23,11 @@ This file is only the **index**; knowledge lives in [`docs/`](docs/README.md).
 ## Always true
 
 - Code, comments and docs in English. API field names are English; user-facing Portuguese texts belong to the frontend.
-- Every model: UUID primary key, `created_at`/`updated_at`, `@final`, constraints that mirror the business rules.
-- DRF does not enforce `CheckConstraint`s: mirror each rule in the serializer `validate` so the API returns 400, not 500.
+- Every model: UUID primary key, `created_at`/`updated_at`, `@final`.
+- **Business rules live ONLY in the models**: field validators (one field), `clean()` (several fields or models), constraints (database guard). Serializers, views and
+  services hold no business rule: serializers inherit `ModelRulesMixin` (it runs the model's rules and returns a 400). See `docs/practices.md` §2.
+- **Names follow Clean Code** (`docs/naming.md`): intention-revealing, no abbreviations or one-letter names, verbs for methods, `is_/has_/should_` for booleans, `reference_date` (not `on`), named constants,
+  no flag arguments, ≤ 3 parameters. Read it before naming anything; contracts (API fields, columns) are renamed only through a spec.
 - App layout is packages (`models/`, `serializers/`, `views/`), one entity per file. Never edit migrations already applied; add new ones.
 - Tests live in each app's `tests/`; they need PostgreSQL (trigram indexes). Run `pytest` before finishing.
 - The OpenAPI schema is the contract with the frontend: after API changes, tell the user the client must be regenerated.
@@ -35,6 +38,7 @@ This file is only the **index**; knowledge lives in [`docs/`](docs/README.md).
 |---|---|
 | Product and stack | [architecture/foundation/product-context.md](docs/architecture/foundation/product-context.md) · [architecture/foundation/overview.md](docs/architecture/foundation/overview.md) |
 | How an app is built | [architecture/structure/app-anatomy.md](docs/architecture/structure/app-anatomy.md) · [practices.md](docs/practices.md) |
+| Naming (Clean Code) | [naming.md](docs/naming.md) |
 | API rules | [architecture/api/api-conventions.md](docs/architecture/api/api-conventions.md) |
 | Data | [architecture/data/data-model.md](docs/architecture/data/data-model.md) |
 | Testing · local commands | [architecture/quality/testing.md](docs/architecture/quality/testing.md) · [architecture/operations/local-dev.md](docs/architecture/operations/local-dev.md) |

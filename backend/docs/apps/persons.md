@@ -19,9 +19,9 @@ A person has **either** an individual **or** a legal record (the API does not en
 ## API (`/api/persons/`)
 - `PersonViewSet` (`select_related("people_individual","people_legal")`), search `name`, `email`, `people_individual__cpf`, `people_legal__cnpj`.
 - Filters: `?active=`, `?type=individual|legal` (`PersonFilter` in `filters.py`).
-- `PersonSerializer` nests `people_individual` / `people_legal` (write): `create`/`update` in `transaction.atomic`; **uniqueness of cpf/rg/cnpj is checked in
-  `validate`, excluding the instance** (the default unique validator would reject a PATCH with the person's own CPF, so nested serializers drop it
-  and keep only the format validator). `update` uses `update_or_create(person=..., defaults=...)`.
+- `PersonSerializer` nests `people_individual` / `people_legal` (write): `create`/`update` in `transaction.atomic`; the document **rules are the models'** (format validators,
+  unique constraints): `PersonSerializer.validate` builds the candidate from the existing document row and runs `run_model_rules`, so the person's own CPF is not reported as a duplicate
+  (nested serializers drop the default unique validator for that reason). `update` uses `update_or_create(person=..., defaults=...)`.
 - Fields in payloads are API names: `cell_number`, `home_phone`, `business_phone`, `people_individual{cpf,rg,birthday,marital_status,job}`,
   `people_legal{cnpj,ie}`. Documents are digits only.
 

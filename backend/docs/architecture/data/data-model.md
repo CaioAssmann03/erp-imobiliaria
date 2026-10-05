@@ -35,7 +35,7 @@ UUID `id`; `created_at`/`updated_at` (except pure child records that are 1:1 wit
 | UnitPerson → Person | PROTECT | keep history; unlink first |
 | EntryTemplate → CostCenter | PROTECT | |
 
-## Constraints (all mirrored in serializers)
+## Constraints (each rule also has a validator or `clean()` in the model, so the API answers 400)
 - `AdministrationContract`: fixed ⇒ `fee_amount`; variable ⇒ `fee_percentage` and `fee_basis`; `fee_floor ≤ fee_ceiling`.
 - `BillingRules`: `due_day` 1–28; discount 0–100.
 - `Unit`: `ideal_fraction` in (0, 1]; unique `(condominium, block, name)` and unique `(condominium, name)` when no block; utility values ≥ 0.

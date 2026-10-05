@@ -1,5 +1,5 @@
 from .address import Address as Address
-from .admnistration_contract import AdministrationContract as AdministrationContract
+from .administration_contract import AdministrationContract as AdministrationContract
 from .billing_rules import BillingRules as BillingRules
 from .block import Block as Block
 from .condominium import Condominium as Condominium

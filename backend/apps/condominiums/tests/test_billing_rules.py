@@ -5,6 +5,10 @@ from django.db import IntegrityError, transaction
 
 from ..models import BillingRules, Condominium
 from ..serializers import BillingRulesSerializer
+from ..validators import validate_due_day
+
+
+pytestmark = pytest.mark.django_db  # the serializer runs the model rules (uniqueness, relations)
 
 
 @pytest.mark.parametrize("due_day", [0, 29, 31])
@@ -37,7 +41,6 @@ def test_discount_in_range_is_valid(discount: str) -> None:
     ).is_valid()
 
 
-@pytest.mark.django_db
 class TestBillingRulesConstraints:
     def test_database_rejects_invalid_due_day(self, condominium: Condominium) -> None:
         with pytest.raises(IntegrityError), transaction.atomic():
@@ -51,3 +54,9 @@ class TestBillingRulesConstraints:
                 condominium=condominium,
                 early_payment_discount_percentage=Decimal("101"),
             )
+
+
+@pytest.mark.parametrize("due_day", [0, 29])
+def test_model_validator_rejects_due_day_out_of_range(due_day: int) -> None:
+    with pytest.raises(Exception):
+        validate_due_day(due_day)

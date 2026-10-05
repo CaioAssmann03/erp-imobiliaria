@@ -1,11 +1,15 @@
 import uuid
 from typing import TYPE_CHECKING
 
+from datetime import date
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Q
 from typing_extensions import final, override
 
 from apps.condominiums.models.condominium import Condominium
+from apps.core.dates import add_months
 
 
 @final
@@ -79,6 +83,36 @@ class AdministrationContract(models.Model):
                 violation_error_message="Floor cannot exceed ceiling.",
             ),
         )
+
+    @override
+    def clean(self) -> None:
+        """Fee rules (also guarded by the check constraints above)."""
+        errors: dict[str, str] = {}
+        if self.fee_type == self.FeeType.FIXED and self.fee_amount is None:
+            errors["fee_amount"] = "Fixed fee requires an amount."
+        if self.fee_type == self.FeeType.VARIABLE:
+            if self.fee_percentage is None:
+                errors["fee_percentage"] = "Variable fee requires percentage and basis."
+            if not self.fee_basis:
+                errors["fee_basis"] = "Variable fee requires percentage and basis."
+        if (
+            self.fee_floor is not None
+            and self.fee_ceiling is not None
+            and self.fee_floor > self.fee_ceiling
+        ):
+            errors["fee_floor"] = "Floor cannot exceed ceiling."
+        if errors:
+            raise ValidationError(errors)
+
+    def next_adjustment_date(self) -> date | None:
+        """Next adjustment: base date plus the adjustment period (None without a base date)."""
+        if self.adjustment_base_date is None:
+            return None
+        return add_months(self.adjustment_base_date, self.adjustment_period_months)
+
+    def is_adjustment_overdue(self, reference_date: date) -> bool:
+        next_date = self.next_adjustment_date()
+        return next_date is not None and next_date < reference_date
 
     @override
     def __str__(self) -> str:

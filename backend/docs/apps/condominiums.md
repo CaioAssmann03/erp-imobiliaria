@@ -8,7 +8,7 @@ skip-if: person data → apps/persons.md; cost centers → apps/financeiro.md; b
 **Purpose:** the core registry: condominium + its address, administration contract, billing rules, blocks, units and who owns/rents each unit.
 Depends on `core` (Company, validators) and `persons`.
 
-## Models (`models/`, one file per entity; `admnistration_contract.py` keeps a typo in its filename)
+## Models (`models/`, one file per entity)
 | Model | Highlights |
 |---|---|
 | `Address` | all fields optional (`zip_code` 8 digits, street, number, complement, district, city, state) |
@@ -32,8 +32,9 @@ Constraints and `on_delete`: see `architecture/data/data-model.md`.
 ## Serializers (`serializers/`, one file per entity)
 - `CondominiumSerializer` writes nested `address` (create or update in place; cannot be cleared), `administration_contract` and `billing_rules`
   (`update_or_create` with `defaults`), all in `transaction.atomic`. Nested serializers exclude the parent FK.
-- Rules mirrored from constraints in `validate` (contract fee rules, billing ranges, unit fraction and block ownership, unit-person role/percentage/dates)
-  so violations return 400.
+- **Model methods**: `AdministrationContract.next_adjustment_date()`, `is_adjustment_overdue(reference_date)`; `UnitPerson.objects.current(reference_date)`, `is_current(reference_date)`; `Unit.objects.inconsistent_apportionment_condominium_ids()` (the dashboard calls them).
+- **Rules are in the models**: `AdministrationContract.clean()` (fee rules), `UnitPerson.clean()` (owner/tenant percentage, dates), `Unit.clean()` (block belongs to the condominium), field validators
+  (`validate_due_day`, `validate_ideal_fraction`, `validate_non_negative`, `validate_percentage`) and constraints. Every serializer inherits `ModelRulesMixin`, so violations return 400 with the model's messages.
 - `UnitSerializer` exposes read-only `unit_people` (with `person_detail`); `UnitPersonSerializer` exposes read-only `person_detail`.
 
 ## Admin / tests
@@ -42,4 +43,5 @@ API payloads in the frontend's exact shape, list pagination/filters/search, unit
 
 ## Rules / future
 - `fee_floor` / `fee_ceiling` exist in the API but no UI uses them yet. Block CRUD has an API but no UI.
-- Apportionment: the active units of a condominium should sum `ideal_fraction` to 1 (reported by the dashboard, not enforced).
+- Apportionment: the active units of a condominium cannot sum more than 1 (`Unit.clean()`); reaching exactly 1 is reported by the dashboard as a pendency.
+- Owners: the owner links of a unit cannot sum more than 100 % at any date (`UnitPerson.clean()`).

@@ -3,7 +3,10 @@ summary: Blank REASONS feature-spec template (copy it to NNN-slug.md).
 read-when: you create a new feature spec
 skip-if: you need the process → features/README.md
 ---
+<!-- When copying: rewrite the 5-line header above for the feature (summary of the feature, read-when, skip-if redirects). -->
 # NNN — Title
+
+**Status:** draft <!-- draft | ready | in-progress | done | dropped --> · **Apps:** app1, app2 · **Frontend impact:** none <!-- none | client regeneration | new screens -->
 
 ## Open questions
 <!-- Everything unclear. Each with your recommended answer. Empty = ready to implement. -->

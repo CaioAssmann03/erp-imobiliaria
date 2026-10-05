@@ -5,8 +5,7 @@ skip-if: environment setup commands → architecture/operations/local-dev.md
 ---
 # Testing
 
-pytest + pytest-django (`pytest.ini`: `DJANGO_SETTINGS_MODULE = config.settings`, `python_files = test_*.py`). **Tests need PostgreSQL**: the trigram GIN indexes do not
-exist in SQLite. Run against the compose database:
+pytest + pytest-django (`pytest.ini`: `DJANGO_SETTINGS_MODULE = config.settings`, `python_files = test_*.py`). **Tests need PostgreSQL** (settings require `POSTGRES_DB`; the trigram GIN indexes do not exist in SQLite). Run against the compose database:
 
 ```bash
 docker compose up -d db
@@ -28,7 +27,8 @@ tests/test_<topic>.py
 | Layer | How | Example |
 |---|---|---|
 | DB constraints | create invalid row inside `with pytest.raises(IntegrityError), transaction.atomic()` | `test_database_rejects_fixed_without_amount` |
-| Serializer rules | call `Serializer(data=...).is_valid()` or `serializer.validate(attrs)`; no DB when possible | `test_floor_cannot_exceed_ceiling` |
+| Model rules (validators, `clean()`) | build an unsaved instance and call `clean()` / the validator; **no DB** | `TestContractModelRules`, `TestUnitPersonModelRules` |
+| Serializer = model rules | `Serializer(data=...).is_valid()` (needs DB) proves the model's error reaches the right field as 400 | `TestUnitSerializerUsesTheModelRules` |
 | Nested create/update | `serializer.save()` and assert related rows | `test_update_upserts_contract_and_billing_rules` |
 | API contract | `APIClient` + `reverse("<basename>-list")`; **payloads in the exact shape the frontend sends** (including nulls) | `test_api_payloads.py` |
 | Lists | pagination keys, `limit`, filters, search, 401 without token | `test_api_list.py` |

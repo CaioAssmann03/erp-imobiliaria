@@ -31,3 +31,6 @@ Thumbs.db
 
 # Celery beat (arquivo local de agendamento)
 celerybeat-schedule*
+
+# Celery beat runtime state
+celerybeat-schedule*

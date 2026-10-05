@@ -9,7 +9,7 @@ skip-if: local commands → architecture/operations/local-dev.md; stack overview
 | Env | How | Notes |
 |---|---|---|
 | Local | `docker compose up -d` (db, redis, backend `runserver`, celery worker/beat, frontend) | `.env` from `.env.example`; Postgres on 5432 |
-| CI | `.github/workflows/ci.yml`: Postgres + Redis services | checks migrations, `migrate`, `check`, tests (see known-gaps.md #1) |
+| CI | `.github/workflows/ci.yml`: Postgres + Redis services | `makemigrations --check`, `migrate`, `check`, `pytest apps` (installs `requirements-dev.txt`) |
 | Production | Render Blueprint `render.yaml`: Postgres, Redis, backend (Docker), frontend (Docker) | free plan: services sleep, Postgres expires after 30 days, no Celery workers |
 
 ## Deploy flow (backend)
@@ -46,7 +46,7 @@ plan), a tested restore, and a retention rule. Needs a spec before go-live.
 | `relation "..." does not exist` | migrations not applied | `docker compose exec backend python manage.py migrate` |
 | login returns 500 | tables missing (see above) or `accounts_user` absent | migrate; create the superuser |
 | `makemigrations --check` fails in CI | model changed without migration | `makemigrations`, commit |
-| tests error on `gin_trgm_ops` | tests run on SQLite | run on PostgreSQL (`architecture/quality/testing.md`) |
+| `POSTGRES_DB is not set` when running a command | the variable is missing outside Docker | export `POSTGRES_DB`/`POSTGRES_HOST` (`architecture/operations/local-dev.md`) |
 | admin login fails behind HTTPS (CSRF) | host missing from `ALLOWED_HOSTS` | fix the env var |
 | frontend cannot call the API (CORS) | `CORS_ALLOWED_ORIGINS` mismatch | set the exact frontend origin |
 

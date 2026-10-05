@@ -15,6 +15,8 @@ docker compose exec backend python manage.py seed_demo         # demo data (--cl
 URLs: API docs `http://localhost:8000/api/docs/` · schema `/api/schema/` · admin `/admin/` · frontend `http://localhost:3000`.
 
 ## Daily commands (from `backend/`, with the compose `db` running)
+`POSTGRES_DB` must be set for **every** `manage.py`/`pytest` command run outside Docker (settings refuse to load without it).
+
 ```bash
 export POSTGRES_DB=erp_imobiliaria POSTGRES_HOST=localhost
 venv/bin/python manage.py check

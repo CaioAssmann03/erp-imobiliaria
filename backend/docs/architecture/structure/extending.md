@@ -9,7 +9,8 @@ Always: feature spec first (`docs/features/`), ask on gaps, then follow the step
 
 ## Add a field to an existing model
 1. Model: field with explicit `null`/`blank`/default; constraint if it is a rule (tuple in `Meta.constraints`, with `violation_error_message`).
-2. Serializer: add to `Meta.fields`; add the rule to `validate` (mirror the constraint, same message).
+2. Rule: add the validator (one field) or the check in `clean()` (several fields) **in the model**, plus the constraint with the same message. The serializer only gets the field in `Meta.fields`
+   (it already inherits `ModelRulesMixin`).
 3. `makemigrations`; for existing rows give a default or a data migration. Never edit applied migrations.
 4. Admin (`list_display`/inline) if useful; tests (constraint + serializer + API payload).
 5. Update `docs/apps/<app>.md`; tell the user the frontend client must be regenerated.
@@ -17,7 +18,7 @@ Always: feature spec first (`docs/features/`), ask on gaps, then follow the step
 ## Add a model (entity)
 1. `models/<entity>.py` (UUID id, timestamps, `@final`, Meta, `__str__`); export in `models/__init__.py`.
 2. Decide `on_delete` with `data-model.md` policy; add `related_name`; type hints for reverse managers under `TYPE_CHECKING`.
-3. `serializers/<entity>_serializers.py` (+ `validate` mirroring constraints), `views/<entity>_views.py`, register in `urls.py`, admin.
+3. `serializers/<entity>_serializers.py` (`ModelRulesMixin` + `ModelSerializer`, no rules inside), `views/<entity>_views.py`, register in `urls.py`, admin.
 4. Migration, tests, docs. If the entity is a 1:1 part of a parent, write it via the parent's serializer (see `practices.md`, nested).
 
 ## Add an endpoint to an existing resource

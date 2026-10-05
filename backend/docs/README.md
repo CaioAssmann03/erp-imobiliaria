@@ -17,6 +17,7 @@ if `skip-if` matches or the summary is not what you need, follow its pointer wit
 | New Django app | `architecture/structure/app-anatomy.md` · `architecture/structure/extending.md` |
 | Recurring change (field, model, filter, Celery, integration, permissions) | `architecture/structure/extending.md` |
 | Business formula or definition | `architecture/data/domain-rules.md` |
+| Naming anything (classes, methods, parameters, variables, tests) | `naming.md` |
 | Tests | `architecture/quality/testing.md` |
 | Security, personal data (LGPD), secrets, roles | `architecture/quality/security.md` |
 | Auth, users | `apps/accounts.md` · `architecture/quality/security.md` |
@@ -39,7 +40,7 @@ if `skip-if` matches or the summary is not what you need, follow its pointer wit
 | `architecture/operations/` | deploy/runbook, local development |
 | `apps/` | one file per app that has code (stub apps get theirs when they start) |
 | `features/` | spec process, template, specs |
-| root | `practices.md` (pattern book), `known-gaps.md` |
+| root | `practices.md` (pattern book), `naming.md` (Clean Code naming), `known-gaps.md` |
 
-Always true: English code and docs · UUID pks · constraints mirrored in serializers · one entity per file · ask when in doubt · spec before feature ·
+Always true: English code and docs · UUID pks · business rules only in models · one entity per file · ask when in doubt · spec before feature ·
 update the doc you changed in the same change.

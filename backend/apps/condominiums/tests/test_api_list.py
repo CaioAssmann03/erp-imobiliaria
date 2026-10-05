@@ -62,7 +62,7 @@ def test_filters_and_search(client: APIClient, company: Company, condominium: Co
     by_condominium = body(client.get(reverse("unit-list"), {"condominium": other.pk}))
     blocks = body(client.get(reverse("block-list"), {"condominium": condominium.pk}))
 
-    assert [c["name"] for c in by_active["results"]] == ["Outro Prédio"]
-    assert [c["name"] for c in by_search["results"]] == ["Residencial Sol"]
+    assert [condominium["name"] for condominium in by_active["results"]] == ["Outro Prédio"]
+    assert [condominium["name"] for condominium in by_search["results"]] == ["Residencial Sol"]
     assert [u["name"] for u in by_condominium["results"]] == ["202"]
     assert blocks["count"] == 1

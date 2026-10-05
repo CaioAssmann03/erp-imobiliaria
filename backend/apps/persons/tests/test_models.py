@@ -51,7 +51,7 @@ def test_person_is_ordered_by_name() -> None:
     _ = Person.objects.create(name="Zeca")
     _ = Person.objects.create(name="Ana")
 
-    assert [p.name for p in Person.objects.all()] == ["Ana", "Zeca"]
+    assert [person.name for person in Person.objects.all()] == ["Ana", "Zeca"]
 
 
 @pytest.mark.parametrize("cpf", ["123", "11111111111", "52998224720", "abcdefghijk"])

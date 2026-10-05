@@ -2,9 +2,10 @@ from rest_framework import serializers
 from typing_extensions import final
 
 from ..models import Company
+from .model_rules import ModelRulesMixin
 
 
-class CompanySerializer(serializers.ModelSerializer[Company]):
+class CompanySerializer(ModelRulesMixin, serializers.ModelSerializer[Company]):
     @final
     class Meta:
         model = Company

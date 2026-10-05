@@ -13,5 +13,7 @@ class QuerySearchFilter(filters.SearchFilter):
     search_description = "Termo de busca (nome, documento…)."
 
     def get_search_terms(self, request):
-        value = request.query_params.get(self.search_param) or request.query_params.get("search", "")
-        return value.replace("\x00", "").replace(",", " ").split()
+        raw_query = request.query_params.get(self.search_param) or request.query_params.get(
+            "search", ""
+        )
+        return raw_query.replace("\x00", "").replace(",", " ").split()

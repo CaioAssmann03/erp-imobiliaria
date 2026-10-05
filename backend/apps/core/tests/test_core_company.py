@@ -47,7 +47,7 @@ def test_search_by_trade_name(api_client: APIClient) -> None:
 
     response = api_client.get(reverse("company-list"), {"query": "alpha"})
 
-    assert [c["legal_name"] for c in results(response)] == ["Alpha LTDA"]
+    assert [company["legal_name"] for company in results(response)] == ["Alpha LTDA"]
 
 
 def test_str_prefers_trade_name() -> None:

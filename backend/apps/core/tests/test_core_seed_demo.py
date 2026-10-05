@@ -53,15 +53,17 @@ def test_seed_apportionment_sums_to_one_except_deliberate_cases(
     call_command("seed_demo", verbosity=0)
 
     wrong = [
-        c.name
-        for c in Condominium.objects.filter(active=True)
-        if abs((c.units.filter(active=True).aggregate(s=Sum("ideal_fraction"))["s"]) - 1)
+        condominium.name
+        for condominium in Condominium.objects.filter(active=True)
+        if abs((condominium.units.filter(active=True).aggregate(s=Sum("ideal_fraction"))["s"]) - 1)
         > 0.0001
     ]
     assert len(wrong) == 2
 
 
 def test_seed_without_company_does_nothing() -> None:
+    Company.objects.all().delete()  # the core.0002 migration seeds one company
+
     call_command("seed_demo", verbosity=0)
 
     assert not Condominium.objects.exists()

@@ -58,41 +58,41 @@ class TestJwtLogin:
     def test_valid_credentials_return_tokens(self) -> None:
         _ = User.objects.create_user("maria", password="x")
 
-        code, data = self.login("maria", "x")
+        status_code, tokens = self.login("maria", "x")
 
-        assert code == status.HTTP_200_OK
-        assert {"access", "refresh"} <= set(data)
+        assert status_code == status.HTTP_200_OK
+        assert {"access", "refresh"} <= set(tokens)
 
     def test_wrong_password_is_rejected(self) -> None:
         _ = User.objects.create_user("maria", password="x")
 
-        code, _data = self.login("maria", "errada")
+        status_code, _tokens = self.login("maria", "errada")
 
-        assert code == status.HTTP_401_UNAUTHORIZED
+        assert status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_inactive_user_cannot_login(self) -> None:
         _ = User.objects.create_user("maria", password="x", is_active=False)
 
-        code, _data = self.login("maria", "x")
+        status_code, _tokens = self.login("maria", "x")
 
-        assert code == status.HTTP_401_UNAUTHORIZED
+        assert status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_access_token_opens_protected_endpoint(self) -> None:
         _ = User.objects.create_user("maria", password="x")
-        _code, data = self.login("maria", "x")
+        _status_code, tokens = self.login("maria", "x")
         client = APIClient()
 
         assert client.get(reverse("person-list")).status_code == 401
-        client.credentials(HTTP_AUTHORIZATION=f"Bearer {data['access']}")
+        client.credentials(HTTP_AUTHORIZATION=f"Bearer {tokens['access']}")
 
         assert client.get(reverse("person-list")).status_code == status.HTTP_200_OK
 
     def test_refresh_token_issues_new_access(self) -> None:
         _ = User.objects.create_user("maria", password="x")
-        _code, data = self.login("maria", "x")
+        _status_code, tokens = self.login("maria", "x")
 
         response = APIClient().post(
-            reverse("token_refresh"), {"refresh": data["refresh"]}, format="json"
+            reverse("token_refresh"), {"refresh": tokens["refresh"]}, format="json"
         )
 
         assert response.status_code == status.HTTP_200_OK

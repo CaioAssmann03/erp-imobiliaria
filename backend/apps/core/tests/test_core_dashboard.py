@@ -37,11 +37,11 @@ def dashboard(client: APIClient) -> JsonObject:
 
 
 def test_empty_dashboard(api_client: APIClient) -> None:
-    data = dashboard(api_client)
+    summary = dashboard(api_client)
 
-    assert data["condominiums"]["total"] == 0
-    assert data["fixed_revenue"]["monthly_total"] == "0.00"
-    assert [m["month"] for m in data["adjustments_by_month"]][0] == "overdue"
+    assert summary["condominiums"]["total"] == 0
+    assert summary["fixed_revenue"]["monthly_total"] == "0.00"
+    assert [entry["month"] for entry in summary["adjustments_by_month"]][0] == "overdue"
 
 
 def test_summaries_count_by_type(api_client: APIClient, company: Company) -> None:
@@ -50,13 +50,13 @@ def test_summaries_count_by_type(api_client: APIClient, company: Company) -> Non
     person = Person.objects.create(name="Maria")
     _ = PeopleIndividual.objects.create(person=person, cpf="52998224725")
 
-    data = dashboard(api_client)
+    summary = dashboard(api_client)
 
-    assert data["condominiums"]["total"] == 2
-    assert data["condominiums"]["active"] == 1
-    by_type = {t["type"]: t["total"] for t in data["condominiums"]["by_type"]}
+    assert summary["condominiums"]["total"] == 2
+    assert summary["condominiums"]["active"] == 1
+    by_type = {entry["type"]: entry["total"] for entry in summary["condominiums"]["by_type"]}
     assert by_type == {"residential": 1, "commercial": 1}
-    persons = {t["type"]: t["total"] for t in data["persons"]["by_type"]}
+    persons = {entry["type"]: entry["total"] for entry in summary["persons"]["by_type"]}
     assert persons == {"individual": 1, "legal": 0}
 
 
@@ -84,7 +84,7 @@ def test_fixed_revenue_ignores_variable_and_inactive(
     assert revenue["monthly_total"] == "500.00"
     assert revenue["fixed_condominiums"] == 1
     assert revenue["variable_condominiums"] == 1
-    assert [c["name"] for c in revenue["largest"]] == ["Fixo"]
+    assert [condominium["name"] for condominium in revenue["largest"]] == ["Fixo"]
 
 
 def test_adjustments_overdue_and_upcoming(
@@ -100,12 +100,12 @@ def test_adjustments_overdue_and_upcoming(
             adjustment_base_date=today() + timedelta(days=days) - timedelta(days=365),
         )
 
-    data = dashboard(api_client)
+    summary = dashboard(api_client)
 
-    assert data["pending"]["overdue_adjustments"] == 1
-    assert data["pending"]["adjustments_next_30_days"] == 1
-    assert data["upcoming_adjustments"][0]["overdue"] is True
-    assert data["adjustments_by_month"][0]["total"] == 1
+    assert summary["pending"]["overdue_adjustments"] == 1
+    assert summary["pending"]["adjustments_next_30_days"] == 1
+    assert summary["upcoming_adjustments"][0]["overdue"] is True
+    assert summary["adjustments_by_month"][0]["total"] == 1
 
 
 def test_units_without_responsible(api_client: APIClient, company: Company) -> None:
@@ -130,11 +130,11 @@ def test_units_without_responsible(api_client: APIClient, company: Company) -> N
         end_date=today() - timedelta(days=10),
     )
 
-    data = dashboard(api_client)
+    summary = dashboard(api_client)
 
-    assert data["responsibles"]["active_units"] == 3
-    assert data["responsibles"]["with_responsible"] == 1
-    assert data["pending"]["units_without_responsible"] == 2
+    assert summary["responsibles"]["active_units"] == 3
+    assert summary["responsibles"]["with_responsible"] == 1
+    assert summary["pending"]["units_without_responsible"] == 2
 
 
 def test_leases_ending_soon(api_client: APIClient, company: Company) -> None:
@@ -150,14 +150,14 @@ def test_leases_ending_soon(api_client: APIClient, company: Company) -> None:
             end_date=today() + timedelta(days=days) if days is not None else None,
         )
 
-    data = dashboard(api_client)
+    summary = dashboard(api_client)
 
-    assert data["pending"]["leases_ending"] == 2
-    assert [(lease["unit"], lease["ended"]) for lease in data["leases"]] == [
+    assert summary["pending"]["leases_ending"] == 2
+    assert [(lease["unit"], lease["ended"]) for lease in summary["leases"]] == [
         ("102", True),
         ("101", False),
     ]
-    assert data["leases"][0]["tenant"] == "Inquilino"
+    assert summary["leases"][0]["tenant"] == "Inquilino"
 
 
 def test_apportionment_must_sum_to_one(api_client: APIClient, company: Company) -> None:

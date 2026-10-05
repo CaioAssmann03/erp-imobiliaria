@@ -1,12 +1,14 @@
 from rest_framework import serializers
 from typing_extensions import final
 
+from apps.core.serializers import ModelRulesMixin
+
 from ..models import (
     Address,
 )
 
 
-class AddressSerializer(serializers.ModelSerializer[Address]):
+class AddressSerializer(ModelRulesMixin, serializers.ModelSerializer[Address]):
     @final
     class Meta:
         model = Address

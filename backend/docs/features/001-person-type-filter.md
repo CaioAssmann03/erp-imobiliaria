@@ -5,6 +5,8 @@ skip-if: you need the blank template → features/_template.md; you need the per
 ---
 # 001 — Filter persons by kind
 
+**Status:** done · **Apps:** persons · **Frontend impact:** client regeneration
+
 > Retro-spec of a finished feature, kept as a **worked example** of the template.
 
 ## Open questions

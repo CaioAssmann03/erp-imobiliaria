@@ -24,14 +24,14 @@ skip-if: serializer/view code patterns → practices.md; security and permission
 - `ModelViewSet` (create, update, partial update, delete). The frontend uses PATCH for edits.
 - **Nested one-to-one parts** (address, contract, billing rules, people_individual/people_legal) are written through the parent serializer
   (`create`/`update` in `transaction.atomic`). **Child collections** (unit people) have their own endpoint.
-- Business rules live in the serializer `validate` (mirroring model constraints, because DRF does not enforce `CheckConstraint`) and in
-  model constraints (last line of defence). A rule broken must yield **400**, never 500.
+- **Business rules live only in the models** (validators, `clean()`, constraints). Serializers inherit `ModelRulesMixin`, which runs the model's `full_clean()` so any broken rule
+  yields **400** with the model's message on the model's field, never 500. Serializers contain no domain logic (see `practices.md` §2–3).
 
 ## Errors
 - 400: DRF dict `{field: [messages]}`, nested for nested serializers (`{"administration_contract": {"fee_amount": [...]}}`);
   rule-level errors under `non_field_errors`. 401 invalid/missing token; 403 forbidden; 404 missing record.
 - Messages are **English** (the frontend maps known ones to Portuguese). Do not return Portuguese user text from the API.
-- Use the same message as the model's `violation_error_message` when a serializer mirrors a constraint.
+- The messages come from the model (`clean()`/validators/`violation_error_message`); keep a rule's message identical across `clean()` and its constraint.
 
 ## Contract with the frontend
 - drf-spectacular generates the schema from serializers/views; the frontend client is generated from it (orval). Field names, enums and
