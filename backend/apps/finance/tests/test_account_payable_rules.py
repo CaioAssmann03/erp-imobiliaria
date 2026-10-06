@@ -185,12 +185,12 @@ def test_the_database_pairs_the_cost_center_with_the_condominium(company, condom
 # ----- R5 (atomicity) -----
 
 
-def test_settle_is_atomic(make_account) -> None:  # type: ignore[no-untyped-def]
+def test_settle_is_atomic(make_account, staff_user) -> None:  # type: ignore[no-untyped-def]
     account = make_account()
 
     with mock.patch.object(AccountPayable, "save", side_effect=RuntimeError("boom")):
         with pytest.raises(RuntimeError):
-            settle_account_payable(account, AccountPayablePayment(date(2026, 10, 18), Decimal("1250.00"), "pix"))
+            settle_account_payable(account, AccountPayablePayment(date(2026, 10, 18), Decimal("1250.00"), "pix", staff_user))
 
     stored = AccountPayable.objects.get(pk=account.pk)
     assert stored.status == "open"
@@ -252,9 +252,9 @@ def test_a_cancelled_account_can_be_deleted(api_client: APIClient, make_account)
     assert api_client.delete(reverse(DETAIL, args=[account.pk])).status_code == status.HTTP_204_NO_CONTENT
 
 
-def test_model_save_of_a_closed_account_is_refused(make_account) -> None:  # type: ignore[no-untyped-def]
+def test_model_save_of_a_closed_account_is_refused(make_account, staff_user) -> None:  # type: ignore[no-untyped-def]
     account = make_account()
-    settle_account_payable(account, AccountPayablePayment(date(2026, 10, 18), Decimal("1250.00"), "pix"))
+    settle_account_payable(account, AccountPayablePayment(date(2026, 10, 18), Decimal("1250.00"), "pix", staff_user))
     account.description = "mudou"
 
     with pytest.raises(ValidationError) as error:

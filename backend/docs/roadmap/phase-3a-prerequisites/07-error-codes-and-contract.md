@@ -6,7 +6,7 @@ skip-if: you need the whole phase → roadmap/phase-3a-prerequisites/README.md; 
 # Part 07 — Error codes and API contract cleanup
 
 **Status:** done · **Phase:** 3a (Prerequisites for phase 3) · **Apps:** core, condominiums, persons, finance, frontend · **Frontend impact:** client regeneration · **Depends on:** 05
-**Spec:** [006 — Error codes and API contract cleanup](../../features/006-error-codes-and-contract.md)
+**Spec:** [006 — Error codes and API contract cleanup](../../features/history.md) (section 006)
 
 ## Goal
 Every model error carries a stable `code`; the frontend translates by code. In the same wave `upcoming_adjustments[].index` becomes `adjustment_index`, so the client is regenerated once. Decided in gaps #6 and #23.

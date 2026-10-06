@@ -15,6 +15,12 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "account_payable.cost_center.required_for_condominium": "A despesa de um condomínio precisa de um centro de custo.",
   "account_payable.deletion.is_paid": "Uma conta a pagar paga não pode ser excluída.",
   "account_payable.due_date.before_issue_date": "O vencimento não pode ser anterior à emissão.",
+  "account_payable.entry_template.not_allowed_for_company_expense":
+    "Despesa da empresa não tem modelo de lançamento.",
+  "account_payable.entry_template.other_cost_center":
+    "O modelo de lançamento pertence a outro centro de custo.",
+  "account_payable.entry_template.required_to_pay":
+    "Para pagar uma despesa de condomínio, informe o modelo de lançamento.",
   "account_payable.payment.not_allowed_unless_paid": "Só uma conta paga tem dados de pagamento.",
   "account_payable.payment.required_when_paid": "Uma conta paga precisa de data, valor e forma de pagamento.",
   "account_payable.status.not_open": "Só uma conta a pagar em aberto pode ser alterada, baixada ou cancelada.",
@@ -36,6 +42,7 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
     "O desconto deve ficar entre 0 e 100.",
   blank: "Campo obrigatório.",
   "block.name.duplicate_in_condominium": "Já existe um bloco com este nome neste condomínio.",
+  "cash_number.not_positive": "O número do caixa deve ser maior que zero.",
   "cnpj.invalid_check_digits": "CNPJ inválido.",
   "cnpj.invalid_length": "O CNPJ deve ter 14 caracteres, sem pontuação.",
   "condominium.advisor.other_company": "O assessor pertence a outra empresa.",
@@ -46,9 +53,43 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
     "Já existe um centro de custo com este nome neste condomínio.",
   "cpf.invalid_check_digits": "CPF inválido.",
   "cpf.invalid_length": "O CPF deve ter 11 dígitos, sem pontuação.",
+  "current_account.condominium.duplicate": "Este condomínio já tem uma conta corrente.",
+  "current_account.condominium.immutable": "O condomínio de uma conta corrente não pode ser alterado.",
+  "current_account.condominium.other_company": "O condomínio pertence a outra empresa.",
+  "current_account.deletion.has_entries": "Uma conta corrente com lançamentos não pode ser excluída.",
+  "current_account_entry.account_payable.already_posted": "Esta conta a pagar já tem o seu lançamento.",
+  "current_account_entry.account_payable.mismatch_origin":
+    "Só um lançamento gerado pelo pagamento de uma conta a pagar aponta para ela.",
+  "current_account_entry.account_payable.other_condominium": "A conta a pagar pertence a outro condomínio.",
+  "current_account_entry.amount.not_positive": "O valor deve ser maior que zero.",
+  "current_account_entry.batch.other_company": "O lote pertence a outra empresa.",
+  "current_account_entry.competence_month.not_first_day": "A competência deve ser o primeiro dia do mês.",
+  "current_account_entry.cost_center.inactive": "O centro de custo está inativo.",
+  "current_account_entry.cost_center.other_condominium": "O centro de custo pertence a outro condomínio.",
+  "current_account_entry.current_account.other_company": "A conta corrente pertence a outra empresa.",
+  "current_account_entry.deletion_not_allowed":
+    "Um lançamento nunca é excluído: estorne-o com um lançamento oposto.",
+  "current_account_entry.entry_template.inactive": "O modelo de lançamento está inativo.",
+  "current_account_entry.entry_template.other_condominium":
+    "O modelo de lançamento pertence a outro condomínio.",
+  "current_account_entry.justification.blank": "Informe a justificativa.",
+  "current_account_entry.reversal_of.already_reversed": "Este lançamento já foi estornado.",
+  "current_account_entry.reversal_of.amount_differs":
+    "O estorno deve ter o mesmo valor do lançamento estornado.",
+  "current_account_entry.reversal_of.is_a_reversal": "Um estorno não pode ser estornado.",
+  "current_account_entry.reversal_of.other_account":
+    "O estorno deve ser da mesma conta corrente do lançamento estornado.",
+  "current_account_entry.reversal_of.same_kind":
+    "O estorno deve ter o tipo oposto ao do lançamento estornado.",
+  "current_account_entry.unit.other_condominium": "A unidade pertence a outro condomínio.",
+  "current_account_entry.update_not_allowed":
+    "Um lançamento nunca é alterado: estorne-o com um lançamento oposto.",
   does_not_exist: "Seleção inválida.",
   "due_day.out_of_range": "O dia de vencimento deve ficar entre 1 e 28.",
   empty: "Campo obrigatório.",
+  "entry_batch.cash_number.not_allowed": "Um lote de banco não tem número de caixa.",
+  "entry_batch.cash_number.required": "Informe o número do caixa para um lote de caixa ou caixa extra.",
+  "entry_batch.deletion.has_entries": "Um lote com lançamentos não pode ser excluído.",
   "entry_template.admin_fee_incidence_percentage.out_of_range":
     "O percentual deve ficar entre 0 e 100.",
   "entry_template.name.duplicate_in_cost_center":

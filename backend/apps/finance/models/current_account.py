@@ -1,32 +1,60 @@
-import uuid
+from decimal import Decimal
+from typing import Any
 
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from typing_extensions import override
+from typing_extensions import final, override
+
+from apps.condominiums.models import Condominium
+from apps.core.models import Company
+from apps.core.models.base import BaseModel
+from apps.finance.errors import CurrentAccountError
+from apps.finance.models.rules import CurrentAccountRules
 
 
-class CurrentAccount(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+@final
+class CurrentAccount(BaseModel):
+    company = models.ForeignKey(
+        Company, on_delete=models.PROTECT, related_name="current_accounts"
+    )
+    condominium = models.ForeignKey(
+        Condominium, on_delete=models.PROTECT, related_name="current_accounts"
+    )
 
-    entity_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    entity_id = models.UUIDField(editable=False)
-    entity = GenericForeignKey("entity_type", "entity_id")
+    balance = models.DecimalField(
+        max_digits=12, decimal_places=2, default=Decimal(0), editable=False
+    )
 
-    balance = models.DecimalField(max_digits=12, decimal_places=2, editable=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    company_lookup = "company"
 
     class Meta:
         verbose_name = "Current Account"
         verbose_name_plural = "Current Accounts"
-        constraints = models.UniqueConstraint(
-            fields=("entity_type", "entity_id"),
-            name="current_account_unique_account_per_owner",
-            violation_error_message="This account has already an owner",
+        constraints = (
+            models.UniqueConstraint(
+                fields=("condominium",),
+                name="current_account_unique_per_condominium",
+                violation_error_message=CurrentAccountError.CONDOMINIUM_DUPLICATE.message,
+                violation_error_code=CurrentAccountError.CONDOMINIUM_DUPLICATE.value,
+            ),
         )
+
+    def recalculated_balance(self) -> Decimal:
+        """The balance summed from the entries; the check that the cached `balance` still matches."""
+        return self.entries.signed_total()
+
+    def balances_by_cost_center(self) -> list[dict[str, object]]:
+        return self.entries.balances_by_cost_center()
+
+    @override
+    def clean(self) -> None:
+        CurrentAccountRules(self).validate()
+
+    @override
+    def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
+        if self.entries.exists():
+            raise CurrentAccountError.DELETION_HAS_ENTRIES.to_validation_error()
+        return super().delete(*args, **kwargs)
 
     @override
     def __str__(self) -> str:
-        return f"{self.entity} - {self.balance}"
+        return f"{self.condominium} - {self.balance}"

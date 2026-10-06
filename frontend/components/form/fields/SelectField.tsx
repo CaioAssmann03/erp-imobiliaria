@@ -13,6 +13,8 @@ interface SelectFieldProps extends BaseProps {
   options: readonly { value: string | number; label: string }[];
   placeholder?: string;
   disabled?: boolean;
+  /** Chamado a cada escolha do usuário (não em reset/setValue). */
+  onValueChange?: (value: string) => void;
 }
 
 export function SelectField({
@@ -24,10 +26,12 @@ export function SelectField({
   options,
   placeholder,
   disabled,
+  onValueChange,
 }: SelectFieldProps) {
   const { register } = useFormContext();
   const id = useId();
   const error = useFieldError(name);
+  const field = register(name);
 
   return (
     <FormField id={id} label={label} required={required} hint={hint} error={error} className={className}>
@@ -38,7 +42,11 @@ export function SelectField({
         aria-describedby={error || hint ? `${id}-message` : undefined}
         aria-required={required}
         disabled={disabled}
-        {...register(name)}
+        {...field}
+        onChange={(event) => {
+          field.onChange(event);
+          onValueChange?.(event.target.value);
+        }}
       >
         {placeholder !== undefined && (
           <option value="">{placeholder}</option>

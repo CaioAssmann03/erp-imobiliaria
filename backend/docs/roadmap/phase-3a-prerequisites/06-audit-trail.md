@@ -6,7 +6,7 @@ skip-if: you need the whole phase → roadmap/phase-3a-prerequisites/README.md; 
 # Part 06 — Change audit trail
 
 **Status:** done · **Phase:** 3a (Prerequisites for phase 3) · **Apps:** core, persons, condominiums, finance · **Frontend impact:** none · **Depends on:** 05
-**Spec:** [005 — Change audit trail](../../features/005-audit-trail.md)
+**Spec:** [005 — Change audit trail](../../features/history.md) (section 005)
 
 ## Goal
 Know who changed which registry record and when, without touching the models. Decided in gap #20. Finance records keep their own explicit audit fields (they are part of the business rule, phase 3).

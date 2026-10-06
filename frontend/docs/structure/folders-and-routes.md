@@ -36,6 +36,10 @@ docs/         REASONS documentation
 | `/condominiums/[id]/blocks`, `/condominiums/[id]/units` | redirect to `/condominiums/blocks?condominium=<id>` / `/condominiums/units?condominium=<id>`: a condominium's lists are the global lists with the condominium filter applied (`?block=<id>` also pre-filters units) |
 | `/condominiums/cost-centers`, `/new`, `/[id]` | `app/(dashboard)/condominiums/cost-centers/...` ("Sub-contas": cost center CRUD; name and active only, no code; condominium chosen on create; `?condominium=<id>` pre-filters) |
 | `/persons`, `/new`, `/[id]` | `app/(dashboard)/persons/...` |
+| `/finance` | redirects to `/finance/accounts-payable` (`finance/layout.tsx` renders the sub-header `FinanceSubNav`: Contas a pagar · Extrato · Lançamento manual) |
+| `/finance/accounts-payable`, `/new`, `/[id]` | `app/(dashboard)/finance/accounts-payable/...` (a paid or cancelled account opens read-only; settling is a dialog, `SettleAccountPayableDialog`, cancelling is a row action) |
+| `/finance/statement` | `app/(dashboard)/finance/statement/page.tsx` (`?condominium=<id>` picks the condominium; reversing is a dialog; `/condominiums/[id]/statement` redirects here) |
+| `/finance/entries/new` | `app/(dashboard)/finance/entries/new/page.tsx` (batch + lines with `useFieldArray`) |
 
 ## Where new code goes
 

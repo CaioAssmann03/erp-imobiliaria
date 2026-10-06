@@ -16,10 +16,10 @@ Accounts payable, current account (ledger) and the most critical rule of the pro
 | 01 | [Finish cost center and entry template API](01-cost-center-entry-template-api.md) | done | finance |
 | 02 | [Suppliers and bank accounts](02-suppliers-and-bank-accounts.md) | done | finance |
 | 03 | [Accounts payable](03-accounts-payable.md) | done | finance |
-| 04 | [Current account, batches and ledger entries](04-current-account-ledger.md) | todo | finance |
-| 05 | [Automatic ledger posting rule](05-automatic-ledger-posting.md) | todo | finance |
-| 06 | [Payment receipts](06-payment-receipts.md) | todo | finance, frontend |
-| 07 | [Accounts payable screens](07-accounts-payable-screens.md) | todo | frontend |
+| 04 | [Current account, batches and ledger entries](04-current-account-ledger.md) | done | finance |
+| 05 | [Automatic ledger posting rule](05-automatic-ledger-posting.md) | done | finance |
+| 06 | [Payment receipts](06-payment-receipts.md) | blocked | finance, frontend |
+| 07 | [Accounts payable screens](07-accounts-payable-screens.md) | done | frontend |
 
 ## Notes
 Contains the critical financial rules; test them first (see `architecture/quality.md`). Parts 06 and 07 were split out of part 03 (user decision, 2026-10-05): the receipt waits for the hosting, the screens for the ledger.

@@ -29,7 +29,15 @@ from apps.condominiums.models import (
     UnitPerson,
 )
 from apps.core.models import Company
-from apps.finance.models import CostCenter
+from apps.finance.models import (
+    AccountPayable,
+    CostCenter,
+    CurrentAccount,
+    CurrentAccountEntry,
+    EntryBatch,
+    EntryTemplate,
+    Supplier,
+)
 from apps.persons.models import PeopleIndividual, PeopleLegal, Person
 
 WRONG_APPORTIONMENT_TOTAL = Decimal("0.9")  # fractions that do not close at 1 (shows the pendency)
@@ -226,6 +234,40 @@ UNIT_TYPES = {
 UNIT_NUMBERS = range(101, 120)
 
 COST_CENTERS = ["Fundo de Reserva", "Fundo de Obras", "Água e Esgoto"]
+# Fornecedores fictícios e o modelo de lançamento de cada sub-conta.
+DEMO_SUPPLIERS = [
+    "Companhia de Energia Elétrica",
+    "Departamento Municipal de Água e Esgoto",
+    "Elevadores Atlas Manutenção Ltda",
+    "Limpeza Total Serviços Ltda",
+]
+ENTRY_TEMPLATES = {
+    "Fundo de Reserva": "DEPÓSITO FUNDO DE RESERVA",
+    "Fundo de Obras": "PG MANUTENÇÃO E OBRAS",
+    "Água e Esgoto": "PG ÁGUA E ESGOTO",
+}
+
+
+@dataclass(frozen=True)
+class DemoPayable:
+    """An open account payable: `condominium_position` is an index of DEMO_CONDOMINIUMS (None = company expense)."""
+
+    description: str
+    supplier: str
+    amount: str
+    days_until_due: int
+    condominium_position: int | None
+    cost_center: str | None
+
+
+DEMO_PAYABLES = [
+    DemoPayable("Conta de água - setembro", DEMO_SUPPLIERS[1], "1284.50", -5, 0, "Água e Esgoto"),
+    DemoPayable("Manutenção dos elevadores", DEMO_SUPPLIERS[2], "2100.00", 10, 0, "Fundo de Obras"),
+    DemoPayable("Conta de água - setembro", DEMO_SUPPLIERS[1], "960.00", 3, 1, "Água e Esgoto"),
+    DemoPayable("Limpeza pós-obra", DEMO_SUPPLIERS[3], "1500.00", 20, 2, "Fundo de Obras"),
+    DemoPayable("Energia elétrica - escritório", DEMO_SUPPLIERS[0], "780.35", 7, None, None),
+]
+
 # Dias até o fim de cada locação sorteada (negativo = já encerrada).
 DAYS_UNTIL_LEASE_END = [-12, 9, 25, 48, 90, None]
 
@@ -510,8 +552,90 @@ def _create_demo_condominiums(context: SeedContext) -> tuple[int, int]:
     return units_created, links_created
 
 
+def _demo_supplier_documents() -> list[str]:
+    return [_generate_cnpj(100 + position) for position, _ in enumerate(DEMO_SUPPLIERS)]
+
+
+def _create_demo_finance(context: SeedContext) -> None:
+    """Suppliers, entry templates and open accounts payable (idempotent; nothing is paid here)."""
+    suppliers: dict[str, Supplier] = {}
+    for position, name in enumerate(DEMO_SUPPLIERS):
+        document = _generate_cnpj(100 + position)
+        person = Person.objects.filter(people_legal__cnpj=document).first()
+        if person is None:
+            person = _create_validated(
+                Person,
+                company=context.company,
+                name=name,
+                email=f"contato@{_email_slug(name)}.com.br",
+                cell_number=_random_phone(context.random_generator),
+            )
+            _ = _create_validated(PeopleLegal, person=person, company=context.company, cnpj=document)
+        suppliers[name] = Supplier.objects.filter(person=person).first() or _create_validated(Supplier, person=person)
+
+    for demo in DEMO_CONDOMINIUMS:
+        condominium = Condominium.objects.filter(name=demo.name).first()
+        if condominium is None:
+            continue
+        for cost_center in CostCenter.objects.filter(condominium=condominium, name__in=ENTRY_TEMPLATES):
+            if not EntryTemplate.objects.filter(cost_center=cost_center).exists():
+                _ = _create_validated(EntryTemplate, cost_center=cost_center, name=ENTRY_TEMPLATES[cost_center.name])
+
+    for payable in DEMO_PAYABLES:
+        supplier = suppliers[payable.supplier]
+        condominium = (
+            Condominium.objects.filter(name=DEMO_CONDOMINIUMS[payable.condominium_position].name).first()
+            if payable.condominium_position is not None
+            else None
+        )
+        if payable.condominium_position is not None and condominium is None:
+            continue
+        already_exists = AccountPayable.objects.filter(
+            supplier=supplier, description=payable.description, condominium=condominium
+        ).exists()
+        if already_exists:
+            continue
+        cost_center = (
+            CostCenter.objects.filter(condominium=condominium, name=payable.cost_center).first()
+            if condominium is not None
+            else None
+        )
+        if condominium is not None and cost_center is None:
+            continue
+        _ = _create_validated(
+            AccountPayable,
+            company=context.company,
+            condominium=condominium,
+            cost_center=cost_center,
+            entry_template=EntryTemplate.objects.filter(cost_center=cost_center).first() if cost_center else None,
+            supplier=supplier,
+            description=payable.description,
+            document_number=f"NF {1000 + context.random_generator.randint(0, 8999)}",
+            amount=Decimal(payable.amount),
+            issue_date=context.today - timedelta(days=15),
+            due_date=context.today + timedelta(days=payable.days_until_due),
+        )
+
+
+def _clear_demo_finance(condominiums: "models.QuerySet[Condominium]") -> None:
+    """Remove the finance records of the demo (entries are deleted by queryset: they are never edited by hand)."""
+    supplier_persons = Person.objects.filter(people_legal__cnpj__in=_demo_supplier_documents())
+    suppliers = Supplier.objects.filter(person__in=supplier_persons)
+    accounts = CurrentAccount.objects.filter(condominium__in=condominiums)
+    entries = CurrentAccountEntry.objects.filter(current_account__in=accounts)
+    batch_ids = list(entries.values_list("batch_id", flat=True).distinct())
+    _ = entries.filter(reversal_of__isnull=False).delete()
+    _ = entries.delete()
+    _ = EntryBatch.objects.filter(pk__in=batch_ids, entries__isnull=True).delete()
+    _ = AccountPayable.objects.filter(Q(supplier__in=suppliers) | Q(condominium__in=condominiums)).delete()
+    _ = accounts.delete()
+    _ = EntryTemplate.objects.filter(cost_center__condominium__in=condominiums).delete()
+    _ = suppliers.delete()
+    _ = supplier_persons.delete()
+
+
 class Command(BaseCommand):
-    help = "Cria (ou remove, com --clear) dados de exemplo: condomínios, unidades, pessoas e vínculos."
+    help = "Cria (ou remove, com --clear) dados de exemplo: condomínios, unidades, pessoas, vínculos e o financeiro (fornecedores, modelos e contas a pagar)."
 
     @override
     def add_arguments(self, parser: CommandParser) -> None:
@@ -530,6 +654,7 @@ class Command(BaseCommand):
     def _clear(self) -> None:
         demo_names = [demo.name for demo in DEMO_CONDOMINIUMS]
         condominiums = Condominium.objects.filter(name__in=demo_names)
+        _clear_demo_finance(condominiums)
         # Address é OneToOne com SET_NULL: apagar o condomínio deixaria o endereço órfão.
         _ = Address.objects.filter(condominium__in=condominiums).delete()
         condos, _ = condominiums.delete()
@@ -599,6 +724,7 @@ class Command(BaseCommand):
         )
         units_created, links_created = _create_demo_condominiums(context)
         self._finalize(random_generator)
+        _create_demo_finance(context)
         self._report(len(persons), units_created, links_created)
 
     def _report(self, persons_count: int, units_created: int, links_created: int) -> None:

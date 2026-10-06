@@ -590,7 +590,7 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getAccountsPayableCancelMutationOptions(options), queryClient);
     }
     /**
- * Pay ("baixa") an open account: the rules and the transaction are the model's.
+ * Pay ("baixa") an open account.
  */
 export const accountsPayableSettle = (
     id: string,

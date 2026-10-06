@@ -1,7 +1,7 @@
 ---
 summary: HttpOnly-cookie auth through the Next API proxy: who holds the tokens, the flow of login, requests, renewal and logout, and its limits.
 read-when: you touch login, logout, tokens, cookies, proxy.ts or the /api route handler
-skip-if: headers/CSP → safeguards/http-hardening.md; general secure coding → safeguards/secure-coding.md; the backend side (blacklist, throttle) → backend/docs/features/007-auth-hardening.md
+skip-if: headers/CSP → safeguards/http-hardening.md; general secure coding → safeguards/secure-coding.md; the backend side (blacklist, throttle) → backend/docs/features/history.md (section 007)
 ---
 # Authentication and token storage (S — Safeguards)
 

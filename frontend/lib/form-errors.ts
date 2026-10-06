@@ -16,18 +16,20 @@ function readErrors(data: unknown): ErrorItem[] | null {
  * Os campos do formulário são planos e usam o nome do campo da API; um erro aninhado
  * (`address.city`, `unit_people.0.person`) vale para o último nome do caminho.
  */
-function formFieldName(path: string): string {
+export function formFieldName(path: string): string {
   const names = path.split(".").filter((name) => !/^\d+$/.test(name));
   return names[names.length - 1] ?? path;
 }
 
 /**
  * Aplica os erros de validação do backend nos campos do formulário, traduzidos pelo
- * código. Retorna uma mensagem geral para exibir em toast.
+ * código. Retorna uma mensagem geral para exibir em toast. `toFieldName` converte o caminho do
+ * erro da API no nome do campo do formulário (padrão: o último nome do caminho).
  */
 export function applyServerErrors<T extends FieldValues>(
   error: unknown,
-  setError: UseFormSetError<T>
+  setError: UseFormSetError<T>,
+  toFieldName: (path: string) => string = formFieldName
 ): string {
   if (!isAxiosError(error) || !error.response) {
     return "Sem conexão com o servidor. Tente novamente.";
@@ -46,7 +48,7 @@ export function applyServerErrors<T extends FieldValues>(
         continue;
       }
       setError(
-        formFieldName(field) as Path<T>,
+        toFieldName(field) as Path<T>,
         { type: "server", message: translated },
         { shouldFocus: applied === 0 }
       );

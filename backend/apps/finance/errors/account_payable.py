@@ -50,3 +50,15 @@ class AccountPayableError(RuleError):
         "account_payable.deletion.is_paid",
         "A paid account payable cannot be deleted.",
     )
+    ENTRY_TEMPLATE_NOT_ALLOWED_FOR_COMPANY_EXPENSE = (
+        "account_payable.entry_template.not_allowed_for_company_expense",
+        "A company expense has no entry template.",
+    )
+    ENTRY_TEMPLATE_OTHER_COST_CENTER = (
+        "account_payable.entry_template.other_cost_center",
+        "The entry template belongs to another cost center.",
+    )
+    ENTRY_TEMPLATE_REQUIRED_TO_PAY = (
+        "account_payable.entry_template.required_to_pay",
+        "An expense of a condominium needs an entry template to be paid.",
+    )

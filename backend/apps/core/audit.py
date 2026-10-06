@@ -16,7 +16,10 @@ MASKED_VALUE = "[masked]"
 
 # Models that are deliberately not audited here, with the reason (model label -> reason).
 # The finance records of phase 3 carry their own `created_by`, `created_at` and reversal entries.
-AUDIT_EXEMPT: dict[str, str] = {}
+AUDIT_EXEMPT: dict[str, str] = {
+    "finance.CurrentAccount": "Its balance derives from the ledger entries, which never change and carry their own `created_by` and `created_at`.",
+    "finance.CurrentAccountEntry": "It never changes and is never deleted (a mistake is fixed by an opposite entry) and carries its own `created_by` and `created_at`.",
+}
 
 
 def mask_personal_value(value: str) -> str:

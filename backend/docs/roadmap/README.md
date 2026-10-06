@@ -19,14 +19,14 @@ A phase is `done` only when every part is `done` or `moved`.
 | 1 | [Foundations](phase-1-foundations/README.md) | done | 5/5 | Sprint 1 |
 | 2 | [Condominium registry](phase-2-condominium-registry/README.md) | done | 4/4 | Sprint 2 |
 | 3a | [Prerequisites for phase 3](phase-3a-prerequisites/README.md) | in-progress | 7/9 | Known-gaps review |
-| 3 | [Finance base](phase-3-finance-base/README.md) | in-progress | 3/7 | Sprint 3 |
+| 3 | [Finance base](phase-3-finance-base/README.md) | in-progress | 6/7 | Sprint 3 |
 | 4 | [Billing issuance (generation)](phase-4-billing-generation/README.md) | todo | 0/6 | Sprint 4 |
 | 5 | [Billing issuance (bank)](phase-5-billing-bank-integration/README.md) | todo | 0/5 | Sprint 5 |
 | 6 | [Closings and agreements](phase-6-closings-and-agreements/README.md) | todo | 0/4 | Sprint 6 |
 | 7 | [Client portal](phase-7-client-portal/README.md) | todo | 0/3 | Sprint 7 |
 | 8 | [Rentals](phase-8-rentals/README.md) | todo | 0/5 | Sprint 8 |
 
-Current position: phases 1 and 2 are done. **Phase 3a** (prerequisites from the known-gaps review) is done except two items that wait for the backend hosting decision: part 01 (deploy docs) and the host checklist of part 09. **Phase 3** is in progress: parts 01 (cost center and entry template API), 02 (suppliers and bank accounts) and 03 (accounts payable) are done; next are the ledger and the automatic posting rule, each needing its spec first (then the receipts and the screens).
+Current position: phases 1 and 2 are done. **Phase 3a** (prerequisites from the known-gaps review) is done except two items that wait for the backend hosting decision: part 01 (deploy docs) and the host checklist of part 09. **Phase 3** is in progress: parts 01 to 05 and 07 are done (backend and screens); only part 06 (payment receipts) remains, **blocked** until the hosting and the bucket are decided.
 
 ## How to use
 1. Pick the next `todo` part in the lowest unfinished phase (respect **Depends on**).

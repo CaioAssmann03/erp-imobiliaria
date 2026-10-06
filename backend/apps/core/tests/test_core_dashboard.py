@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APIClient
 
+from apps.accounts.models import User
 from apps.core.testing import seeded_company
 from apps.condominiums.models import (
     AdministrationContract,
@@ -270,12 +271,12 @@ def test_accounts_payable_this_month_counts_the_calendar_month(
 
 
 def test_accounts_payable_ignores_paid_and_cancelled(
-    api_client: APIClient, company: Company
+    api_client: APIClient, company: Company, staff_user: User
 ) -> None:
     reference = today()
     paid = make_payable(company, reference - timedelta(days=1))
     settle_account_payable(
-        paid, AccountPayablePayment(reference, Decimal("100.00"), AccountPayable.PaymentMethod.PIX)
+        paid, AccountPayablePayment(reference, Decimal("100.00"), AccountPayable.PaymentMethod.PIX, staff_user)
     )
     cancelled = make_payable(company, reference - timedelta(days=1))
     cancel_account_payable(cancelled)

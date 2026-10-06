@@ -13,6 +13,7 @@ from apps.finance.models.rules import AccountPayableRules
 from apps.finance.validators import validate_positive_amount
 
 from .cost_center import CostCenter
+from .entry_template import EntryTemplate
 from .supplier import Supplier
 
 
@@ -51,6 +52,14 @@ class AccountPayable(BaseModel):
         related_name="accounts_payable",
     )
     supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, related_name="accounts_payable")
+    # The kind of ledger entry that paying this account posts; required to pay a condominium expense.
+    entry_template = models.ForeignKey(
+        EntryTemplate,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="accounts_payable",
+    )
 
     description = models.CharField(max_length=255)
     document_number = models.CharField(max_length=60, blank=True, help_text="Invoice number or the supplier's barcode")

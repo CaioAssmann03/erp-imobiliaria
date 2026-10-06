@@ -5,29 +5,20 @@ skip-if: you need the whole phase → roadmap/phase-3-finance-base/README.md; yo
 ---
 # Part 07 — Accounts payable screens
 
-**Status:** todo · **Phase:** 3 (Finance base) · **Apps:** frontend · **Frontend impact:** new screens · **Depends on:** 05
-**Spec:** none yet (planned: full)
+**Status:** done · **Phase:** 3 (Finance base) · **Apps:** frontend · **Frontend impact:** new screens · **Depends on:** 05
+**Spec:** [016 — Finance screens](../../features/history.md) (section 016)
 
 ## Goal
 The staff register, list and settle accounts payable in the Next frontend, after settling creates its ledger entry.
 
 ## Scope
-- [ ] Screen: list and filter accounts payable (status, supplier, condominium, due date)
-- [ ] Screen: register and edit an account payable (supplier, condominium or company expense, cost center, amounts, dates)
-- [ ] Action: settle ("baixa": date, amount paid, method) and cancel
-- [ ] The receipt upload control, once part 06 exists
+- [x] Screen: list and filter accounts payable (status, supplier, condominium, due date)
+- [x] Screen: register and edit an account payable (supplier, condominium or company expense, cost center, amounts, dates)
+- [x] Action: settle ("baixa": date, amount paid, method) and cancel
+- Moved out: the receipt upload control → part 06 (it needs the storage and the hosting first)
 
 ## Draft for the spec
-Moved out of part 03 by the user's decision (2026-10-05): the screens are built after the settlement posts to the ledger, so they are not built twice.
-
-### Entities
-None new.
-
-### Business rules
-- Errors are translated by code (`lib/error-messages.ts`); the screen only shows what the API answers.
-
-### Open questions
-- [ ] Where does it live in the navigation (a finance section)? (recommended: a "Financeiro" group with accounts payable first)
+Moved to the spec.
 
 ## Result
-Not started.
+Done on 2026-10-06 (spec 016). `/finance/accounts-payable` (list with search and filters, register, edit, settle and cancel; a closed account opens read-only), under a new **Financeiro** navigation group. `tsc`, `eslint` and `next build` are clean; the screens were not exercised in a browser in this change.

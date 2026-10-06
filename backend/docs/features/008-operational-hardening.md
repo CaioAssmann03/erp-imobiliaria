@@ -1,7 +1,7 @@
 ---
 summary: Spec: a minimal /api/health/ (app + database), HTTPS redirect and a short HSTS configurable by env, and a configurable admin path (ADMIN_URL); written to be independent of the hosting provider, with a verification checklist for when the host is chosen.
 read-when: you touch the health check, SECURE_SSL_REDIRECT, HSTS, ADMIN_URL, the host's health probe or the production security headers
-skip-if: token, login and cookie hardening → features/007-auth-hardening.md; the change audit trail → features/005-audit-trail.md; deploy topology and the runbook → architecture/operations.md
+skip-if: token, login and cookie hardening, or the change audit trail → features/history.md (sections 007 and 005); deploy topology and the runbook → architecture/operations.md
 ---
 # 008 — Operational hardening: health, HTTPS, admin path
 

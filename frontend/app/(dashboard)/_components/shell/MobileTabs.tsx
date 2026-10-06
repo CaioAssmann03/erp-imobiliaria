@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, LayoutDashboard, Users } from "lucide-react";
+import { Building2, LayoutDashboard, Users, Wallet } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { href: "/", label: "Painel", icon: LayoutDashboard },
   { href: "/condominiums", label: "Condomínios", icon: Building2 },
+  { href: "/finance", label: "Financeiro", icon: Wallet },
   { href: "/persons", label: "Pessoas", icon: Users },
 ];
 
@@ -19,7 +20,7 @@ export function MobileTabs() {
   return (
     <nav
       aria-label="Navegação principal"
-      className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-1px_12px_rgb(0_0_0/0.06)] backdrop-blur-md lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-1px_12px_rgb(0_0_0/0.06)] backdrop-blur-md lg:hidden"
     >
       {TABS.map((tab) => (
         <Link

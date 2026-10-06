@@ -1,6 +1,13 @@
 from apps.core.audit import register_audited
 
-from .models import AccountPayable, BankAccount, CostCenter, EntryTemplate, Supplier
+from .models import (
+    AccountPayable,
+    BankAccount,
+    CostCenter,
+    EntryBatch,
+    EntryTemplate,
+    Supplier,
+)
 
 
 def register() -> None:
@@ -11,3 +18,4 @@ def register() -> None:
     register_audited(Supplier, masked_fields=("bank_code", "branch", "account_number", "pix_key"))
     # Editable money records keep their history here: every change of amount or due date, with the actor.
     register_audited(AccountPayable)
+    register_audited(EntryBatch)

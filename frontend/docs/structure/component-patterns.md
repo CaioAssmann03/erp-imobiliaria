@@ -14,7 +14,7 @@ XxxRow.tsx      client  one row (ConfirmDeleteButton, RowLink, RowActions)
 ```
 `page.tsx` (server) prefetches and renders `<HydrationBoundary><XxxTable/></HydrationBoundary>`.
 State: `hooks/use-list-params.ts`. Blocks: `components/data-list/` (`Toolbar`, `SearchField`, `RowLink`,
-`RowActions`, `ListState`), `FilterMenu`, `Pagination`. Filter values are English (`status=active`).
+`RowActions`, `ListState`), `FilterMenu`, `Pagination`. Sections with sub-pages (Condomínios, Financeiro) share `components/SectionTabs.tsx` (underlined, collapsible tabs). Periods (due date, entry date) are ready-made options of the `FilterMenu`, never loose date inputs. Filter values are English (`status=active`).
 
 ## Form
 

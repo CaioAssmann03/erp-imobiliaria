@@ -42,6 +42,9 @@ Search/filters/page are query params (`hooks/use-list-params.ts`); `placeholderD
 | condominium | list, record, dashboard |
 | unit | list, record, dashboard |
 | unit link | the unit record, dashboard |
+| account payable (create/edit/cancel) | list, record, dashboard |
+| settle an account payable | list, record, dashboard, current accounts, entries |
+| manual entries / reversal | entries, current accounts (and batches) |
 | person | list, record, dashboard |
 
 ## Do not

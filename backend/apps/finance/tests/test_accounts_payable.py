@@ -59,12 +59,12 @@ def test_crud(api_client: APIClient, condominium, cost_center, supplier) -> None
     assert not AccountPayable.objects.exists()
 
 
-def test_filters(api_client: APIClient, company: Company, condominium, cost_center, supplier, make_account) -> None:  # type: ignore[no-untyped-def]
+def test_filters(api_client: APIClient, company: Company, condominium, cost_center, supplier, make_account, staff_user) -> None:  # type: ignore[no-untyped-def]
     from datetime import date
 
     _ = make_account(description="Aberta", due_date=date(2026, 10, 10))
     paid = make_account(description="Paga", due_date=date(2026, 10, 20))
-    settle_account_payable(paid, AccountPayablePayment(date(2026, 10, 19), paid.amount, "pix"))
+    settle_account_payable(paid, AccountPayablePayment(date(2026, 10, 19), paid.amount, "pix", staff_user))
     _ = make_account(description="Despesa da empresa", condominium=None, cost_center=None, due_date=date(2026, 11, 5))
     other_person = Person.objects.create(company=company, name="Outro fornecedor")
     other_supplier = Supplier.objects.create(person=other_person)

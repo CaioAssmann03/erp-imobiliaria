@@ -8,7 +8,7 @@
 import type { PaymentMethodEnum } from './paymentMethodEnum';
 
 /**
- * The input of `POST .../settle/`; the rules are the model's (`AccountPayable.settle`).
+ * Payment data to settle an open account.
  */
 export interface SettleAccountPayable {
   payment_date: string;

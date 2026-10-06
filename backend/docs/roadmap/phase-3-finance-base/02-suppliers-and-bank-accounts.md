@@ -6,7 +6,7 @@ skip-if: you need the whole phase → roadmap/phase-3-finance-base/README.md; yo
 # Part 02 — Suppliers and bank accounts
 
 **Status:** done · **Phase:** 3 (Finance base) · **Apps:** finance · **Frontend impact:** client regeneration · **Depends on:** 01
-**Spec:** [010 — Suppliers and bank accounts](../../features/010-suppliers-and-bank-accounts.md)
+**Spec:** [010 — Suppliers and bank accounts](../../features/history.md) (section 010)
 
 ## Goal
 Who the company pays and which real bank accounts exist.

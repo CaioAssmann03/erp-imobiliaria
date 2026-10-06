@@ -11,6 +11,9 @@ from ..models import AccountPayable
 
 class AccountPayableSerializer(ModelRulesMixin, serializers.ModelSerializer[AccountPayable]):
     supplier_name = serializers.CharField(source="supplier.person.name", read_only=True)
+    condominium_name = serializers.CharField(source="condominium.name", read_only=True, default=None)
+    cost_center_name = serializers.CharField(source="cost_center.name", read_only=True, default=None)
+    entry_template_name = serializers.CharField(source="entry_template.name", read_only=True, default=None)
 
     @final
     class Meta:
@@ -19,9 +22,13 @@ class AccountPayableSerializer(ModelRulesMixin, serializers.ModelSerializer[Acco
             "id",
             "company",
             "condominium",
+            "condominium_name",
             "cost_center",
+            "cost_center_name",
             "supplier",
             "supplier_name",
+            "entry_template",
+            "entry_template_name",
             "description",
             "document_number",
             "amount",

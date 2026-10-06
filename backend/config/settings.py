@@ -158,6 +158,11 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API do sistema de administração de condomínios, locações, vendas e financeiro.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # Two models have a `kind` choice: name them, or the client gets hash-suffixed enum names.
+    "ENUM_NAME_OVERRIDES": {
+        "AccountKindEnum": "apps.finance.models.AccountKind",
+        "EntryKindEnum": "apps.finance.models.CurrentAccountEntry.Kind",
+    },
     "POSTPROCESSING_HOOKS": [
         "drf_spectacular.hooks.postprocess_schema_enums",
         "apps.core.schema.add_error_contract",

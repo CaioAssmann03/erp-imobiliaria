@@ -6,7 +6,7 @@ skip-if: you need the whole phase → roadmap/phase-3-finance-base/README.md; yo
 # Part 01 — Finish cost center and entry template API
 
 **Status:** done · **Phase:** 3 (Finance base) · **Apps:** finance · **Frontend impact:** client regeneration · **Depends on:** phase 3a
-**Spec:** [009 — Cost center and entry template API](../../features/009-cost-center-entry-template-api.md)
+**Spec:** [009 — Cost center and entry template API](../../features/history.md) (section 009)
 
 ## Goal
 Close the carry-over of phase 2 part 04.

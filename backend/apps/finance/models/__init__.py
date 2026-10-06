@@ -3,5 +3,7 @@ from .bank_account import AccountKind as AccountKind
 from .bank_account import BankAccount as BankAccount
 from .cost_center import CostCenter as CostCenter
 from .current_account import CurrentAccount as CurrentAccount
+from .current_account_entry import CurrentAccountEntry as CurrentAccountEntry
+from .entry_batch import EntryBatch as EntryBatch
 from .entry_template import EntryTemplate as EntryTemplate
 from .supplier import Supplier as Supplier

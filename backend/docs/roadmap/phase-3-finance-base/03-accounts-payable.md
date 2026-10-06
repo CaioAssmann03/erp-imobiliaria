@@ -6,7 +6,7 @@ skip-if: you need the whole phase → roadmap/phase-3-finance-base/README.md; yo
 # Part 03 — Accounts payable
 
 **Status:** done · **Phase:** 3 (Finance base) · **Apps:** finance · **Frontend impact:** client regeneration · **Depends on:** 02
-**Spec:** [011 — Accounts payable](../../features/011-accounts-payable.md)
+**Spec:** [011 — Accounts payable](../../features/history.md) (section 011)
 
 ## Goal
 Register and settle ("baixa") expenses of a condominium or the company.

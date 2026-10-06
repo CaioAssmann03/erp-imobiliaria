@@ -21,7 +21,7 @@ from ..services.settle_account_payable import (
 
 @final
 class AccountPayableViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[AccountPayable]):
-    queryset = AccountPayable.objects.select_related("supplier__person", "condominium", "cost_center")
+    queryset = AccountPayable.objects.select_related("supplier__person", "condominium", "cost_center", "entry_template")
     serializer_class = AccountPayableSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)
     search_fields = ("description", "document_number", "supplier__person__name")
@@ -38,7 +38,7 @@ class AccountPayableViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Acc
         account = self.get_object()
         payment = SettleAccountPayableSerializer(data=request.data)
         payment.is_valid(raise_exception=True)
-        settle_account_payable(account, AccountPayablePayment(**payment.validated_data))
+        settle_account_payable(account, AccountPayablePayment(**payment.validated_data, settled_by=request.user))
         return Response(self.get_serializer(account).data)
 
     @extend_schema(request=None, responses=AccountPayableSerializer, operation_id="accounts_payable_cancel")

@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { KindEnum } from './kindEnum';
+import type { AccountKindEnum } from './accountKindEnum';
 
 /**
  * Serializer mixin: input is validated by the model's rules, never by rules written here.
@@ -27,7 +27,7 @@ export interface PatchedBankAccount {
   branch?: string;
   /** @maxLength 20 */
   account_number?: string;
-  kind?: KindEnum;
+  kind?: AccountKindEnum;
   /**
      * Ex: Conta Movimento
      * @maxLength 60

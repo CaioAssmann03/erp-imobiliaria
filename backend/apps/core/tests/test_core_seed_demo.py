@@ -16,7 +16,19 @@ from apps.condominiums.models import (
 )
 from apps.core.management.commands.seed_demo import _create_validated
 from apps.core.models import Company
-from apps.finance.models import CostCenter
+from apps.finance.models import (
+    AccountPayable,
+    CostCenter,
+    CurrentAccount,
+    CurrentAccountEntry,
+    EntryBatch,
+    EntryTemplate,
+    Supplier,
+)
+from apps.finance.services.settle_account_payable import (
+    AccountPayablePayment,
+    settle_account_payable,
+)
 from apps.persons.models import PeopleIndividual, PeopleLegal, Person
 
 pytestmark = pytest.mark.django_db
@@ -28,7 +40,7 @@ def test_seed_creates_data(company: Company) -> None:
     assert Condominium.objects.count() == 8
     assert Unit.objects.exists()
     assert UnitPerson.objects.exists()
-    assert Person.objects.count() == 26
+    assert Person.objects.count() == 30  # 26 owners and tenants + 4 suppliers
 
 
 def test_seed_is_idempotent(company: Company) -> None:
@@ -90,6 +102,9 @@ SEEDED_MODELS: tuple[type[models.Model], ...] = (
     Person,
     Unit,
     UnitPerson,
+    Supplier,
+    EntryTemplate,
+    AccountPayable,
 )
 
 
@@ -109,7 +124,7 @@ def test_seed_helper_rejects_a_record_that_breaks_a_rule(company: Company) -> No
 
     with pytest.raises(ValidationError):
         _ = _create_validated(
-            Unit, condominium=condominium, name="101", ideal_fraction=Decimal("2")
+            Unit, condominium=condominium, name="101", ideal_fraction=Decimal(2)
         )
 
     assert not Unit.objects.exists()
@@ -121,3 +136,40 @@ def test_seed_assigns_the_company_to_people_and_documents(company: Company) -> N
     assert not Person.objects.exclude(company=company).exists()
     assert not PeopleIndividual.objects.exclude(company=company).exists()
     assert not PeopleLegal.objects.exclude(company=company).exists()
+
+
+def test_seed_creates_open_accounts_payable_ready_to_be_paid(company: Company) -> None:
+    call_command("seed_demo", verbosity=0)
+
+    assert Supplier.objects.count() == 4
+    assert AccountPayable.objects.filter(status="open").count() == 5
+    assert AccountPayable.objects.filter(condominium__isnull=True).count() == 1
+    condominium_expenses = AccountPayable.objects.filter(condominium__isnull=False)
+    assert not condominium_expenses.filter(entry_template__isnull=True).exists()
+    assert not CurrentAccountEntry.objects.exists()  # nothing is paid by the seed
+
+
+def test_seed_finance_is_idempotent(company: Company) -> None:
+    call_command("seed_demo", verbosity=0)
+    counts = (Supplier.objects.count(), EntryTemplate.objects.count(), AccountPayable.objects.count())
+
+    call_command("seed_demo", verbosity=0)
+
+    assert (Supplier.objects.count(), EntryTemplate.objects.count(), AccountPayable.objects.count()) == counts
+
+
+def test_clear_removes_the_finance_data_even_after_payments_and_reversals(company: Company, staff_user) -> None:  # type: ignore[no-untyped-def]
+    import datetime
+
+    from apps.finance.services.reverse_entry import reverse_entry
+
+    call_command("seed_demo", verbosity=0)
+    account = AccountPayable.objects.filter(condominium__isnull=False).first()
+    assert account is not None
+    settle_account_payable(account, AccountPayablePayment(datetime.date(2026, 10, 6), account.amount, "pix", staff_user))
+    reverse_entry(CurrentAccountEntry.objects.get(), "Teste", datetime.date(2026, 10, 7), staff_user)
+
+    call_command("seed_demo", "--clear", verbosity=0)
+
+    for model in (AccountPayable, Supplier, EntryTemplate, CurrentAccount, CurrentAccountEntry, EntryBatch, Person, Condominium):
+        assert not model._default_manager.exists(), model.__name__

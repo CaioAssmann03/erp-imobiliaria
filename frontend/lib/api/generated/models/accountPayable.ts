@@ -20,10 +20,15 @@ export interface AccountPayable {
   readonly company: string;
   /** @nullable */
   condominium?: string | null;
+  readonly condominium_name: string;
   /** @nullable */
   cost_center?: string | null;
+  readonly cost_center_name: string;
   supplier: string;
   readonly supplier_name: string;
+  /** @nullable */
+  entry_template?: string | null;
+  readonly entry_template_name: string;
   /** @maxLength 255 */
   description: string;
   /**

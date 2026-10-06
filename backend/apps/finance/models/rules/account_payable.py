@@ -31,6 +31,21 @@ class AccountPayableRules(ModelRules["AccountPayable"]):
             and cost_center.condominium_id != condominium.pk
         )
 
+    @rule("entry_template", AccountPayableError.ENTRY_TEMPLATE_NOT_ALLOWED_FOR_COMPANY_EXPENSE)
+    def company_expense_has_entry_template(self) -> bool:
+        return self._condominium() is None and self.instance.entry_template_id is not None
+
+    @rule("entry_template", AccountPayableError.ENTRY_TEMPLATE_OTHER_COST_CENTER)
+    def entry_template_belongs_to_another_cost_center(self) -> bool:
+        account = self.instance
+        if account.entry_template_id is None or account.cost_center_id is None:
+            return False
+        return account.entry_template.cost_center_id != account.cost_center_id
+
+    @rule("entry_template", AccountPayableError.ENTRY_TEMPLATE_REQUIRED_TO_PAY)
+    def paid_condominium_expense_lacks_entry_template(self) -> bool:
+        return self._is_paid() and self._condominium() is not None and self.instance.entry_template_id is None
+
     @rule("condominium", AccountPayableError.CONDOMINIUM_OTHER_COMPANY)
     def condominium_belongs_to_another_company(self) -> bool:
         condominium = self._condominium()

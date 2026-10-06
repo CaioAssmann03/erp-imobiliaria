@@ -17,8 +17,11 @@ authenticated with a Django user (admins only for now).
 | Condominiums | `/condominiums` | CRUD: identification, address, fee contract, billing rules, adjustment |
 | Units | `/condominiums/[id]/units` | CRUD per condominium; owners/tenants linked to each unit |
 | Persons | `/persons` | CRUD of individuals (CPF) and legal entities (CNPJ) |
+| Finance · Accounts payable | `/finance/accounts-payable` | list with filters, register/edit, settle ("baixa", which posts the debit in the condominium's statement) and cancel |
+| Finance · Statement | `/finance/statement` | current account of a condominium: balance and balance by cost center, entries (newest first) with filters (period, reference month, kind), reversal |
+| Finance · Manual entry | `/finance/entries/new` | one batch with several entries, possibly of several condominiums, posted all or none |
 
-Out of scope for now: finance, billing, rentals, sales (backend placeholders only), person login (only admins log in).
+Out of scope for now: suppliers, bank accounts and entry templates screens (registered in the Django Admin), payment receipts, billing, rentals, sales (backend placeholders only), person login (only admins log in).
 
 ## Non-functional requirements
 

@@ -1,10 +1,20 @@
 from django.contrib import admin
+from django.http import HttpRequest
 from typing_extensions import final
 from unfold.admin import ModelAdmin, TabularInline
 
 from apps.core.scoping import CompanyScopedAdminMixin
 
-from .models import AccountPayable, BankAccount, CostCenter, EntryTemplate, Supplier
+from .models import (
+    AccountPayable,
+    BankAccount,
+    CostCenter,
+    CurrentAccount,
+    CurrentAccountEntry,
+    EntryBatch,
+    EntryTemplate,
+    Supplier,
+)
 
 
 @final
@@ -58,3 +68,40 @@ class AccountPayableAdmin(CompanyScopedAdminMixin, ModelAdmin):
     raw_id_fields = ("supplier",)
     # The life cycle (status and payment) changes through settle/cancel, not by hand.
     readonly_fields = ("status", "payment_date", "amount_paid", "payment_method")
+
+
+@final
+@admin.register(CurrentAccount)
+class CurrentAccountAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("condominium", "balance")
+    search_fields = ("condominium__name",)
+    # The balance moves only when an entry is posted.
+    readonly_fields = ("balance",)
+
+
+@final
+@admin.register(EntryBatch)
+class EntryBatchAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("batch_date", "origin", "cash_number")
+    list_filter = ("origin",)
+    date_hierarchy = "batch_date"
+
+
+@final
+@admin.register(CurrentAccountEntry)
+class CurrentAccountEntryAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    """Read-only: an entry is posted through the API (it moves the balance) and never changes."""
+
+    list_display = ("registry", "current_account", "entry_date", "kind", "amount", "description")
+    search_fields = ("description",)
+    list_filter = ("kind", "origin")
+    date_hierarchy = "entry_date"
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj: CurrentAccountEntry | None = None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: CurrentAccountEntry | None = None) -> bool:
+        return False

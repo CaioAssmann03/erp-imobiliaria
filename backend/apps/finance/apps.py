@@ -7,8 +7,6 @@ class FinanceConfig(AppConfig):
 
     @override
     def ready(self) -> None:
-        import finance.signals
-
         from . import audit
 
         audit.register()

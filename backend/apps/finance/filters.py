@@ -2,7 +2,7 @@ import django_filters
 from django.db.models import QuerySet
 from typing_extensions import final
 
-from .models import AccountPayable, EntryTemplate
+from .models import AccountPayable, CurrentAccountEntry, EntryTemplate
 
 
 @final
@@ -32,3 +32,16 @@ class AccountPayableFilter(django_filters.FilterSet):
         self, queryset: QuerySet[AccountPayable], name: str, value: bool
     ) -> QuerySet[AccountPayable]:
         return queryset.filter(condominium__isnull=value)
+
+
+@final
+class CurrentAccountEntryFilter(django_filters.FilterSet):
+    """The statement: `?condominium=<id>`, an entry-date range and a competence month (`?competence_month=2026-10-01`)."""
+
+    condominium = django_filters.UUIDFilter(field_name="current_account__condominium")
+    entry_date_after = django_filters.DateFilter(field_name="entry_date", lookup_expr="gte")
+    entry_date_before = django_filters.DateFilter(field_name="entry_date", lookup_expr="lte")
+
+    class Meta:
+        model = CurrentAccountEntry
+        fields = ("current_account", "batch", "cost_center", "entry_template", "unit", "kind", "origin", "competence_month")

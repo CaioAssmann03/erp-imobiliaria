@@ -1,5 +1,4 @@
-export const brl = (value: number | string) =>
-  Number(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+export { brl } from "@/lib/format";
 
 /** "2025-03" → "mar" */
 export function shortMonthLabel(value: string) {

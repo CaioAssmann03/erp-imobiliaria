@@ -1,7 +1,7 @@
 ---
 summary: Process to specify a feature (levels, questions → decisions → spec → implement → close) and the index of specs.
 read-when: you are about to build any feature, or you need the list of specs and their status
-skip-if: you only need a blank template → features/_template.md (full) or features/_template-lite.md (lite); you want a filled example → features/001-person-type-filter.md; you need what is planned → roadmap/README.md
+skip-if: you only need a blank template → features/_template.md (full) or features/_template-lite.md (lite); you want a filled example → features/history.md (finished specs) or features/008-operational-hardening.md (a full one); you need what is planned → roadmap/README.md
 ---
 # Feature specs
 
@@ -49,16 +49,6 @@ Bug fixes and refactors that change no behavior or contract. Say explicitly that
 One row per spec; update it in the same change that creates or closes the spec.
 | Spec | Title | Level | Status | Roadmap (`phase N part NN` or `none`) |
 |---|---|---|---|---|
-| [001](001-person-type-filter.md) | Filter persons by kind (worked example, retro-spec) | full | done | none |
-| [002](002-business-rules-in-models.md) | Business rules live only in the models (retro-spec) | full | done | none |
-| [003](003-enforce-sums-and-cleanup.md) | Enforce sum caps, drop the SQLite fallback, clean imports (retro-spec) | full | done | none |
-| [004](004-company-scoping.md) | Company scoping (`User.company`, `Person.company`, scope mixin) | full | done | phase 3a part 05 |
-| [005](005-audit-trail.md) | Change audit trail (`django-auditlog`, masked personal data, Django 6.1 spike) | full | done | phase 3a part 06 |
-| [006](006-error-codes-and-contract.md) | Error codes and API contract cleanup (flat `errors[]`, codes, `adjustment_index`) | full | done | phase 3a part 07 |
-| [007](007-auth-hardening.md) | Auth hardening: logout, throttle, HttpOnly cookies | full | done | phase 3a part 08 |
 | [008](008-operational-hardening.md) | Operational hardening: health, HTTPS/HSTS, admin path | full | in-progress | phase 3a part 09 |
-| [009](009-cost-center-entry-template-api.md) | Cost center and entry template API and Admin | full | done | phase 3 part 01 |
-| [010](010-suppliers-and-bank-accounts.md) | Suppliers and bank accounts | full | done | phase 3 part 02 |
-| [011](011-accounts-payable.md) | Accounts payable (settle and cancel) | full | done | phase 3 part 03 |
-| [012](012-dashboard-accounts-payable.md) | Dashboard: accounts payable section | lite | done | none |
-| [013](013-pending-filters.md) | Pending filters (`?pending=`) on condominiums and units | lite | done | none |
+
+The finished specs (001–007 and 009–017) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.

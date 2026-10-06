@@ -6,7 +6,7 @@ skip-if: you need the whole phase → roadmap/phase-3a-prerequisites/README.md; 
 # Part 05 — Company scoping
 
 **Status:** done · **Phase:** 3a (Prerequisites for phase 3) · **Apps:** accounts, core, persons, condominiums, finance · **Frontend impact:** client regeneration · **Depends on:** 02
-**Spec:** [004 — Company scoping](../../features/004-company-scoping.md)
+**Spec:** [004 — Company scoping](../../features/history.md) (section 004)
 
 ## Goal
 Every logged-in user sees only the data of their company, before any money model exists. Roles come in phase 7. Decided in gap #2.

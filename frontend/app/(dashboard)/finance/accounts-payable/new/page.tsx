@@ -1,0 +1,16 @@
+import type { Metadata } from "next";
+
+import { AccountPayableForm } from "../../_components/AccountPayableForm";
+import { FormPage } from "@/components/form/FormPage";
+import { PageHeader } from "@/components/PageHeader";
+
+export const metadata: Metadata = { title: "Nova conta a pagar" };
+
+export default function NewAccountPayablePage() {
+  return (
+    <FormPage>
+      <PageHeader back={{ href: "/finance/accounts-payable", label: "Contas a pagar" }} title="Nova conta a pagar" />
+      <AccountPayableForm />
+    </FormPage>
+  );
+}

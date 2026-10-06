@@ -6,7 +6,7 @@ skip-if: you need the whole phase → roadmap/phase-3a-prerequisites/README.md; 
 # Part 08 — Auth hardening: logout, throttle, HttpOnly cookies
 
 **Status:** done · **Phase:** 3a (Prerequisites for phase 3) · **Apps:** accounts, core, frontend · **Frontend impact:** client regeneration · **Depends on:** 05, 07
-**Spec:** [007 — Auth hardening](../../features/007-auth-hardening.md)
+**Spec:** [007 — Auth hardening](../../features/history.md) (section 007)
 
 ## Goal
 Refresh tokens can be revoked, login is rate limited, and the frontend no longer keeps tokens where JavaScript can read them. Decided in gaps #3 and #15 (throttle part).

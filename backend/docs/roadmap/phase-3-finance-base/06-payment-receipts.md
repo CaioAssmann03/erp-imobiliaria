@@ -5,7 +5,7 @@ skip-if: you need the whole phase → roadmap/phase-3-finance-base/README.md; yo
 ---
 # Part 06 — Payment receipts
 
-**Status:** todo · **Phase:** 3 (Finance base) · **Apps:** finance, frontend · **Frontend impact:** client regeneration · **Depends on:** 03, and the backend hosting (phase 3a part 01)
+**Status:** blocked · **Phase:** 3 (Finance base) · **Apps:** finance, frontend · **Frontend impact:** client regeneration · **Depends on:** 03, and the backend hosting (phase 3a part 01)
 **Spec:** none yet (planned: full)
 
 ## Goal
@@ -15,6 +15,9 @@ Attach the payment receipt (a PDF or photo) to a settled account payable, stored
 - [ ] File storage on an S3-compatible bucket (`django-storages`; Backblaze B2 or Cloudflare R2 per the stack), configured by environment variables
 - [ ] Signed upload and download URLs (the Next proxy only carries JSON and Vercel caps request bodies near 4.5 MB)
 - [ ] Link the file to the `AccountPayable` it proves; only a paid account has a receipt
+
+## Why it is blocked
+The Trello card accepts "local disk for now", but the Next proxy (`app/api/[...path]`) carries JSON only, by design: a file would have to reach Django through a signed URL of a bucket, which needs the hosting and the provider decided (phase 3a part 01). Do it together with the deploy; until then the settle dialog and the account have no receipt control.
 
 ## Draft for the spec
 Moved out of part 03 by the user's decision (2026-10-05): no storage and no host exist yet.
