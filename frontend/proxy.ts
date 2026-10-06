@@ -1,23 +1,49 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { ACCESS_COOKIE } from "./lib/api-client";
+import { ACCESS_COOKIE, REFRESH_COOKIE } from "./lib/auth";
+import { clearAuthCookies, setAuthCookies } from "./lib/auth-cookies";
+import { refreshTokens } from "./lib/backend";
+import { isTokenExpiring } from "./lib/jwt";
 
 const PUBLIC_PATHS = ["/login"];
 
-export function proxy(request: NextRequest) {
+function redirectToLogin(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const loginUrl = new URL("/login", request.url);
+  if (pathname !== "/") loginUrl.searchParams.set("next", pathname);
+  const response = NextResponse.redirect(loginUrl);
+  clearAuthCookies(response);
+  return response;
+}
+
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isPublicPath = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
-  const hasToken = request.cookies.has(ACCESS_COOKIE);
+  const access = request.cookies.get(ACCESS_COOKIE)?.value;
+  const refresh = request.cookies.get(REFRESH_COOKIE)?.value;
 
-  if (!hasToken && !isPublicPath) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+  if (isPublicPath) {
+    return access
+      ? NextResponse.redirect(new URL("/", request.url))
+      : NextResponse.next();
   }
 
-  if (hasToken && isPublicPath) {
-    return NextResponse.redirect(new URL("/", request.url));
+  if (!access && !refresh) return redirectToLogin(request);
+
+  if (!access || isTokenExpiring(access)) {
+    // Renova o access token antes da renderização, para que Server Components
+    // consigam buscar dados com um token válido (eles não podem gravar cookies).
+    const tokens = refresh ? await refreshTokens(refresh, request.headers) : null;
+    if (!tokens) return redirectToLogin(request);
+
+    // Repassa os novos tokens para os Server Components desta requisição...
+    request.cookies.set(ACCESS_COOKIE, tokens.access);
+    if (tokens.refresh) request.cookies.set(REFRESH_COOKIE, tokens.refresh);
+    const response = NextResponse.next({ request: { headers: request.headers } });
+    // ...e para o navegador (cookies HttpOnly).
+    setAuthCookies(response, tokens);
+    return response;
   }
 
   return NextResponse.next();

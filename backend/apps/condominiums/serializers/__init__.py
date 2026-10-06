@@ -1,0 +1,9 @@
+from .address_serializers import AddressSerializer as AddressSerializer
+from .administration_contract_serializers import (
+    AdministrationContractSerializer as AdministrationContractSerializer,
+)
+from .billing_rules_serializers import BillingRulesSerializer as BillingRulesSerializer
+from .block_serializers import BlockSerializer as BlockSerializer
+from .condominium_serializers import CondominiumSerializer as CondominiumSerializer
+from .unit_person_serializers import UnitPersonSerializer as UnitPersonSerializer
+from .unit_serializers import UnitSerializer as UnitSerializer

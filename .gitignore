@@ -28,3 +28,9 @@ Thumbs.db
 
 # Claude Code session-local state (not project config)
 .claude/scheduled_tasks.lock
+
+# Celery beat (arquivo local de agendamento)
+celerybeat-schedule*
+
+# Celery beat runtime state
+celerybeat-schedule*

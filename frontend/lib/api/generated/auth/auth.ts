@@ -16,6 +16,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ErrorResponse,
+  Logout,
   TokenObtainPair,
   TokenRefresh
 } from '../models';
@@ -53,8 +55,7 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 
 
 /**
- * Takes a set of user credentials and returns an access and refresh JSON web
- * token pair to prove the authentication of those credentials.
+ * Username + password -> access and refresh tokens (rate limited).
  */
 export const authLoginCreate = (
     tokenObtainPair: NonReadonly<TokenObtainPair>,
@@ -75,7 +76,7 @@ export const authLoginCreate = (
 
 export const getAuthLoginCreateMutationKey = () => ['authLoginCreate'] as const;
 
-export const getAuthLoginCreateMutationOptions = <TError = unknown,
+export const getAuthLoginCreateMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authLoginCreate>>, TError,AuthLoginCreateMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof authLoginCreate>>, TError,AuthLoginCreateMutationVariables, TContext> => {
 
@@ -104,10 +105,10 @@ const {mutation: mutationOptions} = options ?
 
     export type AuthLoginCreateMutationResult = NonNullable<Awaited<ReturnType<typeof authLoginCreate>>>
     export type AuthLoginCreateMutationBody = NonReadonly<TokenObtainPair>
-    export type AuthLoginCreateMutationError = unknown
+    export type AuthLoginCreateMutationError = ErrorResponse
     export type AuthLoginCreateMutationVariables = {data: NonReadonly<TokenObtainPair>}
 
-    export const useAuthLoginCreate = <TError = unknown,
+    export const useAuthLoginCreate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authLoginCreate>>, TError,AuthLoginCreateMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authLoginCreate>>,
@@ -118,8 +119,71 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getAuthLoginCreateMutationOptions(options), queryClient);
     }
     /**
- * Takes a refresh type JSON web token and returns an access type JSON web
- * token if the refresh token is valid.
+ * Revokes a refresh token. Idempotent: it always answers 204 and never says whether the token was valid.
+ */
+export const authLogoutCreate = (
+    logout: Logout,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<void>(
+      {url: `/api/auth/logout/`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: logout, signal
+    },
+      );
+    }
+
+
+
+
+export const getAuthLogoutCreateMutationKey = () => ['authLogoutCreate'] as const;
+
+export const getAuthLogoutCreateMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authLogoutCreate>>, TError,AuthLogoutCreateMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof authLogoutCreate>>, TError,AuthLogoutCreateMutationVariables, TContext> => {
+
+const mutationKey = getAuthLogoutCreateMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authLogoutCreate>>, AuthLogoutCreateMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  authLogoutCreate(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthLogoutCreateMutationResult = NonNullable<Awaited<ReturnType<typeof authLogoutCreate>>>
+    export type AuthLogoutCreateMutationBody = Logout
+    export type AuthLogoutCreateMutationError = ErrorResponse
+    export type AuthLogoutCreateMutationVariables = {data: Logout}
+
+    export const useAuthLogoutCreate = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authLogoutCreate>>, TError,AuthLogoutCreateMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authLogoutCreate>>,
+        TError,
+        AuthLogoutCreateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAuthLogoutCreateMutationOptions(options), queryClient);
+    }
+    /**
+ * A refresh token -> a new access token and a rotated refresh token (the old one is revoked).
  */
 export const authRefreshCreate = (
     tokenRefresh: NonReadonly<TokenRefresh>,
@@ -140,7 +204,7 @@ export const authRefreshCreate = (
 
 export const getAuthRefreshCreateMutationKey = () => ['authRefreshCreate'] as const;
 
-export const getAuthRefreshCreateMutationOptions = <TError = unknown,
+export const getAuthRefreshCreateMutationOptions = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authRefreshCreate>>, TError,AuthRefreshCreateMutationVariables, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof authRefreshCreate>>, TError,AuthRefreshCreateMutationVariables, TContext> => {
 
@@ -169,10 +233,10 @@ const {mutation: mutationOptions} = options ?
 
     export type AuthRefreshCreateMutationResult = NonNullable<Awaited<ReturnType<typeof authRefreshCreate>>>
     export type AuthRefreshCreateMutationBody = NonReadonly<TokenRefresh>
-    export type AuthRefreshCreateMutationError = unknown
+    export type AuthRefreshCreateMutationError = ErrorResponse
     export type AuthRefreshCreateMutationVariables = {data: NonReadonly<TokenRefresh>}
 
-    export const useAuthRefreshCreate = <TError = unknown,
+    export const useAuthRefreshCreate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authRefreshCreate>>, TError,AuthRefreshCreateMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authRefreshCreate>>,

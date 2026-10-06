@@ -1,0 +1,115 @@
+"use client";
+
+import { useFormContext, useWatch } from "react-hook-form";
+
+import { SelectField, TextField } from "@/components/form/fields";
+import { FieldRow } from "@/components/form/FormSection";
+import { Button } from "@/components/ui/button";
+import { useCondominiumsList, useCostCentersList, useEntryTemplatesList, useUnitsList } from "@/lib/api/generated";
+import { maskMoney } from "@/lib/masks";
+import { ENTRY_KINDS } from "@/lib/schemas/entry-batch";
+
+/** Um lançamento do lote: condomínio, modelo e sub-conta (que dependem dele), valor, datas e justificativa. */
+export function EntryLineFields({
+  index,
+  canRemove,
+  onRemove,
+}: {
+  index: number;
+  canRemove: boolean;
+  onRemove: () => void;
+}) {
+  const { setValue } = useFormContext();
+  const prefix = `lines.${index}`;
+  const condominium = useWatch({ name: `${prefix}.condominium` }) as string;
+
+  const { data: condominiums } = useCondominiumsList({ limit: 100 });
+  const { data: costCenters } = useCostCentersList(
+    { condominium, active: true, limit: 100 },
+    { query: { enabled: condominium !== "" } }
+  );
+  const { data: units } = useUnitsList(
+    { condominium, active: true, limit: 100 },
+    { query: { enabled: condominium !== "" } }
+  );
+  const { data: entryTemplates } = useEntryTemplatesList(
+    { condominium, active: true, limit: 100 },
+    { query: { enabled: condominium !== "" } }
+  );
+
+  // O modelo traz a sub-conta padrão (pode ser trocada depois).
+  const chooseTemplate = (templateId: string) => {
+    const template = entryTemplates?.results.find((item) => item.id === templateId);
+    if (template) setValue(`${prefix}.cost_center`, template.cost_center, { shouldDirty: true, shouldValidate: true });
+  };
+  const chooseCondominium = () => {
+    setValue(`${prefix}.entry_template`, "", { shouldDirty: true });
+    setValue(`${prefix}.cost_center`, "", { shouldDirty: true });
+    setValue(`${prefix}.unit`, "", { shouldDirty: true });
+  };
+
+  return (
+    <div className="space-y-3 rounded-panel bg-surface-muted/40 p-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-caption font-medium uppercase tracking-wide text-ink-soft">Lançamento {index + 1}</h3>
+        {canRemove && (
+          <Button type="button" variant="ghost" size="sm" className="text-ink-soft hover:text-danger" onClick={onRemove}>
+            Remover
+          </Button>
+        )}
+      </div>
+      <FieldRow columns={3}>
+        <SelectField
+          name={`${prefix}.condominium`}
+          label="Condomínio"
+          required
+          placeholder="Selecione"
+          onValueChange={chooseCondominium}
+          options={(condominiums?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
+        />
+        <SelectField
+          name={`${prefix}.entry_template`}
+          label="Modelo de lançamento"
+          required
+          placeholder={condominium ? "Selecione" : "Escolha o condomínio"}
+          disabled={!condominium}
+          onValueChange={chooseTemplate}
+          options={(entryTemplates?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
+        />
+        <SelectField
+          name={`${prefix}.cost_center`}
+          label="Sub-conta"
+          required
+          placeholder={condominium ? "Selecione" : "Escolha o condomínio"}
+          disabled={!condominium}
+          options={(costCenters?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
+        />
+      </FieldRow>
+      <FieldRow template="repeat(4, minmax(0, 1fr))">
+        <SelectField name={`${prefix}.kind`} label="Tipo" required options={ENTRY_KINDS} />
+        <TextField
+          name={`${prefix}.amount`}
+          label="Valor"
+          required
+          inputMode="numeric"
+          placeholder="0,00"
+          mask={(value) => maskMoney(value, 12)}
+        />
+        <TextField name={`${prefix}.entry_date`} label="Data" type="date" required />
+        <TextField name={`${prefix}.competence_month`} label="Competência" type="month" required />
+      </FieldRow>
+      <FieldRow>
+        <TextField name={`${prefix}.description`} label="Descrição" required maxLength={255} autoComplete="off" />
+        <SelectField
+          name={`${prefix}.unit`}
+          label="Unidade"
+          placeholder="Todo o condomínio"
+          disabled={!condominium}
+          hint="Opcional: só para lançamento de uma unidade."
+          options={(units?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
+        />
+      </FieldRow>
+      <TextField name={`${prefix}.justification`} label="Justificativa" required maxLength={2000} autoComplete="off" />
+    </div>
+  );
+}

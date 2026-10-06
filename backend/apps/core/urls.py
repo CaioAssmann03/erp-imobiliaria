@@ -1,8 +1,13 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from .views import EmpresaViewSet
+from .views import CompanyViewSet, DashboardView, SearchView
 
 router = DefaultRouter()
-router.register("empresas", EmpresaViewSet, basename="empresa")
+router.register("companies", CompanyViewSet, basename="company")
 
-urlpatterns = router.urls
+urlpatterns = [
+    path("dashboard/", DashboardView.as_view(), name="dashboard"),
+    path("search/", SearchView.as_view(), name="search"),
+    *router.urls,
+]

@@ -1,0 +1,123 @@
+---
+summary: The finished feature specs (001–007, 009–017) condensed: what each did, the decisions that still explain the code, and its numbered requirements.
+read-when: you wonder why something was built a certain way, or a test cites "spec NNN, Rn" and you need what Rn means
+skip-if: you are specifying a new feature → features/README.md; you need the spec still in progress → features/008-operational-hardening.md; you need what an app does today → apps/<app>.md
+---
+# Finished specs
+
+The full text of each spec stays in git history (`git log -- backend/docs/features`). Tests cite a requirement as `spec NNN, Rn`: the lists below keep those numbers.
+
+## 001 — Filter persons by kind (retro-spec)
+`GET /api/persons/?type=individual|legal`, derived from the presence of a `PeopleIndividual` / `PeopleLegal` record (the old `tipo_pessoa` column is gone).
+- R1 `individual` → only persons with a `PeopleIndividual` · R2 `legal` → only with a `PeopleLegal` · R3 any other value → 400 · R4 no `type` → everyone
+
+## 002 — Business rules only in the models (retro-spec)
+Rules were split between constraints and hand-written serializer `validate` methods. Now every rule is a model rule (validator, `clean()`, constraint); serializers run them through `ModelRulesMixin` and return a 400.
+- Each former serializer rule exists in the model (plus its constraint, same message) · serializers hold no rule · dashboard calculations are model/queryset methods · valid input behaves as before
+
+## 003 — Sum caps, no SQLite fallback (retro-spec)
+- The active units of a condominium cannot sum more than 1 (a cap, not equality: units are created one by one, so exactly 1 is only a dashboard pendency).
+- The owner links of a unit cannot sum more than 100% at any date (historical, non-overlapping owners are allowed; checked by sweeping the intervals).
+- PostgreSQL only: the silent SQLite fallback is gone and a missing `POSTGRES_DB` fails fast.
+
+## 004 — Company scoping · phase 3a part 05
+Any logged-in user read and wrote every company's data. Now each user sees only their company; a superuser bypasses the scope.
+- `User.company` is required (superuser included); `Person.company` exists (the same real person in two companies is two records); `createsuperuser` and the entrypoint use the seeded company when it is the only one, else `DJANGO_SUPERUSER_COMPANY`.
+- CPF, CNPJ and RG are unique **per company**: `company` is copied onto `PeopleIndividual` / `PeopleLegal` (kept equal to `person.company` by `clean()`) so a `UniqueConstraint` can hold it. A duplicate is a non-field 400.
+- Every model declares `company_lookup`, its path to the company; a guard test fails for a model without one. `company` is read-only in the API; another company's record is 404, as a related id it is 400 `does_not_exist`.
+- Linked records share a company, enforced in `clean()` (`Condominium.advisor`, `UnitPerson.person`, the documents). `/api/companies/`: staff sees and edits only their own; create and delete are superuser-only.
+- `accounts` depends on `core` (`core ← accounts`; `core` never imports `accounts`). The Django Admin applies the same scope. Migrations are two per app (add nullable and backfill, then NOT NULL and constraints) because PostgreSQL refuses to alter a table updated in the same transaction.
+- R1 `User.company` required · R2 `Person.company`, documents unique per company · R3 `company_lookup` on every model (guard test) · R4 list/retrieve/update/delete limited to the company, others 404 · R5 created records take the user's company, a body `company` is ignored · R6 foreign related id → 400 `does_not_exist` · R7 `clean()` rejects links across companies · R8 `/api/companies/` rules · R9 dashboard counters and global search over the user's company · R10 Admin scoped · R11 `seed_demo` uses the seeded company · R12 the frontend drops the company field
+
+## 005 — Change audit trail · phase 3a part 06
+Nobody could tell who changed a record. `django-auditlog` (not declared for Django 6, so the spec began with a spike that passed) logs create, update and delete with the actor, the time and the changed fields.
+- Each app registers its models in `apps/<app>/audit.py` (called from `AppConfig.ready()`) through `apps/core/audit.py`; `core` imports no other app. `Company` and `User` are audited (`password`, `last_login` excluded).
+- Personal fields (`Person` e-mail and phones, the individual's cpf/rg/birthday/marital status/job, the legal's cnpj/ie) are logged as changed with the value masked: `mask_personal_value` always logs `[masked]` (the library's default keeps half the value). `Condominium.cnpj` is a company document and stays visible.
+- The actor of an API request is set by `AuditedJWTAuthentication` (the library's middleware only sees the session user). `AUDITLOG_DISABLE_REMOTE_ADDR`: the client address is not stored. Only superusers see the log, read-only, in the Admin; it is kept indefinitely.
+- Known limit: writes that bypass `save()` (`QuerySet.update()`, `bulk_create`, raw SQL) are not logged.
+- R1 spike passes on Django 6.1 · R2 each write logs actor, time, action, model, object id and changed fields · R3 actor = API or Admin user, none for commands and tasks · R4 masked fields never store the value · R5 a nested write logs one entry per record, a rolled-back one none · R6 superuser-only read-only log · R7 `Company` and `User` audited · R8 guard test: a model is audited or on the exempt list · R9 limits and rules documented
+
+## 006 — Error codes and API contract · phase 3a part 07
+The API mixed English model messages with Portuguese Django built-ins, and the frontend guessed by substring. Now every error has a stable code and one shape.
+- Body `{errors: [{field, code, message}]}` for **every** error response (400, 401, 403, 404, 405, 429…), statuses unchanged, 500 not reshaped; `field` is a dotted path (`address.city`, `unit_people.0.person`) or null.
+- Domain codes are `model.field.reason`; shared validators `<validator>.<reason>`; the generic Django/DRF/SimpleJWT codes stay. A rule has the same message and code in `clean()` and in its constraint (`violation_error_code`, passed as `.value`).
+- Codes are registered per app and collected for the OpenAPI schema (`ErrorCodeEnum`), so the frontend map is `Record<ErrorCode, string>` and an untranslated code fails the TypeScript compile. The catalog is part of the contract: adding a code is compatible, renaming or removing one is breaking.
+- Guard tests: every constraint has a code, every `ValidationError(` has `code=`, codes are unique. `upcoming_adjustments[].index` became `adjustment_index`.
+- R1 every rule carries a code · R2 one error shape · R3 dotted `field` · R4 generic codes kept · R5 English messages · R6 `ErrorResponse` and `ErrorCode` in the schema · R7 the frontend translates by code with an English fallback · R8 `adjustment_index` · R9 guard tests · R10 docs updated
+
+## 007 — Auth hardening · phase 3a part 08
+Refresh tokens could not be revoked, login could be brute-forced and tokens sat in cookies JavaScript can read.
+- `token_blacklist` with rotation: a used refresh token is revoked. `POST /api/auth/logout/` is idempotent and always 204. Login 5/min, refresh 30/min, logout 30/min (DRF `ScopedRateThrottle` on a Redis cache, no lockout); the 429 uses the `throttled` code. If the cache fails, login proceeds unthrottled and the error is logged.
+- The throttle key is the real client address forwarded by Next, trusted only when `X-Internal-Key` matches `INTERNAL_API_KEY` (mandatory when `DEBUG=false`, compared in constant time).
+- The browser never sees a token: Next route handlers keep it in `HttpOnly` cookies (access lifetime = JWT's 30 min, refresh 7 days) and proxy every JSON call with `Authorization: Bearer`, refreshing once on expiry. One refresh is shared per token for 30 s (rotation revokes the old one while the screen fires several requests). A non-GET with a foreign `Origin` is 403 (on top of `SameSite=Lax`). Files will go by signed bucket URLs (the platform caps bodies).
+- Not covered: the Django Admin login (`/admin/login/`).
+- R1 blacklist after rotation · R2 logout 204 always · R3 rate limits and 429 shape · R4 trusted client address · R5 counters in Redis · R6 the browser sees no token · R7 handlers: login, logout, catch-all proxy with one refresh · R8 CSRF origin check · R9 same-origin `/api/...`, server-only variables · R10 UI logout revokes and clears · R11 `proxy.ts` and handlers share one cookie helper · R12 docs updated
+
+## 009 — Cost centers and entry templates · phase 3 part 01
+API and Admin for `CostCenter` (the PDF's *SubConta*) and `EntryTemplate` (*Histórico*); no Next screen.
+- Flat resources `cost-centers` and `entry-templates` (`condominium`, `cost_center` are filters). `DELETE` of a cost center with templates is a 400 with its own code, and the rule is the model's (`delete()` raises a `ValidationError`; the exception handler gives the same 400 for any model rule raised outside a serializer).
+- `CostCenter.condominium` and `EntryTemplate.cost_center` cannot change after creation (the ledger groups by them). No rule ties a template's `active` to its cost center's. Both models got a `Meta.ordering` (state-only migration).
+- R1 cost-center endpoints, filters, search · R2 entry-template endpoints · R3 company-scoped · R4 unique names and percentage 0–100 · R5 delete refused with templates · R6 fixed parent after creation · R7 Admins, audited · R8 ordering · R9 codes registered and translated, client regenerated · R10 docs updated
+
+## 010 — Suppliers and bank accounts · phase 3 part 02
+- `Supplier` is its own table, 1:1 with `Person`, holding the payment data (bank or PIX key), all optional; bank code, branch and account number are filled together or not at all. `pix_key` is free text.
+- `BankAccount`: `company` is always set (the administrator that owns it) and `condominium` is optional (a condominium's own account, the exception: boleto money lands in the company's account by default). No `Condominium.own_bank_account`: it would make `condominiums` depend on `finance`. Unique per holder on `(bank_code, branch, account_number)`.
+- Bank data (branch, account number, PIX key, a supplier's bank code) is masked in the audit log. Flat resources `suppliers` and `bank-accounts`; the supplier response carries a read-only `person_detail`.
+- R1 supplier endpoints, search by name and document · R2 a person is a supplier once, same company · R3 bank data together · R4 bank-account endpoints, `company` read-only · R5 bank code format, no duplicate per holder · R6 the condominium belongs to the account's company · R7 company-scoped · R8 Admins, bank data masked in the log · R9 codes translated, client regenerated · R10 docs updated
+
+## 011 — Accounts payable · phase 3 part 03
+- An expense of a condominium or of the company itself: `company` always set, `condominium` optional (empty = a company expense). The cost center is required with a condominium (and from it), not allowed without; the supplier belongs to the account's company.
+- Life cycle `open → paid` (settle) and `open → cancelled`; only an open account can be edited, settled or cancelled (a model rule, so API, Admin and code obey it); a paid one cannot be deleted. The payment fields are filled exactly when `paid`; `amount_paid` may differ from `amount`. Settling and cancelling lock the row (`select_for_update`). The receipt file and the ledger entry are later parts.
+- The history of amount and due-date changes is the audit trail (no masking), not extra columns.
+- R1 endpoints, filters, search · R2 new accounts are `open`, payment fields read-only · R3 amount > 0, due not before issue · R4 cost center and holder rules · R5 settle · R6 cancel · R7 closed accounts never change, paid cannot be deleted · R8 payment fields only when paid (model and constraint) · R9 company-scoped · R10 Admin, audited · R11 codes translated, client regenerated · R12 docs updated
+
+## 012 — Dashboard: accounts payable (lite)
+`GET /api/dashboard/` returns `accounts_payable` over **open** accounts only (company expenses included), computed by `AccountPayableQuerySet` methods so the dashboard holds no rule.
+- R1 `overdue`, `due_today`, `due_next_7_days`, `due_this_month`, each `{count, total}` (`"0.00"` when empty); an overdue account of a previous month is not "this month" · R2 `upcoming`: the 6 oldest open accounts (overdue first) with supplier and condominium names · R3 only `open` · R4 only the user's company
+
+## 013 — Pending filters (lite)
+Each row of the dashboard's pendencies opens the list already filtered. One `?pending=<value>` choice per resource (an unknown value is a 400), sharing one definition with the dashboard through queryset methods.
+- R1 `GET /api/condominiums/?pending=` accepts `without_cost_centers`, `inconsistent_apportionment`, `overdue_adjustment`, `upcoming_adjustment` · R2 `GET /api/units/?pending=` accepts `without_responsible`, `lease_ending`, `billing_blocked` · R3 other values are 400, filters stay in the user's company and combine with the others · R4 the dashboard counters keep their values
+- "Locações terminando" opens the **units** with such a tenant link (a unit with two ending links counts once in the list).
+
+## 014 — Ledger: current account, batches, entries, reversal and API · phase 3 part 04 (backend)
+Written together with the code (the user answered the open questions on 2026-10-06). The statement of a condominium: one `CurrentAccount` with a cached `balance`, `EntryBatch` groups and `CurrentAccountEntry` lines. Screens are not part of this spec.
+- `CurrentAccount` (*ContaCorrente*): one per condominium, same company, condominium never changes; `balance` is a **cache** (`editable=False`, starts at 0) that only `services/post_entry.py` moves. `recalculated_balance()` sums the entries with their sign and is the check of the cache. A `rental_contract` holder comes with phase 8. Audit-exempt (the balance derives from entries). Deleting an account with entries is a coded 400.
+- `EntryBatch` (*Lote*): no condominium (one batch may cover several); `origin` cash / extra_cash / bank; `cash_number` (> 0) required for the cash origins and forbidden for bank (rules class + `CheckConstraint`). Audited; not deletable through the API, and a coded 400 when it has entries.
+- `CurrentAccountEntry` (*LancamentoContaCorrente*): `registry` is one global counter from the PostgreSQL sequence `current_account_entry_registry_seq` (never reused); validation never draws from it (`validate_unique` skips `registry`: Django's check would evaluate the default and burn a number per `full_clean()`), so only a rolled-back insert leaves a hole; positive `amount` with `kind` credit/debit (`signed_amount`); `competence_month` is the first day of a month; `created_by` is set by the service, never by the client. Account, batch, cost center and entry template must agree on company and condominium and the last two must be active. An entry **never changes and is never deleted** (`save()` of a saved entry and `delete()` raise coded errors); the Admin shows it read-only.
+- `post_entry` locks the account row, runs `full_clean()`, saves the entry and moves the balance in one `transaction.atomic`; an invalid entry saves nothing; a negative balance is allowed.
+- Reversal: `reverse_entry` posts the opposite entry (`reversal_of`, one-to-one so one reversal per entry), same account, amount, batch, template, cost center and competence; a reversal is manual and its reason is the justification; a reversal cannot be reversed.
+- `origin` is `manual` or `automatic_payable`; a manual entry needs a justification, an automatic one points at its `account_payable` (one entry per account payable, rule and constraint).
+- API (company-scoped, flat): `current-accounts` (create, list, retrieve; `?condominium=`), `entry-batches` (create, list, retrieve, update), `current-account-entries` (the statement: create a manual entry, list, retrieve, `POST /{id}/reverse/` with `reason` and `reversal_date`; filters `condominium`, `current_account`, `batch`, `cost_center`, `entry_template`, `kind`, `origin`, `competence_month`, `entry_date_after/before`; newest first by `registry`; each row carries the condominium, entry template and cost center names and `is_reversed`), and `POST /entry-batches/{id}/entries/` posting several manual entries into one batch, all or none (spec 016). No update or delete of an entry.
+- Decisions (agent, to be confirmed by the user): the reversal belongs to the batch of the entry it reverses; a batch gets no delete endpoint; `origin` has only the two values needed now (billing arrives with phase 4).
+- R1 one account per condominium, same company, fixed condominium, balance starts at 0 · R2 batch cash number matches the origin · R3 entry consistency rules (company, condominium, active, competence, justification) · R4 an entry is never changed or deleted · R5 `post_entry` moves the balance atomically and an invalid entry changes nothing · R6 `registry` is global and growing · R7 reversal rules (opposite, same amount, once, not a reversal, same account) and the balance returns · R8 API: create, list, filters, reverse, no update/delete of an entry, coded errors · R9 company-scoped · R10 origin rules and constraints · R11 deletion guards · R12 Admin read-only for entries · R13 codes translated, client to regenerate · R14 docs updated
+
+## 015 — Automatic ledger posting on payment · phase 3 part 05
+Settling an account payable of a condominium posts its debit in the same transaction (the most critical rule of the project).
+- `settle_account_payable` marks the account paid, then `post_account_payable_entry` posts the debit; if anything fails the account stays open and nothing is created. The service needs who pays: `AccountPayablePayment.settled_by` (the request's user) becomes the entry's `created_by`.
+- The entry is a **debit** of `amount_paid` (not `amount`) on the **payment date**, with the competence month of the **due date**, the account's cost center and entry template, and the description `"<supplier> - <cost center>"` (no typing). `origin` is `automatic_payable` and `account_payable` points back.
+- `AccountPayable.entry_template` (optional, from the account's own cost center) is **required to pay** a condominium expense and not allowed on a company expense. A company expense posts nothing (it has no statement).
+- Each payment creates its own bank batch dated on the payment day. The condominium's current account is created on its first posting and reused afterwards.
+- Reversing a payment's entry is the ledger reversal of spec 014; the paid account stays closed (no "undo payment").
+- Decisions (user, 2026-10-06): the template comes from a field on the account payable; one new batch per payment; the account is created on the first posting; only the entry is reversible. Agent, to be confirmed: the competence month is the due month; the description format above.
+- R1 paying a condominium expense posts one debit with origin `automatic_payable` and the user · R2 amount paid and payment date · R3 description from supplier and cost center · R4 competence month is the due month · R5 template and cost center of the account · R6 a new bank batch per payment · R7 the balance goes down and equals the recalculated one · R8 the account is created once and reused · R9 a company expense posts nothing · R10 a condominium expense without template cannot be paid, template rules (own cost center, none for company expense) · R11 atomic: a failure leaves the account open and creates nothing · R12 through the `settle` action with the request's user, coded error without template
+
+## 016 — Finance screens: accounts payable, statement and manual entries · phase 3 parts 04 and 07 (frontend)
+The staff register, settle and cancel accounts payable, read the statement of a condominium and post manual entries. Suppliers, bank accounts and entry templates stay in the Django Admin; the receipt control waits for part 06.
+- A **Financeiro** group in the navigation (sidebar and mobile tabs) with the same tabs as Condomínios (`SectionTabs`): Contas a pagar · Extrato · Lançamento manual. Lists follow Persons and Condominiums (Filters + Row + Table, search and a filter menu, columns hidden on mobile); the due date and statement period are ready-made options of the filter menu, and the statement's condominium is a filter of its toolbar (it lives in the URL). `/finance` opens accounts payable.
+- Accounts payable: list (search, situation, expense kind, condominium, due-date range), form (condominium or company expense; the sub-conta and the entry template follow the condominium), settle and cancel from the row (like Persons' delete). A paid or cancelled account opens read-only and links to the statement. Settling a condominium expense without an entry template is blocked in the dialog (the server refuses it too).
+- Statement: pick a condominium (`?condominium=`), see the balance and the entries newest first (filters: kind, date range, search); reverse an entry with a reason and a date (an already reversed entry or a reversal has no button).
+- Manual entries: one batch (date, origin, cash number for the cash origins) with several lines, each of its own condominium; the screen creates the missing current accounts, the batch and posts the lines in one call (`POST /entry-batches/{id}/entries/`: all or none, errors named by line). A batch created before a refusal is reused on the retry.
+- Supporting backend: read-only names on the entry and account payable responses, `is_reversed`, the batch endpoint, newest-first statement, enum names `EntryKindEnum` and `AccountKindEnum` in the schema.
+- Decisions (agent, to be confirmed by the user): navigation group and tab names; manual entries go through the batch endpoint with the accounts created by the screen, instead of one call per line; suppliers, bank accounts and entry templates have no screen yet; the supplier picker lists up to 100 suppliers (a search picker comes with the supplier screen).
+- R1 `Financeiro` in the navigation and the search · R2 accounts payable list and filters · R3 register and edit an open account, closed accounts read-only · R4 settle (date, amount, method) and cancel · R5 statement with balance, filters and reversal · R6 manual entry of several lines over several condominiums, all or none · R7 server errors on the fields and codes translated · R8 docs updated
+Checked: `tsc`, `eslint` and `next build` clean; the screens were not exercised in a browser in this change.
+
+## 017 — Statement completion: balance by cost center, unit, lote and reference month · phase 3 part 04
+Closes the gaps between the Sprint 3 cards and the first ledger: the statement shows the balance of each cost center (the Sami's *Saldo Sub-Contas*), an entry may point at one unit, and the list carries the batch and filters by reference month.
+- `CurrentAccountEntryQuerySet` (`signed_total()`, `balances_by_cost_center()`) holds the sign rule; `CurrentAccount.recalculated_balance()` uses it. `GET /current-accounts/{id}/balances/` answers the total and one row per cost center, summed from the entries (not the cached balance).
+- `CurrentAccountEntry.unit` (optional; the unit must belong to the account's condominium; a reversal keeps it); filter `?unit=`; entries carry `unit_name`, `batch_origin` and `batch_date`.
+- Screens: balance by cost center above the list, a "Mês de referência" filter (the last 12 months, by competence month), the *Unidade* and *Lote* columns, an optional unit on each manual line, and `/condominiums/{id}/statement` redirecting to the statement of that condominium.
+- Left out, with the reason: `serie_doc`/`registro_doc` and `documento_cobranca_item` (they need the billing entities of phase 4); the payment receipt (part 06, blocked: it needs the storage and the hosting).
+- Decisions (agent, to be confirmed by the user): the balance by cost center covers the whole ledger (it does not follow the reference-month filter); the reference month is picked from the last 12 months.
+- R1 balance of the account and of each cost center, summed from the entries · R2 the endpoint is company-scoped and an account without entries answers zeros · R3 an entry may name a unit of its condominium, another condominium's unit is refused with its code · R4 the statement carries the unit and the batch and filters by unit and competence month · R5 the screen shows the balance by cost center, the reference-month filter and the new columns

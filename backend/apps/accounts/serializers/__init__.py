@@ -1,0 +1,1 @@
+from .logout_serializers import LogoutSerializer as LogoutSerializer

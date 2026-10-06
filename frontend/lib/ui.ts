@@ -1,36 +1,33 @@
+/**
+ * Classes compartilhadas pelos formulários. Usam apenas tokens do design
+ * system (ver app/globals.css e docs/norms/design-system.md) — não use cores ou tamanhos soltos.
+ */
+
 export const inputClass =
-  "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100";
+  "h-9 w-full min-w-0 rounded-control bg-surface-muted px-4 text-body text-ink outline-none transition-colors placeholder:text-ink-faint focus:bg-surface focus:ring-2 focus:ring-brand/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:bg-danger-soft/50 aria-invalid:ring-2 aria-invalid:ring-danger/40";
 
 export const selectClass = inputClass;
 
-export const labelClass =
-  "mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300";
+export const labelClass = "mb-1 block text-caption font-medium text-ink-soft";
 
-export const fieldWrapClass = "flex flex-col gap-1";
+export const fieldWrapClass = "flex flex-col";
 
-export const errorTextClass = "text-xs text-red-600 dark:text-red-400";
+export const errorTextClass = "mt-1 text-caption text-danger";
 
-export const sectionClass =
-  "space-y-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800";
+export const sectionClass = "space-y-4 rounded-card bg-card p-5 shadow-card";
 
-export const sectionTitleClass =
-  "text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400";
+export const sectionTitleClass = "text-heading";
 
 export const buttonPrimaryClass =
-  "inline-flex items-center justify-center rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300";
+  "inline-flex h-8 items-center justify-center gap-2 rounded-full bg-ink px-4 text-body font-medium text-ink-foreground transition-colors hover:bg-ink/85 disabled:pointer-events-none disabled:opacity-50";
 
 export const buttonSecondaryClass =
-  "inline-flex items-center justify-center rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800";
+  "inline-flex h-8 items-center justify-center gap-2 rounded-full bg-surface-muted px-4 text-body font-medium text-ink transition-colors hover:bg-surface-sunken disabled:pointer-events-none disabled:opacity-50";
 
 export const buttonDangerClass =
-  "inline-flex items-center justify-center rounded border border-red-300 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950";
+  "inline-flex h-8 items-center justify-center rounded-full bg-danger-soft px-3.5 text-caption font-medium text-danger transition-colors hover:bg-danger/15";
 
-export const checkboxLabelClass =
-  "flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300";
+export const checkboxLabelClass = "flex items-center gap-2 text-body text-ink";
 
-export const tableClass = "w-full border-collapse text-sm";
-
-export const thClass =
-  "border-b border-zinc-200 px-3 py-2 text-left font-medium text-zinc-500 dark:border-zinc-800 dark:text-zinc-400";
-
-export const tdClass = "border-b border-zinc-100 px-3 py-2 dark:border-zinc-900";
+export const formActionsClass =
+  "sticky bottom-4 z-10 flex items-center gap-3 rounded-card bg-card p-3 shadow-float";

@@ -1,0 +1,9 @@
+-r requirements.txt
+pytest==8.*
+pytest-django==4.*
+pytest-env==1.*
+mypy==1.*
+django-stubs[compatible-mypy]==6.1.1
+djangorestframework-stubs[compatible-mypy]==3.18.1
+celery-types
+types-python-dateutil
