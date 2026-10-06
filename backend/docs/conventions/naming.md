@@ -42,7 +42,7 @@ No Hungarian prefixes (`str_name`, `lst_links`), no member prefixes. A single le
 ## 6. Classes are nouns, methods are verbs
 - Classes/models: nouns from the domain (`UnitPerson`, `OwnershipPeriod`, `ClassifiedTerm`). Avoid vague suffixes (`Manager`, `Processor`, `Data`).
 - Methods: verbs or verb phrases that say the action: `next_adjustment_date()`, `build_candidate()`, `run_model_rules()`, `validate_due_day()`.
-- **Booleans** read as a question: `is_`, `has_`, `can_`, `should_`: `is_current`, `has_responsible`, `should_search_document`. Never negative booleans (`not_active`).
+- **Booleans** read as a question: `is_`, `has_`, `can_`, `should_`: `is_adjustment_overdue`, `has_responsible`, `should_search_document`. Never negative booleans (`not_active`).
 - Accessors/queries return a value and change nothing (`current(...)`, `next_adjustment_date()`); commands change state and return nothing meaningful. Do not mix both in one name
   (command-query separation).
 - Querysets: filters named for the condition (`current`, `inconsistent_apportionment_condominium_ids`).
@@ -98,7 +98,9 @@ Names fixed by Django/DRF/Python keep their name (`validate`, `validated_data`, 
 API field names, URL paths, database columns, enum values, **error codes** and migration names are contracts. Improving one (done once: the dashboard key `upcoming_adjustments[].index` became
 `adjustment_index`, spec 006) needs a feature spec, a migration or frontend change, and a note to the user to regenerate the client. Do not rename them as part of a "cleanup".
 
-**Error codes** (`apps/<app>/error_codes.py`) are dotted lowercase `model.field.reason` (`unit.ideal_fraction.sum_exceeds_total`; the model in snake_case, the reason says what is wrong, not who checks it). A rule that spans several fields is named after the rule (`administration_contract.variable_fee.requires_percentage_and_basis`); a shared validator, which does not know its field, is `<validator>.<reason>` (`cpf.invalid_length`).
+**Services** (`apps/<app>/services/<use_case>.py`): the file and its function share one verb-first name that says the use case (`settle_account_payable.py` → `settle_account_payable`, `create_condominium`); never `*_service`, `manage_*` or `handle_*`. Their parameters are domain objects (`company`, the instance, a frozen dataclass for more than three values), never the request.
+
+**Error codes** (`apps/<app>/errors/<entity>.py`, one `<Entity>Error` class per model; shared validators go in `errors/validators.py` as `<App>ValidatorError`; members are named without the model prefix: `AccountPayableError.STATUS_NOT_OPEN`) are dotted lowercase `model.field.reason` (`unit.ideal_fraction.sum_exceeds_total`; the model in snake_case, the reason says what is wrong, not who checks it). A rule that spans several fields is named after the rule (`administration_contract.variable_fee.requires_percentage_and_basis`); a shared validator, which does not know its field, is `<validator>.<reason>` (`cpf.invalid_length`).
 
 ## 15. Review checklist for names
 - [ ] No one-letter or noise names (`data`, `value`, `obj`, `tmp`, `res`) except where §13 or §4 allows

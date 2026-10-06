@@ -16,7 +16,6 @@ import type { Unit } from "@/lib/api/generated/models";
 import { applyServerErrors } from "@/lib/form-errors";
 import { unitToPayload, type UnitFormInput, type UnitFormOutput } from "@/lib/schemas/unit";
 
-/** Grava a unidade (criação ou edição), atualiza os caches e navega. */
 export function useUnitSubmit(
   condominiumId: string,
   unitId: string | undefined,

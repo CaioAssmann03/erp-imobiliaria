@@ -20,7 +20,6 @@ import {
   type CondominiumFormOutput,
 } from "@/lib/schemas/condominium";
 
-/** Grava o condomínio (criação ou edição), atualiza os caches e navega para o próximo passo. */
 export function useCondominiumSubmit(
   condominiumId: string | undefined,
   setError: UseFormSetError<CondominiumFormInput>

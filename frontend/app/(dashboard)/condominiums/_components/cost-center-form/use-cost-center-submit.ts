@@ -21,7 +21,6 @@ import {
 
 export const COST_CENTERS_URL = "/condominiums/cost-centers";
 
-/** Grava a sub-conta (criação ou edição), atualiza os caches e volta para a lista. */
 export function useCostCenterSubmit(
   costCenterId: string | undefined,
   setError: UseFormSetError<CostCenterFormInput>

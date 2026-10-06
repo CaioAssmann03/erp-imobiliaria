@@ -1,13 +1,14 @@
-import uuid
 from typing import TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
 from django.db import models
 from typing_extensions import final, override
 
-from apps.condominiums.error_codes import CondominiumsErrorCode as Code
+from apps.condominiums.errors import CondominiumError
 from apps.condominiums.models.address import Address
+from apps.condominiums.models.querysets import CondominiumQuerySet
 from apps.core.models import Company
+from apps.core.models.base import BaseModel
 from apps.core.validators import validate_cnpj
 from apps.persons.models import Person
 
@@ -19,14 +20,9 @@ if TYPE_CHECKING:
     from .unit import Unit
 
 
-class CondominiumQuerySet(models.QuerySet["Condominium"]):
-    def without_cost_centers(self) -> "CondominiumQuerySet":
-        """Active condominiums with no cost center (sub-conta): they block the finance."""
-        return self.filter(active=True, cost_centers__isnull=True)
-
 
 @final
-class Condominium(models.Model):
+class Condominium(BaseModel):
     objects = CondominiumQuerySet.as_manager()
 
     class CondominiumType(models.TextChoices):
@@ -38,7 +34,6 @@ class Condominium(models.Model):
         billing_rules: "BillingRules"
         units: "RelatedManager[Unit]"
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.ForeignKey(
         Company, on_delete=models.PROTECT, related_name="company_condominium"
     )
@@ -67,10 +62,6 @@ class Condominium(models.Model):
 
     active = models.BooleanField(default=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    # Path from the model to its company (spec 004: company scoping).
     company_lookup = "company"
 
     class Meta:
@@ -80,16 +71,12 @@ class Condominium(models.Model):
 
     @override
     def clean(self) -> None:
-        """The advisor belongs to the same company as the condominium."""
         advisor = self.advisor if self.advisor_id is not None else None
         if advisor is not None and self.company_id is not None:
             if advisor.company_id != self.company_id:
                 raise ValidationError(
                     {
-                        "advisor": ValidationError(
-                            "Advisor belongs to another company.",
-                            code=Code.CONDOMINIUM_ADVISOR_OTHER_COMPANY.value,
-                        )
+                        "advisor": CondominiumError.ADVISOR_OTHER_COMPANY.to_validation_error()
                     }
                 )
 

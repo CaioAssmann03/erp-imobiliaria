@@ -19,9 +19,9 @@ A person has **either** an individual **or** a legal record (the API does not en
 ## API (`/api/persons/`)
 - `PersonViewSet` (`CompanyScopedViewSetMixin`; `select_related("people_individual","people_legal")`), search `name`, `email`, `people_individual__cpf`, `people_legal__cnpj`.
 - Filters: `?active=`, `?type=individual|legal` (`PersonFilter` in `filters.py`).
-- `PersonSerializer` nests `people_individual` / `people_legal` (write): `create`/`update` in `transaction.atomic`; the document **rules are the models'** (format validators,
+- `PersonSerializer` nests `people_individual` / `people_legal` (write): `create`/`update` call the services `create_person` / `update_person` (`services/`), which write them in `transaction.atomic`; the document **rules are the models'** (format validators,
   unique constraints): `PersonSerializer.validate` builds the candidate from the existing document row and runs `run_model_rules`, so the person's own CPF is not reported as a duplicate
-  (nested serializers drop the default unique validator for that reason). `update` uses `update_or_create(person=..., defaults=...)`.
+  (nested serializers drop the default unique validator for that reason). `update_person` uses `update_or_create(person=..., defaults=...)`.
 - `company` is read-only: `create` takes the user's company, a `company` in the body is ignored, the children copy it from the person. A duplicate CPF/CNPJ **in the same company** is a 400 (a non-field error under `people_individual`/`people_legal`: it comes from the model constraint); the same document in another company is accepted.
 - Fields in payloads are API names: `cell_number`, `home_phone`, `business_phone`, `people_individual{cpf,rg,birthday,marital_status,job}`,
   `people_legal{cnpj,ie}`. Documents are digits only.

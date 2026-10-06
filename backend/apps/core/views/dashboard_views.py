@@ -12,17 +12,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from typing_extensions import final
 
-from apps.condominiums.models.unit_person import UnitPersonQuerySet
 from apps.condominiums.models import (
     AdministrationContract,
     Condominium,
     Unit,
     UnitPerson,
 )
+from apps.condominiums.models.querysets import UnitPersonQuerySet
 from apps.core.dates import add_months
 from apps.core.scoping import scope_to_company
 from apps.finance.models import AccountPayable
-from apps.finance.models.account_payable import AccountPayableQuerySet
+from apps.finance.models.querysets import AccountPayableQuerySet
 from apps.persons.models import Person
 
 from ..serializers import DashboardSerializer
@@ -65,7 +65,6 @@ class Adjustment(TypedDict):
     overdue: bool
 
 
-# ----- cálculos -----
 
 
 def _summary(

@@ -30,7 +30,6 @@ interface CondominiumsFiltersProps {
   onClear: () => void;
 }
 
-/** Busca por texto e filtros de status e tipo de condomínio. */
 export function CondominiumsFilters({
   search,
   onSearchChange,

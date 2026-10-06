@@ -5,7 +5,6 @@ from rest_framework.test import APIClient
 
 from apps.core.testing import seeded_company
 from apps.condominiums.models import Address, Condominium, Unit
-from apps.core.models import Company
 from apps.persons.models import PeopleIndividual, Person
 
 from .base import JsonObject, body

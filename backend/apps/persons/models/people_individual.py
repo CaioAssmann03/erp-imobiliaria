@@ -5,14 +5,13 @@ from typing_extensions import final, override
 
 from apps.core.models import Company
 from apps.core.validators import validate_cpf
-from apps.persons.error_codes import PersonsErrorCode as Code
+from apps.persons.errors import PeopleIndividualError
 
 from .person import Person
 
 
 @final
 class PeopleIndividual(models.Model):
-    # Path from the model to its company (spec 004: company scoping).
     company_lookup = "company"
 
     person = models.OneToOneField(
@@ -41,15 +40,15 @@ class PeopleIndividual(models.Model):
             models.UniqueConstraint(
                 fields=("company", "cpf"),
                 name="people_individual_unique_cpf_per_company",
-                violation_error_message="A person with this CPF already exists in this company.",
-                violation_error_code=Code.PEOPLE_INDIVIDUAL_CPF_DUPLICATE_IN_COMPANY.value,
+                violation_error_message=PeopleIndividualError.CPF_DUPLICATE_IN_COMPANY.message,
+                violation_error_code=PeopleIndividualError.CPF_DUPLICATE_IN_COMPANY.value,
             ),
             models.UniqueConstraint(
                 fields=("company", "rg"),
                 condition=Q(rg__isnull=False),
                 name="people_individual_unique_rg_per_company",
-                violation_error_message="A person with this RG already exists in this company.",
-                violation_error_code=Code.PEOPLE_INDIVIDUAL_RG_DUPLICATE_IN_COMPANY.value,
+                violation_error_message=PeopleIndividualError.RG_DUPLICATE_IN_COMPANY.message,
+                violation_error_code=PeopleIndividualError.RG_DUPLICATE_IN_COMPANY.value,
             ),
         )
 
@@ -63,10 +62,7 @@ class PeopleIndividual(models.Model):
         elif self.company_id != self.person.company_id:
             raise ValidationError(
                 {
-                    "company": ValidationError(
-                        "The document must belong to the same company as the person.",
-                        code=Code.PEOPLE_INDIVIDUAL_COMPANY_MISMATCH.value,
-                    )
+                    "company": PeopleIndividualError.COMPANY_MISMATCH.to_validation_error()
                 }
             )
 

@@ -30,9 +30,9 @@ def app_models() -> list[type]:
 
 
 def rule_source_files() -> list[Path]:
-    """Models and validators: where business rules are written."""
+    """Models, rules classes and validators: where business rules are written."""
     files: list[Path] = []
-    for pattern in ("*/models/*.py", "*/validators.py", "*/validators/*.py"):
+    for pattern in ("*/models/*.py", "*/models/rules/*.py", "*/validators.py", "*/validators/*.py"):
         files.extend(APPS_DIR.glob(pattern))
     return sorted(files)
 
@@ -101,9 +101,20 @@ def test_codes_are_unique_across_apps() -> None:
 
 
 def test_every_app_registry_is_found() -> None:
-    names = {enum.__name__ for enum in domain_error_code_enums()}
+    apps_with_errors = {enum.__module__.split(".")[1] for enum in domain_error_code_enums()}
 
-    assert {"CoreErrorCode", "CondominiumsErrorCode", "PersonsErrorCode", "FinanceErrorCode"} <= names
+    assert {"core", "condominiums", "persons", "finance"} <= apps_with_errors
+
+
+def test_every_error_has_an_english_message() -> None:
+    without_message = [
+        str(error)
+        for enum in domain_error_code_enums()
+        for error in enum
+        if not error.message.endswith(".")  # type: ignore[attr-defined]
+    ]
+
+    assert without_message == []
 
 
 @pytest.mark.parametrize(

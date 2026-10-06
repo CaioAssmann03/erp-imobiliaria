@@ -53,8 +53,6 @@ def _save_validated(record: models.Model) -> None:
 
 @dataclass(frozen=True)
 class DemoCondominium:
-    """Definition of one demo condominium (what the seed will create)."""
-
     name: str
     city: str
     state: str
@@ -279,8 +277,6 @@ def _random_past_datetime(random_generator: random.Random, max_days_ago: int) ->
 @final
 @dataclass(frozen=True)
 class SeedContext:
-    """What every creation step of the seed needs."""
-
     random_generator: random.Random
     company: Company
     active_persons: list[Person]
@@ -417,7 +413,6 @@ def _create_units(
 def _create_condominium(
     context: SeedContext, position: int, demo: DemoCondominium
 ) -> tuple[int, int]:
-    """One demo condominium with its address, contract, billing rules and units."""
     condominium = _create_validated(
         Condominium,
         company=context.company,

@@ -18,6 +18,10 @@ from apps.core.models import Company
 from apps.persons.models import Person
 
 from ..models import AccountPayable, CostCenter, Supplier
+from ..services.settle_account_payable import (
+    AccountPayablePayment,
+    settle_account_payable,
+)
 from .base import error_codes, errors
 
 pytestmark = pytest.mark.django_db
@@ -186,7 +190,7 @@ def test_settle_is_atomic(make_account) -> None:  # type: ignore[no-untyped-def]
 
     with mock.patch.object(AccountPayable, "save", side_effect=RuntimeError("boom")):
         with pytest.raises(RuntimeError):
-            account.settle(date(2026, 10, 18), Decimal("1250.00"), "pix")
+            settle_account_payable(account, AccountPayablePayment(date(2026, 10, 18), Decimal("1250.00"), "pix"))
 
     stored = AccountPayable.objects.get(pk=account.pk)
     assert stored.status == "open"
@@ -250,7 +254,7 @@ def test_a_cancelled_account_can_be_deleted(api_client: APIClient, make_account)
 
 def test_model_save_of_a_closed_account_is_refused(make_account) -> None:  # type: ignore[no-untyped-def]
     account = make_account()
-    account.settle(date(2026, 10, 18), Decimal("1250.00"), "pix")
+    settle_account_payable(account, AccountPayablePayment(date(2026, 10, 18), Decimal("1250.00"), "pix"))
     account.description = "mudou"
 
     with pytest.raises(ValidationError) as error:

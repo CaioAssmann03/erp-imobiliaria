@@ -10,7 +10,6 @@ import type { Widget, WidgetId } from "./types";
 
 export { WIDGET_IDS, type Widget, type WidgetId } from "./types";
 
-/** Definição de todos os widgets do painel a partir do resumo da API. */
 export function buildWidgets(dash: Dashboard | undefined): Record<WidgetId, Widget> {
   return {
     condominiums: buildCondominiumsWidget(dash),

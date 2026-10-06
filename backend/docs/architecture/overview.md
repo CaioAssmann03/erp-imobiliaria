@@ -69,7 +69,7 @@ Changing one needs a feature spec.
 | 1 | UUID primary keys on every model → opaque, safe to expose; ids are strings in the API |
 | 2 | English code and API names, Portuguese only in UI/sample data → the generated client needs no translation; API errors are English, the frontend translates |
 | 3 | Apps are packages (`models/`, `serializers/`, `views/`), one entity per file → small files; re-export in `__init__.py` |
-| 4 | 1:1 parts (address, contract, billing, person documents) are written through the parent serializer in `transaction.atomic`; child collections (unit people) have their own endpoint |
+| 4 | 1:1 parts (address, contract, billing, person documents) are written through the parent serializer, which calls a service (`create_condominium`, `update_person`...) that writes them in `transaction.atomic`; child collections (unit people) have their own endpoint |
 | 5 | Business rules live only in the models (validators, `clean()`, constraints); serializers run them via `ModelRulesMixin` → one source of truth for API, admin, commands and tasks; new write paths call `full_clean()` |
 | 6 | PostgreSQL only (trigram search) → tests and dev need Postgres |
 | 7 | Documents stored digits-only → one canonical form; masks are UI-only |
@@ -80,3 +80,4 @@ Changing one needs a feature spec.
 | 12 | Spec-first workflow; ask on any gap → `features/` is mandatory for features |
 | 13 | Celery/Redis provisioned but unused → jobs (boleto, mail) are coming; workers disabled on the free plan |
 | 14 | Dashboard adjustments are computed in Python over the active contracts → fine for tens of condominiums; move to SQL (spec) when active contracts pass ~1,000 or the dashboard passes ~500 ms |
+| 15 | A use case that orchestrates several models or a transaction is a **service** (`services/<use_case>.py`, one file per use case); the rules stay in the models and the service never raises its own `ValidationError` → a thin orchestration layer that serializers and views call (2026-10-06, a refactor with no behavior change) |

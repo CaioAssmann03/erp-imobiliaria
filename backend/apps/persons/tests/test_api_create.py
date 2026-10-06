@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from ..models import PeopleIndividual, PeopleLegal, Person
-from .base import CNPJ_A, CPF_A, body, error_codes, make_individual, make_legal
+from .base import CNPJ_A, CPF_A, error_codes, make_individual, make_legal
 
 pytestmark = pytest.mark.django_db
 

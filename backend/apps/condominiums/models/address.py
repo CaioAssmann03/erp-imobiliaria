@@ -1,12 +1,11 @@
-import uuid
-
 from django.db import models
 from typing_extensions import final, override
 
+from apps.core.models.base import BaseModel
+
 
 @final
-class Address(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class Address(BaseModel):
 
     zip_code = models.CharField(max_length=8, blank=True, null=True)
     street = models.CharField(max_length=255, blank=True, null=True)
@@ -16,10 +15,6 @@ class Address(models.Model):
     city = models.CharField(max_length=120, blank=True, null=True)
     state = models.CharField(max_length=2, blank=True, null=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    # Path from the model to its company (spec 004: company scoping).
     company_lookup = "condominium__company"
 
     class Meta:

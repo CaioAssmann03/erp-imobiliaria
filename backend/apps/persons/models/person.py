@@ -1,4 +1,3 @@
-import uuid
 from typing import TYPE_CHECKING
 
 from django.contrib.postgres.indexes import GinIndex, OpClass
@@ -7,6 +6,7 @@ from django.db.models.functions import Upper
 from typing_extensions import final, override
 
 from apps.core.models import Company
+from apps.core.models.base import BaseModel
 
 if TYPE_CHECKING:
     from .people_individual import PeopleIndividual
@@ -14,15 +14,13 @@ if TYPE_CHECKING:
 
 
 @final
-class Person(models.Model):
+class Person(BaseModel):
     if TYPE_CHECKING:
         people_individual: "PeopleIndividual"
         people_legal: "PeopleLegal"
 
-    # Path from the model to its company (spec 004: company scoping).
     company_lookup = "company"
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name="people")
     name = models.CharField(max_length=255)
 
@@ -32,9 +30,6 @@ class Person(models.Model):
 
     email = models.EmailField(blank=True)
     active = models.BooleanField(default=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Person"

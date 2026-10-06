@@ -12,6 +12,11 @@ from apps.core.scoping import CompanyScopedViewSetMixin
 from ..filters import AccountPayableFilter
 from ..models import AccountPayable
 from ..serializers import AccountPayableSerializer, SettleAccountPayableSerializer
+from ..services.cancel_account_payable import cancel_account_payable
+from ..services.settle_account_payable import (
+    AccountPayablePayment,
+    settle_account_payable,
+)
 
 
 @final
@@ -29,11 +34,11 @@ class AccountPayableViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Acc
     )
     @action(detail=True, methods=["post"])
     def settle(self, request: Request, pk: str | None = None) -> Response:
-        """Pay ("baixa") an open account: the rules and the transaction are the model's."""
+        """Pay ("baixa") an open account."""
         account = self.get_object()
         payment = SettleAccountPayableSerializer(data=request.data)
         payment.is_valid(raise_exception=True)
-        account.settle(**payment.validated_data)
+        settle_account_payable(account, AccountPayablePayment(**payment.validated_data))
         return Response(self.get_serializer(account).data)
 
     @extend_schema(request=None, responses=AccountPayableSerializer, operation_id="accounts_payable_cancel")
@@ -41,5 +46,5 @@ class AccountPayableViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Acc
     def cancel(self, request: Request, pk: str | None = None) -> Response:
         """Cancel an open account."""
         account = self.get_object()
-        account.cancel()
+        cancel_account_payable(account)
         return Response(self.get_serializer(account).data)

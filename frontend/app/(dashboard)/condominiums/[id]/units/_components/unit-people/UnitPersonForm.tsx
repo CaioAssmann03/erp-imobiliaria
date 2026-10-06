@@ -27,7 +27,6 @@ interface UnitPersonFormProps {
   onCreated: () => void;
 }
 
-/** Vincula uma pessoa à unidade como proprietário ou locatário. */
 export function UnitPersonForm({ unitId, onCreated }: UnitPersonFormProps) {
   const [person, setPerson] = useState<Person | null>(null);
   const [personError, setPersonError] = useState<string>();

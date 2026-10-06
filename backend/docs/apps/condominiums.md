@@ -17,7 +17,7 @@ Depends on `core` (Company, validators) and `persons`.
 | `BillingRules` | 1:1 (`related_name="billing_rules"`): `due_day` 1–28, business-day flag, calculation period, discount % and days, credit limit |
 | `Block` | `name` unique per condominium |
 | `Unit` | type enum, `resident_count`, `ideal_fraction` (0,1], utility values, `is_manager_unit`, `is_billing_blocked`, `active`; `block` optional **RESTRICT**; `clean()` checks block belongs to the condominium |
-| `UnitPerson` | `clean()` also checks the person belongs to the unit's company; role owner/tenant, `ownership_percentage`, `start_date`, `end_date`; ordering `-start_date, id`; one active link per `(unit, person, role)` |
+| `UnitPerson` | `clean()` calls `UnitPersonRules` (`models/rules/unit_person.py`: owner needs a percentage, tenant has none, dates, the person belongs to the unit's company, owners sum at most 100%); role owner/tenant, `ownership_percentage`, `start_date`, `end_date`; ordering `-start_date, id`; one active link per `(unit, person, role)` |
 
 Constraints and `on_delete`: see `architecture/data.md`.
 
@@ -32,10 +32,10 @@ Every viewset uses `CompanyScopedViewSetMixin` (spec 004): lists, details and wr
 | `unit-people` | `UnitPersonViewSet` | filters `unit`, `person`, `role` |
 
 ## Serializers (`serializers/`, one file per entity)
-- `CondominiumSerializer` writes nested `address` (create or update in place; cannot be cleared), `administration_contract` and `billing_rules`
-  (`update_or_create` with `defaults`), all in `transaction.atomic`. Nested serializers exclude the parent FK.
-- **Model methods**: `AdministrationContract.next_adjustment_date()`, `is_adjustment_overdue(reference_date)`; `UnitPerson.objects.current(reference_date)`, `is_current(reference_date)`; `Unit.objects.inconsistent_apportionment_condominium_ids()`, `without_responsible(reference_date)`, `with_lease_ending_soon(reference_date)`, `UnitPerson.objects.leases_ending_soon(reference_date)`, `Condominium.objects.without_cost_centers()`, `AdministrationContract.objects.overdue_adjustment_condominium_ids` / `upcoming_adjustment_condominium_ids` (the dashboard and the `?pending=` filters call them).
-- **Rules are in the models**: `AdministrationContract.clean()` (fee rules), `UnitPerson.clean()` (owner/tenant percentage, dates), `Unit.clean()` (block belongs to the condominium), field validators
+- `CondominiumSerializer` validates nested `address`, `administration_contract` and `billing_rules` and calls the services `create_condominium` / `update_condominium` (`services/`), which write them in
+  `transaction.atomic`: the address is created or updated in place (cannot be cleared), the contract and billing rules use `update_or_create` with `defaults`. Nested serializers exclude the parent FK.
+- **Model methods**: `AdministrationContract.next_adjustment_date()`, `is_adjustment_overdue(reference_date)`; `UnitPerson.objects.current(reference_date)`; `Unit.objects.inconsistent_apportionment_condominium_ids()`, `without_responsible(reference_date)`, `with_lease_ending_soon(reference_date)`, `UnitPerson.objects.leases_ending_soon(reference_date)`, `Condominium.objects.without_cost_centers()`, `AdministrationContract.objects.overdue_adjustment_condominium_ids` / `upcoming_adjustment_condominium_ids` (the dashboard and the `?pending=` filters call them).
+- **Rules are in the models**: `AdministrationContract.clean()` → `AdministrationContractRules` (fee rules), `UnitPerson.clean()` → `UnitPersonRules` (owner/tenant percentage, dates), `Unit.clean()` → `UnitRules` (block belongs to the condominium, apportionment) (`models/rules/`), field validators
   (`validate_due_day`, `validate_ideal_fraction`, `validate_non_negative`, `validate_percentage`) and constraints. Every serializer inherits `ModelRulesMixin`, so violations return 400 with the model's messages.
 - `UnitSerializer` exposes read-only `unit_people` (with `person_detail`); `UnitPersonSerializer` exposes read-only `person_detail`.
 
@@ -45,5 +45,5 @@ API payloads in the frontend's exact shape, list pagination/filters/search, unit
 
 ## Rules / future
 - `fee_floor` / `fee_ceiling` exist in the API but no UI uses them yet. Block CRUD has an API but no UI.
-- Apportionment: the active units of a condominium cannot sum more than 1 (`Unit.clean()`); reaching exactly 1 is reported by the dashboard as a pendency.
-- Owners: the owner links of a unit cannot sum more than 100 % at any date (`UnitPerson.clean()`).
+- Apportionment: the active units of a condominium cannot sum more than 1 (`UnitRules.apportionment_exceeds_total`); reaching exactly 1 is reported by the dashboard as a pendency.
+- Owners: the owner links of a unit cannot sum more than 100 % at any date (`UnitPersonRules.owners_share_exceeds_100_percent`).

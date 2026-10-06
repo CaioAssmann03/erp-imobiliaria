@@ -1,7 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Card de listagem com estados de carregamento e vazio. */
 export function ListState({
   isLoading,
   isEmpty,

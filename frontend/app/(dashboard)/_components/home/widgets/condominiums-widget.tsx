@@ -28,7 +28,6 @@ function Stat({ label, total, active }: { label: string; total: number | undefin
   );
 }
 
-/** Faixa de números do topo: cadastros em uma linha, com os atalhos de cadastro. */
 export const buildCondominiumsWidget: WidgetBuilder = (dash) => ({
   title: "Resumo dos cadastros",
   className: "lg:col-span-12",

@@ -22,7 +22,6 @@ import { ContactSection } from "./person-form/ContactSection";
 import { IdentificationSection } from "./person-form/IdentificationSection";
 import { usePersonSubmit } from "./person-form/use-person-submit";
 
-/** Cadastro e edição de pessoa: carrega, valida e compõe as seções. */
 export function PersonForm({ personId }: { personId?: string }) {
   const router = useRouter();
   const isEdit = personId !== undefined;

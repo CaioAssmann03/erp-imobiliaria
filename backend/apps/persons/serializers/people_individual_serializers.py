@@ -14,8 +14,6 @@ class PeopleIndividualSerializer(serializers.ModelSerializer[PeopleIndividual]):
     class Meta:
         model = PeopleIndividual
         fields = ("cpf", "rg", "birthday", "marital_status", "job")
-        # A unicidade é checada no PersonSerializer, que conhece a instância
-        # sendo editada; o UniqueValidator padrão reprovaria um PATCH com o mesmo CPF.
         extra_kwargs: ClassVar[dict[str, dict[str, list[Callable[[str], None]]]]] = {
             "cpf": {"validators": [validate_cpf]},
             "rg": {"validators": []},

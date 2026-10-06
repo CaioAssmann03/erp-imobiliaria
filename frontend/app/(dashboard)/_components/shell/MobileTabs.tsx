@@ -12,7 +12,6 @@ const TABS = [
   { href: "/persons", label: "Pessoas", icon: Users },
 ];
 
-/** Client Component: navegação em abas fixa na parte de baixo, só em telas pequenas. */
 export function MobileTabs() {
   const pathname = usePathname();
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname?.startsWith(href));

@@ -1,4 +1,3 @@
-/** Seção de formulário: título, descrição opcional e campos empilhados (um por linha). */
 export function FormSection({
   title,
   description,

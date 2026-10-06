@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError
 
 
 def test_valid_cnpj() -> None:
-    # should be valid
     validate_cnpj("11222333000181")
 
 

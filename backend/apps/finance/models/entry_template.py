@@ -1,22 +1,16 @@
-import uuid
-
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from typing_extensions import final, override
 
-from apps.finance.error_codes import FinanceErrorCode as Code
-
+from apps.core.models.base import BaseModel
 from apps.core.validators import validate_percentage
+from apps.finance.errors import EntryTemplateError
 from apps.finance.models.cost_center import CostCenter
 
 
-COST_CENTER_IS_FIXED = "The cost center of an entry template cannot be changed."
-
-
 @final
-class EntryTemplate(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class EntryTemplate(BaseModel):
 
     name = models.CharField(max_length=120)
     cost_center = models.ForeignKey(
@@ -31,10 +25,6 @@ class EntryTemplate(models.Model):
         max_digits=5, decimal_places=2, default=0, validators=[validate_percentage]
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    # Path from the model to its company (spec 004: company scoping).
     company_lookup = "cost_center__condominium__company"
 
     class Meta:
@@ -46,14 +36,14 @@ class EntryTemplate(models.Model):
                 name="entry_template_admin_fee_pct_0_100",
                 condition=Q(admin_fee_incidence_percentage__gte=0)
                 & Q(admin_fee_incidence_percentage__lte=100),
-                violation_error_message="Percentage must be between 0 and 100.",
-                violation_error_code=Code.ENTRY_TEMPLATE_ADMIN_FEE_PERCENTAGE_OUT_OF_RANGE.value,
+                violation_error_message=EntryTemplateError.ADMIN_FEE_PERCENTAGE_OUT_OF_RANGE.message,
+                violation_error_code=EntryTemplateError.ADMIN_FEE_PERCENTAGE_OUT_OF_RANGE.value,
             ),
             models.UniqueConstraint(
                 fields=("cost_center", "name"),
                 name="entry_template_unique_name_per_cost_center",
-                violation_error_message="This cost center already has an entry template with this name.",
-                violation_error_code=Code.ENTRY_TEMPLATE_NAME_DUPLICATE_IN_COST_CENTER.value,
+                violation_error_message=EntryTemplateError.NAME_DUPLICATE_IN_COST_CENTER.message,
+                violation_error_code=EntryTemplateError.NAME_DUPLICATE_IN_COST_CENTER.value,
             ),
         )
 
@@ -63,14 +53,18 @@ class EntryTemplate(models.Model):
         if self._state.adding:
             return
         stored_cost_center_id = (
-            type(self).objects.filter(pk=self.pk).values_list("cost_center_id", flat=True).first()
+            type(self)
+            .objects.filter(pk=self.pk)
+            .values_list("cost_center_id", flat=True)
+            .first()
         )
-        if stored_cost_center_id is not None and stored_cost_center_id != self.cost_center_id:
+        if (
+            stored_cost_center_id is not None
+            and stored_cost_center_id != self.cost_center_id
+        ):
             raise ValidationError(
                 {
-                    "cost_center": ValidationError(
-                        COST_CENTER_IS_FIXED, code=Code.ENTRY_TEMPLATE_COST_CENTER_IMMUTABLE.value
-                    )
+                    "cost_center": EntryTemplateError.COST_CENTER_IMMUTABLE.to_validation_error()
                 }
             )
 

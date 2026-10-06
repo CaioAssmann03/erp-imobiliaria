@@ -11,7 +11,7 @@ skip-if: business people → apps/persons.md; API auth conventions → architect
 |---|---|
 | Model | `User(AbstractUser)` with UUID `id` and **`company`** (FK `core.Company`, PROTECT, required); `ordering=("username",)`; `__str__` = username; manager `UserManager` (`models/user_manager.py`) |
 | Setting | `AUTH_USER_MODEL = "accounts.User"` (first migration depends on `auth`) |
-| Auth endpoints | `views/auth_views.py`: `LoginView` (5/min), `RefreshView` (30/min), `LogoutView` (30/min, idempotent 204: blacklists the refresh token), all with `TrustedProxyScopedRateThrottle` (`apps/core/throttling.py`); mounted in `config/urls.py` |
+| Auth endpoints | `views/auth_views.py`: `LoginView` (5/min), `RefreshView` (30/min), `LogoutView` (30/min, idempotent 204: calls the `revoke_refresh_token` service in `services/`, which blacklists the refresh token and ignores an invalid one), all with `TrustedProxyScopedRateThrottle` (`apps/core/throttling.py`); mounted in `config/urls.py` |
 | Authentication class | `authentication.py`: `AuditedJWTAuthentication` (SimpleJWT + `set_audit_actor`), the DRF default |
 | Admin | `UserAdmin`, `GroupAdmin` (unfold styled; `Group` is unregistered and re-registered) |
 | API | `/api/auth/login/`, `/api/auth/refresh/`, `/api/auth/logout/` (see below) |

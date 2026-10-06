@@ -4,7 +4,6 @@ import { Late } from "./Late";
 import { RecentList } from "./RecentList";
 import { formatDate, relativeDays } from "./relative-days";
 
-/** Server Component: próximos reajustes de contrato, os atrasados em vermelho. */
 export function UpcomingAdjustments({ adjustments }: { adjustments: UpcomingAdjustment[] }) {
   return (
     <RecentList

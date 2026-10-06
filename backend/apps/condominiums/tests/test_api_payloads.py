@@ -1,13 +1,11 @@
 """Payloads no formato exato que o formulário do frontend envia (criação e edição)."""
 
 import pytest
-from django.contrib.auth.models import AbstractBaseUser
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.core.testing import seeded_company
-from apps.accounts.models import User
 from apps.core.models import Company
 from apps.persons.models import Person
 

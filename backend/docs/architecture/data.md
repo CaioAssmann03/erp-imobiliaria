@@ -21,7 +21,7 @@ Company ◄── PROTECT ── AccountPayable (finance) ── PROTECT ──�
 accounts.User  (→ Company; no link to Person yet)
 Company scoping: every model declares `company_lookup` (path to its company); see `apps/core/scoping.py`
 ```
-**Every model:** UUID `id`; `created_at`/`updated_at` (except pure 1:1 children keyed by the parent); `@final`; `Meta.verbose_name(_plural)`;
+**Every model:** UUID `id`; `created_at`/`updated_at` (except pure 1:1 children keyed by the parent); both come from the abstract `BaseModel` (`UUIDModel` when there are no timestamps: `Block`, `BillingRules`, `AdministrationContract`; `PeopleIndividual`/`PeopleLegal` are keyed by their `person` and `User` extends `AbstractUser`, so they declare their own); `@final`; `Meta.verbose_name(_plural)`;
 `Meta.ordering` when listed; `__str__` with `@override`; reverse-manager type hints under `if TYPE_CHECKING`.
 
 **`on_delete`:** parts owned by a condominium CASCADE; Condominium → Company PROTECT; advisor and address SET_NULL; `Unit.block` RESTRICT (a block with units

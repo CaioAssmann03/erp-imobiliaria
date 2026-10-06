@@ -6,14 +6,13 @@ from typing_extensions import final, override
 
 from apps.core.models import Company
 from apps.core.validators import validate_cnpj
-from apps.persons.error_codes import PersonsErrorCode as Code
+from apps.persons.errors import PeopleLegalError
 
 from .person import Person
 
 
 @final
 class PeopleLegal(models.Model):
-    # Path from the model to its company (spec 004: company scoping).
     company_lookup = "company"
 
     person = models.OneToOneField(
@@ -34,8 +33,8 @@ class PeopleLegal(models.Model):
             models.UniqueConstraint(
                 fields=("company", "cnpj"),
                 name="people_legal_unique_cnpj_per_company",
-                violation_error_message="A person with this CNPJ already exists in this company.",
-                violation_error_code=Code.PEOPLE_LEGAL_CNPJ_DUPLICATE_IN_COMPANY.value,
+                violation_error_message=PeopleLegalError.CNPJ_DUPLICATE_IN_COMPANY.message,
+                violation_error_code=PeopleLegalError.CNPJ_DUPLICATE_IN_COMPANY.value,
             ),
         )
         indexes = (
@@ -54,10 +53,7 @@ class PeopleLegal(models.Model):
         elif self.company_id != self.person.company_id:
             raise ValidationError(
                 {
-                    "company": ValidationError(
-                        "The document must belong to the same company as the person.",
-                        code=Code.PEOPLE_LEGAL_COMPANY_MISMATCH.value,
-                    )
+                    "company": PeopleLegalError.COMPANY_MISMATCH.to_validation_error()
                 }
             )
 

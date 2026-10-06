@@ -17,7 +17,6 @@ import { blockToPayload, type BlockFormInput, type BlockFormOutput } from "@/lib
 
 export const BLOCKS_URL = "/condominiums/blocks";
 
-/** Grava o bloco (criação ou edição), atualiza os caches e volta para a lista. */
 export function useBlockSubmit(
   blockId: string | undefined,
   setError: UseFormSetError<BlockFormInput>,

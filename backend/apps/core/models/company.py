@@ -1,19 +1,17 @@
-import uuid
-
 from django.db import models
 from typing_extensions import final, override
 
 from apps.core.validators.cnpj import validate_cnpj
 
+from .base import BaseModel
+
 
 @final
-class Company(models.Model):
+class Company(BaseModel):
     """Administradora (multiempresa desde o início)."""
 
-    # Path from the model to its company (spec 004: company scoping): the company itself.
+    # A company is scoped by itself.
     company_lookup = "id"
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     legal_name = models.CharField(max_length=255)
     trade_name = models.CharField(max_length=255, blank=True)
@@ -27,9 +25,6 @@ class Company(models.Model):
     state = models.CharField(max_length=2, blank=True)
 
     active = models.BooleanField(default=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Company"

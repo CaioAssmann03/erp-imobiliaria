@@ -16,6 +16,8 @@ from apps.condominiums.models import (
 from apps.core.models import Company
 from apps.core.dates import add_months
 from apps.finance.models import AccountPayable, CostCenter, Supplier
+from apps.finance.services.cancel_account_payable import cancel_account_payable
+from apps.finance.services.settle_account_payable import AccountPayablePayment, settle_account_payable
 from apps.persons.models import PeopleIndividual, Person
 
 from .base import JsonObject, body
@@ -272,9 +274,11 @@ def test_accounts_payable_ignores_paid_and_cancelled(
 ) -> None:
     reference = today()
     paid = make_payable(company, reference - timedelta(days=1))
-    paid.settle(reference, Decimal("100.00"), AccountPayable.PaymentMethod.PIX)
+    settle_account_payable(
+        paid, AccountPayablePayment(reference, Decimal("100.00"), AccountPayable.PaymentMethod.PIX)
+    )
     cancelled = make_payable(company, reference - timedelta(days=1))
-    cancelled.cancel()
+    cancel_account_payable(cancelled)
 
     payables = dashboard(api_client)["accounts_payable"]
 

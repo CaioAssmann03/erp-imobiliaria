@@ -11,7 +11,6 @@ def body(response: Response) -> JsonObject:
 
 
 def results(response: Response) -> list[JsonObject]:
-    """Itens da página de uma listagem paginada."""
     return cast(list[JsonObject], body(response)["results"])
 
 

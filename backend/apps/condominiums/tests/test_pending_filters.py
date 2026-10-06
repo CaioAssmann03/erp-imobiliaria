@@ -43,7 +43,6 @@ def make_unit(condominium: Condominium, name: str, **fields: object) -> Unit:
     )
 
 
-# ----- condominiums -----
 
 
 def test_condominiums_without_cost_centers(api_client: APIClient, company: Company) -> None:
@@ -87,7 +86,6 @@ def test_condominium_pending_rejects_unknown_choice(api_client: APIClient) -> No
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
-# ----- units -----
 
 
 def test_units_without_responsible(api_client: APIClient, company: Company) -> None:

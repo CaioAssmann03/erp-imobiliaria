@@ -20,7 +20,6 @@ class User(AbstractUser):
     on_delete=SET_NULL, related_name="person")`. Assim o `accounts` não depende do domínio.
     """
 
-    # Path from the model to its company (spec 004: company scoping).
     company_lookup = "company"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

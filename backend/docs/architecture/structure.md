@@ -13,8 +13,12 @@ apps/<app>/
   apps.py            @final AppConfig, name = "apps.<app>"
   admin.py           unfold ModelAdmin / TabularInline
   models/            package, one entity per file; __init__.py re-exports (X as X)
+  models/querysets/  one <Entity>QuerySet per file (only for entities that have one); the model file keeps fields, Meta, rules and life cycle
+  models/rules/      one <Entity>Rules per file, only for a model whose clean() has 2+ rules (UnitPerson, Unit, AdministrationContract, AccountPayable); clean() just calls it
   serializers/       <entity>_serializers.py; re-exports
+  services/          one file per use case (a function named like the file), only where a use case orchestrates several models or a transaction; __init__.py stays empty
   views/             <entity>_views.py (ViewSets); re-exports
+  errors/            one <Entity>Error enum (code + English message) per entity, errors/validators.py for shared validators; __init__.py re-exports
   filters.py         only for custom FilterSets
   urls.py            DefaultRouter, included by config/urls.py
   migrations/        generated; never edited once applied

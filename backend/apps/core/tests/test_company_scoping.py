@@ -12,7 +12,7 @@ from rest_framework.test import APIClient
 from apps.core.models import Company
 from apps.core.scoping import CompanyScopedViewSetMixin, company_lookup_of
 
-from .base import body, error_codes, errors, results
+from .base import error_codes, errors, results
 from .scoping_data import CompanyData, build_company_data
 
 pytestmark = pytest.mark.django_db

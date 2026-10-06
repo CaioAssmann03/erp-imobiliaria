@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 
-/** ⌘K / Ctrl+K chama `onToggle` em qualquer lugar da página. */
 export function useSearchShortcut(onToggle: () => void) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {

@@ -25,7 +25,6 @@ import { FeeSection } from "./condominium-form/FeeSection";
 import { IdentificationSection } from "./condominium-form/IdentificationSection";
 import { useCondominiumSubmit } from "./condominium-form/use-condominium-submit";
 
-/** Cadastro e edição de condomínio: carrega, valida e compõe as seções. */
 export function CondominiumForm({ condominiumId }: { condominiumId?: string }) {
   const router = useRouter();
   const isEdit = condominiumId !== undefined;

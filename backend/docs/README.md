@@ -13,6 +13,7 @@ if `skip-if` matches or the summary is not what you need, follow its pointer wit
 | **What is done / what comes next** (phases, parts, status, backlog, open cross-phase decisions) | `roadmap/README.md` → the phase folder `README.md` → the part file |
 | **Any new feature** (do this first) | the roadmap part (if any) → `features/README.md` → copy `features/_template.md` (full) or `features/_template-lite.md` (small change); example: `features/001-person-type-filter.md` |
 | Plan a new phase or part | `roadmap/README.md` → copy `roadmap/_template-phase.md` or `roadmap/_template-part.md` |
+| New use case / workflow (several models, a transaction, a state change) | `conventions/practices.md` (§3b Services) · `apps/<app>.md` · `architecture/structure.md` |
 | New model / field / constraint | `conventions/practices.md` · `architecture/data.md` · `apps/<app>.md` |
 | New endpoint (viewset, serializer, filter) | `architecture/api.md` · `conventions/practices.md` · `apps/<app>.md` |
 | Nested write (parent + children in one request) | `conventions/practices.md` (section "Nested serializers") · `apps/condominiums.md` or `apps/persons.md` |

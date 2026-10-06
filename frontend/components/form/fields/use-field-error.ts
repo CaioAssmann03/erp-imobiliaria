@@ -2,7 +2,6 @@
 
 import { get, useFormContext } from "react-hook-form";
 
-/** Mensagem de erro do campo (validação do Zod ou do servidor), se houver. */
 export function useFieldError(name: string) {
   const {
     formState: { errors },

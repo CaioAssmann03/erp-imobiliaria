@@ -17,10 +17,6 @@ const TRIGGER_COMPACT =
 const TRIGGER_SIDEBAR =
   "flex h-9 w-full items-center rounded-control px-3 text-body font-medium whitespace-nowrap text-ink-soft transition-colors hover:bg-surface hover:text-ink lg:group-data-[collapsed]/sidebar:justify-center lg:group-data-[collapsed]/sidebar:px-0";
 
-/**
- * Client Component: botão de engrenagem (no menu lateral) que abre as configurações de
- * aparência no centro da tela: modo (claro/escuro/sistema), cor de destaque e fonte.
- */
 export function SettingsDialog({
   initial,
   compact = false,

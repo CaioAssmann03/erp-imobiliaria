@@ -9,7 +9,7 @@ skip-if: serializer/view code patterns → conventions/practices.md; permissions
 - Auth: `POST /api/auth/login/` and `/api/auth/refresh/` (SimpleJWT); everything else needs `Authorization: Bearer <access>`.
 - **Company scoping:** a user sees and writes only their company's records (a superuser sees all). A record of another company answers **404**; a related id of another company answers **400 "does not exist"** (the same as a missing id). `company` is read-only; what you create belongs to your company. Every viewset uses `CompanyScopedViewSetMixin` and every model declares `company_lookup` (`apps/core/scoping.py`).
 - Ids are UUIDs; decimals are serialized as **strings** (money: `"1250.00"`); dates ISO 8601.
-- State changes that are not a plain edit are `POST` actions on the record (`/accounts-payable/{id}/settle/`, `.../cancel/`): the transition and its rules are a model method, the view only parses the input and calls it.
+- State changes that are not a plain edit are `POST` actions on the record (`/accounts-payable/{id}/settle/`, `.../cancel/`): the rules are the model's, the transaction and the transition are a service (`settle_account_payable`, `cancel_account_payable`), the view only parses the input and calls it.
 
 ## Collections
 - **Pagination** (`core.pagination.StandardPagination`): `?page=`, `?limit=` (default 20, max 100); body `{count, next, previous, results}`. Querysets must be **ordered** (`Meta.ordering`).
@@ -32,9 +32,9 @@ Every error response (400, 401, 403, 404, 405, 429...) has one body, built by `a
 ]}
 ```
 - `field` is the dotted path (`address.city`, `unit_people.0.person`, list positions as numbers) and **null** when the error is not about a field (`non_field_errors`, `detail`).
-- `code` is the **stable contract**: the frontend translates by code (`frontend/lib/error-messages.ts`); `message` is the English fallback. Generic Django/DRF/SimpleJWT codes (`required`, `blank`, `null`, `invalid`, `max_length`, `unique`, `does_not_exist`, `not_authenticated`, `permission_denied`, `not_found`, `throttled`, `token_not_valid`...) stay as they are; domain codes are dotted `model.field.reason` (shared validators `<validator>.<reason>`) and live in each app's `error_codes.py`. Adding a code is compatible; renaming or removing one is breaking (it needs a spec).
+- `code` is the **stable contract**: the frontend translates by code (`frontend/lib/error-messages.ts`); `message` is the English fallback. Generic Django/DRF/SimpleJWT codes (`required`, `blank`, `null`, `invalid`, `max_length`, `unique`, `does_not_exist`, `not_authenticated`, `permission_denied`, `not_found`, `throttled`, `token_not_valid`...) stay as they are; domain codes are dotted `model.field.reason` (shared validators `<validator>.<reason>`) and live, with their English message, in each app's `errors/<entity>.py`. Adding a code is compatible; renaming or removing one is breaking (it needs a spec).
 - The OpenAPI schema carries `ErrorCodeEnum` (every registered code), `ErrorItem` and `ErrorResponse`, attached to the operations (`apps/core/schema.py`), so the generated client types the code as a union and an untranslated code fails to compile.
-- Messages are **English** and come from the model (`clean()`/validators/`violation_error_message`, identical in `clean()` and its constraint, together with the same code).
+- Messages are **English** and are declared next to their code in `errors/<entity>.py`; the model (`clean()`/validators/`violation_error_message`) only uses them, so `clean()` and its constraint share the same message and code.
 
 ## Contract with the frontend
 - drf-spectacular builds the schema from serializers/views; orval generates the client. Field names, enums and `read_only` flags **are** the contract.

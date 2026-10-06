@@ -23,7 +23,6 @@ interface PersonsFiltersProps {
   onClear: () => void;
 }
 
-/** Busca por texto e filtros de status e tipo de pessoa. */
 export function PersonsFilters({
   search,
   onSearchChange,

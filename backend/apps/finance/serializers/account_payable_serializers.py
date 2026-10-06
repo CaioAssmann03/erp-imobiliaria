@@ -52,7 +52,7 @@ class AccountPayableSerializer(ModelRulesMixin, serializers.ModelSerializer[Acco
 
 
 class SettleAccountPayableSerializer(serializers.Serializer[dict[str, Any]]):
-    """The input of `POST .../settle/`; the rules are the model's (`AccountPayable.settle`)."""
+    """Payment data to settle an open account."""
 
     payment_date = serializers.DateField()
     amount_paid = serializers.DecimalField(max_digits=12, decimal_places=2)

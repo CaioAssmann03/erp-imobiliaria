@@ -1,23 +1,19 @@
-import uuid
-
 from django.db import models
 from typing_extensions import final, override
 
-from apps.condominiums.error_codes import CondominiumsErrorCode as Code
-
+from apps.condominiums.errors import BlockError
 from apps.condominiums.models.condominium import Condominium
+from apps.core.models.base import UUIDModel
 
 
 @final
-class Block(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class Block(UUIDModel):
     condominium = models.ForeignKey(
         Condominium, on_delete=models.CASCADE, related_name="blocks"
     )
 
     name = models.CharField(max_length=60)
 
-    # Path from the model to its company (spec 004: company scoping).
     company_lookup = "condominium__company"
 
     class Meta:
@@ -28,8 +24,8 @@ class Block(models.Model):
             models.UniqueConstraint(
                 fields=("condominium", "name"),
                 name="block_unique_name_per_condominium",
-                violation_error_message="This condominium already has a block with this name.",
-                violation_error_code=Code.BLOCK_NAME_DUPLICATE_IN_CONDOMINIUM.value,
+                violation_error_message=BlockError.NAME_DUPLICATE_IN_CONDOMINIUM.message,
+                violation_error_code=BlockError.NAME_DUPLICATE_IN_CONDOMINIUM.value,
             ),
         )
 

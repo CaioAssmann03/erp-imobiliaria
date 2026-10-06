@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 
-/** Status discreto: ponto verde com halo suave (ativo) ou ponto vazado cinza (inativo) + texto. Sem fundo. */
 export function StatusBadge({ active }: { active?: boolean }) {
   return (
     <span className={cn("inline-flex items-center gap-2", active ? "text-ink" : "text-ink-faint")}>

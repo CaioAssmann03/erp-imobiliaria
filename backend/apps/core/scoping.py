@@ -12,7 +12,6 @@ from django.db import models
 from django.db.models import Model, QuerySet
 from django.http import HttpRequest
 from rest_framework import serializers
-from rest_framework.request import Request
 
 ModelT = TypeVar("ModelT", bound=Model)
 

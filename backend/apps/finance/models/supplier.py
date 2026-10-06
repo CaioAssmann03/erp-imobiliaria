@@ -1,38 +1,36 @@
-import uuid
-
 from django.core.exceptions import ValidationError
 from django.db import models
 from typing_extensions import final, override
 
-from apps.finance.error_codes import FinanceErrorCode as Code
+from apps.core.models.base import BaseModel
+from apps.finance.errors import SupplierError
 from apps.finance.validators import validate_bank_code
 from apps.persons.models import Person
 
 from .bank_account import AccountKind
 
-BANK_DATA_TOGETHER = "Bank code, branch and account number must be filled together."
-
 
 @final
-class Supplier(models.Model):
+class Supplier(BaseModel):
     """Who the company pays (the PDF's *Fornecedor*): a `Person` plus how to pay them."""
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    person = models.OneToOneField(Person, on_delete=models.PROTECT, related_name="supplier")
+    person = models.OneToOneField(
+        Person, on_delete=models.PROTECT, related_name="supplier"
+    )
 
     # Payment data, all optional: a supplier paid by boleto has none; a PIX key may stand alone.
-    bank_code = models.CharField(max_length=3, blank=True, validators=[validate_bank_code])
+    bank_code = models.CharField(
+        max_length=3, blank=True, validators=[validate_bank_code]
+    )
     branch = models.CharField(max_length=10, blank=True)
     account_number = models.CharField(max_length=20, blank=True)
-    account_kind = models.CharField(max_length=10, blank=True, choices=AccountKind.choices)
+    account_kind = models.CharField(
+        max_length=10, blank=True, choices=AccountKind.choices
+    )
     pix_key = models.CharField(max_length=140, blank=True)
 
     active = models.BooleanField(default=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    # Path from the model to its company (spec 004: company scoping).
     company_lookup = "person__company"
 
     class Meta:
@@ -52,7 +50,7 @@ class Supplier(models.Model):
             return
         raise ValidationError(
             {
-                field: ValidationError(BANK_DATA_TOGETHER, code=Code.SUPPLIER_BANK_DATA_INCOMPLETE.value)
+                field: SupplierError.BANK_DATA_INCOMPLETE.to_validation_error()
                 for field, value in bank_data.items()
                 if not value
             }

@@ -1,12 +1,14 @@
 """Every error code of the API, collected from the apps (spec 006).
 
-Each app declares its domain codes in `apps/<app>/error_codes.py` as `StrEnum` classes; this module
-finds them through the installed apps, so `core` imports no domain app by name.
+Each app declares its domain errors (code and English message) in `apps/<app>/errors/<entity>.py`
+as `RuleError` classes; this module finds them through the installed apps, so `core` imports no
+domain app by name.
 """
 
 from enum import StrEnum
 from importlib import import_module
 from importlib.util import find_spec
+from pkgutil import iter_modules
 
 from django.apps import apps as django_apps
 
@@ -49,21 +51,24 @@ GENERIC_ERROR_CODES: tuple[str, ...] = (
 
 
 def domain_error_code_enums() -> list[type[StrEnum]]:
-    """The `StrEnum` classes defined in the installed apps' `error_codes` modules."""
+    """The `RuleError` enums defined in the modules of the installed apps' `errors` packages."""
     enums: list[type[StrEnum]] = []
     for config in django_apps.get_app_configs():
-        module_name = f"{config.name}.error_codes"
-        if find_spec(module_name) is None:
+        package_name = f"{config.name}.errors"
+        if find_spec(package_name) is None:
             continue
-        module = import_module(module_name)
-        enums.extend(
-            member
-            for member in vars(module).values()
-            if isinstance(member, type)
-            and issubclass(member, StrEnum)
-            and member is not StrEnum
-            and member.__module__ == module_name
-        )
+        package = import_module(package_name)
+        for module_info in iter_modules(package.__path__):
+            module_name = f"{package_name}.{module_info.name}"
+            module = import_module(module_name)
+            enums.extend(
+                member
+                for member in vars(module).values()
+                if isinstance(member, type)
+                and issubclass(member, StrEnum)
+                and len(member) > 0  # the abstract base `RuleError` has no codes
+                and member.__module__ == module_name
+            )
     return enums
 
 

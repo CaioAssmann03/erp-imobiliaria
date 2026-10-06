@@ -1,5 +1,3 @@
-"""System checks (spec 008)."""
-
 from typing import Any
 
 from django.conf import settings

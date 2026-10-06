@@ -1,4 +1,3 @@
-/** Seção com título à esquerda e o valor atual à direita. */
 export function SettingsSection({
   title,
   value,

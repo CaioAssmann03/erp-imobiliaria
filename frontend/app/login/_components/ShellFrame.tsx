@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 
-/** Moldura do login: tela inteira no celular; no desktop, canvas cinza + shell arredondado. */
 export function ShellFrame({
   children,
   className,

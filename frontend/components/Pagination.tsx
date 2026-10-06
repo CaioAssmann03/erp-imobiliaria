@@ -9,7 +9,6 @@ interface PaginationProps {
   onLimitChange: (limit: number) => void;
 }
 
-/** Rodapé de tabela, discreto: faixa exibida à esquerda; tamanho da página e navegação à direita. */
 export function Pagination({ page, limit, count, onPageChange, onLimitChange }: PaginationProps) {
   if (count === 0) return null;
 

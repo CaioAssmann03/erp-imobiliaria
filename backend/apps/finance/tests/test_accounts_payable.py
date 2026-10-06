@@ -11,6 +11,10 @@ from apps.core.models import Company
 from apps.persons.models import Person
 
 from ..models import AccountPayable, CostCenter, Supplier
+from ..services.settle_account_payable import (
+    AccountPayablePayment,
+    settle_account_payable,
+)
 from .base import body, error_codes, errors, results
 
 pytestmark = pytest.mark.django_db
@@ -60,7 +64,7 @@ def test_filters(api_client: APIClient, company: Company, condominium, cost_cent
 
     _ = make_account(description="Aberta", due_date=date(2026, 10, 10))
     paid = make_account(description="Paga", due_date=date(2026, 10, 20))
-    paid.settle(date(2026, 10, 19), paid.amount, "pix")
+    settle_account_payable(paid, AccountPayablePayment(date(2026, 10, 19), paid.amount, "pix"))
     _ = make_account(description="Despesa da empresa", condominium=None, cost_center=None, due_date=date(2026, 11, 5))
     other_person = Person.objects.create(company=company, name="Outro fornecedor")
     other_supplier = Supplier.objects.create(person=other_person)

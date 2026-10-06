@@ -13,7 +13,6 @@ interface SearchResultsProps {
   onSelect: (item: SearchResultItem) => void;
 }
 
-/** Lista de resultados agrupada por tipo, com os estados de espera e de vazio. */
 export function SearchResults({
   items,
   query,

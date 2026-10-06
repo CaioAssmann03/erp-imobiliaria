@@ -1,6 +1,5 @@
 from typing import Any, override
 
-from django.db import transaction
 from rest_framework import serializers
 from typing_extensions import final
 
@@ -8,6 +7,8 @@ from apps.core.scoping import request_company, request_company_or_none
 from apps.core.serializers import ModelRulesMixin, build_candidate, run_model_rules
 
 from ..models import PeopleIndividual, PeopleLegal, Person
+from ..services.create_person import create_person
+from ..services.update_person import update_person
 from .people_individual_serializers import PeopleIndividualSerializer
 from .people_legal_serializers import PeopleLegalSerializer
 
@@ -70,42 +71,9 @@ class PersonSerializer(ModelRulesMixin, serializers.ModelSerializer[Person]):
             raise serializers.ValidationError({nested_key: error.detail}) from error
 
     @override
-    @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> Person:
-        individual_data = validated_data.pop("people_individual", None)
-        legal_data = validated_data.pop("people_legal", None)
-
-        person = Person.objects.create(company=request_company(self), **validated_data)
-
-        if individual_data:
-            _ = PeopleIndividual.objects.create(
-                person=person, company=person.company, **individual_data
-            )
-
-        if legal_data:
-            _ = PeopleLegal.objects.create(person=person, company=person.company, **legal_data)
-
-        return person
+        return create_person(request_company(self), validated_data)
 
     @override
-    @transaction.atomic
-    def update(
-        self, instance: Person, validated_data: dict[str, Any]
-    ) -> Person:
-        individual_data = validated_data.pop("people_individual", None)
-        legal_data = validated_data.pop("people_legal", None)
-
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-
-        if individual_data:
-            _ = PeopleIndividual.objects.update_or_create(
-                person=instance, defaults={**individual_data, "company": instance.company}
-            )
-        if legal_data:
-            _ = PeopleLegal.objects.update_or_create(
-                person=instance, defaults={**legal_data, "company": instance.company}
-            )
-
-        return instance
+    def update(self, instance: Person, validated_data: dict[str, Any]) -> Person:
+        return update_person(instance, validated_data)

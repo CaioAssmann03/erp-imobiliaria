@@ -6,7 +6,7 @@ from rest_framework.test import APIClient
 from apps.core.models import Company
 
 from ..models import Block, Condominium, Unit
-from .base import body, results
+from .base import body
 
 pytestmark = pytest.mark.django_db
 

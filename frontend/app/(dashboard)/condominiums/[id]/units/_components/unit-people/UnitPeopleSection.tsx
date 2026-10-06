@@ -15,7 +15,6 @@ interface UnitPeopleSectionProps {
   onChanged: () => void;
 }
 
-/** Proprietários e locatários da unidade: lista com remoção e formulário de novo vínculo. */
 export function UnitPeopleSection({ unitId, links, onChanged }: UnitPeopleSectionProps) {
   const destroyMutation = useUnitPeopleDestroy();
 

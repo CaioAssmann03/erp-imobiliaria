@@ -1,5 +1,3 @@
-"""Helpers shared by the tests of every app."""
-
 from apps.core.models import Company
 
 SEEDED_COMPANY_CNPJ = "03136483000144"  # created by migration core.0002_seed_company

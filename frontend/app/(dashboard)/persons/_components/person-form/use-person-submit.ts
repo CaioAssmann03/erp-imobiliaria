@@ -16,7 +16,6 @@ import type { Person } from "@/lib/api/generated/models";
 import { applyServerErrors } from "@/lib/form-errors";
 import { personToPayload, type PersonFormInput, type PersonFormOutput } from "@/lib/schemas/person";
 
-/** Grava a pessoa (criação ou edição), atualiza os caches e volta para a listagem. */
 export function usePersonSubmit(personId: string | undefined, setError: UseFormSetError<PersonFormInput>) {
   const router = useRouter();
   const queryClient = useQueryClient();

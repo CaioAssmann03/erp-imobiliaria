@@ -23,9 +23,10 @@ This file is only the **index**; knowledge lives in [`docs/`](docs/README.md).
 
 ## Always true
 
-- Code, comments and docs in English. API field names are English; user-facing Portuguese texts belong to the frontend.
-- Every model: UUID primary key, `created_at`/`updated_at`, `@final`.
-- **Business rules live ONLY in the models**: field validators (one field), `clean()` (several fields or models), constraints (database guard). Serializers, views and
+- Code, comments and docs in English. Comments only where the code cannot explain itself (a reason, a constraint, a format): see `docs/conventions/practices.md` §9. API field names are English; user-facing Portuguese texts belong to the frontend.
+- Every model: UUID primary key, `created_at`/`updated_at`, `@final`: inherit `BaseModel` (all three; `apps/core/models/base.py`) or `UUIDModel` (the id only, for a model that has no timestamps), never repeat those fields.
+- **A use case that orchestrates several models or a transaction is a service**: `apps/<app>/services/<use_case>.py`, one file per use case, a function named like the file. Services and serializers call it; it holds **no** business rule (see `docs/conventions/practices.md` §3b). Plain CRUD stays in the serializer.
+- **Business rules live ONLY in the models**: field validators (one field), `clean()` (several fields or models; with 2+ rules it calls a `models/rules/<entity>.py` class), constraints (database guard). Serializers, views and
   services hold no business rule: serializers inherit `ModelRulesMixin` (it runs the model's rules and returns a 400). See `docs/conventions/practices.md` §2.
 - **Names follow Clean Code** (`docs/conventions/naming.md`): intention-revealing, no abbreviations or one-letter names, verbs for methods, `is_/has_/should_` for booleans, `reference_date` (not `on`), named constants,
   no flag arguments, ≤ 3 parameters. Read it before naming anything; contracts (API fields, columns) are renamed only through a spec.

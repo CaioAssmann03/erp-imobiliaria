@@ -1,7 +1,3 @@
-"""
-Django settings for config project.
-"""
-
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -22,7 +18,6 @@ if SECRET_KEY is None:
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 
-# Application definition
 
 INSTALLED_APPS = [
     "unfold",
@@ -119,7 +114,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
 
 LANGUAGE_CODE = "pt-br"
 TIME_ZONE = "America/Sao_Paulo"
@@ -127,7 +121,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -139,7 +132,6 @@ STORAGES = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# Django REST Framework
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
@@ -202,7 +194,6 @@ if not _admin_url.strip("/") or "://" in _admin_url or ".." in _admin_url:
     raise ImproperlyConfigured("ADMIN_URL must be a relative path such as 'admin/'.")
 ADMIN_URL = _admin_url.strip("/") + "/"
 
-# Cookies only over HTTPS outside development.
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 _LOCAL_HOSTS = {"localhost", "127.0.0.1", "backend"}
@@ -231,7 +222,6 @@ INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY", "")
 if not INTERNAL_API_KEY and not DEBUG:
     raise ImproperlyConfigured("INTERNAL_API_KEY must be set when DEBUG is false.")
 
-# Celery
 CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL", "redis://redis:6379/0")
 CELERY_ACCEPT_CONTENT = ["json"]

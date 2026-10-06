@@ -1,6 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Esqueleto exibido enquanto o registro em edição carrega. */
 export function FormSkeleton({ sections = 2 }: { sections?: number }) {
   return (
     <div className="max-w-5xl space-y-4" aria-busy="true" aria-label="Carregando formulário">

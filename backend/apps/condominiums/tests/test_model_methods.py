@@ -54,7 +54,7 @@ class TestCurrentLinks:
             unit=unit, person=person, role="owner", ownership_percentage=Decimal("50"),
             start_date=date(2024, 1, 1), end_date=reference_date,
         )
-        ended = UnitPerson.objects.create(
+        _ = UnitPerson.objects.create(  # ended before the reference date: not current
             unit=unit, person=person, role="owner", ownership_percentage=Decimal("50"),
             start_date=date(2023, 1, 1), end_date=date(2024, 12, 31),
         )
@@ -62,8 +62,6 @@ class TestCurrentLinks:
         current_links = set(UnitPerson.objects.current(reference_date))
 
         assert current_links == {open_link, ends_on_reference_date}
-        assert open_link.is_current(reference_date) and ends_on_reference_date.is_current(reference_date)
-        assert not ended.is_current(reference_date)
 
 
 @pytest.mark.django_db

@@ -57,7 +57,6 @@ def set_audit_actor(user: Any) -> None:
 
 
 def register() -> None:
-    """The audited models of `core` itself."""
     from .models import Company
 
     register_audited(Company)
