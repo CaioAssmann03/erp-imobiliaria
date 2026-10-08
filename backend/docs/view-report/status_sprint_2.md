@@ -50,7 +50,7 @@ O Financeiro foi construído sobre um modelo que, na Sprint 1, ainda era hipóte
 | Lançamento manual na conta do condomínio | EQUIPE | Concluído | Entradas e saídas avulsas fora do fluxo de boleto |
 | Consulta de extratos | EQUIPE | Concluído | Movimentações da conta do condomínio por período |
 | Card de vencimentos no painel inicial | EQUIPE | Concluído | Vencidas, vencem hoje, próximos 7 dias e próximos vencimentos |
-| Enviar prints de Financeiro, Locações, Vendas e Login | Caio | A confirmar | Necessário para validar o modelo do Financeiro já implementado |
+| Enviar prints de Financeiro, Locações, Vendas e Login | EQUIPE | A confirmar | Necessário para validar o modelo do Financeiro já implementado |
 | Decidir multiempresa e migração de dados do Sami | EQUIPE | A confirmar | Impacta a estrutura do banco; ideal decidir antes do próximo módulo |
 | Iniciar credenciamento com o Santander | EQUIPE | A confirmar | Prazo externo; bloqueia a Fase 5 (Emissão de Boletos) |
 
