@@ -6,7 +6,7 @@ skip-if: condominium data → apps/condominiums.md; what the fields mean → arc
 
 # App `finance`
 
-**State:** cost centers and entry templates, suppliers and bank accounts, accounts payable, and the ledger (current account, entry batches, entries, reversal, automatic posting on payment): API + Admin done (specs 009–015 in `features/history.md`). The screens are in the frontend (spec 016); the payment receipts (spec 018) are implemented and wait for the R2 bucket to be set up. Depends on `condominiums` and `core`.
+**State:** cost centers and entry templates, suppliers and bank accounts, accounts payable, and the ledger (current account, entry batches, entries, reversal, automatic posting on payment): API + Admin done (specs 009–015 in `features/history.md`). The screens are in the frontend (spec 016); the payment receipts (spec 018) are done and in use on the VPS. Depends on `condominiums` and `core`.
 
 ## Rules worth knowing (the fields are in `models/`; the error codes in `errors/`)
 - **`CostCenter`** (the PDF's *SubConta*): its `condominium` never changes after creation (ledger entries group by it) and it cannot be deleted while it has entry templates (deactivate it).
@@ -30,4 +30,4 @@ Flat, company-scoped resources: `cost-centers`, `entry-templates`, `suppliers` (
 The `core` dashboard counts active condominiums without cost centers, and its accounts payable section reads `AccountPayableQuerySet`; `seed_demo` creates three cost centers per condominium.
 
 ## Next
-Set up the R2 bucket and its CORS rule, then the billing phases.
+The billing phases (4 and 5).

@@ -5,8 +5,8 @@ skip-if: you need the whole phase → roadmap/phase-3-finance-base/README.md; yo
 ---
 # Part 06 — Payment receipts
 
-**Status:** in-progress · **Phase:** 3 (Finance base) · **Apps:** finance, frontend · **Frontend impact:** client regeneration · **Depends on:** 03, and the backend hosting (phase 3a part 01)
-**Spec:** [018](../../features/018-payment-receipts.md) (full)
+**Status:** done · **Phase:** 3 (Finance base) · **Apps:** finance, frontend · **Frontend impact:** client regeneration · **Depends on:** 03, and the backend hosting (phase 3a part 01)
+**Spec:** [018 — Payment receipts](../../features/history.md) (section 018)
 
 ## Goal
 Attach the payment receipt (a PDF or photo) to a settled account payable, stored outside the server's disk.
@@ -16,7 +16,7 @@ Attach the payment receipt (a PDF or photo) to a settled account payable, stored
 - [x] Signed upload and download URLs (the Next proxy only carries JSON)
 - [x] Link the file to the `AccountPayable` it proves; only a paid account has a receipt
 - [x] Receipts panel on the paid account screen (list, attach, download, delete)
-- [ ] Create the R2 bucket, token and CORS rule, set `AWS_*` on the VPS and check one upload and download end to end
+- [x] Create the R2 bucket, token and CORS rule, set `AWS_*` on the VPS and check one upload and download end to end
 
 ## Why it was blocked (resolved 2026-10-08)
 The Trello card accepts "local disk for now", but the Next proxy (`app/api/[...path]`) carries JSON only, by design: a file would have to reach Django through a signed URL of a bucket, which needs the hosting and the provider decided (phase 3a part 01). The hosting is now decided (the VPS, with HTTPS) and the bucket is Cloudflare R2, so the part is unblocked; the settle dialog and the account have no receipt control until spec 018 is done.
@@ -38,4 +38,4 @@ None: answered on 2026-10-08 and recorded in spec 018 (Cloudflare R2; several re
 
 ## Result
 Backend and screen implemented on 2026-10-08 (spec 018): `PaymentReceipt` (migration `0011`), three services, `payment-receipts` API and `POST /accounts-payable/{id}/receipts/`, the `core` storage client, the panel in the paid account screen. `pytest apps -q` 677 passed; frontend `tsc`, `eslint` and `npm run build` clean.
-**Left:** the R2 bucket, its token and the CORS rule do not exist yet (they are created in the Cloudflare account by the user); until the `AWS_*` variables are set the endpoints answer 503 and the panel shows the error. Then deploy and check one real upload, which closes this part and the spec.
+Deployed to the VPS and checked with a real upload, download and delete on 2026-10-08 (the user created the R2 bucket, token and CORS rule and filled the `AWS_*` variables).
