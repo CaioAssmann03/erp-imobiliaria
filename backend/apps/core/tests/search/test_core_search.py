@@ -7,7 +7,7 @@ from apps.core.testing import seeded_company
 from apps.condominiums.models import Address, Condominium, Unit
 from apps.persons.models import PeopleIndividual, Person
 
-from .base import JsonObject, body
+from ..base import JsonObject, body
 
 pytestmark = pytest.mark.django_db
 

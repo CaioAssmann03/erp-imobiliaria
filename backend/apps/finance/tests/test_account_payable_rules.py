@@ -13,7 +13,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.condominiums.models import Condominium
-from apps.core.management.commands.seed_demo import _generate_cnpj
+from apps.core.seed.documents import generate_cnpj
 from apps.core.models import Company
 from apps.persons.models import Person
 
@@ -159,7 +159,7 @@ def test_cost_center_must_belong_to_the_condominium(  # type: ignore[no-untyped-
 def test_condominium_and_supplier_must_belong_to_the_company(  # type: ignore[no-untyped-def]
     company: Company, other_company: Company, supplier
 ) -> None:
-    theirs = Condominium.objects.create(company=other_company, name="Alheio", cnpj=_generate_cnpj(12))
+    theirs = Condominium.objects.create(company=other_company, name="Alheio", cnpj=generate_cnpj(12))
     their_cost_center = CostCenter.objects.create(condominium=theirs, name="Alheio")
     their_supplier = Supplier.objects.create(person=Person.objects.create(company=other_company, name="Alheia"))
 

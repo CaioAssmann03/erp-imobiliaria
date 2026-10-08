@@ -3,7 +3,7 @@
 import ast
 from pathlib import Path
 
-APPS_DIR = Path(__file__).resolve().parents[2]
+APPS_DIR = Path(__file__).resolve().parents[3]
 
 
 def service_files() -> list[Path]:

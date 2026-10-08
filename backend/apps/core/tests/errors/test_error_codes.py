@@ -16,7 +16,7 @@ from apps.core.error_registry import (
     domain_error_codes,
 )
 
-APPS_DIR = Path(__file__).resolve().parents[2]
+APPS_DIR = Path(__file__).resolve().parents[3]
 CODE_PATTERN = re.compile(r"^[a-z0-9_]+(\.[a-z0-9_]+)+$")
 
 

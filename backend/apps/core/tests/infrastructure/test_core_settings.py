@@ -3,7 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-BACKEND = Path(__file__).resolve().parents[3]
+BACKEND = Path(__file__).resolve().parents[4]
 
 
 def import_settings(**env: str) -> subprocess.CompletedProcess[str]:

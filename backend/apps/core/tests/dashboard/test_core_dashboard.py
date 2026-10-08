@@ -21,7 +21,7 @@ from apps.finance.services.cancel_account_payable import cancel_account_payable
 from apps.finance.services.settle_account_payable import AccountPayablePayment, settle_account_payable
 from apps.persons.models import PeopleIndividual, Person
 
-from .base import JsonObject, body
+from ..base import JsonObject, body
 
 pytestmark = pytest.mark.django_db
 

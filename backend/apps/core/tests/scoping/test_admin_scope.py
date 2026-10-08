@@ -10,7 +10,7 @@ from apps.condominiums.models import Condominium
 from apps.core.models import Company
 from apps.persons.models import Person
 
-from .scoping_data import build_company_data
+from ..scoping_data import build_company_data
 
 pytestmark = pytest.mark.django_db
 

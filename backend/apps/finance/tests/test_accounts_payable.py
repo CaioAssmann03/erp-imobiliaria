@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.condominiums.models import Condominium
-from apps.core.management.commands.seed_demo import _generate_cnpj
+from apps.core.seed.documents import generate_cnpj
 from apps.core.models import Company
 from apps.persons.models import Person
 
@@ -249,7 +249,7 @@ def test_other_company_is_404_and_foreign_ids_are_does_not_exist(  # type: ignor
     api_client: APIClient, other_company: Company, condominium, cost_center, supplier
 ) -> None:
     their_condominium = Condominium.objects.create(
-        company=other_company, name="Alheio", cnpj=_generate_cnpj(11)
+        company=other_company, name="Alheio", cnpj=generate_cnpj(11)
     )
     their_cost_center = CostCenter.objects.create(condominium=their_condominium, name="Alheio")
     their_supplier = Supplier.objects.create(person=Person.objects.create(company=other_company, name="Alheia"))

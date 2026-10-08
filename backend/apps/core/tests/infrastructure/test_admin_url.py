@@ -11,7 +11,7 @@ from django.test import override_settings
 
 from apps.core.checks import check_admin_url_is_not_the_default
 
-BACKEND = Path(__file__).resolve().parents[3]
+BACKEND = Path(__file__).resolve().parents[4]
 
 
 def run(code: str, **env: str) -> subprocess.CompletedProcess[str]:

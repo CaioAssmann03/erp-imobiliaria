@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 
 from apps.core.models import Company
 
-from .base import results
+from ..base import results
 
 pytestmark = pytest.mark.django_db
 

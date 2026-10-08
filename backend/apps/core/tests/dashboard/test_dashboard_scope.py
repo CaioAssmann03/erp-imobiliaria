@@ -6,8 +6,8 @@ from rest_framework.test import APIClient
 
 from apps.core.models import Company
 
-from .base import body
-from .scoping_data import build_company_data
+from ..base import body
+from ..scoping_data import build_company_data
 
 pytestmark = pytest.mark.django_db
 

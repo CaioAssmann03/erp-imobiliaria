@@ -12,8 +12,8 @@ from rest_framework.test import APIClient
 from apps.core.error_registry import all_error_codes
 from apps.core.exception_handler import api_exception_handler, flatten_errors
 
-from .base import error_codes, errors
-from .scoping_data import build_company_data
+from ..base import error_codes, errors
+from ..scoping_data import build_company_data
 
 pytestmark = pytest.mark.django_db
 
@@ -125,7 +125,7 @@ def test_nested_error_uses_dotted_path(api_client: APIClient, company) -> None: 
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert error_codes(response, "billing_rules.due_day") == ["due_day.out_of_range"]
+    assert error_codes(response, "billing_rules.due_day") == ["billing_rules.due_day.out_of_range"]
 
 
 def test_list_position_is_a_number_in_the_path() -> None:

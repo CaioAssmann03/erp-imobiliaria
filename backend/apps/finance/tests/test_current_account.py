@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
 from apps.condominiums.models import Condominium
-from apps.core.management.commands.seed_demo import _generate_cnpj
+from apps.core.seed.documents import generate_cnpj
 from apps.core.models import Company
 
 from ..models import CurrentAccount
@@ -42,7 +42,7 @@ def test_a_second_account_is_refused_by_the_model_rules_with_its_code(
 
 
 def test_condominium_of_another_company_is_rejected(company: Company, other_company: Company) -> None:
-    theirs = Condominium.objects.create(company=other_company, name="Alheio", cnpj=_generate_cnpj(9))
+    theirs = Condominium.objects.create(company=other_company, name="Alheio", cnpj=generate_cnpj(9))
     account = CurrentAccount(company=company, condominium=theirs)
 
     with pytest.raises(ValidationError) as error:

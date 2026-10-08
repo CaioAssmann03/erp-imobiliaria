@@ -7,7 +7,7 @@ from django.test import RequestFactory
 
 from apps.accounts.models import User
 from apps.condominiums.models import Condominium
-from apps.core.management.commands.seed_demo import _generate_cnpj
+from apps.core.seed.documents import generate_cnpj
 from apps.core.models import Company
 
 from ..admin import EntryTemplateInline
@@ -31,7 +31,7 @@ def test_admins_are_company_scoped(
     staff: User, cost_center: CostCenter, other_company: Company
 ) -> None:
     their_condominium = Condominium.objects.create(
-        company=other_company, name="Alheio", cnpj=_generate_cnpj(7)
+        company=other_company, name="Alheio", cnpj=generate_cnpj(7)
     )
     their_cost_center = CostCenter.objects.create(condominium=their_condominium, name="Alheio")
     _ = EntryTemplate.objects.create(cost_center=their_cost_center, name="Alheio")

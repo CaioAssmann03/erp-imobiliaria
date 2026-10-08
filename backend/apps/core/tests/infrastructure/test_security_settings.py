@@ -10,7 +10,7 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 
-BACKEND = Path(__file__).resolve().parents[3]
+BACKEND = Path(__file__).resolve().parents[4]
 
 
 def setting(name: str, **env: str) -> str:

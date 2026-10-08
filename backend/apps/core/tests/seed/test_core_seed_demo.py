@@ -14,7 +14,7 @@ from apps.condominiums.models import (
     Unit,
     UnitPerson,
 )
-from apps.core.management.commands.seed_demo import _create_validated
+from apps.core.seed.validated import create_validated
 from apps.core.models import Company
 from apps.finance.models import (
     AccountPayable,
@@ -123,7 +123,7 @@ def test_seed_helper_rejects_a_record_that_breaks_a_rule(company: Company) -> No
     )
 
     with pytest.raises(ValidationError):
-        _ = _create_validated(
+        _ = create_validated(
             Unit, condominium=condominium, name="101", ideal_fraction=Decimal(2)
         )
 
