@@ -6,4 +6,3 @@ from .block import BlockError as BlockError
 from .condominium import CondominiumError as CondominiumError
 from .unit import UnitError as UnitError
 from .unit_person import UnitPersonError as UnitPersonError
-from .validators import CondominiumsValidatorError as CondominiumsValidatorError
