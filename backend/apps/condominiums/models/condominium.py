@@ -20,7 +20,6 @@ if TYPE_CHECKING:
     from .unit import Unit
 
 
-
 @final
 class Condominium(BaseModel):
     objects = CondominiumQuerySet.as_manager()
@@ -72,13 +71,16 @@ class Condominium(BaseModel):
     @override
     def clean(self) -> None:
         advisor = self.advisor if self.advisor_id is not None else None
-        if advisor is not None and self.company_id is not None:
-            if advisor.company_id != self.company_id:
-                raise ValidationError(
-                    {
-                        "advisor": CondominiumError.ADVISOR_OTHER_COMPANY.to_validation_error()
-                    }
-                )
+        if (
+            advisor is not None
+            and self.company_id is not None
+            and advisor.company_id != self.company_id
+        ):
+            raise ValidationError(
+                {
+                    "advisor": CondominiumError.ADVISOR_OTHER_COMPANY.to_validation_error()
+                }
+            )
 
     @override
     def __str__(self) -> str:

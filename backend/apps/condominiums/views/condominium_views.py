@@ -3,7 +3,6 @@ from rest_framework import viewsets
 from typing_extensions import final
 
 from apps.core.filters import QuerySearchFilter
-
 from apps.core.scoping import CompanyScopedViewSetMixin
 
 from ..filters import CondominiumFilter

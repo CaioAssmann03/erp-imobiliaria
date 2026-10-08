@@ -12,14 +12,6 @@ from .user_manager import UserManager
 
 @final
 class User(AbstractUser):
-    """Credencial de acesso ao sistema (login e permissões).
-
-    Por enquanto só administradores entram; o `Person` continua sendo a entidade de negócio.
-    Quando pessoas passarem a logar, o vínculo entra em `persons.Person`, e não aqui:
-    `user = OneToOneField(settings.AUTH_USER_MODEL, null=True, blank=True,
-    on_delete=SET_NULL, related_name="person")`. Assim o `accounts` não depende do domínio.
-    """
-
     company_lookup = "company"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
