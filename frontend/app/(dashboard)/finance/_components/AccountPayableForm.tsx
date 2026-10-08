@@ -19,6 +19,7 @@ import {
 } from "@/lib/schemas/account-payable";
 
 import { AccountPayableSummary } from "./AccountPayableSummary";
+import { PaymentReceiptsSection } from "./PaymentReceiptsSection";
 import { AmountsSection } from "./account-payable-form/AmountsSection";
 import { HolderSection } from "./account-payable-form/HolderSection";
 import { ACCOUNTS_PAYABLE_URL, useAccountPayableSubmit } from "./account-payable-form/use-account-payable-submit";
@@ -43,7 +44,14 @@ export function AccountPayableForm({ accountId }: { accountId?: string }) {
   }, [account, reset]);
 
   if (isEdit && isLoading) return <FormSkeleton sections={2} />;
-  if (account && account.status !== "open") return <AccountPayableSummary account={account} />;
+  if (account && account.status !== "open") {
+    return (
+      <div className="flex flex-col gap-4">
+        <AccountPayableSummary account={account} />
+        {account.status === "paid" && <PaymentReceiptsSection accountId={account.id} />}
+      </div>
+    );
+  }
 
   return (
     <FormProvider {...methods}>

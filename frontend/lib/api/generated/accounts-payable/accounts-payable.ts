@@ -27,9 +27,11 @@ import type {
 import type {
   AccountPayable,
   AccountsPayableListParams,
+  CreatePaymentReceipt,
   ErrorResponse,
   PaginatedAccountPayableList,
   PatchedAccountPayable,
+  PaymentReceiptUpload,
   SettleAccountPayable
 } from '../models';
 
@@ -588,6 +590,71 @@ const {mutation: mutationOptions} = options ?
         TContext
       > => {
       return useMutation(getAccountsPayableCancelMutationOptions(options), queryClient);
+    }
+    /**
+ * Register a receipt file of a paid account and answer the signed URL to upload it to.
+ */
+export const accountsPayableReceiptsCreate = (
+    id: string,
+    createPaymentReceipt: CreatePaymentReceipt,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<PaymentReceiptUpload>(
+      {url: `/api/accounts-payable/${id}/receipts/`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createPaymentReceipt, signal
+    },
+      );
+    }
+
+
+
+
+export const getAccountsPayableReceiptsCreateMutationKey = () => ['accountsPayableReceiptsCreate'] as const;
+
+export const getAccountsPayableReceiptsCreateMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof accountsPayableReceiptsCreate>>, TError,AccountsPayableReceiptsCreateMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof accountsPayableReceiptsCreate>>, TError,AccountsPayableReceiptsCreateMutationVariables, TContext> => {
+
+const mutationKey = getAccountsPayableReceiptsCreateMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof accountsPayableReceiptsCreate>>, AccountsPayableReceiptsCreateMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  accountsPayableReceiptsCreate(id,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AccountsPayableReceiptsCreateMutationResult = NonNullable<Awaited<ReturnType<typeof accountsPayableReceiptsCreate>>>
+    export type AccountsPayableReceiptsCreateMutationBody = CreatePaymentReceipt
+    export type AccountsPayableReceiptsCreateMutationError = ErrorResponse
+    export type AccountsPayableReceiptsCreateMutationVariables = {id: string;data: CreatePaymentReceipt}
+
+    export const useAccountsPayableReceiptsCreate = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof accountsPayableReceiptsCreate>>, TError,AccountsPayableReceiptsCreateMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof accountsPayableReceiptsCreate>>,
+        TError,
+        AccountsPayableReceiptsCreateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAccountsPayableReceiptsCreateMutationOptions(options), queryClient);
     }
     /**
  * Pay ("baixa") an open account.

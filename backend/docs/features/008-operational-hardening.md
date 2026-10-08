@@ -56,11 +56,11 @@ No models or migrations.
 ## S — Structure
 | File | Change |
 |---|---|
-| `apps/core/middleware.py` | new: `HealthCheckMiddleware` |
+| `apps/core/api/middleware.py` | new: `HealthCheckMiddleware` |
 | `config/settings.py` | middleware first in the list; `SECURE_SSL_REDIRECT`, `SECURE_HSTS_*`, `ADMIN_URL` parsing and validation |
 | `config/urls.py` | `path(settings.ADMIN_URL, admin.site.urls)` |
 | `apps/core/checks.py`, `apps/core/apps.py` | production warning for the default admin path (registered in `ready()`) |
-| `apps/core/tests/test_health.py`, `apps/core/tests/test_security_settings.py`, `apps/core/tests/test_admin_url.py` | tests (the settings ones follow the subprocess pattern of `test_core_settings.py`) |
+| `apps/core/tests/infrastructure/test_health.py`, `apps/core/tests/infrastructure/test_security_settings.py`, `apps/core/tests/infrastructure/test_admin_url.py` | tests (the settings ones follow the subprocess pattern of `test_core_settings.py`) |
 | `.env.example`, `docker-compose.yml`, the host's deploy file (part 01) | variables and the health check path |
 | `docs/architecture/operations.md`, `overview.md`, `quality.md`, `known-gaps.md` | docs and the checklist |
 Endpoint:
@@ -77,7 +77,7 @@ Depends on phase 3a part 01 (hosting variables) and part 08 (spec 007 adds `INTE
 5. When the backend host is chosen: run the checklist (R8), then delete gaps #18 and the admin-path half of #20, trim #15.
 
 ## N — Norms
-`architecture/quality.md` (secrets and config from env, no personal data in logs), `architecture/operations.md` (runbook), `conventions/naming.md`. Settings tests use the subprocess pattern already in `apps/core/tests/test_core_settings.py`.
+`architecture/quality.md` (secrets and config from env, no personal data in logs), `architecture/operations.md` (runbook), `conventions/naming.md`. Settings tests use the subprocess pattern already in `apps/core/tests/infrastructure/test_core_settings.py`.
 
 ## S — Safeguards
 - **Information exposure:** the health answer reveals nothing but up or down; errors stay in the logs.
@@ -92,12 +92,12 @@ Depends on phase 3a part 01 (hosting variables) and part 08 (spec 007 adds `INTE
 Every criterion maps to at least one test. A gap is written down, never left out.
 | Criterion | Test |
 |---|---|
-| R1 | `apps/core/tests/test_health.py::test_health_is_ok_when_the_database_answers`, `::test_health_is_503_when_the_database_fails`, `::test_health_body_has_only_status`, `::test_health_handles_get_and_head_only`, `::test_health_needs_no_authentication` |
-| R2 | `apps/core/tests/test_health.py::test_health_ignores_allowed_hosts`, `::test_health_answers_over_plain_http_with_ssl_redirect_on` |
-| R3 | `apps/core/tests/test_security_settings.py::test_http_request_is_redirected_when_ssl_redirect_is_on`, `::test_https_request_is_not_redirected`, `::test_ssl_redirect_defaults_on_in_production_and_off_in_development`, `::test_ssl_redirect_can_be_turned_off_by_env` |
-| R4 | `apps/core/tests/test_security_settings.py::test_hsts_header_on_https_responses`, `::test_hsts_defaults_and_no_subdomains_or_preload`, `::test_hsts_can_be_raised_by_env`, `::test_no_hsts_in_development` |
-| R5 | `apps/core/tests/test_admin_url.py::test_admin_is_served_at_admin_url_by_default`, `::test_old_admin_path_is_404_after_change`, `::test_admin_url_is_normalized`, `::test_invalid_admin_url_stops_startup` (fresh interpreters) |
-| R6 | `apps/core/tests/test_admin_url.py::test_check_warns_in_production_with_the_default_path`, `::test_check_is_silent_with_a_custom_path_or_in_development` |
+| R1 | `apps/core/tests/infrastructure/test_health.py::test_health_is_ok_when_the_database_answers`, `::test_health_is_503_when_the_database_fails`, `::test_health_body_has_only_status`, `::test_health_handles_get_and_head_only`, `::test_health_needs_no_authentication` |
+| R2 | `apps/core/tests/infrastructure/test_health.py::test_health_ignores_allowed_hosts`, `::test_health_answers_over_plain_http_with_ssl_redirect_on` |
+| R3 | `apps/core/tests/infrastructure/test_security_settings.py::test_http_request_is_redirected_when_ssl_redirect_is_on`, `::test_https_request_is_not_redirected`, `::test_ssl_redirect_defaults_on_in_production_and_off_in_development`, `::test_ssl_redirect_can_be_turned_off_by_env` |
+| R4 | `apps/core/tests/infrastructure/test_security_settings.py::test_hsts_header_on_https_responses`, `::test_hsts_defaults_and_no_subdomains_or_preload`, `::test_hsts_can_be_raised_by_env`, `::test_no_hsts_in_development` |
+| R5 | `apps/core/tests/infrastructure/test_admin_url.py::test_admin_is_served_at_admin_url_by_default`, `::test_old_admin_path_is_404_after_change`, `::test_admin_url_is_normalized`, `::test_invalid_admin_url_stops_startup` (fresh interpreters) |
+| R6 | `apps/core/tests/infrastructure/test_admin_url.py::test_check_warns_in_production_with_the_default_path`, `::test_check_is_silent_with_a_custom_path_or_in_development` |
 | R7 | gap: documentation has no test; `architecture/operations.md` (variables, health path, checklist), `overview.md`, `quality.md` and `.env.example` updated; `render.yaml` now points the health check at `/api/health/`; checked by review and `python backend/docs/tools/check_docs.py` |
 | R8 | **pending**: depends on the chosen backend host (phase 3a part 01); run the checklist in `architecture/operations.md` on the real environment and tick it |
 | R9 | gap: documentation has no test; gaps #18 and #20 are deleted and #15 keeps only the structured logs; checked by review |

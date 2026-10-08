@@ -13,6 +13,7 @@ from .models import (
     CurrentAccountEntry,
     EntryBatch,
     EntryTemplate,
+    PaymentReceipt,
     Supplier,
 )
 
@@ -104,4 +105,22 @@ class CurrentAccountEntryAdmin(CompanyScopedAdminMixin, ModelAdmin):
         return False
 
     def has_delete_permission(self, request: HttpRequest, obj: CurrentAccountEntry | None = None) -> bool:
+        return False
+
+
+@final
+@admin.register(PaymentReceipt)
+class PaymentReceiptAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    """Read-only: a receipt is sent and deleted through the API, which also moves the file in the bucket."""
+
+    list_display = ("original_name", "account_payable", "content_type", "size_bytes", "confirmed_at")
+    search_fields = ("original_name", "account_payable__description")
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj: PaymentReceipt | None = None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: PaymentReceipt | None = None) -> bool:
         return False

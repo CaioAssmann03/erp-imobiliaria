@@ -156,7 +156,7 @@ class TestCondominiumForm:
         response = client.post(reverse("condominium-list"), payload, format="json")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert error_codes(response, "billing_rules.due_day") == ["due_day.out_of_range"]
+        assert error_codes(response, "billing_rules.due_day") == ["billing_rules.due_day.out_of_range"]
 
 
 class TestUnitForm:

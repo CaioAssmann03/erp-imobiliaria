@@ -51,4 +51,4 @@ One row per spec; update it in the same change that creates or closes the spec.
 |---|---|---|---|---|
 | [008](008-operational-hardening.md) | Operational hardening: health, HTTPS/HSTS, admin path | full | in-progress | phase 3a part 09 |
 
-The finished specs (001–007 and 009–017) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.
+The finished specs (001–007 and 009–018) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.

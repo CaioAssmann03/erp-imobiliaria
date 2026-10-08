@@ -12,11 +12,6 @@ if TYPE_CHECKING:
 
 
 def default_company() -> Company:
-    """The company a new user belongs to when none is given (spec 004).
-
-    `DJANGO_SUPERUSER_COMPANY` (an id or a CNPJ) wins; otherwise the only existing company
-    (the one migration `core.0002` seeds). With several companies it must be given.
-    """
     chosen = os.environ.get("DJANGO_SUPERUSER_COMPANY", "").strip()
     if chosen:
         try:
@@ -34,8 +29,6 @@ def default_company() -> Company:
 
 
 class UserManager(DjangoUserManager["User"]):
-    """`create_user` and `create_superuser` fill `company` with `default_company()` when absent."""
-
     @staticmethod
     def _with_company(extra_fields: dict[str, Any]) -> dict[str, Any]:
         if "company" in extra_fields or "company_id" in extra_fields:
@@ -50,7 +43,9 @@ class UserManager(DjangoUserManager["User"]):
         password: str | None = None,
         **extra_fields: Any,
     ) -> "User":
-        return super().create_user(username, email, password, **self._with_company(extra_fields))
+        return super().create_user(
+            username, email, password, **self._with_company(extra_fields)
+        )
 
     @override
     def create_superuser(
@@ -60,4 +55,6 @@ class UserManager(DjangoUserManager["User"]):
         password: str | None = None,
         **extra_fields: Any,
     ) -> "User":
-        return super().create_superuser(username, email, password, **self._with_company(extra_fields))
+        return super().create_superuser(
+            username, email, password, **self._with_company(extra_fields)
+        )

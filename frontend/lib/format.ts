@@ -45,3 +45,16 @@ export const monthBounds = (iso: string, monthOffset = 0) => {
 /** Os últimos `count` meses (o atual primeiro) como primeiro dia do mês ISO, para o filtro de competência. */
 export const recentMonths = (iso: string, count: number) =>
   Array.from({ length: count }, (_, offset) => monthBounds(iso, -offset).from);
+
+/** Tamanho de arquivo legível: 2048 -> "2,0 KB", 3_145_728 -> "3,0 MB". */
+export function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ["KB", "MB", "GB"];
+  let value = bytes / 1024;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit += 1;
+  }
+  return `${value.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${units[unit]}`;
+}

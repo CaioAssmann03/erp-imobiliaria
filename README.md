@@ -13,7 +13,7 @@ Documentação completa:
 - **Backend:** Django + Django REST Framework + PostgreSQL
 - **Frontend:** Next.js + TypeScript + Tailwind + TanStack Query
 - **Jobs:** Celery + Redis
-- **Deploy:** Render
+- **Deploy:** VPS com Docker Compose e HTTPS pelo Caddy (ver *Deploy na VPS*); `render.yaml` é o plano antigo
 
 ## Rodando localmente
 
@@ -30,7 +30,16 @@ docker-compose exec backend python manage.py createsuperuser
 - Admin: http://localhost:8000/admin/
 - Frontend: http://localhost:3000 (login com o usuário criado acima)
 
-## Deploy no Render (repositório privado)
+## Deploy na VPS
+
+Produção roda numa VPS com Docker Compose: Postgres, Redis, backend (gunicorn), Celery e frontend. O
+HTTPS vem do Caddy que já existe na VPS (um bloco no `Caddyfile` aponta o domínio para o frontend), e o
+nome provisório é `erp.177-7-63-175.sslip.io`. Os comprovantes de pagamento ficam num bucket Cloudflare R2
+(variáveis `AWS_*`; sem elas só a parte de comprovantes fica indisponível). O passo a passo, as variáveis e o
+que fazer quando algo falha estão em [`backend/docs/architecture/operations.md`](backend/docs/architecture/operations.md)
+(seção *Production on the VPS*). O compose de produção e o `deploy.sh` ainda estão só na VPS.
+
+## Deploy no Render (plano antigo, repositório privado)
 
 O Render não aceita upload de arquivos: o deploy vem de um repositório Git (privado funciona: ao
 conectar o GitHub, dê acesso só a este repositório) ou de uma imagem Docker.

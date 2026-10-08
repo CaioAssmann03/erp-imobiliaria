@@ -25,11 +25,11 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "account_payable.payment.required_when_paid": "Uma conta paga precisa de data, valor e forma de pagamento.",
   "account_payable.status.not_open": "Só uma conta a pagar em aberto pode ser alterada, baixada ou cancelada.",
   "account_payable.supplier.other_company": "O fornecedor pertence a outra empresa.",
-  "amount.not_positive": "O valor deve ser maior que zero.",
   "administration_contract.fee_amount.required_for_fixed": "Informe o valor da taxa fixa.",
   "administration_contract.fee_floor.exceeds_ceiling": "O piso não pode ser maior que o teto.",
   "administration_contract.variable_fee.requires_percentage_and_basis":
     "A taxa variável exige percentual e base de cálculo.",
+  "amount.not_positive": "O valor deve ser maior que zero.",
   authentication_failed: "Falha na autenticação.",
   bad_authorization_header: "Cabeçalho de autorização inválido.",
   bad_gateway: "Servidor indisponível no momento. Tente novamente em instantes.",
@@ -85,18 +85,16 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "current_account_entry.update_not_allowed":
     "Um lançamento nunca é alterado: estorne-o com um lançamento oposto.",
   does_not_exist: "Seleção inválida.",
-  "due_day.out_of_range": "O dia de vencimento deve ficar entre 1 e 28.",
   empty: "Campo obrigatório.",
   "entry_batch.cash_number.not_allowed": "Um lote de banco não tem número de caixa.",
   "entry_batch.cash_number.required": "Informe o número do caixa para um lote de caixa ou caixa extra.",
   "entry_batch.deletion.has_entries": "Um lote com lançamentos não pode ser excluído.",
   "entry_template.admin_fee_incidence_percentage.out_of_range":
     "O percentual deve ficar entre 0 e 100.",
-  "entry_template.name.duplicate_in_cost_center":
-    "Já existe um modelo de lançamento com este nome neste centro de custo.",
   "entry_template.cost_center.immutable":
     "O centro de custo de um modelo de lançamento não pode ser alterado.",
-  "ideal_fraction.out_of_range": "A fração ideal deve ser maior que 0 e no máximo 1.",
+  "entry_template.name.duplicate_in_cost_center":
+    "Já existe um modelo de lançamento com este nome neste centro de custo.",
   incorrect_type: "Valor em formato inválido.",
   invalid: "Valor inválido.",
   invalid_choice: "Opção inválida.",
@@ -114,7 +112,15 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   not_authenticated: "Sessão expirada. Entre novamente.",
   not_found: "Registro não encontrado.",
   null: "Campo obrigatório.",
+  "object_storage.unavailable": "O armazenamento de arquivos está indisponível. Tente novamente em instantes.",
   parse_error: "Requisição inválida.",
+  "payment_receipt.account_payable.not_paid": "Só uma conta paga pode ter comprovante.",
+  "payment_receipt.already_confirmed": "O comprovante já foi confirmado.",
+  "payment_receipt.content_type.not_allowed": "O comprovante deve ser um arquivo PDF, JPEG ou PNG.",
+  "payment_receipt.file.missing_in_storage": "O arquivo não foi enviado. Tente anexar de novo.",
+  "payment_receipt.file.size_mismatch": "O arquivo enviado não tem o tamanho informado. Tente anexar de novo.",
+  "payment_receipt.size_bytes.not_positive": "O arquivo não pode estar vazio.",
+  "payment_receipt.size_bytes.too_large": "O arquivo é maior que o limite de 10 MB.",
   "people_individual.company.mismatch": "O documento pertence a outra empresa.",
   "people_individual.cpf.duplicate_in_company": "Já existe uma pessoa com este CPF nesta empresa.",
   "people_individual.rg.duplicate_in_company": "Já existe uma pessoa com este RG nesta empresa.",
@@ -147,7 +153,6 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   unsupported_media_type: "Formato de envio não suportado.",
   user_inactive: "Usuário inativo.",
   user_not_found: "Usuário não encontrado.",
-  "value.negative": "O valor não pode ser negativo.",
 };
 
 /** A mensagem em português do código; sem tradução (backend mais novo), usa a mensagem da API. */

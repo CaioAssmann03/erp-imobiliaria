@@ -6,13 +6,19 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from typing_extensions import final
 
-from apps.core.filters import QuerySearchFilter
+from apps.core.api.filters import QuerySearchFilter
 from apps.core.scoping import CompanyScopedViewSetMixin
 
 from ..filters import AccountPayableFilter
 from ..models import AccountPayable
-from ..serializers import AccountPayableSerializer, SettleAccountPayableSerializer
+from ..serializers import (
+    AccountPayableSerializer,
+    CreatePaymentReceiptSerializer,
+    PaymentReceiptUploadSerializer,
+    SettleAccountPayableSerializer,
+)
 from ..services.cancel_account_payable import cancel_account_payable
+from ..services.create_payment_receipt import ReceiptFile, create_payment_receipt
 from ..services.settle_account_payable import (
     AccountPayablePayment,
     settle_account_payable,
@@ -48,3 +54,25 @@ class AccountPayableViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Acc
         account = self.get_object()
         cancel_account_payable(account)
         return Response(self.get_serializer(account).data)
+
+    @extend_schema(
+        request=CreatePaymentReceiptSerializer,
+        responses={201: PaymentReceiptUploadSerializer},
+        operation_id="accounts_payable_receipts_create",
+    )
+    @action(detail=True, methods=["post"], url_path="receipts", url_name="receipts")
+    def receipts(self, request: Request, pk: str | None = None) -> Response:
+        """Register a receipt file of a paid account and answer the signed URL to upload it to."""
+        account = self.get_object()
+        file = CreatePaymentReceiptSerializer(data=request.data)
+        file.is_valid(raise_exception=True)
+        upload = create_payment_receipt(account, ReceiptFile(**file.validated_data), request.user)  # type: ignore[arg-type]
+        return Response(
+            {
+                "id": upload.receipt.pk,
+                "upload_url": upload.upload_url,
+                "upload_headers": {"Content-Type": upload.receipt.content_type},
+                "expires_in": upload.expires_in,
+            },
+            status=201,
+        )

@@ -14,7 +14,7 @@ errors carry codes (one client regeneration), auth is hardened and the operation
 ## Parts
 | # | Part | Status | Apps |
 |---|---|---|---|
-| 01 | [Deploy docs for the new hosting](01-deploy-docs-hosting.md) | todo | - |
+| 01 | [Deploy docs for the new hosting](01-deploy-docs-hosting.md) | in-progress | - |
 | 02 | [Rename the stub apps to English](02-rename-apps.md) | done | finance, billing, rentals, sales |
 | 03 | [Clean mypy and enforce it in CI](03-mypy-in-ci.md) | done | all |
 | 04 | [Validated and smaller seed_demo](04-seed-demo-validation.md) | done | core |

@@ -1,5 +1,5 @@
 ---
-summary: The finished feature specs (001–007, 009–017) condensed: what each did, the decisions that still explain the code, and its numbered requirements.
+summary: The finished feature specs (001–007, 009–018) condensed: what each did, the decisions that still explain the code, and its numbered requirements.
 read-when: you wonder why something was built a certain way, or a test cites "spec NNN, Rn" and you need what Rn means
 skip-if: you are specifying a new feature → features/README.md; you need the spec still in progress → features/008-operational-hardening.md; you need what an app does today → apps/<app>.md
 ---
@@ -121,3 +121,13 @@ Closes the gaps between the Sprint 3 cards and the first ledger: the statement s
 - Left out, with the reason: `serie_doc`/`registro_doc` and `documento_cobranca_item` (they need the billing entities of phase 4); the payment receipt (part 06, blocked: it needs the storage and the hosting).
 - Decisions (agent, to be confirmed by the user): the balance by cost center covers the whole ledger (it does not follow the reference-month filter); the reference month is picked from the last 12 months.
 - R1 balance of the account and of each cost center, summed from the entries · R2 the endpoint is company-scoped and an account without entries answers zeros · R3 an entry may name a unit of its condominium, another condominium's unit is refused with its code · R4 the statement carries the unit and the batch and filters by unit and competence month · R5 the screen shows the balance by cost center, the reference-month filter and the new columns
+
+## 018 — Payment receipts · phase 3 part 06
+A paid account payable carries the proof of payment (PDF, JPEG or PNG, up to 10 MB), several per account, kept in a private Cloudflare R2 bucket and moved by signed URLs: the file never crosses Next or Django.
+- `PaymentReceipt` (audited; `file_key` built by the service from the company, the account and a random id, never from the file name; `confirmed_at` empty until the file is checked in the bucket; only confirmed receipts are listed). `PaymentReceiptRules` requires a paid account; type and size are field validators.
+- Three steps because R2 has no POST policy and a signed `PUT` cannot cap the size: `POST /accounts-payable/{id}/receipts/` (registers it and answers the signed `PUT` URL) → the browser uploads → `POST /payment-receipts/{id}/confirm/` reads the real size with `HEAD` and deletes the object and the row on a missing file or a size mismatch. Download is a short-lived signed `GET` URL that names the file; delete removes the row and, after commit, the object (a failed object delete only leaves an orphan, logged).
+- `apps/core/storage/object_storage.py` is the only module that imports `boto3` (no `django-storages`); without the `AWS_*` settings the endpoints answer a coded 503 (`object_storage.unavailable`) and nothing else is affected. Tests replace `get_object_storage` with an in-memory fake.
+- Frontend: the "Comprovantes" panel on the paid account screen (list, attach, download, delete). The browser `PUT` to the signed URL is the one call outside the generated client (the URL is signed, so it must not carry the session token); the Next proxy keeps carrying JSON only.
+- Decisions (user, 2026-10-08): Cloudflare R2; several receipts per account; PDF/JPEG/PNG up to 10 MB; upload by signed URL from the browser; any user of the company may delete (the object too); only `boto3`. Left out, with the reason: a cleanup task for orphans (known gap 31).
+- R1 attach to a paid account only · R2 type and size refused before any URL, a wrong-sized upload is rejected and deleted · R3 several per account, only confirmed ones listed · R4 download by signed URL with the original name · R5 delete removes row and object · R6 other company's data is 404 · R7 503 without the bucket settings · R8 the screen panel
+Checked: `pytest apps -q` 677 passed; frontend `tsc`, `eslint` and `npm run build` clean; one real upload, download and delete done on the VPS on 2026-10-08 (bucket, token and CORS set up by the user).

@@ -47,7 +47,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     # First: the host's health probe is answered before the HTTPS redirect and the host check.
-    "apps.core.middleware.HealthCheckMiddleware",
+    "apps.core.api.middleware.HealthCheckMiddleware",
     "django.middleware.security.SecurityMiddleware",
     # Serve os arquivos estáticos (admin) em produção, sem nginx/CDN.
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -135,12 +135,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "EXCEPTION_HANDLER": "apps.core.exception_handler.api_exception_handler",
+    "EXCEPTION_HANDLER": "apps.core.api.exception_handler.api_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "apps.accounts.authentication.AuditedJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_PAGINATION_CLASS": "apps.core.pagination.StandardPagination",
+    "DEFAULT_PAGINATION_CLASS": "apps.core.api.pagination.StandardPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_THROTTLE_RATES": {
         "auth_login": "5/min",
@@ -165,7 +165,7 @@ SPECTACULAR_SETTINGS = {
     },
     "POSTPROCESSING_HOOKS": [
         "drf_spectacular.hooks.postprocess_schema_enums",
-        "apps.core.schema.add_error_contract",
+        "apps.core.api.schema.add_error_contract",
     ],
 }
 
@@ -226,6 +226,14 @@ CACHES = {
 INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY", "")
 if not INTERNAL_API_KEY and not DEBUG:
     raise ImproperlyConfigured("INTERNAL_API_KEY must be set when DEBUG is false.")
+
+# Bucket of the payment receipts (spec 018): Cloudflare R2, S3-compatible. Credentials come only from the
+# environment; with any of them empty the receipt endpoints answer 503 and nothing else is affected.
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID", "")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY", "")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "")
+AWS_S3_ENDPOINT_URL = os.environ.get("AWS_S3_ENDPOINT_URL", "")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "auto")
 
 CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL", "redis://redis:6379/0")

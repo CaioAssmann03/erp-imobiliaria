@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.condominiums.models import Condominium
-from apps.core.management.commands.seed_demo import _generate_cnpj
+from apps.core.seed.documents import generate_cnpj
 from apps.core.models import Company
 
 from ..models import BankAccount
@@ -176,7 +176,7 @@ def test_condominium_of_another_company_is_rejected(
     company: Company, other_company: Company
 ) -> None:
     theirs = Condominium.objects.create(
-        company=other_company, name="Alheio", cnpj=_generate_cnpj(9)
+        company=other_company, name="Alheio", cnpj=generate_cnpj(9)
     )
     account = BankAccount(
         company=company, condominium=theirs, bank_code="033", branch="1", account_number="2"
@@ -199,7 +199,7 @@ def test_condominium_account_of_the_same_company_is_accepted(
 def test_foreign_condominium_is_does_not_exist_in_the_api(
     api_client: APIClient, other_company: Company
 ) -> None:
-    theirs = Condominium.objects.create(company=other_company, name="Alheio", cnpj=_generate_cnpj(9))
+    theirs = Condominium.objects.create(company=other_company, name="Alheio", cnpj=generate_cnpj(9))
 
     response = api_client.post(
         reverse(LIST), {**PAYLOAD, "condominium": str(theirs.pk)}, format="json"
