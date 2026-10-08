@@ -72,7 +72,7 @@ def test_comparison_is_constant_time(settings: Any, monkeypatch: pytest.MonkeyPa
         calls.append((first, second))
         return real_compare(first, second)
 
-    monkeypatch.setattr("apps.core.throttling.hmac.compare_digest", spy)
+    monkeypatch.setattr("apps.core.api.throttling.hmac.compare_digest", spy)
 
     _ = login(APIClient(), **as_proxy("10.0.0.1"))
 

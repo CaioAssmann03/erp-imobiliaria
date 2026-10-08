@@ -10,6 +10,7 @@ export * from './current-accounts/current-accounts';
 export * from './dashboard/dashboard';
 export * from './entry-batches/entry-batches';
 export * from './entry-templates/entry-templates';
+export * from './payment-receipts/payment-receipts';
 export * from './persons/persons';
 export * from './search/search';
 export * from './suppliers/suppliers';

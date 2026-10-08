@@ -67,3 +67,17 @@ export function applyServerErrors<T extends FieldValues>(
   if (status >= 500) return "Erro no servidor. Tente novamente em instantes.";
   return "Não foi possível salvar. Tente novamente.";
 }
+
+/**
+ * Mensagem em português de um erro de chamada que não é de formulário (anexar, baixar, excluir):
+ * o primeiro erro da API traduzido pelo código; sem corpo no formato da API, uma mensagem pelo status.
+ */
+export function apiErrorMessage(error: unknown, fallback: string): string {
+  if (!isAxiosError(error) || !error.response) return "Sem conexão com o servidor. Tente novamente.";
+  const { status, data } = error.response;
+  const first = readErrors(data)?.[0];
+  if (first) return errorMessage(first.code, first.message);
+  if (status === 403) return "Você não tem permissão para esta ação.";
+  if (status >= 500) return "Erro no servidor. Tente novamente em instantes.";
+  return fallback;
+}

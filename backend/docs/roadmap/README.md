@@ -26,7 +26,7 @@ A phase is `done` only when every part is `done` or `moved`.
 | 7 | [Client portal](phase-7-client-portal/README.md) | todo | 0/3 | Sprint 7 |
 | 8 | [Rentals](phase-8-rentals/README.md) | todo | 0/5 | Sprint 8 |
 
-Current position: phases 1 and 2 are done. **Phase 3a** (prerequisites from the known-gaps review) is done except two items that wait for the backend hosting decision: part 01 (deploy docs) and the host checklist of part 09. **Phase 3** is in progress: parts 01 to 05 and 07 are done (backend and screens); only part 06 (payment receipts) remains, **blocked** until the hosting and the bucket are decided.
+Current position: phases 1 and 2 are done. **Phase 3a** (prerequisites from the known-gaps review) is done except two items: part 01 (hosting decided on 2026-10-08: the VPS; left to retire `render.yaml` and version the VPS compose) and part 09 (host checklist run; left a non-obvious `ADMIN_URL` and a compose health check). **Phase 3** is in progress: parts 01 to 05 and 07 are done (backend and screens); only part 06 (payment receipts) remains, **in progress**: hosting (the VPS) and bucket (Cloudflare R2) are decided and spec 018 is ready.
 
 ## How to use
 1. Pick the next `todo` part in the lowest unfinished phase (respect **Depends on**).

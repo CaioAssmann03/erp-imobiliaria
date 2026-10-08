@@ -25,4 +25,16 @@ from .entry_batch_serializers import EntryBatchSerializer as EntryBatchSerialize
 from .entry_template_serializers import (
     EntryTemplateSerializer as EntryTemplateSerializer,
 )
+from .payment_receipt_serializers import (
+    CreatePaymentReceiptSerializer as CreatePaymentReceiptSerializer,
+)
+from .payment_receipt_serializers import (
+    PaymentReceiptDownloadSerializer as PaymentReceiptDownloadSerializer,
+)
+from .payment_receipt_serializers import (
+    PaymentReceiptSerializer as PaymentReceiptSerializer,
+)
+from .payment_receipt_serializers import (
+    PaymentReceiptUploadSerializer as PaymentReceiptUploadSerializer,
+)
 from .supplier_serializers import SupplierSerializer as SupplierSerializer

@@ -44,8 +44,12 @@ Search/filters/page are query params (`hooks/use-list-params.ts`); `placeholderD
 | unit link | the unit record, dashboard |
 | account payable (create/edit/cancel) | list, record, dashboard |
 | settle an account payable | list, record, dashboard, current accounts, entries |
+| attach or delete a payment receipt | the receipts list of that account (`getPaymentReceiptsListQueryKey({ account_payable })`) |
 | manual entries / reversal | entries, current accounts (and batches) |
 | person | list, record, dashboard |
+
+## Files (payment receipts)
+A file never goes through the Next proxy (it carries JSON only). The flow is: `useAccountsPayableReceiptsCreate` returns a signed URL, `uploadToBucket` (`lib/payment-receipts.ts`) `PUT`s the file straight to the bucket, `usePaymentReceiptsConfirm` makes the backend check it. That `PUT` is the one call outside the generated client on purpose: the URL is signed and must **not** carry the session token. A download asks for a fresh signed URL (`staleTime: 0`) and navigates to it. Errors of calls that are not forms use `apiErrorMessage` (`lib/form-errors.ts`).
 
 ## Do not
 Copy cache into `useState` (use form `reset`) · duplicate a query under another key · raise global `staleTime` to hide a problem ·

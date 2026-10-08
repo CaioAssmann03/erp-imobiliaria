@@ -21,7 +21,7 @@ def test_health_is_ok_when_the_database_answers() -> None:
 
 
 def test_health_is_503_when_the_database_fails() -> None:
-    with mock.patch("apps.core.middleware.connection") as broken_connection:
+    with mock.patch("apps.core.api.middleware.connection") as broken_connection:
         broken_connection.cursor.side_effect = OperationalError("database is down")
         response = Client().get(URL)
 
@@ -30,7 +30,7 @@ def test_health_is_503_when_the_database_fails() -> None:
 
 
 def test_health_body_has_only_status() -> None:
-    with mock.patch("apps.core.middleware.connection") as broken_connection:
+    with mock.patch("apps.core.api.middleware.connection") as broken_connection:
         broken_connection.cursor.side_effect = OperationalError("password authentication failed for user")
         response = Client().get(URL)
 

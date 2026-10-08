@@ -18,7 +18,7 @@ Accounts payable, current account (ledger) and the most critical rule of the pro
 | 03 | [Accounts payable](03-accounts-payable.md) | done | finance |
 | 04 | [Current account, batches and ledger entries](04-current-account-ledger.md) | done | finance |
 | 05 | [Automatic ledger posting rule](05-automatic-ledger-posting.md) | done | finance |
-| 06 | [Payment receipts](06-payment-receipts.md) | blocked | finance, frontend |
+| 06 | [Payment receipts](06-payment-receipts.md) | in-progress | finance, frontend |
 | 07 | [Accounts payable screens](07-accounts-payable-screens.md) | done | frontend |
 
 ## Notes

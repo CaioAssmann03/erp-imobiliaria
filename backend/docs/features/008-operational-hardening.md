@@ -56,7 +56,7 @@ No models or migrations.
 ## S — Structure
 | File | Change |
 |---|---|
-| `apps/core/middleware.py` | new: `HealthCheckMiddleware` |
+| `apps/core/api/middleware.py` | new: `HealthCheckMiddleware` |
 | `config/settings.py` | middleware first in the list; `SECURE_SSL_REDIRECT`, `SECURE_HSTS_*`, `ADMIN_URL` parsing and validation |
 | `config/urls.py` | `path(settings.ADMIN_URL, admin.site.urls)` |
 | `apps/core/checks.py`, `apps/core/apps.py` | production warning for the default admin path (registered in `ready()`) |

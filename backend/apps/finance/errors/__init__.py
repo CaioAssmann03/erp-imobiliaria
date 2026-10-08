@@ -5,5 +5,6 @@ from .current_account import CurrentAccountError as CurrentAccountError
 from .current_account_entry import CurrentAccountEntryError as CurrentAccountEntryError
 from .entry_batch import EntryBatchError as EntryBatchError
 from .entry_template import EntryTemplateError as EntryTemplateError
+from .payment_receipt import PaymentReceiptError as PaymentReceiptError
 from .supplier import SupplierError as SupplierError
 from .validators import FinanceValidatorError as FinanceValidatorError

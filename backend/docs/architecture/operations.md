@@ -29,10 +29,25 @@ After an API change: backend running → `cd frontend && npm run generate:api` (
 |---|---|---|
 | Local | compose | backend `runserver`; Postgres on 5432 |
 | CI | `.github/workflows/ci.yml`, Postgres + Redis services | `makemigrations --check`, `migrate`, `check`, `pytest apps` |
-| Production | Render Blueprint `render.yaml`: Postgres, Redis, backend and frontend (Docker) | free plan: services sleep, Postgres expires after 30 days, no Celery workers |
+| Production | one VPS (Docker Compose), reached through the Caddy of a project that already runs there: see *Production on the VPS* | temporary name `erp.177-7-63-175.sslip.io` until the final domain exists. `render.yaml` (Render Blueprint) is no longer used |
 
 ## Deploy (backend)
-Docker image → `entrypoint.sh`: `migrate --noinput` → `collectstatic --noinput` → optional `createsuperuser --noinput` (idempotent) → `gunicorn` (`WEB_CONCURRENCY`, default 2; `PORT`). Health check `GET /api/health/` (200 if the app runs and the database answers, 503 otherwise; no auth, answered before the HTTPS redirect and the host check). **Migrations run on every container start.** Per-service env vars are in `render.yaml`; `ALLOWED_HOSTS` and `CORS_ALLOWED_ORIGINS` must match the real Render domains.
+Docker image → `entrypoint.sh`: `migrate --noinput` → `collectstatic --noinput` → optional `createsuperuser --noinput` (idempotent) → `gunicorn` (`WEB_CONCURRENCY`, default 2; `PORT`). Health check `GET /api/health/` (200 if the app runs and the database answers, 503 otherwise; no auth, answered before the HTTPS redirect and the host check). **Migrations run on every container start.** The environment of the production stack is described in *Production on the VPS*; `ALLOWED_HOSTS` and `CORS_ALLOWED_ORIGINS` must match the real domain.
+
+## Production on the VPS
+Decided on 2026-10-08 (it replaces the Supabase, Vercel and Render plans of phase 3a part 01). One Ubuntu VPS runs the ERP **next to** another, unrelated project (`/root/air-app-node`) without sharing anything except the Caddy that owns ports 80/443.
+
+| Piece | Where / how |
+|---|---|
+| Stack | `/root/erp-imobiliaria/docker-compose.yml`, Compose project `erp`: `db` (Postgres 16, volume `erp_postgres_data`), `redis`, `backend` (the `backend/Dockerfile` image: `entrypoint.sh` migrates, collects static, creates the admin, runs gunicorn), `celery_worker` and `celery_beat` (same image), `frontend` (the `production` stage of `frontend/Dockerfile`). Nothing but the frontend is reachable from outside; Postgres and Redis publish no port |
+| HTTPS | the other project's Caddy (`/root/air-app-node/Caddyfile`) has a block for the ERP name that proxies to `frontend:3000`; it issues and renews the Let's Encrypt certificate. The ERP frontend joins the Docker network `erp_edge`, which that Caddy also joins (`docker network create erp_edge`; declared in both compose files) |
+| Name | `erp.177-7-63-175.sslip.io` (sslip.io resolves any IP-in-the-name; free, real certificate). Swap it in the Caddyfile, `ALLOWED_HOSTS` and `CORS_ALLOWED_ORIGINS` when the final domain exists, then raise `SECURE_HSTS_SECONDS` |
+| Environment | `/root/erp-imobiliaria/.env` (mode 600, never in git): the variables of `architecture/overview.md`. Differences from local: `DEBUG=false`, `ALLOWED_HOSTS=<name>,backend`, `SECURE_SSL_REDIRECT=false` (TLS ends at Caddy; the Next server calls Django over plain HTTP on the private network), `API_INTERNAL_URL=http://backend:8000`, generated `SECRET_KEY`, `INTERNAL_API_KEY`, database password and first-admin password |
+| Code | `/root/erp-imobiliaria/app`: until the repository gives the VPS access, the code is sent with `git archive <branch> | ssh root@<vps> tar -x -C /root/erp-imobiliaria/app` and applied with `./deploy.sh`. `deploy.env` and the key `erp_deploy(.pub)` are ready for `./deploy.sh --pull` (a clone over SSH) once the public key is registered as a read-only *Deploy key* of the repository |
+| Deploy | `cd /root/erp-imobiliaria && ./deploy.sh` (creates `erp_edge` if missing, then `docker compose up -d --build`). Migrations run on container start |
+| Not in git yet | `docker-compose.yml`, `deploy.sh`, `deploy.env` live only on the VPS; the Caddy block is in the other project's repository. Version them (for example under `deploy/vps/`) before a second person deploys |
+
+Receipts (spec 018) live in a private **Cloudflare R2** bucket, not on the VPS: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_STORAGE_BUCKET_NAME` and `AWS_S3_ENDPOINT_URL` in `.env` (without them the receipt endpoints answer 503). The bucket needs a CORS rule that allows `PUT` and `GET` from the ERP origin with the `Content-Type` header, otherwise the browser upload is blocked.
 
 ## Production security
 | Variable | Default | Notes |
@@ -42,11 +57,12 @@ Docker image → `entrypoint.sh`: `migrate --noinput` → `collectstatic --noinp
 | `ADMIN_URL` | `admin/` | set a non-obvious path in production (obscurity only); a check (`core.W001`) warns while it is the default; an empty, absolute (`://`) or `..` value stops startup |
 | `INTERNAL_API_KEY` | none | mandatory when `DEBUG=false`; the same value on the backend and the Next server |
 
-**Checklist for a new host** (tick it on the real environment):
-- [ ] The platform terminates TLS and sends `X-Forwarded-Proto: https` (Django trusts it: `SECURE_PROXY_SSL_HEADER`).
-- [ ] The platform's health check calls `GET /api/health/` over HTTP (any `Host`).
-- [ ] The frontend's `API_INTERNAL_URL` is `https` (or the private network sends `X-Forwarded-Proto: https`); with the redirect on, a plain `http` URL breaks the Next server's calls.
-- [ ] `ADMIN_URL`, `INTERNAL_API_KEY`, `SECRET_KEY` are set; `REDIS_URL` is reachable (the login rate limit lives there).
+**Checklist for a new host** (checked on the VPS on 2026-10-08):
+- [x] TLS is terminated in front: Caddy serves the browser over HTTPS and proxies to the Next server. Django is not reached by the browser at all; it listens only on the private Docker network.
+- [x] The health path answers: `GET /api/health/` returned 200 from inside the stack (`docker compose exec backend`). The compose file has no health check yet, so nothing restarts a backend that stops answering.
+- [x] The frontend's `API_INTERNAL_URL` is plain `http://backend:8000` on the private network, so `SECURE_SSL_REDIRECT=false` there (with the redirect on, that URL would loop on 301).
+- [x] `INTERNAL_API_KEY` and `SECRET_KEY` are set and `REDIS_URL` is reachable (the login rate limit lives there).
+- [ ] `ADMIN_URL` is still the default `admin/` (the `core.W001` warning shows in the log): the Admin is not published by Caddy, so it is not reachable. Set a non-obvious path before it is published.
 
 ## Migrations in production
 1. Commit them with the feature; CI fails on missing ones.
@@ -55,7 +71,7 @@ Docker image → `entrypoint.sh`: `migrate --noinput` → `collectstatic --noinp
 4. **History reset:** migrations were reset to one `0001` per app before production. A database that applied the *old* ones must be recreated (or its `django_migrations` reconciled) first; confirm with the user before touching a shared DB.
 
 ## Seeding, logs, backups
-`seed_demo` is local/demo only: **never in production** with real data (the initial company comes from `core.0002_seed_company`). Logs go to stdout; no structured logging, error tracker or alerts yet (use `logging.getLogger(__name__)`, log ids and outcomes, never personal data). No backup policy yet: a real deployment needs scheduled `pg_dump` (or the provider's plan), a tested restore and retention, which needs a spec before go-live.
+`seed_demo` is local/demo only: **never in production** with real data (the initial company comes from `core.0002_seed_company`). Logs go to stdout; no structured logging, error tracker or alerts yet (use `logging.getLogger(__name__)`, log ids and outcomes, never personal data). No backup policy yet: a real deployment needs scheduled `pg_dump` (or the provider's plan), a tested restore and retention, which needs a spec before go-live. The ERP database on the VPS has **no** backup (the other project there has a daily dump in `/root/backups`; do not assume it covers the ERP volume), and the receipt files live in R2, outside any Postgres dump.
 
 ## Runbook
 | Symptom | Cause → action |
@@ -69,6 +85,8 @@ Docker image → `entrypoint.sh`: `migrate --noinput` → `collectstatic --noinp
 | admin login fails behind HTTPS (CSRF) | host missing from `ALLOWED_HOSTS` |
 | frontend cannot call the API | the browser only calls the Next server (same origin); check the Next server's `API_INTERNAL_URL` and `INTERNAL_API_KEY` |
 | host keeps restarting the backend | its health check must call `/api/health/`; a 503 means the database does not answer (the log has the reason) |
+| `https://<name>` answers 502 right after a deploy | the frontend is still starting or crashed: `docker compose logs frontend`; Caddy reaches it as `frontend:3000` on `erp_edge`, so check the network exists and both stacks joined it |
+| the other project's site went down after editing its Caddyfile | restore `Caddyfile.bak-antes-erp` / `docker-compose.yml.bak-antes-erp` in `/root/air-app-node` and `docker compose up -d --no-deps caddy`; validate first with `caddy validate` in a throwaway container |
 | every request redirects (301) forever | `X-Forwarded-Proto` is not reaching Django behind the proxy, or `API_INTERNAL_URL` is plain `http` |
 
 **Rollback:** redeploy the previous image; undo a migration with `migrate <app> <previous>` (destructive schema changes are not reversible, hence rule 2).

@@ -2,8 +2,8 @@ from rest_framework import viewsets
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from typing_extensions import final, override
 
-from apps.core.filters import QuerySearchFilter
-from apps.core.permissions import IsSuperuser
+from apps.core.api.filters import QuerySearchFilter
+from apps.core.api.permissions import IsSuperuser
 from apps.core.scoping import CompanyScopedViewSetMixin
 
 from ..models import Company

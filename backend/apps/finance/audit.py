@@ -6,6 +6,7 @@ from .models import (
     CostCenter,
     EntryBatch,
     EntryTemplate,
+    PaymentReceipt,
     Supplier,
 )
 
@@ -19,3 +20,5 @@ def register() -> None:
     # Editable money records keep their history here: every change of amount or due date, with the actor.
     register_audited(AccountPayable)
     register_audited(EntryBatch)
+    # Who attached and who deleted a proof of payment.
+    register_audited(PaymentReceipt)
