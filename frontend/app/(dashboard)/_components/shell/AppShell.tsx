@@ -25,7 +25,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-shell lg:bg-transparent lg:p-4">
-      <div className="mx-auto flex min-h-screen max-w-[96rem] flex-col lg:min-h-[calc(100vh-2rem)] lg:flex-row lg:gap-4">
+      <div className="flex min-h-screen flex-col lg:min-h-[calc(100vh-2rem)] lg:flex-row lg:gap-4">
         <Sidebar defaultOpen={sidebarOpen} appearance={appearance} />
 
         <div className="min-w-0 flex-1 bg-shell lg:rounded-shell lg:p-5">
