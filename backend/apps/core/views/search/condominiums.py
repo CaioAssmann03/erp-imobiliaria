@@ -5,21 +5,26 @@ from django.db.models import Q
 from apps.condominiums.models import Condominium
 from apps.core.scoping import scope_to_company
 
-from .ranking import LIMIT_PER_TYPE, relevance_rank
+from .ranking import LIMIT_PER_TYPE, any_of, exact_code, relevance_rank
+from .term import ClassifiedTerm
 
 
-def search_condominiums(
-    user: Any, term: str, digits: str, should_search_document: bool
-) -> list[Condominium]:
-    name_filter = Q(name__icontains=term)
-    ranking = [Q(name__istartswith=term)]
-    if should_search_document:
-        name_filter |= Q(cnpj__contains=digits)
-        ranking.append(Q(cnpj__startswith=digits))
+def search_condominiums(user: Any, query: ClassifiedTerm) -> list[Condominium]:
+    matching: list[Q] = []
+    starts_with: list[Q] = []
+    if query.matches_text:
+        matching.append(Q(name__icontains=query.text))
+        starts_with.append(Q(name__istartswith=query.text))
+    if query.matches_document:
+        matching.append(Q(cnpj__contains=query.digits))
+        starts_with.append(Q(cnpj__startswith=query.digits))
+    exact = exact_code(query)
+    if exact is not None:
+        matching.append(exact)
     return list(
         scope_to_company(Condominium.objects.all(), user)
-        .filter(name_filter)
-        .annotate(rank=relevance_rank(*ranking))
+        .filter(any_of(matching))
+        .annotate(rank=relevance_rank(starts_with, exact))
         .select_related("address")
         .order_by("rank", "name")[:LIMIT_PER_TYPE]
     )
