@@ -9,6 +9,7 @@ skip-if: you need a how-to → docs/README.md routing table
 cd frontend
 npx tsc --noEmit    # types
 npx eslint .        # lint (generated code ignored)
+npm test            # unit tests of pure helpers (node:test, tests/*.test.mjs; also runs in CI)
 npm run build       # validates pages, routes, server/client boundaries
 ```
 API changed → backend running → `npm run generate:api` first. Stale type errors after renaming routes → delete `.next/` and rebuild.

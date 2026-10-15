@@ -22,6 +22,7 @@ The browser never sees a token. The Next server holds them in `HttpOnly` cookies
 `/api/auth/refresh/` is **not** reachable from the browser (the handler answers 404): renewal is internal.
 
 ## What the handler guarantees
+- **Only `/api/...` routes.** Every URL segment must match `[A-Za-z0-9_-]+` (`lib/api-path.ts`, tested in `tests/api-path.test.mjs`); anything else answers `404` before Django is called. Next decodes segments, so `/api/..%2fadmin/login/` would otherwise become `/admin/login/` on Django (the Admin was reachable through the proxy until this check).
 - **JSON only.** A body that is not JSON answers `415`; files (receipts, boleto PDFs) will not go through it (the platform caps request bodies near 4.5 MB): they will use signed bucket URLs.
 - **No browser state forwarded.** The `Cookie` header is not sent to Django; only the content type comes back.
 - **CSRF.** Besides `SameSite=Lax`, a non-GET whose `Origin` is not this server's own origin answers `403` (own origin = `x-forwarded-host`/`host` + `x-forwarded-proto`).
