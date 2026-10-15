@@ -81,6 +81,7 @@ export function CondominiumsTable({ initialPending }: { initialPending?: string 
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
+                  <TableHead className="hidden w-16 md:table-cell">ID</TableHead>
                   <TableHead>Condomínio</TableHead>
                   <TableHead className="hidden md:table-cell">Status</TableHead>
                   <TableHead />

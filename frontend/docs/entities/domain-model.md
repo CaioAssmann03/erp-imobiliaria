@@ -11,7 +11,7 @@ the UI shows Portuguese labels.
 | Entity (API resource) | Key fields | Relations |
 |---|---|---|
 | **Company** (`companies`) | `legal_name`, `trade_name`, `cnpj` (14 digits), address fields, `active` | has many Condominiums |
-| **Condominium** (`condominiums`) | `name`, `cnpj` (required, unique), `type` `residential`/`commercial`, `municipal_registration`, `water_meter`, `electricity_meter`, `active` | `company`, `advisor` (Person, optional), nested `address`, `administration_contract`, `billing_rules` |
+| **Condominium** (`condominiums`) | read-only `code` (the "ID"), `name`, `cnpj` (required, unique), `type` `residential`/`commercial`, `municipal_registration`, `water_meter`, `electricity_meter`, `active` | `company`, `advisor` (Person, optional), nested `address`, `administration_contract`, `billing_rules` |
 | **Address** (nested) | `zip_code` (8 digits), `street`, `number`, `complement`, `district`, `city`, `state` | 1:1 with Condominium; cannot be cleared as a whole through the API |
 | **AdministrationContract** (nested) | `fee_type` `fixed`/`variable`, `fee_amount`, `fee_percentage`, `fee_basis` `revenue`/`expense`, `charges_iss_on_fee`, `start_date`, `adjustment_base_date`, `adjustment_period_months`, `adjustment_index` | 1:1 |
 | **BillingRules** (nested) | `due_day` (1–28), `due_on_business_day`, `calculation_period` `reference`/`following`, `credit_limit`, `early_payment_discount_percentage` (0–100), `early_payment_discount_days` | 1:1 |
@@ -22,7 +22,7 @@ the UI shows Portuguese labels.
 | **CurrentAccount** (`current-accounts`) | read-only `balance`; `GET /{id}/balances/` answers the total and one row per cost center | one per `condominium` (created by the first payment or the first manual entry) |
 | **EntryBatch** (`entry-batches`) | `batch_date`, `origin` `bank`/`cash`/`extra_cash`, `cash_number` (only for the two cash origins) | groups entries; `POST /{id}/entries/` posts several manual entries, all or none |
 | **CurrentAccountEntry** (`current-account-entries`) | `registry`, `entry_date`, `competence_month` (first day), `kind` `credit`/`debit`, `amount` (> 0), `description`, `justification`, `origin` `manual`/`automatic_payable`, `is_reversed`, `reversal_of`; read-only names, `batch_origin`, `batch_date` | `current_account`, `batch`, `entry_template`, `cost_center`, `unit` (optional); never edited or deleted, only reversed (`POST /{id}/reverse/`) |
-| **Person** (`persons`) | `name`, `email`, `cell_number`, `home_phone`, `business_phone`, `active` | nested `people_individual` (`cpf`, `rg`, `birthday`, `marital_status`, `job`) **or** `people_legal` (`cnpj`, `ie`) |
+| **Person** (`persons`) | read-only `code` (the "ID"), `name`, `email`, `cell_number`, `home_phone`, `business_phone`, `active`, `modules` (`condominiums`/`rentals`, default `condominiums`) | nested `people_individual` (`cpf`, `rg`, `birthday`, `marital_status`, `job`) **or** `people_legal` (`cnpj`, `ie`) |
 
 ## Business rules the UI must respect (the server enforces them too)
 
@@ -30,6 +30,8 @@ the UI shows Portuguese labels.
 - `due_day` 1–28; discount percentage 0–100; `ideal_fraction` > 0 and ≤ 1 (apportionment per condominium should sum to 1).
 - Owner link requires `ownership_percentage` (0–100); tenant link has none; `end_date` ≥ `start_date`.
 - A person has only one document kind; it cannot change after creation.
+- `code` is the "ID" users type, on people and condominiums (a unit has none: it is its condominium plus its number): assigned by the server, never edited. Their lists show it as the first column (and as `ID n` in the mobile line), their edit pages show it under the title, and every search accepts it (a number puts that record first).
+- A person belongs to one or more `modules`. The screens of this app are the Condominiums module's: they pass `module=condominiums` (`lib/person-module.ts`) to the persons list, the person picker and the header search, so a person who is only in `rentals` never shows up and cannot be linked to a unit (400 `unit_person.person.not_in_condominiums`). The Rentals module will pass `rentals`.
 - CPF/CNPJ/CEP travel as digits only; masks are display-only.
 - A block must belong to the unit's condominium.
 - A condominium expense needs a cost center; paying it needs an entry template of that cost center and posts a debit in the condominium's statement. A company expense has neither and posts nothing. A paid or cancelled account is read-only.

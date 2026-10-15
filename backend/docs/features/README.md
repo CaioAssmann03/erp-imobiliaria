@@ -50,6 +50,5 @@ One row per spec; update it in the same change that creates or closes the spec.
 | Spec | Title | Level | Status | Roadmap (`phase N part NN` or `none`) |
 |---|---|---|---|---|
 | [008](008-operational-hardening.md) | Operational hardening: health, HTTPS/HSTS, admin path | full | in-progress | phase 3a part 09 |
-| [019](019-sequential-ids-and-person-modules.md) | Sequential IDs and people by module | full | in-progress | none |
 
-The finished specs (001–007 and 009–018) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.
+The finished specs (001–007 and 009–019) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.

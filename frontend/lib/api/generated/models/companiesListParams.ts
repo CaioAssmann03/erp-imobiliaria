@@ -16,7 +16,7 @@ limit?: number;
  */
 page?: number;
 /**
- * Termo de busca (nome, documento…).
+ * Termo de busca (nome, documento, ID…).
  */
 query?: string;
 };

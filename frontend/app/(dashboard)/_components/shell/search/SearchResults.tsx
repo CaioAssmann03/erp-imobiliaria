@@ -26,7 +26,7 @@ export function SearchResults({
     return (
       <p className="px-4 py-8 text-center text-ink-soft">
         {!searchable
-          ? `Digite ao menos ${MIN_TEXT_LENGTH} letras (ou 2 números) para buscar cadastros.`
+          ? `Digite ao menos ${MIN_TEXT_LENGTH} letras ou o número (ID) do cadastro para buscar.`
           : waiting
             ? "Buscando…"
             : `Nenhum resultado para “${query.trim()}”`}

@@ -40,7 +40,7 @@ export function CondominiumsFilters({
   return (
     <>
       <SearchField
-        placeholder="Buscar por nome ou CNPJ"
+        placeholder="Buscar por nome, CNPJ ou ID"
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}
       />

@@ -19,6 +19,7 @@ import {
   usePersonsDestroy,
   usePersonsList,
 } from "@/lib/api/generated";
+import { CONDOMINIUMS_MODULE } from "@/lib/person-module";
 
 import { PersonRow } from "./PersonRow";
 import { PersonsFilters } from "./PersonsFilters";
@@ -32,6 +33,7 @@ export function PersonsTable() {
   const { data, isLoading, isPlaceholderData } = usePersonsList(
     {
       ...params,
+      module: CONDOMINIUMS_MODULE,
       ...(filters.status ? { active: filters.status === "active" } : {}),
       ...(filters.type ? { type: filters.type as "individual" | "legal" } : {}),
     },
@@ -81,6 +83,7 @@ export function PersonsTable() {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
+                  <TableHead className="hidden w-16 md:table-cell">ID</TableHead>
                   <TableHead>Nome</TableHead>
                   <TableHead className="hidden md:table-cell">CPF/CNPJ</TableHead>
                   <TableHead className="hidden md:table-cell">Celular</TableHead>

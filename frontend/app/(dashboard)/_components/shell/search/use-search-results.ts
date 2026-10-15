@@ -6,11 +6,16 @@ import { useMemo } from "react";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useSearchRetrieve } from "@/lib/api/generated";
 import type { Search } from "@/lib/api/generated/models";
+import { CONDOMINIUMS_MODULE } from "@/lib/person-module";
 import { isSearchable, searchStatic } from "@/lib/search-index";
 
 import type { SearchResultItem } from "./types";
 
 const DEBOUNCE_MS = 250;
+
+function withId(code: number, ...details: (string | null | undefined)[]) {
+  return [`ID ${code}`, ...details].filter(Boolean).join(" · ");
+}
 
 function apiResults(data: Search): SearchResultItem[] {
   return [
@@ -18,14 +23,17 @@ function apiResults(data: Search): SearchResultItem[] {
       key: `p${person.id}`,
       group: "Pessoas",
       title: person.name,
-      subtitle: person.document,
+      subtitle: withId(person.code, person.document),
       href: `/persons/${person.id}`,
     })),
     ...data.condominiums.map((condominium) => ({
       key: `c${condominium.id}`,
       group: "Condomínios",
       title: condominium.name,
-      subtitle: condominium.city ? `${condominium.city}/${condominium.state}` : (condominium.cnpj ?? undefined),
+      subtitle: withId(
+        condominium.code,
+        condominium.city ? `${condominium.city}/${condominium.state}` : condominium.cnpj
+      ),
       href: `/condominiums/${condominium.id}`,
     })),
     ...data.units.map((unit) => ({
@@ -48,7 +56,7 @@ export function useSearchResults(query: string) {
   const enabled = isSearchable(term);
 
   const { data, isFetching } = useSearchRetrieve(
-    { q: term },
+    { q: term, module: CONDOMINIUMS_MODULE },
     { query: { enabled, placeholderData: keepPreviousData, staleTime: 30_000 } }
   );
 

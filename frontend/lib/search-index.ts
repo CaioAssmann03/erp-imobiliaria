@@ -39,13 +39,18 @@ export function searchStatic(term: string): StaticSearchItem[] {
   ).slice(0, 5);
 }
 
-/** Mesma regra do backend (apps/core/views/search_views.py): 3 caracteres, ou 2 se for numérico. */
+/**
+ * Same rule as the backend (apps/core/views/search/term.py): 3 characters, 2 if numeric, and a
+ * term of only digits is an ID, so even a single digit is searchable.
+ */
 const NUMERIC_TERM = /^[\d.\-/\s]+$/;
+const ID_TERM = /^\d+$/;
 export const MIN_TEXT_LENGTH = 3;
 export const MIN_NUMERIC_LENGTH = 2;
 
 export function isSearchable(term: string) {
   const value = term.trim();
+  if (ID_TERM.test(value)) return true;
   if (NUMERIC_TERM.test(value)) return value.replace(/\D/g, "").length >= MIN_NUMERIC_LENGTH;
   return value.length >= MIN_TEXT_LENGTH;
 }

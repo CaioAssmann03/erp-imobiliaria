@@ -19,6 +19,7 @@ import type { CondominiumTypeEnum } from './condominiumTypeEnum';
  */
 export interface Condominium {
   readonly id: string;
+  readonly code: number;
   readonly company: string;
   /** @nullable */
   advisor?: string | null;

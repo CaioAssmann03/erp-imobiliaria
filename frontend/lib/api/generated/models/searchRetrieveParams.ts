@@ -5,10 +5,15 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { SearchRetrieveModule } from './searchRetrieveModule';
 
 export type SearchRetrieveParams = {
 /**
- * Termo: mín. 3 caracteres (2 se for numérico). CPF/CNPJ com ou sem pontuação.
+ * Lista só as pessoas que pertencem a este módulo.
+ */
+module?: SearchRetrieveModule;
+/**
+ * Termo: mín. 3 caracteres (2 se for numérico). CPF/CNPJ com ou sem pontuação. Só dígitos (1 a 18) também buscam o ID do cadastro; 1 dígito busca só o ID.
  */
 q: string;
 };

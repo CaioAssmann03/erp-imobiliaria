@@ -46,7 +46,10 @@ export function UnitRow({ unit, condominiumId, blockName, condominiumName = null
         {links.length === 0
           ? "—"
           : links
-              .map((link) => `${link.person_detail.name} (${link.role === "owner" ? "Prop." : "Loc."})`)
+              .map(
+                (link) =>
+                  `${link.person_detail.name} (${link.role === "owner" ? "Prop." : "Loc."}, ID ${link.person_detail.code})`
+              )
               .join(", ")}
       </TableCell>
       <TableCell className="hidden md:table-cell">
