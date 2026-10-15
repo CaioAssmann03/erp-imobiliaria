@@ -76,7 +76,7 @@ export function GlobalSearch() {
             type="text"
             value={query}
             autoFocus
-            placeholder="Buscar pessoas, condomínios, gráficos…"
+            placeholder="Buscar pessoas, condomínios, unidades, IDs, gráficos…"
             aria-label="Busca global"
             autoComplete="off"
             className="h-14 w-full bg-transparent px-6 text-[1.0625rem] text-ink outline-none placeholder:text-ink-soft/70"

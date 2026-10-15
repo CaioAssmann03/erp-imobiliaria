@@ -19,10 +19,15 @@ export default async function EditPersonPage({
 
   const queryClient = getServerQueryClient();
   await queryClient.prefetchQuery(getPersonsRetrieveQueryOptions(personId));
+  const person = queryClient.getQueryData(getPersonsRetrieveQueryOptions(personId).queryKey);
 
   return (
     <FormPage>
-      <PageHeader back={{ href: "/persons", label: "Pessoas" }} title="Editar pessoa" />
+      <PageHeader
+        back={{ href: "/persons", label: "Pessoas" }}
+        title="Editar pessoa"
+        description={person ? `ID ${person.code}` : undefined}
+      />
       <HydrationBoundary state={dehydrate(queryClient)}>
         <PersonForm personId={personId} />
       </HydrationBoundary>

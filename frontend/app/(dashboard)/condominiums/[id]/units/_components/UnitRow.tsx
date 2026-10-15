@@ -25,10 +25,11 @@ export function UnitRow({ unit, condominiumId, blockName, condominiumName = null
 
   return (
     <TableRow>
+      <TableCell className="hidden md:table-cell text-ink-soft tabular-nums">{unit.code}</TableCell>
       <TableCell>
         <RowLink
           href={href}
-          sub={[condominiumName, blockName, unitTypeLabel(unit.type), unit.active ? null : "Inativa"]
+          sub={[`ID ${unit.code}`, condominiumName, blockName, unitTypeLabel(unit.type), unit.active ? null : "Inativa"]
             .filter(Boolean)
             .join(" · ")}
         >
@@ -46,7 +47,10 @@ export function UnitRow({ unit, condominiumId, blockName, condominiumName = null
         {links.length === 0
           ? "—"
           : links
-              .map((link) => `${link.person_detail.name} (${link.role === "owner" ? "Prop." : "Loc."})`)
+              .map(
+                (link) =>
+                  `${link.person_detail.name} (${link.role === "owner" ? "Prop." : "Loc."}, ID ${link.person_detail.code})`
+              )
               .join(", ")}
       </TableCell>
       <TableCell className="hidden md:table-cell">

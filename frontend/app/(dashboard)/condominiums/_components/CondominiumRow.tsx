@@ -22,11 +22,14 @@ export function CondominiumRow({ condominium, onDelete }: CondominiumRowProps) {
 
   return (
     <TableRow>
+      <TableCell className="hidden md:table-cell text-ink-soft tabular-nums">{condominium.code}</TableCell>
       <TableCell>
         <RowLink
           compact
           href={`/condominiums/${condominium.id}`}
-          sub={[city, condominium.active ? null : "Inativo"].filter(Boolean).join(" · ")}
+          sub={[`ID ${condominium.code}`, city, condominium.active ? null : "Inativo"]
+            .filter(Boolean)
+            .join(" · ")}
         >
           {condominium.name}
         </RowLink>

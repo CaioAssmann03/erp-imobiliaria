@@ -18,10 +18,13 @@ export function PersonRow({ person, onDelete }: PersonRowProps) {
 
   return (
     <TableRow>
+      <TableCell className="hidden md:table-cell text-ink-soft tabular-nums">{person.code}</TableCell>
       <TableCell>
         <RowLink
           href={`/persons/${person.id}`}
-          sub={[person.email || document, person.active ? null : "Inativo"].filter(Boolean).join(" · ")}
+          sub={[`ID ${person.code}`, person.email || document, person.active ? null : "Inativo"]
+            .filter(Boolean)
+            .join(" · ")}
         >
           {person.name}
         </RowLink>

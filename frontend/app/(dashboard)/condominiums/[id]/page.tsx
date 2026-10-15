@@ -25,12 +25,16 @@ export default async function EditCondominiumPage({
     queryClient.prefetchQuery(getCondominiumsRetrieveQueryOptions(condominiumId)),
     queryClient.prefetchQuery(getCompaniesListQueryOptions({ limit: 100 })),
   ]);
+  const condominium = queryClient.getQueryData(
+    getCondominiumsRetrieveQueryOptions(condominiumId).queryKey
+  );
 
   return (
     <FormPage>
       <PageHeader
         back={{ href: "/condominiums", label: "Condomínios" }}
         title="Editar condomínio"
+        description={condominium ? `ID ${condominium.code}` : undefined}
       />
       <HydrationBoundary state={dehydrate(queryClient)}>
         <CondominiumForm condominiumId={condominiumId} />

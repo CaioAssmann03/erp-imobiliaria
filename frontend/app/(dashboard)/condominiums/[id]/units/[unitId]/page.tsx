@@ -25,12 +25,14 @@ export default async function EditUnitPage({
     queryClient.prefetchQuery(getUnitsRetrieveQueryOptions(unitId)),
     queryClient.prefetchQuery(getBlocksListQueryOptions({ condominium: condominiumId, limit: 100 })),
   ]);
+  const unit = queryClient.getQueryData(getUnitsRetrieveQueryOptions(unitId).queryKey);
 
   return (
     <FormPage>
       <PageHeader
         back={{ href: `/condominiums/${condominiumId}/units`, label: "Unidades" }}
         title="Editar unidade"
+        description={unit ? `ID ${unit.code}` : undefined}
       />
       <HydrationBoundary state={dehydrate(queryClient)}>
         <UnitForm condominiumId={condominiumId} unitId={unitId} />

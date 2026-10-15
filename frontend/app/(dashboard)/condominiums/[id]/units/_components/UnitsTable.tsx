@@ -116,6 +116,7 @@ export function UnitsTable({
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
+                  <TableHead className="hidden w-16 md:table-cell">ID</TableHead>
                   <TableHead>Unidade</TableHead>
                   {isOverview && <TableHead className="hidden md:table-cell">Condomínio</TableHead>}
                   <TableHead className="hidden md:table-cell">Bloco</TableHead>

@@ -24,7 +24,9 @@ export function UnitPeopleList({ links, onRemove }: UnitPeopleListProps) {
         >
           <div className="min-w-0">
             <div className="truncate font-medium">{link.person_detail.name}</div>
-            <div className="text-caption text-ink-soft">{linkSummary(link)}</div>
+            <div className="text-caption text-ink-soft">
+              ID {link.person_detail.code} · {linkSummary(link)}
+            </div>
           </div>
           <ConfirmDeleteButton
             label="Remover"

@@ -33,7 +33,7 @@ export function PersonsFilters({
   return (
     <>
       <SearchField
-        placeholder="Buscar por nome, CPF/CNPJ ou email"
+        placeholder="Buscar por nome, CPF/CNPJ, email ou ID"
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}
       />
