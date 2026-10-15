@@ -22,7 +22,7 @@ Property rentals reusing the current account, batches and billing already built;
 ## Notes
 Rental data already partly exists as `UnitPerson` with role `tenant`; the data model PDF introduces `Property` and `RentalContract` as new entities instead.
 
-**People and IDs** ([spec 019](../../features/019-sequential-ids-and-person-modules.md)): rental people are the same `Person` records, marked `rentals` in `Person.modules`. The Rentals lists and pickers send `module=rentals`, the rental models refuse a person who is not in `rentals`, `Property` gets a `code` from its own sequence with the spec's helper, and owners and tenants are identified by the person's `code`.
+**People and IDs** ([spec 019](../../features/history.md)): rental people are the same `Person` records, marked `rentals` in `Person.modules`. The Rentals lists and pickers send `module=rentals`, the rental models refuse a person who is not in `rentals`, `Property` gets a `code` from its own sequence with the spec's helper, and owners and tenants are identified by the person's `code`.
 
 ## Closing checklist
 - [ ] Every part is `done` or `moved`
