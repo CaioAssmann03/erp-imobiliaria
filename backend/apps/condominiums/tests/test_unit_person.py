@@ -245,3 +245,69 @@ class TestOwnersCap:
 
         assert not serializer.is_valid()
         assert "ownership_percentage" in serializer.errors
+
+
+@pytest.mark.django_db
+class TestPersonModuleRule:
+    """A person is linked to a unit only if they belong to the condominiums module (spec 019, R9)."""
+
+    @pytest.fixture
+    def rentals_person(self) -> Person:
+        return Person.objects.create(
+            company=seeded_company(), name="Locadora", modules=["rentals"]
+        )
+
+    def tenant_link(self, unit: Unit, person: Person) -> UnitPerson:
+        return UnitPerson(unit=unit, person=person, role="tenant", start_date=date(2025, 1, 1))
+
+    def test_a_rentals_only_person_cannot_be_linked(
+        self, unit: Unit, rentals_person: Person
+    ) -> None:
+        assert "person" in clean_errors(self.tenant_link(unit, rentals_person))
+
+    def test_the_api_answers_400_with_the_module_code(
+        self, unit: Unit, rentals_person: Person
+    ) -> None:
+        serializer = UnitPersonSerializer(
+            data={
+                "unit": unit.pk,
+                "person": rentals_person.pk,
+                "role": "tenant",
+                "start_date": "2025-01-01",
+            }
+        )
+
+        assert not serializer.is_valid()
+        assert [error.code for error in serializer.errors["person"]] == [
+            "unit_person.person.not_in_condominiums"
+        ]
+
+    def test_a_person_in_both_modules_can_be_linked(self, unit: Unit) -> None:
+        both = Person.objects.create(
+            company=seeded_company(), name="Ambas", modules=["condominiums", "rentals"]
+        )
+
+        self.tenant_link(unit, both).clean()
+
+    def test_changing_a_link_to_a_rentals_only_person_is_refused(
+        self, unit: Unit, person: Person, rentals_person: Person
+    ) -> None:
+        link = self.tenant_link(unit, person)
+        link.save()
+
+        link.person = rentals_person
+
+        assert "person" in clean_errors(link)
+
+    def test_a_person_who_leaves_condominiums_keeps_the_links(
+        self, unit: Unit, person: Person
+    ) -> None:
+        link = self.tenant_link(unit, person)
+        link.save()
+        person.modules = ["rentals"]
+        person.save()
+
+        link.refresh_from_db()
+        serializer = UnitPersonSerializer(link, data={"end_date": "2025-06-01"}, partial=True)
+
+        assert serializer.is_valid(), serializer.errors

@@ -16,4 +16,5 @@ class PersonViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Person]):
     serializer_class = PersonSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)
     search_fields = ("name", "email", "people_individual__cpf", "people_legal__cnpj")
+    search_code_field = "code"
     filterset_class = PersonFilter

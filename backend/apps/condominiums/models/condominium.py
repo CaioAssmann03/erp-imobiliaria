@@ -7,7 +7,7 @@ from typing_extensions import final, override
 from apps.condominiums.errors import CondominiumError
 from apps.condominiums.models.address import Address
 from apps.condominiums.models.querysets import CondominiumQuerySet
-from apps.core.models import Company
+from apps.core.models import Company, SequentialCodeMixin, sequential_code_field
 from apps.core.models.base import BaseModel
 from apps.core.validators import validate_cnpj
 from apps.persons.models import Person
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 
 @final
-class Condominium(BaseModel):
+class Condominium(SequentialCodeMixin, BaseModel):
     objects = CondominiumQuerySet.as_manager()
 
     class CondominiumType(models.TextChoices):
@@ -36,6 +36,7 @@ class Condominium(BaseModel):
     company = models.ForeignKey(
         Company, on_delete=models.PROTECT, related_name="company_condominium"
     )
+    code = sequential_code_field("condominium_code_seq")
     advisor = models.ForeignKey(
         Person,
         on_delete=models.SET_NULL,

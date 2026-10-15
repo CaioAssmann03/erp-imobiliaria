@@ -20,4 +20,5 @@ class UnitViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Unit]):
     serializer_class = UnitSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)
     search_fields = ("name", "registration_number")
+    search_code_field = "code"
     filterset_class = UnitFilter
