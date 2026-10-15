@@ -40,7 +40,7 @@ function apiResults(data: Search): SearchResultItem[] {
       key: `u${unit.id}`,
       group: "Unidades",
       title: `Unidade ${unit.name}`,
-      subtitle: withId(unit.code, unit.condominium_name),
+      subtitle: unit.condominium_name,
       href: `/condominiums/${unit.condominium}/units/${unit.id}`,
     })),
   ];

@@ -25,11 +25,10 @@ export function UnitRow({ unit, condominiumId, blockName, condominiumName = null
 
   return (
     <TableRow>
-      <TableCell className="hidden md:table-cell text-ink-soft tabular-nums">{unit.code}</TableCell>
       <TableCell>
         <RowLink
           href={href}
-          sub={[`ID ${unit.code}`, condominiumName, blockName, unitTypeLabel(unit.type), unit.active ? null : "Inativa"]
+          sub={[condominiumName, blockName, unitTypeLabel(unit.type), unit.active ? null : "Inativa"]
             .filter(Boolean)
             .join(" · ")}
         >

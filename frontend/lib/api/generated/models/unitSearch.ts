@@ -8,7 +8,6 @@
 
 export interface UnitSearch {
   id: string;
-  code: number;
   name: string;
   condominium: string;
   condominium_name: string;
