@@ -34,3 +34,8 @@ celerybeat-schedule*
 
 # Celery beat runtime state
 celerybeat-schedule*
+
+# Tool caches (never versioned)
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
