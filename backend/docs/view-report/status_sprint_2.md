@@ -1,3 +1,8 @@
+---
+summary: Status report of calendar sprint 2 (2026-09-25 to 2026-10-08), in Portuguese: goal, result, planned items, quality, retrospective and next sprint.
+read-when: you need what the team reported at the end of calendar sprint 2 (it counts calendar sprints, not the roadmap phases)
+skip-if: you need what is done or comes next in the project → roadmap/README.md
+---
 # Status Report da Sprint 2 — ERP Imobiliária
 
 ## 1. Identificação

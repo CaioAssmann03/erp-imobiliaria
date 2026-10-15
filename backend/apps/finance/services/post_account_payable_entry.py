@@ -15,6 +15,7 @@ def post_account_payable_entry(account: AccountPayable, posted_by: User) -> Curr
     on the payment day. Call it inside the transaction that marks the account as paid.
     """
     assert account.condominium_id is not None
+    assert account.payment_date is not None
     current_account, _ = CurrentAccount.objects.get_or_create(
         condominium_id=account.condominium_id, defaults={"company_id": account.company_id}
     )

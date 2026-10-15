@@ -89,8 +89,10 @@ def test_hsts_can_be_raised_by_env() -> None:
 
 
 @pytest.mark.django_db
-def test_no_hsts_in_development() -> None:
+def test_no_hsts_in_development(settings: Any) -> None:
     assert setting("SECURE_HSTS_SECONDS") == "0"
+    settings.SECURE_HSTS_SECONDS = 0  # this process may run with DEBUG=false (CI)
+
     response = Client().get(reverse("person-list"), secure=True)
 
     assert "Strict-Transport-Security" not in response

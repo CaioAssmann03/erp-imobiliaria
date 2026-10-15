@@ -1,5 +1,7 @@
 """Bank data is masked in the audit log (spec 010, R8)."""
 
+import re
+
 import pytest
 from auditlog.models import LogEntry
 
@@ -11,11 +13,18 @@ from ..models import BankAccount, Supplier
 
 pytestmark = pytest.mark.django_db
 
-SECRETS = ("9876543-2", "chave-pix-secreta@exemplo.com", "4321")
+LONG_SECRETS = ("9876543-2", "chave-pix-secreta@exemplo.com", "nova-chave-secreta@exemplo.com")
+# The branch and the supplier's bank code (masked too; the bank account's code is public).
+SHORT_SECRETS = ("4321", "341")
 
 
 def all_changes_text() -> str:
     return " ".join(str(entry.changes) for entry in LogEntry.objects.all())
+
+
+def appears_as_a_value(text: str, short_number: str) -> bool:
+    """A short number counts only as a token of its own: inside an id or a timestamp it is just digits."""
+    return re.search(rf"(?<![0-9a-fA-F]){short_number}(?![0-9a-fA-F])", text) is not None
 
 
 def test_bank_data_is_masked_in_the_log(company: Company) -> None:
@@ -45,6 +54,7 @@ def test_no_real_bank_value_appears_in_any_entry(company: Company) -> None:
 
     text = all_changes_text()
 
-    for secret in (*SECRETS[:3], "nova-chave-secreta@exemplo.com"):
+    for secret in LONG_SECRETS:
         assert secret not in text
-    assert "341" not in text  # the supplier's bank code is masked too
+    for short_number in SHORT_SECRETS:
+        assert not appears_as_a_value(text, short_number)

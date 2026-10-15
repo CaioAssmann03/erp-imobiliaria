@@ -62,7 +62,7 @@ def check_links(path: Path, text: str) -> None:
 def check_roadmap() -> None:
     roadmap = DOCS / "roadmap"
     index_path = roadmap / "README.md"
-    index_text = index_path.read_text()
+    index_text = index_path.read_text(encoding="utf-8")
     index_rows = {
         match.group(3): (match.group(4), match.group(5))
         for match in re.finditer(r"^\| (\d+[a-z]?) \| \[[^\]]+\]\(((phase-[^/]+)/README\.md)\) \| ([\w-]+) \| (\d+/\d+) \|", index_text, re.M)
@@ -73,13 +73,13 @@ def check_roadmap() -> None:
         if not readme.exists():
             report(roadmap, f"{phase_dir.name} has no README.md")
             continue
-        readme_text = readme.read_text()
+        readme_text = readme.read_text(encoding="utf-8")
         phase_status = read_status(readme_text)
         if phase_status not in PHASE_STATUSES:
             report(readme, f"invalid phase status: {phase_status}")
         part_statuses: dict[str, str | None] = {}
         for part in sorted(phase_dir.glob("[0-9][0-9]-*.md")):
-            status = read_status(part.read_text())
+            status = read_status(part.read_text(encoding="utf-8"))
             part_statuses[part.name] = status
             if status not in PART_STATUSES:
                 report(part, f"invalid part status: {status}")
@@ -131,13 +131,13 @@ def check_done_spec(spec: Path, text: str) -> None:
 
 def check_specs() -> None:
     features = DOCS / "features"
-    index_text = (features / "README.md").read_text()
+    index_text = (features / "README.md").read_text(encoding="utf-8")
     indexed = {
         match.group(1): (match.group(2), match.group(3), match.group(4).strip())
         for match in re.finditer(r"^\| \[\d+\]\(([^)]+)\) \|[^|]*\| (\w+) \| ([\w-]+) \| ([^|]+) \|", index_text, re.M)
     }
     for spec in sorted(features.glob("[0-9][0-9][0-9]-*.md")):
-        text = spec.read_text()
+        text = spec.read_text(encoding="utf-8")
         status = read_status(text)
         level_match = re.search(r"\*\*Level:\*\*\s*(\w+)", text)
         level = level_match.group(1) if level_match else None
@@ -169,7 +169,7 @@ def main() -> int:
     for path in sorted(DOCS.rglob("*.md")):
         if "tools" in path.relative_to(DOCS).parts:
             continue
-        text = path.read_text()
+        text = path.read_text(encoding="utf-8")
         check_header(path, text.split("\n")[:5])
         if not path.name.startswith("_template"):
             check_links(path, text)

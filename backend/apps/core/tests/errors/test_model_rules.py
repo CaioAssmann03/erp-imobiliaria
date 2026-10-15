@@ -18,17 +18,17 @@ class SampleRules(ModelRules[Any]):
     @rule("ownership_percentage", UnitPersonError.PERCENTAGE_REQUIRED_FOR_OWNER)
     def first_rule(self) -> bool:
         self.evaluated.append("first_rule")
-        return self.instance.first_violated
+        return bool(self.instance.first_violated)
 
     @rule("ownership_percentage", UnitPersonError.PERCENTAGE_SUM_EXCEEDS_100)
     def second_rule_of_the_same_field(self) -> bool:
         self.evaluated.append("second_rule_of_the_same_field")
-        return self.instance.second_violated
+        return bool(self.instance.second_violated)
 
     @rule("end_date", UnitPersonError.END_DATE_BEFORE_START_DATE)
     def rule_of_another_field(self) -> bool:
         self.evaluated.append("rule_of_another_field")
-        return self.instance.other_violated
+        return bool(self.instance.other_violated)
 
     def helper_that_is_not_a_rule(self) -> bool:  # an undecorated method is never run
         raise AssertionError("not a rule")

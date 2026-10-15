@@ -56,14 +56,14 @@ def create_demo_finance(context: SeedContext) -> None:
         condominium = Condominium.objects.filter(name=demo.name).first()
         if condominium is None:
             continue
-        for cost_center in CostCenter.objects.filter(
+        for template_cost_center in CostCenter.objects.filter(
             condominium=condominium, name__in=ENTRY_TEMPLATES
         ):
-            if not EntryTemplate.objects.filter(cost_center=cost_center).exists():
+            if not EntryTemplate.objects.filter(cost_center=template_cost_center).exists():
                 _ = create_validated(
                     EntryTemplate,
-                    cost_center=cost_center,
-                    name=ENTRY_TEMPLATES[cost_center.name],
+                    cost_center=template_cost_center,
+                    name=ENTRY_TEMPLATES[template_cost_center.name],
                 )
 
     for payable in DEMO_PAYABLES:

@@ -7,7 +7,7 @@ BACKEND = Path(__file__).resolve().parents[4]
 
 
 def import_settings(**env: str) -> subprocess.CompletedProcess[str]:
-    base = {k: v for k, v in os.environ.items() if k not in {"POSTGRES_DB", "SECRET_KEY", "DEBUG"}}
+    base = {k: v for k, v in os.environ.items() if k not in {"POSTGRES_DB", "SECRET_KEY", "DEBUG", "INTERNAL_API_KEY"}}
     return subprocess.run(
         [sys.executable, "-c", "import config.settings"],
         cwd=BACKEND,

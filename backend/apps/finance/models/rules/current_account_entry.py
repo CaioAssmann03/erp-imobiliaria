@@ -53,9 +53,10 @@ class CurrentAccountEntryRules(ModelRules["CurrentAccountEntry"]):
     @rule("unit", CurrentAccountEntryError.UNIT_OTHER_CONDOMINIUM)
     def unit_belongs_to_another_condominium(self) -> bool:
         entry = self.instance
-        if entry.unit_id is None or entry.current_account_id is None:
+        unit = entry.unit
+        if unit is None or entry.current_account_id is None:
             return False
-        return entry.unit.condominium_id != entry.current_account.condominium_id
+        return unit.condominium_id != entry.current_account.condominium_id
 
     @rule("competence_month", CurrentAccountEntryError.COMPETENCE_MONTH_NOT_FIRST_DAY)
     def competence_month_is_not_the_first_day(self) -> bool:
@@ -76,9 +77,10 @@ class CurrentAccountEntryRules(ModelRules["CurrentAccountEntry"]):
     @rule("account_payable", CurrentAccountEntryError.ACCOUNT_PAYABLE_OTHER_CONDOMINIUM)
     def account_payable_belongs_to_another_condominium(self) -> bool:
         entry = self.instance
-        if entry.account_payable_id is None or entry.current_account_id is None:
+        account_payable = entry.account_payable
+        if account_payable is None or entry.current_account_id is None:
             return False
-        return entry.account_payable.condominium_id != entry.current_account.condominium_id
+        return account_payable.condominium_id != entry.current_account.condominium_id
 
     @rule("account_payable", CurrentAccountEntryError.ACCOUNT_PAYABLE_ALREADY_POSTED)
     def account_payable_already_has_an_entry(self) -> bool:
@@ -90,12 +92,13 @@ class CurrentAccountEntryRules(ModelRules["CurrentAccountEntry"]):
     @rule("reversal_of", CurrentAccountEntryError.REVERSAL_OTHER_ACCOUNT)
     def reversal_belongs_to_another_account(self) -> bool:
         entry = self.instance
-        return entry.reversal_of_id is not None and entry.reversal_of.current_account_id != entry.current_account_id
+        reversal_of = entry.reversal_of
+        return reversal_of is not None and reversal_of.current_account_id != entry.current_account_id
 
     @rule("reversal_of", CurrentAccountEntryError.REVERSAL_OF_A_REVERSAL)
     def reversal_targets_a_reversal(self) -> bool:
-        entry = self.instance
-        return entry.reversal_of_id is not None and entry.reversal_of.reversal_of_id is not None
+        reversal_of = self.instance.reversal_of
+        return reversal_of is not None and reversal_of.reversal_of_id is not None
 
     @rule("reversal_of", CurrentAccountEntryError.REVERSAL_ALREADY_REVERSED)
     def reversal_targets_an_already_reversed_entry(self) -> bool:
@@ -107,9 +110,11 @@ class CurrentAccountEntryRules(ModelRules["CurrentAccountEntry"]):
     @rule("reversal_of", CurrentAccountEntryError.REVERSAL_SAME_KIND)
     def reversal_has_the_same_kind(self) -> bool:
         entry = self.instance
-        return entry.reversal_of_id is not None and entry.reversal_of.kind == entry.kind
+        reversal_of = entry.reversal_of
+        return reversal_of is not None and reversal_of.kind == entry.kind
 
     @rule("reversal_of", CurrentAccountEntryError.REVERSAL_AMOUNT_DIFFERS)
     def reversal_has_another_amount(self) -> bool:
         entry = self.instance
-        return entry.reversal_of_id is not None and entry.reversal_of.amount != entry.amount
+        reversal_of = entry.reversal_of
+        return reversal_of is not None and reversal_of.amount != entry.amount

@@ -38,9 +38,10 @@ class AccountPayableRules(ModelRules["AccountPayable"]):
     @rule("entry_template", AccountPayableError.ENTRY_TEMPLATE_OTHER_COST_CENTER)
     def entry_template_belongs_to_another_cost_center(self) -> bool:
         account = self.instance
-        if account.entry_template_id is None or account.cost_center_id is None:
+        entry_template = account.entry_template
+        if entry_template is None or account.cost_center_id is None:
             return False
-        return account.entry_template.cost_center_id != account.cost_center_id
+        return entry_template.cost_center_id != account.cost_center_id
 
     @rule("entry_template", AccountPayableError.ENTRY_TEMPLATE_REQUIRED_TO_PAY)
     def paid_condominium_expense_lacks_entry_template(self) -> bool:

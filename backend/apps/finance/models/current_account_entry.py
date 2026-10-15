@@ -1,5 +1,6 @@
 import datetime
 from collections.abc import Collection
+from decimal import Decimal
 from typing import Any, Self
 
 from django.conf import settings
@@ -17,7 +18,7 @@ from apps.finance.validators import validate_positive_amount
 
 from .account_payable import AccountPayable
 from .cost_center import CostCenter
-from .current_account import CurrentAccount, Decimal
+from .current_account import CurrentAccount
 from .entry_batch import EntryBatch
 from .entry_template import EntryTemplate
 
@@ -136,8 +137,10 @@ class CurrentAccountEntry(BaseModel):
 
         The description is built from the supplier and the cost center, never typed.
         """
-        description = f"{account_payable.supplier.person.name} - {account_payable.cost_center.name}"
+        cost_center = account_payable.cost_center
+        assert cost_center is not None
         assert account_payable.payment_date is not None and account_payable.amount_paid is not None
+        description = f"{account_payable.supplier.person.name} - {cost_center.name}"
         return cls(
             company=account_payable.company,
             current_account=current_account,

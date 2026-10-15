@@ -2,7 +2,7 @@
 
 import datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -54,7 +54,10 @@ def test_balances_are_split_by_cost_center(
     post_entry(make_entry(kind="debit", amount=Decimal("30.00")))
     post_entry(make_entry(kind="credit", amount=Decimal("40.00"), cost_center=second_cost_center, entry_template=second_template))
 
-    balances = {row["cost_center_name"]: row["balance"] for row in current_account.balances_by_cost_center()}
+    balances = cast(
+        dict[str, Decimal],
+        {row["cost_center_name"]: row["balance"] for row in current_account.balances_by_cost_center()},
+    )
 
     assert balances == {"Fundo de Reserva": Decimal("70.00"), "Fundo de Obras": Decimal("40.00")}
     assert sum(balances.values()) == current_account.recalculated_balance()

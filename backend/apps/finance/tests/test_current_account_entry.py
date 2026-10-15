@@ -22,7 +22,7 @@ from ..models import (
 pytestmark = pytest.mark.django_db
 
 
-def codes(entry: CurrentAccountEntry, field: str) -> list[str]:
+def codes(entry: CurrentAccountEntry, field: str) -> list[str | None]:
     with pytest.raises(ValidationError) as error:
         entry.full_clean()
     return [item.code for item in error.value.error_dict[field]]
@@ -84,9 +84,9 @@ def test_current_account_of_another_company_is_rejected(  # type: ignore[no-unty
     )
 
 
-def test_batch_of_another_company_is_rejected(
+def test_batch_of_another_company_is_rejected(  # type: ignore[no-untyped-def]
     make_entry, other_company: Company
-) -> None:  # type: ignore[no-untyped-def]
+) -> None:
     batch = EntryBatch.objects.create(
         company=other_company, batch_date=datetime.date(2026, 10, 6), origin="bank"
     )
@@ -132,9 +132,9 @@ def test_entry_template_of_another_condominium_is_rejected(  # type: ignore[no-u
     ]
 
 
-def test_inactive_entry_template_is_rejected(
+def test_inactive_entry_template_is_rejected(  # type: ignore[no-untyped-def]
     make_entry, entry_template: EntryTemplate
-) -> None:  # type: ignore[no-untyped-def]
+) -> None:
     EntryTemplate.objects.filter(pk=entry_template.pk).update(active=False)
     entry_template.refresh_from_db()
 
