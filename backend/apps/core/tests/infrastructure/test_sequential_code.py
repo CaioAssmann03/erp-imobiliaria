@@ -6,14 +6,13 @@ import pytest
 from django.db import connection, models
 from django.db.models import Func, Value
 
-from apps.condominiums.models import Condominium, Unit
+from apps.condominiums.models import Condominium
 from apps.core.models import sequential_code_field
 from apps.persons.models import Person
 
 SEQUENCES: dict[type[models.Model], str] = {
     Person: "person_code_seq",
     Condominium: "condominium_code_seq",
-    Unit: "unit_code_seq",
 }
 
 

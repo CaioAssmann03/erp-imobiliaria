@@ -15,7 +15,6 @@ class UnitSerializer(ModelRulesMixin, serializers.ModelSerializer[Unit]):
         model = Unit
         fields = (
             "id",
-            "code",
             "condominium",
             "block",
             "name",
@@ -33,4 +32,4 @@ class UnitSerializer(ModelRulesMixin, serializers.ModelSerializer[Unit]):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "code", "created_at", "updated_at")
+        read_only_fields = ("id", "created_at", "updated_at")
