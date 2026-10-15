@@ -1,3 +1,5 @@
+from typing import cast
+
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
@@ -6,6 +8,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from typing_extensions import final
 
+from apps.accounts.models import User
 from apps.core.api.filters import QuerySearchFilter
 from apps.core.scoping import CompanyScopedViewSetMixin
 
@@ -44,7 +47,8 @@ class CurrentAccountEntryViewSet(
         entry = self.get_object()
         data = ReverseEntrySerializer(data=request.data)
         data.is_valid(raise_exception=True)
+        reversed_by = cast(User, request.user)  # IsAuthenticated: never anonymous here
         reversal = reverse_entry(
-            entry, data.validated_data["reason"], data.validated_data["reversal_date"], request.user
+            entry, data.validated_data["reason"], data.validated_data["reversal_date"], reversed_by
         )
         return Response(self.get_serializer(reversal).data, status=status.HTTP_201_CREATED)

@@ -16,9 +16,10 @@ class UnitRules(ModelRules["Unit"]):
     @rule("block", UnitError.BLOCK_OTHER_CONDOMINIUM)
     def block_belongs_to_another_condominium(self) -> bool:
         unit = self.instance
-        if unit.block_id is None:
+        block = unit.block
+        if block is None:
             return False
-        return unit.block.condominium_id != unit.condominium_id
+        return block.condominium_id != unit.condominium_id
 
     @rule("ideal_fraction", UnitError.IDEAL_FRACTION_SUM_EXCEEDS_TOTAL)
     def apportionment_exceeds_total(self) -> bool:

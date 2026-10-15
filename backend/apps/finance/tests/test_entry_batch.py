@@ -19,7 +19,7 @@ def make_batch(company: Company, origin: str, cash_number: int | None) -> EntryB
     return EntryBatch(company=company, batch_date=TODAY, origin=origin, cash_number=cash_number)
 
 
-def error_codes(batch: EntryBatch) -> list[str]:
+def error_codes(batch: EntryBatch) -> list[str | None]:
     with pytest.raises(ValidationError) as error:
         batch.full_clean()
     return [item.code for item in error.value.error_dict["cash_number"]]

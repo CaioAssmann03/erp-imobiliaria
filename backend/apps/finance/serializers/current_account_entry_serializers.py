@@ -107,7 +107,7 @@ class BatchEntryLineSerializer(CurrentAccountEntrySerializer):
         return super().validate({**attrs, "batch": self.context["batch"]})
 
 
-class BatchEntriesSerializer(serializers.Serializer[dict[str, Any]]):
+class BatchEntriesSerializer(serializers.Serializer[list[CurrentAccountEntry]]):
     """Several manual entries posted into one batch, all or none."""
 
     entries = BatchEntryLineSerializer(many=True, allow_empty=False)

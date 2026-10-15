@@ -1,3 +1,5 @@
+from typing import cast
+
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
@@ -6,6 +8,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from typing_extensions import final
 
+from apps.accounts.models import User
 from apps.core.api.filters import QuerySearchFilter
 from apps.core.scoping import CompanyScopedViewSetMixin
 
@@ -44,7 +47,8 @@ class AccountPayableViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Acc
         account = self.get_object()
         payment = SettleAccountPayableSerializer(data=request.data)
         payment.is_valid(raise_exception=True)
-        settle_account_payable(account, AccountPayablePayment(**payment.validated_data, settled_by=request.user))
+        settled_by = cast(User, request.user)  # IsAuthenticated: never anonymous here
+        settle_account_payable(account, AccountPayablePayment(**payment.validated_data, settled_by=settled_by))
         return Response(self.get_serializer(account).data)
 
     @extend_schema(request=None, responses=AccountPayableSerializer, operation_id="accounts_payable_cancel")
