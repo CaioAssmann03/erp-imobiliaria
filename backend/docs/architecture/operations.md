@@ -62,7 +62,8 @@ Receipts (spec 018) live in a private **Cloudflare R2** bucket, not on the VPS: 
 - [x] The health path answers: `GET /api/health/` returned 200 from inside the stack (`docker compose exec backend`). The compose file has no health check yet, so nothing restarts a backend that stops answering.
 - [x] The frontend's `API_INTERNAL_URL` is plain `http://backend:8000` on the private network, so `SECURE_SSL_REDIRECT=false` there (with the redirect on, that URL would loop on 301).
 - [x] `INTERNAL_API_KEY` and `SECRET_KEY` are set and `REDIS_URL` is reachable (the login rate limit lives there).
-- [ ] `ADMIN_URL` is still the default `admin/` (the `core.W001` warning shows in the log): the Admin is not published by Caddy, so it is not reachable. Set a non-obvious path before it is published.
+- [ ] `ADMIN_URL` is still the default `admin/` (the `core.W001` warning shows in the log): the Admin is not published by Caddy and the Next proxy only forwards `/api/...` segments (`frontend/lib/api-path.ts`), so it is not reachable from outside. Set a non-obvious path before it is published.
+- [ ] After every deploy, smoke test that the proxy cannot leave `/api`: `curl -s -o /dev/null -w '%{http_code}' --path-as-is https://<name>/api/..%2fadmin/login/` must print `404` (it printed `200`, the Django Admin login page, until the segment check was added).
 
 ## Migrations in production
 1. Commit them with the feature; CI fails on missing ones.

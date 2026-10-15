@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { errorResponse } from "@/lib/api-error";
+import { backendApiPath } from "@/lib/api-path";
 import { clearAuthCookies, setAuthCookies, type Tokens } from "@/lib/auth-cookies";
 import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/lib/auth";
 import { API_URL, backendHeaders, refreshTokens } from "@/lib/backend";
@@ -147,10 +148,13 @@ async function proxyJson(request: NextRequest, route: string): Promise<NextRespo
 }
 
 async function handle(request: NextRequest, context: Context): Promise<NextResponse> {
-  const route = (await context.params).path.join("/");
+  const segments = (await context.params).path;
   if (isCrossOrigin(request)) {
     return errorResponse(403, "permission_denied", "Cross-origin request blocked.");
   }
+  // Before anything reaches Django: a segment such as `..%2fadmin` must not leave `/api` (see lib/api-path.ts).
+  if (backendApiPath(segments) === null) return errorResponse(404, "not_found", "Not found.");
+  const route = segments.join("/");
   if (route === "auth/refresh") return errorResponse(404, "not_found", "Not found.");
   if (route === "auth/login" && request.method === "POST") return login(request);
   if (route === "auth/logout" && request.method === "POST") return logout(request);
