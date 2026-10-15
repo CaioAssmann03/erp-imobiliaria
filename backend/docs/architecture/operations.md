@@ -15,6 +15,8 @@ docker compose exec backend python manage.py seed_demo         # demo data (--cl
 ```
 URLs: API docs `localhost:8000/api/docs/` · schema `/api/schema/` · admin `/admin/` · frontend `localhost:3000`.
 
+`docker compose up` fails with "port is already allocated" when another Postgres already uses 5432 (the Windows service, another project's container). Set `POSTGRES_HOST_PORT=5434` (any free port) in `.env`: it only changes the port on your computer; the containers still reach `db:5432`, so `POSTGRES_PORT` stays `5432`. `manage.py` and pytest run outside Docker then need `POSTGRES_PORT=5434` too. The tests never touch the data you see in the app: pytest creates its own database (`test_<POSTGRES_DB>`) and drops it when the session ends (a run with `--reuse-db` keeps it on purpose; the CI never does).
+
 From `backend/` with the `db` up, **`POSTGRES_DB` must be exported for every `manage.py` outside Docker** (pytest has its own defaults):
 ```bash
 export POSTGRES_DB=erp_imobiliaria POSTGRES_HOST=localhost
@@ -27,7 +29,7 @@ After an API change: backend running → `cd frontend && npm run generate:api` (
 ## Environments
 | Env | How | Notes |
 |---|---|---|
-| Local | compose | backend `runserver`; Postgres on 5432 |
+| Local | compose | backend `runserver`; Postgres on 5432 (host port `POSTGRES_HOST_PORT`) |
 | CI | `.github/workflows/ci.yml`, Postgres + Redis services | `makemigrations --check`, `migrate`, `check`, `pytest apps` |
 | Production | one VPS (Docker Compose), reached through the Caddy of a project that already runs there: see *Production on the VPS* | temporary name `erp.177-7-63-175.sslip.io` until the final domain exists. `render.yaml` (Render Blueprint) is no longer used |
 
