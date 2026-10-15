@@ -8,6 +8,7 @@
 
 export interface CondominiumSearch {
   id: string;
+  code: number;
   name: string;
   cnpj: string;
   /** @nullable */

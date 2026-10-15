@@ -17,6 +17,7 @@ import type { UnitTypeEnum } from './unitTypeEnum';
  */
 export interface PatchedUnit {
   readonly id?: string;
+  readonly code?: number;
   condominium?: string;
   /** @nullable */
   block?: string | null;

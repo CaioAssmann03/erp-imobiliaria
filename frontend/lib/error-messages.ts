@@ -126,6 +126,8 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "people_individual.rg.duplicate_in_company": "Já existe uma pessoa com este RG nesta empresa.",
   "people_legal.cnpj.duplicate_in_company": "Já existe uma pessoa com este CNPJ nesta empresa.",
   "people_legal.company.mismatch": "O documento pertence a outra empresa.",
+  "person.modules.empty": "A pessoa precisa pertencer a ao menos um módulo.",
+  "person.modules.unknown": "Módulo desconhecido.",
   "percentage.out_of_range": "O percentual deve ficar entre 0 e 100.",
   permission_denied: "Você não tem permissão para esta ação.",
   required: "Campo obrigatório.",
@@ -149,6 +151,7 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "unit_person.ownership_percentage.sum_exceeds_100":
     "Os proprietários desta unidade passariam de 100% no mesmo período.",
   "unit_person.person.duplicate_active_link": "Esta pessoa já tem um vínculo ativo com este papel.",
+  "unit_person.person.not_in_condominiums": "Esta pessoa não está cadastrada para Condomínios.",
   "unit_person.person.other_company": "A pessoa pertence a outra empresa.",
   unsupported_media_type: "Formato de envio não suportado.",
   user_inactive: "Usuário inativo.",

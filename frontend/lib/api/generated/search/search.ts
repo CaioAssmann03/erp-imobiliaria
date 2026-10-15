@@ -49,7 +49,8 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 /**
  * Busca global: poucos resultados de cada cadastro, em uma única requisição.
  *
- * Cada consulta é limitada a `LIMIT_PER_TYPE` linhas. Quem começa com o termo vem primeiro.
+ * Cada consulta é limitada a `LIMIT_PER_TYPE` linhas. O cadastro cujo ID foi digitado vem primeiro,
+ * depois quem começa com o termo.
  */
 export const searchRetrieve = (
     params: SearchRetrieveParams,

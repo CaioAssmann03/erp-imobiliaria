@@ -8,6 +8,7 @@
 
 export interface PersonSearch {
   id: string;
+  code: number;
   name: string;
   document: string;
 }
