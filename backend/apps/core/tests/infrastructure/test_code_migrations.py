@@ -19,7 +19,7 @@ pytestmark = pytest.mark.django_db(transaction=True)
 PERSONS_BEFORE = [("persons", "0004_constraint_error_codes")]
 CONDOMINIUMS_BEFORE = [("condominiums", "0003_constraint_error_codes")]
 SEEDED_CNPJ = "03136483000144"
-SEQUENCES = {"person_code_seq", "condominium_code_seq", "unit_code_seq"}
+SEQUENCES = {"person_code_seq", "condominium_code_seq"}
 
 
 def migrate(targets: list[tuple[str, str]]) -> StateApps:
@@ -94,32 +94,29 @@ def test_the_sequence_continues_after_the_highest_code() -> None:
     assert next_person.code == 4
 
 
-def test_existing_condominiums_and_units_are_numbered_by_creation_order() -> None:
+def test_existing_condominiums_are_numbered_by_creation_order() -> None:
     old_apps = migrate(CONDOMINIUMS_BEFORE)
     condominium_model: Any = old_apps.get_model("condominiums", "Condominium")
-    unit_model: Any = old_apps.get_model("condominiums", "Unit")
     company = company_of(old_apps)
-    condominiums = {}
     for name, cnpj, day in (("Sol", "11222333000181", 3), ("Lua", "45723174000110", 1)):
-        condominiums[name] = condominium_model.objects.create(company=company, name=name, cnpj=cnpj)
-        condominium_model.objects.filter(pk=condominiums[name].pk).update(created_at=created_at(day))
-    for name, day in (("102", 5), ("101", 4)):
-        unit = unit_model.objects.create(condominium=condominiums["Sol"], name=name)
-        unit_model.objects.filter(pk=unit.pk).update(created_at=created_at(day))
+        condominium = condominium_model.objects.create(company=company, name=name, cnpj=cnpj)
+        condominium_model.objects.filter(pk=condominium.pk).update(created_at=created_at(day))
 
     new_apps = migrate(latest("condominiums"))
 
     new_condominium: Any = new_apps.get_model("condominiums", "Condominium")
-    new_unit: Any = new_apps.get_model("condominiums", "Unit")
     assert [(row.code, row.name) for row in new_condominium.objects.order_by("code")] == [
         (1, "Lua"),
         (2, "Sol"),
     ]
-    assert [(row.code, row.name) for row in new_unit.objects.order_by("code")] == [
-        (1, "101"),
-        (2, "102"),
-    ]
     assert new_condominium.objects.create(company=company_of(new_apps), name="Mar", cnpj="11444777000161").code == 3
+
+
+def test_units_get_no_code() -> None:
+    new_apps = migrate(latest("condominiums"))
+
+    unit_model: Any = new_apps.get_model("condominiums", "Unit")
+    assert "code" not in {field.name for field in unit_model._meta.get_fields()}
 
 
 def test_the_migrations_reverse() -> None:
@@ -128,7 +125,7 @@ def test_the_migrations_reverse() -> None:
     with connection.cursor() as cursor:
         tables = {
             table: {column.name for column in connection.introspection.get_table_description(cursor, table)}
-            for table in ("persons_person", "condominiums_condominium", "condominiums_unit")
+            for table in ("persons_person", "condominiums_condominium")
         }
         cursor.execute("SELECT relname FROM pg_class WHERE relkind = 'S'")
         sequences = {row[0] for row in cursor.fetchall()}

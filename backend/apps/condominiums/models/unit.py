@@ -12,12 +12,11 @@ from apps.condominiums.models.condominium import Condominium
 from apps.condominiums.models.querysets import UnitQuerySet
 from apps.condominiums.models.rules import UnitRules
 from apps.condominiums.validators import validate_ideal_fraction, validate_non_negative
-from apps.core.models import SequentialCodeMixin, sequential_code_field
 from apps.core.models.base import BaseModel
 
 
 @final
-class Unit(SequentialCodeMixin, BaseModel):
+class Unit(BaseModel):
     APPORTIONMENT_TOTAL = Decimal(1)
     APPORTIONMENT_TOLERANCE = Decimal("0.0001")
 
@@ -41,7 +40,6 @@ class Unit(SequentialCodeMixin, BaseModel):
     block = models.ForeignKey(
         Block, on_delete=models.RESTRICT, related_name="units", blank=True, null=True
     )
-    code = sequential_code_field("unit_code_seq")
 
     name = models.CharField(max_length=30, help_text="Ex.: 101")
 

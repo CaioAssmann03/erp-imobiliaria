@@ -1,4 +1,7 @@
-"""Search by ID (spec 019, R4, R6, R8): the record whose number was typed comes first."""
+"""Search by ID (spec 019, R4, R6, R8): the record whose number was typed comes first.
+
+People and condominiums have an ID; a unit has none and is found by its number (its name).
+"""
 
 import pytest
 from django.urls import reverse
@@ -38,18 +41,27 @@ def make_condominium(name: str, code: int, cnpj: str = CNPJ) -> Condominium:
     return Condominium.objects.create(company=seeded_company(), name=name, code=code, cnpj=cnpj)
 
 
-def make_unit(condominium: Condominium, name: str, code: int) -> Unit:
-    return Unit.objects.create(condominium=condominium, name=name, code=code)
+def make_unit(condominium: Condominium, name: str) -> Unit:
+    return Unit.objects.create(condominium=condominium, name=name)
 
 
-def test_every_search_item_carries_the_code(api_client: APIClient) -> None:
+def test_people_and_condominiums_carry_the_code(api_client: APIClient) -> None:
     _ = make_person("Maria Silva", 51)
-    condominium = make_condominium("Residencial Sol", 52)
-    _ = make_unit(condominium, "101", 53)
+    _ = make_condominium("Residencial Sol", 52)
 
     assert body(search(api_client, "maria"))["persons"][0]["code"] == 51
     assert body(search(api_client, "residencial"))["condominiums"][0]["code"] == 52
-    assert body(search(api_client, "101"))["units"][0]["code"] == 53
+
+
+def test_a_unit_is_found_by_its_number_and_has_no_code(api_client: APIClient) -> None:
+    condominium = make_condominium("Residencial Sol", 52)
+    _ = make_unit(condominium, "101")
+    _ = make_unit(condominium, "202")
+
+    found = body(search(api_client, "101"))
+
+    assert [unit["name"] for unit in found["units"]] == ["101"]
+    assert "code" not in found["units"][0]
 
 
 @pytest.mark.parametrize("term", ["42", "4242"])
@@ -59,15 +71,15 @@ def test_digits_only_term_puts_the_code_match_first(api_client: APIClient, term:
     _ = make_person(f"Ana {term}", code + 1)
     first_condominium = make_condominium("Zeta", code)
     _ = make_condominium(f"Alfa {term}", code + 1, OTHER_CNPJ)
-    _ = make_unit(first_condominium, "Z-unit", code)
-    _ = make_unit(first_condominium, f"A-{term}", code + 1)
+    _ = make_unit(first_condominium, f"A-{term}")
 
     found = search(api_client, term)
 
     # By name the "A…" records would come first; the ID that was typed comes before them.
     assert names(found, "persons") == ["Zeca", f"Ana {term}"]
     assert names(found, "condominiums") == ["Zeta", f"Alfa {term}"]
-    assert names(found, "units") == ["Z-unit", f"A-{term}"]
+    # A unit has no ID: it matches only by its number.
+    assert names(found, "units") == [f"A-{term}"]
 
 
 def test_one_digit_term_returns_only_the_code_match(api_client: APIClient) -> None:
@@ -75,14 +87,13 @@ def test_one_digit_term_returns_only_the_code_match(api_client: APIClient) -> No
     _ = make_person("Ana 7", 9)
     first_condominium = make_condominium("Zeta", 7)
     _ = make_condominium("Bloco 7", 9, OTHER_CNPJ)
-    _ = make_unit(first_condominium, "Z-unit", 7)
-    _ = make_unit(first_condominium, "A-7", 9)
+    _ = make_unit(first_condominium, "A-7")
 
     found = search(api_client, "7")
 
     assert names(found, "persons") == ["Zeca"]
     assert names(found, "condominiums") == ["Zeta"]
-    assert names(found, "units") == ["Z-unit"]
+    assert names(found, "units") == []
 
 
 def test_a_document_start_comes_after_the_exact_match(api_client: APIClient) -> None:

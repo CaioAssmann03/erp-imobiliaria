@@ -27,7 +27,7 @@ Company ◄── PROTECT ── CurrentAccount (finance; the holder is a generi
 **Constraints and rules** are in each model's `Meta.constraints`, `clean()` and `models/rules/`, with the same message and code (`errors/`). Two to remember: SQL `CHECK (x >= 0)` passes when `x` is NULL (add `isnull=False` when null must fail), and the same CPF, CNPJ or RG may exist in two companies (unique per company, not global).
 
 ## Indexes and formats
-Trigram GIN on `Person` (`UPPER(name)`, `UPPER(email)`) and `PeopleLegal` (`UPPER(ie)`); `core.0001` creates `pg_trgm`, `persons.0001` depends on it. CPF 11 digits, CNPJ 14 (alphanumeric accepted), CEP 8: stored digits-only, validated in `core/validators/`. Money is a `DecimalField` (2 places); percentages 0–100 (2 places); `ideal_fraction` 8 places. `code` (the "ID" users type) is a whole number from one PostgreSQL sequence per kind of record: `person_code_seq`, `condominium_code_seq`, `unit_code_seq` (and `registry` for ledger entries); it is unique, never reused, read-only and assigned by the database.
+Trigram GIN on `Person` (`UPPER(name)`, `UPPER(email)`) and `PeopleLegal` (`UPPER(ie)`); `core.0001` creates `pg_trgm`, `persons.0001` depends on it. CPF 11 digits, CNPJ 14 (alphanumeric accepted), CEP 8: stored digits-only, validated in `core/validators/`. Money is a `DecimalField` (2 places); percentages 0–100 (2 places); `ideal_fraction` 8 places. `code` (the "ID" users type) is a whole number from one PostgreSQL sequence per kind of record: `person_code_seq` and `condominium_code_seq` (and `registry` for ledger entries); it is unique, never reused, read-only and assigned by the database.
 
 ## Business rules and formulas
 Rules live in the models; the dashboard and API only call them. **Implemented** · **Stored** (kept, no calculation) · **Planned**. *Confirm* = inferred meaning: ask before building on it.
@@ -46,7 +46,7 @@ Rules live in the models; the dashboard and API only call them. **Implemented** 
 | Links | Owner percentages of a unit never sum more than 100 at any start date (ended owners do not block new ones; tenants ignored; exactly 100 is not required) | Implemented (`UnitPersonRules`) |
 | Links | Lease ending = tenant link with `end_date` in [today−30, today+60] | Implemented (dashboard) |
 | Person | Individual (CPF) or legal (CNPJ), kind fixed after creation (UI rule); documents digits-only with check digits | Implemented |
-| IDs | `Condominium`, `Person` and `Unit` have a `code` (their "ID"); owners and tenants are identified by the person's `code`; a numeric search finds the exact `code` first | Implemented (spec 019) |
+| IDs | `Condominium` and `Person` have a `code` (their "ID"); a unit has none (it is its condominium plus its number); owners and tenants are identified by the person's `code`; a numeric search finds the exact `code` first | Implemented (spec 019) |
 | Modules | A person belongs to one or more modules (`condominiums`, `rentals`); lists, pickers and search show only the module's people, and a unit link needs `condominiums`; the same person keeps one `code` in every module | Implemented (spec 019); the rentals models follow in phase 8 |
 | Finance | `CostCenter` (was "sub-conta") groups entries per condominium; condominiums with none are flagged. `EntryTemplate` (was "histórico"): `admin_fee_incidence_percentage`, `accumulate_to_balance`, `has_accumulation_history`, `is_subject_to_social_security` | Models only — meanings inferred from Sami, *confirm* |
 

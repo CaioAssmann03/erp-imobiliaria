@@ -19,7 +19,6 @@ class CondominiumSearchSerializer(serializers.Serializer[dict[str, object]]):
 
 class UnitSearchSerializer(serializers.Serializer[dict[str, object]]):
     id = serializers.UUIDField()
-    code = serializers.IntegerField()
     name = serializers.CharField()
     condominium = serializers.UUIDField(source="condominium_id")
     condominium_name = serializers.CharField(source="condominium.name")

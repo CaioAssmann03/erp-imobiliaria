@@ -53,8 +53,7 @@ class UnitPersonInline(CompanyScopedAdminMixin, TabularInline):
 
 @admin.register(Unit)
 class UnitAdmin(CompanyScopedAdminMixin, ModelAdmin):
-    list_display = ("code", "condominium", "block", "name", "type", "active")
-    readonly_fields = ("code",)
-    search_fields = ("=code", "name", "registration_number")
+    list_display = ("condominium", "block", "name", "type", "active")
+    search_fields = ("name", "registration_number")
     list_filter = ("condominium", "type", "active")
     inlines = (UnitPersonInline,)
