@@ -26,3 +26,7 @@ class UnitPersonError(RuleError):
         "unit_person.person.other_company",
         "Person belongs to another company.",
     )
+    PERSON_NOT_IN_CONDOMINIUMS = (
+        "unit_person.person.not_in_condominiums",
+        "The person is not registered for condominiums.",
+    )

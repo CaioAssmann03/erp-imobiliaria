@@ -22,4 +22,5 @@ class CondominiumViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Condom
     serializer_class = CondominiumSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)
     search_fields = ("name", "cnpj", "address__city")
+    search_code_field = "code"
     filterset_class = CondominiumFilter

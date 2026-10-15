@@ -9,10 +9,11 @@ The core registry: a condominium with its address, administration contract, bill
 
 ## Rules worth knowing
 - **`Condominium`**: `company` is the user's (read-only in the API); the `advisor` (a `Person`) must belong to the same company.
+- **`code`** is the "ID" of a `Condominium`: a number from its own sequence (`condominium_code_seq`), unique, never reused and read-only; a term of only digits in `?query=` finds it first (spec 019). A `Unit` has no ID: it is its condominium plus its number (`name`, and the block when there is one). `Unit.registration_number` is another thing: the registry-office "matrícula", free text.
 - **`AdministrationContract`** (1:1): the fee rules (fixed needs an amount, variable needs percentage and basis, floor ≤ ceiling) are `AdministrationContractRules`, each also guarded by a check constraint. `fee_floor` / `fee_ceiling` exist in the API but no screen uses them yet.
 - **`BillingRules`** (1:1): `due_day` 1–28, discount 0–100.
 - **`Unit`**: its `block` must belong to the same condominium (`RESTRICT` on delete). The active units of a condominium cannot sum more than 1 (`UnitRules.apportionment_exceeds_total`); reaching exactly 1 is only a dashboard pendency.
-- **`UnitPerson`** (owner/tenant link): `UnitPersonRules` (an owner needs a percentage and a tenant has none; end not before start; the person belongs to the unit's company; owners sum at most 100% at any date). One active link per `(unit, person, role)`.
+- **`UnitPerson`** (owner/tenant link): `UnitPersonRules` (an owner needs a percentage and a tenant has none; end not before start; the person belongs to the unit's company and to the `condominiums` module, checked when the link is created or its person changes, so a person who later leaves the module keeps the links they have; owners sum at most 100% at any date). One active link per `(unit, person, role)`.
 - Reusable queries live in `models/querysets/` (`UnitPerson.objects.current` / `leases_ending_soon`, `Unit.objects.without_responsible` / `with_lease_ending_soon`, `Condominium.objects.without_cost_centers`, the adjustment queries of the contract). The dashboard and the `?pending=` filters call the same ones, so their numbers match. Block CRUD has an API but no screen.
 
 ## API (`/api/`)

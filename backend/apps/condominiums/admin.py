@@ -37,8 +37,9 @@ class AddressAdmin(CompanyScopedAdminMixin, ModelAdmin):
 
 @admin.register(Condominium)
 class CondominiumAdmin(CompanyScopedAdminMixin, ModelAdmin):
-    list_display = ("name", "company", "type", "active")
-    search_fields = ("name", "cnpj")
+    list_display = ("code", "name", "company", "type", "active")
+    readonly_fields = ("code",)
+    search_fields = ("=code", "name", "cnpj")
     list_filter = ("company", "type", "active")
     raw_id_fields = ("advisor", "address")
     inlines = (BlockInline, AdministrationContractInline, BillingRulesInline)

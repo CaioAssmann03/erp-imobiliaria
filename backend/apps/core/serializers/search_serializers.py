@@ -3,12 +3,14 @@ from rest_framework import serializers
 
 class PersonSearchSerializer(serializers.Serializer[dict[str, object]]):
     id = serializers.UUIDField()
+    code = serializers.IntegerField()
     name = serializers.CharField()
     document = serializers.CharField(allow_blank=True)
 
 
 class CondominiumSearchSerializer(serializers.Serializer[dict[str, object]]):
     id = serializers.UUIDField()
+    code = serializers.IntegerField()
     name = serializers.CharField()
     cnpj = serializers.CharField()
     city = serializers.CharField(source="address.city", default=None, allow_null=True)

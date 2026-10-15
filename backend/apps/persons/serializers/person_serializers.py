@@ -23,6 +23,7 @@ class PersonSerializer(ModelRulesMixin, serializers.ModelSerializer[Person]):
         model = Person
         fields = (
             "id",
+            "code",
             "company",
             "name",
             "home_phone",
@@ -30,12 +31,13 @@ class PersonSerializer(ModelRulesMixin, serializers.ModelSerializer[Person]):
             "cell_number",
             "email",
             "active",
+            "modules",
             "people_individual",
             "people_legal",
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("company", "created_at", "updated_at")
+        read_only_fields = ("code", "company", "created_at", "updated_at")
 
     @override
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:

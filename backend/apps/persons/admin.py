@@ -27,9 +27,10 @@ class PeopleLegalInline(StackedInline):
 @final
 @admin.register(Person)
 class PersonAdmin(CompanyScopedAdminMixin, ModelAdmin):
-    list_display = ("name", "get_cpf", "get_cnpj", "cell_number", "email", "active")
+    list_display = ("code", "name", "get_cpf", "get_cnpj", "cell_number", "email", "active")
     list_filter = ("active",)
-    search_fields = ("name", "email", "people_individual__cpf", "people_legal__cnpj")
+    readonly_fields = ("code",)
+    search_fields = ("=code", "name", "email", "people_individual__cpf", "people_legal__cnpj")
     list_select_related = ("people_individual", "people_legal")
     inlines = (PeopleIndividualInline, PeopleLegalInline)
 

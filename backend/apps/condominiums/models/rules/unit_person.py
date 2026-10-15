@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from apps.condominiums.errors import UnitPersonError
 from apps.core.models.rules import ModelRules, rule
+from apps.persons.models import PersonModule
 
 if TYPE_CHECKING:
     # Used only in the string generic argument below: ruff cannot see it, hence the noqa.
@@ -47,6 +48,20 @@ class UnitPersonRules(ModelRules["UnitPerson"]):
         if link.person_id is None or link.unit_id is None:
             return False
         return link.person.company_id != link.unit.condominium.company_id
+
+    @rule("person", UnitPersonError.PERSON_NOT_IN_CONDOMINIUMS)
+    def person_is_not_from_condominiums(self) -> bool:
+        """Only a new link or a new person is checked: a person who leaves the module keeps the links they have."""
+        link = self.instance
+        if link.person_id is None or not self._person_is_new_or_changed():
+            return False
+        return PersonModule.CONDOMINIUMS not in link.person.modules
+
+    def _person_is_new_or_changed(self) -> bool:
+        link = self.instance
+        if link._state.adding:
+            return True
+        return not type(link).objects.filter(pk=link.pk, person_id=link.person_id).exists()
 
     @rule("ownership_percentage", UnitPersonError.PERCENTAGE_SUM_EXCEEDS_100)
     def owners_share_exceeds_100_percent(self) -> bool:

@@ -25,6 +25,7 @@ class CondominiumSerializer(ModelRulesMixin, serializers.ModelSerializer[Condomi
         model = Condominium
         fields = (
             "id",
+            "code",
             "company",
             "advisor",
             "address",
@@ -41,7 +42,7 @@ class CondominiumSerializer(ModelRulesMixin, serializers.ModelSerializer[Condomi
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "company", "created_at", "updated_at")
+        read_only_fields = ("id", "code", "company", "created_at", "updated_at")
 
     @override
     def create(self, validated_data: dict[str, Any]) -> Condominium:
