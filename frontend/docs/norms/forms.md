@@ -40,6 +40,10 @@ const methods = useForm<XxxFormInput, unknown, XxxFormOutput>({
 (`maskCpf`, `maskCnpj`, `maskCep`, `maskPhone`, `maskMoney`, `maskDecimal`, `maskInteger`); masks are display-only:
 CPF/CNPJ/CEP leave as digits. Validators in `lib/validators.ts` mirror the backend.
 
+`SelectField` is **controlled** (`value` comes from `useWatch`): the options usually load after `reset(xxxToForm(record))`, and an
+uncontrolled native `<select>` only shows a value whose `<option>` already exists (the stored supplier, sub-account or block would
+appear as the placeholder). Build any new select with `SelectField`, never a bare `<select {...register()}>` with async options.
+
 ## Rules
 Field names = API names (server errors land correctly). Client validation helps; the **server is the truth**: always handle 400.
 Never log form values (PII).

@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 
 import { inputClass } from "@/lib/ui";
 
@@ -32,6 +32,10 @@ export function SelectField({
   const id = useId();
   const error = useFieldError(name);
   const field = register(name);
+  // Controlled on purpose: the options usually load after the form was filled (`reset`), and an
+  // uncontrolled native select only shows a value whose <option> already exists. A controlled one
+  // re-applies `value` each time the options change, so the stored choice appears once they arrive.
+  const value = useWatch({ name }) as string | number | undefined;
 
   return (
     <FormField id={id} label={label} required={required} hint={hint} error={error} className={className}>
@@ -43,6 +47,7 @@ export function SelectField({
         aria-required={required}
         disabled={disabled}
         {...field}
+        value={value ?? ""}
         onChange={(event) => {
           field.onChange(event);
           onValueChange?.(event.target.value);
