@@ -174,6 +174,21 @@ def test_apportionment_must_sum_to_one(api_client: APIClient, company: Company) 
     assert dashboard(api_client)["pending"]["inconsistent_apportionment"] == 1
 
 
+def test_a_partly_filled_second_fraction_is_counted_as_inconsistent(
+    api_client: APIClient, company: Company
+) -> None:
+    closed = make_condominium(company, "Fecha", "11222333000181")
+    partly_filled = make_condominium(company, "Segunda Aberta", "45723174000110")
+    _ = Unit.objects.create(
+        condominium=closed, name="1", ideal_fraction=Decimal("1"), ideal_fraction_2=Decimal("1")
+    )
+    _ = Unit.objects.create(
+        condominium=partly_filled, name="1", ideal_fraction=Decimal("1"), ideal_fraction_2=Decimal("0.4")
+    )
+
+    assert dashboard(api_client)["pending"]["inconsistent_apportionment"] == 1
+
+
 def test_cost_centers_and_billing_block(api_client: APIClient, company: Company) -> None:
     with_centers = make_condominium(company, "Com", "11222333000181")
     _ = make_condominium(company, "Sem", "45723174000110")

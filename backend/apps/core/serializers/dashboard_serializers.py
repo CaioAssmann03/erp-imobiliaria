@@ -63,7 +63,7 @@ class PendingItemsSerializer(serializers.Serializer[dict[str, object]]):
         help_text="Unidades ativas sem proprietário/locatário: não há a quem cobrar"
     )
     inconsistent_apportionment = serializers.IntegerField(
-        help_text="Condomínios ativos cuja soma das frações ideais não fecha 1"
+        help_text="Condomínios ativos cuja soma de alguma fração ideal em uso não fecha 1"
     )
     overdue_adjustments = serializers.IntegerField()
     adjustments_next_30_days = serializers.IntegerField()

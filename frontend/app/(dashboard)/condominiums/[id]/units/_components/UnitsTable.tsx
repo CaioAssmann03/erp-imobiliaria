@@ -16,6 +16,7 @@ import {
   useUnitsList,
 } from "@/lib/api/generated";
 import type { UnitsListPending } from "@/lib/api/generated/models";
+import { invalidateApportionment } from "@/lib/query/apportionment";
 import type { UNIT_TYPES } from "@/lib/schemas/unit";
 
 import { UnitRow } from "./UnitRow";
@@ -84,6 +85,7 @@ export function UnitsTable({
           if (goBack) setPage(page - 1);
           queryClient.invalidateQueries({ queryKey: getUnitsListQueryKey() });
           queryClient.invalidateQueries({ queryKey: getDashboardRetrieveQueryKey() });
+          invalidateApportionment(queryClient);
           toast.success("Unidade excluída.");
         },
         onError: () => toast.error("Não foi possível excluir a unidade."),

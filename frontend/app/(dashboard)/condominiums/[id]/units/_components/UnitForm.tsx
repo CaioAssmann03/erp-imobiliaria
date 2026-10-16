@@ -23,6 +23,7 @@ import {
   type UnitFormOutput,
 } from "@/lib/schemas/unit";
 
+import { FractionsSection } from "./unit-form/FractionsSection";
 import { IdentificationSection } from "./unit-form/IdentificationSection";
 import { MetersSection } from "./unit-form/MetersSection";
 import { useUnitSubmit } from "./unit-form/use-unit-submit";
@@ -73,6 +74,7 @@ export function UnitForm({ condominiumId, unitId, listUrl }: UnitFormProps) {
           className="space-y-4"
         >
           <IdentificationSection condominiumId={condominiumId} />
+          <FractionsSection />
           <MetersSection />
           <FormActions isSubmitting={isSubmitting}>
             <Button

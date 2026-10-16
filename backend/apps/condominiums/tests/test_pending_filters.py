@@ -63,6 +63,19 @@ def test_condominiums_with_inconsistent_apportionment(api_client: APIClient, com
     assert condominium_names(api_client, "inconsistent_apportionment") == ["Nao Fecha"]
 
 
+def test_inconsistent_apportionment_looks_at_the_fractions_in_use(
+    api_client: APIClient, company: Company
+) -> None:
+    both_close = make_condominium(company, "Duas Fecham", "11222333000181")
+    make_unit(both_close, "101", ideal_fraction_2=Decimal("1"))
+    second_open = make_condominium(company, "Segunda Aberta", "45723174000110")
+    make_unit(second_open, "101", ideal_fraction_2=Decimal("0.5"))
+    second_unused = make_condominium(company, "Segunda Sem Uso", "11444777000161")
+    make_unit(second_unused, "101")
+
+    assert condominium_names(api_client, "inconsistent_apportionment") == ["Segunda Aberta"]
+
+
 def test_condominiums_by_adjustment_window(api_client: APIClient, company: Company) -> None:
     late = make_condominium(company, "Atrasado", "11222333000181")
     soon = make_condominium(company, "Em breve", "45723174000110")

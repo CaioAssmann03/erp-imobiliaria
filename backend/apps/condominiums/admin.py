@@ -9,6 +9,7 @@ from .models import (
     BillingRules,
     Block,
     Condominium,
+    LateInterestRate,
     Unit,
     UnitPerson,
 )
@@ -29,6 +30,11 @@ class BillingRulesInline(TabularInline):
     extra = 0
 
 
+class LateInterestRateInline(TabularInline):
+    model = LateInterestRate
+    extra = 0
+
+
 @admin.register(Address)
 class AddressAdmin(CompanyScopedAdminMixin, ModelAdmin):
     list_display = ("street", "number", "city", "state", "zip_code")
@@ -42,7 +48,12 @@ class CondominiumAdmin(CompanyScopedAdminMixin, ModelAdmin):
     search_fields = ("=code", "name", "cnpj")
     list_filter = ("company", "type", "active")
     raw_id_fields = ("advisor", "address")
-    inlines = (BlockInline, AdministrationContractInline, BillingRulesInline)
+    inlines = (
+        BlockInline,
+        AdministrationContractInline,
+        BillingRulesInline,
+        LateInterestRateInline,
+    )
 
 
 class UnitPersonInline(CompanyScopedAdminMixin, TabularInline):

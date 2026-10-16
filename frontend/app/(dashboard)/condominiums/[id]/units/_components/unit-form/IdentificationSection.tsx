@@ -3,7 +3,7 @@
 import { CheckboxField, SelectField, TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { useBlocksList } from "@/lib/api/generated";
-import { maskDecimal, maskInteger } from "@/lib/masks";
+import { maskInteger } from "@/lib/masks";
 import { UNIT_TYPES } from "@/lib/schemas/unit";
 
 export function IdentificationSection({ condominiumId }: { condominiumId: string }) {
@@ -28,21 +28,13 @@ export function IdentificationSection({ condominiumId }: { condominiumId: string
         />
         <SelectField name="type" label="Tipo" options={UNIT_TYPES} />
       </FieldRow>
-      <FieldRow columns={3}>
+      <FieldRow>
         <TextField name="registration_number" label="Matrícula do imóvel" maxLength={60} />
         <TextField
           name="resident_count"
           label="Nº de moradores"
           mask={(value) => maskInteger(value, 3)}
           inputMode="numeric"
-        />
-        <TextField
-          name="ideal_fraction"
-          label="Fração ideal"
-          mask={(value) => maskDecimal(value, 8, 1)}
-          inputMode="decimal"
-          placeholder="0,00000000"
-          hint="De 0 a 1. Usada no rateio."
         />
       </FieldRow>
       <FieldRow>

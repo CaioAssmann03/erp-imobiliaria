@@ -9,7 +9,7 @@
 export interface PendingItems {
   /** Unidades ativas sem proprietário/locatário: não há a quem cobrar */
   units_without_responsible: number;
-  /** Condomínios ativos cuja soma das frações ideais não fecha 1 */
+  /** Condomínios ativos cuja soma de alguma fração ideal em uso não fecha 1 */
   inconsistent_apportionment: number;
   overdue_adjustments: number;
   adjustments_next_30_days: number;
