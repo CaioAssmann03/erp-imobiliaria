@@ -15,10 +15,30 @@ from apps.condominiums.validators import validate_ideal_fraction, validate_non_n
 from apps.core.models.base import BaseModel
 
 
+def _ideal_fraction_range_check(field_name: str, constraint_name: str) -> models.CheckConstraint:
+    """The fraction is empty or greater than 0 and at most 1 (the same rule as `validate_ideal_fraction`)."""
+    return models.CheckConstraint(
+        name=constraint_name,
+        condition=Q(**{f"{field_name}__isnull": True})
+        | (Q(**{f"{field_name}__gt": 0}) & Q(**{f"{field_name}__lte": 1})),
+        violation_error_message=UnitError.IDEAL_FRACTION_OUT_OF_RANGE.message,
+        violation_error_code=UnitError.IDEAL_FRACTION_OUT_OF_RANGE.value,
+    )
+
+
 @final
 class Unit(BaseModel):
     APPORTIONMENT_TOTAL = Decimal(1)
     APPORTIONMENT_TOLERANCE = Decimal("0.0001")
+    # A unit has up to six ideal fractions (the 1st is the main one); each splits the expenses its own way.
+    IDEAL_FRACTION_FIELDS = (
+        "ideal_fraction",
+        "ideal_fraction_2",
+        "ideal_fraction_3",
+        "ideal_fraction_4",
+        "ideal_fraction_5",
+        "ideal_fraction_6",
+    )
 
     objects = UnitQuerySet.as_manager()
 
@@ -55,6 +75,46 @@ class Unit(BaseModel):
         validators=[validate_ideal_fraction],
         help_text="Share of common areas, from 0 to 1. Used for expanse apportionment",
     )
+    ideal_fraction_2 = models.DecimalField(
+        max_digits=9,
+        decimal_places=8,
+        blank=True,
+        null=True,
+        validators=[validate_ideal_fraction],
+        help_text="2nd ideal fraction, optional (from 0 to 1)",
+    )
+    ideal_fraction_3 = models.DecimalField(
+        max_digits=9,
+        decimal_places=8,
+        blank=True,
+        null=True,
+        validators=[validate_ideal_fraction],
+        help_text="3rd ideal fraction, optional (from 0 to 1)",
+    )
+    ideal_fraction_4 = models.DecimalField(
+        max_digits=9,
+        decimal_places=8,
+        blank=True,
+        null=True,
+        validators=[validate_ideal_fraction],
+        help_text="4th ideal fraction, optional (from 0 to 1)",
+    )
+    ideal_fraction_5 = models.DecimalField(
+        max_digits=9,
+        decimal_places=8,
+        blank=True,
+        null=True,
+        validators=[validate_ideal_fraction],
+        help_text="5th ideal fraction, optional (from 0 to 1)",
+    )
+    ideal_fraction_6 = models.DecimalField(
+        max_digits=9,
+        decimal_places=8,
+        blank=True,
+        null=True,
+        validators=[validate_ideal_fraction],
+        help_text="6th ideal fraction, optional (from 0 to 1)",
+    )
 
     is_manager_unit = models.BooleanField(default=False)
     registration_number = models.CharField(max_length=60, blank=True)
@@ -86,6 +146,11 @@ class Unit(BaseModel):
                 violation_error_message=UnitError.IDEAL_FRACTION_OUT_OF_RANGE.message,
                 violation_error_code=UnitError.IDEAL_FRACTION_OUT_OF_RANGE.value,
             ),
+            _ideal_fraction_range_check("ideal_fraction_2", "unit_ideal_fraction_2_0_1"),
+            _ideal_fraction_range_check("ideal_fraction_3", "unit_ideal_fraction_3_0_1"),
+            _ideal_fraction_range_check("ideal_fraction_4", "unit_ideal_fraction_4_0_1"),
+            _ideal_fraction_range_check("ideal_fraction_5", "unit_ideal_fraction_5_0_1"),
+            _ideal_fraction_range_check("ideal_fraction_6", "unit_ideal_fraction_6_0_1"),
             models.UniqueConstraint(
                 fields=("condominium", "block", "name"),
                 name="unit_unique_per_block",
@@ -112,6 +177,16 @@ class Unit(BaseModel):
     @override
     def clean(self) -> None:
         UnitRules(self).validate()
+
+    @classmethod
+    def is_apportionment_inconsistent(cls, fraction_number: int, total: Decimal) -> bool:
+        """Whether the sum of a fraction over the active units of a condominium does not close at 1.
+
+        The 1st fraction always has to; the 2nd to 6th only once some unit uses them (a sum above 0).
+        """
+        if fraction_number > 1 and total == 0:
+            return False
+        return abs(total - cls.APPORTIONMENT_TOTAL) > cls.APPORTIONMENT_TOLERANCE
 
     @override
     def __str__(self) -> str:

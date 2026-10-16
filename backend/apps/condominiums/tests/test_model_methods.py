@@ -8,7 +8,36 @@ import pytest
 from apps.core.testing import seeded_company
 from apps.persons.models import Person
 
-from ..models import AdministrationContract, Condominium, Unit, UnitPerson
+from ..models import AdministrationContract, BillingRules, Condominium, Unit, UnitPerson
+
+
+class TestBillingMonths:
+    """The reference month is the month the issuance refers to (the Sami's "referência")."""
+
+    @pytest.mark.parametrize(
+        ("due_month", "competence_month", "due", "competence"),
+        [
+            ("following", "same_as_due", date(2026, 11, 1), date(2026, 11, 1)),
+            ("following", "before_due", date(2026, 11, 1), date(2026, 10, 1)),
+            ("reference", "same_as_due", date(2026, 10, 1), date(2026, 10, 1)),
+            ("reference", "before_due", date(2026, 10, 1), date(2026, 9, 1)),
+        ],
+    )
+    def test_due_month_and_competence_month_of_a_reference_month(
+        self, due_month: str, competence_month: str, due: date, competence: date
+    ) -> None:
+        billing_rules = BillingRules(due_month=due_month, competence_month=competence_month)
+        reference_month = date(2026, 10, 17)  # any day of the month
+
+        assert billing_rules.due_month_of(reference_month) == due
+        assert billing_rules.competence_month_of(reference_month) == competence
+
+    def test_the_months_cross_the_year_boundary(self) -> None:
+        following = BillingRules(due_month="following", competence_month="same_as_due")
+        before_due = BillingRules(due_month="reference", competence_month="before_due")
+
+        assert following.due_month_of(date(2026, 12, 31)) == date(2027, 1, 1)
+        assert before_due.competence_month_of(date(2027, 1, 5)) == date(2026, 12, 1)
 
 
 class TestContractAdjustment:
