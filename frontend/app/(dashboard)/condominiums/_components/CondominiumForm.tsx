@@ -26,7 +26,14 @@ import { FeeSection } from "./condominium-form/FeeSection";
 import { IdentificationSection } from "./condominium-form/IdentificationSection";
 import { useCondominiumSubmit } from "./condominium-form/use-condominium-submit";
 
-export function CondominiumForm({ condominiumId }: { condominiumId?: string }) {
+export function CondominiumForm({
+  condominiumId,
+  mapsEmbedKey,
+}: {
+  condominiumId?: string;
+  /** Chave da Maps Embed API, lida no servidor pela página; sem ela o endereço só ganha o link do mapa. */
+  mapsEmbedKey?: string;
+}) {
   const router = useRouter();
   const isEdit = condominiumId !== undefined;
 
@@ -56,7 +63,7 @@ export function CondominiumForm({ condominiumId }: { condominiumId?: string }) {
         className="space-y-4"
       >
         <IdentificationSection />
-        <AddressSection />
+        <AddressSection mapsEmbedKey={mapsEmbedKey} />
         <FeeSection />
         <BillingSection condominiumId={condominiumId} />
         <AdjustmentSection />

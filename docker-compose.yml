@@ -74,6 +74,7 @@ services:
       # (dentro do container, "localhost" não é o backend). Variável só do servidor.
       API_INTERNAL_URL: http://backend:8000
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
+      GOOGLE_MAPS_EMBED_KEY: ${GOOGLE_MAPS_EMBED_KEY:-}
     volumes:
       - ./frontend:/app
       - /app/node_modules
