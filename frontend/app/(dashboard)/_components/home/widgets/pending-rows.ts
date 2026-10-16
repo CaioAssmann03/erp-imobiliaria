@@ -19,7 +19,7 @@ export function pendingRows(pending: Dashboard["pending"] | undefined): PendingR
     {
       count: pending?.inconsistent_apportionment ?? 0,
       label: "Rateio que não fecha 100%",
-      detail: "Condomínios cuja soma das frações ideais é diferente de 100%",
+      detail: "Condomínios em que alguma fração ideal em uso não soma 100%",
       href: "/condominiums?pending=inconsistent_apportionment",
     },
     {

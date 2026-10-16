@@ -27,17 +27,35 @@ export const UNIT_TYPES = [
 export const unitTypeLabel = (type: string | undefined) =>
   UNIT_TYPES.find((item) => item.value === type)?.label ?? type ?? "";
 
+/** As seis frações ideais da unidade, com o nome do campo na API; a 1ª é a principal, as outras são opcionais. */
+export const UNIT_FRACTIONS = [
+  { name: "ideal_fraction", label: "1ª fração" },
+  { name: "ideal_fraction_2", label: "2ª fração" },
+  { name: "ideal_fraction_3", label: "3ª fração" },
+  { name: "ideal_fraction_4", label: "4ª fração" },
+  { name: "ideal_fraction_5", label: "5ª fração" },
+  { name: "ideal_fraction_6", label: "6ª fração" },
+] as const;
+
+// numeric(9, 8): fração de 0 a 1, usada no rateio das despesas
+const idealFraction = (label: string) =>
+  decimalField(label, { max: 1, decimals: 8 }).refine(
+    (value) => value === undefined || Number(value) > 0,
+    `A ${label.toLowerCase()} deve ser maior que zero`
+  );
+
 export const unitSchema = z.object({
   name: requiredText("a unidade", { max: 30 }),
   block: z.string().transform((value) => (value ? value : null)),
   type: enumField(UNIT_TYPES.map((t) => t.value) as [string, ...string[]]),
   registration_number: optionalText("Matrícula do imóvel", 60),
   resident_count: intField("Nº de moradores", 0, 999),
-  // numeric(9, 8): fração de 0 a 1, usada no rateio das despesas
-  ideal_fraction: decimalField("Fração ideal", { max: 1, decimals: 8 }).refine(
-    (value) => value === undefined || Number(value) > 0,
-    "A fração ideal deve ser maior que zero"
-  ),
+  ideal_fraction: idealFraction("1ª fração"),
+  ideal_fraction_2: idealFraction("2ª fração"),
+  ideal_fraction_3: idealFraction("3ª fração"),
+  ideal_fraction_4: idealFraction("4ª fração"),
+  ideal_fraction_5: idealFraction("5ª fração"),
+  ideal_fraction_6: idealFraction("6ª fração"),
   is_manager_unit: z.boolean(),
   is_billing_blocked: z.boolean(),
   active: z.boolean(),
@@ -56,6 +74,11 @@ export const UNIT_DEFAULTS: UnitFormInput = {
   registration_number: "",
   resident_count: "0",
   ideal_fraction: "",
+  ideal_fraction_2: "",
+  ideal_fraction_3: "",
+  ideal_fraction_4: "",
+  ideal_fraction_5: "",
+  ideal_fraction_6: "",
   is_manager_unit: false,
   is_billing_blocked: false,
   active: true,
@@ -72,6 +95,11 @@ export function unitToForm(u: Unit): UnitFormInput {
     registration_number: u.registration_number ?? "",
     resident_count: String(u.resident_count ?? 0),
     ideal_fraction: decimalFromApi(u.ideal_fraction, 8),
+    ideal_fraction_2: decimalFromApi(u.ideal_fraction_2, 8),
+    ideal_fraction_3: decimalFromApi(u.ideal_fraction_3, 8),
+    ideal_fraction_4: decimalFromApi(u.ideal_fraction_4, 8),
+    ideal_fraction_5: decimalFromApi(u.ideal_fraction_5, 8),
+    ideal_fraction_6: decimalFromApi(u.ideal_fraction_6, 8),
     is_manager_unit: u.is_manager_unit ?? false,
     is_billing_blocked: u.is_billing_blocked ?? false,
     active: u.active ?? true,
@@ -96,6 +124,11 @@ export function unitToPayload(
     registration_number: values.registration_number ?? (isEdit ? "" : undefined),
     resident_count: values.resident_count,
     ideal_fraction: values.ideal_fraction ?? empty,
+    ideal_fraction_2: values.ideal_fraction_2 ?? empty,
+    ideal_fraction_3: values.ideal_fraction_3 ?? empty,
+    ideal_fraction_4: values.ideal_fraction_4 ?? empty,
+    ideal_fraction_5: values.ideal_fraction_5 ?? empty,
+    ideal_fraction_6: values.ideal_fraction_6 ?? empty,
     is_manager_unit: values.is_manager_unit,
     is_billing_blocked: values.is_billing_blocked,
     active: values.active,

@@ -20,12 +20,20 @@ import {
 
 import { AddressSection } from "./condominium-form/AddressSection";
 import { AdjustmentSection } from "./condominium-form/AdjustmentSection";
+import { ApportionmentCard } from "./condominium-form/ApportionmentCard";
 import { BillingSection } from "./condominium-form/BillingSection";
 import { FeeSection } from "./condominium-form/FeeSection";
 import { IdentificationSection } from "./condominium-form/IdentificationSection";
 import { useCondominiumSubmit } from "./condominium-form/use-condominium-submit";
 
-export function CondominiumForm({ condominiumId }: { condominiumId?: string }) {
+export function CondominiumForm({
+  condominiumId,
+  mapsEmbedKey,
+}: {
+  condominiumId?: string;
+  /** Chave da Maps Embed API, lida no servidor pela página; sem ela o endereço só ganha o link do mapa. */
+  mapsEmbedKey?: string;
+}) {
   const router = useRouter();
   const isEdit = condominiumId !== undefined;
 
@@ -55,10 +63,11 @@ export function CondominiumForm({ condominiumId }: { condominiumId?: string }) {
         className="space-y-4"
       >
         <IdentificationSection />
-        <AddressSection />
+        <AddressSection mapsEmbedKey={mapsEmbedKey} />
         <FeeSection />
-        <BillingSection />
+        <BillingSection condominiumId={condominiumId} />
         <AdjustmentSection />
+        {isEdit && <ApportionmentCard condominiumId={condominiumId} />}
         <FormActions isSubmitting={isSubmitting}>
           <Button type="button" variant="secondary" onClick={() => router.push("/condominiums")}>
             Cancelar

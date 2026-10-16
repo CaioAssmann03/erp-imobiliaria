@@ -37,6 +37,36 @@ export interface PatchedUnit {
      * @pattern ^-?\d{0,1}(?:\.\d{0,8})?$
      */
   ideal_fraction?: string | null;
+  /**
+     * 2nd ideal fraction, optional (from 0 to 1)
+     * @nullable
+     * @pattern ^-?\d{0,1}(?:\.\d{0,8})?$
+     */
+  ideal_fraction_2?: string | null;
+  /**
+     * 3rd ideal fraction, optional (from 0 to 1)
+     * @nullable
+     * @pattern ^-?\d{0,1}(?:\.\d{0,8})?$
+     */
+  ideal_fraction_3?: string | null;
+  /**
+     * 4th ideal fraction, optional (from 0 to 1)
+     * @nullable
+     * @pattern ^-?\d{0,1}(?:\.\d{0,8})?$
+     */
+  ideal_fraction_4?: string | null;
+  /**
+     * 5th ideal fraction, optional (from 0 to 1)
+     * @nullable
+     * @pattern ^-?\d{0,1}(?:\.\d{0,8})?$
+     */
+  ideal_fraction_5?: string | null;
+  /**
+     * 6th ideal fraction, optional (from 0 to 1)
+     * @nullable
+     * @pattern ^-?\d{0,1}(?:\.\d{0,8})?$
+     */
+  ideal_fraction_6?: string | null;
   is_manager_unit?: boolean;
   /** @maxLength 60 */
   registration_number?: string;

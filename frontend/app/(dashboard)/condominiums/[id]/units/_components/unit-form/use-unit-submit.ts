@@ -14,6 +14,7 @@ import {
 } from "@/lib/api/generated";
 import type { Unit } from "@/lib/api/generated/models";
 import { applyServerErrors } from "@/lib/form-errors";
+import { invalidateApportionment } from "@/lib/query/apportionment";
 import { unitToPayload, type UnitFormInput, type UnitFormOutput } from "@/lib/schemas/unit";
 
 export function useUnitSubmit(
@@ -34,6 +35,7 @@ export function useUnitSubmit(
       queryClient.invalidateQueries({ queryKey: getUnitsListQueryKey() }),
       queryClient.invalidateQueries({ queryKey: getDashboardRetrieveQueryKey() }),
       queryClient.invalidateQueries({ queryKey: getUnitsRetrieveQueryKey(id) }),
+      invalidateApportionment(queryClient),
     ]);
 
   const onError = (error: unknown) => toast.error(applyServerErrors(error, setError));

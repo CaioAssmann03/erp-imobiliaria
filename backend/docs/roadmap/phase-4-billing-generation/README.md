@@ -23,6 +23,8 @@ Compute the monthly charge per unit and generate the boleto document in draft/ho
 ## Notes
 **External action on day 1:** request the Santander Collection API accreditation (certificate + OAuth). It has the longest lead time of the project.
 
+**Before part 02:** the per-condominium late-payment rules (fine, interest rates, grace), the competence settings and the six ideal fractions per unit are specified in [spec 020](../../features/history.md); billing plan items will name a fraction number from 1 to 6.
+
 ## Closing checklist
 - [ ] Every part is `done` or `moved`
 - [ ] Docs of the affected apps updated

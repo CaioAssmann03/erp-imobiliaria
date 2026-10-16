@@ -10,10 +10,10 @@
  * * `reference` - Reference
  * * `following` - Following
  */
-export type CalculationPeriodEnum = typeof CalculationPeriodEnum[keyof typeof CalculationPeriodEnum];
+export type DueMonthEnum = typeof DueMonthEnum[keyof typeof DueMonthEnum];
 
 
-export const CalculationPeriodEnum = {
+export const DueMonthEnum = {
   reference: 'reference',
   following: 'following',
 } as const;

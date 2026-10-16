@@ -4,9 +4,10 @@ import { TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { maskCep } from "@/lib/masks";
 
+import { AddressMap } from "./AddressMap";
 import { useZipCodeAutofill } from "./use-zip-code-autofill";
 
-export function AddressSection() {
+export function AddressSection({ mapsEmbedKey }: { mapsEmbedKey?: string }) {
   const { onZipCodeChange, hint } = useZipCodeAutofill();
 
   return (
@@ -38,6 +39,7 @@ export function AddressSection() {
           placeholder="SP"
         />
       </FieldRow>
+      <AddressMap apiKey={mapsEmbedKey} />
       <FieldRow>
         <TextField name="water_meter" label="Hidrômetro" maxLength={30} />
         <TextField name="electricity_meter" label="Relógio de luz" maxLength={30} />

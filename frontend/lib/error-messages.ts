@@ -40,6 +40,10 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "billing_rules.due_day.out_of_range": "O dia de vencimento deve ficar entre 1 e 28.",
   "billing_rules.early_payment_discount_percentage.out_of_range":
     "O desconto deve ficar entre 0 e 100.",
+  "billing_rules.initial_late_fee.incomplete":
+    "Informe o percentual e os dias da multa dos primeiros dias.",
+  "billing_rules.initial_late_fee_days.out_of_range": "Informe ao menos 1 dia.",
+  "billing_rules.late_fee_percentage.out_of_range": "A multa deve ficar entre 0% e 2%.",
   blank: "Campo obrigatório.",
   "block.name.duplicate_in_condominium": "Já existe um bloco com este nome neste condomínio.",
   "cash_number.not_positive": "O número do caixa deve ser maior que zero.",
@@ -98,6 +102,8 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   incorrect_type: "Valor em formato inválido.",
   invalid: "Valor inválido.",
   invalid_choice: "Opção inválida.",
+  "late_interest_rate.start_date.duplicate_in_condominium":
+    "Já existe uma taxa de juros com esta data de início neste condomínio.",
   max_decimal_places: "Casas decimais demais.",
   max_digits: "Número com dígitos demais.",
   max_length: "Texto muito longo.",
