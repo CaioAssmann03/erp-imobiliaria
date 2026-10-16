@@ -1,7 +1,7 @@
 ---
 summary: Spec: a Google Maps map (Maps Embed API) under the condominium address, fed by the address fields (so the CEP lookup brings it), with an "Abrir no Maps" link when no key is configured.
 read-when: you touch the address section of the condominium form, GOOGLE_MAPS_EMBED_KEY, or the CSP frame-src
-skip-if: the CEP lookup itself (ViaCEP) → frontend `hooks/use-cep-lookup.ts`; security headers and CSP → frontend `docs/safeguards/http-hardening.md`; late-payment rules and fractions → features/020-late-payment-rules-and-fractions.md
+skip-if: the CEP lookup itself (ViaCEP) → frontend `hooks/use-cep-lookup.ts`; security headers and CSP → frontend `docs/safeguards/http-hardening.md`; late-payment rules and fractions → features/history.md (section 020)
 ---
 # 021 — Address map (Google Maps)
 
