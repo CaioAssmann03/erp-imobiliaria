@@ -25,6 +25,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  Apportionment,
   Condominium,
   CondominiumsListParams,
   ErrorResponse,
@@ -526,3 +527,92 @@ const {mutation: mutationOptions} = options ?
       > => {
       return useMutation(getCondominiumsDestroyMutationOptions(options), queryClient);
     }
+    /**
+ * The sum of each ideal fraction over the active units, and whether it closes at 1.
+ */
+export const condominiumsApportionment = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<Apportionment>(
+      {url: `/api/condominiums/${id}/apportionment/`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getCondominiumsApportionmentQueryKey = (id: string,) => {
+    return [
+    `/api/condominiums/${id}/apportionment/`
+    ] as const;
+    }
+
+
+export const getCondominiumsApportionmentQueryOptions = <TData = Awaited<ReturnType<typeof condominiumsApportionment>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsApportionment>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCondominiumsApportionmentQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof condominiumsApportionment>>> = ({ signal }) => condominiumsApportionment(id, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof condominiumsApportionment>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CondominiumsApportionmentQueryResult = NonNullable<Awaited<ReturnType<typeof condominiumsApportionment>>>
+export type CondominiumsApportionmentQueryError = ErrorResponse
+
+
+export function useCondominiumsApportionment<TData = Awaited<ReturnType<typeof condominiumsApportionment>>, TError = ErrorResponse>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsApportionment>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof condominiumsApportionment>>,
+          TError,
+          Awaited<ReturnType<typeof condominiumsApportionment>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCondominiumsApportionment<TData = Awaited<ReturnType<typeof condominiumsApportionment>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsApportionment>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof condominiumsApportionment>>,
+          TError,
+          Awaited<ReturnType<typeof condominiumsApportionment>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCondominiumsApportionment<TData = Awaited<ReturnType<typeof condominiumsApportionment>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsApportionment>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useCondominiumsApportionment<TData = Awaited<ReturnType<typeof condominiumsApportionment>>, TError = ErrorResponse>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsApportionment>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCondominiumsApportionmentQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
