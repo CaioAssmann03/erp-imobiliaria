@@ -9,7 +9,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      # Host side of the mapping: set POSTGRES_HOST_PORT in .env when 5432 is taken by another Postgres.
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
 
   redis:
     image: redis:7
