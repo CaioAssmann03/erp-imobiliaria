@@ -12,6 +12,7 @@ Company (core) ◄── PROTECT ── Person (persons) ── 1:1 ── Peopl
    │ └─ accounts.User.company (every user belongs to one company)
 Condominium (condominiums) ── advisor ─┘ SET_NULL
    ├─ 1:1 Address (SET_NULL)    ├─ 1:1 AdministrationContract (CASCADE)    ├─ 1:1 BillingRules (CASCADE)
+   ├─ 1:N LateInterestRate (CASCADE: the interest history by start date)
    ├─ 1:N Block (CASCADE) ── RESTRICT ── Unit.block (optional)
    ├─ 1:N Unit (CASCADE) └─ 1:N UnitPerson (CASCADE) ── PROTECT ── Person
    └─ 1:N CostCenter (finance, CASCADE) ── 1:N EntryTemplate (PROTECT)
@@ -38,9 +39,11 @@ Rules live in the models; the dashboard and API only call them. **Implemented** 
 | Fee | Variable fee = percentage of the period's revenue/expense, limited by floor and ceiling; `charges_iss_on_fee` | Stored — *confirm* (needs finance entries) |
 | Adjustment | Next date = `adjustment_base_date` + `adjustment_period_months` (day clamped to month end); overdue when before today; "next 30 days" within `[today, today+30]`; chart = next 6 months + overdue | Implemented (`AdministrationContract.next_adjustment_date()`, dashboard) |
 | Adjustment | `adjustment_index` is free text; no index values, no recalculated fee, base date not advanced | Stored / Planned — *confirm* |
-| Apportionment | Active units of a condominium cannot sum more than 1 (+ tolerance 0.0001). Exactly 1 is a *pendency* (dashboard: `|sum − 1| > 0.0001`) | Implemented (`UnitRules`) |
-| Apportionment | Split expenses among units by `ideal_fraction` | Planned |
-| Billing rules | `due_on_business_day`, `calculation_period` (`reference`/`following`), early-payment discount (% + days), `credit_limit` | Stored — *confirm* |
+| Apportionment | For each of the six ideal fractions, the active units of a condominium cannot sum more than 1 (+ tolerance 0.0001). A pendency (dashboard, `?pending=`): the 1st fraction does not sum 1, or a 2nd–6th one is in use (sum > 0) and does not sum 1 (`|sum − 1| > 0.0001`) | Implemented (`UnitRules`, `Unit.is_apportionment_inconsistent`; spec 020) |
+| Apportionment | Split expenses among units by one of the fractions (the billing plan item names its number) | Planned (phase 4) |
+| Billing rules | `due_on_business_day`, early-payment discount (% + days), `credit_limit` | Stored — *confirm* |
+| Billing months | From a reference month R: the due month is R (`due_month = reference`) or R + 1 (`following`); the competence is the due month (`competence_month = same_as_due`) or the month before it (`before_due`) | Implemented as `BillingRules.due_month_of` / `competence_month_of` (spec 020); used by phase 4 |
+| Late payment | Fine `late_fee_percentage` (0–2 %), or the first-days tier (`initial_late_fee_percentage` within the first `initial_late_fee_days` days of delay, both or neither). Interest: the `LateInterestRate` in force on the date (latest start not after it; none = no interest), counted as the whole month (`full_month`) or rate ÷ 30 per day late (`per_day`), after `interest_grace_days`. Monetary correction is not modeled | Stored (spec 020); the calculation is phases 4–5 |
 | Units | `type`, `resident_count`, `registration_number`, utility values, `is_manager_unit`; `is_billing_blocked` is counted in the dashboard, blocking entries is planned | Stored |
 | Links | **Current** link = `end_date` empty or ≥ today (`UnitPerson.objects.current`; it ignores `start_date`); **responsible** = at least one current link; none = "without responsible" | Implemented (dashboard) |
 | Links | Owner percentages of a unit never sum more than 100 at any start date (ended owners do not block new ones; tenants ignored; exactly 100 is not required) | Implemented (`UnitPersonRules`) |

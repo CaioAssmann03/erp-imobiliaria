@@ -6,6 +6,7 @@ from .models import (
     BillingRules,
     Block,
     Condominium,
+    LateInterestRate,
     Unit,
     UnitPerson,
 )
@@ -18,6 +19,7 @@ def register() -> None:
         BillingRules,
         Block,
         Condominium,
+        LateInterestRate,
         Unit,
         UnitPerson,
     ):
