@@ -8,6 +8,7 @@ import {
   getCondominiumsRetrieveQueryOptions,
   getCompaniesListQueryOptions,
 } from "@/lib/api/generated";
+import { getMapsEmbedKey } from "@/lib/maps-embed-key";
 import { getServerQueryClient } from "@/lib/query/server";
 
 export const metadata: Metadata = { title: "Editar condomínio" };
@@ -37,7 +38,7 @@ export default async function EditCondominiumPage({
         description={condominium ? `ID ${condominium.code}` : undefined}
       />
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <CondominiumForm condominiumId={condominiumId} />
+        <CondominiumForm condominiumId={condominiumId} mapsEmbedKey={getMapsEmbedKey()} />
       </HydrationBoundary>
     </FormPage>
   );

@@ -22,6 +22,8 @@ import {
 } from "./fields";
 
 const MAX_MONEY = 99_999_999.99; // numeric(10, 2)
+/** Limite da multa de condomínio (Código Civil, art. 1.336 §1); o backend recusa acima disso. */
+const MAX_LATE_FEE = 2;
 
 /** CNPJ obrigatório; a saída são só os 14 dígitos, como o backend guarda. */
 const cnpjField = z
@@ -84,10 +86,20 @@ export const condominiumSchema = z
 
     due_day: intField("Dia de vencimento", 1, 28),
     due_on_business_day: z.boolean(),
-    calculation_period: enumField(["reference", "following"]),
+    due_month: enumField(["reference", "following"]),
+    competence_month: enumField(["same_as_due", "before_due"]),
     credit_limit: decimalField("Limite de crédito", { max: MAX_MONEY }),
     early_payment_discount_percentage: decimalField("Desconto", { max: 100 }),
     early_payment_discount_days: intField("Dias antes do vencimento", 0, 31),
+    late_fee_percentage: decimalField("Multa", { max: MAX_LATE_FEE }),
+    // Só da tela: liga a multa dos primeiros dias; desligada, o percentual e os dias vão vazios.
+    has_initial_late_fee: z.boolean(),
+    initial_late_fee_percentage: decimalField("Multa dos primeiros dias", { max: MAX_LATE_FEE }),
+    initial_late_fee_days: intField("Dias da multa dos primeiros dias", 1, 365),
+    interest_calculation: enumField(["full_month", "per_day"]),
+    interest_grace_days: intField("Carência dos juros", 0, 365),
+    should_show_qr_code: z.boolean(),
+    should_show_fee_statement: z.boolean(),
 
     start_date: dateField("Data de início", { min: "1900-01-01", max: "2100-12-31" }),
     adjustment_base_date: dateField("Base do reajuste", {
@@ -105,6 +117,17 @@ export const condominiumSchema = z
     path: ["fee_amount"],
     when: () => true,
     error: (issue) => feeError(issue.input as FeeInput)?.message ?? "Taxa inválida",
+  })
+  // A multa dos primeiros dias, quando ligada, exige o percentual e os dias (o backend recusa um só).
+  .refine((values) => !values.has_initial_late_fee || values.initial_late_fee_percentage !== undefined, {
+    path: ["initial_late_fee_percentage"],
+    when: () => true,
+    error: "Informe o percentual dos primeiros dias",
+  })
+  .refine((values) => !values.has_initial_late_fee || values.initial_late_fee_days !== undefined, {
+    path: ["initial_late_fee_days"],
+    when: () => true,
+    error: "Informe quantos dias",
   });
 
 export type CondominiumFormInput = z.input<typeof condominiumSchema>;
@@ -133,10 +156,19 @@ export const CONDOMINIUM_DEFAULTS: CondominiumFormInput = {
   charges_iss_on_fee: false,
   due_day: "10",
   due_on_business_day: false,
-  calculation_period: "reference",
+  due_month: "reference",
+  competence_month: "same_as_due",
   credit_limit: "",
   early_payment_discount_percentage: "",
   early_payment_discount_days: "0",
+  late_fee_percentage: "",
+  has_initial_late_fee: false,
+  initial_late_fee_percentage: "",
+  initial_late_fee_days: "",
+  interest_calculation: "full_month",
+  interest_grace_days: "0",
+  should_show_qr_code: false,
+  should_show_fee_statement: false,
   start_date: "",
   adjustment_base_date: "",
   adjustment_period_months: "12",
@@ -170,13 +202,22 @@ export function condominiumToForm(c: Condominium): CondominiumFormInput {
     charges_iss_on_fee: contract?.charges_iss_on_fee ?? false,
     due_day: String(billing?.due_day ?? 10),
     due_on_business_day: billing?.due_on_business_day ?? false,
-    calculation_period: billing?.calculation_period ?? "reference",
+    due_month: billing?.due_month ?? "reference",
+    competence_month: billing?.competence_month ?? "same_as_due",
     credit_limit: moneyFromApi(billing?.credit_limit),
     early_payment_discount_percentage: decimalFromApi(
       billing?.early_payment_discount_percentage,
       2
     ),
     early_payment_discount_days: String(billing?.early_payment_discount_days ?? 0),
+    late_fee_percentage: decimalFromApi(billing?.late_fee_percentage, 2),
+    has_initial_late_fee: billing?.initial_late_fee_days != null,
+    initial_late_fee_percentage: decimalFromApi(billing?.initial_late_fee_percentage, 2),
+    initial_late_fee_days: billing?.initial_late_fee_days != null ? String(billing.initial_late_fee_days) : "",
+    interest_calculation: billing?.interest_calculation ?? "full_month",
+    interest_grace_days: String(billing?.interest_grace_days ?? 0),
+    should_show_qr_code: billing?.should_show_qr_code ?? false,
+    should_show_fee_statement: billing?.should_show_fee_statement ?? false,
     start_date: contract?.start_date ?? "",
     adjustment_base_date: contract?.adjustment_base_date ?? "",
     adjustment_period_months: String(contract?.adjustment_period_months ?? 12),
@@ -236,10 +277,19 @@ export function condominiumToPayload(
     billing_rules: {
       due_day: values.due_day ?? 10,
       due_on_business_day: values.due_on_business_day,
-      calculation_period: values.calculation_period,
+      due_month: values.due_month,
+      competence_month: values.competence_month,
       credit_limit: values.credit_limit ?? "0.00",
       early_payment_discount_percentage: values.early_payment_discount_percentage ?? "0.00",
       early_payment_discount_days: values.early_payment_discount_days ?? 0,
+      late_fee_percentage: values.late_fee_percentage ?? "0.00",
+      // Sem a multa dos primeiros dias, os dois vão nulos (limpam um valor que já estava salvo).
+      initial_late_fee_percentage: values.has_initial_late_fee ? values.initial_late_fee_percentage : null,
+      initial_late_fee_days: values.has_initial_late_fee ? values.initial_late_fee_days : null,
+      interest_calculation: values.interest_calculation,
+      interest_grace_days: values.interest_grace_days ?? 0,
+      should_show_qr_code: values.should_show_qr_code,
+      should_show_fee_statement: values.should_show_fee_statement,
     },
   };
 }

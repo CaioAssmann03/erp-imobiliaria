@@ -25,7 +25,7 @@ Seed material from the project PDFs. When the spec is written, move this content
 | ItemPlanoCobranca | `BillingPlanItem` | description, cost center, calculation kind (fixed / ideal-fraction share / per-unit registered value), default value |
 
 ### Business rules
-- Calculation kinds: fixed value, share by `ideal_fraction`, value registered per unit (gas, water, energy on `Unit`).
+- Calculation kinds: fixed value, share by one of the six ideal fractions (`ideal_fraction` … `ideal_fraction_6`: the item names its number, [spec 020](../../features/history.md)), value registered per unit (gas, water, energy on `Unit`).
 
 ### Open questions
 (none)

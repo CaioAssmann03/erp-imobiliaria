@@ -5,7 +5,9 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { CalculationPeriodEnum } from './calculationPeriodEnum';
+import type { CompetenceMonthEnum } from './competenceMonthEnum';
+import type { DueMonthEnum } from './dueMonthEnum';
+import type { InterestCalculationEnum } from './interestCalculationEnum';
 
 /**
  * Serializer mixin: input is validated by the model's rules, never by rules written here.
@@ -22,7 +24,8 @@ export interface BillingRules {
      */
   due_day?: number;
   due_on_business_day?: boolean;
-  calculation_period?: CalculationPeriodEnum;
+  due_month?: DueMonthEnum;
+  competence_month?: CompetenceMonthEnum;
   /** @pattern ^-?\d{0,3}(?:\.\d{0,2})?$ */
   early_payment_discount_percentage?: string;
   /**
@@ -32,4 +35,25 @@ export interface BillingRules {
   early_payment_discount_days?: number;
   /** @pattern ^-?\d{0,8}(?:\.\d{0,2})?$ */
   credit_limit?: string;
+  /** @pattern ^-?\d{0,3}(?:\.\d{0,2})?$ */
+  late_fee_percentage?: string;
+  /**
+     * @nullable
+     * @pattern ^-?\d{0,3}(?:\.\d{0,2})?$
+     */
+  initial_late_fee_percentage?: string | null;
+  /**
+     * @minimum 0
+     * @maximum 32767
+     * @nullable
+     */
+  initial_late_fee_days?: number | null;
+  interest_calculation?: InterestCalculationEnum;
+  /**
+     * @minimum 0
+     * @maximum 32767
+     */
+  interest_grace_days?: number;
+  should_show_qr_code?: boolean;
+  should_show_fee_statement?: boolean;
 }
