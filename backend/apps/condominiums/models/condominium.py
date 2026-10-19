@@ -1,8 +1,7 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, final, override
 
 from django.core.exceptions import ValidationError
 from django.db import models
-from typing_extensions import final, override
 
 from apps.condominiums.errors import CondominiumError
 from apps.condominiums.models.address import Address

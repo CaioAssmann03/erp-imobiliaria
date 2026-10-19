@@ -37,6 +37,8 @@ jobs:
     env:
       SECRET_KEY: ci-test-secret-key-not-for-production-0123456789
       INTERNAL_API_KEY: ci-internal-api-key-not-for-production-0123456789
+      # Test-only Ed25519 key, the same as pytest.ini (spec 020).
+      JWT_SIGNING_KEY: '-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEIPgNc4Fe8BDipzi1QlwfpVP8iIyGPH1Mx9AUw9UaXYvD\n-----END PRIVATE KEY-----'
       DEBUG: "false"
       POSTGRES_DB: erp_imobiliaria
       POSTGRES_USER: postgres
@@ -89,24 +91,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Version from "packageManager" in frontend/package.json.
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Install dependencies
         working-directory: frontend
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
         working-directory: frontend
-        run: npm run lint -- --max-warnings=0
+        run: pnpm lint --max-warnings=0
 
       - name: Unit tests
         working-directory: frontend
-        run: npm test
+        run: pnpm test
 
       - name: Build
         working-directory: frontend
-        run: npm run build
+        run: pnpm build

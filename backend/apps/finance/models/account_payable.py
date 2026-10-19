@@ -1,8 +1,7 @@
-from typing import Any
+from typing import Any, final, override
 
 from django.db import models
 from django.db.models import F, Q
-from typing_extensions import final, override
 
 from apps.condominiums.models import Condominium
 from apps.core.models import Company

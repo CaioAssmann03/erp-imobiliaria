@@ -1,7 +1,8 @@
+from typing import final, override
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
-from typing_extensions import final, override
 
 from apps.condominiums.models import Condominium
 from apps.core.models import Company

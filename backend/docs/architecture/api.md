@@ -36,5 +36,5 @@ Every error response (400, 401, 403, 404, 405, 429...) has one body, built by `c
 
 ## Contract with the frontend
 - drf-spectacular builds the schema from serializers and views; orval generates the client. Field names, enums and `read_only` flags **are** the contract. The docstrings of views and serializers become the endpoint descriptions: write them for the API reader.
-- After any API change, tell the user to regenerate the client (`cd frontend && npm run generate:api`) and restart the frontend dev server. Renaming a field or enum value is breaking: it needs a spec.
+- After any API change, tell the user to regenerate the client (`cd frontend && pnpm generate:api`) and restart the frontend dev server. Renaming a field or enum value is breaking: it needs a spec.
 - `read_only_fields` for ids and timestamps; related objects as read-only nested serializers (`person_detail`, `unit_people`). Dashboard and search are non-model endpoints (`APIView` + plain `Serializer`s for documentation) in `core`.

@@ -22,7 +22,7 @@ TanStack Query hooks, react-hook-form, `useRouter`/`usePathname`, browser APIs, 
 
 ## Placement
 One route → `app/<route>/_components/`; two or more → `components/`; dashboard layout → `_components/shell/`; home → `_components/home/`;
-shadcn primitives → `components/ui/` (add with `npx shadcn add`, do not edit casually).
+shadcn primitives → `components/ui/` (add with `pnpm exec shadcn add`, do not edit casually).
 
 ## Size and responsibility
 - One component per file, ~100 lines max; beyond that, split. One job: load, compose, or render one piece.

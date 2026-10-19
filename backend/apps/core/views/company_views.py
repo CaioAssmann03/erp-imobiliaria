@@ -1,6 +1,7 @@
+from typing import final, override
+
 from rest_framework import viewsets
 from rest_framework.permissions import BasePermission, IsAuthenticated
-from typing_extensions import final, override
 
 from apps.core.api.filters import QuerySearchFilter
 from apps.core.api.permissions import IsSuperuser

@@ -1,6 +1,7 @@
+from typing import final, override
+
 from django.conf import settings
 from django.db import models
-from typing_extensions import final, override
 
 from apps.core.models.base import BaseModel
 from apps.finance.models.rules import PaymentReceiptRules

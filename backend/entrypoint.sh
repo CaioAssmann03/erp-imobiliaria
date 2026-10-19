@@ -1,5 +1,5 @@
 #!/bin/sh
-# Inicialização do backend em produção (Render). Em desenvolvimento o docker-compose
+# Inicialização do backend em produção (VPS). Em desenvolvimento o docker-compose
 # sobrescreve o comando (runserver), então este script não roda lá.
 set -e
 
@@ -11,5 +11,5 @@ if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; t
   python manage.py createsuperuser --noinput || true
 fi
 
-# O Render define PORT; localmente cai em 8000.
+# Produção pode definir PORT; sem ela, 8000.
 exec gunicorn config.wsgi:application --bind "0.0.0.0:${PORT:-8000}" --workers "${WEB_CONCURRENCY:-2}"

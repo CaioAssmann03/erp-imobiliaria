@@ -1,7 +1,6 @@
-from typing import Any, override
+from typing import Any, final, override
 
 from rest_framework import serializers
-from typing_extensions import final
 
 from apps.core.scoping import request_company, request_company_or_none
 from apps.core.serializers import ModelRulesMixin, build_candidate, run_model_rules

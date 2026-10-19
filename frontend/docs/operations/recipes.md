@@ -6,7 +6,7 @@ skip-if: a whole new resource → operations/new-resource-page.md
 # Recipes (O — Operations)
 
 ## Regenerate the API client
-Backend running → `cd frontend && npm run generate:api`. Never edit `lib/api/generated/`. If the build then
+Backend running → `cd frontend && pnpm generate:api`. Never edit `lib/api/generated/`. If the build then
 fails on a renamed type, fix the caller (schemas, payload builders), not the generated file.
 
 ## Add a field to an existing form

@@ -1,7 +1,7 @@
 ---
 summary: Process to specify a feature (levels, questions → decisions → spec → implement → close) and the index of specs.
 read-when: you are about to build any feature, or you need the list of specs and their status
-skip-if: you only need a blank template → features/_template.md (full) or features/_template-lite.md (lite); you want a filled example → features/history.md (finished specs) or features/008-operational-hardening.md (a full one); you need what is planned → roadmap/README.md
+skip-if: you only need a blank template → features/_template.md (full) or features/_template-lite.md (lite); you want a filled example → features/history.md (finished specs); you need what is planned → roadmap/README.md
 ---
 # Feature specs
 
@@ -49,6 +49,5 @@ Bug fixes and refactors that change no behavior or contract. Say explicitly that
 One row per spec; update it in the same change that creates or closes the spec.
 | Spec | Title | Level | Status | Roadmap (`phase N part NN` or `none`) |
 |---|---|---|---|---|
-| [008](008-operational-hardening.md) | Operational hardening: health, HTTPS/HSTS, admin path | full | in-progress | phase 3a part 09 |
 
-The finished specs (001–007 and 009–021) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.
+The finished specs (001–021) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.

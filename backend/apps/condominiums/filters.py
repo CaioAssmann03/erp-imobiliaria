@@ -1,7 +1,8 @@
+from typing import final
+
 import django_filters
 from django.db.models import QuerySet, TextChoices
 from django.utils import timezone
-from typing_extensions import final
 
 from .models import AdministrationContract, Condominium, Unit
 
