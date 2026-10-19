@@ -1,5 +1,5 @@
 ---
-summary: The finished feature specs (001–023) condensed: what each did, the decisions that still explain the code, and its numbered requirements.
+summary: The finished feature specs (001–024) condensed: what each did, the decisions that still explain the code, and its numbered requirements.
 read-when: you wonder why something was built a certain way, or a test cites "spec NNN, Rn" and you need what Rn means
 skip-if: you are specifying a new feature → features/README.md; you need what an app does today → apps/<app>.md
 ---
@@ -187,3 +187,11 @@ New and changed passwords are hashed with Argon2id (memory-hard, Django's recomm
 - Decisions (user, 2026-10-19): Argon2. Agent, confirmed by the user: keep PBKDF2 for old hashes; Django's default cost.
 - R1 a new password is stored as `argon2$argon2id$...` · R2 a PBKDF2 user logs in and the hash becomes Argon2
 Checked: `pytest apps -q` 770 passed; `mypy`, `manage.py check` and `check_docs` clean (2026-10-19).
+
+## 024 — Billing plans · phase 4 part 02
+The reusable mold of a condominium's monthly charge: what each unit's boleto is made of, read by the monthly issuance (part 04). New app `billing` (the stub restructured into packages).
+- `BillingPlan` (condominium, unique name, `active`, optional `start_month`/`end_month` on day 1, end not before start; condominium fixed after creation) and `BillingPlanItem` (`position`, `description`, `cost_center` + `entry_template` both active, of the plan's condominium and of that cost center, `PROTECT`; `calculation_kind` with only its own fields: `fixed_amount` → `amount` per unit, `ideal_fraction_share` → `amount` is the condominium's total split by `ideal_fraction_number` 1–6, `unit_registered_value` → `unit_value_field` gas/water/electricity). Every kind rule is in `BillingPlanItemRules` and a check constraint. `BillingPlan.objects.in_force(reference_month)`.
+- `/api/billing-plans/`: a plan is written with its nested `items` (at least one), all or none; sending `items` replaces the list in that order; a PATCH without `items` keeps them. The item serializer runs the item rules without the plan; the plan serializer runs them again with the plan candidate attached, so a cost center of another condominium is `items.<n>.cost_center`. Company-scoped, filters `condominium`/`active`, search by name, names of condominium, cost center and template in the response; Admin with items inline; both models audited.
+- Decisions (user, 2026-10-19): several plans per condominium joined into one boleto per unit; cost center and entry template on every item; the three calculation kinds with the share amount as the total to split; nested write (an exception to "child collections are separate endpoints", recorded in `conventions/practices.md` §3); optional validity months; a share item may name a fraction no unit has yet (the issuance checks it). Agent, confirmed by the user: items replaced as a whole, the plan's condominium fixed, active cost center and template, at least one item and cascade delete.
+- R1 plan fields and rules · R2 item kinds, each a rule and a constraint · R3 cost center and template of the right condominium, active · R4 nested write all or none, `items.<n>.<field>` · R5 list, filters, delete, scoping · R6 `in_force` · R7 Admin and audit · R8 client and translations, docs
+Checked: `pytest apps -q` 920 passed; `mypy`, `makemigrations --check` and `check_docs` clean; frontend `tsc`, `eslint`, tests and `pnpm build` clean after regenerating the client (2026-10-19).

@@ -48,6 +48,6 @@ This file is only the **index**; knowledge lives in [`docs/`](docs/README.md).
 | Security · personal data | [architecture/quality.md](docs/architecture/quality.md) |
 | Deploy · production · runbook | [architecture/operations.md](docs/architecture/operations.md) |
 | Business rules and formulas | [architecture/data.md](docs/architecture/data.md) |
-| Each app | [apps/](docs/apps/) — `accounts`, `core`, `persons`, `condominiums`, `finance` (apps with no code yet get their doc when they start) |
+| Each app | [apps/](docs/apps/) — `accounts`, `core`, `persons`, `condominiums`, `finance`, `billing` (apps with no code yet get their doc when they start) |
 | New feature process | [features/README.md](docs/features/README.md) |
 | Known gaps | [known-gaps.md](docs/known-gaps.md) |

@@ -20,13 +20,13 @@ A phase is `done` only when every part is `done` or `moved`.
 | 2 | [Condominium registry](phase-2-condominium-registry/README.md) | done | 4/4 | Sprint 2 |
 | 3a | [Prerequisites for phase 3](phase-3a-prerequisites/README.md) | done | 9/9 | Known-gaps review |
 | 3 | [Finance base](phase-3-finance-base/README.md) | done | 7/7 | Sprint 3 |
-| 4 | [Billing issuance (generation)](phase-4-billing-generation/README.md) | todo | 0/6 | Sprint 4 |
+| 4 | [Billing issuance (generation)](phase-4-billing-generation/README.md) | in-progress | 1/6 | Sprint 4 |
 | 5 | [Billing issuance (bank)](phase-5-billing-bank-integration/README.md) | todo | 0/5 | Sprint 5 |
 | 6 | [Closings and agreements](phase-6-closings-and-agreements/README.md) | todo | 0/4 | Sprint 6 |
 | 7 | [Client portal](phase-7-client-portal/README.md) | todo | 0/3 | Sprint 7 |
 | 8 | [Rentals](phase-8-rentals/README.md) | todo | 0/5 | Sprint 8 |
 
-Current position: phases 1, 2, **3a** (closed on 2026-10-19: hosting docs, `render.yaml` retired, VPS compose versioned in `deploy/vps/` with a health check, spec 008 closed) and **3** (finance base, Sprint 3) are **done**. **Next:** phase 4 (billing issuance): start the Santander accreditation (part 01, external, the longest lead time) and the billing plans spec (part 02).
+Current position: phases 1, 2, **3a** (closed on 2026-10-19: hosting docs, `render.yaml` retired, VPS compose versioned in `deploy/vps/` with a health check, spec 008 closed) and **3** (finance base, Sprint 3) are **done**. **Phase 4** (billing issuance) is in progress: part 02 (billing plans, spec 024) is done. **Next:** the Santander accreditation (part 01, external, the longest lead time; it blocks part 03), the billing plan screen (part 06) meanwhile.
 
 ## How to use
 1. Pick the next `todo` part in the lowest unfinished phase (respect **Depends on**).

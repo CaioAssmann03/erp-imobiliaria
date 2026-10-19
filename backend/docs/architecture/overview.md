@@ -26,7 +26,7 @@ skip-if: schema, relations, business formulas → architecture/data.md; deploy, 
 ## Layers (dependency direction, never reversed)
 ```
 core  ←  accounts   (`User.company`; `core` never imports `accounts`)
-core  ←  persons  ←  condominiums  ←  finance  ←  (billing, rentals, sales: future)
+core  ←  persons  ←  condominiums  ←  finance  ←  billing  ←  (rentals, sales: future)
 ```
 `core` holds shared infrastructure. An app imports only from apps to its left; a cycle means the code belongs in a lower layer.
 
@@ -56,7 +56,7 @@ Changing one needs a feature spec.
 | 1 | UUID primary keys on every model → opaque, safe to expose; ids are strings in the API |
 | 2 | English code and API names, Portuguese only in UI/sample data → the generated client needs no translation; API errors are English, the frontend translates by code |
 | 3 | Apps are packages (`models/`, `serializers/`, `views/`...), one entity per file → small files; re-export in `__init__.py` |
-| 4 | 1:1 parts (address, contract, billing, person documents) are written through the parent serializer, which calls a service (`create_condominium`, `update_person`...) in `transaction.atomic`; child collections (unit people) have their own endpoint |
+| 4 | 1:1 parts (address, contract, billing, person documents) are written through the parent serializer, which calls a service (`create_condominium`, `update_person`...) in `transaction.atomic`; child collections (unit people) have their own endpoint, except the items of a billing plan, written with the plan (spec 024) |
 | 5 | Business rules live only in the models (validators, `clean()`, constraints); serializers run them via `ModelRulesMixin` → one source of truth for API, admin, commands and tasks |
 | 6 | PostgreSQL only (trigram search) → tests and dev need Postgres |
 | 7 | Documents stored digits-only → one canonical form; masks are UI-only |

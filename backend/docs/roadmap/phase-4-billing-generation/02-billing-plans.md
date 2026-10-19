@@ -5,30 +5,18 @@ skip-if: you need the whole phase → roadmap/phase-4-billing-generation/README.
 ---
 # Part 02 — Billing plans
 
-**Status:** todo · **Phase:** 4 (Billing issuance (generation)) · **Apps:** billing · **Frontend impact:** client regeneration · **Depends on:** phase 3
-**Spec:** none yet
+**Status:** done · **Phase:** 4 (Billing issuance (generation)) · **Apps:** billing · **Frontend impact:** client regeneration · **Depends on:** phase 3
+**Spec:** [024 — Billing plans](../../features/history.md) (section 024)
 
 ## Goal
 Reusable mold of the monthly issuance per condominium.
 
 ## Scope
-- [ ] Models + API: `BillingPlan`, `BillingPlanItem`
-- [ ] Admin
+- [x] Models + API: `BillingPlan`, `BillingPlanItem`
+- [x] Admin
 
 ## Draft for the spec
-Seed material from the project PDFs. When the spec is written, move this content into it and replace this section with the line `Moved to the spec.`
-
-### Entities
-| PDF name | Code name | Notes |
-|---|---|---|
-| PlanoCobranca | `BillingPlan` | per condominium, named |
-| ItemPlanoCobranca | `BillingPlanItem` | description, cost center, calculation kind (fixed / ideal-fraction share / per-unit registered value), default value |
-
-### Business rules
-- Calculation kinds: fixed value, share by one of the six ideal fractions (`ideal_fraction` … `ideal_fraction_6`: the item names its number, [spec 020](../../features/history.md)), value registered per unit (gas, water, energy on `Unit`).
-
-### Open questions
-(none)
+Moved to the spec.
 
 ## Result
-Not started.
+Done on 2026-10-19 (spec 024): new app `billing` with `BillingPlan` and `BillingPlanItem`, `/api/billing-plans/` with nested items, Admin, audit, client regenerated. Several plans per condominium are joined into one boleto per unit by the issuance (part 04), which also does the rounding and checks the fractions. The screen is part 06.

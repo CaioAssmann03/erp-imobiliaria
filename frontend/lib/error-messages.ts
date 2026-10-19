@@ -37,6 +37,22 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
     "Este titular já tem uma conta com este banco, agência e número.",
   "bank_account.condominium.other_company": "O condomínio pertence a outra empresa.",
   "bank_code.invalid_format": "O código do banco deve ter exatamente 3 dígitos.",
+  "billing_plan.condominium.immutable": "O condomínio de um plano de cobrança não pode ser alterado.",
+  "billing_plan.end_month.before_start_month": "O mês final não pode ser anterior ao mês inicial.",
+  "billing_plan.name.duplicate_in_condominium":
+    "Já existe um plano de cobrança com este nome neste condomínio.",
+  "billing_plan_item.amount.does_not_match_kind":
+    "Itens de valor fixo e de rateio precisam de valor; itens com o valor da unidade não têm.",
+  "billing_plan_item.cost_center.inactive": "O centro de custo está inativo.",
+  "billing_plan_item.cost_center.other_condominium": "O centro de custo pertence a outro condomínio.",
+  "billing_plan_item.entry_template.inactive": "O modelo de lançamento está inativo.",
+  "billing_plan_item.entry_template.other_cost_center":
+    "O modelo de lançamento pertence a outro centro de custo.",
+  "billing_plan_item.ideal_fraction_number.does_not_match_kind":
+    "Só o item de rateio escolhe uma fração ideal.",
+  "billing_plan_item.position.duplicate_in_plan": "Já existe um item nesta posição do plano.",
+  "billing_plan_item.unit_value_field.does_not_match_kind":
+    "Só o item com o valor da unidade escolhe gás, água ou energia.",
   "billing_rules.due_day.out_of_range": "O dia de vencimento deve ficar entre 1 e 28.",
   "billing_rules.early_payment_discount_percentage.out_of_range":
     "O desconto deve ficar entre 0 e 100.",
@@ -99,6 +115,7 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
     "O centro de custo de um modelo de lançamento não pode ser alterado.",
   "entry_template.name.duplicate_in_cost_center":
     "Já existe um modelo de lançamento com este nome neste centro de custo.",
+  "ideal_fraction_number.out_of_range": "A fração ideal deve ser de 1 a 6.",
   incorrect_type: "Valor em formato inválido.",
   invalid: "Valor inválido.",
   invalid_choice: "Opção inválida.",
@@ -112,6 +129,7 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   method_not_allowed: "Operação não permitida.",
   min_length: "Texto muito curto.",
   min_value: "Valor abaixo do permitido.",
+  "month.not_first_day": "Informe o mês (o primeiro dia do mês).",
   no_active_account: "Usuário ou senha inválidos.",
   not_a_list: "Formato inválido.",
   not_acceptable: "Formato de resposta não suportado.",

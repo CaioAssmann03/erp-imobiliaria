@@ -1,6 +1,7 @@
 export * from './accounts-payable/accounts-payable';
 export * from './auth/auth';
 export * from './bank-accounts/bank-accounts';
+export * from './billing-plans/billing-plans';
 export * from './blocks/blocks';
 export * from './companies/companies';
 export * from './condominiums/condominiums';
