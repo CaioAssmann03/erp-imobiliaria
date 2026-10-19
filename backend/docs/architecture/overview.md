@@ -36,7 +36,8 @@ core  ←  persons  ←  condominiums  ←  finance  ←  (billing, rentals, sal
 ## Environment variables
 | Variable | Purpose |
 |---|---|
-| `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS` | Django basics. **`SECRET_KEY` is mandatory when `DEBUG=false`** (≥ 32 chars: it signs the JWTs) |
+| `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS` | Django basics. **`SECRET_KEY` is mandatory when `DEBUG=false`** (≥ 32 chars) |
+| `JWT_SIGNING_KEY` | Ed25519 private key (PKCS#8 PEM, one line with literal `\n` allowed) that signs the JWTs with EdDSA; the public key is derived from it. **Mandatory in every environment, development included**; generate it with the command in `.env.example` (spec 020) |
 | `POSTGRES_DB/USER/PASSWORD/HOST/PORT` | database. **`POSTGRES_DB` is mandatory** (no SQLite fallback) |
 | `REDIS_URL` | Celery broker/result backend **and the shared cache** (the login rate limit holds across workers) |
 | `SECURE_SSL_REDIRECT`, `SECURE_HSTS_SECONDS`, `ADMIN_URL` | production security (`operations.md`) |

@@ -37,6 +37,8 @@ jobs:
     env:
       SECRET_KEY: ci-test-secret-key-not-for-production-0123456789
       INTERNAL_API_KEY: ci-internal-api-key-not-for-production-0123456789
+      # Test-only Ed25519 key, the same as pytest.ini (spec 020).
+      JWT_SIGNING_KEY: '-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEIPgNc4Fe8BDipzi1QlwfpVP8iIyGPH1Mx9AUw9UaXYvD\n-----END PRIVATE KEY-----'
       DEBUG: "false"
       POSTGRES_DB: erp_imobiliaria
       POSTGRES_USER: postgres
