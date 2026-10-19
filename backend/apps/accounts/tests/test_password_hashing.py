@@ -1,4 +1,4 @@
-"""Passwords are hashed with Argon2id; old PBKDF2 hashes still log in and are upgraded (spec 021)."""
+"""Passwords are hashed with Argon2id; old PBKDF2 hashes still log in and are upgraded (spec 023)."""
 
 import pytest
 from django.contrib.auth.hashers import make_password

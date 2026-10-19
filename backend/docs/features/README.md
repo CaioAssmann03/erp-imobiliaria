@@ -50,4 +50,4 @@ One row per spec; update it in the same change that creates or closes the spec.
 | Spec | Title | Level | Status | Roadmap (`phase N part NN` or `none`) |
 |---|---|---|---|---|
 
-The finished specs (001–021) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.
+The finished specs (001–023) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.

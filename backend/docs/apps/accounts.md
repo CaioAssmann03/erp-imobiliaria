@@ -12,8 +12,8 @@ Authentication identity only: `User(AbstractUser)` with a UUID id and a required
 - `create_user` / `create_superuser` fill `company` with `default_company()`: `DJANGO_SUPERUSER_COMPANY` (an id or a CNPJ) if set, else the only existing company (the one migration `core.0002` seeds); with several it must be given (`ValueError`).
 - The business entity is `persons.Person`, not the user. The future link is `Person.user` (a 1:1 in `persons`), so `accounts` never depends on the domain.
 - Login (5/min), refresh (30/min) and logout (30/min) are in `views/auth_views.py`, all with `TrustedProxyScopedRateThrottle`. Logout is idempotent (always 204) and calls the `revoke_refresh_token` service. `AuditedJWTAuthentication` (the DRF default) also tells the audit trail who acts.
-- Passwords are hashed with Argon2id (`PASSWORD_HASHERS`; PBKDF2 kept only to verify old hashes, rehashed with Argon2 on the next login; spec 021).
-- JWTs are signed with EdDSA (Ed25519): `settings.SIMPLE_JWT` takes the private key from `JWT_SIGNING_KEY` and derives the verifying key (spec 020). Lifetimes: access 30 min, refresh 7 days, rotating. A used refresh token is revoked, and logout revokes it too (`token_blacklist`). The frontend keeps the tokens in HttpOnly cookies.
+- Passwords are hashed with Argon2id (`PASSWORD_HASHERS`; PBKDF2 kept only to verify old hashes, rehashed with Argon2 on the next login; spec 023).
+- JWTs are signed with EdDSA (Ed25519): `settings.SIMPLE_JWT` takes the private key from `JWT_SIGNING_KEY` and derives the verifying key (spec 022). Lifetimes: access 30 min, refresh 7 days, rotating. A used refresh token is revoked, and logout revokes it too (`token_blacklist`). The frontend keeps the tokens in HttpOnly cookies.
 
 ## Future
 Roles and permissions (phase 7, with the portal); person login.
