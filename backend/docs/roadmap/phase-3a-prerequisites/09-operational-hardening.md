@@ -5,8 +5,8 @@ skip-if: you need the whole phase → roadmap/phase-3a-prerequisites/README.md; 
 ---
 # Part 09 — Operational hardening: health, HTTPS, admin path
 
-**Status:** in-progress · **Phase:** 3a (Prerequisites for phase 3) · **Apps:** core, config · **Frontend impact:** none · **Depends on:** 01, 08
-**Spec:** [008 — Operational hardening](../../features/008-operational-hardening.md)
+**Status:** done · **Phase:** 3a (Prerequisites for phase 3) · **Apps:** core, config · **Frontend impact:** none · **Depends on:** 01, 08
+**Spec:** [008 — Operational hardening](../../features/history.md) (section 008)
 
 ## Goal
 A cheap health endpoint, HTTPS enforcement with a safe HSTS, and a non-default admin path. Decided in gaps #15, #18 and #20.
@@ -15,7 +15,7 @@ A cheap health endpoint, HTTPS enforcement with a safe HSTS, and a non-default a
 - [x] `GET /api/health/`: no auth, 200 if the app runs and `SELECT 1` works, else 503; point the host's health check at it
 - [x] `SECURE_SSL_REDIRECT` and `SECURE_HSTS_SECONDS` from env (default 3600 s in production, no `includeSubDomains`/`preload`); `/api/health/` exempt from the redirect
 - [x] `ADMIN_URL` from env (default `admin/`; production sets a non-obvious path)
-- [ ] Update `architecture/operations.md`, `architecture/quality.md`, `.env.example`; delete gap #18 and the health/admin parts of #15 and #20
+- [x] Update `architecture/operations.md`, `architecture/quality.md`, `.env.example`; delete gap #18 and the health/admin parts of #15 and #20
 
 ## Draft for the spec
 Moved to the spec.
@@ -26,3 +26,4 @@ Delivered: `HealthCheckMiddleware` first in `MIDDLEWARE` (`GET`/`HEAD /api/healt
 Checked: `pytest apps -q` 379 passed, `mypy apps config` clean.
 Host checklist run on the VPS on 2026-10-08 (`architecture/operations.md`): TLS terminated by Caddy, health path answers 200, the Next server reaches Django over plain HTTP with the redirect off, `INTERNAL_API_KEY`, `SECRET_KEY` and Redis are in place.
 To close: set a non-obvious `ADMIN_URL` before the Admin is published (it is not reachable today), add a health check to the compose file, then tick R8, set spec 008 and this part to `done`, and raise `SECURE_HSTS_SECONDS` to a year when the final domain exists.
+Closed on 2026-10-19: the production compose is versioned in `deploy/vps/` with a backend health check (`/api/health/` every 15 s; the frontend waits for a healthy backend); a non-obvious `ADMIN_URL` was generated and handed to the user, who sets it in the host `.env` (never in git; host checklist in `architecture/operations.md`); spec 008 condensed into `features/history.md`. Still for later, outside this part: HSTS to a year once the final domain exists.

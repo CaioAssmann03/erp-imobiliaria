@@ -1,9 +1,8 @@
 import os
 import uuid
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, override
 
 from django.contrib.auth.models import UserManager as DjangoUserManager
-from typing_extensions import override
 
 from apps.core.models import Company
 

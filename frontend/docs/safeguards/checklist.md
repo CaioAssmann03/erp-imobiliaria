@@ -7,12 +7,12 @@ skip-if: you need a how-to → docs/README.md routing table
 
 ```bash
 cd frontend
-npx tsc --noEmit    # types
-npx eslint .        # lint (generated code ignored)
-npm test            # unit tests of pure helpers (node:test, tests/*.test.mjs; also runs in CI)
-npm run build       # validates pages, routes, server/client boundaries
+pnpm exec tsc --noEmit  # types
+pnpm exec eslint .      # lint (generated code ignored)
+pnpm test           # unit tests of pure helpers (node:test, tests/*.test.mjs; also runs in CI)
+pnpm build          # validates pages, routes, server/client boundaries
 ```
-API changed → backend running → `npm run generate:api` first. Stale type errors after renaming routes → delete `.next/` and rebuild.
+API changed → backend running → `pnpm generate:api` first. Stale type errors after renaming routes → delete `.next/` and rebuild.
 
 - [ ] Code English, user text Portuguese (norms/language-and-naming.md)
 - [ ] File in the right place; ≤ ~100 lines; logic outside JSX (norms/components.md)

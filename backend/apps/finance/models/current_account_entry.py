@@ -1,12 +1,11 @@
 import datetime
 from collections.abc import Collection
 from decimal import Decimal
-from typing import Any, Self
+from typing import Any, Self, final, override
 
 from django.conf import settings
 from django.db import models
 from django.db.models import Func, Q, Value
-from typing_extensions import final, override
 
 from apps.condominiums.models import Unit
 from apps.core.models import Company

@@ -1,8 +1,7 @@
 from collections.abc import Callable
-from typing import ClassVar
+from typing import ClassVar, final
 
 from rest_framework import serializers
-from typing_extensions import final
 
 from apps.core.validators.cnpj import validate_cnpj
 

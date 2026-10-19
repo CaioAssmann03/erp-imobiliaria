@@ -20,6 +20,8 @@ services:
 
   backend:
     build: ./backend
+    # Built once here; the Celery services run the same image.
+    image: erp-imobiliaria-backend
     restart: unless-stopped
     env_file: .env
     environment:
@@ -37,7 +39,8 @@ services:
       - redis
 
   celery_worker:
-    build: ./backend
+    image: erp-imobiliaria-backend
+    pull_policy: never
     restart: unless-stopped
     env_file: .env
     environment:
@@ -51,7 +54,8 @@ services:
       - redis
 
   celery_beat:
-    build: ./backend
+    image: erp-imobiliaria-backend
+    pull_policy: never
     restart: unless-stopped
     env_file: .env
     environment:

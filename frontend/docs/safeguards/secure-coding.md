@@ -17,7 +17,7 @@ skip-if: token/cookie details → safeguards/auth-and-tokens.md
 - **Validation:** Zod for UX **and** always handle the server 400 (`applyServerErrors`); normalize in `xxxToPayload`; mirror backend `max_length`.
 - **Requests:** only the generated client carries the token. Third parties (ViaCEP in `use-cep-lookup`) are anonymous, read-only and receive only
   the CEP; treat their responses as untrusted and map only needed fields.
-- **Dependencies:** add only when needed; keep `npm audit` free of high/critical; review lockfile changes; no third-party scripts without
+- **Dependencies:** add only when needed; keep `pnpm audit` free of high/critical; review lockfile changes; a dependency runs install scripts only when listed in `allowBuilds` of `pnpm-workspace.yaml` (today `esbuild`, `unrs-resolver`); no third-party scripts without
   review and a CSP update.
 - **Errors:** short Portuguese messages; never stack traces or server internals.
 

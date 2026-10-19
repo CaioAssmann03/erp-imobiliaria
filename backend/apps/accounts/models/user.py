@@ -1,9 +1,8 @@
 import uuid
-from typing import ClassVar
+from typing import ClassVar, final, override
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from typing_extensions import final, override
 
 from apps.core.models import Company
 

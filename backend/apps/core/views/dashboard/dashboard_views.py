@@ -1,11 +1,10 @@
-from typing import Any
+from typing import Any, final
 
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from typing_extensions import final
 
 from apps.condominiums.models import Condominium, Unit
 from apps.core.serializers import DashboardSerializer

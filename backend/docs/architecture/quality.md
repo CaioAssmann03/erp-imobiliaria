@@ -29,13 +29,13 @@ Every rule has a test; a constraint is tested twice (serializer 400 + `Integrity
 ## Security
 | Area | Today |
 |---|---|
-| Auth | SimpleJWT (access 30 min, refresh 7 days, rotating and **revoked after use**); logout revokes a refresh token; login 5/min, refresh 30/min, logout 30/min per client on a Redis cache, no lockout. The throttle key is the client address forwarded by the Next server, trusted only with the shared `INTERNAL_API_KEY` (mandatory when `DEBUG=false`); a cache failure lets login through (logged). The Django Admin login is not throttled (gap #26). The frontend keeps tokens in `HttpOnly` cookies (`frontend/docs/safeguards/auth-and-tokens.md`) |
+| Auth | Passwords hashed with **Argon2id** (spec 021). SimpleJWT signed with **EdDSA (Ed25519)** from `JWT_SIGNING_KEY` (spec 020; access 30 min, refresh 7 days, rotating and **revoked after use**); logout revokes a refresh token; login 5/min, refresh 30/min, logout 30/min per client on a Redis cache, no lockout. The throttle key is the client address forwarded by the Next server, trusted only with the shared `INTERNAL_API_KEY` (mandatory when `DEBUG=false`); a cache failure lets login through (logged). The Django Admin login is not throttled (gap #26). The frontend keeps tokens in `HttpOnly` cookies (`frontend/docs/safeguards/auth-and-tokens.md`) |
 | Authorization | `IsAuthenticated` + **company scoping**: every queryset, related field and admin is limited to `user.company` (a superuser bypasses); `/api/companies/` create and delete are superuser-only. **No roles yet** (phase 7) |
 | Network | CORS allow-list (`CORS_ALLOWED_ORIGINS`); `SECURE_PROXY_SSL_HEADER` for a TLS-terminating proxy; plain HTTP redirected to HTTPS with a short HSTS; the Admin path comes from `ADMIN_URL` (`operations.md`) |
 | Input | ORM only (no raw SQL); explicit serializer `fields` |
 
 **Rules for new code**
-1. Secrets only from env vars (`SECRET_KEY` also signs JWTs, ≥ 32 chars); never in code, fixtures, migrations, logs or errors. `.env` is gitignored; `.env.example` holds placeholders.
+1. Secrets only from env vars (`SECRET_KEY` ≥ 32 chars; `JWT_SIGNING_KEY` signs the JWTs); never in code, fixtures, migrations, logs or errors. `.env` is gitignored; `.env.example` holds placeholders.
 2. ORM only; if raw SQL is unavoidable, parametrize.
 3. Explicit serializer `fields` (never `"__all__"`: a new model field must not reach the API unreviewed); ids, timestamps and derived data `read_only`.
 4. Validate on the server whatever the UI validates: a broken rule is a 400.

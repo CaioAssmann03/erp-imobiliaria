@@ -1,10 +1,9 @@
-from typing import Any
+from typing import Any, final, override
 
 from auditlog.admin import LogEntryAdmin as LibraryLogEntryAdmin
 from auditlog.models import LogEntry
 from django.contrib import admin
 from django.http import HttpRequest
-from typing_extensions import final, override
 from unfold.admin import ModelAdmin
 
 from .models import Company

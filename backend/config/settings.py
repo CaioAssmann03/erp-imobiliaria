@@ -2,6 +2,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -104,6 +106,12 @@ DATABASES = {
 
 AUTH_USER_MODEL = "accounts.User"
 
+# Argon2id hashes new passwords (spec 021); PBKDF2 stays to verify old hashes, which are rehashed on the next login.
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+]
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
@@ -169,14 +177,38 @@ SPECTACULAR_SETTINGS = {
     ],
 }
 
+def _jwt_key_pair() -> tuple[str, str]:
+    """The Ed25519 private and public PEM from JWT_SIGNING_KEY (spec 020); one-line PEMs use a literal `\\n`."""
+    signing_key = os.environ.get("JWT_SIGNING_KEY", "").replace("\\n", "\n").strip()
+    if not signing_key:
+        raise ImproperlyConfigured(
+            "JWT_SIGNING_KEY must be set (an Ed25519 private key in PEM); see docs/architecture/operations.md."
+        )
+    try:
+        private_key = serialization.load_pem_private_key(signing_key.encode(), password=None)
+    except ValueError as error:
+        raise ImproperlyConfigured("JWT_SIGNING_KEY is not a valid PEM private key.") from error
+    if not isinstance(private_key, Ed25519PrivateKey):
+        raise ImproperlyConfigured("JWT_SIGNING_KEY must be an Ed25519 private key.")
+    verifying_key = private_key.public_key().public_bytes(
+        serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+    return signing_key, verifying_key.decode()
+
+
+JWT_SIGNING_KEY, JWT_VERIFYING_KEY = _jwt_key_pair()
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
+    "ALGORITHM": "EdDSA",
+    "SIGNING_KEY": JWT_SIGNING_KEY,
+    "VERIFYING_KEY": JWT_VERIFYING_KEY,
 }
 
-# Atrás de proxy HTTPS (Render): confia no cabeçalho do proxy para saber que a requisição
+# Atrás de proxy HTTPS (Caddy na VPS): confia no cabeçalho do proxy para saber que a requisição
 # é segura. Sem isso o login do admin falha por CSRF (origem https x requisição http).
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Plain HTTP is redirected to HTTPS outside development; HSTS starts short (an hour, no

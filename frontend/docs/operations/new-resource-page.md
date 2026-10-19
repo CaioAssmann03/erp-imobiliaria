@@ -8,7 +8,7 @@ skip-if: a small task (field, widget, accent) → operations/recipes.md
 Example resource `blocks` → route `/blocks`. Do the steps in order; each step names the norm to follow.
 
 1. **Backend first.** The endpoint, serializer and filters must exist. With the backend running:
-   `npm run generate:api` (hooks `useBlocksList`, `useBlocksCreate`, ... and models appear).
+   `pnpm generate:api` (hooks `useBlocksList`, `useBlocksCreate`, ... and models appear).
 2. **Schema** `lib/schemas/block.ts`: Zod schema (field names = API names), `BLOCK_DEFAULTS`,
    `blockToForm`, `blockToPayload(values, isEdit)`.
 3. **Route files** under `app/(dashboard)/blocks/`:

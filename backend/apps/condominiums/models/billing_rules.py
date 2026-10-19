@@ -1,6 +1,7 @@
+from typing import final, override
+
 from django.db import models
 from django.db.models import Q
-from typing_extensions import final, override
 
 from apps.condominiums.errors import BillingRulesError
 from apps.condominiums.models.condominium import Condominium

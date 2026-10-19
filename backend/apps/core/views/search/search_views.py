@@ -1,11 +1,10 @@
-from typing import Any
+from typing import Any, final
 
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import serializers
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from typing_extensions import final
 
 from apps.core.serializers import SearchSerializer
 from apps.persons.models import PersonModule

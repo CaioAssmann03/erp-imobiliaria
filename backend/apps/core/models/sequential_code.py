@@ -1,8 +1,8 @@
 from collections.abc import Collection
+from typing import override
 
 from django.db import models
 from django.db.models import Func, Value
-from typing_extensions import override
 
 
 def sequential_code_field(sequence: str) -> "models.BigIntegerField[int, int]":

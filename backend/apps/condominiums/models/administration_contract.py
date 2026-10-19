@@ -1,10 +1,9 @@
 import uuid
 from datetime import date
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, final, override
 
 from django.db import models
 from django.db.models import F, Q
-from typing_extensions import final, override
 
 from apps.condominiums.errors import AdministrationContractError
 from apps.condominiums.models.condominium import Condominium

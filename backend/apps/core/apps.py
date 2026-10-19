@@ -1,5 +1,6 @@
+from typing import override
+
 from django.apps import AppConfig
-from typing_extensions import override
 
 
 class CoreConfig(AppConfig):

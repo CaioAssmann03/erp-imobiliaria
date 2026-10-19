@@ -1,7 +1,7 @@
 ---
-summary: The finished feature specs (001–007, 009–019) condensed: what each did, the decisions that still explain the code, and its numbered requirements.
+summary: The finished feature specs (001–021) condensed: what each did, the decisions that still explain the code, and its numbered requirements.
 read-when: you wonder why something was built a certain way, or a test cites "spec NNN, Rn" and you need what Rn means
-skip-if: you are specifying a new feature → features/README.md; you need the spec still in progress → features/008-operational-hardening.md; you need what an app does today → apps/<app>.md
+skip-if: you are specifying a new feature → features/README.md; you need what an app does today → apps/<app>.md
 ---
 # Finished specs
 
@@ -52,6 +52,16 @@ Refresh tokens could not be revoked, login could be brute-forced and tokens sat 
 - The browser never sees a token: Next route handlers keep it in `HttpOnly` cookies (access lifetime = JWT's 30 min, refresh 7 days) and proxy every JSON call with `Authorization: Bearer`, refreshing once on expiry. One refresh is shared per token for 30 s (rotation revokes the old one while the screen fires several requests). A non-GET with a foreign `Origin` is 403 (on top of `SameSite=Lax`). Files will go by signed bucket URLs (the platform caps bodies).
 - Not covered: the Django Admin login (`/admin/login/`).
 - R1 blacklist after rotation · R2 logout 204 always · R3 rate limits and 429 shape · R4 trusted client address · R5 counters in Redis · R6 the browser sees no token · R7 handlers: login, logout, catch-all proxy with one refresh · R8 CSRF origin check · R9 same-origin `/api/...`, server-only variables · R10 UI logout revokes and clears · R11 `proxy.ts` and handlers share one cookie helper · R12 docs updated
+
+## 008 — Operational hardening: health, HTTPS/HSTS, admin path · phase 3a part 09
+The host probed `/api/schema/` (the whole OpenAPI schema), there was no HTTPS enforcement and the Admin sat on `/admin/`.
+- `HealthCheckMiddleware`, first in `MIDDLEWARE`: `GET`/`HEAD /api/health/` answers 200 `{"status":"ok"}` or 503 `{"status":"unavailable"}` (database `SELECT 1`; Redis not checked) before the HTTPS redirect and the host check, so it needs no `SECURE_REDIRECT_EXEMPT`; not in the OpenAPI schema; errors only logged.
+- `SECURE_SSL_REDIRECT` (default on when `DEBUG=false`) and `SECURE_HSTS_SECONDS` (default 3600, no subdomains/preload; a year once the final domain exists) from env.
+- `ADMIN_URL` from env, normalized; an empty, absolute or `..` value stops startup; check `core.W001` warns in production while it is `admin/`. Obscurity only: strong passwords, staff-only access and the audit trail are the protection (the Admin login has no throttle, gap #26).
+- On the VPS TLS ends at Caddy and the Next server calls Django over plain HTTP on the private network with `SECURE_SSL_REDIRECT=false` (instead of an https `API_INTERNAL_URL`). The production compose (`deploy/vps/docker-compose.yml`) health-checks the backend and the frontend waits for it.
+- Decisions (user, 2026-10-05): the health endpoint and its scope, env-driven HTTPS/HSTS, `ADMIN_URL`, a host-agnostic spec with a checklist, structured logs left out. Agent, confirmed by the user: middleware before `SecurityMiddleware` (on 2026-10-05, the redirect exemption by construction on 2026-10-19), minimal body, the defaults, `ADMIN_URL` normalization, the server-to-server URL rule.
+- R1 health 200/503, GET/HEAD, no auth · R2 independent of `ALLOWED_HOSTS` and HTTPS · R3 HTTPS redirect, can be turned off · R4 HSTS from env, none in development · R5 Admin at `ADMIN_URL`, invalid stops startup · R6 `core.W001` · R7 docs · R8 host checklist · R9 gaps #18, #20 (admin half) and #15 (health part) closed
+Checked: `pytest apps -q` 379 passed when implemented (2026-10-05); host checklist on the VPS on 2026-10-08; compose health check added on 2026-10-19 (the production `ADMIN_URL` is set by the user in the host `.env`).
 
 ## 009 — Cost centers and entry templates · phase 3 part 01
 API and Admin for `CostCenter` (the PDF's *SubConta*) and `EntryTemplate` (*Histórico*); no Next screen.
@@ -141,3 +151,19 @@ Condominiums and people get a `code`, the "ID" users type: an automatic number t
 - Decisions (user, 2026-10-15): an automatic sequential number per kind of record; owners and tenants use the person's ID; one person record released to a module (same ID); now the IDs of condominiums and people plus the module marking, and the IDs of rental properties, owners and tenants with the Rentals module (phase 8). Agent, confirmed by the user: field `code` (label "ID"), one global sequence (not per company), an array for the modules, no module rule on `advisor` or `Supplier`, no module control on the screens yet. Units: the first delivery numbered them too, then the user said a unit needs no ID (it is its condominium plus its number) and it was removed before the merge.
 - R1 own sequence, unique, never reused, `full_clean()` draws none · R2 read-only in the API and the Admin · R3 the migration numbers by creation order, is reversible and marks existing people `condominiums` · R4 `code` in the API and in the search items · R5 list search puts the ID first · R6 global search by ID (one digit means the ID only) · R7 `modules` rules and API · R8 `?module=` filters people and the search · R9 a unit link needs `condominiums` · R10 one person, one `code` · R11 frontend: ID, search and module · R12 docs
 Checked: `pytest apps -q` 762 passed (the one other test, a cost-center search for "água", fails the same on the original code on a Windows PostgreSQL that does not fold accented letters; it passes in CI); `mypy`, `makemigrations --check` and `check_docs` clean; frontend `tsc`, `eslint`, `npm test` and `npm run build` clean; lists, edit pages, picker, header search and a rentals-only person checked in the browser against the running stack on 2026-10-15.
+
+## 020 — EdDSA (Ed25519) JWT signing · none
+JWTs are signed with EdDSA instead of HS256 with `SECRET_KEY`, so the JWT key is separate from Django's secret and asymmetric.
+- `JWT_SIGNING_KEY` (PKCS#8 PEM of an Ed25519 private key; one line with a literal `\n` is accepted) is read in `config/settings.py`; the verifying key is derived from it and both go to `SIMPLE_JWT` with `ALGORITHM = "EdDSA"`. `cryptography` is a dependency. A missing, malformed or non-Ed25519 key stops startup with an error that names only the variable.
+- `pytest.ini` defaults the variable to a test-only key (real env wins) and CI uses the same one; `.env.example` has the generation command.
+- Decisions (user, 2026-10-19): EdDSA/Ed25519 (not ECDSA); the key is mandatory in every environment, development included; a full spec. Agent, confirmed by the user: one variable with the public key derived; the test-only key committed in `pytest.ini` and CI.
+- Deploy: set the key on the host before deploying; every user logs in again (old HS256 tokens are rejected).
+- R1 tokens carry `alg: EdDSA` and verify with the derived public key · R2 an HS256 token signed with `SECRET_KEY` is 401 · R3 no key → settings refuse to load, also with `DEBUG=true` · R4 garbage or a non-Ed25519 key → refused · R5 one-line PEM accepted
+Checked: `pytest apps -q` 768 passed; `mypy`, `manage.py check`, `makemigrations --check` and `check_docs` clean (2026-10-19).
+
+## 021 — Argon2 password hashing · none
+New and changed passwords are hashed with Argon2id (memory-hard, Django's recommendation) instead of PBKDF2-SHA256.
+- `PASSWORD_HASHERS` = Argon2 first, PBKDF2 second (only to verify old hashes; Django rehashes them with Argon2 on the next successful login, so no data migration and nobody is logged out). `argon2-cffi` is a dependency. Django's default Argon2 cost (time 2, memory 100 MiB, parallelism 8); the login throttle bounds the memory use.
+- Decisions (user, 2026-10-19): Argon2. Agent, confirmed by the user: keep PBKDF2 for old hashes; Django's default cost.
+- R1 a new password is stored as `argon2$argon2id$...` · R2 a PBKDF2 user logs in and the hash becomes Argon2
+Checked: `pytest apps -q` 770 passed; `mypy`, `manage.py check` and `check_docs` clean (2026-10-19).

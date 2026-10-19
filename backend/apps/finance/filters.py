@@ -1,6 +1,7 @@
+from typing import final
+
 import django_filters
 from django.db.models import QuerySet
-from typing_extensions import final
 
 from .models import AccountPayable, CurrentAccountEntry, EntryTemplate
 

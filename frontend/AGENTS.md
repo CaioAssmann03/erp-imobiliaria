@@ -26,8 +26,8 @@ organized by the SPDD REASONS canvas.
 
 - Code in English; everything the user reads in Portuguese (pt-BR). Docs and this file in English.
 - Server Component by default; `"use client"` only for interaction.
-- Style only with design tokens. Never edit `lib/api/generated/` (regenerate with `npm run generate:api`).
-- Before finishing: `npx tsc --noEmit` · `npx eslint .` · `npm run build`.
+- Style only with design tokens. Never edit `lib/api/generated/` (regenerate with `pnpm generate:api`).
+- Before finishing: `pnpm exec tsc --noEmit` · `pnpm exec eslint .` · `pnpm build`.
 
 ## Map (REASONS)
 

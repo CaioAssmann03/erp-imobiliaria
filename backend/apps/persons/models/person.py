@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, final, override
 
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GinIndex, OpClass
@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.db.models.functions import Upper
-from typing_extensions import final, override
 
 from apps.core.models import Company, SequentialCodeMixin, sequential_code_field
 from apps.core.models.base import BaseModel

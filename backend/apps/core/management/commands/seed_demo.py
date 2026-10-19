@@ -6,13 +6,12 @@ A lógica está em `apps/core/seed/`; aqui ficam só os argumentos e a ordem dos
 """
 
 import random
-from typing import Any
+from typing import Any, override
 
 from django.core.management.base import BaseCommand, CommandParser
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
-from typing_extensions import override
 
 from apps.condominiums.models import Address, Condominium
 from apps.core.models import Company
