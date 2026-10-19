@@ -15,7 +15,8 @@ Condominium (condominiums) ── advisor ─┘ SET_NULL
    ├─ 1:N LateInterestRate (CASCADE: the interest history by start date)
    ├─ 1:N Block (CASCADE) ── RESTRICT ── Unit.block (optional)
    ├─ 1:N Unit (CASCADE) └─ 1:N UnitPerson (CASCADE) ── PROTECT ── Person
-   └─ 1:N CostCenter (finance, CASCADE) ── 1:N EntryTemplate (PROTECT)
+   ├─ 1:N CostCenter (finance, CASCADE) ── 1:N EntryTemplate (PROTECT)
+   └─ 1:N BillingPlan (billing, CASCADE) ── 1:N BillingPlanItem (CASCADE) ── PROTECT ──► CostCenter, EntryTemplate
 Company ◄── PROTECT ── BankAccount (finance) ── PROTECT ──► Condominium (optional: a condominium's own account)
 Person ◄── 1:1 PROTECT ── Supplier (finance: payment data)
 Company ◄── PROTECT ── AccountPayable (finance) ── PROTECT ──► Supplier, CostCenter, Condominium (optional: empty = a company expense)
@@ -23,7 +24,7 @@ Company ◄── PROTECT ── CurrentAccount (finance; the holder is a generi
 ```
 **Every model** has a UUID `id` and (except `Block`, `BillingRules`, `AdministrationContract`, and the documents keyed by their `person`) `created_at` / `updated_at`, from the abstract bases in `core/models/base.py`; `@final`; `Meta.verbose_name(_plural)`; `Meta.ordering` when listed; every model declares `company_lookup`.
 
-**`on_delete`:** parts owned by a condominium CASCADE; `Condominium` → `Company` PROTECT; advisor and address SET_NULL; `Unit.block` RESTRICT (a block with units cannot go alone, a condominium delete still cascades); `UnitPerson.person` PROTECT (unlink first); `EntryTemplate.cost_center` PROTECT.
+**`on_delete`:** parts owned by a condominium CASCADE; `Condominium` → `Company` PROTECT; advisor and address SET_NULL; `Unit.block` RESTRICT (a block with units cannot go alone, a condominium delete still cascades); `UnitPerson.person` PROTECT (unlink first); `EntryTemplate.cost_center` PROTECT; a billing plan item's cost center and entry template PROTECT (deactivate them instead).
 
 **Constraints and rules** are in each model's `Meta.constraints`, `clean()` and `models/rules/`, with the same message and code (`errors/`). Two to remember: SQL `CHECK (x >= 0)` passes when `x` is NULL (add `isnull=False` when null must fail), and the same CPF, CNPJ or RG may exist in two companies (unique per company, not global).
 

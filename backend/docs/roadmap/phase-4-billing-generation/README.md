@@ -5,7 +5,7 @@ skip-if: you need the overall status of all phases → roadmap/README.md; you ne
 ---
 # Phase 4 — Billing issuance (generation)
 
-**Status:** todo · **Source:** Sprint 4 of the sprints PDF · **Depends on:** phase 3
+**Status:** in-progress · **Source:** Sprint 4 of the sprints PDF · **Depends on:** phase 3
 
 ## Goal
 Compute the monthly charge per unit and generate the boleto document in draft/homologation mode, without bank registration.
@@ -14,7 +14,7 @@ Compute the monthly charge per unit and generate the boleto document in draft/ho
 | # | Part | Status | Apps |
 |---|---|---|---|
 | 01 | [Santander accreditation (external action)](01-bank-accreditation.md) | todo | - |
-| 02 | [Billing plans](02-billing-plans.md) | todo | billing |
+| 02 | [Billing plans](02-billing-plans.md) | done | billing |
 | 03 | [Billing documents](03-billing-documents.md) | todo | billing |
 | 04 | [Monthly issuance task](04-monthly-issuance-task.md) | todo | billing |
 | 05 | [Boleto PDF (draft)](05-boleto-pdf-draft.md) | todo | billing |
