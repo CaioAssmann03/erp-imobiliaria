@@ -34,6 +34,10 @@ services:
         condition: service_started
     expose:
       - '8000'
+    # Loopback only, never public: the Django Admin is opened through an SSH tunnel
+    # (backend/docs/architecture/operations.md). ALLOWED_HOSTS must include localhost.
+    ports:
+      - '127.0.0.1:8000:8000'
     # /api/health/ answers before the host check and the HTTPS redirect (spec 008); the image has no curl.
     healthcheck:
       test: ['CMD', 'python', '-c', "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/', timeout=3)"]

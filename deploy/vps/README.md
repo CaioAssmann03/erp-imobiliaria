@@ -5,7 +5,7 @@ How production works, its variables and the runbook: [`backend/docs/architecture
 
 | File | Purpose |
 |---|---|
-| `docker-compose.yml` | the production stack (Compose project `erp`): db, redis, backend (with a health check), Celery worker and beat, frontend |
+| `docker-compose.yml` | the production stack (Compose project `erp`): db, redis, backend (with a health check, published on the VPS loopback for the Admin SSH tunnel), Celery worker and beat, frontend |
 | `deploy.sh` | `./deploy.sh` rebuilds and restarts with the code in `./app`; `./deploy.sh --pull` first resets `./app` to `origin/main` |
 | `deploy.env` | where `--pull` clones from (repository, branch, deploy key path); no secret |
 
