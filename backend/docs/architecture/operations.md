@@ -44,7 +44,7 @@ Decided on 2026-10-08 (it replaces the Supabase, Vercel and Render plans of phas
 | Stack | `/root/erp-imobiliaria/docker-compose.yml`, Compose project `erp`: `db` (Postgres 16, volume `erp_postgres_data`), `redis`, `backend` (the `backend/Dockerfile` image: `entrypoint.sh` migrates, collects static, creates the admin, runs gunicorn), `celery_worker` and `celery_beat` (same image), `frontend` (the `production` stage of `frontend/Dockerfile`). Nothing but the frontend is reachable from outside; Postgres and Redis publish no port |
 | HTTPS | the other project's Caddy (`/root/air-app-node/Caddyfile`) has a block for the ERP name that proxies to `frontend:3000`; it issues and renews the Let's Encrypt certificate. The ERP frontend joins the Docker network `erp_edge`, which that Caddy also joins (`docker network create erp_edge`; declared in both compose files) |
 | Name | `erp.177-7-63-175.sslip.io` (sslip.io resolves any IP-in-the-name; free, real certificate). Swap it in the Caddyfile, `ALLOWED_HOSTS` and `CORS_ALLOWED_ORIGINS` when the final domain exists, then raise `SECURE_HSTS_SECONDS` |
-| Environment | `/root/erp-imobiliaria/.env` (mode 600, never in git): the variables of `architecture/overview.md`. Differences from local: `DEBUG=false`, `ALLOWED_HOSTS=<name>,backend`, `SECURE_SSL_REDIRECT=false` (TLS ends at Caddy; the Next server calls Django over plain HTTP on the private network), `API_INTERNAL_URL=http://backend:8000`, generated `SECRET_KEY`, `JWT_SIGNING_KEY` (Ed25519, spec 022; changing it logs everybody out), `INTERNAL_API_KEY`, database password and first-admin password |
+| Environment | `/root/erp-imobiliaria/.env` (mode 600, never in git): the variables of `architecture/overview.md`. Differences from local: `DEBUG=false`, `ALLOWED_HOSTS=<name>,backend,localhost` (`localhost` for the Admin tunnel), `SECURE_SSL_REDIRECT=false` (TLS ends at Caddy; the Next server calls Django over plain HTTP on the private network), `API_INTERNAL_URL=http://backend:8000`, generated `SECRET_KEY`, `JWT_SIGNING_KEY` (Ed25519, spec 022; changing it logs everybody out), `INTERNAL_API_KEY`, database password and first-admin password |
 | Code | `/root/erp-imobiliaria/app` is a git clone of the repository (read-only *Deploy key* `erp_deploy`); `./deploy.sh --pull` resets it to `origin/main` and rebuilds. CI does not deploy (a push-to-deploy workflow was set aside on 2026-10-19) |
 | Deploy | `cd /root/erp-imobiliaria && ./deploy.sh --pull` (creates `erp_edge` if missing, then `docker compose up -d --build`). Migrations run on container start |
 | Versioned files | `docker-compose.yml`, `deploy.sh` and `deploy.env` are in [`deploy/vps/`](../../../deploy/vps/README.md) (copied from the VPS on 2026-10-19, plus the backend health check); after changing one, copy it to `/root/erp-imobiliaria/`. The `.env` and the deploy key stay only on the VPS; the Caddy block is in the other project's repository |
@@ -67,8 +67,15 @@ The address map (spec 021) is Google's **Maps Embed API** under the condominium 
 - [x] The frontend's `API_INTERNAL_URL` is plain `http://backend:8000` on the private network, so `SECURE_SSL_REDIRECT=false` there (with the redirect on, that URL would loop on 301).
 - [x] `INTERNAL_API_KEY` and `SECRET_KEY` are set and `REDIS_URL` is reachable (the login rate limit lives there).
 - [ ] `JWT_SIGNING_KEY` (spec 022) is set in the host `.env` **before** deploying the EdDSA change: without it the backend and Celery do not start. Every user logs in again after that deploy.
-- [ ] `ADMIN_URL` is set to a non-obvious path in the host `.env` (a value was generated on 2026-10-19 and handed to the user; it is never written in git). The Admin is not published by Caddy and the Next proxy only forwards `/api/...` segments (`frontend/lib/api-path.ts`), so the default path was not reachable from outside meanwhile.
+- [x] `ADMIN_URL` is set to a non-obvious path in the host `.env` (2026-10-19; the value is never written in git). The Admin is not published by Caddy and the Next proxy only forwards `/api/...` segments (`frontend/lib/api-path.ts`); it is opened through the SSH tunnel below.
 - [ ] After every deploy, smoke test that the proxy cannot leave `/api`: `curl -s -o /dev/null -w '%{http_code}' --path-as-is https://<name>/api/..%2fadmin/login/` must print `404` (it printed `200`, the Django Admin login page, until the segment check was added).
+
+### Django Admin through an SSH tunnel
+The backend publishes port 8000 on the VPS **loopback only** (`127.0.0.1:8000`, `deploy/vps/docker-compose.yml`); nothing new is reachable from the internet. From your computer:
+```bash
+ssh -N -L 8000:127.0.0.1:8000 root@177.7.63.175   # keep it open while you use the Admin
+```
+Then open `http://localhost:8000/<ADMIN_URL>` (the path is in the host `.env`). It needs `localhost` in `ALLOWED_HOSTS`. The session and CSRF cookies are `Secure` in production: Chrome and Firefox accept them on `http://localhost`, Safari does not (use another browser). Close the tunnel with Ctrl+C.
 
 ## Migrations in production
 1. Commit them with the feature; CI fails on missing ones.
