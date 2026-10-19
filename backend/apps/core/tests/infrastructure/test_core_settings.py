@@ -9,7 +9,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 BACKEND = Path(__file__).resolve().parents[4]
 
 
-# Test-only key of pytest.ini (spec 020); the helper below drops the inherited one.
+# Test-only key of pytest.ini (spec 022); the helper below drops the inherited one.
 JWT_SIGNING_KEY = os.environ["JWT_SIGNING_KEY"]
 RSA_PRIVATE_KEY = (
     rsa.generate_private_key(public_exponent=65537, key_size=2048)

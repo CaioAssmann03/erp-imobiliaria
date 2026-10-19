@@ -1,3 +1,4 @@
+from datetime import date
 from typing import final, override
 
 from django.db import models

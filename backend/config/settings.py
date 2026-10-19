@@ -106,7 +106,7 @@ DATABASES = {
 
 AUTH_USER_MODEL = "accounts.User"
 
-# Argon2id hashes new passwords (spec 021); PBKDF2 stays to verify old hashes, which are rehashed on the next login.
+# Argon2id hashes new passwords (spec 023); PBKDF2 stays to verify old hashes, which are rehashed on the next login.
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
@@ -178,7 +178,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 def _jwt_key_pair() -> tuple[str, str]:
-    """The Ed25519 private and public PEM from JWT_SIGNING_KEY (spec 020); one-line PEMs use a literal `\\n`."""
+    """The Ed25519 private and public PEM from JWT_SIGNING_KEY (spec 022); one-line PEMs use a literal `\\n`."""
     signing_key = os.environ.get("JWT_SIGNING_KEY", "").replace("\\n", "\n").strip()
     if not signing_key:
         raise ImproperlyConfigured(

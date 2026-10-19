@@ -1,4 +1,4 @@
-"""JWTs are signed with EdDSA (Ed25519) from JWT_SIGNING_KEY, not HS256 with SECRET_KEY (spec 020)."""
+"""JWTs are signed with EdDSA (Ed25519) from JWT_SIGNING_KEY, not HS256 with SECRET_KEY (spec 022)."""
 
 from datetime import UTC, datetime, timedelta
 
