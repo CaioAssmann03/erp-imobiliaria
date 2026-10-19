@@ -5,7 +5,7 @@ skip-if: you need the whole phase → roadmap/phase-3a-prerequisites/README.md; 
 ---
 # Part 01 — Deploy docs for the new hosting
 
-**Status:** in-progress · **Phase:** 3a (Prerequisites for phase 3) · **Apps:** - · **Frontend impact:** none · **Depends on:** -
+**Status:** done · **Phase:** 3a (Prerequisites for phase 3) · **Apps:** - · **Frontend impact:** none · **Depends on:** -
 **Spec:** none (docs and config only)
 
 ## Goal
@@ -13,10 +13,10 @@ Align the docs and the deploy config with the new hosting (the deploy moved to S
 
 ## Scope
 - [x] Confirm where the Django backend, the Next.js frontend, Redis and the Celery worker run now: all in one Docker Compose stack on a VPS (decided and deployed on 2026-10-08)
-- [ ] Replace or retire `render.yaml` and update `.github/workflows/ci.yml` if it deploys (CI does not deploy; `render.yaml` still in the repository)
+- [x] Replace or retire `render.yaml` and update `.github/workflows/ci.yml` if it deploys (`render.yaml` deleted on 2026-10-19; CI does not deploy)
 - [x] Update `architecture/operations.md` (environments, deploy flow, runbook) and `architecture/overview.md` (env vars, stack)
 - [x] Update the gaps that mention the old host (#19 now says the ERP database has no backup yet; #7, #15 and #18 no longer name a host)
-- [x] Update the root `README.md` quick start if it changed (a *Deploy na VPS* section was added; the Render section stays until `render.yaml` is retired)
+- [x] Update the root `README.md` quick start if it changed (a *Deploy na VPS* section was added; the Render section was removed on 2026-10-19)
 - [x] Give the frontend `API_INTERNAL_URL` and `INTERNAL_API_KEY`, and the backend `INTERNAL_API_KEY` and a reachable `REDIS_URL` (the login rate limit lives in Redis)
 - [x] Create the production database from scratch (Postgres 16 container) and run `migrate` (done by `entrypoint.sh` on the first start)
 
@@ -44,3 +44,4 @@ The plan of 2026-10-05 (Vercel, Supabase, managed Redis) is replaced: everything
 ## Result
 Deployed and answering over HTTPS on 2026-10-08.
 **Left:** retire `render.yaml` and the Render section of the root `README.md` (kept for now; ask before deleting), decide whether `ci.yml` should deploy, and version the VPS compose and `deploy.sh` in the repository.
+Closed on 2026-10-19 (user): `render.yaml` and the Render section of the root `README.md` deleted; the VPS `docker-compose.yml`, `deploy.sh` and `deploy.env` versioned in `deploy/vps/` (copied read-only from the VPS, no secret); CI does not deploy for now (a push-to-deploy workflow was set aside).

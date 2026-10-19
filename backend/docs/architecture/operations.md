@@ -31,7 +31,7 @@ After an API change: backend running → `cd frontend && pnpm generate:api` (it 
 |---|---|---|
 | Local | compose | backend `runserver`; Postgres on 5432 (host port `POSTGRES_HOST_PORT`) |
 | CI | `.github/workflows/ci.yml`, Postgres + Redis services | `makemigrations --check`, `migrate`, `check`, `pytest apps` |
-| Production | one VPS (Docker Compose), reached through the Caddy of a project that already runs there: see *Production on the VPS* | temporary name `erp.177-7-63-175.sslip.io` until the final domain exists. `render.yaml` (Render Blueprint) is no longer used |
+| Production | one VPS (Docker Compose), reached through the Caddy of a project that already runs there: see *Production on the VPS* | temporary name `erp.177-7-63-175.sslip.io` until the final domain exists. The old Render Blueprint was removed on 2026-10-19 |
 
 ## Deploy (backend)
 Docker image → `entrypoint.sh`: `migrate --noinput` → `collectstatic --noinput` → optional `createsuperuser --noinput` (idempotent) → `gunicorn` (`WEB_CONCURRENCY`, default 2; `PORT`). Health check `GET /api/health/` (200 if the app runs and the database answers, 503 otherwise; no auth, answered before the HTTPS redirect and the host check). **Migrations run on every container start.** The environment of the production stack is described in *Production on the VPS*; `ALLOWED_HOSTS` and `CORS_ALLOWED_ORIGINS` must match the real domain.
@@ -45,9 +45,9 @@ Decided on 2026-10-08 (it replaces the Supabase, Vercel and Render plans of phas
 | HTTPS | the other project's Caddy (`/root/air-app-node/Caddyfile`) has a block for the ERP name that proxies to `frontend:3000`; it issues and renews the Let's Encrypt certificate. The ERP frontend joins the Docker network `erp_edge`, which that Caddy also joins (`docker network create erp_edge`; declared in both compose files) |
 | Name | `erp.177-7-63-175.sslip.io` (sslip.io resolves any IP-in-the-name; free, real certificate). Swap it in the Caddyfile, `ALLOWED_HOSTS` and `CORS_ALLOWED_ORIGINS` when the final domain exists, then raise `SECURE_HSTS_SECONDS` |
 | Environment | `/root/erp-imobiliaria/.env` (mode 600, never in git): the variables of `architecture/overview.md`. Differences from local: `DEBUG=false`, `ALLOWED_HOSTS=<name>,backend`, `SECURE_SSL_REDIRECT=false` (TLS ends at Caddy; the Next server calls Django over plain HTTP on the private network), `API_INTERNAL_URL=http://backend:8000`, generated `SECRET_KEY`, `JWT_SIGNING_KEY` (Ed25519, spec 020; changing it logs everybody out), `INTERNAL_API_KEY`, database password and first-admin password |
-| Code | `/root/erp-imobiliaria/app`: until the repository gives the VPS access, the code is sent with `git archive <branch> | ssh root@<vps> tar -x -C /root/erp-imobiliaria/app` and applied with `./deploy.sh`. `deploy.env` and the key `erp_deploy(.pub)` are ready for `./deploy.sh --pull` (a clone over SSH) once the public key is registered as a read-only *Deploy key* of the repository |
-| Deploy | `cd /root/erp-imobiliaria && ./deploy.sh` (creates `erp_edge` if missing, then `docker compose up -d --build`). Migrations run on container start |
-| Not in git yet | `docker-compose.yml`, `deploy.sh`, `deploy.env` live only on the VPS; the Caddy block is in the other project's repository. Version them (for example under `deploy/vps/`) before a second person deploys |
+| Code | `/root/erp-imobiliaria/app` is a git clone of the repository (read-only *Deploy key* `erp_deploy`); `./deploy.sh --pull` resets it to `origin/main` and rebuilds. CI does not deploy (a push-to-deploy workflow was set aside on 2026-10-19) |
+| Deploy | `cd /root/erp-imobiliaria && ./deploy.sh --pull` (creates `erp_edge` if missing, then `docker compose up -d --build`). Migrations run on container start |
+| Versioned files | `docker-compose.yml`, `deploy.sh` and `deploy.env` are in [`deploy/vps/`](../../../deploy/vps/README.md) (copied from the VPS on 2026-10-19, plus the backend health check); after changing one, copy it to `/root/erp-imobiliaria/`. The `.env` and the deploy key stay only on the VPS; the Caddy block is in the other project's repository |
 
 Receipts (spec 018) live in a private **Cloudflare R2** bucket, not on the VPS: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_STORAGE_BUCKET_NAME` and `AWS_S3_ENDPOINT_URL` in `.env` (without them the receipt endpoints answer 503). The bucket needs a CORS rule that allows `PUT` and `GET` from the ERP origin with the `Content-Type` header, otherwise the browser upload is blocked.
 
@@ -61,11 +61,11 @@ Receipts (spec 018) live in a private **Cloudflare R2** bucket, not on the VPS: 
 
 **Checklist for a new host** (checked on the VPS on 2026-10-08):
 - [x] TLS is terminated in front: Caddy serves the browser over HTTPS and proxies to the Next server. Django is not reached by the browser at all; it listens only on the private Docker network.
-- [x] The health path answers: `GET /api/health/` returned 200 from inside the stack (`docker compose exec backend`). The compose file has no health check yet, so nothing restarts a backend that stops answering.
+- [x] The health path answers: `GET /api/health/` returned 200 from inside the stack (`docker compose exec backend`). The compose file (`deploy/vps/docker-compose.yml`) checks it every 15 s and the frontend waits for a healthy backend.
 - [x] The frontend's `API_INTERNAL_URL` is plain `http://backend:8000` on the private network, so `SECURE_SSL_REDIRECT=false` there (with the redirect on, that URL would loop on 301).
 - [x] `INTERNAL_API_KEY` and `SECRET_KEY` are set and `REDIS_URL` is reachable (the login rate limit lives there).
 - [ ] `JWT_SIGNING_KEY` (spec 020) is set in the host `.env` **before** deploying the EdDSA change: without it the backend and Celery do not start. Every user logs in again after that deploy.
-- [ ] `ADMIN_URL` is still the default `admin/` (the `core.W001` warning shows in the log): the Admin is not published by Caddy and the Next proxy only forwards `/api/...` segments (`frontend/lib/api-path.ts`), so it is not reachable from outside. Set a non-obvious path before it is published.
+- [ ] `ADMIN_URL` is set to a non-obvious path in the host `.env` (a value was generated on 2026-10-19 and handed to the user; it is never written in git). The Admin is not published by Caddy and the Next proxy only forwards `/api/...` segments (`frontend/lib/api-path.ts`), so the default path was not reachable from outside meanwhile.
 - [ ] After every deploy, smoke test that the proxy cannot leave `/api`: `curl -s -o /dev/null -w '%{http_code}' --path-as-is https://<name>/api/..%2fadmin/login/` must print `404` (it printed `200`, the Django Admin login page, until the segment check was added).
 
 ## Migrations in production

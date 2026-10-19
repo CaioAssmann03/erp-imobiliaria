@@ -208,7 +208,7 @@ SIMPLE_JWT = {
     "VERIFYING_KEY": JWT_VERIFYING_KEY,
 }
 
-# Atrás de proxy HTTPS (Render): confia no cabeçalho do proxy para saber que a requisição
+# Atrás de proxy HTTPS (Caddy na VPS): confia no cabeçalho do proxy para saber que a requisição
 # é segura. Sem isso o login do admin falha por CSRF (origem https x requisição http).
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Plain HTTP is redirected to HTTPS outside development; HSTS starts short (an hour, no

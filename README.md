@@ -13,7 +13,7 @@ Documentação completa:
 - **Backend:** Django + Django REST Framework + PostgreSQL
 - **Frontend:** Next.js + TypeScript + Tailwind + TanStack Query
 - **Jobs:** Celery + Redis
-- **Deploy:** VPS com Docker Compose e HTTPS pelo Caddy (ver *Deploy na VPS*); `render.yaml` é o plano antigo
+- **Deploy:** VPS com Docker Compose e HTTPS pelo Caddy (ver *Deploy na VPS*)
 
 ## Rodando localmente
 
@@ -37,29 +37,7 @@ HTTPS vem do Caddy que já existe na VPS (um bloco no `Caddyfile` aponta o domí
 nome provisório é `erp.177-7-63-175.sslip.io`. Os comprovantes de pagamento ficam num bucket Cloudflare R2
 (variáveis `AWS_*`; sem elas só a parte de comprovantes fica indisponível). O passo a passo, as variáveis e o
 que fazer quando algo falha estão em [`backend/docs/architecture/operations.md`](backend/docs/architecture/operations.md)
-(seção *Production on the VPS*). O compose de produção e o `deploy.sh` ainda estão só na VPS.
-
-## Deploy no Render (plano antigo, repositório privado)
-
-O Render não aceita upload de arquivos: o deploy vem de um repositório Git (privado funciona: ao
-conectar o GitHub, dê acesso só a este repositório) ou de uma imagem Docker.
-
-**Jeito rápido (Blueprint):** New > Blueprint > escolha o repositório. O Render lê o `render.yaml`
-e cria Postgres, Redis, backend e frontend. Ele pergunta `DJANGO_SUPERUSER_USERNAME`,
-`DJANGO_SUPERUSER_EMAIL` e `DJANGO_SUPERUSER_PASSWORD` (usuário do primeiro login).
-
-**Jeito manual:** crie um PostgreSQL e dois Web Services Docker (`backend` e `frontend`, cada um com
-seu *root directory*) com as variáveis do `render.yaml`. Pontos importantes:
-
-- O backend sobe pelo `backend/entrypoint.sh`: roda `migrate`, `collectstatic`, cria o admin (se
-  `DJANGO_SUPERUSER_*` estiverem definidos) e inicia o gunicorn na porta de `PORT`.
-- O frontend usa o último estágio do `frontend/Dockerfile` (produção). O navegador só fala com o Next
-  (mesma origem); o servidor Next chama o Django por `API_INTERNAL_URL` (variável só do servidor, em tempo de
-  execução) e `INTERNAL_API_KEY` (a mesma do backend) identifica essas chamadas.
-- `ALLOWED_HOSTS` (backend) = domínio do backend; `CORS_ALLOWED_ORIGINS` = URL do frontend.
-- Plano free: serviços dormem sem uso, o Postgres gratuito expira em 30 dias e não há workers
-  (Celery fica de fora até haver tarefas).
-- Opcional: `python manage.py seed_demo` (no Shell do Render, só planos pagos) cria dados de exemplo.
+(seção *Production on the VPS*). O compose de produção e o `deploy.sh` estão versionados em [`deploy/vps/`](deploy/vps/README.md).
 
 ## Client da API no frontend
 

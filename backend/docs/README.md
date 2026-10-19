@@ -10,7 +10,7 @@ Find your task, open **only** the listed files (usually 2–3). **Read the heade
 | Task | Open |
 |---|---|
 | **What is done / what comes next** | `roadmap/README.md` → the phase folder `README.md` → the part file |
-| **Any new feature** (do this first) | the roadmap part (if any) → `features/README.md` → copy `features/_template.md` (full) or `features/_template-lite.md` (small change); examples: `features/history.md` (finished specs), `features/008-operational-hardening.md` |
+| **Any new feature** (do this first) | the roadmap part (if any) → `features/README.md` → copy `features/_template.md` (full) or `features/_template-lite.md` (small change); examples: `features/history.md` (finished specs) |
 | Plan a new phase or part | `roadmap/README.md` → copy `roadmap/_template-phase.md` or `roadmap/_template-part.md` |
 | New model, field, constraint, rule | `conventions/practices.md` · `architecture/data.md` · `apps/<app>.md` |
 | New use case (several models, a transaction, a state change) | `conventions/practices.md` §3b · `apps/<app>.md` |

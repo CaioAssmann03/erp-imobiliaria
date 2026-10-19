@@ -43,6 +43,6 @@ skip-if: other situation → path of the right file; ...
 | File | Purpose |
 |---|---|
 | `docker-compose.yml` | local environment (db, redis, backend, celery, frontend) |
-| `render.yaml` | production Blueprint (Render) |
+| `deploy/vps/` | production compose and deploy script of the VPS |
 | `.github/workflows/ci.yml` | CI (backend and frontend jobs) |
 | `README.md` | human-oriented overview and quick start |
