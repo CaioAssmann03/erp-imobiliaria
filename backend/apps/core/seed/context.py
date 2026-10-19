@@ -3,8 +3,7 @@
 import random
 from dataclasses import dataclass
 from datetime import date
-
-from typing_extensions import final
+from typing import final
 
 from apps.core.models import Company
 from apps.persons.models import Person

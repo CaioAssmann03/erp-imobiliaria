@@ -1,8 +1,7 @@
-from typing import Any
+from typing import Any, override
 
 from rest_framework.request import Request
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from typing_extensions import override
 
 from apps.core.audit import set_audit_actor
 

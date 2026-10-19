@@ -1,9 +1,8 @@
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, final, override
 
 from django.db import models
 from django.db.models import F, Q
-from typing_extensions import final, override
 
 from apps.condominiums.errors import UnitPersonError
 from apps.condominiums.models.querysets import UnitPersonQuerySet

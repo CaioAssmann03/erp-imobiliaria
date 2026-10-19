@@ -59,6 +59,6 @@ Layers to cover: model/constraint, serializer validation, API (create, update, l
 - [ ] Every criterion R1… has a passing test in the Test plan
 - [ ] `pytest apps -q` green; `manage.py check` and `makemigrations --check --dry-run` clean
 - [ ] `python backend/docs/tools/check_docs.py` passes
-- [ ] Frontend client regenerated and callers fixed (`npm run generate:api`), or `N/A — no API change`
+- [ ] Frontend client regenerated and callers fixed (`pnpm generate:api`), or `N/A — no API change`
 - [ ] `docs/apps/<app>.md` updated; `docs/known-gaps.md` row closed (if any)
 - [ ] Roadmap part and phase table updated (if **Roadmap** is set); index in `features/README.md` updated

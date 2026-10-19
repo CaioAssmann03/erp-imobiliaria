@@ -24,7 +24,7 @@ venv/bin/python manage.py check
 venv/bin/python manage.py makemigrations --check --dry-run     # must be clean
 venv/bin/python manage.py makemigrations <app>
 ```
-After an API change: backend running → `cd frontend && npm run generate:api` (it deletes and recreates `lib/api/generated/`, so **restart the frontend container afterwards**: the dev server keeps the empty folder in cache and answers 500), fix callers, `npx tsc --noEmit`, `npx eslint .`, `npm run build`. Reset (destroys data): `docker compose down -v && docker compose up -d`, migrate, create the superuser; if the backend starts before Postgres, `docker compose restart backend`. Dev tools: `pip install -r requirements-dev.txt`.
+After an API change: backend running → `cd frontend && pnpm generate:api` (it deletes and recreates `lib/api/generated/`, so **restart the frontend container afterwards**: the dev server keeps the empty folder in cache and answers 500), fix callers, `pnpm exec tsc --noEmit`, `pnpm exec eslint .`, `pnpm build`. Reset (destroys data): `docker compose down -v && docker compose up -d`, migrate, create the superuser; if the backend starts before Postgres, `docker compose restart backend`. Dev tools: `pip install -r requirements-dev.txt`.
 
 ## Environments
 | Env | How | Notes |

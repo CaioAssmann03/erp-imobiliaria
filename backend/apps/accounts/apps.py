@@ -1,5 +1,6 @@
+from typing import final, override
+
 from django.apps import AppConfig
-from typing_extensions import final, override
 
 
 @final

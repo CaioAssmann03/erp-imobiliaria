@@ -67,7 +67,7 @@ O frontend não chama a API manualmente: os hooks React Query em `frontend/lib/a
 
 ```bash
 cd frontend
-npm run generate:api
+pnpm generate:api
 ```
 
 ## Estrutura

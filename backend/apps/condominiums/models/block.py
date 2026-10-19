@@ -1,5 +1,6 @@
+from typing import final, override
+
 from django.db import models
-from typing_extensions import final, override
 
 from apps.condominiums.errors import BlockError
 from apps.condominiums.models.condominium import Condominium

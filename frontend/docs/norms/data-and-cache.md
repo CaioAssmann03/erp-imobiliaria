@@ -6,7 +6,7 @@ skip-if: advanced query/mutation usage → norms/tanstack-query.md; auth in requ
 # Data, API client and cache (N — Norms)
 
 ## Generated client
-Hooks come from orval (`npm run generate:api`, backend running); `lib/api/generated/` is wiped on regenerate: **never edit**.
+Hooks come from orval (`pnpm generate:api`, backend running); `lib/api/generated/` is wiped on regenerate: **never edit**.
 
 | Use | Name (resource `condominiums`) |
 |---|---|

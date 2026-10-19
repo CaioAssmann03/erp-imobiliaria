@@ -1,5 +1,6 @@
+from typing import final
+
 from rest_framework import serializers
-from typing_extensions import final
 
 from apps.core.serializers import ModelRulesMixin
 from apps.persons.serializers import PersonSerializer

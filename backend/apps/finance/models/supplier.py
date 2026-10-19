@@ -1,6 +1,7 @@
+from typing import final, override
+
 from django.core.exceptions import ValidationError
 from django.db import models
-from typing_extensions import final, override
 
 from apps.core.models.base import BaseModel
 from apps.finance.errors import SupplierError

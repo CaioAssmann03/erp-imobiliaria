@@ -1,8 +1,9 @@
+from typing import final, override
+
 from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.functions import Upper
-from typing_extensions import final, override
 
 from apps.core.models import Company
 from apps.core.validators import validate_cnpj

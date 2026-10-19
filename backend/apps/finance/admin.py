@@ -1,6 +1,7 @@
+from typing import final
+
 from django.contrib import admin
 from django.http import HttpRequest
-from typing_extensions import final
 from unfold.admin import ModelAdmin, TabularInline
 
 from apps.core.scoping import CompanyScopedAdminMixin

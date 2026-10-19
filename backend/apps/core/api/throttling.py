@@ -8,11 +8,11 @@ else can forge it to dodge the limit.
 
 import hmac
 import logging
+from typing import override
 from django.conf import settings
 from rest_framework.request import Request
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
-from typing_extensions import override
 
 logger = logging.getLogger(__name__)
 
