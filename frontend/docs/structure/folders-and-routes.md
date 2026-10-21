@@ -39,6 +39,10 @@ docs/         REASONS documentation
 | `/finance` | redirects to `/finance/accounts-payable` (`finance/layout.tsx` renders the sub-header `FinanceSubNav`: Contas a pagar · Extrato · Lançamento manual) |
 | `/finance/accounts-payable`, `/new`, `/[id]` | `app/(dashboard)/finance/accounts-payable/...` (a paid or cancelled account opens read-only; settling is a dialog, `SettleAccountPayableDialog`, cancelling is a row action) |
 | `/finance/statement` | `app/(dashboard)/finance/statement/page.tsx` (`?condominium=<id>` picks the condominium; reversing is a dialog; `/condominiums/[id]/statement` redirects here) |
+| `/billing` | redirects to `/billing/plans` (`billing/layout.tsx` renders the sub-header `BillingSubNav`: Planos de cobrança) |
+| `/billing/plans`, `/new`, `/[id]` | `app/(dashboard)/billing/plans/...` (billing plans with a nested `items` editor: `useFieldArray`, move up/down buttons; the condominium is chosen on create and fixed on edit; the pure payload helpers are in `lib/billing-plan-payload.ts`, tested by `tests/billing-plan.test.mjs`) |
+| `/billing/documents`, `/[id]` | `app/(dashboard)/billing/documents/...` (documents of the units: list with filters; the page is read-only, with items, the terms copied at issuance, **Baixar PDF** (generates it when missing) and a confirmed cancel; the status is `BillingDocumentStatusBadge`, "Vencido" derived from `is_overdue`) |
+| `/billing/runs`, `/[id]` | `app/(dashboard)/billing/runs/...` (issuance runs: list, the **Emitir mês** dialog, and the run page with counts and the problems explained by `lib/billing-run-problems.ts`) |
 | `/finance/entries/new` | `app/(dashboard)/finance/entries/new/page.tsx` (batch + lines with `useFieldArray`) |
 
 ## Where new code goes

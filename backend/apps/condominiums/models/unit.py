@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 from decimal import Decimal
 from typing import TYPE_CHECKING, final, override
 
@@ -12,6 +13,12 @@ from apps.condominiums.models.querysets import UnitQuerySet
 from apps.condominiums.models.rules import UnitRules
 from apps.condominiums.validators import validate_ideal_fraction, validate_non_negative
 from apps.core.models.base import BaseModel
+
+if TYPE_CHECKING:
+    from django.db.models.fields.related_descriptors import RelatedManager
+
+    from apps.condominiums.models.unit_person import UnitPerson
+    from apps.persons.models import Person
 
 
 def _ideal_fraction_range_check(field_name: str, constraint_name: str) -> models.CheckConstraint:
@@ -41,6 +48,12 @@ class Unit(BaseModel):
 
     objects = UnitQuerySet.as_manager()
 
+    class BillingRecipient(models.TextChoices):
+        """Who receives the unit's boleto (the PDF's "sends document to")."""
+
+        OWNER = "owner", "Owner"
+        TENANT = "tenant", "Tenant"
+
     class UnitType(models.TextChoices):
         APARTMENT = "apartment", "Apartment"
         OFFICE = "office", "Office"
@@ -52,6 +65,7 @@ class Unit(BaseModel):
 
     if TYPE_CHECKING:
         condominium_id: uuid.UUID
+        unit_people: "RelatedManager[UnitPerson]"
 
     condominium = models.ForeignKey(
         Condominium, on_delete=models.CASCADE, related_name="units"
@@ -116,6 +130,12 @@ class Unit(BaseModel):
     )
 
     is_manager_unit = models.BooleanField(default=False)
+    billing_recipient = models.CharField(
+        max_length=10,
+        choices=BillingRecipient.choices,
+        default=BillingRecipient.OWNER,
+        db_default=BillingRecipient.OWNER,
+    )
     registration_number = models.CharField(max_length=60, blank=True)
 
     gas_value = models.DecimalField(
@@ -186,6 +206,28 @@ class Unit(BaseModel):
         if fraction_number > 1 and total == 0:
             return False
         return abs(total - cls.APPORTIONMENT_TOTAL) > cls.APPORTIONMENT_TOLERANCE
+
+    def billing_payer(self, reference_date: date) -> "Person | None":
+        """Who pays the unit's boleto: the current tenant when the unit sends it to the tenant and has one,
+        otherwise the current owner with the largest share (the earliest link on a tie); None without an owner."""
+        from apps.condominiums.models.unit_person import UnitPerson  # unit_person imports this module
+
+        current_links = [
+            link
+            for link in self.unit_people.all()
+            if link.end_date is None or link.end_date >= reference_date
+        ]
+        if self.billing_recipient == self.BillingRecipient.TENANT:
+            tenant_links = [link for link in current_links if link.role == UnitPerson.Role.TENANT]
+            if tenant_links:
+                return min(tenant_links, key=lambda link: (link.start_date, str(link.pk))).person
+        owner_links = [link for link in current_links if link.role == UnitPerson.Role.OWNER]
+        if not owner_links:
+            return None
+        return min(
+            owner_links,
+            key=lambda link: (-(link.ownership_percentage or Decimal(0)), link.start_date, str(link.pk)),
+        ).person
 
     @override
     def __str__(self) -> str:

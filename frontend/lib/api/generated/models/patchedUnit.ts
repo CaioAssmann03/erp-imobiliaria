@@ -5,6 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { BillingRecipientEnum } from './billingRecipientEnum';
 import type { UnitPerson } from './unitPerson';
 import type { UnitTypeEnum } from './unitTypeEnum';
 
@@ -68,6 +69,7 @@ export interface PatchedUnit {
      */
   ideal_fraction_6?: string | null;
   is_manager_unit?: boolean;
+  billing_recipient?: BillingRecipientEnum;
   /** @maxLength 60 */
   registration_number?: string;
   /** @pattern ^-?\d{0,6}(?:\.\d{0,2})?$ */

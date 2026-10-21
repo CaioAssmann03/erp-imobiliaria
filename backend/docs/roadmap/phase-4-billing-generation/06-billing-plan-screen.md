@@ -5,26 +5,18 @@ skip-if: you need the whole phase → roadmap/phase-4-billing-generation/README.
 ---
 # Part 06 — Billing plan screen
 
-**Status:** todo · **Phase:** 4 (Billing issuance (generation)) · **Apps:** frontend · **Frontend impact:** new screens · **Depends on:** 02
-**Spec:** none yet
+**Status:** done · **Phase:** 4 (Billing issuance (generation)) · **Apps:** frontend · **Frontend impact:** new screens · **Depends on:** 02
+**Spec:** [028 — Billing plan screen](../../features/history.md) (section 028)
 
 ## Goal
 Configure the billing plan per condominium in the UI.
 
 ## Scope
-- [ ] Screen: billing plan form with items and target cost centers
+- [x] Screen: billing plan form with items and target cost centers
+- [x] The issuance fields on the condominium and unit forms (added by the spec)
 
 ## Draft for the spec
-Seed material from the project PDFs. When the spec is written, move this content into it and replace this section with the line `Moved to the spec.`
-
-### Entities
-None new.
-
-### Business rules
-- None.
-
-### Open questions
-- None.
+Moved to the spec.
 
 ## Result
-Not started.
+Done on 2026-10-21 (spec 028): **Cobrança → Planos de cobrança** (list, create, edit, delete) with the items editor, plus `issuance_day`, `exempts_manager_unit` and `billing_recipient` on the existing forms. Not exercised in a browser yet (manual run pending). The documents and runs screens are part 07.

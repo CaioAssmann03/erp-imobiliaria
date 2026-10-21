@@ -18,7 +18,7 @@ skip-if: schema, relations, business formulas → architecture/data.md; deploy, 
 | Admin / static | django-unfold / WhiteNoise |
 | Audit | django-auditlog: registry changes, personal values masked |
 | Cache | Redis (`CACHES`); tests use local memory |
-| Async | Celery + Redis (`config/celery.py`; **no tasks yet**) |
+| Async | Celery + Redis (`config/celery.py`; the monthly issuance in `apps/billing/tasks.py`, scheduled by `CELERY_BEAT_SCHEDULE` in `config/settings.py`) |
 | Quality | pytest + pytest-django; mypy strict (django/drf plugins) |
 
 `DEFAULT_AUTO_FIELD` is `BigAutoField` on purpose: it only applies to third-party tables (e.g. `token_blacklist`); every model of ours declares a UUID primary key.
@@ -45,6 +45,7 @@ core  ←  persons  ←  condominiums  ←  finance  ←  billing  ←  (rentals
 | `CORS_ALLOWED_ORIGINS` | frontend origin(s) |
 | `DJANGO_SUPERUSER_USERNAME/PASSWORD/EMAIL` | first admin, created by `entrypoint.sh` |
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_STORAGE_BUCKET_NAME`, `AWS_S3_ENDPOINT_URL`, `AWS_S3_REGION_NAME` | the Cloudflare R2 bucket of the payment receipts (spec 018); all but the region are required, without them the receipt endpoints answer 503 |
+| `ASAAS_API_KEY`, `ASAAS_BASE_URL`, `ASAAS_WEBHOOK_TOKEN` | Asaas payment gateway (boleto issuance). Sandbox key (`$aact_hmlg_…`) and `https://api-sandbox.asaas.com/v3` in development; the webhook token is used from phase 5 (phase 4 part 01) |
 
 ## Vocabulary (code ⇄ business term)
 Condominium, Block, Unit = Condomínio, Bloco, Unidade · Person (individual CPF / legal CNPJ) = Pessoa (física / jurídica) · UnitPerson (`owner`, `tenant`) = vínculo proprietário / locatário · AdministrationContract, BillingRules = contrato de administração, regras de cobrança · `ideal_fraction` = fração ideal (rateio) · CostCenter = centro de custo (antes "sub-conta") · EntryTemplate = modelo de lançamento (antes "histórico") · Advisor = assessor. The full PDF → code name map is in `roadmap/README.md`.

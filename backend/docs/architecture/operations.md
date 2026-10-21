@@ -13,6 +13,8 @@ docker compose exec backend python manage.py migrate
 docker compose exec backend python manage.py createsuperuser   # or DJANGO_SUPERUSER_* + --noinput
 docker compose exec backend python manage.py seed_demo         # demo data (--clear removes it)
 ```
+**System libraries (WeasyPrint renders the boleto PDF, spec 027):** the backend image installs `libpango-1.0-0`, `libpangoft2-1.0-0` and `fonts-liberation` (the `Dockerfile` and the CI job); running `manage.py` or pytest outside Docker needs them too (`brew install pango` on macOS, `apt install libpango-1.0-0 libpangoft2-1.0-0 fonts-liberation` on Debian/Ubuntu). Without them the PDF tests and `generate_billing_document_pdf` fail at import or render time.
+
 URLs: API docs `localhost:8000/api/docs/` · schema `/api/schema/` · admin `/admin/` · frontend `localhost:3000`.
 
 `docker compose up` fails with "port is already allocated" when another Postgres already uses 5432 (the Windows service, another project's container). Set `POSTGRES_HOST_PORT=5434` (any free port) in `.env`: it only changes the port on your computer; the containers still reach `db:5432`, so `POSTGRES_PORT` stays `5432`. `manage.py` and pytest run outside Docker then need `POSTGRES_PORT=5434` too. The tests never touch the data you see in the app: pytest creates its own database (`test_<POSTGRES_DB>`) and drops it when the session ends (a run with `--reuse-db` keeps it on purpose; the CI never does).

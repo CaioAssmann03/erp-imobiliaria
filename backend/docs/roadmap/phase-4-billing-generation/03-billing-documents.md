@@ -5,30 +5,17 @@ skip-if: you need the whole phase → roadmap/phase-4-billing-generation/README.
 ---
 # Part 03 — Billing documents
 
-**Status:** todo · **Phase:** 4 (Billing issuance (generation)) · **Apps:** billing · **Frontend impact:** client regeneration · **Depends on:** 01
-**Spec:** none yet
+**Status:** done · **Phase:** 4 (Billing issuance (generation)) · **Apps:** billing · **Frontend impact:** client regeneration · **Depends on:** -
+**Spec:** [025 — Billing documents](../../features/history.md) (section 025)
 
 ## Goal
 The boleto as a business record with its composition by cost center.
 
 ## Scope
-- [ ] Models + API: `BillingDocument`, `BillingDocumentItem`
+- [x] Models + API: `BillingDocument`, `BillingDocumentItem`
 
 ## Draft for the spec
-Seed material from the project PDFs. When the spec is written, move this content into it and replace this section with the line `Moved to the spec.`
-
-### Entities
-| PDF name | Code name | Notes |
-|---|---|---|
-| DocumentoCobranca | `BillingDocument` | origin (unit / rental contract / sale installment), payer person, competence, original value, due date, status issued/registered/paid/overdue/cancelled, fine/interest/discount |
-| DocumentoCobrancaItem | `BillingDocumentItem` | description, cost center, value; sum of items = document value |
-
-### Business rules
-- Bank fields (`our_number`, digitable line, barcode) do NOT live here; they change on every reissue (phase 5 part 02).
-- Payer defaults per the "sends document to" setting (owner or tenant).
-
-### Open questions
-- [ ] Same polymorphic origin question as phase 3 (recommended: nullable FKs + `CheckConstraint`).
+Moved to the spec.
 
 ## Result
-Not started.
+Done on 2026-10-21 (spec 025): `BillingDocument` and `BillingDocumentItem` in `billing`, `create_billing_document` / `cancel_billing_document` services, read-only `/api/billing-documents/` with cancel, Admin, audit, client regenerated. The monthly issuance (part 04) is the only caller of the create service and decides who the payer is.

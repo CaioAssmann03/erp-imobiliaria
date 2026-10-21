@@ -16,7 +16,9 @@ Condominium (condominiums) ── advisor ─┘ SET_NULL
    ├─ 1:N Block (CASCADE) ── RESTRICT ── Unit.block (optional)
    ├─ 1:N Unit (CASCADE) └─ 1:N UnitPerson (CASCADE) ── PROTECT ── Person
    ├─ 1:N CostCenter (finance, CASCADE) ── 1:N EntryTemplate (PROTECT)
+   ├─ 1:N BillingRun (billing, PROTECT: the audit of each monthly issuance)
    └─ 1:N BillingPlan (billing, CASCADE) ── 1:N BillingPlanItem (CASCADE) ── PROTECT ──► CostCenter, EntryTemplate
+Unit ◄── PROTECT ── BillingDocument (billing) ── PROTECT ──► Person (payer); 1:N BillingDocumentItem (CASCADE) ── PROTECT ──► CostCenter, EntryTemplate
 Company ◄── PROTECT ── BankAccount (finance) ── PROTECT ──► Condominium (optional: a condominium's own account)
 Person ◄── 1:1 PROTECT ── Supplier (finance: payment data)
 Company ◄── PROTECT ── AccountPayable (finance) ── PROTECT ──► Supplier, CostCenter, Condominium (optional: empty = a company expense)
@@ -42,8 +44,10 @@ Rules live in the models; the dashboard and API only call them. **Implemented** 
 | Adjustment | `adjustment_index` is free text; no index values, no recalculated fee, base date not advanced | Stored / Planned — *confirm* |
 | Apportionment | For each of the six ideal fractions, the active units of a condominium cannot sum more than 1 (+ tolerance 0.0001). A pendency (dashboard, `?pending=`): the 1st fraction does not sum 1, or a 2nd–6th one is in use (sum > 0) and does not sum 1 (`|sum − 1| > 0.0001`) | Implemented (`UnitRules`, `Unit.is_apportionment_inconsistent`; spec 020) |
 | Apportionment | Split expenses among units by one of the fractions (the billing plan item names its number) | Planned (phase 4) |
-| Billing rules | `due_on_business_day`, early-payment discount (% + days), `credit_limit` | Stored — *confirm* |
+| Billing rules | `due_on_business_day`, early-payment discount (% + days), `credit_limit` | Stored — *confirm*; the due date and the discount terms are read by the monthly issuance, `credit_limit` is not |
+| Monthly issuance | Per condominium and reference month, one document per active, unblocked unit (not the exempt manager unit) from the plans in force; shares rounded half-up with the leftover cents to the largest fraction; a rerun adds nothing; a share whose fraction does not close at 1 fails the run | Implemented (`issue_condominium_billing`, `BillingRun`; spec 026) |
 | Billing months | From a reference month R: the due month is R (`due_month = reference`) or R + 1 (`following`); the competence is the due month (`competence_month = same_as_due`) or the month before it (`before_due`) | Implemented as `BillingRules.due_month_of` / `competence_month_of` (spec 020); used by phase 4 |
+| Billing document | One non-cancelled document per unit and reference month; the terms are copied from the rules at issuance; amount = sum of the items; only the status changes (issued → registered → paid, or cancelled); overdue is derived from the due date | Implemented (`BillingDocumentRules`; spec 025) |
 | Late payment | Fine `late_fee_percentage` (0–2 %), or the first-days tier (`initial_late_fee_percentage` within the first `initial_late_fee_days` days of delay, both or neither). Interest: the `LateInterestRate` in force on the date (latest start not after it; none = no interest), counted as the whole month (`full_month`) or rate ÷ 30 per day late (`per_day`), after `interest_grace_days`. Monetary correction is not modeled | Stored (spec 020); the calculation is phases 4–5 |
 | Units | `type`, `resident_count`, `registration_number`, utility values, `is_manager_unit`; `is_billing_blocked` is counted in the dashboard, blocking entries is planned | Stored |
 | Links | **Current** link = `end_date` empty or ≥ today (`UnitPerson.objects.current`; it ignores `start_date`); **responsible** = at least one current link; none = "without responsible" | Implemented (dashboard) |

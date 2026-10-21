@@ -5,28 +5,19 @@ skip-if: you need the whole phase → roadmap/phase-4-billing-generation/README.
 ---
 # Part 04 — Monthly issuance task
 
-**Status:** todo · **Phase:** 4 (Billing issuance (generation)) · **Apps:** billing · **Frontend impact:** none · **Depends on:** 02, 03
-**Spec:** none yet
+**Status:** done · **Phase:** 4 (Billing issuance (generation)) · **Apps:** billing · **Frontend impact:** none · **Depends on:** 02, 03
+**Spec:** [026 — Monthly issuance](../../features/history.md) (section 026)
 
 ## Goal
 Run a plan for a month: one document + items per unit.
 
 ## Scope
-- [ ] Celery task: monthly calculation (fixed or ideal-fraction share)
-- [ ] Beat schedule with a configurable day per condominium
-- [ ] Idempotency: running twice for the same month creates no duplicates
+- [x] Celery task: monthly calculation (fixed, ideal-fraction share or the unit's registered value)
+- [x] Beat schedule with a configurable day per condominium (`BillingRules.issuance_day`)
+- [x] Idempotency: running twice for the same month creates no duplicates
 
 ## Draft for the spec
-Seed material from the project PDFs. When the spec is written, move this content into it and replace this section with the line `Moved to the spec.`
-
-### Entities
-None new.
-
-### Business rules
-- Uses `BillingRules` (due day, early-payment discount, credit limit) and skips the syndic unit when exempt (`is_syndic_unit`).
-
-### Open questions
-- [ ] Dedicated `BillingRun` record to audit each run? (recommended: yes, small model with status and counts)
+Moved to the spec.
 
 ## Result
-Not started.
+Done on 2026-10-21 (spec 026): `issue_condominium_billing` service, `BillingRun` audit (`/api/billing-runs/`, also the manual trigger), daily beat task at 06:00, `Unit.billing_recipient`, `BillingRules.issuance_day` and `exempts_manager_unit`, payer choice and share rounding in the models, client regenerated. National holidays and `credit_limit` are recorded in `known-gaps.md`.

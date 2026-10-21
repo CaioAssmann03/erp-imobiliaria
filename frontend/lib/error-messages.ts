@@ -37,6 +37,23 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
     "Este titular já tem uma conta com este banco, agência e número.",
   "bank_account.condominium.other_company": "O condomínio pertence a outra empresa.",
   "bank_code.invalid_format": "O código do banco deve ter exatamente 3 dígitos.",
+  "billing_document.amount.differs_from_items_total": "O valor do documento deve ser igual à soma dos itens.",
+  "billing_document.data.immutable":
+    "Unidade, pagador, meses, vencimento, valor e condições de um documento de cobrança não podem ser alterados.",
+  "billing_document.items.required": "O documento de cobrança precisa de ao menos um item.",
+  "billing_document.payer.other_company": "O pagador pertence a outra empresa.",
+  "billing_document.reference_month.duplicate_for_unit":
+    "Esta unidade já tem um documento de cobrança para este mês de referência.",
+  "billing_document.status.transition_not_allowed":
+    "Um documento emitido passa a registrado ou cancelado, e um registrado passa a pago ou cancelado.",
+  "billing_document_item.cost_center.inactive": "O centro de custo está inativo.",
+  "billing_document_item.cost_center.other_condominium": "O centro de custo pertence a outro condomínio.",
+  "billing_document_item.data.immutable": "Um item de documento de cobrança não pode ser alterado.",
+  "billing_document_item.entry_template.inactive": "O modelo de lançamento está inativo.",
+  "billing_document_item.entry_template.other_cost_center":
+    "O modelo de lançamento pertence a outro centro de custo.",
+  "billing_document_item.position.duplicate_in_document": "Já existe um item nesta posição do documento.",
+  "billing_document_pdf.not_generated": "Este documento de cobrança ainda não tem PDF.",
   "billing_plan.condominium.immutable": "O condomínio de um plano de cobrança não pode ser alterado.",
   "billing_plan.end_month.before_start_month": "O mês final não pode ser anterior ao mês inicial.",
   "billing_plan.name.duplicate_in_condominium":
@@ -59,7 +76,9 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "billing_rules.initial_late_fee.incomplete":
     "Informe o percentual e os dias da multa dos primeiros dias.",
   "billing_rules.initial_late_fee_days.out_of_range": "Informe ao menos 1 dia.",
+  "billing_rules.issuance_day.out_of_range": "O dia de emissão deve estar entre 1 e 28.",
   "billing_rules.late_fee_percentage.out_of_range": "A multa deve ficar entre 0% e 2%.",
+  "billing_run.finished_at.before_started_at": "Uma execução não pode terminar antes de começar.",
   blank: "Campo obrigatório.",
   "block.name.duplicate_in_condominium": "Já existe um bloco com este nome neste condomínio.",
   "cash_number.not_positive": "O número do caixa deve ser maior que zero.",

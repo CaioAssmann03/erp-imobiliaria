@@ -11,6 +11,11 @@ def validate_due_day(due_day: int) -> None:
         raise BillingRulesError.DUE_DAY_OUT_OF_RANGE.to_validation_error()
 
 
+def validate_issuance_day(issuance_day: int) -> None:
+    if not 1 <= issuance_day <= 28:
+        raise BillingRulesError.ISSUANCE_DAY_OUT_OF_RANGE.to_validation_error()
+
+
 def validate_late_fee_percentage(late_fee_percentage: Decimal) -> None:
     if not 0 <= late_fee_percentage <= MAX_LATE_FEE_PERCENTAGE:
         raise BillingRulesError.LATE_FEE_OUT_OF_RANGE.to_validation_error()
