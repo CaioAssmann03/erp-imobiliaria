@@ -63,6 +63,16 @@ export function BillingSection({ condominiumId }: { condominiumId?: string }) {
           />
           <CheckboxField name="due_on_business_day" label="Vencimento por dia útil" />
         </FieldRow>
+        <FieldRow>
+          <TextField
+            name="issuance_day"
+            label="Dia de emissão"
+            mask={dayOfMonth}
+            inputMode="numeric"
+            hint="De 1 a 28. O dia do mês em que os boletos são emitidos."
+          />
+          <CheckboxField name="exempts_manager_unit" label="Isentar a unidade do síndico" />
+        </FieldRow>
         <p className="rounded-panel bg-surface-muted px-4 py-2.5 text-body text-ink-soft" role="note">
           {billingExample(currentMonth(), dueMonth as DueMonth, competenceMonth as CompetenceMonth)}
         </p>

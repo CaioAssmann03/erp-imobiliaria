@@ -15,7 +15,7 @@ import { ModeSection } from "./settings/ModeSection";
 const TRIGGER_COMPACT =
   "flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink";
 const TRIGGER_SIDEBAR =
-  "flex h-9 w-full items-center rounded-control px-3 text-body font-medium whitespace-nowrap text-ink-soft transition-colors hover:bg-surface hover:text-ink lg:group-data-[collapsed]/sidebar:justify-center lg:group-data-[collapsed]/sidebar:px-0";
+  "flex h-9 w-full items-center gap-3 rounded-control px-3 text-body font-medium whitespace-nowrap text-ink-soft transition-colors hover:bg-surface hover:text-ink lg:group-data-[collapsed]/sidebar:justify-center lg:group-data-[collapsed]/sidebar:px-0";
 
 export function SettingsDialog({
   initial,
@@ -51,7 +51,7 @@ export function SettingsDialog({
           <Settings className="size-5" />
         ) : (
           <>
-            <Settings className="hidden size-[1.125rem] lg:group-data-[collapsed]/sidebar:block" />
+            <Settings className="size-[1.125rem] shrink-0" />
             <span className="lg:group-data-[collapsed]/sidebar:hidden">Configurações</span>
           </>
         )}

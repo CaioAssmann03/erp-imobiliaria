@@ -14,6 +14,12 @@ import {
 
 const MAX_MONEY = 999_999.99; // numeric(8, 2)
 
+/** Quem recebe o boleto da unidade (o proprietário é o pagador quando não há inquilino atual). */
+export const BILLING_RECIPIENTS = [
+  { value: "owner", label: "Proprietário" },
+  { value: "tenant", label: "Inquilino" },
+] as const;
+
 export const UNIT_TYPES = [
   { value: "apartment", label: "Apartamento" },
   { value: "office", label: "Sala" },
@@ -57,6 +63,7 @@ export const unitSchema = z.object({
   ideal_fraction_5: idealFraction("5ª fração"),
   ideal_fraction_6: idealFraction("6ª fração"),
   is_manager_unit: z.boolean(),
+  billing_recipient: enumField(BILLING_RECIPIENTS.map((item) => item.value) as [string, ...string[]]),
   is_billing_blocked: z.boolean(),
   active: z.boolean(),
   gas_value: decimalField("Valor do gás", { max: MAX_MONEY }),
@@ -80,6 +87,7 @@ export const UNIT_DEFAULTS: UnitFormInput = {
   ideal_fraction_5: "",
   ideal_fraction_6: "",
   is_manager_unit: false,
+  billing_recipient: "owner",
   is_billing_blocked: false,
   active: true,
   gas_value: "",
@@ -101,6 +109,7 @@ export function unitToForm(u: Unit): UnitFormInput {
     ideal_fraction_5: decimalFromApi(u.ideal_fraction_5, 8),
     ideal_fraction_6: decimalFromApi(u.ideal_fraction_6, 8),
     is_manager_unit: u.is_manager_unit ?? false,
+    billing_recipient: u.billing_recipient ?? "owner",
     is_billing_blocked: u.is_billing_blocked ?? false,
     active: u.active ?? true,
     gas_value: moneyFromApi(u.gas_value),
@@ -130,6 +139,7 @@ export function unitToPayload(
     ideal_fraction_5: values.ideal_fraction_5 ?? empty,
     ideal_fraction_6: values.ideal_fraction_6 ?? empty,
     is_manager_unit: values.is_manager_unit,
+    billing_recipient: values.billing_recipient,
     is_billing_blocked: values.is_billing_blocked,
     active: values.active,
     gas_value: values.gas_value,
