@@ -1,5 +1,5 @@
-from datetime import date
-from typing import final, override
+from datetime import date, timedelta
+from typing import TYPE_CHECKING, final, override
 
 from django.db import models
 from django.db.models import Q
@@ -10,12 +10,19 @@ from apps.condominiums.models.rules import BillingRulesRules
 from apps.condominiums.validators import (
     MAX_LATE_FEE_PERCENTAGE,
     validate_due_day,
+    validate_issuance_day,
     validate_initial_late_fee_days,
     validate_late_fee_percentage,
 )
 from apps.core.dates import add_months
 from apps.core.models.base import UUIDModel
 from apps.core.validators import validate_percentage
+
+if TYPE_CHECKING:
+    from apps.condominiums.models.unit import Unit
+
+
+SATURDAY = 5  # date.weekday(): Monday is 0
 
 
 @final
@@ -46,6 +53,13 @@ class BillingRules(UUIDModel):
         default=10, validators=[validate_due_day]
     )
     due_on_business_day = models.BooleanField(default=False)
+
+    # Day of the month the monthly issuance runs for this condominium.
+    issuance_day = models.PositiveSmallIntegerField(
+        default=1, db_default=1, validators=[validate_issuance_day]
+    )
+    # The manager unit (the syndic's) is left out of the monthly issuance.
+    exempts_manager_unit = models.BooleanField(default=False, db_default=False)
 
     # The column keeps the name it had as `calculation_period`, so a container that still runs the
     # old code keeps working while a deploy replaces the containers.
@@ -114,6 +128,12 @@ class BillingRules(UUIDModel):
                 violation_error_code=BillingRulesError.DUE_DAY_OUT_OF_RANGE.value,
             ),
             models.CheckConstraint(
+                name="billing_issuance_day_1_28",
+                condition=Q(issuance_day__gte=1) & Q(issuance_day__lte=28),
+                violation_error_message=BillingRulesError.ISSUANCE_DAY_OUT_OF_RANGE.message,
+                violation_error_code=BillingRulesError.ISSUANCE_DAY_OUT_OF_RANGE.value,
+            ),
+            models.CheckConstraint(
                 name="billing_discount_pct_0_100",
                 condition=Q(early_payment_discount_percentage__gte=0)
                 & Q(early_payment_discount_percentage__lte=100),
@@ -173,6 +193,18 @@ class BillingRules(UUIDModel):
         """First day of the month the boleto accounts for, for the month the issuance refers to."""
         months_before_due = 1 if self.competence_month == self.CompetenceMonth.BEFORE_DUE else 0
         return add_months(self.due_month_of(reference_month), -months_before_due)
+
+    def exempts(self, unit: "Unit") -> bool:
+        """Whether the monthly issuance leaves the unit out because it is the exempt manager unit."""
+        return self.exempts_manager_unit and unit.is_manager_unit
+
+    def due_date_of(self, reference_month: date) -> date:
+        """The due date for the month the issuance refers to: `due_day` of the due month, moved from a
+        Saturday or Sunday to the next Monday when `due_on_business_day` (national holidays are not considered)."""
+        due_date = self.due_month_of(reference_month).replace(day=self.due_day)
+        if self.due_on_business_day and due_date.weekday() >= SATURDAY:
+            due_date += timedelta(days=7 - due_date.weekday())
+        return due_date
 
     @override
     def __str__(self) -> str:

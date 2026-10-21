@@ -18,6 +18,10 @@ class BillingRulesError(RuleError):
         "billing_rules.initial_late_fee.incomplete",
         "The first-days late fee needs both a percentage and a number of days.",
     )
+    ISSUANCE_DAY_OUT_OF_RANGE = (
+        "billing_rules.issuance_day.out_of_range",
+        "Issuance day must be between 1 and 28.",
+    )
     INITIAL_LATE_FEE_DAYS_OUT_OF_RANGE = (
         "billing_rules.initial_late_fee_days.out_of_range",
         "The first-days late fee must last at least 1 day.",

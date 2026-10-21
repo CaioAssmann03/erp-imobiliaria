@@ -28,6 +28,7 @@ class UnitSerializer(ModelRulesMixin, serializers.ModelSerializer[Unit]):
             "ideal_fraction_5",
             "ideal_fraction_6",
             "is_manager_unit",
+            "billing_recipient",
             "registration_number",
             "gas_value",
             "water_value",

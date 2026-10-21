@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 from decimal import Decimal
 
 import pytest
@@ -216,3 +217,45 @@ class TestBillingRulesDefaults:
 def test_model_validator_rejects_due_day_out_of_range(due_day: int) -> None:
     with pytest.raises(Exception):
         validate_due_day(due_day)
+
+
+# ----- spec 026: issuance day, manager unit exemption and the due date -----
+
+
+@pytest.mark.parametrize("issuance_day", [0, 29])
+def test_issuance_day_out_of_range_is_invalid(issuance_day: int) -> None:
+    serializer = BillingRulesSerializer(data={"issuance_day": issuance_day})
+
+    assert not serializer.is_valid()
+    assert [error.code for error in serializer.errors["issuance_day"]] == ["billing_rules.issuance_day.out_of_range"]
+
+
+def test_issuance_day_defaults_to_the_first_and_nothing_is_exempt(condominium: Condominium) -> None:
+    rules = BillingRules.objects.create(condominium=condominium)
+
+    assert (rules.issuance_day, rules.exempts_manager_unit) == (1, False)
+
+
+def test_issuance_day_is_refused_by_the_database(condominium: Condominium) -> None:
+    with pytest.raises(IntegrityError), transaction.atomic():
+        _ = BillingRules.objects.create(condominium=condominium, issuance_day=29)
+
+
+@pytest.mark.parametrize(
+    ("due_on_business_day", "expected"),
+    [
+        (False, date(2026, 10, 10)),  # a Saturday stays
+        (True, date(2026, 10, 12)),  # moves to Monday
+    ],
+)
+def test_due_date_moves_off_the_weekend_only_when_asked(condominium: Condominium, due_on_business_day: bool, expected: date) -> None:
+    rules = BillingRules(condominium=condominium, due_day=10, due_on_business_day=due_on_business_day)
+
+    assert rules.due_date_of(date(2026, 10, 1)) == expected
+
+
+def test_due_date_follows_the_due_month_and_keeps_weekdays(condominium: Condominium) -> None:
+    rules = BillingRules(condominium=condominium, due_day=14, due_month=BillingRules.DueMonth.FOLLOWING, due_on_business_day=True)
+
+    assert rules.due_date_of(date(2026, 10, 1)) == date(2026, 11, 16)  # 14 Nov 2026 is a Saturday
+    assert BillingRules(condominium=condominium, due_day=15, due_on_business_day=True).due_date_of(date(2026, 10, 1)) == date(2026, 10, 15)
