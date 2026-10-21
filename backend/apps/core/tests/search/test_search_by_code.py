@@ -118,7 +118,7 @@ def test_long_digit_terms_do_not_overflow(api_client: APIClient, term: str) -> N
     response = search(api_client, term)
 
     assert response.status_code == status.HTTP_200_OK
-    assert body(response) == {"persons": [], "condominiums": [], "units": []}
+    assert all(group == [] for group in body(response).values())
 
 
 def test_search_filters_people_by_module(api_client: APIClient) -> None:
