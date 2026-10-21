@@ -23,6 +23,8 @@ export interface Widget {
   seeAll?: { href: string };
   /** `large` = versão ampliada exibida no modal de foco. */
   render: (large: boolean) => React.ReactNode;
+  /** Visão completa exibida no modal de foco: mais dados que o card, não só ele ampliado (padrão: `render(true)`). */
+  renderFocus?: () => React.ReactNode;
 }
 
 /** Cada widget recebe o resumo do painel (ou `undefined` se a API falhou) e devolve sua definição. */

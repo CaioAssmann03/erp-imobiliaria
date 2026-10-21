@@ -26,8 +26,17 @@ import {
 } from "@/lib/api/generated";
 import type { BillingRun } from "@/lib/api/generated/models";
 import { applyServerErrors } from "@/lib/form-errors";
-import { todayIso } from "@/lib/format";
+import { issuedNothing } from "@/lib/billing-documents";
+import { currentMonthTyped, maskMonthYear } from "@/lib/billing-plan-payload";
 import { issueMonthSchema, type IssueMonthFormInput, type IssueMonthFormOutput } from "@/lib/schemas/billing-run";
+
+/** O aviso depois de emitir: sucesso só se emitiu algo; sem emissão nenhuma é um alerta que manda ver os problemas. */
+function notifyResult(run: BillingRun) {
+  if (run.status === "failed") toast.error("A emissão falhou. Veja o motivo na execução.");
+  else if (issuedNothing(run) && run.skipped_count > 0) toast.warning("Nenhum documento foi emitido. Veja os problemas da execução.");
+  else if (run.issued_count === 0) toast.info("Todos os documentos do mês já estavam emitidos.");
+  else toast.success(run.issued_count === 1 ? "1 documento emitido." : `${run.issued_count} documentos emitidos.`);
+}
 
 /** Emite agora o mês de um condomínio (a chamada é síncrona) e abre a execução. Unidades já emitidas não duplicam. */
 export function IssueMonthDialog() {
@@ -39,7 +48,7 @@ export function IssueMonthDialog() {
 
   const methods = useForm<IssueMonthFormInput, unknown, IssueMonthFormOutput>({
     resolver: zodResolver(issueMonthSchema),
-    defaultValues: { condominium: "", reference_month: todayIso().slice(0, 7) },
+    defaultValues: { condominium: "", reference_month: currentMonthTyped() },
     mode: "onTouched",
   });
   const { handleSubmit, setError } = methods;
@@ -51,7 +60,7 @@ export function IssueMonthDialog() {
         onSuccess: (run) => {
           queryClient.invalidateQueries({ queryKey: getBillingRunsListQueryKey() });
           queryClient.invalidateQueries({ queryKey: getBillingDocumentsListQueryKey() });
-          toast.success(run.issued_count === 1 ? "1 documento emitido." : `${run.issued_count} documentos emitidos.`);
+          notifyResult(run);
           setOpen(false);
           router.push(`/billing/runs/${run.id}`);
         },
@@ -81,7 +90,15 @@ export function IssueMonthDialog() {
                 placeholder="Selecione"
                 options={(condominiums?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
               />
-              <TextField name="reference_month" label="Mês de referência" type="month" required />
+              <TextField
+                name="reference_month"
+                label="Mês de referência"
+                required
+                inputMode="numeric"
+                placeholder="03/2026"
+                mask={maskMonthYear}
+                hint="Mês/ano a que a emissão se refere."
+              />
             </form>
           </FormProvider>
           <AlertDialogFooter>

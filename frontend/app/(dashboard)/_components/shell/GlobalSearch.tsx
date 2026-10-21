@@ -69,14 +69,14 @@ export function GlobalSearch() {
       </Dialog.Trigger>
 
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-40 bg-ink/15 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+        <Dialog.Backdrop className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
         <Dialog.Popup className="glass fixed top-[8vh] left-1/2 z-50 w-[min(40rem,94vw)] sm:top-[14vh] -translate-x-1/2 overflow-hidden rounded-[1.75rem] outline-none transition duration-200 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
           <Dialog.Title className="sr-only">Busca</Dialog.Title>
           <input
             type="text"
             value={query}
             autoFocus
-            placeholder="Buscar pessoas, condomínios, unidades, IDs, gráficos…"
+            placeholder="Buscar pessoas, condomínios, contas, cobranças, IDs, páginas…"
             aria-label="Busca global"
             autoComplete="off"
             className="h-14 w-full bg-transparent px-6 text-[1.0625rem] text-ink outline-none placeholder:text-ink-soft/70"

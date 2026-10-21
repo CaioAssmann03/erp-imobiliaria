@@ -5,6 +5,7 @@ import { Late } from "../Late";
 import { formatDate, relativeDays } from "../relative-days";
 import { Caption } from "./Caption";
 import { brl } from "./format";
+import { AccountsPayableFocus } from "./focus/AccountsPayableFocus";
 import type { WidgetBuilder } from "./types";
 
 const SHORT_LIST = 4;
@@ -64,6 +65,7 @@ export const buildAccountsPayableWidget: WidgetBuilder = (dash) => {
     description: "Em aberto, por vencimento (inclui despesas da empresa)",
     className: "lg:col-span-8",
     showHeader: true,
+    renderFocus: () => <AccountsPayableFocus payables={payables} />,
     render: (large) => (
       <>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

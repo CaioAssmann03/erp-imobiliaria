@@ -6,7 +6,10 @@ import { useMemo } from "react";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useSearchRetrieve } from "@/lib/api/generated";
 import type { Search } from "@/lib/api/generated/models";
+import { brl, formatDate, formatMonth } from "@/lib/format";
+import { documentStatusLabel } from "@/lib/billing-documents";
 import { CONDOMINIUMS_MODULE } from "@/lib/person-module";
+import { payableStatusLabel } from "@/lib/schemas/account-payable";
 import { isSearchable, searchStatic } from "@/lib/search-index";
 
 import type { SearchResultItem } from "./types";
@@ -42,6 +45,41 @@ function apiResults(data: Search): SearchResultItem[] {
       title: `Unidade ${unit.name}`,
       subtitle: unit.condominium_name,
       href: `/condominiums/${unit.condominium}/units/${unit.id}`,
+    })),
+    ...data.blocks.map((block) => ({
+      key: `b${block.id}`,
+      group: "Blocos",
+      title: block.name,
+      subtitle: block.condominium_name,
+      href: `/condominiums/blocks/${block.id}`,
+    })),
+    ...data.cost_centers.map((costCenter) => ({
+      key: `cc${costCenter.id}`,
+      group: "Sub-contas",
+      title: costCenter.name,
+      subtitle: costCenter.condominium_name,
+      href: `/condominiums/cost-centers/${costCenter.id}`,
+    })),
+    ...data.accounts_payable.map((account) => ({
+      key: `ap${account.id}`,
+      group: "Contas a pagar",
+      title: account.description,
+      subtitle: [account.supplier_name, brl(account.amount), `vence ${formatDate(account.due_date)}`, payableStatusLabel(account.status)].join(" · "),
+      href: `/finance/accounts-payable/${account.id}`,
+    })),
+    ...data.billing_plans.map((plan) => ({
+      key: `bp${plan.id}`,
+      group: "Planos de cobrança",
+      title: plan.name,
+      subtitle: plan.condominium_name,
+      href: `/billing/plans/${plan.id}`,
+    })),
+    ...data.billing_documents.map((document) => ({
+      key: `bd${document.id}`,
+      group: "Documentos de cobrança",
+      title: `${document.condominium_name} · unidade ${document.unit_name}`,
+      subtitle: [document.payer_name, formatMonth(document.reference_month), brl(document.amount), documentStatusLabel(document.status)].join(" · "),
+      href: `/billing/documents/${document.id}`,
     })),
   ];
 }

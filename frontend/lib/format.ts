@@ -7,6 +7,13 @@ export const brl = (value: number | string) =>
 /** "2025-03-31" → "31/03/2025" */
 export const formatDate = (iso: string) => iso.split("-").reverse().join("/");
 
+/**
+ * "2026-10-21T16:27:00Z" → "21/10/2026, 13:27": sempre no horário de Brasília, igual no servidor (que roda em UTC) e
+ * no navegador, senão a página renderizada no servidor não confere com a do navegador (erro de hidratação).
+ */
+export const formatDateTime = (iso: string) =>
+  new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" });
+
 /** "2026-10-01" → "10/2026" (competência: mês e ano) */
 export const formatMonth = (iso: string) => {
   const [year, month] = iso.split("-");

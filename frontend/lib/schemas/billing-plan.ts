@@ -25,11 +25,11 @@ export const IDEAL_FRACTIONS = [1, 2, 3, 4, 5, 6].map((number) => ({
   label: `Fração ideal ${number}`,
 }));
 
-/** `<input type="month">`: vazio ou "2026-03"; vai à API como o primeiro dia do mês. */
+/** Mês e ano digitados ("03/2026"), opcional; vai à API como o primeiro dia do mês. */
 const monthField = (label: string) =>
   z
     .string()
-    .refine((value) => value === "" || monthToApi(value) !== undefined, `${label} inválido`)
+    .refine((value) => value === "" || monthToApi(value) !== undefined, `${label} inválido. Use mês/ano, ex.: 03/2026`)
     .transform(monthToApi);
 
 export const billingPlanItemSchema = z

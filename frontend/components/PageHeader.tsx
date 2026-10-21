@@ -1,4 +1,6 @@
-import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
+import { LinkButton } from "@/components/LinkButton";
 
 interface PageHeaderProps {
   title: React.ReactNode;
@@ -12,12 +14,16 @@ export function PageHeader({ title, description, back, actions }: PageHeaderProp
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
         {back && (
-          <Link
+          <LinkButton
             href={back.href}
-            className="mb-2 inline-block text-body text-ink-soft transition-colors hover:text-ink"
+            variant="ghost"
+            size="sm"
+            aria-label={`Voltar para ${back.label}`}
+            className="group -ml-2.5 mb-2 gap-1.5 px-2.5 text-ink-soft hover:text-ink"
           >
-            ‹ {back.label}
-          </Link>
+            <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-0.5" />
+            {back.label}
+          </LinkButton>
         )}
         <h1 className="text-title">{title}</h1>
         {description && <p className="mt-1.5 text-body text-ink-soft">{description}</p>}

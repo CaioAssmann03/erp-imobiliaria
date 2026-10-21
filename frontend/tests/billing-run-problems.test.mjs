@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { canCancelDocument, documentStatusLabel, runStatusLabel } from "../lib/billing-documents.ts";
+import { canCancelDocument, documentStatusLabel, issuedNothing, runStatusLabel } from "../lib/billing-documents.ts";
 import { describeProblem, problemFix } from "../lib/billing-run-problems.ts";
 
 const CODES = [
@@ -61,4 +61,15 @@ test("only an issued or registered document can be cancelled", () => {
 test("run statuses have a label", () => {
   assert.equal(runStatusLabel("partial"), "Parcial");
   assert.equal(runStatusLabel("failed"), "Falhou");
+});
+
+test("a run that issued nothing is not shown as a plain success", () => {
+  const nothing = { issued_count: 0, already_issued_count: 0 };
+
+  assert.equal(issuedNothing(nothing), true);
+  assert.equal(runStatusLabel("succeeded", nothing), "Concluída sem emissão");
+  assert.equal(runStatusLabel("succeeded", { issued_count: 3, already_issued_count: 0 }), "Concluída");
+  assert.equal(runStatusLabel("succeeded", { issued_count: 0, already_issued_count: 4 }), "Concluída");
+  assert.equal(runStatusLabel("failed", nothing), "Falhou");
+  assert.equal(runStatusLabel("succeeded"), "Concluída");
 });

@@ -34,7 +34,17 @@ def search(client: APIClient, term: str) -> JsonObject:
 def test_short_term_returns_nothing(api_client: APIClient, data: None) -> None:
     search_results = search(api_client, "ma")
 
-    assert search_results == {"persons": [], "condominiums": [], "units": []}
+    assert all(group == [] for group in search_results.values())
+    assert set(search_results) == {
+        "persons",
+        "condominiums",
+        "units",
+        "blocks",
+        "cost_centers",
+        "accounts_payable",
+        "billing_plans",
+        "billing_documents",
+    }
 
 
 def test_finds_person_by_name(api_client: APIClient, data: None) -> None:

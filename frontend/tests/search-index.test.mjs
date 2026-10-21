@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { isSearchable } from "../lib/search-index.ts";
+import { isSearchable, searchStatic } from "../lib/search-index.ts";
 
 test("a term of only digits is an ID, searchable from the first digit", () => {
   assert.equal(isSearchable("7"), true);
@@ -23,4 +23,16 @@ test("a document-like term (with punctuation) needs two digits", () => {
 test("an empty term is not searchable", () => {
   assert.equal(isSearchable(""), false);
   assert.equal(isSearchable("   "), false);
+});
+
+test("every section of the site is reachable from the static pages", () => {
+  const titles = (term) => searchStatic(term).map((item) => item.title);
+
+  assert.ok(titles("torre").includes("Blocos"));
+  assert.ok(titles("centro de custo").includes("Sub-contas"));
+  assert.ok(titles("apartamento").includes("Unidades"));
+  assert.ok(titles("boleto").includes("Documentos de cobrança"));
+  assert.ok(titles("emissao").includes("Execuções da emissão"));
+  assert.ok(titles("plano").includes("Planos de cobrança"));
+  assert.ok(titles("despesa").includes("Contas a pagar"));
 });
