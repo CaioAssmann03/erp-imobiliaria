@@ -5,6 +5,9 @@ import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
+import { useIsApplePlatform } from "@/hooks/use-platform";
+import { searchShortcutLabel } from "@/lib/platform";
+
 import { SearchResults } from "./search/SearchResults";
 import type { SearchResultItem } from "./search/types";
 import { useSearchResults } from "./search/use-search-results";
@@ -12,7 +15,7 @@ import { useSearchShortcut } from "./search/use-search-shortcut";
 
 /**
  * Busca global estilo Spotlight: o header tem um botão de vidro e o painel de busca
- * abre centralizado sobre a página (⌘K). Cadastros vêm da API; páginas e gráficos do
+ * abre centralizado sobre a página (⌘K no Mac, Ctrl+K no Windows). Cadastros vêm da API; páginas e gráficos do
  * painel são filtrados no navegador.
  */
 export function GlobalSearch() {
@@ -20,6 +23,7 @@ export function GlobalSearch() {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  const shortcut = searchShortcutLabel(useIsApplePlatform());
 
   const { items, searchable, waiting } = useSearchResults(query);
   useSearchShortcut(useCallback(() => setOpen((current) => !current), []));
@@ -65,7 +69,7 @@ export function GlobalSearch() {
       >
         <Search className="size-5 lg:hidden" />
         <span className="hidden truncate lg:inline">Buscar…</span>
-        <kbd className="hidden rounded-md bg-ink/5 px-1.5 py-0.5 text-caption lg:inline">⌘K</kbd>
+        <kbd className="hidden rounded-md bg-ink/5 px-1.5 py-0.5 text-caption lg:inline">{shortcut}</kbd>
       </Dialog.Trigger>
 
       <Dialog.Portal>
