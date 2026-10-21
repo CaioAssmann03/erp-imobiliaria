@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleAlert } from "lucide-react";
+import { describeField } from "@/lib/form-labels";
 import {
   useFormContext,
   type FieldErrors,
@@ -57,31 +57,24 @@ export function FormErrorSummary() {
   if (submitCount === 0 || (!general && fields.length === 0)) return null;
 
   return (
-    <div
-      role="alert"
-      className="mb-3 rounded-card bg-danger-soft p-4 text-danger"
-    >
-      <p className="flex items-center gap-2 text-body font-medium">
-        <CircleAlert aria-hidden className="size-4 shrink-0" />
+    <div role="alert" className="mb-3 rounded-card bg-card p-4 shadow-card">
+      <p className="text-body font-medium">
         {general ??
-          `Corrija ${fields.length === 1 ? "o campo destacado" : `os ${fields.length} campos destacados`}.`}
+          (fields.length === 1 ? "Há 1 campo para corrigir" : `Há ${fields.length} campos para corrigir`)}
       </p>
       {fields.length > 0 && (
-        <ul className="mt-2 space-y-0.5 pl-6 text-caption">
+        <ul className="-mx-2 mt-2">
           {fields.map(({ name, message }) => {
-            const label =
-              typeof document === "undefined" ? null : labelOf(name);
+            const label = typeof document === "undefined" ? null : labelOf(name);
             return (
-              <li key={name} className="list-disc">
+              <li key={name}>
                 <button
                   type="button"
                   onClick={() => setFocus(name)}
-                  className="text-left underline-offset-2 outline-none hover:underline focus-visible:underline"
+                  className="grid w-full grid-cols-1 gap-x-4 rounded-control px-2 py-1.5 text-left text-caption outline-none transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted sm:grid-cols-[minmax(7rem,11rem)_minmax(0,1fr)]"
                 >
-                  {label ? (
-                    <strong className="font-medium">{label}: </strong>
-                  ) : null}
-                  {message}
+                  <span className="font-medium text-ink">{describeField(name, label)}</span>
+                  <span className="text-danger">{message}</span>
                 </button>
               </li>
             );

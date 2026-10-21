@@ -164,10 +164,10 @@ export function BillingSection({ condominiumId }: { condominiumId?: string }) {
           />
           <TextField
             name="early_payment_discount_days"
-            label="Dias antes do venc."
+            label="Prazo do desconto (dias)"
             mask={dayOfMonth}
             inputMode="numeric"
-            hint="Prazo do desconto."
+            hint="Quantos dias antes do vencimento o desconto ainda vale. 0: só até o vencimento."
           />
         </FieldRow>
       </FormSection>
