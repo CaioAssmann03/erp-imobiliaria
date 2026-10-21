@@ -1,3 +1,6 @@
+import uuid
+from collections.abc import Sequence
+from decimal import ROUND_HALF_UP, Decimal
 from typing import final, override
 
 from django.db import models
@@ -11,10 +14,14 @@ from apps.billing.validators import (
     LAST_IDEAL_FRACTION_NUMBER,
     validate_ideal_fraction_number,
 )
+from apps.condominiums.models import Unit
 from apps.core.models.base import BaseModel
 from apps.finance.errors import FinanceValidatorError
 from apps.finance.models import CostCenter, EntryTemplate
 from apps.finance.validators import validate_positive_amount
+
+
+CENT = Decimal("0.01")
 
 
 @final
@@ -108,6 +115,45 @@ class BillingPlanItem(BaseModel):
     @override
     def clean(self) -> None:
         BillingPlanItemRules(self).validate()
+
+    def uses_inconsistent_apportionment(self, apportionment_totals: Sequence[Decimal]) -> bool:
+        """Whether a share item names a fraction that does not close at 1 over the active units
+        (`Unit.objects.apportionment_totals()`); the other kinds never do. A fraction no unit has yet counts."""
+        if self.calculation_kind != self.CalculationKind.IDEAL_FRACTION_SHARE:
+            return False
+        assert self.ideal_fraction_number is not None
+        total = apportionment_totals[self.ideal_fraction_number - 1]
+        return abs(total - Unit.APPORTIONMENT_TOTAL) > Unit.APPORTIONMENT_TOLERANCE
+
+    def amounts_by_unit(self, units: Sequence[Unit]) -> dict[uuid.UUID, Decimal]:
+        """What each unit pays for this line; zero when it owes nothing for it.
+
+        `units` must be all the active units of the plan's condominium: a share is split among them, so
+        the shares of the whole list add up exactly to the total (a unit that is not billed leaves its share
+        uncharged).
+        """
+        if self.calculation_kind == self.CalculationKind.FIXED_AMOUNT:
+            assert self.amount is not None
+            return {unit.pk: self.amount for unit in units}
+        if self.calculation_kind == self.CalculationKind.UNIT_REGISTERED_VALUE:
+            return {unit.pk: getattr(unit, f"{self.unit_value_field}_value") for unit in units}
+        return self._share_amounts(units)
+
+    def _share_amounts(self, units: Sequence[Unit]) -> dict[uuid.UUID, Decimal]:
+        """The total split by the named fraction, each share rounded half-up to the cent; the leftover cents
+        go to the unit with the largest fraction (then by name) so a rerun gives the same amounts."""
+        assert self.amount is not None and self.ideal_fraction_number is not None
+        fraction_field = Unit.IDEAL_FRACTION_FIELDS[self.ideal_fraction_number - 1]
+        fractions = {unit.pk: getattr(unit, fraction_field) or Decimal(0) for unit in units}
+        shares = {
+            unit_id: (self.amount * fraction).quantize(CENT, rounding=ROUND_HALF_UP)
+            for unit_id, fraction in fractions.items()
+        }
+        leftover = self.amount - sum(shares.values(), Decimal(0))
+        if leftover and any(fractions.values()):
+            largest = min(units, key=lambda unit: (-fractions[unit.pk], unit.name, str(unit.pk)))
+            shares[largest.pk] += leftover
+        return shares
 
     @override
     def __str__(self) -> str:

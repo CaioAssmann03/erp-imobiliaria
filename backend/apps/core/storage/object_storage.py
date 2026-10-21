@@ -1,6 +1,6 @@
 """The bucket of uploaded files (spec 018): Cloudflare R2 through its S3-compatible API.
 
-Files never cross Django: the browser uploads and downloads through short-lived signed URLs. This
+Files users send never cross Django: the browser uploads and downloads through short-lived signed URLs (a file the server generates itself, such as a boleto PDF, is uploaded with `put_object`). This
 module is the only place that imports `boto3`; callers use `get_object_storage()` and tests replace it
 with a fake.
 """
@@ -62,6 +62,10 @@ class ObjectStorage:
             ExpiresIn=expires_in,
         )
         return url
+
+    def put_object(self, key: str, content: bytes, content_type: str) -> None:
+        """Upload a file the server itself produced (a generated PDF); user files go through signed URLs."""
+        self._client.put_object(Bucket=self._bucket, Key=key, Body=content, ContentType=content_type)
 
     def object_size(self, key: str) -> int | None:
         """The real size of the stored object, or `None` when it is not there."""

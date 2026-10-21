@@ -2,6 +2,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from celery.schedules import crontab
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from django.core.exceptions import ImproperlyConfigured
@@ -272,6 +273,10 @@ CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL", "redis://redis:6379/0")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULE = {
+    # Each condominium has its own issuance day (`BillingRules.issuance_day`); the task picks today's.
+    "issue-due-billing": {"task": "apps.billing.tasks.issue_due_billing", "schedule": crontab(hour=6, minute=0)},
+}
 
 UNFOLD = {
     "SITE_TITLE": "ERP Imobiliária",
