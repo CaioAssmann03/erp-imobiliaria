@@ -1,6 +1,8 @@
 import { Caption } from "./Caption";
 import { LinkButton } from "@/components/LinkButton";
 
+import { CondominiumsFocus } from "./focus/CondominiumsFocus";
+import { typeLabel } from "./focus/parts";
 import type { WidgetBuilder } from "./types";
 
 function TypeList({ items }: { items: { title: string; total: number }[] }) {
@@ -8,7 +10,7 @@ function TypeList({ items }: { items: { title: string; total: number }[] }) {
     <ul className="space-y-1.5">
       {items.map((item) => (
         <li key={item.title} className="flex justify-between">
-          <span className="text-ink-soft">{item.title}</span>
+          <span className="text-ink-soft">{typeLabel(item.title)}</span>
           <span className="tabular-nums">{item.total}</span>
         </li>
       ))}
@@ -32,6 +34,7 @@ export const buildCondominiumsWidget: WidgetBuilder = (dash) => ({
   title: "Resumo dos cadastros",
   className: "lg:col-span-12",
   showHeader: false,
+  renderFocus: () => <CondominiumsFocus dash={dash} />,
   render: (large) => (
     <>
       <div className="flex flex-wrap items-center justify-between gap-x-10 gap-y-4">

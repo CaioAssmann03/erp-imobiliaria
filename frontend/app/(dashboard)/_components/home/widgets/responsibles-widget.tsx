@@ -1,5 +1,6 @@
 import { DotMatrix } from "../DotMatrix";
 import { Caption } from "./Caption";
+import { ResponsiblesFocus } from "./focus/ResponsiblesFocus";
 import type { WidgetBuilder } from "./types";
 
 export const buildResponsiblesWidget: WidgetBuilder = (dash) => {
@@ -11,6 +12,7 @@ export const buildResponsiblesWidget: WidgetBuilder = (dash) => {
     description: "Unidades ativas com proprietário ou locatário vinculado.",
     className: "lg:col-span-4",
     showHeader: true,
+    renderFocus: () => <ResponsiblesFocus stats={stats} />,
     render: (large) => (
       <>
         <DotMatrix

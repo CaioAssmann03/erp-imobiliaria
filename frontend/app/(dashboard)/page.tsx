@@ -37,7 +37,7 @@ export default async function DashboardHomePage({
 
       {focused && (
         <FocusModal title={focused.title} description={focused.description}>
-          {focused.render(true)}
+          {focused.renderFocus ? focused.renderFocus() : focused.render(true)}
         </FocusModal>
       )}
 

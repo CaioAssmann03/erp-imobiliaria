@@ -1,3 +1,4 @@
+import { PendingFocus } from "./focus/PendingFocus";
 import { PendingItems } from "./PendingItems";
 import type { WidgetBuilder } from "./types";
 
@@ -6,5 +7,6 @@ export const buildPendingWidget: WidgetBuilder = (dash) => ({
   description: "O que pede ação, da mais crítica para a menos",
   className: "lg:col-span-4",
   showHeader: true,
+  renderFocus: () => <PendingFocus pending={dash?.pending} />,
   render: (large) => <PendingItems pending={dash?.pending} large={large} />,
 });

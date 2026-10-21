@@ -1,5 +1,6 @@
 import { SimpleBarChart } from "../SimpleBarChart";
 import { Caption } from "./Caption";
+import { FixedRevenueFocus } from "./focus/FixedRevenueFocus";
 import { brl } from "./format";
 import type { WidgetBuilder } from "./types";
 
@@ -11,6 +12,7 @@ export const buildFixedRevenueWidget: WidgetBuilder = (dash) => {
     description: "Taxa de administração dos condomínios com valor fixo",
     className: "lg:col-span-4",
     showHeader: true,
+    renderFocus: () => <FixedRevenueFocus dash={dash} />,
     render: (large) => (
       <>
         <div className="mb-4 flex flex-col items-start gap-1 md:flex-row md:items-end md:justify-between md:gap-4">
