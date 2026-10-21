@@ -12,7 +12,7 @@ skip-if: you need the whole phase → roadmap/phase-5-billing-bank-integration/R
 Decide and build what an overdue document needs. The first plan reissued overdue boletos daily with fine and interest calculated by us; with Asaas the charge keeps being payable after its due date with the fine and interest it was created with.
 
 ## Scope
-- [ ] Registration lifetime: the boleto registration is cancelled automatically `daysAfterDueDateToRegistrationCancellation` business days after the due date (set when the charge is created, up to 3650, immutable); `PAYMENT_BANK_SLIP_CANCELLED` announces it and the charge still exists. Ask Asaas how to revive a charge whose registration was cancelled
+- [ ] Registration lifetime: the boleto registration is cancelled automatically `daysAfterDueDateToRegistrationCancellation` business days after the due date (set when the charge is created, up to 3650, immutable; decided to send 60 by default, decision 8); `PAYMENT_BANK_SLIP_CANCELLED` announces it and the charge still exists. **Not documented:** how to revive such a charge; the safe path is to create a new charge for the same document (a new registration, the old one `replaced`)
 - [ ] If a charge expires or its terms must change: an operation that updates the charge's due date or creates a new one, recording a new registration (`reason` reissue) and replacing the old
 - [ ] Celery Beat daily task only if the confirmed behaviour needs it (detecting charges about to expire)
 - [ ] The second copy of a boleto for a payer is the same registration's URL, not a new charge
@@ -27,7 +27,7 @@ None new (uses `BillingDocumentRegistration` of part 02).
 
 ### Open questions
 - [ ] Do we need any automatic reissue at all, or only a manual "reemitir" action for staff? (recommended: manual only in this phase, because Asaas applies the fine and interest itself while the registration lives; the registration window is set long at creation, part 02)
-- [ ] Does Asaas's updating of a charge (due date, value) register the boleto again and keep the same `bankSlipUrl`? (not found in the pages read; check "Atualizar cobrança existente")
+- [ ] Updating a charge: `PUT /v3/payments/{id}` (value, due date and billing type required; allowed while waiting for payment or overdue) fires `PAYMENT_UPDATED`; after it, fetch the digitable line and the Pix QR again. Whether the boleto is registered again and `bankSlipUrl` changes is **not documented**: store what comes back and treat the URL as changeable
 - [ ] Is the monetary correction still wanted? (not modeled; the data model marks it as not modeled; recommended: no)
 
 ## Result

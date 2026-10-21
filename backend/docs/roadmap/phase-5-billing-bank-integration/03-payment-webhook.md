@@ -33,7 +33,7 @@ When Asaas says a charge was paid, mark the document paid and post its items as 
 ### Open questions
 - [ ] Amount different from the charge (interest, discount, a fee the gateway took): how is it allocated across the items? (open since the data model; recommended: priority order, fee first; the amount comes from the event, interest and fine as their own entries if the cost centers exist)
 - [ ] Does the amount ever legitimately differ from the charged one? The payload has `value`, `netValue` (after the Asaas fee) and, when the paid amount differs, `originalValue`; interest and fine make the paid value larger than the item sum. (recommended: no tolerance margin; post the items at their amounts and the difference as its own entry, or send it to the unprocessed queue when the cost center for it does not exist)
-- [ ] Which event posts the ledger? `PAYMENT_CONFIRMED` (paid, balance not yet available) comes before `PAYMENT_RECEIVED` (available) for a boleto; Pix goes straight to RECEIVED. (decision 9; recommended: `PAYMENT_RECEIVED`)
+- [ ] Which event posts the ledger: decided (decision 9) `PAYMENT_RECEIVED`; `PAYMENT_CONFIRMED` is stored and shown as "em processamento"
 - [ ] Handle `PAYMENT_DELETED`, `PAYMENT_REFUNDED` and `PAYMENT_BANK_SLIP_CANCELLED` (the charge exists but cannot be paid) in this part or in part 05? (recommended: record them as events here; act on them in part 05)
 
 ## Result
