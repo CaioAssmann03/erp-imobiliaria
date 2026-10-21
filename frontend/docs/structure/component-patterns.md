@@ -34,8 +34,7 @@ form and mutation hooks, and calls `onChanged` so the parent invalidates the par
 ## Dashboard widget (`app/(dashboard)/_components/home/widgets/`)
 
 `xxx-widget.tsx` exports `buildXxxWidget(dash)` → `{ title, className, showHeader, render(large) }`.
-Register in `widgets/types.ts` (`WIDGET_IDS`) and `widgets/index.ts`; add a `lib/search-index.ts` entry. The same
-`render(large)` feeds the card and the focus modal (`/?focus=<id>`).
+Register in `widgets/types.ts` (`WIDGET_IDS`) and `widgets/index.ts`; add a `lib/search-index.ts` entry. `render(large)` draws the card; the focus modal (`/?focus=<id>`) draws `renderFocus()` when the widget defines it (a richer view with more data: totals, breakdowns, a filterable list, shortcuts, under `widgets/focus/`), and falls back to `render(true)` (the card enlarged) otherwise.
 
 ## Floating UI
 
