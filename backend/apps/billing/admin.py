@@ -1,12 +1,23 @@
 from typing import final
 
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.db.models import QuerySet
 from django.http import HttpRequest
 from unfold.admin import ModelAdmin, TabularInline
 
 from apps.core.scoping import CompanyScopedAdminMixin
 
-from .models import BillingDocument, BillingDocumentItem, BillingDocumentPdf, BillingPlan, BillingPlanItem, BillingRun
+from .gateway.asaas_client import GatewayError
+from .models import (
+    BillingDocument,
+    BillingDocumentItem,
+    BillingDocumentPdf,
+    BillingPlan,
+    BillingPlanItem,
+    BillingRun,
+    GatewayAccount,
+)
+from .services.sync_gateway_account_status import sync_gateway_account_status
 
 
 @final
@@ -94,3 +105,32 @@ class BillingDocumentPdfAdmin(CompanyScopedAdminMixin, ModelAdmin):
 
     def has_delete_permission(self, request: HttpRequest, obj: BillingDocumentPdf | None = None) -> bool:
         return False
+
+
+@final
+@admin.register(GatewayAccount)
+class GatewayAccountAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    """Read-only: accounts are opened by `onboard_gateway_account`; the credentials are never shown (spec 030)."""
+
+    list_display = ("condominium", "status", "wallet_id", "approved_at")
+    list_filter = ("status",)
+    search_fields = ("condominium__name",)
+    exclude = ("api_key", "webhook_token")
+    actions = ("sync_status",)
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj: GatewayAccount | None = None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: GatewayAccount | None = None) -> bool:
+        return False
+
+    @admin.action(description="Sync status with the gateway")
+    def sync_status(self, request: HttpRequest, queryset: QuerySet[GatewayAccount]) -> None:
+        for account in queryset:
+            try:
+                sync_gateway_account_status(account)
+            except GatewayError as error:
+                self.message_user(request, f"{account.condominium}: {error}", messages.ERROR)

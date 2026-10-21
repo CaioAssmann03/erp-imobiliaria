@@ -21,7 +21,7 @@ A phase is `done` only when every part is `done` or `moved`.
 | 3a | [Prerequisites for phase 3](phase-3a-prerequisites/README.md) | done | 9/9 | Known-gaps review |
 | 3 | [Finance base](phase-3-finance-base/README.md) | done | 7/7 | Sprint 3 |
 | 4 | [Billing issuance (generation)](phase-4-billing-generation/README.md) | done | 7/7 | Sprint 4 |
-| 5 | [Billing issuance (gateway)](phase-5-billing-bank-integration/README.md) | todo | 0/7 | Sprint 5 |
+| 5 | [Billing issuance (gateway)](phase-5-billing-bank-integration/README.md) | in-progress | 0/7 | Sprint 5 |
 | 6 | [Closings and agreements](phase-6-closings-and-agreements/README.md) | todo | 0/4 | Sprint 6 |
 | 7 | [Client portal](phase-7-client-portal/README.md) | todo | 0/3 | Sprint 7 |
 | 8 | [Rentals](phase-8-rentals/README.md) | todo | 0/5 | Sprint 8 |

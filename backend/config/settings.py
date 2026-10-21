@@ -3,6 +3,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from celery.schedules import crontab
+from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from django.core.exceptions import ImproperlyConfigured
@@ -267,6 +268,28 @@ AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY", "")
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "")
 AWS_S3_ENDPOINT_URL = os.environ.get("AWS_S3_ENDPOINT_URL", "")
 AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "auto")
+
+def _gateway_credentials_key() -> str:
+    """The Fernet key that encrypts the gateway API keys at rest (spec 030); mandatory, also in development."""
+    key = os.environ.get("GATEWAY_CREDENTIALS_KEY", "").strip()
+    if not key:
+        raise ImproperlyConfigured(
+            "GATEWAY_CREDENTIALS_KEY must be set (a Fernet key); see docs/architecture/operations.md."
+        )
+    try:
+        Fernet(key)
+    except ValueError as error:
+        raise ImproperlyConfigured("GATEWAY_CREDENTIALS_KEY is not a valid Fernet key.") from error
+    return key
+
+
+GATEWAY_CREDENTIALS_KEY = _gateway_credentials_key()
+
+# Asaas, the billing gateway (spec 030). The parent key creates sub-accounts; each condominium then uses its own.
+ASAAS_API_KEY = os.environ.get("ASAAS_API_KEY", "")
+ASAAS_BASE_URL = os.environ.get("ASAAS_BASE_URL", "https://api-sandbox.asaas.com/v3").rstrip("/")
+# Where Asaas posts events (a tunnel in development); empty leaves the sub-account without a webhook for now.
+ASAAS_WEBHOOK_URL = os.environ.get("ASAAS_WEBHOOK_URL", "")
 
 CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL", "redis://redis:6379/0")

@@ -38,6 +38,8 @@ core  ←  persons  ←  condominiums  ←  finance  ←  billing  ←  (rentals
 |---|---|
 | `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS` | Django basics. **`SECRET_KEY` is mandatory when `DEBUG=false`** (≥ 32 chars) |
 | `JWT_SIGNING_KEY` | Ed25519 private key (PKCS#8 PEM, one line with literal `\n` allowed) that signs the JWTs with EdDSA; the public key is derived from it. **Mandatory in every environment, development included**; generate it with the command in `.env.example` (spec 022) |
+| `GATEWAY_CREDENTIALS_KEY` | Fernet key that encrypts the gateway API keys and webhook tokens in the database (spec 030); mandatory, also in development and tests (`pytest.ini` has a test-only one). Losing it makes the stored credentials unreadable |
+| `ASAAS_API_KEY`, `ASAAS_BASE_URL`, `ASAAS_WEBHOOK_URL` | The Asaas parent account that creates the sub-accounts, the API base (sandbox by default) and the public URL where Asaas posts events (empty: sub-accounts without a webhook) |
 | `POSTGRES_DB/USER/PASSWORD/HOST/PORT` | database. **`POSTGRES_DB` is mandatory** (no SQLite fallback) |
 | `REDIS_URL` | Celery broker/result backend **and the shared cache** (the login rate limit holds across workers) |
 | `SECURE_SSL_REDIRECT`, `SECURE_HSTS_SECONDS`, `ADMIN_URL` | production security (`operations.md`) |

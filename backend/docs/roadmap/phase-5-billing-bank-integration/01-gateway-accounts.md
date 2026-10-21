@@ -5,8 +5,8 @@ skip-if: you need the whole phase → roadmap/phase-5-billing-bank-integration/R
 ---
 # Part 01 — Gateway accounts
 
-**Status:** todo · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing · **Frontend impact:** none · **Depends on:** phase 4
-**Spec:** none yet
+**Status:** in-progress · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing · **Frontend impact:** none · **Depends on:** phase 4
+**Spec:** [030](../../features/030-gateway-accounts.md)
 
 ## Goal
 Every condominium that is billed has an account at the gateway that is the beneficiary of its boletos, and the system holds the credentials to use it safely.
@@ -15,9 +15,9 @@ Every condominium that is billed has an account at the gateway that is the benef
 - [ ] Account status per condominium follows `ACCOUNT_STATUS_GENERAL_APPROVAL_APPROVED` and `GET /v3/myAccount/status`; the sandbox evaluation period is turned off for development
 - [ ] Register a Pix key in each sub-account so the boleto shows a durable Pix QR (check whether it can be done by API)
 - [ ] External: open the Asaas production account in the CNPJ of the company (never a personal account); compare the per-charge fee with the old convenio before opening it
-- [ ] Model `GatewayAccount` (condominium, gateway wallet id, API key stored encrypted, status `pending` / `active` / `blocked`) and its Admin
-- [ ] Onboarding of a condominium: create its Asaas sub-account (its CNPJ, address and the data Asaas requires) and store the credentials the response gives once
-- [ ] Encryption key for the stored API keys in the environment (`GATEWAY_CREDENTIALS_KEY`), recorded in `.env.example` and `architecture/overview.md`
+- [x] Model `GatewayAccount` (condominium, gateway wallet id, API key stored encrypted, status `pending` / `active` / `blocked`) and its Admin
+- [x] Onboarding of a condominium: create its Asaas sub-account (its CNPJ, address and the data Asaas requires) and store the credentials the response gives once
+- [x] Encryption key for the stored API keys in the environment (`GATEWAY_CREDENTIALS_KEY`), recorded in `.env.example` and `architecture/overview.md`
 
 ## Draft for the spec
 ### Entities
@@ -38,4 +38,4 @@ Every condominium that is billed has an account at the gateway that is the benef
 - [ ] Encrypt the API keys with a symmetric key from the environment (Fernet), or keep them only in the environment per condominium? (recommended: encrypted in the database; the environment holds one key)
 
 ## Result
-Not started.
+Implemented on 2026-10-21 (spec 030): model, encrypted credentials, onboarding command, status sync, read-only Admin. Pending: validation against the Asaas sandbox (sub-account creation, status read, Pix key by API), the status-follows-webhook wiring (part 03) and the external steps (production account, homologation).

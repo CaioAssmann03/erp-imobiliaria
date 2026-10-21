@@ -5,3 +5,4 @@ from .billing_plan_item import BillingPlanItemError as BillingPlanItemError
 from .validators import BillingValidatorError as BillingValidatorError
 from .billing_run import BillingRunError as BillingRunError
 from .billing_document_pdf import BillingDocumentPdfError as BillingDocumentPdfError
+from .gateway_account import GatewayAccountError as GatewayAccountError
