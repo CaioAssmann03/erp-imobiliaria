@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { addressQuery, isAddressMappable, mapsEmbedUrl, mapsSearchUrl } from "../lib/maps.ts";
+import { addressQuery, isAddressMappable, mapsEmbedUrl, mapsKeylessEmbedUrl, mapsSearchUrl } from "../lib/maps.ts";
 
 const full = {
   zip_code: "80010-000",
@@ -41,7 +41,7 @@ test("the search url needs no key and encodes the address", () => {
 test("a character of the address cannot add or end a parameter of the urls", () => {
   const query = addressQuery({ street: "Rua A & B #5", city: "Curitiba" });
 
-  for (const url of [mapsEmbedUrl("K", query), mapsSearchUrl(query)]) {
+  for (const url of [mapsEmbedUrl("K", query), mapsKeylessEmbedUrl(query), mapsSearchUrl(query)]) {
     assert.equal(new URL(url).searchParams.get(url.includes("embed") ? "q" : "query"), query);
     assert.equal(new URL(url).hash, "");
   }
@@ -58,4 +58,13 @@ test("an address is mappable with a full cep or with street and city only", () =
   assert.equal(isAddressMappable({ city: "Curitiba", state: "PR" }), false);
   assert.equal(isAddressMappable({ street: "  ", city: "Curitiba" }), false);
   assert.equal(isAddressMappable({}), false);
+});
+
+test("the keyless map is the Google embed page with the address as the only query", () => {
+  const url = new URL(mapsKeylessEmbedUrl("Rua A, 10, Curitiba - PR, Brasil"));
+
+  assert.equal(url.origin + url.pathname, "https://www.google.com/maps");
+  assert.equal(url.searchParams.get("q"), "Rua A, 10, Curitiba - PR, Brasil");
+  assert.equal(url.searchParams.get("output"), "embed");
+  assert.equal(url.searchParams.has("key"), false);
 });

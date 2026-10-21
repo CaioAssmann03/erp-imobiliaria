@@ -42,6 +42,15 @@ export function mapsEmbedUrl(apiKey: string, query: string): string {
   return `https://www.google.com/maps/embed/v1/place?key=${encodeURIComponent(apiKey)}&q=${encodeURIComponent(query)}`;
 }
 
+/**
+ * O mapa sem chave: a página de embed do Google (`output=embed`, que o Google redireciona para
+ * `/maps/embed`) localiza o texto do endereço, como o modo "place", mas não é a API oficial. Vale enquanto não há
+ * `GOOGLE_MAPS_EMBED_KEY`; com a chave o formulário usa `mapsEmbedUrl`.
+ */
+export function mapsKeylessEmbedUrl(query: string): string {
+  return `https://www.google.com/maps?q=${encodeURIComponent(query)}&hl=pt-BR&output=embed`;
+}
+
 /** O link "Abrir no Maps": as URLs do Google Maps (`api=1`) não pedem chave. */
 export function mapsSearchUrl(query: string): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
