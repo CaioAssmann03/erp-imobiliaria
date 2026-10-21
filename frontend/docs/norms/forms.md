@@ -15,7 +15,7 @@ react-hook-form + Zod. File layout: structure/component-patterns.md.
    `people_individual`...). Create: omit empty fields. Edit (PATCH): cleared field → `null` (or `""` for non-null text).
 4. `use-xxx-submit.ts`: `useXxxCreate`/`useXxxPartialUpdate`, invalidate caches, `toast`, navigate.
 5. `applyServerErrors(error, setError)` (`lib/form-errors.ts`) puts DRF errors (nested too) on fields; a non-field error also goes to `root.server`. Returns the toast message.
-6. Errors show in three places: under each field (icon + red message), in `FormErrorSummary` (rendered by `FormActions`, above the floating glass bar, which also shows "Alterações não salvas" while the form is dirty and keeps Cancelar before Salvar on the right: the general server error and one clickable line per invalid field, after a save attempt), and in a toast.
+6. Errors show in three places: under each field (icon + red message), in `FormErrorSummary` (rendered by `FormActions`, above the action bar: a plain solid bar (no glass, tint or glow) with the text "Alterações não salvas" while the form is dirty and Cancelar before Salvar on the right. The summary is a flat card: a count line ("Há 3 campos para corrigir") and one row per field, the label on the left and the message in the danger color on the right; a field that is not on screen or repeats in a list is named by `lib/form-labels.ts` ("Item 2 · Valor"): the general server error and one clickable line per invalid field, after a save attempt), and in a toast.
 
 ## react-hook-form
 ```tsx
@@ -43,6 +43,9 @@ CPF/CNPJ/CEP leave as digits. Validators in `lib/validators.ts` mirror the backe
 `SelectField` is **controlled** (`value` comes from `useWatch`): the options usually load after `reset(xxxToForm(record))`, and an
 uncontrolled native `<select>` only shows a value whose `<option>` already exists (the stored supplier, sub-account or block would
 appear as the placeholder). Build any new select with `SelectField`, never a bare `<select {...register()}>` with async options.
+
+## Hints (the `hint` prop)
+A field's explanation (a range, a unit, what an empty value means) is **not** printed under the field: `FormField` shows an info icon (`FieldHint`, a Base UI popover) next to the label, which opens on hover, tap or Enter, and keeps the same text in a screen-reader-only span tied to the control by `aria-describedby`. The line under the control is reserved for the **error** only, so the fields keep one rhythm and an error does not shift the ones below. Write a hint as a short sentence about the field ("Quantos dias antes do vencimento o desconto ainda vale. 0: só até o vencimento."); a label that needs a unit says it itself ("Prazo do desconto (dias)"). Do not repeat in the hint what the label or the placeholder already say.
 
 ## Rules
 Field names = API names (server errors land correctly). Client validation helps; the **server is the truth**: always handle 400.

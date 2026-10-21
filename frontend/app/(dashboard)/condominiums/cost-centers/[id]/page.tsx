@@ -5,6 +5,7 @@ import { CostCenterForm } from "../../_components/CostCenterForm";
 import { FormPage } from "@/components/form/FormPage";
 import { PageHeader } from "@/components/PageHeader";
 import { getCostCentersRetrieveQueryOptions } from "@/lib/api/generated";
+import { fetchOrNotFound } from "@/lib/query/fetch-or-not-found";
 import { getServerQueryClient } from "@/lib/query/server";
 
 export const metadata: Metadata = { title: "Editar sub-conta" };
@@ -12,7 +13,7 @@ export const metadata: Metadata = { title: "Editar sub-conta" };
 export default async function EditCostCenterPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const queryClient = getServerQueryClient();
-  await queryClient.prefetchQuery(getCostCentersRetrieveQueryOptions(id));
+  await fetchOrNotFound(queryClient, getCostCentersRetrieveQueryOptions(id));
 
   return (
     <FormPage>

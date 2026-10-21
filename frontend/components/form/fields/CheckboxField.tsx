@@ -5,6 +5,7 @@ import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/lib/utils";
 
+import { FieldHint } from "../FieldHint";
 import type { BaseProps } from "./types";
 
 export function CheckboxField({
@@ -29,8 +30,13 @@ export function CheckboxField({
           {...register(name)}
         />
         {label}
+        {hint && (
+          <span className="ml-auto">
+            <FieldHint label={label}>{hint}</FieldHint>
+          </span>
+        )}
       </label>
-      <p className="mt-1 min-h-4 text-caption leading-4 text-ink-faint">{hint}</p>
+      <p className="mt-1 min-h-4 text-caption leading-4">{hint && <span className="sr-only">{hint}</span>}</p>
     </div>
   );
 }

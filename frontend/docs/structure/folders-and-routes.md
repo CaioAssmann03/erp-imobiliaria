@@ -23,6 +23,8 @@ docs/         REASONS documentation
 
 `_`-prefixed folders are private (not routes).
 
+`app/(dashboard)/` also holds `loading.tsx` (skeleton on a page change), `error.tsx` (an unexpected error, with retry) and `not-found.tsx`.
+
 ## Routes
 
 | URL | File |

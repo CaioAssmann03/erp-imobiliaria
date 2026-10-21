@@ -135,3 +135,14 @@ test("the validity is described from its months", async () => {
   assert.equal(describeValidity(undefined, "2026-12-01"), "até dez/2026");
   assert.equal(describeValidity("2026-03-01", "2026-12-01"), "mar/2026 a dez/2026");
 });
+
+test("the error summary names a field that is not on screen, and the row of a list", async () => {
+  const { describeField } = await import("../lib/form-labels.ts");
+
+  assert.equal(describeField("condominium", null), "Condomínio");
+  assert.equal(describeField("name", "Nome do plano"), "Nome do plano");
+  assert.equal(describeField("items.0.description", null), "Item 1 · Descrição");
+  assert.equal(describeField("items.2.amount", "Valor por unidade (R$)"), "Item 3 · Valor por unidade (R$)");
+  assert.equal(describeField("lines.1.entry_template", null), "Lançamento 2 · Modelo de lançamento");
+  assert.equal(describeField("something_new", null), "something_new");
+});

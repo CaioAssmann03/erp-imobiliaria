@@ -8,6 +8,7 @@ import {
   getBlocksListQueryOptions,
   getUnitsRetrieveQueryOptions,
 } from "@/lib/api/generated";
+import { fetchOrNotFound } from "@/lib/query/fetch-or-not-found";
 import { getServerQueryClient } from "@/lib/query/server";
 
 export const metadata: Metadata = { title: "Editar unidade" };
@@ -22,7 +23,7 @@ export default async function EditUnitPage({
 
   const queryClient = getServerQueryClient();
   await Promise.all([
-    queryClient.prefetchQuery(getUnitsRetrieveQueryOptions(unitId)),
+    fetchOrNotFound(queryClient, getUnitsRetrieveQueryOptions(unitId)),
     queryClient.prefetchQuery(getBlocksListQueryOptions({ condominium: condominiumId, limit: 100 })),
   ]);
 

@@ -25,12 +25,18 @@ axios via `customInstance`; the query `signal` aborts stale requests. Base URL: 
 
 ## QueryClient (`lib/query/`)
 Server: `getServerQueryClient()` (React `cache`, **one per request**, never shared). Browser: `getBrowserQueryClient()` singleton.
-Defaults: `staleTime 60s`, `refetchOnWindowFocus false`.
+Defaults: `staleTime 60s`, `refetchOnWindowFocus false`, and `retry: shouldRetry` (`lib/query/make-query-client.ts`): a 4xx answer (not found, forbidden, invalid) is never retried, a network error or a 5xx is retried twice. A `MutationCache.onSuccess` invalidates the cached global searches after **any** successful mutation (a record that was just created must be findable), so a form does not invalidate the search by hand.
 
 ## Hydration
 `prefetchQuery` in `page.tsx` + `<HydrationBoundary state={dehydrate(queryClient)}>`. Key = hook + params, so server and client must use
-**identical params** (`DEFAULT_PAGE_SIZE` from `lib/pagination.ts`). Prefetch independent queries with `Promise.all`. Failed prefetch: let the
+**identical params** (`DEFAULT_PAGE_SIZE` from `lib/pagination.ts`). Prefetch independent queries with `Promise.all`. **Everything that reads the cache must sit inside the `<HydrationBoundary>`, the page header included** (a dialog in `PageHeader` actions that reads a list was refetching it). Every client query a page's form or table makes on first paint needs its prefetch with the same key: the pickers of a new-record form (`condominiums`, `suppliers`...), and the dependent ones of an edit form (the plan's cost centers and the templates of each item's cost center). A way to check it: load the page in a browser and count the `/api/` calls the client makes; a fully prefetched page makes none (conditional sections, like the receipts of a paid account, are the exception). Failed prefetch: let the
 client fetch; for the dashboard use `fetchQuery(...).catch(() => undefined)`.
+
+## Detail pages
+A `[id]` page fetches its record with `fetchOrNotFound(queryClient, get…RetrieveQueryOptions(id))` (`lib/query/fetch-or-not-found.ts`): the result stays in the cache that hydrates the client, a 404 (missing, or another company's) becomes `notFound()` instead of an empty form, and any other error goes to `app/(dashboard)/error.tsx` (retry). `app/(dashboard)/loading.tsx` is the skeleton shown at once on a page change, and `not-found.tsx` the page for an address or record that does not exist.
+
+## The dashboard is not in the client cache
+`/` is a Server Component that fetches the summary on every visit (`fetchQuery(...).catch(() => undefined)`), then hands it to the widgets. Invalidating `getDashboardRetrieveQueryKey()` in the browser therefore changes nothing (those calls in the mutation hooks are harmless leftovers); the page is fresh on the next visit because dynamic routes are not kept in the Router Cache. Its focus views fetch their own lists with client queries (for example the open accounts payable), which the list invalidations already cover.
 
 ## Lists
 Search/filters/page are query params (`hooks/use-list-params.ts`); `placeholderData: keepPreviousData`; debounce search
