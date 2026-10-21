@@ -28,12 +28,30 @@ export interface PlanValues {
   items: PlanItemValues[];
 }
 
-/** Mês de um `<input type="month">` ("2026-03") → primeiro dia do mês ("2026-03-01"); vazio ou inválido → undefined. */
-export const monthToApi = (value: string): string | undefined =>
-  /^\d{4}-(0[1-9]|1[0-2])$/.test(value) ? `${value}-01` : undefined;
+/** Mês digitado ("03/2026"; "2026-03" também vale) → primeiro dia do mês ("2026-03-01"); vazio ou inválido → undefined. */
+export function monthToApi(value: string): string | undefined {
+  const typed = /^(0[1-9]|1[0-2])\/(\d{4})$/.exec(value);
+  if (typed) return `${typed[2]}-${typed[1]}-01`;
+  return /^\d{4}-(0[1-9]|1[0-2])$/.test(value) ? `${value}-01` : undefined;
+}
 
-/** Data da API ("2026-03-01") → valor do `<input type="month">` ("2026-03"). */
-export const monthFromApi = (value: string | null | undefined): string => (value ? value.slice(0, 7) : "");
+/** Data da API ("2026-03-01") → mês como o usuário digita ("03/2026"). */
+export function monthFromApi(value: string | null | undefined): string {
+  if (!value) return "";
+  const [year, month] = value.split("-");
+  return `${month}/${year}`;
+}
+
+/** Máscara de "mês/ano" enquanto digita: "032026" → "03/2026" (só dígitos, a barra entra sozinha). */
+export function maskMonthYear(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 6);
+  return digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+}
+
+/** O mês de hoje no formato digitado ("10/2026"). */
+export function currentMonthTyped(today: Date = new Date()): string {
+  return `${String(today.getMonth() + 1).padStart(2, "0")}/${today.getFullYear()}`;
+}
 
 /** Fixo e rateio levam valor; o valor cadastrado da unidade não. */
 export const needsAmount = (kind: string): boolean => kind !== "unit_registered_value";

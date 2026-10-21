@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
+  currentMonthTyped,
   itemToPayload,
+  maskMonthYear,
   monthFromApi,
   monthToApi,
   needsAmount,
@@ -21,15 +23,34 @@ const item = (overrides = {}) => ({
   ...overrides,
 });
 
-test("a month input becomes the first day of the month", () => {
+test("a typed month becomes the first day of the month", () => {
+  assert.equal(monthToApi("03/2026"), "2026-03-01");
+  assert.equal(monthToApi("12/2026"), "2026-12-01");
   assert.equal(monthToApi("2026-03"), "2026-03-01");
   assert.equal(monthToApi(""), undefined);
-  assert.equal(monthToApi("2026-13"), undefined);
-  assert.equal(monthToApi("2026-3"), undefined);
+  assert.equal(monthToApi("13/2026"), undefined);
+  assert.equal(monthToApi("00/2026"), undefined);
+  assert.equal(monthToApi("3/2026"), undefined);
+  assert.equal(monthToApi("03/26"), undefined);
 });
 
-test("an API date becomes a month input value", () => {
-  assert.equal(monthFromApi("2026-03-01"), "2026-03");
+test("the month mask adds the slash by itself and keeps digits only", () => {
+  assert.equal(maskMonthYear("0"), "0");
+  assert.equal(maskMonthYear("03"), "03");
+  assert.equal(maskMonthYear("032"), "03/2");
+  assert.equal(maskMonthYear("032026"), "03/2026");
+  assert.equal(maskMonthYear("03/2026"), "03/2026");
+  assert.equal(maskMonthYear("03/20269999"), "03/2026");
+  assert.equal(maskMonthYear("ab"), "");
+});
+
+test("the current month is typed as month/year", () => {
+  assert.equal(currentMonthTyped(new Date(2026, 9, 21)), "10/2026");
+  assert.equal(currentMonthTyped(new Date(2027, 0, 5)), "01/2027");
+});
+
+test("an API date becomes the month the user types", () => {
+  assert.equal(monthFromApi("2026-03-01"), "03/2026");
   assert.equal(monthFromApi(null), "");
   assert.equal(monthFromApi(undefined), "");
 });

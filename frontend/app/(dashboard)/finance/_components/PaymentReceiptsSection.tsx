@@ -17,11 +17,11 @@ import {
 } from "@/lib/api/generated";
 import type { PaymentReceipt } from "@/lib/api/generated/models";
 import { apiErrorMessage } from "@/lib/form-errors";
-import { formatFileSize } from "@/lib/format";
+import { formatDateTime, formatFileSize } from "@/lib/format";
 import { RECEIPT_ACCEPT, receiptFileProblem, uploadToBucket } from "@/lib/payment-receipts";
 
 function formatSentAt(iso: string) {
-  return new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  return formatDateTime(iso);
 }
 
 /**

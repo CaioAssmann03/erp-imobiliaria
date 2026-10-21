@@ -21,7 +21,20 @@ const RUN_STATUS_LABELS: Record<string, string> = {
 export const documentStatusLabel = (status: string, isOverdue = false): string =>
   isOverdue ? "Vencido" : (DOCUMENT_STATUS_LABELS[status] ?? status);
 
-export const runStatusLabel = (status: string): string => RUN_STATUS_LABELS[status] ?? status;
+export interface RunCounts {
+  issued_count: number;
+  already_issued_count: number;
+}
+
+/** Uma execução que não emitiu nada e não encontrou nada já emitido (o mês ficou sem documento nenhum). */
+export const issuedNothing = (run: RunCounts): boolean => run.issued_count === 0 && run.already_issued_count === 0;
+
+/**
+ * "Concluída" só quer dizer que nenhuma unidade falhou: sem emissão nenhuma (as unidades foram puladas) o rótulo
+ * avisa isso, para não parecer que os boletos foram gerados.
+ */
+export const runStatusLabel = (status: string, counts?: RunCounts): string =>
+  status === "succeeded" && counts && issuedNothing(counts) ? "Concluída sem emissão" : (RUN_STATUS_LABELS[status] ?? status);
 
 /** Só um documento emitido ou registrado pode ser cancelado (o servidor confere de novo). */
 export const canCancelDocument = (status: string): boolean => status === "issued" || status === "registered";
