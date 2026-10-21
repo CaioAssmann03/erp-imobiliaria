@@ -18,7 +18,7 @@ Example resource `blocks` → route `/blocks`. Do the steps in order; each step 
 4. **Components** in `blocks/_components/`: `BlocksTable`, `BlocksFilters`, `BlockRow`, `BlockForm`,
    `block-form/*Section.tsx`, `block-form/use-block-submit.ts` (patterns: structure/component-patterns.md).
 5. **Cache:** the submit/delete hooks invalidate the list, the record and the dashboard (norms/data-and-cache.md).
-6. **Navigation and search:** add an item to `NavLinks` and `MobileTabs`; add entries to `lib/search-index.ts`;
+6. **Navigation and search:** add an item to `nav-items.ts` (it feeds `NavLinks` and `MobileMenu`); add entries to `lib/search-index.ts`;
    if the global search API should return it, that is a backend change.
 7. **Finish:** safeguards/checklist.md (types, lint, build, manual run).
 

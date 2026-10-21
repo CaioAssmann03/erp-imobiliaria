@@ -1,28 +1,18 @@
 "use client";
 
-import { Building2, LayoutDashboard, Receipt, Users, Wallet } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
-
-const NAV_ITEMS = [
-  { href: "/", label: "Painel", icon: LayoutDashboard },
-  { href: "/condominiums", label: "Condomínios", icon: Building2 },
-  { href: "/finance", label: "Financeiro", icon: Wallet },
-  { href: "/billing", label: "Cobrança", icon: Receipt },
-  { href: "/persons", label: "Pessoas", icon: Users },
-];
+import { isNavItemActive, NAV_ITEMS } from "./nav-items";
 
 /**
  * Client Component: precisa do pathname para marcar o item ativo.
  * Dentro de `<aside data-collapsed>`: recolhida = só ícone, aberta = ícone e texto.
- * Só desktop (no celular a navegação é o `MobileTabs`).
+ * Só desktop (no celular a navegação é o `MobileMenu`).
  */
 export function NavLinks() {
   const pathname = usePathname();
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname?.startsWith(href);
 
   return (
     <nav className="flex flex-col gap-1">
@@ -34,7 +24,7 @@ export function NavLinks() {
             aria-label={item.label}
             className={cn(
               "flex h-9 items-center gap-3 rounded-control px-3 text-body font-medium whitespace-nowrap transition-colors lg:group-data-[collapsed]/sidebar:justify-center lg:group-data-[collapsed]/sidebar:px-0",
-              isActive(item.href)
+              isNavItemActive(item.href, pathname)
                 ? "bg-ink text-ink-foreground"
                 : "text-ink-soft hover:bg-surface hover:text-ink"
             )}

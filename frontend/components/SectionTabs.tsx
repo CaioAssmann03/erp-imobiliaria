@@ -57,7 +57,7 @@ export function SectionTabs({ ariaLabel, tabs, current, storageKey }: SectionTab
               href={tab.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "-mb-px border-b-2 px-3 py-2 text-body font-medium transition-colors",
+                "-mb-px min-w-0 truncate border-b-2 px-2 py-2 text-body font-medium transition-colors sm:px-3",
                 active ? "border-ink text-ink" : "border-transparent text-ink-soft hover:text-ink"
               )}
             >

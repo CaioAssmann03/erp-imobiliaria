@@ -25,7 +25,7 @@ Entry in `ACCENTS` (`lib/appearance.ts`) + `html[data-accent="x"]` block in `app
 `--color-brand`, `-strong`, `-light`; if reddish, also override `--color-danger` (and dark/system variants).
 
 ## Add a navigation item
-`NavLinks` and `MobileTabs` in `app/(dashboard)/_components/shell/` (label in Portuguese, href in English).
+`nav-items.ts` (used by `NavLinks` and `MobileMenu`) in `app/(dashboard)/_components/shell/` (label in Portuguese, href in English).
 
 ## Add a shared component
 Only when two or more routes use it: `components/`; otherwise `_components/` of the route.
