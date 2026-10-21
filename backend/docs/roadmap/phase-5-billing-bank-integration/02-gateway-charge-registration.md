@@ -34,11 +34,12 @@ After a document is issued, create its charge at Asaas (boleto with Pix) and sto
 
 ### Open questions
 - [ ] Official boleto: the Asaas hosted boleto or our own PDF with a barcode? (decision 2 of the phase; recommended: the Asaas boleto; our PDF stays as the statement of items)
-- [ ] **Terms that do not map.** The gateway takes one fine (percentage or fixed), one monthly interest percentage and one discount (percentage or fixed, N days before the due date); it has no first-days fine tier, no grace period and no `full_month`/`per_day` choice that the documentation shows. What do we do with `initial_late_fee_*`, `interest_grace_days` and `interest_calculation` for gateway charges? (decision 3 of the phase; recommended: send what maps, keep the rest as data, and ask Asaas how its interest is counted)
-- [ ] How long must the boleto registration stay alive? `daysAfterDueDateToRegistrationCancellation` is set at creation and cannot change; the account default is unknown. (decision 8; recommended: set it explicitly and long)
-- [ ] A Pix key must be registered in the beneficiary account for the boleto to show the Pix QR code: part of the account onboarding?
-- [ ] The sandbox can confirm a charge through `POST /v3/sandbox/payment/{id}/confirm` and fires the webhooks; does it also return the digitable line and the Pix payload? (check while building the client)
-- [ ] How is the customer's Asaas notification turned off, and is the customer's e-mail required? (not found in the pages read)
+- [ ] **Terms that do not map** (decided, decision 3): the gateway takes one fine, one monthly interest percentage and one discount; the first-days fine, the grace period and `interest_calculation` stay as data without effect on gateway charges, and the condominium screen says so. To validate in the sandbox: how the interest is counted
+- [ ] Registration lifetime (decided, decision 8): `daysAfterDueDateToRegistrationCancellation` is sent explicitly from a setting (default 60 business days) because it cannot change after creation
+- [ ] Customers (decided, decision 10): looked up by `externalReference` (the person's id) and then by `cpfCnpj` before creating, because the API allows duplicates; `notificationDisabled: true`; only `name` and `cpfCnpj` are required
+- [ ] The Pix QR comes from `GET /v3/payments/{id}/pixQrCode` (`encodedImage`, `payload`, `expirationDate`); without a Pix key in the account it expires at 23:59 of the same day, so the key is part of the onboarding (part 01)
+- [ ] Rate limits: 25,000 requests per account every 12 hours and 50 concurrent GETs; a charge costs about four calls (customer lookup/creation, charge, digitable line, Pix QR), so the client must honor `429` and `RateLimit-Reset` and never poll
+- [ ] The sandbox confirms a charge through `POST /v3/sandbox/payment/{id}/confirm` and fires the webhooks; does it also return the digitable line and the Pix payload without a Pix key? (check while building the client)
 
 ## Result
 Not started.
