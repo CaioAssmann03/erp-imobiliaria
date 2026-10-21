@@ -5,28 +5,19 @@ skip-if: you need the whole phase → roadmap/phase-4-billing-generation/README.
 ---
 # Part 05 — Boleto PDF (draft)
 
-**Status:** todo · **Phase:** 4 (Billing issuance (generation)) · **Apps:** billing · **Frontend impact:** none · **Depends on:** 03
-**Spec:** none yet
+**Status:** done · **Phase:** 4 (Billing issuance (generation)) · **Apps:** billing · **Frontend impact:** none · **Depends on:** 03
+**Spec:** [027 — Boleto PDF (draft)](../../features/history.md) (section 027)
 
 ## Goal
 Printable boleto without bank registration, for homologation.
 
 ## Scope
-- [ ] WeasyPrint HTML/CSS template
-- [ ] Payer, condominium, item lines, company logo
-- [ ] Store the PDF linked to the document
+- [x] WeasyPrint HTML/CSS template
+- [x] Payer, condominium, item lines; the company name as text (the logo waits for a file upload, `known-gaps.md`)
+- [x] Store the PDF linked to the document
 
 ## Draft for the spec
-Seed material from the project PDFs. When the spec is written, move this content into it and replace this section with the line `Moved to the spec.`
-
-### Entities
-None new.
-
-### Business rules
-- None.
-
-### Open questions
-- [ ] Draft marking on the PDF until the bank registers it? (recommended: yes, visible "DRAFT" watermark)
+Moved to the spec.
 
 ## Result
-Not started.
+Done on 2026-10-21 (spec 027): `BillingDocumentPdf`, the WeasyPrint renderer and template ("RASCUNHO" watermark, no bank data), `generate_billing_document_pdf` storing it in the bucket, a task enqueued after each issuance commits, `GET`/`POST /api/billing-documents/{id}/pdf/`, client regenerated. Pango and `fonts-liberation` are now required in the image, CI and local machines (`operations.md`).
