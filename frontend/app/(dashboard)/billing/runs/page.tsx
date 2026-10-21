@@ -17,16 +17,15 @@ export default async function BillingRunsPage() {
     queryClient.prefetchQuery(getCondominiumsListQueryOptions({ limit: 100 })),
   ]);
 
+  // O cabeçalho também fica dentro do boundary: o diálogo "Emitir mês" lê a lista de condomínios.
   return (
-    <div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
       <PageHeader
         title="Execuções da emissão"
         description="O que cada emissão mensal fez: documentos emitidos, unidades puladas e o motivo."
         actions={<IssueMonthDialog />}
       />
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <BillingRunsTable />
-      </HydrationBoundary>
-    </div>
+      <BillingRunsTable />
+    </HydrationBoundary>
   );
 }

@@ -1,11 +1,8 @@
-"use client";
-
 import Link from "next/link";
 
 import { FormSection } from "@/components/form/FormSection";
-import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useBillingDocumentsRetrieve } from "@/lib/api/generated";
+import type { BillingDocument } from "@/lib/api/generated/models";
 import { INTEREST_CALCULATION_LABELS } from "@/lib/billing-documents";
 import { brl, formatDate, formatMonth } from "@/lib/format";
 
@@ -23,11 +20,11 @@ function Item({ label, children }: { label: string; children: React.ReactNode })
 
 const percent = (value: string) => `${Number(value).toLocaleString("pt-BR")}%`;
 
-/** Página de um documento de cobrança: dados, itens e condições copiadas na emissão (somente leitura). */
-export function BillingDocumentView({ documentId }: { documentId: string }) {
-  const { data: document, isLoading } = useBillingDocumentsRetrieve(documentId);
-  if (isLoading || !document) return <FormSkeleton sections={2} />;
-
+/**
+ * Server Component: dados, itens e condições copiadas na emissão (somente leitura), desenhados no servidor.
+ * A única parte interativa é `BillingDocumentActions` (baixar o PDF e cancelar).
+ */
+export function BillingDocumentView({ document }: { document: BillingDocument }) {
   return (
     <div className="space-y-4">
       <FormSection title="Documento">

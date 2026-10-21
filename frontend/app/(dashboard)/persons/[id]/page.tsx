@@ -5,6 +5,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { PageHeader } from "@/components/PageHeader";
 import { PersonForm } from "../_components/PersonForm";
 import { getPersonsRetrieveQueryOptions } from "@/lib/api/generated";
+import { fetchOrNotFound } from "@/lib/query/fetch-or-not-found";
 import { getServerQueryClient } from "@/lib/query/server";
 
 export const metadata: Metadata = { title: "Editar pessoa" };
@@ -18,7 +19,7 @@ export default async function EditPersonPage({
   const personId = id;
 
   const queryClient = getServerQueryClient();
-  await queryClient.prefetchQuery(getPersonsRetrieveQueryOptions(personId));
+  await fetchOrNotFound(queryClient, getPersonsRetrieveQueryOptions(personId));
   const person = queryClient.getQueryData(getPersonsRetrieveQueryOptions(personId).queryKey);
 
   return (

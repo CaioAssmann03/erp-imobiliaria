@@ -1,12 +1,12 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import {
   getBillingDocumentsListQueryKey,
-  getBillingDocumentsRetrieveQueryKey,
   useBillingDocumentsCancel,
 } from "@/lib/api/generated";
 import type { BillingDocument } from "@/lib/api/generated/models";
@@ -14,6 +14,7 @@ import { apiErrorMessage } from "@/lib/form-errors";
 
 /** Cancela um documento emitido ou registrado; o mês da unidade fica livre para uma nova emissão. */
 export function CancelBillingDocumentButton({ document }: { document: BillingDocument }) {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const cancelMutation = useBillingDocumentsCancel();
 
@@ -23,8 +24,9 @@ export function CancelBillingDocumentButton({ document }: { document: BillingDoc
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getBillingDocumentsListQueryKey() });
-          queryClient.invalidateQueries({ queryKey: getBillingDocumentsRetrieveQueryKey(document.id) });
           toast.success("Documento cancelado.");
+          // A página do documento é desenhada no servidor: pede a nova versão dela.
+          router.refresh();
         },
         onError: (error) => toast.error(apiErrorMessage(error, "Não foi possível cancelar o documento.")),
       }

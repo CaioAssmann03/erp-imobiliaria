@@ -5,6 +5,7 @@ import { BlockForm } from "../../_components/BlockForm";
 import { FormPage } from "@/components/form/FormPage";
 import { PageHeader } from "@/components/PageHeader";
 import { getBlocksRetrieveQueryOptions } from "@/lib/api/generated";
+import { fetchOrNotFound } from "@/lib/query/fetch-or-not-found";
 import { getServerQueryClient } from "@/lib/query/server";
 
 export const metadata: Metadata = { title: "Editar bloco" };
@@ -12,7 +13,7 @@ export const metadata: Metadata = { title: "Editar bloco" };
 export default async function EditBlockPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const queryClient = getServerQueryClient();
-  await queryClient.prefetchQuery(getBlocksRetrieveQueryOptions(id));
+  await fetchOrNotFound(queryClient, getBlocksRetrieveQueryOptions(id));
 
   return (
     <FormPage>

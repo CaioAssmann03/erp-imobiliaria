@@ -1,10 +1,7 @@
-"use client";
-
 import Link from "next/link";
 
 import { FormSection } from "@/components/form/FormSection";
-import { FormSkeleton } from "@/components/form/FormSkeleton";
-import { useBillingRunsRetrieve } from "@/lib/api/generated";
+import type { BillingRun } from "@/lib/api/generated/models";
 import { issuedNothing } from "@/lib/billing-documents";
 import { formatDateTime, formatMonth } from "@/lib/format";
 
@@ -12,11 +9,8 @@ import { BillingRunCounts } from "./BillingRunCounts";
 import { BillingRunProblems } from "./BillingRunProblems";
 import { BillingRunStatusBadge } from "./BillingRunStatusBadge";
 
-/** Página de uma execução: situação, contagens, problemas explicados e o atalho para os documentos do mês. */
-export function BillingRunView({ runId }: { runId: string }) {
-  const { data: run, isLoading } = useBillingRunsRetrieve(runId);
-  if (isLoading || !run) return <FormSkeleton sections={2} />;
-
+/** Server Component: situação, contagens, problemas explicados e o atalho para os documentos do mês. */
+export function BillingRunView({ run }: { run: BillingRun }) {
   return (
     <div className="space-y-4">
       <FormSection title={`${run.condominium_name} · ${formatMonth(run.reference_month)}`}>

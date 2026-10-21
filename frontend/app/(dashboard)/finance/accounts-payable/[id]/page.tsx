@@ -5,6 +5,7 @@ import { AccountPayableForm } from "../../_components/AccountPayableForm";
 import { FormPage } from "@/components/form/FormPage";
 import { PageHeader } from "@/components/PageHeader";
 import { getAccountsPayableRetrieveQueryOptions } from "@/lib/api/generated";
+import { fetchOrNotFound } from "@/lib/query/fetch-or-not-found";
 import { getServerQueryClient } from "@/lib/query/server";
 
 export const metadata: Metadata = { title: "Conta a pagar" };
@@ -12,7 +13,7 @@ export const metadata: Metadata = { title: "Conta a pagar" };
 export default async function EditAccountPayablePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const queryClient = getServerQueryClient();
-  await queryClient.prefetchQuery(getAccountsPayableRetrieveQueryOptions(id));
+  await fetchOrNotFound(queryClient, getAccountsPayableRetrieveQueryOptions(id));
 
   return (
     <FormPage>
