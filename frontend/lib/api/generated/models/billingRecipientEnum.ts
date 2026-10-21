@@ -7,15 +7,13 @@
  */
 
 /**
- * * `open` - Open
- * * `paid` - Paid
- * * `cancelled` - Cancelled
+ * * `owner` - Owner
+ * * `tenant` - Tenant
  */
-export type StatusEnum = typeof StatusEnum[keyof typeof StatusEnum];
+export type BillingRecipientEnum = typeof BillingRecipientEnum[keyof typeof BillingRecipientEnum];
 
 
-export const StatusEnum = {
-  open: 'open',
-  paid: 'paid',
-  cancelled: 'cancelled',
+export const BillingRecipientEnum = {
+  owner: 'owner',
+  tenant: 'tenant',
 } as const;

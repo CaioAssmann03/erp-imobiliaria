@@ -24,6 +24,12 @@ export interface BillingRules {
      */
   due_day?: number;
   due_on_business_day?: boolean;
+  /**
+     * @minimum 0
+     * @maximum 32767
+     */
+  issuance_day?: number;
+  exempts_manager_unit?: boolean;
   due_month?: DueMonthEnum;
   competence_month?: CompetenceMonthEnum;
   /** @pattern ^-?\d{0,3}(?:\.\d{0,2})?$ */

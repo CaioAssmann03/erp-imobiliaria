@@ -5,8 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { AccountPayableStatusEnum } from './accountPayableStatusEnum';
 import type { PaymentMethodEnum } from './paymentMethodEnum';
-import type { StatusEnum } from './statusEnum';
 
 /**
  * Serializer mixin: input is validated by the model's rules, never by rules written here.
@@ -41,7 +41,7 @@ export interface PatchedAccountPayable {
   /** @nullable */
   issue_date?: string | null;
   due_date?: string;
-  readonly status?: StatusEnum;
+  readonly status?: AccountPayableStatusEnum;
   /** @nullable */
   readonly payment_date?: string | null;
   /**
