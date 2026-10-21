@@ -5,7 +5,12 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { AccountPayableSearch } from './accountPayableSearch';
+import type { BillingDocumentSearch } from './billingDocumentSearch';
+import type { BillingPlanSearch } from './billingPlanSearch';
+import type { BlockSearch } from './blockSearch';
 import type { CondominiumSearch } from './condominiumSearch';
+import type { CostCenterSearch } from './costCenterSearch';
 import type { PersonSearch } from './personSearch';
 import type { UnitSearch } from './unitSearch';
 
@@ -13,4 +18,9 @@ export interface Search {
   persons: PersonSearch[];
   condominiums: CondominiumSearch[];
   units: UnitSearch[];
+  blocks: BlockSearch[];
+  cost_centers: CostCenterSearch[];
+  accounts_payable: AccountPayableSearch[];
+  billing_plans: BillingPlanSearch[];
+  billing_documents: BillingDocumentSearch[];
 }
