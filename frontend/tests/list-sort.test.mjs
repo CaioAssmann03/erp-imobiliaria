@@ -1,14 +1,19 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { CONDOMINIUM_SORT } from "../app/(dashboard)/condominiums/_components/condominium-sort.ts";
 import { nextSort, orderingOf } from "../lib/list-sort.ts";
 
-const initial = CONDOMINIUM_SORT.initial;
+// A configuração de uma tabela: abre por nome crescente (a ordem padrão do servidor); em Status, crescente põe os ativos primeiro.
+const CONFIG = {
+  initial: { column: "name", direction: "asc" },
+  orderings: { code: ["code", "-code"], name: ["name", "-name"], status: ["-active", "active"] },
+};
+
+const initial = CONFIG.initial;
 
 test("the list opens sorted by name, ascending, and that order is not sent to the API", () => {
   assert.deepEqual(initial, { column: "name", direction: "asc" });
-  assert.equal(orderingOf(CONDOMINIUM_SORT, initial), undefined);
+  assert.equal(orderingOf(CONFIG, initial), undefined);
 });
 
 test("a click on another column starts it ascending", () => {
@@ -29,12 +34,12 @@ test("the sorted-by-default column reverses on its first click", () => {
   const reversed = nextSort(initial, "name");
 
   assert.deepEqual(reversed, { column: "name", direction: "desc" });
-  assert.equal(orderingOf(CONDOMINIUM_SORT, reversed), "-name");
-  assert.equal(orderingOf(CONDOMINIUM_SORT, nextSort(reversed, "name")), undefined);
+  assert.equal(orderingOf(CONFIG, reversed), "-name");
+  assert.equal(orderingOf(CONFIG, nextSort(reversed, "name")), undefined);
 });
 
 test("each column asks the API for its own order, descending with a minus", () => {
-  const ordering = (column, direction) => orderingOf(CONDOMINIUM_SORT, { column, direction });
+  const ordering = (column, direction) => orderingOf(CONFIG, { column, direction });
 
   assert.equal(ordering("code", "asc"), "code");
   assert.equal(ordering("code", "desc"), "-code");
@@ -42,7 +47,7 @@ test("each column asks the API for its own order, descending with a minus", () =
 });
 
 test("status ascending lists the active first, like the alphabetical order of its labels", () => {
-  const ordering = (direction) => orderingOf(CONDOMINIUM_SORT, { column: "status", direction });
+  const ordering = (direction) => orderingOf(CONFIG, { column: "status", direction });
 
   assert.equal(ordering("asc"), "-active");
   assert.equal(ordering("desc"), "active");

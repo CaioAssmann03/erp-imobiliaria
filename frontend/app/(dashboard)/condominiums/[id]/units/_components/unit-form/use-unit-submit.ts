@@ -6,6 +6,7 @@ import type { UseFormSetError } from "react-hook-form";
 import { toast } from "sonner";
 
 import {
+  getCondominiumsListInfiniteQueryKey,
   getDashboardRetrieveQueryKey,
   getUnitsListQueryKey,
   getUnitsRetrieveQueryKey,
@@ -33,6 +34,8 @@ export function useUnitSubmit(
   const invalidate = (id: string) =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: getUnitsListQueryKey() }),
+      // A lista de condomínios do painel mostra quantas unidades cada um tem.
+      queryClient.invalidateQueries({ queryKey: getCondominiumsListInfiniteQueryKey() }),
       queryClient.invalidateQueries({ queryKey: getDashboardRetrieveQueryKey() }),
       queryClient.invalidateQueries({ queryKey: getUnitsRetrieveQueryKey(id) }),
       invalidateApportionment(queryClient),

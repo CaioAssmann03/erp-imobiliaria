@@ -22,6 +22,7 @@ import { AddressSection } from "./condominium-form/AddressSection";
 import { AdjustmentSection } from "./condominium-form/AdjustmentSection";
 import { ApportionmentCard } from "./condominium-form/ApportionmentCard";
 import { BillingSection } from "./condominium-form/BillingSection";
+import { DeleteCondominiumCard } from "./condominium-form/DeleteCondominiumCard";
 import { FeeSection } from "./condominium-form/FeeSection";
 import { IdentificationSection } from "./condominium-form/IdentificationSection";
 import { useCondominiumSubmit } from "./condominium-form/use-condominium-submit";
@@ -31,7 +32,7 @@ export function CondominiumForm({
   mapsEmbedKey,
 }: {
   condominiumId?: string;
-  /** Chave da Maps Embed API, lida no servidor pela página; sem ela o endereço só ganha o link do mapa. */
+  /** Chave da Maps Embed API, lida no servidor pela página; sem ela o formulário usa o mapa do Google sem chave. */
   mapsEmbedKey?: string;
 }) {
   const router = useRouter();
@@ -53,6 +54,9 @@ export function CondominiumForm({
     if (condominium) reset(condominiumToForm(condominium));
   }, [condominium, reset]);
 
+  // Editando, descarta o que foi digitado e volta ao que está salvo; criando, volta para a lista.
+  const discard = () => (condominium ? reset(condominiumToForm(condominium)) : router.push("/condominiums"));
+
   if (isEdit && isLoading) return <FormSkeleton sections={3} />;
 
   return (
@@ -62,15 +66,27 @@ export function CondominiumForm({
         onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))}
         className="space-y-4"
       >
-        <IdentificationSection />
-        <AddressSection mapsEmbedKey={mapsEmbedKey} />
-        <FeeSection />
-        <BillingSection condominiumId={condominiumId} />
-        <AdjustmentSection />
-        {isEdit && <ApportionmentCard condominiumId={condominiumId} />}
+        {/* Os grupos levam o `id` que o menu das seções (SectionMenu) usa para rolar até eles. */}
+        <div id="dados-gerais" className="scroll-mt-24 space-y-4">
+          <IdentificationSection />
+          <AddressSection mapsEmbedKey={mapsEmbedKey} />
+          {isEdit && <ApportionmentCard condominiumId={condominiumId} />}
+        </div>
+        <div id="taxa-de-administracao" className="scroll-mt-24 space-y-4">
+          <FeeSection />
+          <AdjustmentSection />
+        </div>
+        <div id="dados-de-cobranca" className="scroll-mt-24 space-y-4">
+          <BillingSection condominiumId={condominiumId} />
+        </div>
+        {isEdit && condominium && (
+          <div id="configuracoes" className="scroll-mt-24 space-y-4">
+            <DeleteCondominiumCard condominiumId={condominiumId} name={condominium.name} />
+          </div>
+        )}
         <FormActions isSubmitting={isSubmitting}>
-          <Button type="button" variant="secondary" onClick={() => router.push("/condominiums")}>
-            Cancelar
+          <Button type="button" variant="secondary" onClick={discard}>
+            {isEdit ? "Descartar" : "Cancelar"}
           </Button>
           {isEdit && (
             <Button

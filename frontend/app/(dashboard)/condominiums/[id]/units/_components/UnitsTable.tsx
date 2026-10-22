@@ -8,6 +8,7 @@ import { Pagination } from "@/components/Pagination";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useListParams } from "@/hooks/use-list-params";
 import {
+  getCondominiumsListInfiniteQueryKey,
   getDashboardRetrieveQueryKey,
   getUnitsListQueryKey,
   useBlocksList,
@@ -84,6 +85,7 @@ export function UnitsTable({
         onSuccess: () => {
           if (goBack) setPage(page - 1);
           queryClient.invalidateQueries({ queryKey: getUnitsListQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getCondominiumsListInfiniteQueryKey() });
           queryClient.invalidateQueries({ queryKey: getDashboardRetrieveQueryKey() });
           invalidateApportionment(queryClient);
           toast.success("Unidade excluída.");
