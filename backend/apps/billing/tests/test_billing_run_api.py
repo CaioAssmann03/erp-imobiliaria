@@ -33,7 +33,7 @@ def test_creating_a_run_issues_the_month_now(api_client: APIClient, condominium:
 
     assert response.status_code == status.HTTP_201_CREATED
     data = body(response)
-    assert (data["status"], data["issued_count"], data["problems"]) == ("succeeded", 1, [])
+    assert (data["status"], data["issued_count"], [p["code"] for p in data["problems"]]) == ("succeeded", 1, ["gateway_account_missing"])
     assert data["condominium_name"] == "Residencial Sol"
     assert BillingDocument.objects.count() == 1
 
@@ -134,7 +134,10 @@ def test_a_runs_problems_carry_the_name_of_their_unit(  # type: ignore[no-untype
     problems = body(created)["problems"]
     listed = results(api_client.get(reverse(LIST)))[0]["problems"]
 
-    assert problems == [{"unit": str(without_owner.pk), "unit_name": "101", "code": "no_current_payer"}]
+    assert problems == [
+        {"unit": None, "unit_name": None, "code": "gateway_account_missing"},
+        {"unit": str(without_owner.pk), "unit_name": "101", "code": "no_current_payer"},
+    ]
     assert listed == problems
 
 

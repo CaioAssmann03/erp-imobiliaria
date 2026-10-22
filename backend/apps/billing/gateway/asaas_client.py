@@ -5,17 +5,26 @@ import urllib3
 from django.conf import settings
 
 from apps.billing.errors import GatewayAccountError
+from apps.core.errors.base import RuleError
 
 REQUEST_TIMEOUT_SECONDS = 15.0
 RATE_LIMITED_STATUS = 429
 
 
 class GatewayError(Exception):
-    """A gateway call failed. Carries a stable code; the message never holds a credential."""
+    """A gateway call or its preconditions failed. Carries a stable code and the gateway's own codes; the message never holds a credential."""
 
-    def __init__(self, error: GatewayAccountError, detail: str = "") -> None:
+    def __init__(self, error: RuleError, detail: str = "", codes: tuple[str, ...] = ()) -> None:
         super().__init__(f"{error.message} {detail}".strip())
         self.error = error
+        self.codes = codes
+
+
+class GatewayUnavailable(GatewayError):
+    """The gateway did not answer, rate limited or failed (5xx): worth retrying later."""
+
+    def __init__(self, detail: str = "") -> None:
+        super().__init__(GatewayAccountError.GATEWAY_UNAVAILABLE, detail)
 
 
 class AsaasClient:
@@ -27,15 +36,34 @@ class AsaasClient:
         self._pool = urllib3.PoolManager()
 
     def find_accounts_by_document(self, cpf_cnpj: str) -> list[dict[str, Any]]:
-        body = self._request("GET", "/accounts", query={"cpfCnpj": cpf_cnpj})
-        data = body.get("data", [])
-        return data if isinstance(data, list) else []
+        return _data(self._request("GET", "/accounts", query={"cpfCnpj": cpf_cnpj}))
 
     def create_account(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self._request("POST", "/accounts", payload=payload)
 
     def get_account_status(self) -> dict[str, Any]:
         return self._request("GET", "/myAccount/status")
+
+    def find_customers(self, query: dict[str, str]) -> list[dict[str, Any]]:
+        """Customers matching `externalReference` or `cpfCnpj` (the API allows duplicates)."""
+        return _data(self._request("GET", "/customers", query=query))
+
+    def create_customer(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._request("POST", "/customers", payload=payload)
+
+    def find_payments_by_external_reference(self, external_reference: str) -> list[dict[str, Any]]:
+        return _data(self._request("GET", "/payments", query={"externalReference": external_reference}))
+
+    def create_payment(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._request("POST", "/payments", payload=payload)
+
+    def get_identification_field(self, payment_id: str) -> dict[str, Any]:
+        """Digitable line (`identificationField`), `nossoNumero` and `barCode` of a boleto charge."""
+        return self._request("GET", f"/payments/{payment_id}/identificationField")
+
+    def get_pix_qr_code(self, payment_id: str) -> dict[str, Any]:
+        """`encodedImage`, `payload` and `expirationDate` of the Pix QR code of a charge."""
+        return self._request("GET", f"/payments/{payment_id}/pixQrCode")
 
     def _request(
         self, method: str, path: str, payload: dict[str, Any] | None = None, query: dict[str, str] | None = None
@@ -51,18 +79,24 @@ class AsaasClient:
                 retries=False,
             )
         except urllib3.exceptions.HTTPError as error:
-            raise GatewayError(GatewayAccountError.GATEWAY_UNAVAILABLE, type(error).__name__) from None
+            raise GatewayUnavailable(type(error).__name__) from None
         if response.status == RATE_LIMITED_STATUS or response.status >= 500:
-            raise GatewayError(GatewayAccountError.GATEWAY_UNAVAILABLE, f"HTTP {response.status}")
+            raise GatewayUnavailable(f"HTTP {response.status}")
         try:
             body = json.loads(response.data or b"{}")
         except ValueError:
-            raise GatewayError(GatewayAccountError.GATEWAY_UNAVAILABLE, "invalid response") from None
+            raise GatewayUnavailable("invalid response") from None
         if response.status >= 400:
-            raise GatewayError(GatewayAccountError.GATEWAY_REJECTED, f"HTTP {response.status} {_error_codes(body)}")
+            codes = _error_codes(body)
+            raise GatewayError(GatewayAccountError.GATEWAY_REJECTED, f"HTTP {response.status} {','.join(codes)}", codes)
         return body if isinstance(body, dict) else {}
 
 
-def _error_codes(body: Any) -> str:
+def _data(body: dict[str, Any]) -> list[dict[str, Any]]:
+    data = body.get("data", [])
+    return data if isinstance(data, list) else []
+
+
+def _error_codes(body: Any) -> tuple[str, ...]:
     errors = body.get("errors", []) if isinstance(body, dict) else []
-    return ",".join(str(error.get("code", "")) for error in errors if isinstance(error, dict))
+    return tuple(str(error.get("code", "")) for error in errors if isinstance(error, dict))

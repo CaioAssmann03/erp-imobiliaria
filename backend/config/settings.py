@@ -290,6 +290,8 @@ ASAAS_API_KEY = os.environ.get("ASAAS_API_KEY", "")
 ASAAS_BASE_URL = os.environ.get("ASAAS_BASE_URL", "https://api-sandbox.asaas.com/v3").rstrip("/")
 # Where Asaas posts events (a tunnel in development); empty leaves the sub-account without a webhook for now.
 ASAAS_WEBHOOK_URL = os.environ.get("ASAAS_WEBHOOK_URL", "")
+# Business days after the due date until Asaas cancels a boleto's registration; it cannot be changed after creation.
+ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS = int(os.environ.get("ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS", "60"))
 
 CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL", "redis://redis:6379/0")

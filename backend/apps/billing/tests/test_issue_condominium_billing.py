@@ -18,7 +18,12 @@ Problem = BillingRun.ProblemCode
 
 
 def problems_of(run: BillingRun) -> set[tuple[str | None, str]]:
-    return {(problem["unit"], problem["code"]) for problem in run.problems}
+    """The run's problems, without the whole-condominium note that the condominium has no gateway account (the fixtures have none)."""
+    return {
+        (problem["unit"], problem["code"])
+        for problem in run.problems
+        if problem["code"] != Problem.GATEWAY_ACCOUNT_MISSING
+    }
 
 
 def test_every_billable_unit_gets_a_document_with_the_lines_in_order(  # type: ignore[no-untyped-def]
@@ -212,3 +217,46 @@ def test_other_units_data_is_untouched_by_a_unit_of_another_condominium(  # type
     _ = issue_condominium_billing(condominium, OCTOBER)
 
     assert BillingDocument.objects.filter(unit__condominium=other_condominium).count() == 0
+
+
+def _activate_gateway(condominium: Condominium) -> None:
+    from ..models import GatewayAccount
+
+    _ = GatewayAccount.objects.create(
+        condominium=condominium,
+        gateway_account_id="acc-1",
+        wallet_id="w",
+        api_key="k",
+        webhook_token="t",
+        status=GatewayAccount.Status.ACTIVE,
+    )
+
+
+def test_payer_without_document_and_missing_account_are_reported(  # type: ignore[no-untyped-def]
+    condominium: Condominium, billing_rules: BillingRules, make_unit, link, make_plan_item, monkeypatch: pytest.MonkeyPatch, django_capture_on_commit_callbacks
+) -> None:
+    from apps.persons.models import PeopleIndividual
+
+    _ = make_plan_item()
+    without_account = issue_condominium_billing(condominium, OCTOBER)
+    assert any(p["code"] == Problem.GATEWAY_ACCOUNT_MISSING and p["unit"] is None for p in without_account.problems)
+
+    BillingDocument.objects.all().delete()
+    _activate_gateway(condominium)
+    sent: list[tuple[str, list[str]]] = []
+    monkeypatch.setattr(
+        "apps.billing.services.issue_condominium_billing.celery_app.send_task",
+        lambda name, args: sent.append((name, args)),
+    )
+    no_cpf_unit, cpf_unit = make_unit("101"), make_unit("102")
+    _ = link(no_cpf_unit, "Sem Documento")
+    with_cpf = link(cpf_unit, "Com Documento")
+    _ = PeopleIndividual.objects.create(person=with_cpf, company=with_cpf.company, cpf="52998224725")
+
+    with django_capture_on_commit_callbacks(execute=True):
+        run = issue_condominium_billing(condominium, OCTOBER)
+
+    assert problems_of(run) == {(str(no_cpf_unit.pk), Problem.PAYER_WITHOUT_DOCUMENT)}
+    assert not any(p["code"] == Problem.GATEWAY_ACCOUNT_MISSING for p in run.problems)
+    document = BillingDocument.objects.get(unit=cpf_unit)
+    assert ("apps.billing.tasks.register_billing_document_task", [str(document.pk)]) in sent

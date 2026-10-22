@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
 
     from .billing_document_item import BillingDocumentItem
+    from .billing_document_registration import BillingDocumentRegistration
 
 
 @final
@@ -47,6 +48,7 @@ class BillingDocument(BaseModel):
 
     if TYPE_CHECKING:
         items: "RelatedManager[BillingDocumentItem]"
+        registrations: "RelatedManager[BillingDocumentRegistration]"
 
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name="billing_documents")
     payer = models.ForeignKey(Person, on_delete=models.PROTECT, related_name="billing_documents")

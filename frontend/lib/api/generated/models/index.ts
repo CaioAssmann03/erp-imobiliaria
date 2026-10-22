@@ -26,6 +26,7 @@ export * from './batchEntryLine';
 export * from './billingDocument';
 export * from './billingDocumentItem';
 export * from './billingDocumentPdfDownload';
+export * from './billingDocumentRegistration';
 export * from './billingDocumentSearch';
 export * from './billingDocumentsListParams';
 export * from './billingDocumentsListStatus';

@@ -5,19 +5,19 @@ skip-if: you need the whole phase → roadmap/phase-5-billing-bank-integration/R
 ---
 # Part 02 — Charge registration
 
-**Status:** todo · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing · **Frontend impact:** client regeneration · **Depends on:** 01
-**Spec:** none yet
+**Status:** in-progress · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing · **Frontend impact:** client regeneration · **Depends on:** 01
+**Spec:** [031](../../features/031-gateway-charge-registration.md)
 
 ## Goal
 After a document is issued, create its charge at Asaas (boleto with Pix) and store what comes back: the gateway id, the boleto URL, our number, the digitable line, the barcode and the Pix payload.
 
 ## Scope
-- [ ] `httpx` client for the Asaas API, using the beneficiary condominium's credentials; timeouts, retry with backoff and error recording
-- [ ] Customers: the payer as an Asaas customer of the beneficiary account (`GatewayCustomer`), created once and reused; Asaas notifications turned off
-- [ ] Model `BillingDocumentRegistration` (every attempt is a record; a document's current one is `active`; a replaced one is `replaced`, never deleted)
-- [ ] Celery task: register each issued document; the document goes from `issued` to `registered`
-- [ ] Send the terms the document already stores (fine, interest, discount) with the charge
-- [ ] QR code image from the Pix payload
+- [x] `urllib3` client (`httpx` is not a dependency) for the Asaas API, using the beneficiary condominium's credentials; timeouts, retry with backoff and error recording
+- [x] Customers: the payer as an Asaas customer of the beneficiary account (`GatewayCustomer`), created once and reused; Asaas notifications turned off
+- [x] Model `BillingDocumentRegistration` (every attempt is a record; a document's current one is `active`; a replaced one is `replaced`, never deleted)
+- [x] Celery task: register each issued document; the document goes from `issued` to `registered`
+- [x] Send the terms the document already stores (fine, interest, discount) with the charge
+- [x] Pix payload and expiry stored (the QR image is drawn from the payload where it is shown, part 07)
 
 ## Draft for the spec
 ### Entities
@@ -42,4 +42,4 @@ After a document is issued, create its charge at Asaas (boleto with Pix) and sto
 - [ ] The sandbox confirms a charge through `POST /v3/sandbox/payment/{id}/confirm` and fires the webhooks; does it also return the digitable line and the Pix payload without a Pix key? (check while building the client)
 
 ## Result
-Not started.
+Implemented on 2026-10-22 (spec 031): customers, registration records, the registration service and task, the two new issuance problem codes and `registration` on the documents API. Pending: validation against the Asaas sandbox (needs a CNPJ sandbox account); the digitable line and barcode are refetched after a change of value or due date in part 05.

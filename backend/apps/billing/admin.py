@@ -1,4 +1,4 @@
-from typing import final
+from typing import Any, final
 
 from django.contrib import admin, messages
 from django.db.models import QuerySet
@@ -11,11 +11,13 @@ from .gateway.asaas_client import GatewayError
 from .models import (
     BillingDocument,
     BillingDocumentItem,
+    BillingDocumentRegistration,
     BillingDocumentPdf,
     BillingPlan,
     BillingPlanItem,
     BillingRun,
     GatewayAccount,
+    GatewayCustomer,
 )
 from .services.sync_gateway_account_status import sync_gateway_account_status
 
@@ -134,3 +136,31 @@ class GatewayAccountAdmin(CompanyScopedAdminMixin, ModelAdmin):
                 sync_gateway_account_status(account)
             except GatewayError as error:
                 self.message_user(request, f"{account.condominium}: {error}", messages.ERROR)
+
+
+class ReadOnlyAdminMixin:
+    """Gateway records are written by the services only."""
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj: Any = None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: Any = None) -> bool:
+        return False
+
+
+@final
+@admin.register(GatewayCustomer)
+class GatewayCustomerAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("person", "gateway_account", "gateway_customer_id")
+    search_fields = ("person__name", "gateway_customer_id")
+
+
+@final
+@admin.register(BillingDocumentRegistration)
+class BillingDocumentRegistrationAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("document", "status", "reason", "gateway_payment_id", "registered_due_date", "created_at")
+    list_filter = ("status", "reason")
+    search_fields = ("gateway_payment_id", "document__unit__name")

@@ -15,7 +15,7 @@ from apps.core.storage import object_storage
 
 from ..errors import BillingDocumentPdfError
 from ..filters import BillingDocumentFilter
-from ..models import BillingDocument, BillingDocumentItem, BillingDocumentPdf
+from ..models import BillingDocument, BillingDocumentItem, BillingDocumentPdf, BillingDocumentRegistration
 from ..models.billing_document_pdf import DOWNLOAD_URL_TTL_SECONDS
 from ..serializers import (
     BillingDocumentPdfDownloadSerializer,
@@ -33,7 +33,12 @@ class BillingDocumentViewSet(CompanyScopedViewSetMixin, viewsets.ReadOnlyModelVi
         Prefetch(
             "items",
             queryset=BillingDocumentItem.objects.select_related("cost_center", "entry_template"),
-        )
+        ),
+        Prefetch(
+            "registrations",
+            queryset=BillingDocumentRegistration.objects.filter(status=BillingDocumentRegistration.Status.ACTIVE),
+            to_attr="active_registrations",
+        ),
     )
     serializer_class = BillingDocumentSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)

@@ -50,5 +50,6 @@ One row per spec; update it in the same change that creates or closes the spec.
 | Spec | Title | Level | Status | Roadmap (`phase N part NN` or `none`) |
 |---|---|---|---|---|
 | [030](030-gateway-accounts.md) | Gateway accounts | full | in-progress | phase 5 part 01 |
+| [031](031-gateway-charge-registration.md) | Gateway charge registration | full | in-progress | phase 5 part 02 |
 
 The finished specs (001–029) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.

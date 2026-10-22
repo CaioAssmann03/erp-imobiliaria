@@ -42,6 +42,18 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
     "Unidade, pagador, meses, vencimento, valor e condições de um documento de cobrança não podem ser alterados.",
   "billing_document.items.required": "O documento de cobrança precisa de ao menos um item.",
   "billing_document.payer.other_company": "O pagador pertence a outra empresa.",
+  "billing_document_registration.document.not_issued": "Só um documento emitido pode ser registrado no gateway.",
+  "billing_document_registration.gateway_account.not_active": "O condomínio não tem conta ativa no gateway.",
+  "billing_document_registration.gateway_payment_id.duplicate": "Esta cobrança do gateway já pertence a outro registro.",
+  "billing_document_registration.payer.without_document": "O pagador não tem CPF ou CNPJ, exigido pelo gateway.",
+  "billing_document_registration.status.second_active": "O documento já tem um registro ativo.",
+  "gateway_account.condominium.address_incomplete":
+    "O condomínio precisa de endereço completo (rua, número, bairro e CEP) para abrir a conta no gateway.",
+  "gateway_account.condominium.already_registered_remotely":
+    "O gateway já tem uma conta para este CNPJ, mas as credenciais não estão guardadas aqui. Trate manualmente.",
+  "gateway_account.gateway.rejected": "O gateway recusou a solicitação.",
+  "gateway_account.gateway.unavailable": "O gateway não respondeu ou limitou as chamadas. Tente de novo mais tarde.",
+  "gateway_customer.person.duplicate_for_account": "A pessoa já é cliente desta conta do gateway.",
   "billing_document.reference_month.duplicate_for_unit":
     "Esta unidade já tem um documento de cobrança para este mês de referência.",
   "billing_document.status.transition_not_allowed":

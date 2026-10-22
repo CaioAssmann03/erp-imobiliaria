@@ -3,11 +3,13 @@ from datetime import date
 from celery import shared_task
 from django.utils import timezone
 
+from apps.billing.gateway.asaas_client import GatewayUnavailable
 from apps.billing.models import BillingDocument
 from apps.billing.services.generate_billing_document_pdf import (
     generate_billing_document_pdf,
 )
 from apps.billing.services.issue_condominium_billing import issue_condominium_billing
+from apps.billing.services.register_billing_document import register_billing_document
 from apps.condominiums.models import BillingRules, Condominium
 
 
@@ -47,3 +49,15 @@ def generate_billing_document_pdf_task(document_id: str) -> str:
         "unit__block", "unit__condominium__company", "unit__condominium__address", "payer"
     ).prefetch_related("items__cost_center").get(pk=document_id)
     return str(generate_billing_document_pdf(document).pk)
+
+
+@shared_task(autoretry_for=(GatewayUnavailable,), retry_backoff=True, max_retries=5)
+def register_billing_document_task(document_id: str) -> str:
+    """Register one issued document as a charge at the gateway; the id of the registration it recorded.
+
+    Retried with backoff only while the gateway is unavailable; a refusal is recorded as a `failed` registration.
+    """
+    document = BillingDocument.objects.select_related(
+        "unit__condominium", "payer__people_individual", "payer__people_legal"
+    ).get(pk=document_id)
+    return str(register_billing_document(document).pk)

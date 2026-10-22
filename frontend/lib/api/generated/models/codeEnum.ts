@@ -15,6 +15,8 @@
  * * `no_current_payer` - No current payer
  * * `nothing_to_bill` - Nothing to bill
  * * `document_invalid` - Document invalid
+ * * `payer_without_document` - Payer without document
+ * * `gateway_account_missing` - Gateway account missing
  */
 export type CodeEnum = typeof CodeEnum[keyof typeof CodeEnum];
 
@@ -28,4 +30,6 @@ export const CodeEnum = {
   no_current_payer: 'no_current_payer',
   nothing_to_bill: 'nothing_to_bill',
   document_invalid: 'document_invalid',
+  payer_without_document: 'payer_without_document',
+  gateway_account_missing: 'gateway_account_missing',
 } as const;

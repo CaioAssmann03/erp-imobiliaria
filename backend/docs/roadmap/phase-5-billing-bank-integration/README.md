@@ -25,7 +25,7 @@ The first plan integrated Santander directly (certificate, OAuth, remittance and
 | # | Part | Status | Apps |
 |---|---|---|---|
 | 01 | [Gateway accounts](01-gateway-accounts.md) | in-progress | billing |
-| 02 | [Charge registration](02-gateway-charge-registration.md) | todo | billing |
+| 02 | [Charge registration](02-gateway-charge-registration.md) | in-progress | billing |
 | 03 | [Payment webhook and ledger posting](03-payment-webhook.md) | todo | billing, finance |
 | 04 | [Daily reconciliation](04-daily-reconciliation.md) | todo | billing, finance |
 | 05 | [Overdue handling](05-overdue-handling.md) | todo | billing |

@@ -5,3 +5,5 @@ from .billing_plan_item import BillingPlanItem as BillingPlanItem
 from .billing_run import BillingRun as BillingRun
 from .billing_document_pdf import BillingDocumentPdf as BillingDocumentPdf
 from .gateway_account import GatewayAccount as GatewayAccount
+from .gateway_customer import GatewayCustomer as GatewayCustomer
+from .billing_document_registration import BillingDocumentRegistration as BillingDocumentRegistration
