@@ -5,10 +5,10 @@ skip-if: the other sections of the workspace (síndico, bank data, settings...) 
 ---
 # 038 — Condominium workspace
 
-**Status:** draft · **Level:** full · **Roadmap:** phase 2a part 01 · **Apps:** condominiums, frontend · **Frontend impact:** new screens
+**Status:** in-progress · **Level:** full · **Roadmap:** phase 2a part 01 · **Apps:** condominiums, frontend · **Frontend impact:** new screens
 
 ## Open questions
-None. The agent's decisions below wait for the user's review (this spec is `draft` until then).
+None. The agent's decisions below were reviewed and approved by the user on 2026-10-22.
 
 ## Decisions
 | Date | Decision | Decided by |
@@ -16,17 +16,17 @@ None. The agent's decisions below wait for the user's review (this spec is `draf
 | 2026-10-22 | One screen replaces the table and the edit page: the list of condominiums on the left, the sections of the selected one in the middle, the section menu on the right (the reference system's layout) | the user |
 | 2026-10-22 | A pencil on each card edits only that card, with its own Save and Cancel | the user |
 | 2026-10-22 | The first section after this screen is the síndico (part 02); the reading options (gas, water, energy) are left out | the user |
-| 2026-10-22 | `/condominiums` opens the first condominium of the list; with none, an empty state with "Novo condomínio" | agent (to review) |
-| 2026-10-22 | A row of the list reads "0003 - Name" (the code padded to four digits) and "N unidade(s)"; `unit_count` counts all the units of the condominium | agent (to review) |
-| 2026-10-22 | The list loads 50 at a time while scrolling; "Ocultar inativos" is on by default and sends `active=true`; the footer shows the total of the current list ("124 condomínios ativos" while the inactive are hidden, "N condomínios" otherwise) | agent (to review) |
-| 2026-10-22 | The list's tools: search by name or code (`query`), a jump by code (a field and an arrow that open that condominium; an unknown code says so), the sort control (code or name, ascending or descending, the `?ordering=` of spec 037) and a filter (type and pendency; the status is the "Ocultar inativos" box) | agent (to review) |
-| 2026-10-22 | The menu shows only the sections that exist and grows as the parts land: Dados gerais, Taxa de administração, Dados de cobrança and Configurações; it follows the scroll, and a click scrolls to the section | agent (to review) |
-| 2026-10-22 | Where today's fields go: the meters (Hidrômetro, Relógio de luz) stay in the Endereço card; the ISS on the fee goes to "Cobrança sobre a taxa de administração"; the issuance day and the exemption of the síndico's unit to "Vencimento e emissão"; the credit limit stays beside the discount ("Desconto e limite"); "Cadastro ativo" becomes "Status do condomínio" in Configurações | agent (to review) |
-| 2026-10-22 | Deleting a condominium moves to Configurações ("Excluir condomínio", with the same confirmation), since the list has no row actions | agent (to review) |
-| 2026-10-22 | "Novo" opens `/condominiums/new` in the middle area with the existing form; the Blocos, Unidades and Sub-contas pages and their tabs stay as they are | agent (to review) |
-| 2026-10-22 | On a phone the list is its own page (`/condominiums`) and the condominium page has a back link and a horizontal row of sections; from 1024 px the three areas show together | agent (to review) |
-| 2026-10-22 | Any number of cards may be open for editing at once; each saves alone | agent (to review) |
-| 2026-10-22 | Two PRs: the first has the backend `unit_count` and the workspace with the list and the menu around the existing form; the second turns the sections into cards with a pencil (based on the first) | agent (to review) |
+| 2026-10-22 | `/condominiums` opens the first condominium of the list; with none, an empty state with "Novo condomínio" | agent (approved) |
+| 2026-10-22 | A row of the list reads "0003 - Name" (the code padded to four digits) and "N unidade(s)"; `unit_count` counts all the units of the condominium | agent (approved) |
+| 2026-10-22 | The list loads 50 at a time while scrolling; "Ocultar inativos" is on by default and sends `active=true`; the footer shows the total of the current list ("124 condomínios ativos" while the inactive are hidden, "N condomínios" otherwise) | agent (approved) |
+| 2026-10-22 | The list's tools: search by name or code (`query`), a jump by code (a field and an arrow that open that condominium; an unknown code says so), the sort control (code or name, ascending or descending, the `?ordering=` of spec 037) and a filter (type and pendency; the status is the "Ocultar inativos" box) | agent (approved) |
+| 2026-10-22 | The menu shows only the sections that exist and grows as the parts land: Dados gerais, Taxa de administração, Dados de cobrança and Configurações; it follows the scroll, and a click scrolls to the section | agent (approved) |
+| 2026-10-22 | Where today's fields go: the meters (Hidrômetro, Relógio de luz) stay in the Endereço card; the ISS on the fee goes to "Cobrança sobre a taxa de administração"; the issuance day and the exemption of the síndico's unit to "Vencimento e emissão"; the credit limit stays beside the discount ("Desconto e limite"); "Cadastro ativo" becomes "Status do condomínio" in Configurações | agent (approved) |
+| 2026-10-22 | Deleting a condominium moves to Configurações ("Excluir condomínio", with the same confirmation), since the list has no row actions | agent (approved) |
+| 2026-10-22 | "Novo" opens `/condominiums/new` in the middle area with the existing form; the Blocos, Unidades and Sub-contas pages and their tabs stay as they are | agent (approved) |
+| 2026-10-22 | On a phone the list is its own page (`/condominiums`) and the condominium page has a back link and a horizontal row of sections; from 1024 px the three areas show together | agent (approved) |
+| 2026-10-22 | Any number of cards may be open for editing at once; each saves alone | agent (approved) |
+| 2026-10-22 | Two PRs: the first has the backend `unit_count` and the workspace with the list and the menu around the existing form; the second turns the sections into cards with a pencil (based on the first) | agent (approved) |
 
 ## R — Requirements
 Staff work on a condominium in one screen, laid out like the reference system's, instead of a table plus a separate edit page.

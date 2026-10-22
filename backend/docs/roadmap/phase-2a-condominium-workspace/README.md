@@ -5,7 +5,7 @@ skip-if: you need the overall status of all phases → roadmap/README.md; you ne
 ---
 # Phase 2a — Condominium workspace
 
-**Status:** todo · **Source:** user request of 2026-10-22 (screenshots of the reference system's condominium web) · **Depends on:** phases 2 and 4
+**Status:** in-progress · **Source:** user request of 2026-10-22 (screenshots of the reference system's condominium web) · **Depends on:** phases 2 and 4
 
 ## Goal
 One screen for the condominium registry, laid out like the reference system (Sami): the list of condominiums on the left, the sections of the selected one in the middle as read-only cards (a pencil on each card edits only that card), and the section menu on the right. Part 01 builds the screen with the data that exists today; the other parts add the sections and fields the reference has and we lack.
@@ -14,7 +14,7 @@ One screen for the condominium registry, laid out like the reference system (Sam
 <!-- One row per part file. The phase status is derived: all parts done/moved = done; any in-progress/done = in-progress. -->
 | # | Part | Status | Apps |
 |---|---|---|---|
-| 01 | [Workspace screen](01-workspace-screen.md) | todo | condominiums, frontend |
+| 01 | [Workspace screen](01-workspace-screen.md) | in-progress | condominiums, frontend |
 | 02 | [Síndico and other roles](02-sindico-and-roles.md) | todo | condominiums, persons, frontend |
 | 03 | [Bank data and settings](03-bank-data-and-settings.md) | todo | condominiums, billing, frontend |
 | 04 | [Administration fee and billing extras](04-fee-and-billing-extras.md) | todo | condominiums, billing, frontend |

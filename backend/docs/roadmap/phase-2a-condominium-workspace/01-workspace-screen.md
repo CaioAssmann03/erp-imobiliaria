@@ -5,7 +5,7 @@ skip-if: you need the whole phase → roadmap/phase-2a-condominium-workspace/REA
 ---
 # Part 01 — Workspace screen
 
-**Status:** todo · **Phase:** 2a (Condominium workspace) · **Apps:** condominiums, frontend · **Frontend impact:** new screens · **Depends on:** phase 2, phase 4
+**Status:** in-progress · **Phase:** 2a (Condominium workspace) · **Apps:** condominiums, frontend · **Frontend impact:** new screens · **Depends on:** phase 2, phase 4
 **Spec:** [038](../../features/038-condominium-workspace.md)
 
 ## Goal
