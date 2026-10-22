@@ -32,6 +32,8 @@ Defaults: `staleTime 60s`, `refetchOnWindowFocus false`, and `retry: shouldRetry
 **identical params** (`DEFAULT_PAGE_SIZE` from `lib/pagination.ts`). Prefetch independent queries with `Promise.all`. **Everything that reads the cache must sit inside the `<HydrationBoundary>`, the page header included** (a dialog in `PageHeader` actions that reads a list was refetching it). Every client query a page's form or table makes on first paint needs its prefetch with the same key: the pickers of a new-record form (`condominiums`, `suppliers`...), and the dependent ones of an edit form (the plan's cost centers and the templates of each item's cost center). A way to check it: load the page in a browser and count the `/api/` calls the client makes; a fully prefetched page makes none (conditional sections, like the receipts of a paid account, are the exception). Failed prefetch: let the
 client fetch; for the dashboard use `fetchQuery(...).catch(() => undefined)`.
 
+The condominium panel of the workspace (spec 038) is the one list that is not prefetched: it lives in a layout, which does not know the page's params, and its first paint shows skeleton rows.
+
 ## Detail pages
 A `[id]` page fetches its record with `fetchOrNotFound(queryClient, get…RetrieveQueryOptions(id))` (`lib/query/fetch-or-not-found.ts`): the result stays in the cache that hydrates the client, a 404 (missing, or another company's) becomes `notFound()` instead of an empty form, and any other error goes to `app/(dashboard)/error.tsx` (retry). `app/(dashboard)/loading.tsx` is the skeleton shown at once on a page change, and `not-found.tsx` the page for an address or record that does not exist.
 
@@ -42,12 +44,13 @@ A `[id]` page fetches its record with `fetchOrNotFound(queryClient, get…Retrie
 Search/filters/page are query params (`hooks/use-list-params.ts`); `placeholderData: keepPreviousData`; debounce search
 (`useDebouncedValue`); deleting the last item of the last page goes back a page. Sorting is the `ordering` param
 (`hooks/use-list-sort.ts`): the initial order is left out of the request, so the first load keeps the prefetch key, and a new order goes back to page 1.
+A list that loads more while it scrolls is an infinite query: `orval.config.ts` turns it on per operation (`useInfinite`, page param `page`; today `condominiums_list` → `useCondominiumsListInfinite`, in `hooks/use-condominium-list.ts`). Its key is `['infinite', '/api/condominiums/', params]`, which does **not** start with the normal list key, so a mutation that changes a condominium (or its units, whose count the rows show) invalidates `getCondominiumsListInfiniteQueryKey()` besides `getCondominiumsListQueryKey()`.
 
 ## Invalidate after mutation (generated key functions, never strings)
 | Mutation | Invalidate |
 |---|---|
-| condominium | list, record, dashboard |
-| unit | list, record, dashboard |
+| condominium | list, infinite list, record, dashboard |
+| unit | list, record, dashboard, and the condominiums' infinite list (the count in its rows) |
 | unit link | the unit record, dashboard |
 | account payable (create/edit/cancel) | list, record, dashboard |
 | settle an account payable | list, record, dashboard, current accounts, entries |

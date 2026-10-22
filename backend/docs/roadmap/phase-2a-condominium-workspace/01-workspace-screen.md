@@ -12,14 +12,15 @@ skip-if: you need the whole phase → roadmap/phase-2a-condominium-workspace/REA
 The condominium screen becomes the reference system's workspace, with the data we already have: the list of condominiums on the left, the sections of the selected one in the middle as read-only cards (a pencil on each card edits only that card) and the section menu on the right.
 
 ## Scope
-- [ ] The condominiums list carries `unit_count`
-- [ ] The list on the left: code and name, units, search by name or code, jump by code, hide inactive, sort, filter, endless loading and the total
-- [ ] The section menu on the right, following the scroll
+- [x] The condominiums list carries `unit_count`
+- [x] The list on the left: code and name, units, search by name or code, jump by code, hide inactive, sort, filter, endless loading and the total
+- [x] The section menu on the right, following the scroll
 - [ ] Cards with a pencil (Dados gerais, Taxa de administração, Dados de cobrança, Configurações)
-- [ ] The table and the edit page leave; the creation page keeps the form
-- [ ] The layout on a phone
+- [x] The table and the edit page leave; the creation page keeps the form
+- [x] The layout on a phone
 
 ## Draft for the spec
 Moved to the spec.
 
 ## Result
+First PR: the list, the menu and the phone layout around the existing form (the sections are still one form; the menu scrolls to them). Second PR: the cards with a pencil.
