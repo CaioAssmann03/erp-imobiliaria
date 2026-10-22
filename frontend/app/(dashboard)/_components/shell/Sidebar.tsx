@@ -34,7 +34,7 @@ export function Sidebar({
   return (
     <aside
       data-collapsed={open ? undefined : ""}
-      className="group/sidebar sticky top-4 hidden h-[calc(100vh-2rem)] w-44 shrink-0 flex-col gap-3 py-2 transition-[width] duration-200 data-[collapsed]:w-12 lg:flex"
+      className="group/sidebar sticky top-4 hidden h-[calc(100vh-2rem)] w-36 shrink-0 flex-col gap-3 py-2 transition-[width] duration-200 data-[collapsed]:w-12 lg:flex"
     >
       <div className="mb-4 flex items-center justify-between gap-3">
         <Link
