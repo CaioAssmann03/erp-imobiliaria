@@ -468,6 +468,7 @@ def test_the_statement_says_which_entries_were_reversed(api_client: APIClient, m
 
     original = post_entry(make_entry(kind="debit"))
     untouched = post_entry(make_entry(kind="credit"))
+    assert original.created_by is not None
     reversal = reverse_entry(original, "Posted by mistake", datetime.date(2026, 10, 7), original.created_by)
 
     rows = {row["id"]: row for row in results(api_client.get(reverse(ENTRIES)))}

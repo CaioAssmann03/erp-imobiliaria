@@ -1,13 +1,20 @@
 from datetime import date
 
 from celery import shared_task
+from django.conf import settings
 from django.utils import timezone
 
-from apps.billing.models import BillingDocument
+from apps.billing.gateway.asaas_client import GatewayUnavailable
+from apps.billing.gateway.resend_client import EmailUnavailable
+from apps.billing.models import BillingDocument, GatewayAccount, GatewayEvent
 from apps.billing.services.generate_billing_document_pdf import (
     generate_billing_document_pdf,
 )
 from apps.billing.services.issue_condominium_billing import issue_condominium_billing
+from apps.billing.services.process_gateway_event import process_gateway_event
+from apps.billing.services.reconcile_gateway_account import reconcile_gateway_account
+from apps.billing.services.send_billing_document_email import send_billing_document_email
+from apps.billing.services.register_billing_document import register_billing_document
 from apps.condominiums.models import BillingRules, Condominium
 
 
@@ -47,3 +54,44 @@ def generate_billing_document_pdf_task(document_id: str) -> str:
         "unit__block", "unit__condominium__company", "unit__condominium__address", "payer"
     ).prefetch_related("items__cost_center").get(pk=document_id)
     return str(generate_billing_document_pdf(document).pk)
+
+
+@shared_task(autoretry_for=(GatewayUnavailable,), retry_backoff=True, max_retries=5)
+def register_billing_document_task(document_id: str) -> str:
+    """Register one issued document as a charge at the gateway; the id of the registration it recorded.
+
+    Retried with backoff only while the gateway is unavailable; a refusal is recorded as a `failed` registration.
+    """
+    document = BillingDocument.objects.select_related(
+        "unit__condominium", "payer__people_individual", "payer__people_legal"
+    ).get(pk=document_id)
+    return str(register_billing_document(document).pk)
+
+
+@shared_task(autoretry_for=(Exception,), retry_backoff=True, max_retries=5)
+def process_gateway_event_task(event_id: str) -> str:
+    """Process one stored gateway event; its outcome. Retried on an unexpected error (the event stays `pending`)."""
+    return str(process_gateway_event(GatewayEvent.objects.get(pk=event_id)).outcome)
+
+
+@shared_task
+def reconcile_gateway_accounts() -> int:
+    """Daily: reconcile every active gateway account over the configured window; how many accounts were reconciled.
+
+    An account's failure (a gateway outage) is recorded in its run and does not stop the others.
+    """
+    accounts = list(GatewayAccount.objects.filter(status=GatewayAccount.Status.ACTIVE))
+    for account in accounts:
+        _ = reconcile_gateway_account(account, settings.GATEWAY_RECONCILIATION_WINDOW_DAYS)
+    return len(accounts)
+
+
+@shared_task(autoretry_for=(EmailUnavailable,), retry_backoff=True, max_retries=5)
+def send_billing_document_email_task(document_id: str) -> str:
+    """E-mail one registered document to its payer; the delivery's status ('' when it has no registration).
+
+    Retried with backoff only while the provider is unavailable; every other failure is a `failed` delivery.
+    """
+    document = BillingDocument.objects.select_related("unit__condominium", "payer").get(pk=document_id)
+    delivery = send_billing_document_email(document)
+    return delivery.status if delivery else ""

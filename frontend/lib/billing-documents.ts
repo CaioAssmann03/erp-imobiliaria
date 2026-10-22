@@ -43,3 +43,42 @@ export const INTEREST_CALCULATION_LABELS: Record<string, string> = {
   full_month: "Mês cheio",
   per_day: "Por dia de atraso",
 };
+
+const DELIVERY_STATUS_LABELS: Record<string, string> = {
+  pending: "Aguardando envio",
+  sent: "Enviado",
+  delivered: "Entregue",
+  failed: "Falhou",
+};
+
+const DELIVERY_FAILURE_LABELS: Record<string, string> = {
+  payer_without_email: "o pagador não tem e-mail cadastrado",
+  email_not_configured: "o envio de e-mail não está configurado",
+  provider_rejected: "o provedor recusou a mensagem",
+  bounced: "o e-mail voltou (endereço inválido ou caixa cheia)",
+  complained: "o destinatário marcou como spam",
+};
+
+export const deliveryStatusLabel = (status: string): string => DELIVERY_STATUS_LABELS[status] ?? status;
+
+/** Por que um envio falhou, em português (um código desconhecido aparece como está). */
+export const deliveryFailureLabel = (reason: string): string => DELIVERY_FAILURE_LABELS[reason] ?? reason;
+
+export interface BoletoState {
+  status: string;
+  hasRegistration: boolean;
+}
+
+/**
+ * Em que pé está o boleto de um documento: `waiting` (emitido, ainda sem registro no gateway), `active` (pode ser pago),
+ * `cancelled` (registrado, mas o gateway cancelou a cobrança: precisa de reemissão), `paid` ou `none` (cancelado).
+ */
+export function boletoState({ status, hasRegistration }: BoletoState): "waiting" | "active" | "cancelled" | "paid" | "none" {
+  if (status === "paid") return "paid";
+  if (status === "cancelled") return "none";
+  if (status === "issued") return "waiting";
+  return hasRegistration ? "active" : "cancelled";
+}
+
+/** Só um documento registrado (com boleto ativo ou cancelado) pode ser reemitido (o servidor confere de novo). */
+export const canReissueDocument = (status: string): boolean => status === "registered";

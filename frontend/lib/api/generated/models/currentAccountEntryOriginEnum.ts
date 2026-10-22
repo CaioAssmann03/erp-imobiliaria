@@ -9,6 +9,7 @@
 /**
  * * `manual` - Manual
  * * `automatic_payable` - Automatic (account payable)
+ * * `automatic_billing` - Automatic (billing document)
  */
 export type CurrentAccountEntryOriginEnum = typeof CurrentAccountEntryOriginEnum[keyof typeof CurrentAccountEntryOriginEnum];
 
@@ -16,4 +17,5 @@ export type CurrentAccountEntryOriginEnum = typeof CurrentAccountEntryOriginEnum
 export const CurrentAccountEntryOriginEnum = {
   manual: 'manual',
   automatic_payable: 'automatic_payable',
+  automatic_billing: 'automatic_billing',
 } as const;

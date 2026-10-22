@@ -5,7 +5,7 @@ skip-if: you need the overall status of all phases → roadmap/README.md; you ne
 ---
 # Phase 5 — Billing issuance (gateway)
 
-**Status:** todo · **Source:** Sprint 5 of the sprints PDF, revised on 2026-10-21 for the Asaas gateway · **Depends on:** phase 4
+**Status:** in-progress · **Source:** Sprint 5 of the sprints PDF, revised on 2026-10-21 for the Asaas gateway · **Depends on:** phase 4
 
 ## Goal
 Register each issued document as a charge at Asaas (boleto with Pix), learn about payments by webhook and post them to the ledger, handle overdue charges, deliver the boleto by e-mail and show all of it on the Cobrança screens.
@@ -24,13 +24,13 @@ The first plan integrated Santander directly (certificate, OAuth, remittance and
 ## Parts
 | # | Part | Status | Apps |
 |---|---|---|---|
-| 01 | [Gateway accounts](01-gateway-accounts.md) | todo | billing |
-| 02 | [Charge registration](02-gateway-charge-registration.md) | todo | billing |
-| 03 | [Payment webhook and ledger posting](03-payment-webhook.md) | todo | billing, finance |
-| 04 | [Daily reconciliation](04-daily-reconciliation.md) | todo | billing, finance |
-| 05 | [Overdue handling](05-overdue-handling.md) | todo | billing |
-| 06 | [E-mail delivery](06-email-delivery.md) | todo | billing |
-| 07 | [Registration and payment screens](07-registration-payment-screens.md) | todo | frontend |
+| 01 | [Gateway accounts](01-gateway-accounts.md) | in-progress | billing |
+| 02 | [Charge registration](02-gateway-charge-registration.md) | in-progress | billing |
+| 03 | [Payment webhook and ledger posting](03-payment-webhook.md) | in-progress | billing, finance |
+| 04 | [Daily reconciliation](04-daily-reconciliation.md) | in-progress | billing, finance |
+| 05 | [Overdue handling](05-overdue-handling.md) | in-progress | billing |
+| 06 | [E-mail delivery](06-email-delivery.md) | in-progress | billing |
+| 07 | [Registration and payment screens](07-registration-payment-screens.md) | in-progress | frontend |
 
 ## What the Asaas documentation says (checked on 2026-10-21, two passes)
 Read from docs.asaas.com and the public Asaas pages; fees and limits change, so recheck before a spec depends on them. Some help-center pages answered 403 and could not be read. **Not found** means the pages read did not say.

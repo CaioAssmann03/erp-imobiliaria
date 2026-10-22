@@ -27,6 +27,7 @@ import type {
 import type {
   BillingDocument,
   BillingDocumentPdfDownload,
+  BillingDocumentReissue,
   BillingDocumentsListParams,
   ErrorResponse,
   PaginatedBillingDocumentList
@@ -443,4 +444,69 @@ const {mutation: mutationOptions} = options ?
         TContext
       > => {
       return useMutation(getBillingDocumentsPdf2MutationOptions(options), queryClient);
+    }
+    /**
+ * Replace the document's boleto with a new charge due on the given date (staff action; the old one is kept and cancelled).
+ */
+export const billingDocumentsReissue = (
+    id: string,
+    billingDocumentReissue: BillingDocumentReissue,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<BillingDocument>(
+      {url: `/api/billing-documents/${id}/reissue/`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: billingDocumentReissue, signal
+    },
+      );
+    }
+
+
+
+
+export const getBillingDocumentsReissueMutationKey = () => ['billingDocumentsReissue'] as const;
+
+export const getBillingDocumentsReissueMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof billingDocumentsReissue>>, TError,BillingDocumentsReissueMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof billingDocumentsReissue>>, TError,BillingDocumentsReissueMutationVariables, TContext> => {
+
+const mutationKey = getBillingDocumentsReissueMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof billingDocumentsReissue>>, BillingDocumentsReissueMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  billingDocumentsReissue(id,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BillingDocumentsReissueMutationResult = NonNullable<Awaited<ReturnType<typeof billingDocumentsReissue>>>
+    export type BillingDocumentsReissueMutationBody = BillingDocumentReissue
+    export type BillingDocumentsReissueMutationError = ErrorResponse
+    export type BillingDocumentsReissueMutationVariables = {id: string;data: BillingDocumentReissue}
+
+    export const useBillingDocumentsReissue = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof billingDocumentsReissue>>, TError,BillingDocumentsReissueMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof billingDocumentsReissue>>,
+        TError,
+        BillingDocumentsReissueMutationVariables,
+        TContext
+      > => {
+      return useMutation(getBillingDocumentsReissueMutationOptions(options), queryClient);
     }

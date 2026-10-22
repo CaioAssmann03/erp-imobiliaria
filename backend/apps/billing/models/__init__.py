@@ -4,3 +4,10 @@ from .billing_plan import BillingPlan as BillingPlan
 from .billing_plan_item import BillingPlanItem as BillingPlanItem
 from .billing_run import BillingRun as BillingRun
 from .billing_document_pdf import BillingDocumentPdf as BillingDocumentPdf
+from .gateway_account import GatewayAccount as GatewayAccount
+from .gateway_customer import GatewayCustomer as GatewayCustomer
+from .billing_document_registration import BillingDocumentRegistration as BillingDocumentRegistration
+from .gateway_event import GatewayEvent as GatewayEvent
+from .billing_document_payment import BillingDocumentPayment as BillingDocumentPayment
+from .gateway_reconciliation_run import GatewayReconciliationRun as GatewayReconciliationRun
+from .billing_document_delivery import BillingDocumentDelivery as BillingDocumentDelivery

@@ -5,17 +5,17 @@ skip-if: you need the whole phase → roadmap/phase-5-billing-bank-integration/R
 ---
 # Part 04 — Daily reconciliation
 
-**Status:** todo · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing, finance · **Frontend impact:** none · **Depends on:** 03
-**Spec:** none yet
+**Status:** in-progress · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing, finance · **Frontend impact:** none · **Depends on:** 03
+**Spec:** [033](../../features/033-daily-reconciliation.md)
 
 ## Goal
 A webhook can be lost or arrive broken; once a day compare what Asaas says was paid with what we posted and fix the difference.
 
 ## Scope
-- [ ] Celery Beat daily task: for each active gateway account, list the payments received in the last days and compare with the paid documents
-- [ ] A payment we do not know yet is processed through the same path as the webhook (part 03), so there is one posting rule
-- [ ] Differences that cannot be fixed (unknown charge, different amount) go to the unprocessed queue with their reason
-- [ ] The run records what it found (a small audit like `BillingRun`)
+- [x] Celery Beat daily task: for each active gateway account, list the payments received in the last days and compare with the paid documents
+- [x] A payment we do not know yet is processed through the same path as the webhook (part 03), so there is one posting rule
+- [x] Differences that cannot be fixed (unknown charge, different amount) go to the unprocessed queue with their reason
+- [x] The run records what it found (a small audit like `BillingRun`)
 
 ## Draft for the spec
 ### Entities
@@ -30,4 +30,4 @@ None new, or a small `GatewayReconciliationRun` like `BillingRun` (decide in the
 - [ ] Where is the unprocessed queue seen and resolved: the Admin first, a screen in part 07? (recommended: Admin first)
 
 ## Result
-Not started.
+Implemented on 2026-10-22 (spec 033). Pending: validation of the `GET /payments` filters against the sandbox.

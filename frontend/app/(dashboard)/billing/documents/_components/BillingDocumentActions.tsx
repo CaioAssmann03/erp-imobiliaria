@@ -2,12 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import type { BillingDocument } from "@/lib/api/generated/models";
-import { canCancelDocument } from "@/lib/billing-documents";
+import { canCancelDocument, canReissueDocument } from "@/lib/billing-documents";
 
 import { CancelBillingDocumentButton } from "./CancelBillingDocumentButton";
+import { ReissueBillingDocumentDialog } from "./ReissueBillingDocumentDialog";
 import { useBillingDocumentPdf } from "./use-billing-document-pdf";
 
-/** PDF de rascunho (baixa, gerando antes se preciso) e cancelamento (só emitido ou registrado). */
+/** PDF de rascunho (baixa, gerando antes se preciso), reemissão do boleto (só registrado) e cancelamento (só emitido ou registrado). */
 export function BillingDocumentActions({ document }: { document: BillingDocument }) {
   const { download, isPending, isGenerating } = useBillingDocumentPdf(document.id);
 
@@ -16,6 +17,7 @@ export function BillingDocumentActions({ document }: { document: BillingDocument
       <Button type="button" variant="secondary" disabled={isPending} onClick={download}>
         {isGenerating ? "Gerando PDF…" : isPending ? "Abrindo…" : "Baixar PDF"}
       </Button>
+      {canReissueDocument(document.status) && <ReissueBillingDocumentDialog document={document} />}
       {canCancelDocument(document.status) && <CancelBillingDocumentButton document={document} />}
     </div>
   );

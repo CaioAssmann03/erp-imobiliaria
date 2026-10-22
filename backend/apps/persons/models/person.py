@@ -87,6 +87,15 @@ class Person(SequentialCodeMixin, BaseModel):
                 {"modules": PersonError.MODULES_EMPTY.to_validation_error()}
             )
 
+    @property
+    def tax_id(self) -> str | None:
+        """The CPF of an individual or the CNPJ of a legal entity (digits only); None when neither is registered."""
+        individual = getattr(self, "people_individual", None)
+        if individual is not None:
+            return str(individual.cpf)
+        legal = getattr(self, "people_legal", None)
+        return str(legal.cnpj) if legal is not None else None
+
     @override
     def __str__(self) -> str:
         return f"{self.name}"

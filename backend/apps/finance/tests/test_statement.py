@@ -111,6 +111,7 @@ def test_a_unit_of_another_condominium_is_rejected(make_entry: Any, other_condom
 def test_the_reversal_keeps_the_unit(make_entry: Any, unit: Unit) -> None:
     original = post_entry(make_entry(unit=unit))
 
+    assert original.created_by is not None
     reversal = reverse_entry(original, "Posted by mistake", datetime.date(2026, 10, 7), original.created_by)
 
     assert reversal.unit == unit

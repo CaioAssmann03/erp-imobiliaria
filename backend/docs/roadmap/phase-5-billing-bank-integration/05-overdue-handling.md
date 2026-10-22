@@ -5,17 +5,17 @@ skip-if: you need the whole phase → roadmap/phase-5-billing-bank-integration/R
 ---
 # Part 05 — Overdue handling
 
-**Status:** todo · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing · **Frontend impact:** none · **Depends on:** 02
-**Spec:** none yet
+**Status:** in-progress · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing · **Frontend impact:** none · **Depends on:** 02
+**Spec:** [034](../../features/034-overdue-handling-reissue.md)
 
 ## Goal
 Decide and build what an overdue document needs. The first plan reissued overdue boletos daily with fine and interest calculated by us; with Asaas the charge keeps being payable after its due date with the fine and interest it was created with.
 
 ## Scope
-- [ ] Registration lifetime: the boleto registration is cancelled automatically `daysAfterDueDateToRegistrationCancellation` business days after the due date (set when the charge is created, up to 3650, immutable; decided to send 60 by default, decision 8); `PAYMENT_BANK_SLIP_CANCELLED` announces it and the charge still exists. **Not documented:** how to revive such a charge; the safe path is to create a new charge for the same document (a new registration, the old one `replaced`)
-- [ ] If a charge expires or its terms must change: an operation that updates the charge's due date or creates a new one, recording a new registration (`reason` reissue) and replacing the old
-- [ ] Celery Beat daily task only if the confirmed behaviour needs it (detecting charges about to expire)
-- [ ] The second copy of a boleto for a payer is the same registration's URL, not a new charge
+- [x] Registration lifetime: the boleto registration is cancelled automatically `daysAfterDueDateToRegistrationCancellation` business days after the due date (set when the charge is created, up to 3650, immutable; decided to send 60 by default, decision 8); `PAYMENT_BANK_SLIP_CANCELLED` announces it and the charge still exists. **Not documented:** how to revive such a charge; the safe path is to create a new charge for the same document (a new registration, the old one `replaced`)
+- [x] If a charge expires or its terms must change: an operation that updates the charge's due date or creates a new one, recording a new registration (`reason` reissue) and replacing the old
+- [x] Celery Beat daily task: not needed (decided: Asaas applies fine and interest itself; reissue is manual)
+- [x] The second copy of a boleto for a payer is the same registration's URL, not a new charge
 
 ## Draft for the spec
 ### Entities
@@ -31,4 +31,4 @@ None new (uses `BillingDocumentRegistration` of part 02).
 - [ ] Is the monetary correction still wanted? (not modeled; the data model marks it as not modeled; recommended: no)
 
 ## Result
-Not started.
+Implemented on 2026-10-22 (spec 034). Pending: validation of the delete call and the cancellation events against the sandbox.

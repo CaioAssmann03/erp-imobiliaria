@@ -14,7 +14,7 @@ export function AccentSection({ appearance, onChange }: SectionProps) {
       title="Cor de destaque"
       value={ACCENTS.find((a) => a.value === appearance.accent)?.label}
     >
-      <div role="radiogroup" aria-label="Cor de destaque" className="flex flex-wrap gap-3">
+      <div role="radiogroup" aria-label="Cor de destaque" className="flex justify-between sm:justify-start sm:gap-3">
         {ACCENTS.map((accent) => {
           const selected = appearance.accent === accent.value;
           return (
@@ -27,7 +27,7 @@ export function AccentSection({ appearance, onChange }: SectionProps) {
               title={accent.label}
               onClick={() => onChange({ accent: accent.value })}
               className={cn(
-                "size-8 rounded-full outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-brand/60",
+                "size-10 rounded-full outline-none sm:size-8 transition-shadow focus-visible:ring-2 focus-visible:ring-brand/60",
                 selected
                   ? "ring-2 ring-ink ring-offset-2 ring-offset-surface"
                   : "hover:ring-2 hover:ring-ink-faint hover:ring-offset-2 hover:ring-offset-surface"

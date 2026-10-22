@@ -12,7 +12,7 @@ import type { Appearance } from "@/lib/appearance";
 import { SIDEBAR_COOKIE } from "@/lib/auth";
 
 /**
- * Client Component: lateral recolhível (só em telas grandes; no celular há a barra do topo e as abas de baixo). Recolhida mostra só ícones; aberta,
+ * Client Component: lateral recolhível (só em telas grandes; no celular há a barra do topo e o menu lateral `MobileMenu`). Recolhida mostra só ícones; aberta,
  * só textos. A marca fica sempre visível e o botão de alternar logo abaixo dela. O estado vai para um
  * cookie, lido no servidor (AppShell) para não piscar ao carregar. Padrão: aberta.
  */

@@ -21,12 +21,12 @@ A phase is `done` only when every part is `done` or `moved`.
 | 3a | [Prerequisites for phase 3](phase-3a-prerequisites/README.md) | done | 9/9 | Known-gaps review |
 | 3 | [Finance base](phase-3-finance-base/README.md) | done | 7/7 | Sprint 3 |
 | 4 | [Billing issuance (generation)](phase-4-billing-generation/README.md) | done | 7/7 | Sprint 4 |
-| 5 | [Billing issuance (gateway)](phase-5-billing-bank-integration/README.md) | todo | 0/7 | Sprint 5 |
+| 5 | [Billing issuance (gateway)](phase-5-billing-bank-integration/README.md) | in-progress | 0/7 | Sprint 5 |
 | 6 | [Closings and agreements](phase-6-closings-and-agreements/README.md) | todo | 0/4 | Sprint 6 |
 | 7 | [Client portal](phase-7-client-portal/README.md) | todo | 0/3 | Sprint 7 |
 | 8 | [Rentals](phase-8-rentals/README.md) | todo | 0/5 | Sprint 8 |
 
-Current position: phases 1, 2, **3a** (closed on 2026-10-19: hosting docs, `render.yaml` retired, VPS compose versioned in `deploy/vps/` with a health check, spec 008 closed), **3** (finance base, Sprint 3) and **4** (billing issuance, Sprint 4: Asaas sandbox account, billing plans, documents, monthly issuance, draft boleto PDF and the three screens groups, specs 024–029; closed on 2026-10-21) are **done**. **Next:** phase 5 was rewritten for Asaas on 2026-10-21 (webhooks instead of CNAB, a sub-account per condominium; seven decisions are listed in its README and need the user before it starts); a manual browser run of the Cobrança screens is pending.
+Current position: phases 1, 2, **3a** (closed on 2026-10-19: hosting docs, `render.yaml` retired, VPS compose versioned in `deploy/vps/` with a health check, spec 008 closed), **3** (finance base, Sprint 3) and **4** (billing issuance, Sprint 4: Asaas sandbox account, billing plans, documents, monthly issuance, draft boleto PDF and the three screens groups, specs 024–029; closed on 2026-10-21) are **done**. **Next:** phase 5 (Asaas) is **implemented but not closed**: all seven parts are coded and tested (specs 030–036: sub-accounts, charge registration, the payment webhook and ledger posting, the daily reconciliation, the manual reissue, the e-mail delivery and the screens), and stay `in-progress` until they are validated against the Asaas sandbox (it needs a **CNPJ** sandbox account, a tunnel to the webhook endpoints, and for the e-mail a verified Resend domain and keys). Then phase 6. Also pending: a manual browser run of the Cobrança screens.
 
 ## How to use
 1. Pick the next `todo` part in the lowest unfinished phase (respect **Depends on**).

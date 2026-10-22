@@ -69,6 +69,7 @@ The address map (spec 021) is Google's **Maps Embed API** under the condominium 
 - [x] The frontend's `API_INTERNAL_URL` is plain `http://backend:8000` on the private network, so `SECURE_SSL_REDIRECT=false` there (with the redirect on, that URL would loop on 301).
 - [x] `INTERNAL_API_KEY` and `SECRET_KEY` are set and `REDIS_URL` is reachable (the login rate limit lives there).
 - [ ] `JWT_SIGNING_KEY` (spec 022) is set in the host `.env` **before** deploying the EdDSA change: without it the backend and Celery do not start. Every user logs in again after that deploy.
+- [ ] `GATEWAY_CREDENTIALS_KEY` (spec 030) is set in the host `.env` before deploying the gateway accounts: without it the backend refuses to start. Generate it once and keep a copy outside the server; rotating it needs the stored credentials re-encrypted
 - [x] `ADMIN_URL` is set to a non-obvious path in the host `.env` (2026-10-19; the value is never written in git). The Admin is not published by Caddy and the Next proxy only forwards `/api/...` segments (`frontend/lib/api-path.ts`); it is opened through the SSH tunnel below.
 - [ ] After every deploy, smoke test that the proxy cannot leave `/api`: `curl -s -o /dev/null -w '%{http_code}' --path-as-is https://<name>/api/..%2fadmin/login/` must print `404` (it printed `200`, the Django Admin login page, until the segment check was added).
 

@@ -1,12 +1,30 @@
-from typing import final
+from typing import Any, final
 
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.db.models import QuerySet
 from django.http import HttpRequest
 from unfold.admin import ModelAdmin, TabularInline
 
 from apps.core.scoping import CompanyScopedAdminMixin
 
-from .models import BillingDocument, BillingDocumentItem, BillingDocumentPdf, BillingPlan, BillingPlanItem, BillingRun
+from .gateway.asaas_client import GatewayError
+from .models import (
+    BillingDocument,
+    BillingDocumentDelivery,
+    BillingDocumentItem,
+    BillingDocumentPayment,
+    BillingDocumentRegistration,
+    BillingDocumentPdf,
+    BillingPlan,
+    BillingPlanItem,
+    BillingRun,
+    GatewayAccount,
+    GatewayCustomer,
+    GatewayEvent,
+    GatewayReconciliationRun,
+)
+from .services.process_gateway_event import process_gateway_event
+from .services.sync_gateway_account_status import sync_gateway_account_status
 
 
 @final
@@ -94,3 +112,100 @@ class BillingDocumentPdfAdmin(CompanyScopedAdminMixin, ModelAdmin):
 
     def has_delete_permission(self, request: HttpRequest, obj: BillingDocumentPdf | None = None) -> bool:
         return False
+
+
+@final
+@admin.register(GatewayAccount)
+class GatewayAccountAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    """Read-only: accounts are opened by `onboard_gateway_account`; the credentials are never shown (spec 030)."""
+
+    list_display = ("condominium", "status", "wallet_id", "approved_at")
+    list_filter = ("status",)
+    search_fields = ("condominium__name",)
+    exclude = ("api_key", "webhook_token")
+    actions = ("sync_status",)
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj: GatewayAccount | None = None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: GatewayAccount | None = None) -> bool:
+        return False
+
+    @admin.action(description="Sync status with the gateway")
+    def sync_status(self, request: HttpRequest, queryset: QuerySet[GatewayAccount]) -> None:
+        for account in queryset:
+            try:
+                sync_gateway_account_status(account)
+            except GatewayError as error:
+                self.message_user(request, f"{account.condominium}: {error}", messages.ERROR)
+
+
+class ReadOnlyAdminMixin:
+    """Gateway records are written by the services only."""
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj: Any = None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: Any = None) -> bool:
+        return False
+
+
+@final
+@admin.register(GatewayCustomer)
+class GatewayCustomerAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("person", "gateway_account", "gateway_customer_id")
+    search_fields = ("person__name", "gateway_customer_id")
+
+
+@final
+@admin.register(BillingDocumentRegistration)
+class BillingDocumentRegistrationAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("document", "status", "reason", "gateway_payment_id", "registered_due_date", "created_at")
+    list_filter = ("status", "reason")
+    search_fields = ("gateway_payment_id", "document__unit__name")
+
+
+@final
+@admin.register(BillingDocumentPayment)
+class BillingDocumentPaymentAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("document", "paid_on", "amount", "net_amount")
+    search_fields = ("document__unit__name",)
+
+
+@final
+@admin.register(GatewayEvent)
+class GatewayEventAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin):
+    """The gateway's events as received; the `unprocessed` ones are the queue staff resolves (spec 032)."""
+
+    list_display = ("event_type", "event_id", "outcome", "reason", "received_at")
+    list_filter = ("outcome", "reason", "event_type")
+    search_fields = ("event_id", "payload__payment__id")
+    actions = ("reprocess",)
+
+    @admin.action(description="Reprocess the selected unprocessed events")
+    def reprocess(self, request: HttpRequest, queryset: QuerySet[GatewayEvent]) -> None:
+        for event in queryset.filter(outcome=GatewayEvent.Outcome.UNPROCESSED):
+            GatewayEvent.objects.filter(pk=event.pk).update(outcome=GatewayEvent.Outcome.PENDING)
+            event.refresh_from_db()
+            _ = process_gateway_event(event)
+
+
+@final
+@admin.register(GatewayReconciliationRun)
+class GatewayReconciliationRunAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("gateway_account", "window_start", "window_end", "status", "found_count", "processed_count", "unprocessed_count")
+    list_filter = ("status",)
+
+
+@final
+@admin.register(BillingDocumentDelivery)
+class BillingDocumentDeliveryAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("document", "channel", "destination", "status", "failure_reason", "sent_at")
+    list_filter = ("status", "channel", "failure_reason")
+    search_fields = ("destination", "document__unit__name", "provider_message_id")

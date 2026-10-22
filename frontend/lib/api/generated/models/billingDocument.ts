@@ -5,7 +5,10 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { BillingDocumentDelivery } from './billingDocumentDelivery';
 import type { BillingDocumentItem } from './billingDocumentItem';
+import type { BillingDocumentPayment } from './billingDocumentPayment';
+import type { BillingDocumentRegistration } from './billingDocumentRegistration';
 import type { BillingDocumentStatusEnum } from './billingDocumentStatusEnum';
 import type { InterestCalculationEnum } from './interestCalculationEnum';
 
@@ -44,6 +47,9 @@ export interface BillingDocument {
   /** @pattern ^-?\d{0,3}(?:\.\d{0,2})?$ */
   readonly monthly_interest_percentage: string;
   readonly items: readonly BillingDocumentItem[];
+  readonly registration: BillingDocumentRegistration | null;
+  readonly delivery: BillingDocumentDelivery | null;
+  readonly payment: BillingDocumentPayment | null;
   readonly created_at: string;
   readonly updated_at: string;
 }

@@ -82,3 +82,19 @@ class CurrentAccountEntryError(RuleError):
         "current_account_entry.unit.other_condominium",
         "The unit belongs to another condominium than the current account.",
     )
+    BILLING_DOCUMENT_ITEM_MATCHES_ORIGIN = (
+        "current_account_entry.billing_document_item.matches_origin",
+        "An automatic billing entry names its billing document item, and no other entry does.",
+    )
+    BILLING_DOCUMENT_ITEM_ALREADY_POSTED = (
+        "current_account_entry.billing_document_item.already_posted",
+        "This billing document item already has its ledger entry.",
+    )
+    BILLING_DOCUMENT_ITEM_OTHER_CONDOMINIUM = (
+        "current_account_entry.billing_document_item.other_condominium",
+        "The billing document item belongs to another condominium than the current account.",
+    )
+    CREATED_BY_REQUIRED = (
+        "current_account_entry.created_by.required",
+        "Only an automatic billing entry can be posted without a user.",
+    )

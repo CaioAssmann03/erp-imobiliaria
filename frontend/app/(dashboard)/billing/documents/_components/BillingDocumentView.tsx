@@ -7,16 +7,9 @@ import { INTEREST_CALCULATION_LABELS } from "@/lib/billing-documents";
 import { brl, formatDate, formatMonth } from "@/lib/format";
 
 import { BillingDocumentActions } from "./BillingDocumentActions";
+import { BillingDocumentBoleto } from "./BillingDocumentBoleto";
 import { BillingDocumentStatusBadge } from "./BillingDocumentStatusBadge";
-
-function Item({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <dt className="text-caption uppercase tracking-wide text-ink-soft">{label}</dt>
-      <dd className="mt-0.5">{children}</dd>
-    </div>
-  );
-}
+import { DocumentItem } from "./DocumentItem";
 
 const percent = (value: string) => `${Number(value).toLocaleString("pt-BR")}%`;
 
@@ -29,29 +22,31 @@ export function BillingDocumentView({ document }: { document: BillingDocument })
     <div className="space-y-4">
       <FormSection title="Documento">
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Item label="Condomínio">
+          <DocumentItem label="Condomínio">
             <Link href={`/condominiums/${document.condominium}`} className="underline">
               {document.condominium_name}
             </Link>
-          </Item>
-          <Item label="Unidade">
+          </DocumentItem>
+          <DocumentItem label="Unidade">
             <Link href={`/condominiums/${document.condominium}/units/${document.unit}`} className="underline">
               {document.unit_name}
             </Link>
-          </Item>
-          <Item label="Pagador">{document.payer_name}</Item>
-          <Item label="Referência">{formatMonth(document.reference_month)}</Item>
-          <Item label="Competência">{formatMonth(document.competence_month)}</Item>
-          <Item label="Vencimento">{formatDate(document.due_date)}</Item>
-          <Item label="Valor">
+          </DocumentItem>
+          <DocumentItem label="Pagador">{document.payer_name}</DocumentItem>
+          <DocumentItem label="Referência">{formatMonth(document.reference_month)}</DocumentItem>
+          <DocumentItem label="Competência">{formatMonth(document.competence_month)}</DocumentItem>
+          <DocumentItem label="Vencimento">{formatDate(document.due_date)}</DocumentItem>
+          <DocumentItem label="Valor">
             <strong>{brl(document.amount)}</strong>
-          </Item>
-          <Item label="Situação">
+          </DocumentItem>
+          <DocumentItem label="Situação">
             <BillingDocumentStatusBadge status={document.status} overdue={document.is_overdue} />
-          </Item>
+          </DocumentItem>
         </dl>
         <BillingDocumentActions document={document} />
       </FormSection>
+
+      <BillingDocumentBoleto document={document} />
 
       <FormSection title="Itens">
         <Table>
@@ -76,22 +71,22 @@ export function BillingDocumentView({ document }: { document: BillingDocument })
 
       <FormSection title="Condições na emissão" description="Copiadas das regras do condomínio quando o documento foi emitido.">
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Item label="Desconto">
+          <DocumentItem label="Desconto">
             {Number(document.discount_percentage) > 0
               ? `${percent(document.discount_percentage)} (${document.discount_days} dias antes do vencimento)`
               : "Sem desconto"}
-          </Item>
-          <Item label="Multa">
+          </DocumentItem>
+          <DocumentItem label="Multa">
             {Number(document.late_fee_percentage) > 0 ? percent(document.late_fee_percentage) : "Sem multa"}
             {document.initial_late_fee_percentage && document.initial_late_fee_days
               ? ` · ${percent(document.initial_late_fee_percentage)} nos primeiros ${document.initial_late_fee_days} dias`
               : ""}
-          </Item>
-          <Item label="Juros ao mês">
+          </DocumentItem>
+          <DocumentItem label="Juros ao mês">
             {Number(document.monthly_interest_percentage) > 0
               ? `${percent(document.monthly_interest_percentage)} · ${INTEREST_CALCULATION_LABELS[document.interest_calculation] ?? document.interest_calculation} · carência de ${document.interest_grace_days} dias`
               : "Sem juros"}
-          </Item>
+          </DocumentItem>
         </dl>
       </FormSection>
     </div>

@@ -19,6 +19,14 @@ const PROBLEMS: Record<string, { text: string; fix: FixKind }> = {
   manager_unit_exempt: { text: "Unidade do síndico isenta da cobrança.", fix: null },
   no_current_payer: { text: "A unidade não tem proprietário atual.", fix: "unit" },
   nothing_to_bill: { text: "A unidade não tem nada a cobrar neste mês.", fix: "plans" },
+  payer_without_document: {
+    text: "O proprietário da unidade não tem CPF ou CNPJ, exigido para registrar o boleto.",
+    fix: "unit",
+  },
+  gateway_account_missing: {
+    text: "O condomínio não tem conta ativa no gateway: os boletos ficam emitidos, mas não registrados.",
+    fix: "condominium",
+  },
   document_invalid: {
     text: "O documento foi recusado: confira se as sub-contas e os modelos dos itens estão ativos.",
     fix: "plans",

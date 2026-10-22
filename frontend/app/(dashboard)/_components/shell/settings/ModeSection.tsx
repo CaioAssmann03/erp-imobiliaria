@@ -12,7 +12,7 @@ interface SectionProps {
 export function ModeSection({ appearance, onChange }: SectionProps) {
   return (
     <SettingsSection title="Modo" value={MODES.find((m) => m.value === appearance.mode)?.label}>
-      <div role="radiogroup" aria-label="Modo" className="grid grid-cols-3 gap-3">
+      <div role="radiogroup" aria-label="Modo" className="grid grid-cols-3 gap-2.5 sm:gap-3">
         {MODES.map((mode) => {
           const selected = appearance.mode === mode.value;
           return (

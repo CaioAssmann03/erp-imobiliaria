@@ -3,6 +3,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from celery.schedules import crontab
+from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from django.core.exceptions import ImproperlyConfigured
@@ -268,6 +269,36 @@ AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "")
 AWS_S3_ENDPOINT_URL = os.environ.get("AWS_S3_ENDPOINT_URL", "")
 AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "auto")
 
+def _gateway_credentials_key() -> str:
+    """The Fernet key that encrypts the gateway API keys at rest (spec 030); mandatory, also in development."""
+    key = os.environ.get("GATEWAY_CREDENTIALS_KEY", "").strip()
+    if not key:
+        raise ImproperlyConfigured(
+            "GATEWAY_CREDENTIALS_KEY must be set (a Fernet key); see docs/architecture/operations.md."
+        )
+    try:
+        Fernet(key)
+    except ValueError as error:
+        raise ImproperlyConfigured("GATEWAY_CREDENTIALS_KEY is not a valid Fernet key.") from error
+    return key
+
+
+GATEWAY_CREDENTIALS_KEY = _gateway_credentials_key()
+
+# Asaas, the billing gateway (spec 030). The parent key creates sub-accounts; each condominium then uses its own.
+ASAAS_API_KEY = os.environ.get("ASAAS_API_KEY", "")
+ASAAS_BASE_URL = os.environ.get("ASAAS_BASE_URL", "https://api-sandbox.asaas.com/v3").rstrip("/")
+# Where Asaas posts events (a tunnel in development); empty leaves the sub-account without a webhook for now.
+ASAAS_WEBHOOK_URL = os.environ.get("ASAAS_WEBHOOK_URL", "")
+# Business days after the due date until Asaas cancels a boleto's registration; it cannot be changed after creation.
+# Transactional e-mail (Resend, spec 035). Without the key or the sender the deliveries are recorded as failed, never lost.
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+RESEND_FROM = os.environ.get("RESEND_FROM", "")
+RESEND_WEBHOOK_SECRET = os.environ.get("RESEND_WEBHOOK_SECRET", "")
+# Days back the daily reconciliation looks for received payments (Asaas keeps undelivered events for 14 days).
+GATEWAY_RECONCILIATION_WINDOW_DAYS = int(os.environ.get("GATEWAY_RECONCILIATION_WINDOW_DAYS", "3"))
+ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS = int(os.environ.get("ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS", "60"))
+
 CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL", "redis://redis:6379/0")
 CELERY_ACCEPT_CONTENT = ["json"]
@@ -276,6 +307,11 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_SCHEDULE = {
     # Each condominium has its own issuance day (`BillingRules.issuance_day`); the task picks today's.
     "issue-due-billing": {"task": "apps.billing.tasks.issue_due_billing", "schedule": crontab(hour=6, minute=0)},
+    # The safety net of the payment webhook (spec 033): compare what Asaas received with what was posted.
+    "reconcile-gateway-payments": {
+        "task": "apps.billing.tasks.reconcile_gateway_accounts",
+        "schedule": crontab(hour=0, minute=30),
+    },
 }
 
 UNFOLD = {

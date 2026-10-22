@@ -126,3 +126,34 @@ def test_admin_is_company_scoped_and_read_only(company: Company, document: Billi
 def test_documents_and_items_are_audited(document: BillingDocument) -> None:
     assert LogEntry.objects.get_for_model(BillingDocument).count() == 1
     assert LogEntry.objects.get_for_model(BillingDocumentItem).count() == 2
+
+
+def test_documents_show_the_active_registration(api_client: APIClient, document: BillingDocument) -> None:
+    from ..models import BillingDocumentRegistration, GatewayAccount
+
+    assert body(api_client.get(reverse(DETAIL, args=[document.pk])))["registration"] is None
+
+    account = GatewayAccount.objects.create(
+        condominium=document.unit.condominium,
+        gateway_account_id="acc-1",
+        wallet_id="w",
+        api_key="secret-key",
+        webhook_token="secret-token",
+    )
+    _ = BillingDocumentRegistration.objects.create(
+        document=document,
+        gateway_account=account,
+        registered_due_date=document.due_date,
+        gateway_payment_id="pay_1",
+        digitable_line="0001.2 3456",
+        boleto_url="https://asaas.test/boleto/1",
+        pix_payload="00020126pix",
+    )
+
+    response = api_client.get(reverse(DETAIL, args=[document.pk]))
+    listed = results(api_client.get(reverse(LIST)))[0]
+
+    registration = body(response)["registration"]
+    assert (registration["digitable_line"], registration["pix_payload"]) == ("0001.2 3456", "00020126pix")
+    assert listed["registration"]["boleto_url"] == "https://asaas.test/boleto/1"
+    assert "pay_1" not in response.content.decode() and "secret" not in response.content.decode()
