@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 import { StatementTable } from "../_components/StatementTable";
-import { LinkButton } from "@/components/LinkButton";
 import { PageHeader } from "@/components/PageHeader";
 import {
   getCondominiumsListQueryOptions,
@@ -33,11 +32,7 @@ export default async function StatementPage({
 
   return (
     <div>
-      <PageHeader
-        title="Extrato"
-        description="Conta corrente de cada condomínio."
-        actions={<LinkButton href="/finance/entries/new">Lançamento manual</LinkButton>}
-      />
+      <PageHeader title="Extrato" description="Conta corrente de cada condomínio." />
       <HydrationBoundary state={dehydrate(queryClient)}>
         <StatementTable condominium={condominium} />
       </HydrationBoundary>

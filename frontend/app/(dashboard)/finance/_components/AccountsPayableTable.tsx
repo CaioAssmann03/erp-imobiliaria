@@ -99,8 +99,6 @@ export function AccountsPayableTable() {
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead>Descrição</TableHead>
-                  <TableHead className="hidden md:table-cell">Fornecedor</TableHead>
-                  <TableHead className="hidden md:table-cell">Condomínio</TableHead>
                   <TableHead className="hidden md:table-cell">Vencimento</TableHead>
                   <TableHead className="hidden md:table-cell">Valor</TableHead>
                   <TableHead className="hidden md:table-cell">Situação</TableHead>

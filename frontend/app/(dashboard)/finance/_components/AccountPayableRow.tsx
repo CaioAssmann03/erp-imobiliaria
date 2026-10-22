@@ -2,7 +2,6 @@
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { RowActions, RowLink } from "@/components/data-list";
-import { LinkButton } from "@/components/LinkButton";
 import { TableCell, TableRow } from "@/components/ui/table";
 import type { AccountPayable } from "@/lib/api/generated/models";
 import { brl, formatDate } from "@/lib/format";
@@ -26,25 +25,21 @@ export function AccountPayableRow({ account, today, onCancel }: AccountPayableRo
   return (
     <TableRow>
       <TableCell>
-        <RowLink href={href} sub={[account.supplier_name, condominium].join(" · ")}>
+        <RowLink href={href} sub={[account.supplier_name, condominium].join(" · ")} subAlways compact>
           {account.description}
         </RowLink>
       </TableCell>
-      <TableCell className="hidden max-w-[14rem] truncate text-ink-soft md:table-cell">{account.supplier_name}</TableCell>
-      <TableCell className="hidden max-w-[14rem] truncate text-ink-soft md:table-cell">{condominium}</TableCell>
       <TableCell className="hidden text-ink-soft tabular-nums md:table-cell">{formatDate(account.due_date)}</TableCell>
       <TableCell className="hidden tabular-nums md:table-cell">{brl(account.amount_paid ?? account.amount)}</TableCell>
       <TableCell className="hidden md:table-cell">
         <PayableStatusBadge status={account.status} overdue={overdue} />
       </TableCell>
       <TableCell>
+        {/* Só baixar e cancelar: abrir (e editar) é o link da descrição, então a coluna de ações fica estreita. */}
         <RowActions>
-          {isOpen ? (
+          {isOpen && (
             <>
               <SettleAccountPayableDialog account={account} />
-              <LinkButton variant="ghost" size="sm" className="hidden md:inline-flex" href={href}>
-                Editar
-              </LinkButton>
               <ConfirmDeleteButton
                 label="Cancelar"
                 title="Cancelar conta a pagar?"
@@ -52,10 +47,6 @@ export function AccountPayableRow({ account, today, onCancel }: AccountPayableRo
                 onConfirm={() => onCancel(account.id)}
               />
             </>
-          ) : (
-            <LinkButton variant="ghost" size="sm" href={href}>
-              Ver
-            </LinkButton>
           )}
         </RowActions>
       </TableCell>

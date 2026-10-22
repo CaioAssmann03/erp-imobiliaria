@@ -20,10 +20,6 @@ interface StatementFiltersProps {
   filters: Record<FilterKey, string>;
   onFilterChange: (key: FilterKey, value: string) => void;
   onClear: () => void;
-  /** O condomínio do extrato vem da URL: trocá-lo navega, não filtra. */
-  condominium: string;
-  onCondominiumChange: (value: string) => void;
-  condominiums: readonly { value: string; label: string }[];
 }
 
 export function StatementFilters({
@@ -32,28 +28,19 @@ export function StatementFilters({
   filters,
   onFilterChange,
   onClear,
-  condominium,
-  onCondominiumChange,
-  condominiums,
 }: StatementFiltersProps) {
   return (
     <>
-      <SearchField
-        placeholder="Buscar na descrição"
-        value={search}
-        onChange={(event) => onSearchChange(event.target.value)}
-      />
+      <div className="min-w-0 flex-1 sm:flex-none">
+        <SearchField
+          placeholder="Buscar na descrição"
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+        />
+      </div>
       <FilterMenu
         onClear={onClear}
         groups={[
-          {
-            key: "condominium",
-            label: "Condomínio",
-            searchable: true,
-            value: condominium,
-            onChange: onCondominiumChange,
-            options: condominiums,
-          },
           {
             key: "period",
             label: "Período",

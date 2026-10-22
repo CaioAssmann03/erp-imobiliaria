@@ -1,7 +1,6 @@
 "use client";
 
 import { RowActions } from "@/components/data-list";
-import { TableCell, TableRow } from "@/components/ui/table";
 import type { CurrentAccountEntry } from "@/lib/api/generated/models";
 import { brl, formatDate, formatMonth } from "@/lib/format";
 import { BATCH_ORIGINS } from "@/lib/schemas/entry-batch";
@@ -9,39 +8,46 @@ import { cn } from "@/lib/utils";
 
 import { ReverseEntryDialog } from "./ReverseEntryDialog";
 
+/**
+ * Um lançamento do extrato, como linha de lista (sem tabela, sem rolagem lateral): data, descrição com uma linha de apoio
+ * (sub-conta, unidade, nº) e o valor. O resto (modelo, competência, lote) fica no `title`, ao passar o mouse.
+ */
 export function StatementRow({ entry }: { entry: CurrentAccountEntry }) {
   const isReversal = entry.reversal_of !== null;
   const note = [entry.is_reversed ? "Estornado" : null, isReversal ? "Estorno" : null].filter(Boolean).join(" · ");
   const origin = BATCH_ORIGINS.find((item) => item.value === entry.batch_origin)?.label ?? entry.batch_origin;
-  const batch = `${origin} ${formatDate(entry.batch_date)}`;
+  const support = [entry.cost_center_name, entry.unit_name && `Unid. ${entry.unit_name}`, `Nº ${entry.registry}`, note]
+    .filter(Boolean)
+    .join(" · ");
+  const fullDetails = [
+    entry.entry_template_name,
+    `Competência ${formatMonth(entry.competence_month)}`,
+    `Lote: ${origin} ${formatDate(entry.batch_date)}`,
+  ].join(" · ");
+  const isCredit = entry.kind === "credit";
+  const [year, month, day] = entry.entry_date.split("-");
 
   return (
-    <TableRow className={cn(entry.is_reversed && "text-ink-faint")}>
-      <TableCell className="whitespace-nowrap tabular-nums">{formatDate(entry.entry_date)}</TableCell>
-      <TableCell>
-        <div className={cn("max-w-[13rem] truncate font-medium sm:max-w-[22rem]", entry.is_reversed && "line-through")}>
-          {entry.description}
-        </div>
-        <div className="max-w-[13rem] truncate text-caption text-ink-soft md:hidden">
-          {[`Nº ${entry.registry}`, entry.cost_center_name, entry.unit_name && `Unid. ${entry.unit_name}`, note]
-            .filter(Boolean)
-            .join(" · ")}
-        </div>
-      </TableCell>
-      <TableCell className="hidden text-ink-soft tabular-nums md:table-cell">{entry.registry}</TableCell>
-      <TableCell className="hidden max-w-[12rem] truncate text-ink-soft md:table-cell">{entry.entry_template_name}</TableCell>
-      <TableCell className="hidden max-w-[12rem] truncate text-ink-soft md:table-cell">{entry.cost_center_name}</TableCell>
-      <TableCell className="hidden max-w-[8rem] truncate text-ink-soft md:table-cell">{entry.unit_name || "—"}</TableCell>
-      <TableCell className="hidden text-ink-soft tabular-nums md:table-cell">{formatMonth(entry.competence_month)}</TableCell>
-      <TableCell className="hidden whitespace-nowrap text-ink-soft md:table-cell">{batch}</TableCell>
-      <TableCell className="whitespace-nowrap text-right tabular-nums">
-        {entry.kind === "credit" ? "+ " : "− "}
-        {brl(entry.amount)}
-        {note && <div className="hidden text-caption text-ink-soft md:block">{note}</div>}
-      </TableCell>
-      <TableCell>
+    <li
+      title={fullDetails}
+      className={cn(
+        "group/row flex items-start gap-3 border-b border-line px-4 py-3 last:border-b-0 sm:gap-4 sm:px-5",
+        entry.is_reversed && "text-ink-faint"
+      )}
+    >
+      <time dateTime={entry.entry_date} title={`${day}/${month}/${year}`} className="w-11 shrink-0 pt-0.5 text-caption text-ink-soft tabular-nums">
+        {day}/{month}
+      </time>
+      <div className="min-w-0 flex-1">
+        <p className={cn("text-body [overflow-wrap:anywhere]", entry.is_reversed && "line-through")}>{entry.description}</p>
+        <p className="mt-0.5 text-caption text-ink-soft [overflow-wrap:anywhere]">{support}</p>
+      </div>
+      <div className="shrink-0 text-right">
+        <p className={cn("whitespace-nowrap text-body font-medium tabular-nums", isCredit && !entry.is_reversed && "text-success")}>
+          {isCredit ? "+" : "−"} {brl(entry.amount)}
+        </p>
         <RowActions>{!entry.is_reversed && !isReversal && <ReverseEntryDialog entry={entry} />}</RowActions>
-      </TableCell>
-    </TableRow>
+      </div>
+    </li>
   );
 }
