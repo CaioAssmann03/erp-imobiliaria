@@ -17,6 +17,12 @@ export default defineConfig({
           path: "./lib/api/mutator.ts",
           name: "customInstance",
         },
+        operations: {
+          // A lista do painel de condomínios carrega 50 por vez ao rolar (spec 038).
+          condominiums_list: {
+            query: { useInfinite: true, useInfiniteQueryParam: "page" },
+          },
+        },
       },
     },
   },

@@ -6,18 +6,23 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
+  useInfiniteQuery,
   useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
   DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
@@ -101,11 +106,81 @@ export const condominiumsList = (
 
 
 
+export const getCondominiumsListInfiniteQueryKey = (params?: CondominiumsListParams,) => {
+    return [
+    'infinite', `/api/condominiums/`, ...(params ? [params] : [])
+    ] as const;
+    }
+
 export const getCondominiumsListQueryKey = (params?: CondominiumsListParams,) => {
     return [
     `/api/condominiums/`, ...(params ? [params] : [])
     ] as const;
     }
+
+
+export const getCondominiumsListInfiniteQueryOptions = <TData = InfiniteData<Awaited<ReturnType<typeof condominiumsList>>, CondominiumsListParams['page']>, TError = ErrorResponse>(params?: CondominiumsListParams, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof condominiumsList>>, TError, TData, QueryKey, CondominiumsListParams['page']>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCondominiumsListInfiniteQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof condominiumsList>>, QueryKey, CondominiumsListParams['page']> = ({ signal, pageParam }) => condominiumsList({...params, 'page': pageParam ?? params?.['page']}, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseInfiniteQueryOptions<Awaited<ReturnType<typeof condominiumsList>>, TError, TData, QueryKey, CondominiumsListParams['page']> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CondominiumsListInfiniteQueryResult = NonNullable<Awaited<ReturnType<typeof condominiumsList>>>
+export type CondominiumsListInfiniteQueryError = ErrorResponse
+
+
+export function useCondominiumsListInfinite<TData = InfiniteData<Awaited<ReturnType<typeof condominiumsList>>, CondominiumsListParams['page']>, TError = ErrorResponse>(
+ params: undefined |  CondominiumsListParams, options: { query:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof condominiumsList>>, TError, TData, QueryKey, CondominiumsListParams['page']>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof condominiumsList>>,
+          TError,
+          Awaited<ReturnType<typeof condominiumsList>>, QueryKey
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCondominiumsListInfinite<TData = InfiniteData<Awaited<ReturnType<typeof condominiumsList>>, CondominiumsListParams['page']>, TError = ErrorResponse>(
+ params?: CondominiumsListParams, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof condominiumsList>>, TError, TData, QueryKey, CondominiumsListParams['page']>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof condominiumsList>>,
+          TError,
+          Awaited<ReturnType<typeof condominiumsList>>, QueryKey
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCondominiumsListInfinite<TData = InfiniteData<Awaited<ReturnType<typeof condominiumsList>>, CondominiumsListParams['page']>, TError = ErrorResponse>(
+ params?: CondominiumsListParams, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof condominiumsList>>, TError, TData, QueryKey, CondominiumsListParams['page']>>, }
+ , queryClient?: QueryClient
+  ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useCondominiumsListInfinite<TData = InfiniteData<Awaited<ReturnType<typeof condominiumsList>>, CondominiumsListParams['page']>, TError = ErrorResponse>(
+ params?: CondominiumsListParams, options?: { query?:Partial<UseInfiniteQueryOptions<Awaited<ReturnType<typeof condominiumsList>>, TError, TData, QueryKey, CondominiumsListParams['page']>>, }
+ , queryClient?: QueryClient
+ ):  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCondominiumsListInfiniteQueryOptions(params,options)
+
+  const query = useInfiniteQuery(queryOptions, queryClient) as  UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
 
 
 export const getCondominiumsListQueryOptions = <TData = Awaited<ReturnType<typeof condominiumsList>>, TError = ErrorResponse>(params?: CondominiumsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof condominiumsList>>, TError, TData>>, }
