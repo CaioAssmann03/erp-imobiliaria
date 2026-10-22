@@ -3,10 +3,11 @@
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { ListState, Toolbar } from "@/components/data-list";
+import { ListState, SortableHead, Toolbar } from "@/components/data-list";
 import { Pagination } from "@/components/Pagination";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useListParams } from "@/hooks/use-list-params";
+import { useListSort } from "@/hooks/use-list-sort";
 import {
   getCondominiumsListQueryKey,
   getDashboardRetrieveQueryKey,
@@ -16,10 +17,11 @@ import {
 
 import type { CondominiumsListPending } from "@/lib/api/generated/models";
 
+import { CONDOMINIUM_SORT } from "./condominium-sort";
 import { CondominiumRow } from "./CondominiumRow";
 import { CondominiumsFilters } from "./CondominiumsFilters";
 
-/** Client Component: busca, cache e exclusão. A 1ª página vem hidratada do servidor. */
+/** Client Component: busca, ordenação, cache e exclusão. A 1ª página vem hidratada do servidor. */
 export function CondominiumsTable({ initialPending }: { initialPending?: string }) {
   const queryClient = useQueryClient();
   const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
@@ -27,10 +29,12 @@ export function CondominiumsTable({ initialPending }: { initialPending?: string 
       filterKeys: ["status", "type", "pending"],
       initialFilters: { pending: initialPending ?? "" },
     });
+  const { sort, ordering, toggleSort } = useListSort(CONDOMINIUM_SORT, () => setPage(1));
 
   const { data, isLoading, isPlaceholderData } = useCondominiumsList(
     {
       ...params,
+      ...(ordering ? { ordering } : {}),
       ...(filters.status ? { active: filters.status === "active" } : {}),
       ...(filters.type ? { type: filters.type as "residential" | "commercial" } : {}),
       ...(filters.pending ? { pending: filters.pending as CondominiumsListPending } : {}),
@@ -81,9 +85,15 @@ export function CondominiumsTable({ initialPending }: { initialPending?: string 
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="hidden w-16 md:table-cell">ID</TableHead>
-                  <TableHead>Condomínio</TableHead>
-                  <TableHead className="hidden md:table-cell">Status</TableHead>
+                  <SortableHead column="code" sort={sort} onSort={toggleSort} className="hidden w-16 md:table-cell">
+                    ID
+                  </SortableHead>
+                  <SortableHead column="name" sort={sort} onSort={toggleSort}>
+                    Condomínio
+                  </SortableHead>
+                  <SortableHead column="status" sort={sort} onSort={toggleSort} className="hidden md:table-cell">
+                    Status
+                  </SortableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>

@@ -15,6 +15,7 @@ skip-if: serializer/view code patterns → conventions/practices.md; permissions
 - **Pagination** (`StandardPagination`): `?page=`, `?limit=` (default 20, max 100); body `{count, next, previous, results}`. Querysets must be **ordered** (`Meta.ordering`).
 - **Search**: `?query=` over the view's `search_fields`; space-separated terms must all match. `?search=` still works (legacy). A view with `search_code_field = "code"` also matches a term of only digits against the record's ID (the "ID" users type) and lists that record first.
 - **Filters**: `filterset_fields` for exact matches; a `FilterSet` in `filters.py` for derived ones (`persons` `?type=` and `?module=`, `?pending=`).
+- **Ordering**: `?ordering=field` (`-field` for descending) over the view's `ordering_fields` (`TieBreakingOrderingFilter`, spec 037; today only `condominiums`: `code`, `name`, `active`). The view's default `ordering` and then the id follow whatever was asked, so equal rows keep a fixed order across pages; an unknown field is ignored. Declare it **before** `QuerySearchFilter` in `filter_backends`: the search keeps the requested order after the record whose ID matches exactly.
 - Avoid N+1: `select_related` / `prefetch_related` for everything the serializer reads.
 
 ## Writes

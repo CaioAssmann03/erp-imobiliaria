@@ -59,6 +59,7 @@ export * from './competenceMonthEnum';
 export * from './condominium';
 export * from './condominiumFee';
 export * from './condominiumSearch';
+export * from './condominiumsListOrdering';
 export * from './condominiumsListParams';
 export * from './condominiumsListPending';
 export * from './condominiumsListType';
