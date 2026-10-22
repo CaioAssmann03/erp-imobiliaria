@@ -6,6 +6,7 @@ import type { UseFormSetError } from "react-hook-form";
 import { toast } from "sonner";
 
 import {
+  getCondominiumsListInfiniteQueryKey,
   getCondominiumsListQueryKey,
   getCondominiumsRetrieveQueryKey,
   getDashboardRetrieveQueryKey,
@@ -33,6 +34,8 @@ export function useCondominiumSubmit(
   const invalidate = (id: string) =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: getCondominiumsListQueryKey() }),
+      // A lista do painel é uma consulta por páginas, com outra chave.
+      queryClient.invalidateQueries({ queryKey: getCondominiumsListInfiniteQueryKey() }),
       queryClient.invalidateQueries({ queryKey: getDashboardRetrieveQueryKey() }),
       queryClient.invalidateQueries({ queryKey: getCondominiumsRetrieveQueryKey(id) }),
     ]);
@@ -49,7 +52,8 @@ export function useCondominiumSubmit(
           onSuccess: () => {
             invalidate(condominiumId);
             toast.success("Condomínio salvo.");
-            router.push("/condominiums");
+            // Fica no condomínio; o cabeçalho (nome e status) vem do servidor, que relê o registro.
+            router.refresh();
           },
           onError,
         }
@@ -61,7 +65,7 @@ export function useCondominiumSubmit(
           onSuccess: (created) => {
             invalidate(created.id);
             toast.success("Condomínio cadastrado.");
-            router.push(`/condominiums/${created.id}/units`);
+            router.push(`/condominiums/${created.id}`);
           },
           onError,
         }

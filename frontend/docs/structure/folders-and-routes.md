@@ -31,7 +31,7 @@ docs/         REASONS documentation
 |---|---|
 | `/` | `app/(dashboard)/page.tsx` |
 | `/login` | `app/login/page.tsx` |
-| `/condominiums`, `/new`, `/[id]` (`/condominiums?pending=<value>` and `/condominiums/units?pending=<value>` open the lists filtered by a dashboard pendency, linked from *Pendências*) | `app/(dashboard)/condominiums/...` |
+| `/condominiums`, `/new`, `/[id]` (`/condominiums?pending=<value>` and `/condominiums/units?pending=<value>` open the lists filtered by a dashboard pendency, linked from *Pendências*) | `app/(dashboard)/condominiums/(workspace)/...`: one workspace (spec 038). `(workspace)/layout.tsx` keeps the condominium list mounted on the left; `/condominiums` opens the first condominium (on a phone it is the list itself), `/[id]` is the record with its section menu on the right, `/new` the creation form. There is no table and no separate edit page |
 | `/condominiums/blocks`, `/new`, `/[id]` | `app/(dashboard)/condominiums/blocks/...` (block CRUD; `condominiums/layout.tsx` renders the sub-header `CondominiumsSubNav`: Condomínios · Blocos · Unidades) |
 | `/condominiums/units`, `/new` | `app/(dashboard)/condominiums/units/...` (all units; `new` picks the condominium first via `NewUnitForm`; editing reuses `/condominiums/[id]/units/[unitId]`) |
 | `/condominiums/[id]/units`, `/new`, `/[unitId]` | `app/(dashboard)/condominiums/[id]/units/...` |

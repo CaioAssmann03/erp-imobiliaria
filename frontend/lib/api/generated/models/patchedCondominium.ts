@@ -52,6 +52,8 @@ export interface PatchedCondominium {
      */
   gas_meter?: string | null;
   active?: boolean;
+  /** The units of the condominium: the list annotates it (no query per row), a saved instance counts them. */
+  readonly unit_count?: number;
   readonly created_at?: string;
   readonly updated_at?: string;
 }

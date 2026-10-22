@@ -1,5 +1,6 @@
 from typing import final
 
+from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
@@ -23,7 +24,7 @@ class CondominiumViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Condom
         "address",
         "administration_contract",
         "billing_rules",
-    )
+    ).annotate(unit_count=Count("units"))
     serializer_class = CondominiumSerializer
     filter_backends = (DjangoFilterBackend, TieBreakingOrderingFilter, QuerySearchFilter)
     ordering_fields = ("code", "name", "active")

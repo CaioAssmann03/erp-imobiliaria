@@ -1,4 +1,6 @@
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -6,7 +8,7 @@ from rest_framework.test import APIClient
 from apps.core.models import Company
 
 from ..models import Block, Condominium, Unit
-from .base import body
+from .base import body, results
 
 pytestmark = pytest.mark.django_db
 
@@ -63,3 +65,43 @@ def test_filters_and_search(client: APIClient, company: Company, condominium: Co
     assert [condominium["name"] for condominium in by_search["results"]] == ["Residencial Sol"]
     assert [u["name"] for u in by_condominium["results"]] == ["202"]
     assert blocks["count"] == 1
+
+
+def test_the_list_carries_the_unit_count(client: APIClient, company: Company, condominium: Condominium) -> None:
+    """Spec 038, R3: the workspace list shows how many units each condominium has."""
+    _ = Condominium.objects.create(company=company, name="Outro Prédio", cnpj="45723174000110")
+    for number in range(3):
+        _ = Unit.objects.create(condominium=condominium, name=str(number))
+
+    listed = {row["name"]: row["unit_count"] for row in results(client.get(reverse("condominium-list")))}
+    detail = body(client.get(reverse("condominium-detail", args=[condominium.pk])))
+
+    assert listed == {"Residencial Sol": 3, "Outro Prédio": 0}
+    assert detail["unit_count"] == 3
+
+
+def test_a_saved_condominium_answers_its_unit_count(client: APIClient, condominium: Condominium) -> None:
+    _ = Unit.objects.create(condominium=condominium, name="1")
+
+    response = client.patch(reverse("condominium-detail", args=[condominium.pk]), {"name": "Novo nome"}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert body(response)["unit_count"] == 1
+
+
+def test_the_unit_count_costs_no_query_per_row(client: APIClient, company: Company) -> None:
+    def add_condominiums(first: int, last: int) -> None:
+        for index in range(first, last):
+            created = Condominium.objects.create(company=company, name=f"Prédio {index}", cnpj=f"{index:014d}")
+            _ = Unit.objects.create(condominium=created, name="1")
+
+    def queries_of_the_list() -> int:
+        with CaptureQueriesContext(connection) as captured:
+            _ = client.get(reverse("condominium-list"))
+        return len(captured)
+
+    add_condominiums(1, 4)
+    with_three = queries_of_the_list()
+    add_condominiums(4, 11)
+
+    assert queries_of_the_list() == with_three
