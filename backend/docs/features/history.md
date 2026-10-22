@@ -1,5 +1,5 @@
 ---
-summary: The finished feature specs (001–029) condensed: what each did, the decisions that still explain the code, and its numbered requirements.
+summary: The finished feature specs (001–029 and 039) condensed: what each did, the decisions that still explain the code, and its numbered requirements.
 read-when: you wonder why something was built a certain way, or a test cites "spec NNN, Rn" and you need what Rn means
 skip-if: you are specifying a new feature → features/README.md; you need what an app does today → apps/<app>.md
 ---
@@ -244,3 +244,11 @@ Staff follow the monthly issuance from the screen: what was issued, what failed 
 - Decisions (user, 2026-10-21, all recommendations accepted): `unit_name` in the problems; the code table in the frontend; the tabs and cross-links; the dialog; the PDF flow; cancel only on the document page; a read-only document page; left out: bulk PDF, e-mail delivery, payment registration, dashboard widget.
 - R1 documents list · R2 document page, PDF, cancel · R3 runs list · R4 issue a month · R5 a run's counts and explained problems · R6 translated errors · R7 themes, mobile and states
 Checked: `pytest apps/billing` 137 passed, `mypy apps config` clean; `tsc`, `eslint`, `pnpm test` (38 tests, 8 new) and `pnpm build` clean. **The screens were not exercised in a browser** (no browser tool was available), like the plan screens of spec 028: issuing a month, reading a run with problems, opening a document, generating and downloading its PDF, cancelling, dark/light and the narrow width still need a manual run.
+
+## 039 — Manual entries without justification and unit · none
+A manual ledger entry no longer needs a justification or a unit: the form drops both fields, and only a reversal keeps its required reason.
+- Backend: the rule `reversal_lacks_justification` and the constraint `current_account_entry_reversal_has_justification` (migration `finance.0013`) replace the ones that required a justification of every manual entry; they apply to an entry with `reversal_of`, with the same coded error `current_account_entry.justification.blank`. The existing rows satisfy the new constraint because every reversal already had a reason. The API still accepts `justification` and `unit` when they are sent, and the entries already saved keep theirs.
+- Frontend: `EntryLineFields` and `lib/schemas/entry-batch.ts` lose the two fields, so an entry made in the form is for the whole condominium. The reversal dialog keeps its reason.
+- Decisions (2026-10-22): dropping both fields (user); the reversal keeping its reason, the API staying compatible and the error code staying (agent, to review in the PR).
+- R1 a manual entry is saved without a justification (model, database, API) · R2 a reversal without a reason is still refused (rule and constraint) · R3 the form has no Justificativa and no Unidade · R4 the entries already saved keep theirs
+Checked: `pytest apps/finance apps/billing` 469 passed; the 8 failures are the PDF rendering tests, which need WeasyPrint's system libraries that this Windows machine lacks (a stub stood in), unrelated to the change; `mypy apps config` and `makemigrations --check` clean; `tsc`, `eslint --max-warnings=0`, `pnpm test` (54) and `pnpm build` clean; the migration was applied to a database that has entries; the form was opened in a browser and the two fields are gone. Not checked: posting an entry through the form in a browser (its selects were not driven).
