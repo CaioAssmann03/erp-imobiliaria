@@ -57,4 +57,4 @@ One row per spec; update it in the same change that creates or closes the spec.
 | [035](035-email-delivery.md) | E-mail delivery | full | in-progress | phase 5 part 06 |
 | [036](036-registration-payment-screens.md) | Registration and payment screens | lite | in-progress | phase 5 part 07 |
 
-The finished specs (001–029) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.
+The finished specs (001–029 and 037) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.

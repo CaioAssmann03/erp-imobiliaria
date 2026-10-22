@@ -1,6 +1,7 @@
 import operator
+from collections.abc import Sequence
 from functools import reduce
-from typing import Any
+from typing import Any, override
 
 from django.db import models
 from rest_framework import filters
@@ -72,3 +73,40 @@ class QuerySearchFilter(filters.SearchFilter):
         )
         annotated: models.QuerySet[Any] = queryset.annotate(code_match=exact_match)
         return annotated.order_by("code_match", *ordering)
+
+
+class TieBreakingOrderingFilter(filters.OrderingFilter):
+    """`?ordering=field` (`-field` for descending) over the view's `ordering_fields` (spec 037).
+
+    Whatever is asked, the view's default `ordering` and then the id follow it, so rows that compare
+    equal always come back in the same order and consecutive pages never repeat or skip one. An
+    unknown field is ignored. List it before `QuerySearchFilter`, which keeps this order after the
+    record whose ID matches the search term exactly.
+    """
+
+    ordering_description = "Ordering: a field name, with a `-` prefix for descending."
+
+    @override
+    def get_ordering(
+        self, request: Request, queryset: models.QuerySet[Any], view: APIView
+    ) -> Sequence[str] | None:
+        ordering = super().get_ordering(request, queryset, view)
+        if not ordering:
+            return ordering
+        ordered_fields = {field.lstrip("-") for field in ordering}
+        tie_breakers = [
+            field
+            for field in (*(self.get_default_ordering(view) or ()), "pk")
+            if field.lstrip("-") not in ordered_fields
+        ]
+        return [*ordering, *tie_breakers]
+
+    @override
+    def get_schema_operation_parameters(self, view: APIView) -> list[dict[str, Any]]:
+        parameters = super().get_schema_operation_parameters(view)
+        allowed_fields: tuple[str, ...] = getattr(view, "ordering_fields", ())
+        if allowed_fields:
+            parameters[0]["schema"]["enum"] = [
+                f"{direction}{field}" for field in allowed_fields for direction in ("", "-")
+            ]
+        return parameters

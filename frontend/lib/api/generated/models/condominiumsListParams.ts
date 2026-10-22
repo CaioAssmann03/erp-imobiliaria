@@ -5,6 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { CondominiumsListOrdering } from './condominiumsListOrdering';
 import type { CondominiumsListPending } from './condominiumsListPending';
 import type { CondominiumsListType } from './condominiumsListType';
 
@@ -17,6 +18,10 @@ company?: string;
  * Número de resultados a serem retornados por página.
  */
 limit?: number;
+/**
+ * Ordering: a field name, with a `-` prefix for descending.
+ */
+ordering?: CondominiumsListOrdering;
 /**
  * Um número de página dentro do conjunto de resultados paginado.
  */

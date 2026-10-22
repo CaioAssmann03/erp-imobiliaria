@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from apps.core.api.filters import QuerySearchFilter
+from apps.core.api.filters import QuerySearchFilter, TieBreakingOrderingFilter
 from apps.core.scoping import CompanyScopedViewSetMixin
 
 from ..filters import CondominiumFilter
@@ -25,7 +25,9 @@ class CondominiumViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Condom
         "billing_rules",
     )
     serializer_class = CondominiumSerializer
-    filter_backends = (DjangoFilterBackend, QuerySearchFilter)
+    filter_backends = (DjangoFilterBackend, TieBreakingOrderingFilter, QuerySearchFilter)
+    ordering_fields = ("code", "name", "active")
+    ordering = ("name",)
     search_fields = ("name", "cnpj", "address__city")
     search_code_field = "code"
     filterset_class = CondominiumFilter

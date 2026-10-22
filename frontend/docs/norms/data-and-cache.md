@@ -40,7 +40,8 @@ A `[id]` page fetches its record with `fetchOrNotFound(queryClient, get…Retrie
 
 ## Lists
 Search/filters/page are query params (`hooks/use-list-params.ts`); `placeholderData: keepPreviousData`; debounce search
-(`useDebouncedValue`); deleting the last item of the last page goes back a page.
+(`useDebouncedValue`); deleting the last item of the last page goes back a page. Sorting is the `ordering` param
+(`hooks/use-list-sort.ts`): the initial order is left out of the request, so the first load keeps the prefetch key, and a new order goes back to page 1.
 
 ## Invalidate after mutation (generated key functions, never strings)
 | Mutation | Invalidate |
