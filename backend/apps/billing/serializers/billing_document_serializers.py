@@ -5,7 +5,14 @@ from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from ..models import BillingDocument, BillingDocumentItem, BillingDocumentPdf, BillingDocumentRegistration
+from ..models import (
+    BillingDocument,
+    BillingDocumentDelivery,
+    BillingDocumentItem,
+    BillingDocumentPayment,
+    BillingDocumentPdf,
+    BillingDocumentRegistration,
+)
 
 
 class BillingDocumentItemSerializer(serializers.ModelSerializer[BillingDocumentItem]):
@@ -48,6 +55,22 @@ class BillingDocumentRegistrationSerializer(serializers.ModelSerializer[BillingD
         read_only_fields = fields
 
 
+class BillingDocumentDeliverySerializer(serializers.ModelSerializer[BillingDocumentDelivery]):
+    @final
+    class Meta:
+        model = BillingDocumentDelivery
+        fields = ("id", "channel", "status", "destination", "sent_at", "failure_reason")
+        read_only_fields = fields
+
+
+class BillingDocumentPaymentSerializer(serializers.ModelSerializer[BillingDocumentPayment]):
+    @final
+    class Meta:
+        model = BillingDocumentPayment
+        fields = ("paid_on", "amount", "net_amount")
+        read_only_fields = fields
+
+
 class BillingDocumentSerializer(serializers.ModelSerializer[BillingDocument]):
     """A unit's boleto as a record. Documents are issued by the monthly issuance; the API only reads and cancels them."""
 
@@ -58,6 +81,8 @@ class BillingDocumentSerializer(serializers.ModelSerializer[BillingDocument]):
     is_overdue = serializers.SerializerMethodField()
     items = BillingDocumentItemSerializer(many=True, read_only=True)
     registration = serializers.SerializerMethodField()
+    delivery = serializers.SerializerMethodField()
+    payment = BillingDocumentPaymentSerializer(read_only=True, allow_null=True)
 
     @final
     class Meta:
@@ -86,6 +111,8 @@ class BillingDocumentSerializer(serializers.ModelSerializer[BillingDocument]):
             "monthly_interest_percentage",
             "items",
             "registration",
+            "delivery",
+            "payment",
             "created_at",
             "updated_at",
         )
@@ -100,12 +127,28 @@ class BillingDocumentSerializer(serializers.ModelSerializer[BillingDocument]):
             registration = active[0] if active else None
         return None if registration is None else dict(BillingDocumentRegistrationSerializer(registration).data)
 
+    @extend_schema_field(BillingDocumentDeliverySerializer(allow_null=True))
+    def get_delivery(self, document: BillingDocument) -> dict[str, Any] | None:
+        """The latest delivery of the active registration (the e-mail of the boleto the payer holds now)."""
+        registration = getattr(document, "active_registrations", None)
+        active = registration[0] if registration else None
+        if active is None:
+            return None
+        delivery = active.deliveries.order_by("-created_at").first()
+        return None if delivery is None else dict(BillingDocumentDeliverySerializer(delivery).data)
+
     @extend_schema_field(serializers.BooleanField())
     def get_is_overdue(self, document: BillingDocument) -> bool:
         return document.is_overdue_on(self._today())
 
     def _today(self) -> date:
         return timezone.localdate()
+
+
+class BillingDocumentReissueSerializer(serializers.Serializer[dict[str, Any]]):
+    """The due date of the new boleto; whether it may be in the past is the registration model's rule."""
+
+    due_date = serializers.DateField()
 
 
 class BillingDocumentPdfDownloadSerializer(serializers.Serializer[dict[str, Any]]):

@@ -5,18 +5,18 @@ skip-if: you need the whole phase → roadmap/phase-5-billing-bank-integration/R
 ---
 # Part 06 — E-mail delivery
 
-**Status:** todo · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing · **Frontend impact:** none · **Depends on:** 02
-**Spec:** none yet
+**Status:** in-progress · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing · **Frontend impact:** none · **Depends on:** 02
+**Spec:** [035](../../features/035-email-delivery.md)
 
 ## Goal
 Send the boleto to the payer automatically once the charge is registered, and know whether it was delivered.
 
 ## Scope
-- [ ] Provider integration (Resend, whose key is already in `.env.example`)
-- [ ] Model `BillingDocumentDelivery` (channel, status, destination, sent at) with Celery retry
-- [ ] The e-mail carries a link to the boleto and the digitable line, not an attachment
-- [ ] Provider webhook updates delivered/failed
-- [ ] The gateway's own customer notifications stay off (part 02)
+- [x] Provider integration (Resend, whose key is already in `.env.example`)
+- [x] Model `BillingDocumentDelivery` (channel, status, destination, sent at) with Celery retry
+- [x] The e-mail carries a link to the boleto and the digitable line, not an attachment
+- [x] Provider webhook updates delivered/failed
+- [x] The gateway's own customer notifications stay off (part 02)
 
 ## Draft for the spec
 ### Entities
@@ -33,4 +33,4 @@ Send the boleto to the payer automatically once the charge is registered, and kn
 - [ ] Use Asaas's own e-mail instead of ours? (recommended: ours, to control the text and track it; Asaas notifications off)
 
 ## Result
-Not started.
+Implemented on 2026-10-22 (spec 035). Pending: a real send and the webhook against Resend (a verified domain and the keys).

@@ -41,8 +41,11 @@ export interface CurrentAccountEntry {
   /** @nullable */
   readonly account_payable: string | null;
   /** @nullable */
+  readonly billing_document_item: string | null;
+  /** @nullable */
   readonly reversal_of: string | null;
   readonly is_reversed: boolean;
-  readonly created_by: string;
+  /** @nullable */
+  readonly created_by: string | null;
   readonly created_at: string;
 }

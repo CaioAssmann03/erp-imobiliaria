@@ -118,3 +118,24 @@ class CurrentAccountEntryRules(ModelRules["CurrentAccountEntry"]):
         entry = self.instance
         reversal_of = entry.reversal_of
         return reversal_of is not None and reversal_of.amount != entry.amount
+
+    @rule("billing_document_item", CurrentAccountEntryError.BILLING_DOCUMENT_ITEM_MATCHES_ORIGIN)
+    def billing_document_item_does_not_match_origin(self) -> bool:
+        entry = self.instance
+        is_automatic = entry.origin == entry.Origin.AUTOMATIC_BILLING
+        return is_automatic != (entry.billing_document_item_id is not None)
+
+    @rule("billing_document_item", CurrentAccountEntryError.BILLING_DOCUMENT_ITEM_OTHER_CONDOMINIUM)
+    def billing_document_item_belongs_to_another_condominium(self) -> bool:
+        entry = self.instance
+        item = entry.billing_document_item
+        if item is None or entry.current_account_id is None:
+            return False
+        return item.document.unit.condominium_id != entry.current_account.condominium_id
+
+    @rule("billing_document_item", CurrentAccountEntryError.BILLING_DOCUMENT_ITEM_ALREADY_POSTED)
+    def billing_document_item_already_has_an_entry(self) -> bool:
+        entry = self.instance
+        if entry.billing_document_item_id is None or not entry._state.adding:
+            return False
+        return type(entry).objects.filter(billing_document_item_id=entry.billing_document_item_id).exists()

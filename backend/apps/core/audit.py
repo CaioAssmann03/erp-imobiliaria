@@ -18,6 +18,7 @@ MASKED_VALUE = "[masked]"
 # The finance records of phase 3 carry their own `created_by`, `created_at` and reversal entries.
 AUDIT_EXEMPT: dict[str, str] = {
     "finance.CurrentAccount": "Its balance derives from the ledger entries, which never change and carry their own `created_by` and `created_at`.",
+    "billing.GatewayEvent": "It is itself the record of what the gateway sent: stored as received, never edited, and its outcome is the only field processing sets.",
     "finance.CurrentAccountEntry": "It never changes and is never deleted (a mistake is fixed by an opposite entry) and carries its own `created_by` and `created_at`.",
 }
 

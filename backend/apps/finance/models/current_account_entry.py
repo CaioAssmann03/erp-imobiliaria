@@ -35,6 +35,7 @@ class CurrentAccountEntry(BaseModel):
     class Origin(models.TextChoices):
         MANUAL = ("manual", "Manual")
         AUTOMATIC_PAYABLE = ("automatic_payable", "Automatic (account payable)")
+        AUTOMATIC_BILLING = ("automatic_billing", "Automatic (billing document)")
 
     company = models.ForeignKey(
         Company, on_delete=models.PROTECT, related_name="current_account_entries"
@@ -74,6 +75,14 @@ class CurrentAccountEntry(BaseModel):
         blank=True,
         related_name="ledger_entries",
     )
+    # The billing document item whose payment this entry records (spec 032); at most one entry per item.
+    billing_document_item = models.ForeignKey(
+        "billing.BillingDocumentItem",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="ledger_entries",
+    )
     # The opposite entry that cancels this one; set only on the reversal, at most one per entry.
     reversal_of = models.OneToOneField(
         "self",
@@ -92,6 +101,7 @@ class CurrentAccountEntry(BaseModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         editable=False,
+        null=True,
         related_name="+",
     )
 
@@ -120,6 +130,26 @@ class CurrentAccountEntry(BaseModel):
                 condition=~Q(origin="manual") | ~Q(justification=""),
                 violation_error_message=CurrentAccountEntryError.JUSTIFICATION_BLANK.message,
                 violation_error_code=CurrentAccountEntryError.JUSTIFICATION_BLANK.value,
+            ),
+            models.CheckConstraint(
+                name="current_account_entry_billing_item_matches_origin",
+                condition=(Q(origin="automatic_billing") & Q(billing_document_item__isnull=False))
+                | (~Q(origin="automatic_billing") & Q(billing_document_item__isnull=True)),
+                violation_error_message=CurrentAccountEntryError.BILLING_DOCUMENT_ITEM_MATCHES_ORIGIN.message,
+                violation_error_code=CurrentAccountEntryError.BILLING_DOCUMENT_ITEM_MATCHES_ORIGIN.value,
+            ),
+            models.CheckConstraint(
+                name="current_account_entry_created_by_required_unless_automatic_billing",
+                condition=Q(created_by__isnull=False) | Q(origin="automatic_billing"),
+                violation_error_message=CurrentAccountEntryError.CREATED_BY_REQUIRED.message,
+                violation_error_code=CurrentAccountEntryError.CREATED_BY_REQUIRED.value,
+            ),
+            models.UniqueConstraint(
+                fields=("billing_document_item",),
+                condition=Q(billing_document_item__isnull=False),
+                name="current_account_entry_unique_per_billing_document_item",
+                violation_error_message=CurrentAccountEntryError.BILLING_DOCUMENT_ITEM_ALREADY_POSTED.message,
+                violation_error_code=CurrentAccountEntryError.BILLING_DOCUMENT_ITEM_ALREADY_POSTED.value,
             ),
             models.UniqueConstraint(
                 fields=("account_payable",),
@@ -153,6 +183,30 @@ class CurrentAccountEntry(BaseModel):
             description=description[:255],
             origin=cls.Origin.AUTOMATIC_PAYABLE,
             account_payable=account_payable,
+        )
+
+    @classmethod
+    def receiving(cls, item: Any, current_account: CurrentAccount, batch: EntryBatch, paid_on: datetime.date) -> Self:
+        """The credit that the payment of a billing document item posts (not saved; it has no user).
+
+        `item` is a `billing.BillingDocumentItem`: its cost center and entry template say where the money
+        goes, the document says the unit and the competence month. The description is never typed.
+        """
+        document = item.document
+        return cls(
+            company=current_account.company,
+            current_account=current_account,
+            batch=batch,
+            entry_template=item.entry_template,
+            cost_center=item.cost_center,
+            unit=document.unit,
+            entry_date=paid_on,
+            competence_month=document.competence_month,
+            kind=cls.Kind.CREDIT,
+            amount=item.amount,
+            description=f"{document.unit} - {item.description}"[:255],
+            origin=cls.Origin.AUTOMATIC_BILLING,
+            billing_document_item=item,
         )
 
     @classmethod

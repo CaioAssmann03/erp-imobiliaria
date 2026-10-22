@@ -31,3 +31,6 @@ The `core` dashboard counts active condominiums without cost centers, and its ac
 
 ## Next
 The billing phases (4 and 5).
+
+## Automatic billing entries (spec 032)
+A paid billing document posts one **credit** per `BillingDocumentItem` with the origin `automatic_billing`: no user (`created_by` is null; the constraint `current_account_entry_created_by_required_unless_automatic_billing` allows that only for this origin), `billing_document_item` set (unique: an item is posted once; `…matches_origin` ties the origin to the field) and the item's cost center and entry template. Built by `CurrentAccountEntry.receiving(item, current_account, batch, paid_on)`; posted by billing's `post_billing_document_payment` through `post_entries`. The statement and the API show the entry like any other (`created_by` may be null).

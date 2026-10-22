@@ -29,6 +29,7 @@ limit?: number;
 /**
  * * `manual` - Manual
  * * `automatic_payable` - Automatic (account payable)
+ * * `automatic_billing` - Automatic (billing document)
  */
 origin?: CurrentAccountEntriesListOrigin;
 /**

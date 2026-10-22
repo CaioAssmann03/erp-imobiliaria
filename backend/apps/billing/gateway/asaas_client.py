@@ -1,4 +1,5 @@
 import json
+from datetime import date
 from typing import Any
 
 import urllib3
@@ -9,6 +10,7 @@ from apps.core.errors.base import RuleError
 
 REQUEST_TIMEOUT_SECONDS = 15.0
 RATE_LIMITED_STATUS = 429
+PAGE_SIZE = 100
 
 
 class GatewayError(Exception):
@@ -56,6 +58,31 @@ class AsaasClient:
 
     def create_payment(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self._request("POST", "/payments", payload=payload)
+
+    def list_received_payments(self, received_from: date, received_to: date) -> list[dict[str, Any]]:
+        """Every payment received between the two dates (the gateway pages by 100; all pages are read)."""
+        payments: list[dict[str, Any]] = []
+        offset = 0
+        while True:
+            body = self._request(
+                "GET",
+                "/payments",
+                query={
+                    "status": "RECEIVED",
+                    "paymentDate[ge]": received_from.isoformat(),
+                    "paymentDate[le]": received_to.isoformat(),
+                    "limit": str(PAGE_SIZE),
+                    "offset": str(offset),
+                },
+            )
+            payments.extend(_data(body))
+            if not body.get("hasMore"):
+                return payments
+            offset += PAGE_SIZE
+
+    def delete_payment(self, payment_id: str) -> dict[str, Any]:
+        """Cancel a charge at the gateway so it cannot be paid (a paid one is refused)."""
+        return self._request("DELETE", f"/payments/{payment_id}")
 
     def get_identification_field(self, payment_id: str) -> dict[str, Any]:
         """Digitable line (`identificationField`), `nossoNumero` and `barCode` of a boleto charge."""

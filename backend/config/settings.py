@@ -291,6 +291,12 @@ ASAAS_BASE_URL = os.environ.get("ASAAS_BASE_URL", "https://api-sandbox.asaas.com
 # Where Asaas posts events (a tunnel in development); empty leaves the sub-account without a webhook for now.
 ASAAS_WEBHOOK_URL = os.environ.get("ASAAS_WEBHOOK_URL", "")
 # Business days after the due date until Asaas cancels a boleto's registration; it cannot be changed after creation.
+# Transactional e-mail (Resend, spec 035). Without the key or the sender the deliveries are recorded as failed, never lost.
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+RESEND_FROM = os.environ.get("RESEND_FROM", "")
+RESEND_WEBHOOK_SECRET = os.environ.get("RESEND_WEBHOOK_SECRET", "")
+# Days back the daily reconciliation looks for received payments (Asaas keeps undelivered events for 14 days).
+GATEWAY_RECONCILIATION_WINDOW_DAYS = int(os.environ.get("GATEWAY_RECONCILIATION_WINDOW_DAYS", "3"))
 ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS = int(os.environ.get("ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS", "60"))
 
 CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
@@ -301,6 +307,11 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_SCHEDULE = {
     # Each condominium has its own issuance day (`BillingRules.issuance_day`); the task picks today's.
     "issue-due-billing": {"task": "apps.billing.tasks.issue_due_billing", "schedule": crontab(hour=6, minute=0)},
+    # The safety net of the payment webhook (spec 033): compare what Asaas received with what was posted.
+    "reconcile-gateway-payments": {
+        "task": "apps.billing.tasks.reconcile_gateway_accounts",
+        "schedule": crontab(hour=0, minute=30),
+    },
 }
 
 UNFOLD = {

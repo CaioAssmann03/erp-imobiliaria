@@ -40,6 +40,8 @@ core  ←  persons  ←  condominiums  ←  finance  ←  billing  ←  (rentals
 | `JWT_SIGNING_KEY` | Ed25519 private key (PKCS#8 PEM, one line with literal `\n` allowed) that signs the JWTs with EdDSA; the public key is derived from it. **Mandatory in every environment, development included**; generate it with the command in `.env.example` (spec 022) |
 | `GATEWAY_CREDENTIALS_KEY` | Fernet key that encrypts the gateway API keys and webhook tokens in the database (spec 030); mandatory, also in development and tests (`pytest.ini` has a test-only one). Losing it makes the stored credentials unreadable |
 | `ASAAS_API_KEY`, `ASAAS_BASE_URL`, `ASAAS_WEBHOOK_URL` | The Asaas parent account that creates the sub-accounts, the API base (sandbox by default) and the public URL where Asaas posts events (empty: sub-accounts without a webhook) |
+| `RESEND_API_KEY`, `RESEND_FROM`, `RESEND_WEBHOOK_SECRET` | The Resend account that e-mails the boletos (spec 035), its verified sender, and the signing secret (`whsec_…`) of the webhook that reports delivered and bounced e-mails; empty: deliveries are recorded as `failed` |
+| `GATEWAY_RECONCILIATION_WINDOW_DAYS`, `ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS` | Days back the daily reconciliation looks for received payments (default 3, spec 033) and the business days after the due date that Asaas keeps a boleto registered (default 60, spec 031) |
 | `POSTGRES_DB/USER/PASSWORD/HOST/PORT` | database. **`POSTGRES_DB` is mandatory** (no SQLite fallback) |
 | `REDIS_URL` | Celery broker/result backend **and the shared cache** (the login rate limit holds across workers) |
 | `SECURE_SSL_REDIRECT`, `SECURE_HSTS_SECONDS`, `ADMIN_URL` | production security (`operations.md`) |

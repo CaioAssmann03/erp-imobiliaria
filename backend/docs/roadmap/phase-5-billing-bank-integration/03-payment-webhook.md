@@ -5,18 +5,18 @@ skip-if: you need the whole phase → roadmap/phase-5-billing-bank-integration/R
 ---
 # Part 03 — Payment webhook and ledger posting
 
-**Status:** todo · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing, finance · **Frontend impact:** none · **Depends on:** 02
-**Spec:** none yet
+**Status:** in-progress · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing, finance · **Frontend impact:** none · **Depends on:** 02
+**Spec:** [032](../../features/032-payment-webhook.md)
 
 ## Goal
 When Asaas says a charge was paid, mark the document paid and post its items as credits in the condominium's current account, once, whatever the number of times the event arrives.
 
 ## Scope
-- [ ] Public endpoint for the Asaas webhook, authenticated by the `asaas-access-token` header (the `authToken`, 32–255 characters, one per account), answering 200 as soon as the event is stored
-- [ ] Model `GatewayEvent` (the event's `id`, the raw payload, received at, processed at, outcome); the event id is the unique key, a repeat is answered 200 and ignored; processing is a Celery task, never inside the request
-- [ ] A received payment moves the document `registered` → `paid` (the status rules already exist, spec 025)
-- [ ] Paid document → one credit entry per `BillingDocumentItem` in the condominium's current account, each with its cost center and entry template (`services/post_entry.py`)
-- [ ] Amount check: the paid value against the expected one; a mismatch goes to an "unprocessed" queue instead of being posted
+- [x] Public endpoint for the Asaas webhook, authenticated by the `asaas-access-token` header (the `authToken`, 32–255 characters, one per account), answering 200 as soon as the event is stored
+- [x] Model `GatewayEvent` (the event's `id`, the raw payload, received at, processed at, outcome); the event id is the unique key, a repeat is answered 200 and ignored; processing is a Celery task, never inside the request
+- [x] A received payment moves the document `registered` → `paid` (the status rules already exist, spec 025)
+- [x] Paid document → one credit entry per `BillingDocumentItem` in the condominium's current account, each with its cost center and entry template (`services/post_entry.py`)
+- [x] Amount check: the paid value against the expected one; a mismatch goes to an "unprocessed" queue instead of being posted
 
 ## Draft for the spec
 ### Entities
@@ -37,4 +37,4 @@ When Asaas says a charge was paid, mark the document paid and post its items as 
 - [ ] Handle `PAYMENT_DELETED`, `PAYMENT_REFUNDED` and `PAYMENT_BANK_SLIP_CANCELLED` (the charge exists but cannot be paid) in this part or in part 05? (recommended: record them as events here; act on them in part 05)
 
 ## Result
-Not started.
+Implemented on 2026-10-22 (spec 032). Pending: validation of the real payloads against the sandbox.

@@ -1,23 +1,14 @@
-from datetime import datetime
-from typing import Any, Protocol
+from datetime import date, datetime
+from typing import Any
 
-from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
+from config.celery import app as celery_app
 from apps.billing.errors import BillingDocumentRegistrationError, GatewayAccountError
 from apps.billing.gateway.asaas_client import AsaasClient, GatewayError
-from apps.billing.models import BillingDocument, BillingDocumentRegistration, GatewayAccount, GatewayCustomer
-from apps.persons.models import Person
-
-
-class ChargeGateway(Protocol):
-    def find_customers(self, query: dict[str, str]) -> list[dict[str, Any]]: ...
-    def create_customer(self, payload: dict[str, Any]) -> dict[str, Any]: ...
-    def find_payments_by_external_reference(self, external_reference: str) -> list[dict[str, Any]]: ...
-    def create_payment(self, payload: dict[str, Any]) -> dict[str, Any]: ...
-    def get_identification_field(self, payment_id: str) -> dict[str, Any]: ...
-    def get_pix_qr_code(self, payment_id: str) -> dict[str, Any]: ...
+from apps.billing.models import BillingDocument, BillingDocumentRegistration, GatewayAccount
+from apps.billing.gateway.charges import ChargeGateway, ensure_customer, fetch_boleto_details, find_or_create_charge
 
 
 def register_billing_document(
@@ -42,92 +33,33 @@ def register_billing_document(
 
     gateway = client or AsaasClient(api_key=account.api_key)
     try:
-        customer_id = _customer_id(document.payer, account, gateway)
-        payment = _find_or_create_payment(document, customer_id, gateway)
-        details = _boleto_details(payment["id"], gateway)
+        customer_id = ensure_customer(document.payer, account, gateway)
+        payment = find_or_create_charge(document, customer_id, gateway, document.due_date, str(document.pk))
+        details = fetch_boleto_details(payment["id"], gateway)
     except GatewayError as error:
         if error.error is not GatewayAccountError.GATEWAY_REJECTED:
             raise
-        return _record_failure(document, account, error.codes)
-    return _record_registration(document, account, payment, details)
+        return record_failure(document, account, error.codes)
+    return record_registration(document, account, payment, details)
 
 
-def _customer_id(person: Person, account: GatewayAccount, gateway: ChargeGateway) -> str:
-    existing = GatewayCustomer.objects.filter(person=person, gateway_account=account).first()
-    if existing is not None:
-        return existing.gateway_customer_id
-    tax_id = str(person.tax_id)
-    found = gateway.find_customers({"externalReference": str(person.pk)}) or gateway.find_customers({"cpfCnpj": tax_id})
-    if found:
-        customer_id = str(found[0]["id"])
-    else:
-        created = gateway.create_customer(
-            {
-                "name": person.name,
-                "cpfCnpj": tax_id,
-                "externalReference": str(person.pk),
-                "notificationDisabled": True,
-            }
-        )
-        customer_id = str(created["id"])
-    GatewayCustomer.objects.get_or_create(
-        person=person, gateway_account=account, defaults={"gateway_customer_id": customer_id}
-    )
-    return customer_id
-
-
-def _find_or_create_payment(document: BillingDocument, customer_id: str, gateway: ChargeGateway) -> dict[str, Any]:
-    existing = gateway.find_payments_by_external_reference(str(document.pk))
-    if existing:
-        return existing[0]
-    return gateway.create_payment(_charge_payload(document, customer_id))
-
-
-def _charge_payload(document: BillingDocument, customer_id: str) -> dict[str, Any]:
-    payload: dict[str, Any] = {
-        "customer": customer_id,
-        "billingType": "BOLETO",
-        "value": float(document.amount),
-        "dueDate": document.due_date.isoformat(),
-        "description": f"{document.unit.condominium.name} - {document.unit} - {document.reference_month:%m/%Y}",
-        "externalReference": str(document.pk),
-        "daysAfterDueDateToRegistrationCancellation": settings.ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS,
-    }
-    if document.late_fee_percentage > 0:
-        payload["fine"] = {"value": float(document.late_fee_percentage), "type": "PERCENTAGE"}
-    if document.monthly_interest_percentage > 0:
-        payload["interest"] = {"value": float(document.monthly_interest_percentage)}
-    if document.discount_percentage > 0:
-        payload["discount"] = {
-            "value": float(document.discount_percentage),
-            "dueDateLimitDays": document.discount_days,
-            "type": "PERCENTAGE",
-        }
-    return payload
-
-
-def _boleto_details(payment_id: str, gateway: ChargeGateway) -> dict[str, Any]:
-    identification = gateway.get_identification_field(payment_id)
-    try:
-        pix = gateway.get_pix_qr_code(payment_id)
-    except GatewayError as error:
-        # Without a usable Pix QR code the boleto is still payable: the registration keeps the rest.
-        if error.error is not GatewayAccountError.GATEWAY_REJECTED:
-            raise
-        pix = {}
-    return {"identification": identification, "pix": pix}
-
-
-def _record_registration(
-    document: BillingDocument, account: GatewayAccount, payment: dict[str, Any], details: dict[str, Any]
+def record_registration(
+    document: BillingDocument,
+    account: GatewayAccount,
+    payment: dict[str, Any],
+    details: dict[str, Any],
+    reason: str = BillingDocumentRegistration.Reason.INITIAL_ISSUE,
+    due_date: date | None = None,
 ) -> BillingDocumentRegistration:
+    """Save the active registration of a charge and move the document to `registered` (a reissue keeps it there)."""
     identification, pix = details["identification"], details["pix"]
     with transaction.atomic():
         locked = BillingDocument.objects.select_for_update().get(pk=document.pk)
         registration = BillingDocumentRegistration(
             document=locked,
             gateway_account=account,
-            registered_due_date=locked.due_date,
+            reason=reason,
+            registered_due_date=due_date or locked.due_date,
             gateway_payment_id=str(payment["id"]),
             our_number=str(identification.get("nossoNumero") or ""),
             digitable_line=str(identification.get("identificationField") or ""),
@@ -138,21 +70,32 @@ def _record_registration(
         )
         registration.full_clean()
         registration.save()
-        locked.status = BillingDocument.Status.REGISTERED
-        locked.full_clean()
-        locked.save()
+        if locked.status != BillingDocument.Status.REGISTERED:
+            locked.status = BillingDocument.Status.REGISTERED
+            locked.full_clean()
+            locked.save()
+        document_id = str(locked.pk)
+        # By name: tasks.py imports this module. The payer is e-mailed once the registration has committed (spec 035).
+        transaction.on_commit(
+            lambda: celery_app.send_task("apps.billing.tasks.send_billing_document_email_task", args=[document_id])
+        )
     document.refresh_from_db()
     return registration
 
 
-def _record_failure(
-    document: BillingDocument, account: GatewayAccount, codes: tuple[str, ...]
+def record_failure(
+    document: BillingDocument,
+    account: GatewayAccount,
+    codes: tuple[str, ...],
+    reason: str = BillingDocumentRegistration.Reason.INITIAL_ISSUE,
+    due_date: date | None = None,
 ) -> BillingDocumentRegistration:
     registration = BillingDocumentRegistration(
         document=document,
         gateway_account=account,
         status=BillingDocumentRegistration.Status.FAILED,
-        registered_due_date=document.due_date,
+        reason=reason,
+        registered_due_date=due_date or document.due_date,
         error_codes=list(codes),
     )
     registration.full_clean()

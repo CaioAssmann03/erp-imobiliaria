@@ -51,5 +51,10 @@ One row per spec; update it in the same change that creates or closes the spec.
 |---|---|---|---|---|
 | [030](030-gateway-accounts.md) | Gateway accounts | full | in-progress | phase 5 part 01 |
 | [031](031-gateway-charge-registration.md) | Gateway charge registration | full | in-progress | phase 5 part 02 |
+| [032](032-payment-webhook.md) | Payment webhook and ledger posting | full | in-progress | phase 5 part 03 |
+| [033](033-daily-reconciliation.md) | Daily reconciliation | full | in-progress | phase 5 part 04 |
+| [034](034-overdue-handling-reissue.md) | Overdue handling and reissue | full | in-progress | phase 5 part 05 |
+| [035](035-email-delivery.md) | E-mail delivery | full | in-progress | phase 5 part 06 |
+| [036](036-registration-payment-screens.md) | Registration and payment screens | lite | in-progress | phase 5 part 07 |
 
 The finished specs (001–029) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.

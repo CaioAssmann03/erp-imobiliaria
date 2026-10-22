@@ -8,6 +8,7 @@ skip-if: a whole new resource → operations/new-resource-page.md
 ## Regenerate the API client
 Backend running → `cd frontend && pnpm generate:api`. Never edit `lib/api/generated/`. If the build then
 fails on a renamed type, fix the caller (schemas, payload builders), not the generated file.
+The regeneration wipes and rewrites the folder: a running `next dev` keeps a broken module graph ("Export … doesn't exist in target module", login answering 500). Stop it, delete `frontend/.next` and start it again (in Docker: `docker compose restart frontend`), then `pnpm exec next typegen` so `tsc` finds the route types.
 
 ## Add a field to an existing form
 1. Backend field exists and the client is regenerated.

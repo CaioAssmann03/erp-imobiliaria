@@ -10,6 +10,7 @@ export type CurrentAccountEntriesListOrigin = typeof CurrentAccountEntriesListOr
 
 
 export const CurrentAccountEntriesListOrigin = {
+  automatic_billing: 'automatic_billing',
   automatic_payable: 'automatic_payable',
   manual: 'manual',
 } as const;

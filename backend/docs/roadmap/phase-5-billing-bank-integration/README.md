@@ -26,11 +26,11 @@ The first plan integrated Santander directly (certificate, OAuth, remittance and
 |---|---|---|---|
 | 01 | [Gateway accounts](01-gateway-accounts.md) | in-progress | billing |
 | 02 | [Charge registration](02-gateway-charge-registration.md) | in-progress | billing |
-| 03 | [Payment webhook and ledger posting](03-payment-webhook.md) | todo | billing, finance |
-| 04 | [Daily reconciliation](04-daily-reconciliation.md) | todo | billing, finance |
-| 05 | [Overdue handling](05-overdue-handling.md) | todo | billing |
-| 06 | [E-mail delivery](06-email-delivery.md) | todo | billing |
-| 07 | [Registration and payment screens](07-registration-payment-screens.md) | todo | frontend |
+| 03 | [Payment webhook and ledger posting](03-payment-webhook.md) | in-progress | billing, finance |
+| 04 | [Daily reconciliation](04-daily-reconciliation.md) | in-progress | billing, finance |
+| 05 | [Overdue handling](05-overdue-handling.md) | in-progress | billing |
+| 06 | [E-mail delivery](06-email-delivery.md) | in-progress | billing |
+| 07 | [Registration and payment screens](07-registration-payment-screens.md) | in-progress | frontend |
 
 ## What the Asaas documentation says (checked on 2026-10-21, two passes)
 Read from docs.asaas.com and the public Asaas pages; fees and limits change, so recheck before a spec depends on them. Some help-center pages answered 403 and could not be read. **Not found** means the pages read did not say.

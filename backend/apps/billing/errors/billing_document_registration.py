@@ -22,3 +22,15 @@ class BillingDocumentRegistrationError(RuleError):
         "billing_document_registration.gateway_payment_id.duplicate",
         "A gateway charge belongs to a single registration.",
     )
+    DOCUMENT_NOT_REGISTERED = (
+        "billing_document_registration.document.not_registered",
+        "Only a registered document can be reissued.",
+    )
+    NOTHING_TO_REISSUE = (
+        "billing_document_registration.document.nothing_to_reissue",
+        "The document has no registration to replace.",
+    )
+    REISSUE_DUE_DATE_IN_PAST = (
+        "billing_document_registration.registered_due_date.in_past",
+        "A reissued boleto cannot have a due date in the past.",
+    )

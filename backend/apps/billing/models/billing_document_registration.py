@@ -1,7 +1,9 @@
 from typing import final, override
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
 
 from apps.billing.errors import BillingDocumentRegistrationError
 from apps.billing.models.billing_document import BillingDocument
@@ -13,12 +15,15 @@ from apps.core.models.base import BaseModel
 class BillingDocumentRegistration(BaseModel):
     """One attempt to register a document as a charge at the gateway (spec 031). Attempts are never deleted.
 
-    A document has at most one `active` registration; a replaced one is `replaced`, a refused one `failed`.
+    A document has at most one `active` registration; a replaced one is `replaced`, a refused one `failed`, one the gateway
+    cancelled `cancelled`.
     """
 
     class Status(models.TextChoices):
         ACTIVE = ("active", "Active")
         REPLACED = ("replaced", "Replaced")
+        # The gateway cancelled or deleted the charge (an expired registration): it cannot be paid until a reissue.
+        CANCELLED = ("cancelled", "Cancelled")
         FAILED = ("failed", "Failed")
 
     class Reason(models.TextChoices):
@@ -62,6 +67,14 @@ class BillingDocumentRegistration(BaseModel):
                 violation_error_code=BillingDocumentRegistrationError.PAYMENT_ID_DUPLICATE.value,
             ),
         )
+
+    @override
+    def clean(self) -> None:
+        is_new_reissue = self._state.adding and self.reason == self.Reason.REISSUE
+        if is_new_reissue and self.registered_due_date < timezone.localdate():
+            raise ValidationError(
+                {"registered_due_date": BillingDocumentRegistrationError.REISSUE_DUE_DATE_IN_PAST.to_validation_error()}
+            )
 
     @override
     def __str__(self) -> str:

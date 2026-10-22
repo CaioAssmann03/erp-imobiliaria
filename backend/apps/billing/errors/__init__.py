@@ -8,3 +8,6 @@ from .billing_document_pdf import BillingDocumentPdfError as BillingDocumentPdfE
 from .gateway_account import GatewayAccountError as GatewayAccountError
 from .billing_document_registration import BillingDocumentRegistrationError as BillingDocumentRegistrationError
 from .gateway_customer import GatewayCustomerError as GatewayCustomerError
+from .gateway_event import GatewayEventError as GatewayEventError
+from .gateway_reconciliation_run import GatewayReconciliationRunError as GatewayReconciliationRunError
+from .billing_document_delivery import BillingDocumentDeliveryError as BillingDocumentDeliveryError
