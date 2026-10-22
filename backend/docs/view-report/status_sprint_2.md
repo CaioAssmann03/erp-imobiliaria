@@ -7,7 +7,7 @@ skip-if: you need what is done or comes next in the project → roadmap/README.m
 
 ## 1. Identificação
 
-- **Projeto:** ERP Imobiliária (EVE Administradora de Imóveis)
+- **Projeto:** ERP Imobiliária
 - **Número da Sprint:** 2
 - **Período:** 25/09 a 08/10/2026
 - **Integrantes:** Gabriel Tadeu Matiolla, Caio Assmann, Eduardo Paim, Raquel Aguilhera

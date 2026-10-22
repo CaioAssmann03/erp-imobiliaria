@@ -19,7 +19,7 @@ Shared infrastructure plus the read-only dashboard and global search (which read
 | Audit trail | `infrastructure/audit.py`, `admin.py` | `register_audited`, `AUDIT_EXEMPT`, masked personal values; each app registers in its own `audit.py`; the log admin is superuser-only and read-only |
 | Object storage | `infrastructure/storage/object_storage.py`, `infrastructure/errors/object_storage.py` | the only module that imports `boto3`: `get_object_storage()` builds the R2 client from the `AWS_*` settings (any missing one raises the coded 503 `ObjectStorageUnavailable`); signed upload and download URLs, `object_size`, `delete_object`. Tests replace `get_object_storage` with a fake |
 | Validators, pagination, search | `infrastructure/validators/`, `infrastructure/api/pagination.py`, `infrastructure/api/filters.py` | `validate_cpf` / `cnpj` / `percentage` / `first_day_of_month`; `?page` + `?limit` (default 20, max 100); `?query=`; a view with `search_code_field = "code"` also matches a term of only digits against the ID and lists that record first (`code_from_term` in `infrastructure/search/term.py` decides what is an ID) |
-| Migrations | `migrations/` | `0001` runs `TrigramExtension()` first (`persons.0001` depends on it); `0002` seeds the company EVE Administradora; `0003` to `0006` bring `Address` from `condominiums` (spec 043) |
+| Migrations | `migrations/` | `0001` runs `TrigramExtension()` first (`persons.0001` depends on it); `0002` seeds the single company record the app starts with; `0003` to `0006` bring `Address` from `condominiums` (spec 043) |
 
 ## Endpoints
 - `/api/companies/`: staff list, read and edit **only their own company**; create and delete are superuser-only (403).

@@ -1,6 +1,6 @@
 # ERP Imobiliária — repository index
 
-Monorepo for a condominium administration ERP (EVE Administradora de Imóveis).
+Monorepo for a condominium administration ERP.
 
 | Part | Stack | Start here |
 |---|---|---|

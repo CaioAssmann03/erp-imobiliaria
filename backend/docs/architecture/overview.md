@@ -5,7 +5,7 @@ skip-if: schema, relations, business formulas → architecture/data.md; deploy, 
 ---
 # Overview
 
-**ERP Imobiliária** for **EVE Administradora de Imóveis**: condominium administration, rentals, sales and finance. Internal tool (staff only). The reference system is "Sami ERP"; the model and rules come from its analysis. Module status and the plan live in [`roadmap/`](../roadmap/README.md).
+**ERP Imobiliária**: condominium administration, rentals, sales and finance. Internal tool (staff only). The reference system is "Sami ERP"; the model and rules come from its analysis. Module status and the plan live in [`roadmap/`](../roadmap/README.md).
 
 ## Stack
 | Concern | Choice |
