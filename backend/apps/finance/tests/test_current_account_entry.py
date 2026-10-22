@@ -152,8 +152,17 @@ def test_competence_month_must_be_the_first_day(make_entry) -> None:  # type: ig
 
 
 @pytest.mark.parametrize("justification", ["", "   "])
-def test_justification_is_required(make_entry, justification: str) -> None:  # type: ignore[no-untyped-def]
-    assert codes(make_entry(justification=justification), "justification")
+def test_a_manual_entry_needs_no_justification(make_entry, justification: str) -> None:  # type: ignore[no-untyped-def]
+    make_entry(justification=justification).full_clean()
+
+
+@pytest.mark.parametrize("justification", ["", "   "])
+def test_a_reversal_needs_its_justification(make_entry, justification: str) -> None:  # type: ignore[no-untyped-def]
+    original = make_entry()
+    original.save()
+    reversal = make_entry(kind="credit", reversal_of=original, justification=justification)
+
+    assert codes(reversal, "justification") == ["current_account_entry.justification.blank"]
 
 
 def test_a_saved_entry_cannot_be_changed(make_entry) -> None:  # type: ignore[no-untyped-def]

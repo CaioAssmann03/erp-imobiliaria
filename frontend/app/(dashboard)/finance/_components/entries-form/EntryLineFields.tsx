@@ -5,11 +5,11 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { SelectField, TextField } from "@/components/form/fields";
 import { FieldRow } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
-import { useCondominiumsList, useCostCentersList, useEntryTemplatesList, useUnitsList } from "@/lib/api/generated";
+import { useCondominiumsList, useCostCentersList, useEntryTemplatesList } from "@/lib/api/generated";
 import { maskMoney } from "@/lib/masks";
 import { ENTRY_KINDS } from "@/lib/schemas/entry-batch";
 
-/** Um lançamento do lote: condomínio, modelo e sub-conta (que dependem dele), valor, datas e justificativa. */
+/** Um lançamento do lote: condomínio, modelo e sub-conta (que dependem dele), valor, datas e descrição. */
 export function EntryLineFields({
   index,
   canRemove,
@@ -28,10 +28,6 @@ export function EntryLineFields({
     { condominium, active: true, limit: 100 },
     { query: { enabled: condominium !== "" } }
   );
-  const { data: units } = useUnitsList(
-    { condominium, active: true, limit: 100 },
-    { query: { enabled: condominium !== "" } }
-  );
   const { data: entryTemplates } = useEntryTemplatesList(
     { condominium, active: true, limit: 100 },
     { query: { enabled: condominium !== "" } }
@@ -45,7 +41,6 @@ export function EntryLineFields({
   const chooseCondominium = () => {
     setValue(`${prefix}.entry_template`, "", { shouldDirty: true });
     setValue(`${prefix}.cost_center`, "", { shouldDirty: true });
-    setValue(`${prefix}.unit`, "", { shouldDirty: true });
   };
 
   return (
@@ -98,18 +93,7 @@ export function EntryLineFields({
         <TextField name={`${prefix}.entry_date`} label="Data" type="date" required />
         <TextField name={`${prefix}.competence_month`} label="Competência" type="month" required />
       </FieldRow>
-      <FieldRow>
-        <TextField name={`${prefix}.description`} label="Descrição" required maxLength={255} autoComplete="off" />
-        <SelectField
-          name={`${prefix}.unit`}
-          label="Unidade"
-          placeholder="Todo o condomínio"
-          disabled={!condominium}
-          hint="Opcional: só para lançamento de uma unidade."
-          options={(units?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
-        />
-      </FieldRow>
-      <TextField name={`${prefix}.justification`} label="Justificativa" required maxLength={2000} autoComplete="off" />
+      <TextField name={`${prefix}.description`} label="Descrição" required maxLength={255} autoComplete="off" />
     </div>
   );
 }
