@@ -37,7 +37,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       data-font={appearance.font}
       className={`${inter.variable} ${dmSans.variable} ${sourceSerif.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col">
+      {/* Extensões do navegador (ColorZilla, Grammarly...) acrescentam atributos ao <body> antes da hidratação. */}
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <Providers>
           <TooltipProvider>{children}</TooltipProvider>
           <Toaster position="top-right" />
