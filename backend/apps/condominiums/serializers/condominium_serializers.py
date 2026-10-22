@@ -18,6 +18,7 @@ class CondominiumSerializer(ModelRulesMixin, serializers.ModelSerializer[Condomi
     address = AddressSerializer(required=False, allow_null=True)
     administration_contract = AdministrationContractSerializer(required=False)
     billing_rules = BillingRulesSerializer(required=False)
+    unit_count = serializers.SerializerMethodField()
 
     @final
     class Meta:
@@ -38,10 +39,16 @@ class CondominiumSerializer(ModelRulesMixin, serializers.ModelSerializer[Condomi
             "electricity_meter",
             "gas_meter",
             "active",
+            "unit_count",
             "created_at",
             "updated_at",
         )
         read_only_fields = ("id", "code", "company", "created_at", "updated_at")
+
+    def get_unit_count(self, condominium: Condominium) -> int:
+        """The units of the condominium: the list annotates it (no query per row), a saved instance counts them."""
+        annotated: int | None = getattr(condominium, "unit_count", None)
+        return annotated if annotated is not None else condominium.units.count()
 
     @override
     def create(self, validated_data: dict[str, Any]) -> Condominium:
