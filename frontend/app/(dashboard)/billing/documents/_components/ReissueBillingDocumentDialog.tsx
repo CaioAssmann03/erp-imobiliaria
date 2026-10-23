@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -18,7 +17,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { getBillingDocumentsListQueryKey, useBillingDocumentsReissue } from "@/lib/api/generated";
+import {
+  getBillingDocumentsListQueryKey,
+  getBillingDocumentsRetrieveQueryKey,
+  useBillingDocumentsReissue,
+} from "@/lib/api/generated";
 import type { BillingDocument } from "@/lib/api/generated/models";
 import { applyServerErrors } from "@/lib/form-errors";
 import { addDays, todayIso } from "@/lib/format";
@@ -31,7 +34,6 @@ import {
 /** Reemissão: um novo boleto com o novo vencimento; o antigo é cancelado no gateway e o registro dele fica guardado. */
 export function ReissueBillingDocumentDialog({ document }: { document: BillingDocument }) {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
   const queryClient = useQueryClient();
   const reissueMutation = useBillingDocumentsReissue();
 
@@ -50,8 +52,7 @@ export function ReissueBillingDocumentDialog({ document }: { document: BillingDo
           queryClient.invalidateQueries({ queryKey: getBillingDocumentsListQueryKey() });
           toast.success("Boleto reemitido.");
           setOpen(false);
-          // A página do documento é desenhada no servidor: pede a nova versão dela.
-          router.refresh();
+          queryClient.invalidateQueries({ queryKey: getBillingDocumentsRetrieveQueryKey(document.id) });
         },
         onError: (error) => toast.error(applyServerErrors(error, setError)),
       }

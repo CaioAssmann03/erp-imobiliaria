@@ -1,6 +1,7 @@
 "use client";
 
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { ListState } from "@/components/data-list";
@@ -18,8 +19,9 @@ import { apiErrorMessage } from "@/lib/form-errors";
 import { BillingPlanRow } from "./BillingPlanRow";
 import { BillingPlansFilters } from "./BillingPlansFilters";
 
-/** Client Component: lista de planos de cobrança (hidratada do servidor) com busca, filtros e exclusão. */
-export function BillingPlansTable({ initialCondominium }: { initialCondominium?: string }) {
+/** Client Component: lista de planos de cobrança com busca, filtros e exclusão. O condomínio filtrado vem da URL (`?condominium=`). */
+export function BillingPlansTable() {
+  const initialCondominium = useSearchParams().get("condominium") ?? undefined;
   const queryClient = useQueryClient();
   const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
     useListParams({

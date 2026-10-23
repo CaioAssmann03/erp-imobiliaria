@@ -15,22 +15,20 @@ import { ModeSection } from "./settings/ModeSection";
 const TRIGGER_COMPACT =
   "flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink";
 const TRIGGER_SIDEBAR =
-  "flex h-9 w-full items-center gap-3 rounded-control px-3 text-body font-medium whitespace-nowrap text-ink-soft transition-colors hover:bg-surface hover:text-ink lg:group-data-[collapsed]/sidebar:justify-center lg:group-data-[collapsed]/sidebar:px-0";
+  "flex h-9 w-full items-center gap-3 rounded-control px-3 text-body font-medium whitespace-nowrap text-ink-soft transition-colors hover:bg-surface hover:text-ink lg:sidebar-closed:justify-center lg:sidebar-closed:px-0";
 
 export function SettingsDialog({
-  initial,
   compact = false,
   open,
   onOpenChange,
 }: {
-  initial: Appearance;
   /** Botão só com o ícone (barra do topo no celular). */
   compact?: boolean;
   /** Controlado por quem usa (sem estes dois, o próprio botão abre e fecha). Controlado, não desenha o botão. */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
-  const [appearance, setAppearance] = useState(initial);
+  const [appearance, setAppearance] = useState(DEFAULT_APPEARANCE);
 
   const update = (patch: Partial<Appearance>) => {
     const next = { ...appearance, ...patch };
@@ -45,7 +43,7 @@ export function SettingsDialog({
       open={open}
       onOpenChange={(nextOpen) => {
         // Pode haver mais de um botão (lateral e celular): ao abrir, lê o tema atual do <html>.
-        if (nextOpen) setAppearance(readAppearance(initial));
+        if (nextOpen) setAppearance(readAppearance(DEFAULT_APPEARANCE));
         onOpenChange?.(nextOpen);
       }}
     >
@@ -60,7 +58,7 @@ export function SettingsDialog({
           ) : (
             <>
               <Settings className="size-[1.125rem] shrink-0" />
-              <span className="lg:group-data-[collapsed]/sidebar:hidden">Configurações</span>
+              <span className="lg:sidebar-closed:hidden">Configurações</span>
             </>
           )}
         </Dialog.Trigger>

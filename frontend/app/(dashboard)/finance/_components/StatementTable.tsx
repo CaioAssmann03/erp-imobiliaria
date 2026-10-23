@@ -1,7 +1,7 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 import { ListState, Toolbar } from "@/components/data-list";
@@ -36,8 +36,9 @@ function periodParams(period: string, today: string): Pick<CurrentAccountEntries
 }
 
 /** Client Component: o extrato de um condomínio (na URL: `?condominium=`), do mais recente ao mais antigo. */
-export function StatementTable({ condominium }: { condominium?: string }) {
+export function StatementTable() {
   const router = useRouter();
+  const condominium = useSearchParams().get("condominium") ?? undefined;
   const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
     useListParams({ filterKeys: ["kind", "period", "competence"] });
 

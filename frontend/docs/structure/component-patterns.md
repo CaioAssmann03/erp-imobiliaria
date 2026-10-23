@@ -12,7 +12,7 @@ XxxTable.tsx    client  query (useXxxList), delete, pagination; composes the res
 XxxFilters.tsx  client  search + FilterMenu (values/callbacks by props)
 XxxRow.tsx      client  one row (ConfirmDeleteButton, RowLink, RowActions)
 ```
-`page.tsx` (server) prefetches and renders `<HydrationBoundary><XxxTable/></HydrationBoundary>`; its prefetch params must equal the ones the table sends (including `module` for people), or the cache does not hydrate.
+`page.tsx` (server) only renders `PageHeader` and `<XxxTable/>` (inside `<Suspense fallback={<ListFallback/>}>` when the table reads `useSearchParams`); the table fetches in the browser. A filter that arrives in the URL (`?condominium=`, `?pending=`) is read by the table with `useSearchParams` and used as the initial filter.
 The first column of the people and condominium lists is the read-only `ID` (`code`: `hidden md:table-cell`, `tabular-nums`) and the row's mobile `sub` line starts with `ID n`; the search placeholder says it accepts the ID. A unit has no ID (it is its condominium plus its number). Anything that lists or offers people (list, `PersonPicker`, search) sends `module=condominiums` from `lib/person-module.ts`.
 State: `hooks/use-list-params.ts`. Blocks: `components/data-list/` (`Toolbar`, `SearchField`, `RowLink`,
 `RowActions`, `ListState`), `FilterMenu`, `Pagination`. Sections with sub-pages (Condomínios, Financeiro) share `components/SectionTabs.tsx` (underlined, collapsible tabs). Periods (due date, entry date) are ready-made options of the `FilterMenu`, never loose date inputs. Filter values are English (`status=active`).

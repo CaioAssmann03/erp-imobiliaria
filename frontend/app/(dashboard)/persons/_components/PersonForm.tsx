@@ -10,6 +10,7 @@ import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { usePersonsRetrieve } from "@/lib/api/generated";
+import { throwIfNotFound } from "@/lib/query/not-found";
 import {
   PERSON_DEFAULTS,
   personSchema,
@@ -26,9 +27,10 @@ export function PersonForm({ personId }: { personId?: string }) {
   const router = useRouter();
   const isEdit = personId !== undefined;
 
-  const { data: person, isLoading } = usePersonsRetrieve(personId ?? "", {
+  const { data: person, isLoading, error: loadError } = usePersonsRetrieve(personId ?? "", {
     query: { enabled: isEdit },
   });
+  throwIfNotFound(loadError);
 
   const methods = useForm<PersonFormInput, unknown, PersonFormOutput>({
     resolver: zodResolver(personSchema),

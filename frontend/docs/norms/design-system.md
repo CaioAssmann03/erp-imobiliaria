@@ -26,7 +26,7 @@ Source of truth: `app/globals.css` (Tailwind v4 `@theme`). shadcn tokens map to 
 
 ## Theming (Settings)
 Preferences are **cookies** (`ui_mode`, `ui_accent`, `ui_font`) → attributes on `<html>` (`data-mode`, `data-accent`, `data-font`);
-CSS swaps variables only. The server reads the cookies, so the first paint has the right theme (no flash).
+CSS swaps variables only. The server does not read them (the HTML is the same for everyone): an inline script in the root layout's `<head>` (`APPEARANCE_INIT_SCRIPT`, `lib/appearance.ts`) copies the cookies to `<html>` before the first paint, so there is no flash. The sidebar works the same way (`sidebar_open` → `data-sidebar` on `<html>`, CSS variant `sidebar-closed` in `app/globals.css`).
 
 | Preference | Values | Default |
 |---|---|---|
@@ -34,6 +34,6 @@ CSS swaps variables only. The server reads the cookies, so the first paint has t
 | Accent | orange, blue, green, violet, red, rose, graphite | orange |
 | Font | Inter, DM Sans, Source Serif, system | Inter |
 
-Defined in `lib/appearance.ts` (`DEFAULT_APPEARANCE`, `ACCENTS`...); validated by `parseAppearance`; applied by
+Defined in `lib/appearance.ts` (`DEFAULT_APPEARANCE`, `ACCENTS`...); validated by `parseAppearance` and, in the script, by the same lists; applied by
 `shell/settings/apply-appearance.ts` (cookie 1 year, `SameSite=Lax`). Reddish accents also override `--color-danger`.
 Never hardcode a theme color; never use `localStorage` for appearance.

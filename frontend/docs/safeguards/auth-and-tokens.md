@@ -13,7 +13,7 @@ The browser never sees a token. The Next server holds them in `HttpOnly` cookies
 | Login | `LoginForm` → `POST /api/auth/login/` (same origin) | `app/api/[...path]/route.ts` posts to Django, then sets the cookies and answers `204` (no token in the body) |
 | Cookies | `lib/auth-cookies.ts` | `access_token` (Max-Age 30 min = the JWT life) and `refresh_token` (7 days): `HttpOnly`, `Secure` in production, `SameSite=Lax`, `Path=/`; written only on the server |
 | API calls | browser → `/api/...` (same origin) → handler → Django | the handler reads the cookie, adds `Authorization: Bearer`, relays status and JSON unchanged; the browser never calls Django |
-| SSR | `lib/api-client.ts` (server branch) | Server Components read the cookie with `next/headers` and call Django directly |
+| No SSR data | `lib/api-client.ts` | no page calls Django from the server: every call is made by the browser through `/api/...` |
 | Renewal | handler (API calls) and `proxy.ts` (page loads) | access missing/expiring (< 30 s) or refused with 401 → one refresh with the refresh cookie, new cookies on the response; a failed refresh clears the cookies (API: `401`, page: redirect to `/login`) |
 | Logout | `LogoutButton` → `POST /api/auth/logout/` | the handler sends the refresh token to Django (`POST /api/auth/logout/`, which blacklists it) and clears both cookies |
 | Browser 401 | `lib/api-client.ts` | the handler already tried to renew: the session ended → hard navigation to `/login` (`/api/auth/*` is excluded: 401 there is bad credentials) |

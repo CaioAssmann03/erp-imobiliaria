@@ -9,7 +9,7 @@ import { BillingRunCounts } from "./BillingRunCounts";
 import { BillingRunProblems } from "./BillingRunProblems";
 import { BillingRunStatusBadge } from "./BillingRunStatusBadge";
 
-/** Server Component: situação, contagens, problemas explicados e o atalho para os documentos do mês. */
+/** Situação, contagens, problemas explicados e o atalho para os documentos do mês. */
 export function BillingRunView({ run }: { run: BillingRun }) {
   return (
     <div className="space-y-4">

@@ -1,6 +1,7 @@
 "use client";
 
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { ListState, Toolbar } from "@/components/data-list";
@@ -19,8 +20,9 @@ import type { CondominiumsListPending } from "@/lib/api/generated/models";
 import { CondominiumRow } from "./CondominiumRow";
 import { CondominiumsFilters } from "./CondominiumsFilters";
 
-/** Client Component: busca, cache e exclusão. A 1ª página vem hidratada do servidor. */
-export function CondominiumsTable({ initialPending }: { initialPending?: string }) {
+/** Client Component: busca, cache e exclusão. O filtro `?pending=` vem da URL (dashboard → Pendências). */
+export function CondominiumsTable() {
+  const initialPending = useSearchParams().get("pending") ?? undefined;
   const queryClient = useQueryClient();
   const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
     useListParams({

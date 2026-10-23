@@ -1,5 +1,5 @@
 ---
-summary: Detailed TanStack Query usage: queries, server prefetch, mutations, cancelation, pitfalls.
+summary: Detailed TanStack Query usage: queries, mutations, cancelation, pitfalls (no server prefetch).
 read-when: you write or review query/mutation code beyond the standard patterns
 skip-if: the basic data flow and invalidation table → norms/data-and-cache.md
 ---
@@ -13,9 +13,8 @@ Use the **generated hooks**; call `useQuery`/`useMutation` directly only for non
 - `isLoading` first load; `isFetching` any fetch (subtle "updating" hints); `isPlaceholderData` showing previous data.
 - Never put server data in `useState`; never read `getQueryData` to render (the UI would not update).
 
-**Server prefetch**
-- `prefetchQuery` never throws; use `fetchQuery` when the page needs the data to render (e.g. a title) and handle failure.
-- Prefetch in parallel; params must equal the client hook's, or nothing is hydrated. Do not fake data with `initialData`.
+**No server prefetch**
+- Pages fetch on the client with the generated hooks; there is no `prefetchQuery` / `HydrationBoundary`. Do not fake data with `initialData`.
 
 **Mutations**
 ```tsx

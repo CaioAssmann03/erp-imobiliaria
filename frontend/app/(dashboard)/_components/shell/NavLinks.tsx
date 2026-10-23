@@ -23,14 +23,14 @@ export function NavLinks() {
             title={item.label}
             aria-label={item.label}
             className={cn(
-              "flex h-9 items-center gap-3 rounded-control px-3 text-body font-medium whitespace-nowrap transition-colors lg:group-data-[collapsed]/sidebar:justify-center lg:group-data-[collapsed]/sidebar:px-0",
+              "flex h-9 items-center gap-3 rounded-control px-3 text-body font-medium whitespace-nowrap transition-colors lg:sidebar-closed:justify-center lg:sidebar-closed:px-0",
               isNavItemActive(item.href, pathname)
                 ? "bg-ink text-ink-foreground"
                 : "text-ink-soft hover:bg-surface hover:text-ink"
             )}
           >
             <item.icon className="size-[1.125rem] shrink-0" />
-            <span className="lg:group-data-[collapsed]/sidebar:hidden">{item.label}</span>
+            <span className="lg:sidebar-closed:hidden">{item.label}</span>
           </Link>
       ))}
     </nav>

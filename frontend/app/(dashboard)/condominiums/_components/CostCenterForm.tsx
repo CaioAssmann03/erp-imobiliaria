@@ -12,6 +12,7 @@ import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useCondominiumsList, useCostCentersRetrieve } from "@/lib/api/generated";
+import { throwIfNotFound } from "@/lib/query/not-found";
 import {
   COST_CENTER_DEFAULTS,
   costCenterSchema,
@@ -27,9 +28,10 @@ export function CostCenterForm({ costCenterId }: { costCenterId?: string }) {
   const router = useRouter();
   const isEdit = costCenterId !== undefined;
 
-  const { data: costCenter, isLoading } = useCostCentersRetrieve(costCenterId ?? "", {
+  const { data: costCenter, isLoading, error: loadError } = useCostCentersRetrieve(costCenterId ?? "", {
     query: { enabled: isEdit },
   });
+  throwIfNotFound(loadError);
   const { data: condominiums } = useCondominiumsList({ limit: 100 });
 
   const methods = useForm<CostCenterFormInput, unknown, CostCenterFormOutput>({

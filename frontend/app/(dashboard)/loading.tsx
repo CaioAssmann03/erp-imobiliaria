@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Mostrado na hora em que se troca de página, enquanto o servidor busca os dados dela. */
+/** Mostrado na hora em que se troca de página, enquanto o servidor monta o esqueleto dela (os dados vêm do cliente). */
 export default function DashboardLoading() {
   return (
     <div className="space-y-6" aria-busy="true" aria-live="polite">

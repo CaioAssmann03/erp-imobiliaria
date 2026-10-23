@@ -9,9 +9,9 @@ Measure first (React Profiler, Network tab, `next build` output). **done** = alr
 
 | Technique | Status | Rule |
 |---|---|---|
-| Server Components by default, small client islands | done | less JS shipped |
-| Server prefetch + hydration, `Promise.all` | done | first paint has data; never await independent prefetches in series |
-| `Suspense` / `loading.tsx` | do | stream the shell, wrap slow server work |
+| Server shell, data fetched on the client | done | the page paints at once with a skeleton; no API call blocks the server render |
+| Prerendered static shells | done | most routes are `○` in `next build`: no per-request server work |
+| `Suspense` / `loading.tsx` | done | `Suspense` around client components that read `useSearchParams`; skeleton on a page change |
 | `next/dynamic` (`ssr:false` + skeleton) | do | charts, big dialogs |
 | Server-side search/filter/pagination | done | never download everything to filter |
 | `keepPreviousData`, debounce (250–300 ms), request abort | done | no flashes, no request per keystroke |
@@ -27,5 +27,4 @@ only after measuring or where identity matters; stable keys; paginate or virtual
 **CSS:** never build Tailwind class names dynamically; animate `transform`/`opacity` only.
 **Network:** `_next/static` is immutable; API data is per-user, controlled by TanStack Query; compress and use HTTP/2+ at the edge.
 
-Page audit: server `page.tsx` prefetches first-screen data? · each `"use client"` file truly interactive and small? · queries debounced, paginated, params
-equal to prefetch? · heavy lib reachable from a server file? · no state mirroring server data?
+Page audit: `page.tsx` makes no API call? · a skeleton while the client query loads? · each `"use client"` file truly interactive and small? · queries debounced, paginated? · heavy lib reachable from a server file? · no state mirroring server data?

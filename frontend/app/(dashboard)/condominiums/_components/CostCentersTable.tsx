@@ -1,6 +1,7 @@
 "use client";
 
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
@@ -19,8 +20,9 @@ import {
 } from "@/lib/api/generated";
 import { applyServerErrors } from "@/lib/form-errors";
 
-/** Client Component: lista de sub-contas (hidratada do servidor) com busca, filtros e exclusão. */
-export function CostCentersTable({ initialCondominium }: { initialCondominium?: string }) {
+/** Client Component: lista de sub-contas com busca, filtros e exclusão. O condomínio filtrado vem da URL (`?condominium=`). */
+export function CostCentersTable() {
+  const initialCondominium = useSearchParams().get("condominium") ?? undefined;
   const queryClient = useQueryClient();
   const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
     useListParams({

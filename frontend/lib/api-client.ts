@@ -1,30 +1,12 @@
 import axios from "axios";
 
-import { ACCESS_COOKIE } from "./auth";
-
-const isServer = typeof window === "undefined";
-
-// Navegador: só a própria origem (`/api/...`, atendida pelo handler do Next, que guarda o token em
-// cookie HttpOnly). Servidor (SSR): chama o Django direto, na rede interna, com o token do cookie.
-const baseURL = isServer ? process.env.API_INTERNAL_URL || "http://localhost:8000" : "";
-
-export const apiClient = axios.create({ baseURL });
-
-apiClient.interceptors.request.use(async (config) => {
-  if (isServer) {
-    // Import dinâmico: `next/headers` só existe no servidor.
-    const { cookies } = await import("next/headers");
-    const token = (await cookies()).get(ACCESS_COOKIE)?.value;
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// Só a própria origem (`/api/...`, atendida pelo handler do Next, que guarda o token em cookie HttpOnly
+// e o renova): nenhuma página chama o Django a partir do servidor.
+export const apiClient = axios.create({ baseURL: "" });
 
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // No servidor não dá para gravar cookies; o proxy.ts renova o token antes da renderização.
-    if (isServer) return Promise.reject(error);
     // Login: um 401 aqui é "credenciais inválidas", não sessão expirada.
     if (String(error.config?.url ?? "").includes("/api/auth/")) return Promise.reject(error);
     if (error.response?.status === 401) {

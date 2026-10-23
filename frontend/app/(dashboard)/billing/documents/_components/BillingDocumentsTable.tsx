@@ -1,6 +1,7 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 
 import { ListState } from "@/components/data-list";
 import { Pagination } from "@/components/Pagination";
@@ -12,14 +13,11 @@ import type { BillingDocumentsListStatus } from "@/lib/api/generated/models";
 import { BillingDocumentRow } from "./BillingDocumentRow";
 import { BillingDocumentsFilters } from "./BillingDocumentsFilters";
 
-/** Client Component: lista de documentos de cobrança (hidratada do servidor) com busca e filtros. */
-export function BillingDocumentsTable({
-  initialCondominium,
-  initialMonth,
-}: {
-  initialCondominium?: string;
-  initialMonth?: string;
-}) {
+/** Client Component: lista de documentos de cobrança com busca e filtros. Condomínio e mês filtrados vêm da URL (`?condominium=`, `?reference_month=`). */
+export function BillingDocumentsTable() {
+  const searchParams = useSearchParams();
+  const initialCondominium = searchParams.get("condominium") ?? undefined;
+  const initialMonth = searchParams.get("reference_month") ?? undefined;
   const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
     useListParams({
       filterKeys: ["condominium", "status", "month", "overdue"],

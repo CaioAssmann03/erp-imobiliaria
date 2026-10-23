@@ -8,9 +8,9 @@ skip-if: component anatomy → structure/component-patterns.md; naming → norms
 ```
 app/
   layout.tsx, providers.tsx, globals.css    root: fonts, theme attrs, QueryClientProvider, Toaster
-  login/                                     public (server page.tsx + _components/)
+  login/                                     public (page.tsx + _components/)
   (dashboard)/                               authenticated (route group, not in the URL)
-    layout.tsx, page.tsx                     AppShell, dashboard home
+    layout.tsx, page.tsx                     AppShell, dashboard home (`_components/home/DashboardHome.tsx` fetches)
     _components/shell/                       sidebar, global search, settings
     _components/home/                        widgets, lists, focus modal
     condominiums/  persons/                  one folder per resource, each with _components/

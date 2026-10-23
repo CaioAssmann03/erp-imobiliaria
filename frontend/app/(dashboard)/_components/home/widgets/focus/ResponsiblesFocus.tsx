@@ -1,29 +1,24 @@
+"use client";
+
 import Link from "next/link";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getCondominiumsListQueryOptions, getUnitsListQueryOptions } from "@/lib/api/generated";
+import { useCondominiumsList, useUnitsList } from "@/lib/api/generated";
 import type { Dashboard } from "@/lib/api/generated/models";
-import { getServerQueryClient } from "@/lib/query/server";
 
 import { DotMatrix } from "../../DotMatrix";
 import { FocusSection, FocusStat, percent } from "./parts";
 
 const SHOWN = 10;
 
-/**
- * Server Component: a cobertura, os pontos e a lista de quem ainda não tem ninguém para cobrar. Nada nela é
- * interativo, então a lista vem do servidor junto com a página (uma falha só esvazia a lista).
- */
-export async function ResponsiblesFocus({ stats }: { stats: Dashboard["responsibles"] | undefined }) {
+/** Client Component: a cobertura, os pontos e a lista de quem ainda não tem ninguém para cobrar (uma falha só esvazia a lista). */
+export function ResponsiblesFocus({ stats }: { stats: Dashboard["responsibles"] | undefined }) {
   const active = stats?.active_units ?? 0;
   const covered = stats?.with_responsible ?? 0;
   const missing = active - covered;
 
-  const queryClient = getServerQueryClient();
-  const [units, condominiums] = await Promise.all([
-    queryClient.fetchQuery(getUnitsListQueryOptions({ pending: "without_responsible", active: true, limit: SHOWN })).catch(() => undefined),
-    queryClient.fetchQuery(getCondominiumsListQueryOptions({ limit: 100 })).catch(() => undefined),
-  ]);
+  const { data: units } = useUnitsList({ pending: "without_responsible", active: true, limit: SHOWN });
+  const { data: condominiums } = useCondominiumsList({ limit: 100 });
   const condominiumName = (id: string) => condominiums?.results.find((item) => item.id === id)?.name ?? "–";
 
   return (

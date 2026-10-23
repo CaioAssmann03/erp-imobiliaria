@@ -1,7 +1,8 @@
+"use client";
+
 import { LinkButton } from "@/components/LinkButton";
-import { getAccountsPayableListQueryOptions } from "@/lib/api/generated";
+import { useAccountsPayableList } from "@/lib/api/generated";
 import type { AccountsPayable } from "@/lib/api/generated/models";
-import { getServerQueryClient } from "@/lib/query/server";
 
 import { brl } from "../format";
 import { OpenAccountsList } from "./OpenAccountsList";
@@ -10,15 +11,9 @@ import { FocusSection, FocusStat } from "./parts";
 const countLabel = (count: number) => `${count} ${count === 1 ? "conta" : "contas"}`;
 const LIST_LIMIT = 100;
 
-/**
- * Server Component: os totais por janela e as contas em aberto, buscados no servidor. Só o filtro por vencimento
- * (`OpenAccountsList`) é client.
- */
-export async function AccountsPayableFocus({ payables }: { payables: AccountsPayable | undefined }) {
-  const queryClient = getServerQueryClient();
-  const open = await queryClient
-    .fetchQuery(getAccountsPayableListQueryOptions({ status: "open", limit: LIST_LIMIT }))
-    .catch(() => undefined);
+/** Client Component: os totais por janela e as contas em aberto; o filtro por vencimento é o `OpenAccountsList`. */
+export function AccountsPayableFocus({ payables }: { payables: AccountsPayable | undefined }) {
+  const { data: open, isLoading } = useAccountsPayableList({ status: "open", limit: LIST_LIMIT });
   const accounts = [...(open?.results ?? [])]
     .sort((a, b) => a.due_date.localeCompare(b.due_date))
     .map((account) => ({
@@ -45,7 +40,11 @@ export async function AccountsPayableFocus({ payables }: { payables: AccountsPay
       </div>
 
       <FocusSection title="Contas em aberto" action={{ href: "/finance/accounts-payable", label: "Ver todas" }}>
-        {open ? <OpenAccountsList accounts={accounts} total={open.count} /> : <p className="py-6 text-ink-soft">Não foi possível carregar as contas.</p>}
+        {open ? (
+          <OpenAccountsList accounts={accounts} total={open.count} />
+        ) : (
+          <p className="py-6 text-ink-soft">{isLoading ? "Carregando as contas…" : "Não foi possível carregar as contas."}</p>
+        )}
       </FocusSection>
 
       <LinkButton variant="secondary" href="/finance/accounts-payable/new">

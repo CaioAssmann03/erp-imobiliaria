@@ -12,6 +12,7 @@ import { FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useBlocksRetrieve, useCondominiumsList } from "@/lib/api/generated";
+import { throwIfNotFound } from "@/lib/query/not-found";
 import {
   BLOCK_DEFAULTS,
   blockSchema,
@@ -36,7 +37,8 @@ export function BlockForm({
   const router = useRouter();
   const isEdit = blockId !== undefined;
 
-  const { data: block, isLoading } = useBlocksRetrieve(blockId ?? "", { query: { enabled: isEdit } });
+  const { data: block, isLoading, error: loadError } = useBlocksRetrieve(blockId ?? "", { query: { enabled: isEdit } });
+  throwIfNotFound(loadError);
   const { data: condominiums } = useCondominiumsList({ limit: 100 });
 
   const methods = useForm<BlockFormInput, unknown, BlockFormOutput>({

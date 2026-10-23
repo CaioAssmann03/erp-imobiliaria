@@ -10,6 +10,7 @@ import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useCondominiumsRetrieve } from "@/lib/api/generated";
+import { throwIfNotFound } from "@/lib/query/not-found";
 import {
   CONDOMINIUM_DEFAULTS,
   condominiumSchema,
@@ -37,9 +38,10 @@ export function CondominiumForm({
   const router = useRouter();
   const isEdit = condominiumId !== undefined;
 
-  const { data: condominium, isLoading } = useCondominiumsRetrieve(condominiumId ?? "", {
+  const { data: condominium, isLoading, error: loadError } = useCondominiumsRetrieve(condominiumId ?? "", {
     query: { enabled: isEdit },
   });
+  throwIfNotFound(loadError);
 
   const methods = useForm<CondominiumFormInput, unknown, CondominiumFormOutput>({
     resolver: zodResolver(condominiumSchema),

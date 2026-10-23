@@ -14,7 +14,7 @@ import { DocumentItem } from "./DocumentItem";
 const percent = (value: string) => `${Number(value).toLocaleString("pt-BR")}%`;
 
 /**
- * Server Component: dados, itens e condições copiadas na emissão (somente leitura), desenhados no servidor.
+ * Dados, itens e condições copiadas na emissão (somente leitura).
  * A única parte interativa é `BillingDocumentActions` (baixar o PDF e cancelar).
  */
 export function BillingDocumentView({ document }: { document: BillingDocument }) {

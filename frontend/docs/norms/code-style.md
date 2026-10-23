@@ -23,5 +23,5 @@ skip-if: naming → norms/language-and-naming.md; component rules → norms/comp
   (`./_components/X`); use `@/` for `components/`, `lib/`, `hooks/`.
 - Order: libraries, `@/...`, relative; blank line between groups. Named imports from icon/UI libs (tree-shaking).
 
-**Comments**: explain why, not what. A JSDoc on a component or hook only when it says something the name and props do not (a reason, a constraint such as "the first page comes hydrated from the server", a format example, a security note); never a sentence that restates the name. No dead code, no stray `console.log`.
+**Comments**: explain why, not what. A JSDoc on a component or hook only when it says something the name and props do not (a reason, a constraint such as "the filter comes from the URL", a format example, a security note); never a sentence that restates the name. No dead code, no stray `console.log`.
 **Tooling**: `eslint` (Next core-web-vitals + TS), `tsc --noEmit`; generated code is lint-ignored.

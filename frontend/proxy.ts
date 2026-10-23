@@ -32,12 +32,12 @@ export async function proxy(request: NextRequest) {
   if (!access && !refresh) return redirectToLogin(request);
 
   if (!access || isTokenExpiring(access)) {
-    // Renova o access token antes da renderização, para que Server Components
-    // consigam buscar dados com um token válido (eles não podem gravar cookies).
+    // Renova o access token antes de entregar a página: a sessão expirada cai no login aqui, e as chamadas
+    // do navegador já começam com um token válido (o handler de /api também renova num 401).
     const tokens = refresh ? await refreshTokens(refresh, request.headers) : null;
     if (!tokens) return redirectToLogin(request);
 
-    // Repassa os novos tokens para os Server Components desta requisição...
+    // Repassa os novos tokens para esta requisição...
     request.cookies.set(ACCESS_COOKIE, tokens.access);
     if (tokens.refresh) request.cookies.set(REFRESH_COOKIE, tokens.refresh);
     const response = NextResponse.next({ request: { headers: request.headers } });

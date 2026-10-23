@@ -10,6 +10,7 @@ import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useBillingPlansRetrieve } from "@/lib/api/generated";
+import { throwIfNotFound } from "@/lib/query/not-found";
 import {
   BILLING_PLAN_DEFAULTS,
   billingPlanSchema,
@@ -27,7 +28,8 @@ import { ValiditySection } from "./billing-plan-form/ValiditySection";
 export function BillingPlanForm({ billingPlanId }: { billingPlanId?: string }) {
   const router = useRouter();
   const isEdit = billingPlanId !== undefined;
-  const { data: plan, isLoading } = useBillingPlansRetrieve(billingPlanId ?? "", { query: { enabled: isEdit } });
+  const { data: plan, isLoading, error: loadError } = useBillingPlansRetrieve(billingPlanId ?? "", { query: { enabled: isEdit } });
+  throwIfNotFound(loadError);
 
   const methods = useForm<BillingPlanFormInput, unknown, BillingPlanFormOutput>({
     resolver: zodResolver(billingPlanSchema),

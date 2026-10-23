@@ -14,7 +14,7 @@ Organized by the SPDD REASONS canvas. Find your task, open **only** the listed f
 | Change a form or field | `norms/forms.md` · `entities/domain-model.md` |
 | Change a list / table / filter | `structure/component-patterns.md` · `norms/data-and-cache.md` |
 | Create or move a component | `norms/components.md` · `structure/folders-and-routes.md` |
-| Call the API, prefetch, invalidate | `norms/data-and-cache.md` (+ `norms/tanstack-query.md` for advanced use) |
+| Call the API, fetch on the client, invalidate | `norms/data-and-cache.md` (+ `norms/tanstack-query.md` for advanced use) |
 | Styling, colors, theme, accent | `norms/design-system.md` |
 | Login, token, cookie, `proxy.ts` | `safeguards/auth-and-tokens.md` (+ `safeguards/http-hardening.md`) |
 | Input, URLs, redirects, PII | `safeguards/secure-coding.md` |
@@ -30,5 +30,5 @@ Organized by the SPDD REASONS canvas. Find your task, open **only** the listed f
 `requirements/` scope · `entities/` domain model · `approach/` architecture and decisions · `structure/` folders, routes, patterns · `operations/` recipes ·
 `norms/` conventions · `safeguards/` security, performance, a11y, checklist.
 
-Always true: code English, UI text Portuguese · Server Component by default · tokens only · never edit `lib/api/generated/` · docs and `AGENTS.md` in English ·
+Always true: code English, UI text Portuguese · every page renders on the client (static shell + client queries) · tokens only · never edit `lib/api/generated/` · docs and `AGENTS.md` in English ·
 update the doc you changed in the same change.

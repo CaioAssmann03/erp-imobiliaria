@@ -15,6 +15,7 @@ import {
   getUnitsRetrieveQueryKey,
   useUnitsRetrieve,
 } from "@/lib/api/generated";
+import { throwIfNotFound } from "@/lib/query/not-found";
 import {
   UNIT_DEFAULTS,
   unitSchema,
@@ -42,9 +43,10 @@ export function UnitForm({ condominiumId, unitId, listUrl }: UnitFormProps) {
   const queryClient = useQueryClient();
   const isEdit = unitId !== undefined;
 
-  const { data: unit, isLoading } = useUnitsRetrieve(unitId ?? "", {
+  const { data: unit, isLoading, error: loadError } = useUnitsRetrieve(unitId ?? "", {
     query: { enabled: isEdit },
   });
+  throwIfNotFound(loadError);
 
   const methods = useForm<UnitFormInput, unknown, UnitFormOutput>({
     resolver: zodResolver(unitSchema),

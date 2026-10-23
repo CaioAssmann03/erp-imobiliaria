@@ -4,7 +4,7 @@ import { LinkButton } from "@/components/LinkButton";
 
 interface PageHeaderProps {
   title: React.ReactNode;
-  description?: string;
+  description?: React.ReactNode;
   back?: { href: string; label: string };
   actions?: React.ReactNode;
 }

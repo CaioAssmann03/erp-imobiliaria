@@ -33,7 +33,7 @@ Out of scope for now: suppliers, bank accounts and entry templates screens (regi
 | Language | code in English, UI text in Portuguese (pt-BR); docs in English |
 | Themes | dark default; light/system; selectable accent color and font |
 | Responsive | usable on mobile width; secondary columns hidden below `md` |
-| Performance | first paint with data (server prefetch); server-side pagination/search/filters |
+| Performance | instant shell with skeletons, static shells, data fetched on the client; server-side pagination/search/filters |
 | Security | tokens only in cookies, no PII in logs/URLs, backend authorizes everything |
 | Accessibility | keyboard operable, labeled fields, visible focus, contrast in both modes |
 | Quality gate | `tsc`, `eslint`, `next build` clean before finishing |

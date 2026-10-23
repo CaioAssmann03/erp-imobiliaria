@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { DM_Sans, Inter, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { parseAppearance } from "@/lib/appearance";
+import { APPEARANCE_INIT_SCRIPT, DEFAULT_APPEARANCE } from "@/lib/appearance";
 import { Providers } from "./providers";
 
 const inter = Inter({
@@ -25,18 +24,20 @@ export const metadata: Metadata = {
   description: "Administração de condomínios, locações, vendas e financeiro.",
 };
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const cookieStore = await cookies();
-  const appearance = parseAppearance((name) => cookieStore.get(name)?.value);
-
+export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
+    // Os atributos de tema são trocados pelo script do <head> antes do primeiro paint: o React não deve reclamar da diferença.
     <html
       lang="pt-BR"
-      data-mode={appearance.mode}
-      data-accent={appearance.accent}
-      data-font={appearance.font}
+      data-mode={DEFAULT_APPEARANCE.mode}
+      data-accent={DEFAULT_APPEARANCE.accent}
+      data-font={DEFAULT_APPEARANCE.font}
+      suppressHydrationWarning
       className={`${inter.variable} ${dmSans.variable} ${sourceSerif.variable} h-full`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: APPEARANCE_INIT_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <Providers>
           <TooltipProvider>{children}</TooltipProvider>

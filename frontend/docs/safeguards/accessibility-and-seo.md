@@ -20,5 +20,5 @@ skip-if: component rules → norms/components.md
 The app is behind a login, so public SEO matters little; titles and server-rendered HTML still matter.
 - Every `page.tsx` exports `metadata = { title: "Condomínios" }`; the root layout template makes it "Condomínios · ERP Imobiliária".
   `generateMetadata` only when the title depends on data.
-- First HTML is rendered with data on the server (prefetch + hydration). Descriptive link text ("Editar condomínio"), not "clique aqui".
+- The first HTML is the shell (title, header); the data arrives from the client with a skeleton and a busy state. Descriptive link text ("Editar condomínio"), not "clique aqui".
 - Authenticated pages are not indexed; a future public page gets its own `metadata` (`description`, `openGraph`); keep private areas `robots: { index: false }`.

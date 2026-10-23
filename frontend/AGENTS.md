@@ -25,7 +25,7 @@ organized by the SPDD REASONS canvas.
 ## Always true
 
 - Code in English; everything the user reads in Portuguese (pt-BR). Docs and this file in English.
-- Server Component by default; `"use client"` only for interaction.
+- ERP pages render on the client: a `page.tsx` makes no API call (not even the home); `"use client"` for what calls the API or interacts.
 - Style only with design tokens. Never edit `lib/api/generated/` (regenerate with `pnpm generate:api`).
 - Before finishing: `pnpm exec tsc --noEmit` · `pnpm exec eslint .` · `pnpm build`.
 

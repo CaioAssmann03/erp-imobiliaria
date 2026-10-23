@@ -1,6 +1,6 @@
 ---
-summary: Generated API client, request path, QueryClient, hydration, lists, invalidation rules.
-read-when: you call the API, prefetch, hydrate or invalidate
+summary: Generated API client, request path, QueryClient, client-side fetching, lists, invalidation rules.
+read-when: you call the API, fetch on the client or invalidate
 skip-if: advanced query/mutation usage → norms/tanstack-query.md; auth in requests → safeguards/auth-and-tokens.md
 ---
 # Data, API client and cache (N — Norms)
@@ -13,7 +13,6 @@ Hooks come from orval (`pnpm generate:api`, backend running); `lib/api/generated
 | list / detail | `useCondominiumsList(params)` / `useCondominiumsRetrieve(id)` |
 | create / edit / delete | `useCondominiumsCreate`, `useCondominiumsPartialUpdate`, `useCondominiumsDestroy` |
 | cache key | `getCondominiumsListQueryKey()`, `getCondominiumsRetrieveQueryKey(id)` |
-| server prefetch | `getCondominiumsListQueryOptions(params)`, `getCondominiumsRetrieveQueryOptions(id)` |
 | types | `import type { Condominium } from "@/lib/api/generated/models"` |
 
 Same pattern for `persons`, `units`, `unit-people`, `blocks`, `companies`, plus `dashboard`, `search`, `auth`.
@@ -21,22 +20,22 @@ Never write loose `fetch`/`axios` for API endpoints; never redeclare response ty
 ask the backend for new fields and regenerate.
 
 ## Request path (`lib/api/mutator.ts`, `lib/api-client.ts`)
-axios via `customInstance`; the query `signal` aborts stale requests. Base URL: browser = its own origin (`/api/...`, served by the Next handler that holds the HttpOnly token), server `API_INTERNAL_URL` (SSR adds `Authorization: Bearer` from the cookie). Browser 401 → the session ended: go to `/login` (the handler already tried to renew); page renewal happens in `proxy.ts`. `/api/auth/*` is excluded (401 = bad credentials). See safeguards/auth-and-tokens.md.
+axios via `customInstance`; the query `signal` aborts stale requests. Base URL: the browser's own origin (`/api/...`, served by the Next handler that holds the HttpOnly token and adds `Authorization: Bearer`); no page calls Django from the server. Browser 401 → the session ended: go to `/login` (the handler already tried to renew); `proxy.ts` also renews on a page load. `/api/auth/*` is excluded (401 = bad credentials). See safeguards/auth-and-tokens.md.
 
 ## QueryClient (`lib/query/`)
-Server: `getServerQueryClient()` (React `cache`, **one per request**, never shared). Browser: `getBrowserQueryClient()` singleton.
+Browser only: `getBrowserQueryClient()` singleton (there is no server query client: no page prefetches).
 Defaults: `staleTime 60s`, `refetchOnWindowFocus false`, and `retry: shouldRetry` (`lib/query/make-query-client.ts`): a 4xx answer (not found, forbidden, invalid) is never retried, a network error or a 5xx is retried twice. A `MutationCache.onSuccess` invalidates the cached global searches after **any** successful mutation (a record that was just created must be findable), so a form does not invalidate the search by hand.
 
-## Hydration
-`prefetchQuery` in `page.tsx` + `<HydrationBoundary state={dehydrate(queryClient)}>`. Key = hook + params, so server and client must use
-**identical params** (`DEFAULT_PAGE_SIZE` from `lib/pagination.ts`). Prefetch independent queries with `Promise.all`. **Everything that reads the cache must sit inside the `<HydrationBoundary>`, the page header included** (a dialog in `PageHeader` actions that reads a list was refetching it). Every client query a page's form or table makes on first paint needs its prefetch with the same key: the pickers of a new-record form (`condominiums`, `suppliers`...), and the dependent ones of an edit form (the plan's cost centers and the templates of each item's cost center). A way to check it: load the page in a browser and count the `/api/` calls the client makes; a fully prefetched page makes none (conditional sections, like the receipts of a paid account, are the exception). Failed prefetch: let the
-client fetch; for the dashboard use `fetchQuery(...).catch(() => undefined)`.
+## Fetching on the client
+ERP pages do not prefetch or hydrate: the table or form calls the generated hook in the browser and shows a skeleton (`ListState`, `FormSkeleton`) while it loads. A page that reads the URL in a client component wraps it in `<Suspense fallback={<ListFallback/>}>`. A page that waits for nothing on the server paints its shell at once; the cache keeps `staleTime 60s`, so going back to a list is instant.
+
+This includes the home (`/`): `DashboardHome` reads `useDashboardRetrieve()`. Do not add `prefetchQuery` / `HydrationBoundary` to any page.
 
 ## Detail pages
-A `[id]` page fetches its record with `fetchOrNotFound(queryClient, get…RetrieveQueryOptions(id))` (`lib/query/fetch-or-not-found.ts`): the result stays in the cache that hydrates the client, a 404 (missing, or another company's) becomes `notFound()` instead of an empty form, and any other error goes to `app/(dashboard)/error.tsx` (retry). `app/(dashboard)/loading.tsx` is the skeleton shown at once on a page change, and `not-found.tsx` the page for an address or record that does not exist.
+A `[id]` page only passes the `id`. The form (or a `…Detail` component for a read-only page) loads the record with `use…Retrieve(id)` and calls `throwIfNotFound(error)` (`lib/query/not-found.ts`) during render: a 404 (missing, or another company's) renders `app/(dashboard)/not-found.tsx` instead of an empty form, and any other error is retried per `shouldRetry` and then shown by the form or `app/(dashboard)/error.tsx`. A page header that needs the record (the `ID` of a person or condominium) uses a tiny client component with the same hook (`PersonCode`, `CondominiumCode`): same key, one request. `app/(dashboard)/loading.tsx` is the skeleton shown at once on a page change. A read-only view that used `router.refresh()` must invalidate the record key instead (`getBillingDocumentsRetrieveQueryKey(id)`).
 
-## The dashboard is not in the client cache
-`/` is a Server Component that fetches the summary on every visit (`fetchQuery(...).catch(() => undefined)`), then hands it to the widgets. Invalidating `getDashboardRetrieveQueryKey()` in the browser therefore changes nothing (those calls in the mutation hooks are harmless leftovers); the page is fresh on the next visit because dynamic routes are not kept in the Router Cache. Its focus views fetch their own lists with client queries (for example the open accounts payable), which the list invalidations already cover.
+## The dashboard
+`/` is a static shell (`PageHeader`) plus `DashboardHome` (client): the summary comes from `useDashboardRetrieve()` and, until it arrives or if it fails, the widgets show "–". The mutation hooks invalidate `getDashboardRetrieveQueryKey()`, which now refreshes the cached summary. The focus views (`?focus=`) fetch their own lists with client hooks (for example the open accounts payable), which the list invalidations already cover.
 
 ## Lists
 Search/filters/page are query params (`hooks/use-list-params.ts`); `placeholderData: keepPreviousData`; debounce search

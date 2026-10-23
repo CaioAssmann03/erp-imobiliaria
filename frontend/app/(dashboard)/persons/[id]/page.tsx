@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
-import { FormPage } from "@/components/form/FormPage";
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
+import { FormPage } from "@/components/form/FormPage";
 import { PageHeader } from "@/components/PageHeader";
+import { PersonCode } from "../_components/PersonCode";
 import { PersonForm } from "../_components/PersonForm";
-import { getPersonsRetrieveQueryOptions } from "@/lib/api/generated";
-import { fetchOrNotFound } from "@/lib/query/fetch-or-not-found";
-import { getServerQueryClient } from "@/lib/query/server";
 
 export const metadata: Metadata = { title: "Editar pessoa" };
 
@@ -16,22 +13,15 @@ export default async function EditPersonPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const personId = id;
-
-  const queryClient = getServerQueryClient();
-  await fetchOrNotFound(queryClient, getPersonsRetrieveQueryOptions(personId));
-  const person = queryClient.getQueryData(getPersonsRetrieveQueryOptions(personId).queryKey);
 
   return (
     <FormPage>
       <PageHeader
         back={{ href: "/persons", label: "Pessoas" }}
         title="Editar pessoa"
-        description={person ? `ID ${person.code}` : undefined}
+        description={<PersonCode personId={id} />}
       />
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <PersonForm personId={personId} />
-      </HydrationBoundary>
+      <PersonForm personId={id} />
     </FormPage>
   );
 }

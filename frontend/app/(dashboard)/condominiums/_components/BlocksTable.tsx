@@ -1,6 +1,7 @@
 "use client";
 
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
@@ -30,15 +31,9 @@ import {
   useCondominiumsList,
 } from "@/lib/api/generated";
 
-/** Client Component: lista de blocos (hidratada do servidor) com filtro por condomínio e exclusão. */
-export function BlocksTable({
-  condominiumId,
-  initialCondominium,
-}: {
-  condominiumId?: string;
-  /** Condomínio já filtrado ao abrir (vem de "Blocos" na lista de condomínios). */
-  initialCondominium?: string;
-}) {
+/** Client Component: lista de blocos com filtro por condomínio e exclusão. O condomínio já filtrado ao abrir vem da URL (`?condominium=`, de "Blocos" na lista de condomínios). */
+export function BlocksTable({ condominiumId }: { condominiumId?: string }) {
+  const initialCondominium = useSearchParams().get("condominium") ?? undefined;
   const queryClient = useQueryClient();
   const {
     page,

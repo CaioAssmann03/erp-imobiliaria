@@ -1,6 +1,7 @@
 "use client";
 
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { ListState, Toolbar } from "@/components/data-list";
@@ -22,19 +23,12 @@ import type { UNIT_TYPES } from "@/lib/schemas/unit";
 import { UnitRow } from "./UnitRow";
 import { UnitsFilters } from "./UnitsFilters";
 
-/** Client Component: lista de unidades (hidratada do servidor) com filtros e exclusão. */
-export function UnitsTable({
-  condominiumId,
-  initialCondominium,
-  initialBlock,
-  initialPending,
-}: {
-  condominiumId?: string;
-  /** Filtros já aplicados ao abrir (vêm de "Unidades" / "Ver unidades" nas outras listas). */
-  initialCondominium?: string;
-  initialBlock?: string;
-  initialPending?: string;
-}) {
+/** Client Component: lista de unidades com filtros e exclusão. Os filtros já aplicados ao abrir vêm da URL (`?condominium=`, `?block=`, `?pending=`: de "Unidades" / "Ver unidades" nas outras listas). */
+export function UnitsTable({ condominiumId }: { condominiumId?: string }) {
+  const searchParams = useSearchParams();
+  const initialCondominium = searchParams.get("condominium") ?? undefined;
+  const initialBlock = searchParams.get("block") ?? undefined;
+  const initialPending = searchParams.get("pending") ?? undefined;
   const queryClient = useQueryClient();
   const { page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } = useListParams({
     searchable: false,

@@ -8,7 +8,6 @@ import { useState } from "react";
 import { Brand } from "@/components/Brand";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import type { Appearance } from "@/lib/appearance";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "./LogoutButton";
 import { isNavItemActive, NAV_ITEMS } from "./nav-items";
@@ -18,7 +17,7 @@ import { SettingsDialog } from "./SettingsDialog";
  * Client Component: navegação do celular, um menu lateral aberto pelo botão da barra do topo.
  * Embaixo ficam a marca, as configurações (o menu fecha e a janela abre sozinha) e o sair. Fecha ao escolher um item. Só celular (no desktop a navegação é a `Sidebar`).
  */
-export function MobileMenu({ appearance }: { appearance: Appearance }) {
+export function MobileMenu() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -71,7 +70,7 @@ export function MobileMenu({ appearance }: { appearance: Appearance }) {
         </div>
       </SheetContent>
     </Sheet>
-    <SettingsDialog initial={appearance} open={settingsOpen} onOpenChange={setSettingsOpen} />
+    <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
   );
 }

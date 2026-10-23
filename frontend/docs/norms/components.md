@@ -11,13 +11,13 @@ TanStack Query hooks, react-hook-form, `useRouter`/`usePathname`, browser APIs, 
 
 | Server | Client |
 |---|---|
-| `page.tsx`, `layout.tsx`, `metadata`, prefetch + `HydrationBoundary` | forms and sections, filters, searchable tables |
+| `page.tsx`, `layout.tsx`, `metadata` (no data fetching) | forms and sections, filters, searchable tables, anything that calls the API |
 | `PageHeader`, static text, stateless cards, read-only lists | delete buttons, modals, menus, charts, `WidgetCard`, `GlobalSearch` |
 
 1. Keep the client boundary **low**: a server component may render a tiny client one; do not mark a tree client for one `onClick`.
 2. `"use client"` makes everything the file imports client-side; extract the interactive part into its own file.
 3. Client code never imports server-only code (`next/headers`); server code never uses hooks.
-4. Data arrives by props or the hydrated query; do not `fetch` in the client what the page can prefetch.
+4. ERP data is fetched in the client component with the generated hook; a page does not prefetch (not even the home).
 5. Props crossing server → client must be serializable. To put server content inside a client shell, pass it as `children`.
 
 ## Placement

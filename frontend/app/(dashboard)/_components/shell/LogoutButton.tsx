@@ -39,11 +39,11 @@ export function LogoutButton({ compact = false }: { compact?: boolean }) {
       variant="ghost"
       title="Sair"
       aria-label="Sair"
-      className="h-9 w-full justify-start gap-3 rounded-control px-3 hover:bg-surface lg:group-data-[collapsed]/sidebar:justify-center lg:group-data-[collapsed]/sidebar:px-0"
+      className="h-9 w-full justify-start gap-3 rounded-control px-3 hover:bg-surface lg:sidebar-closed:justify-center lg:sidebar-closed:px-0"
       onClick={handleLogout}
     >
       <LogOut className="size-[1.125rem] shrink-0" />
-      <span className="lg:group-data-[collapsed]/sidebar:hidden">Sair</span>
+      <span className="lg:sidebar-closed:hidden">Sair</span>
     </Button>
   );
 }
