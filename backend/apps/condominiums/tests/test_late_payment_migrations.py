@@ -43,7 +43,7 @@ def restore_the_latest_schema() -> Iterator[None]:
 def create_condominium(apps: StateApps) -> Any:
     company_model: Any = apps.get_model("core", "Company")
     company, _ = company_model.objects.get_or_create(
-        cnpj=SEEDED_COMPANY_CNPJ, defaults={"legal_name": "EVE ADM DE IMOVEIS COND E VENDAS LTDA"}
+        cnpj=SEEDED_COMPANY_CNPJ, defaults={"legal_name": "SEEDED COMPANY LTDA"}
     )
     condominium_model: Any = apps.get_model("condominiums", "Condominium")
     return condominium_model.objects.create(company=company, name="Sol", cnpj="11222333000181")

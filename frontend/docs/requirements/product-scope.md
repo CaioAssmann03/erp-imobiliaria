@@ -5,7 +5,7 @@ skip-if: entity fields → entities/domain-model.md; stack → approach/architec
 ---
 # Product scope (R — Requirements)
 
-ERP for a condominium administration company (EVE Administradora). Internal tool; users are staff, all
+ERP for a condominium administration company. Internal tool; users are staff, all
 authenticated with a Django user (admins only for now).
 
 ## Modules in the frontend today

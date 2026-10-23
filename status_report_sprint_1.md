@@ -2,7 +2,7 @@
 
 ## 1. Identificação
 
-- **Projeto:** ERP Imobiliária (EVE Administradora de Imóveis)
+- **Projeto:** ERP Imobiliária
 - **Número da Sprint:** 1
 - **Período:** 17/09 a 24/09/2026
 - **Integrantes:** Gabriel Tadeu Matiolla, Caio assmann, Eduardo Paim, Raquel aguilhera

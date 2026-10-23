@@ -20,8 +20,6 @@ export default function LoginPage() {
 
         <LoginForm />
       </main>
-
-      <p className="mt-12 text-center text-caption text-ink-faint">EVE Administradora de Imóveis</p>
     </ShellFrame>
   );
 }
