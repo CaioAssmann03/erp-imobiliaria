@@ -18,6 +18,7 @@ A phase is `done` only when every part is `done` or `moved`.
 |---|---|---|---|---|
 | 1 | [Foundations](phase-1-foundations/README.md) | done | 5/5 | Sprint 1 |
 | 2 | [Condominium registry](phase-2-condominium-registry/README.md) | done | 4/4 | Sprint 2 |
+| 2a | [Condominium workspace](phase-2a-condominium-workspace/README.md) | in-progress | 0/7 | User request (reference screenshots) |
 | 3a | [Prerequisites for phase 3](phase-3a-prerequisites/README.md) | done | 9/9 | Known-gaps review |
 | 3 | [Finance base](phase-3-finance-base/README.md) | done | 7/7 | Sprint 3 |
 | 4 | [Billing issuance (generation)](phase-4-billing-generation/README.md) | done | 7/7 | Sprint 4 |
