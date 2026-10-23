@@ -158,6 +158,20 @@ def test_a_manual_entry_is_posted_through_the_api(
     assert current_account.balance == Decimal("250.00")
 
 
+def test_a_manual_entry_is_accepted_without_justification_and_without_unit(
+    api_client: APIClient, current_account: CurrentAccount, entry_batch: EntryBatch, entry_template: EntryTemplate,
+    cost_center: CostCenter,
+) -> None:
+    payload = entry_payload(current_account, entry_batch, entry_template, cost_center)
+    del payload["justification"]
+
+    response = api_client.post(reverse(ENTRIES), payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, response.data
+    assert body(response)["justification"] == ""
+    assert body(response)["unit"] is None
+
+
 def test_the_client_cannot_set_the_registry_the_origin_nor_the_user(
     api_client: APIClient, current_account: CurrentAccount, entry_batch: EntryBatch, entry_template: EntryTemplate,
     cost_center: CostCenter, staff_user: User,
@@ -177,8 +191,6 @@ def test_the_client_cannot_set_the_registry_the_origin_nor_the_user(
     [
         ({"amount": "0"}, "amount", "amount.not_positive"),
         ({"competence_month": "2026-10-15"}, "competence_month", "current_account_entry.competence_month.not_first_day"),
-        ({"justification": ""}, "justification", "current_account_entry.justification.blank"),
-        ({"justification": "   "}, "justification", "current_account_entry.justification.blank"),
     ],
 )
 def test_an_invalid_manual_entry_answers_a_coded_error_and_does_not_move_the_balance(
@@ -314,9 +326,16 @@ def test_the_database_refuses_an_automatic_entry_without_account_payable(make_en
         make_entry(origin="automatic_payable", justification="").save()
 
 
-def test_the_database_refuses_a_manual_entry_without_justification(make_entry: Any) -> None:
+def test_the_database_refuses_a_reversal_without_justification(make_entry: Any) -> None:
+    original = make_entry()
+    original.save()
+
     with pytest.raises(IntegrityError), transaction.atomic():
-        make_entry(justification="").save()
+        make_entry(kind="credit", reversal_of=original, justification="").save()
+
+
+def test_the_database_accepts_a_manual_entry_without_justification(make_entry: Any) -> None:
+    make_entry(justification="").save()
 
 
 def test_an_account_payable_has_one_ledger_entry_only(make_entry: Any, make_account: Any, staff_user: User) -> None:

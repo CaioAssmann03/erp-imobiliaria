@@ -28,13 +28,11 @@ export const entryLineSchema = z.object({
   condominium: z.string().min(1, "Selecione o condomínio"),
   entry_template: z.string().min(1, "Selecione o modelo de lançamento"),
   cost_center: z.string().min(1, "Selecione a sub-conta"),
-  unit: z.string(),
   kind: enumField(ENTRY_KINDS.map((item) => item.value) as [string, ...string[]]),
   amount: decimalField("Valor", { min: 0.01, max: MAX_MONEY }).refine((value) => value !== undefined, "Informe o valor"),
   entry_date: requiredDate("Data"),
   competence_month: competenceField,
   description: requiredText("a descrição", { max: 255 }),
-  justification: requiredText("a justificativa", { max: 2000 }),
 });
 
 export const entriesBatchSchema = z
@@ -58,13 +56,11 @@ export const EMPTY_ENTRY_LINE: EntryLineFormInput = {
   condominium: "",
   entry_template: "",
   cost_center: "",
-  unit: "",
   kind: "debit",
   amount: "",
   entry_date: "",
   competence_month: "",
   description: "",
-  justification: "",
 };
 
 export const entriesBatchDefaults = (today: string): EntriesBatchFormInput => ({
@@ -89,13 +85,11 @@ export const entryLineToPayload = (
   current_account: currentAccount,
   entry_template: line.entry_template,
   cost_center: line.cost_center,
-  ...(line.unit ? { unit: line.unit } : {}),
   kind: line.kind,
   amount: line.amount,
   entry_date: line.entry_date,
   competence_month: line.competence_month,
   description: line.description,
-  justification: line.justification,
 });
 
 /** Motivo e data do estorno de um lançamento. */

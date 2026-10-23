@@ -64,7 +64,7 @@ class CurrentAccountEntry(BaseModel):
         max_digits=12, decimal_places=2, validators=[validate_positive_amount]
     )
     description = models.CharField(max_length=255)
-    # Required for a manual entry (a reversal is manual, its reason is the justification).
+    # The reason of a reversal, required then (spec 039); a manual entry no longer needs one, and an old one keeps its own.
     justification = models.TextField(blank=True)
 
     origin = models.CharField(max_length=20, choices=Origin.choices, default=Origin.MANUAL)
@@ -126,8 +126,8 @@ class CurrentAccountEntry(BaseModel):
                 violation_error_code=CurrentAccountEntryError.ACCOUNT_PAYABLE_MATCHES_ORIGIN.value,
             ),
             models.CheckConstraint(
-                name="current_account_entry_manual_has_justification",
-                condition=~Q(origin="manual") | ~Q(justification=""),
+                name="current_account_entry_reversal_has_justification",
+                condition=Q(reversal_of__isnull=True) | ~Q(justification=""),
                 violation_error_message=CurrentAccountEntryError.JUSTIFICATION_BLANK.message,
                 violation_error_code=CurrentAccountEntryError.JUSTIFICATION_BLANK.value,
             ),
