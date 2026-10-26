@@ -134,9 +134,7 @@ def test_documents_show_the_active_registration(api_client: APIClient, document:
     assert body(api_client.get(reverse(DETAIL, args=[document.pk])))["registration"] is None
 
     account = GatewayAccount.objects.create(
-        condominium=document.unit.condominium,
-        gateway_account_id="acc-1",
-        wallet_id="w",
+        company=document.unit.condominium.company,
         api_key="secret-key",
         webhook_token="secret-token",
     )

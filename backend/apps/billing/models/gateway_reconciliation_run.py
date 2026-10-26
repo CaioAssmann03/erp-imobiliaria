@@ -32,7 +32,7 @@ class GatewayReconciliationRun(BaseModel):
     started_at = models.DateTimeField(default=timezone.now)
     finished_at = models.DateTimeField(null=True, blank=True)
 
-    company_lookup = "gateway_account__condominium__company"
+    company_lookup = "gateway_account__company"
 
     class Meta:
         verbose_name = "Gateway Reconciliation Run"

@@ -1,41 +1,24 @@
 ---
-summary: Plan and status of part 01 of phase 5 — Asaas production account and one sub-account per condominium, with the credentials kept encrypted.
+summary: Plan and status of part 01 of phase 5 — the company's single Asaas account, with the credentials kept encrypted.
 read-when: you work on the gateway accounts, their credentials or the onboarding of a condominium at Asaas
 skip-if: you need the whole phase → roadmap/phase-5-billing-bank-integration/README.md; you need the process → roadmap/README.md
 ---
-# Part 01 — Gateway accounts
+# Part 01 — Gateway account
 
-**Status:** in-progress · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing · **Frontend impact:** none · **Depends on:** phase 4
-**Spec:** [030](../../features/030-gateway-accounts.md), reworked by [037](../../features/037-single-gateway-account.md) (one account per company instead of a sub-account per condominium; draft)
+**Status:** in-progress · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing · **Frontend impact:** client regeneration · **Depends on:** phase 4
+**Spec:** [037](../../features/037-single-gateway-account.md) (one Asaas account per company); [030](../../features/030-gateway-accounts.md) (the sub-account per condominium it replaced, dropped)
 
 ## Goal
-Every condominium that is billed has an account at the gateway that is the beneficiary of its boletos, and the system holds the credentials to use it safely.
+The company has one account at the gateway that issues the boletos of every condominium and receives the money, and the system holds its credentials safely. Condominiums have no account and no CNPJ requirement; the split between current account, reserve fund and works fund exists only in the ledger.
 
 ## Scope
-- [ ] Account status per condominium follows `ACCOUNT_STATUS_GENERAL_APPROVAL_APPROVED` and `GET /v3/myAccount/status`; the sandbox evaluation period is turned off for development
-- [ ] Register a Pix key in each sub-account so the boleto shows a durable Pix QR (check whether it can be done by API)
-- [ ] External: open the Asaas production account in the CNPJ of the company (never a personal account); compare the per-charge fee with the old convenio before opening it
-- [x] Model `GatewayAccount` (condominium, gateway wallet id, API key stored encrypted, status `pending` / `active` / `blocked`) and its Admin
-- [x] Onboarding of a condominium: create its Asaas sub-account (its CNPJ, address and the data Asaas requires) and store the credentials the response gives once
-- [x] Encryption key for the stored API keys in the environment (`GATEWAY_CREDENTIALS_KEY`), recorded in `.env.example` and `architecture/overview.md`
-
-## Draft for the spec
-### Entities
-| Name | Code name | Notes |
-|---|---|---|
-| Conta no gateway | `GatewayAccount` | one per condominium; the API key is shown by Asaas only once and must be stored encrypted; never returned by the API |
-
-### Business rules
-- A condominium without an active `GatewayAccount` cannot have charges registered; its documents stay as drafts and the issuance reports it.
-- Each sub-account has its own webhook (the `webhooks` field of the creation request configures it), authenticated by its own `authToken`; the token is shown once and stored like the API key.
-- The credentials never appear in logs, the API, the Admin list or an error message.
-
-### Open questions
-- [ ] How the money reaches each condominium: decided in the phase README (decision 1): a sub-account per condominium, with the **regulatory homologation requested before go-live** (the evaluation period allows 10 sub-accounts and R$ 2,000.00 in charges each for at most 60 days; it ends with the homologation, which can be requested at any time). What is left to learn at onboarding: what the review asks, how long it takes, whether unrelated condominium CNPJs are accepted outside BaaS, and the sub-account creation fee
-- [ ] Each condominium's holder (the síndico or the legal representative) must do the KYC: identification document and selfie, and for an association possibly the election minutes. Who gathers these, and does the administradora act as BaaS onboarding agent? (recommended: the administradora collects them and guides the síndico through the `onboardingUrl`)
-- [ ] Who opens and owns the production account on the client side? (recommended: the company's finance contact; track the date here)
-- [ ] A lost key is reissued through the parent account (`POST /v3/accounts/{id}/accessTokens`, which needs the IP whitelist and a setting enabled in the web UI): does the production host have a fixed IP? (check the VPS)
-- [ ] Encrypt the API keys with a symmetric key from the environment (Fernet), or keep them only in the environment per condominium? (recommended: encrypted in the database; the environment holds one key)
+- [x] Model `GatewayAccount` (company, API key and webhook token stored encrypted, status `pending` / `active` / `blocked`) and its read-only Admin
+- [x] Set-up command `setup_gateway_account` (key by prompt, webhook token generated, optional webhook registration, token rotation)
+- [x] Encryption key for the stored credentials in the environment (`GATEWAY_CREDENTIALS_KEY`), recorded in `.env.example` and `architecture/overview.md`
+- [x] The sub-account onboarding and status sync of spec 030 are removed; the migration moves an existing account to its condominium's company
+- [ ] Validate in the Asaas sandbox with the CPF account: key check, webhook registration, a charge, the confirmed payment and the postings (spec 037, *Pending before done*)
+- [ ] Register a Pix key at the account so the boleto shows a durable Pix QR (`POST /pix/addressKeys` type `EVP` works in the sandbox)
+- [ ] External: decide whether the production account is CPF or CNPJ (the user keeps CPF for now) and confirm with Asaas that collecting on the administradora's own account for the condominiums is allowed
 
 ## Result
-Implemented on 2026-10-21 (spec 030): model, encrypted credentials, onboarding command, status sync, read-only Admin. Pending: validation against the Asaas sandbox (sub-account creation, status read, Pix key by API), the status-follows-webhook wiring (part 03) and the external steps (production account, homologation).
+Implemented on 2026-10-26 (spec 037). The spec stays `in-progress` until the sandbox validation above is done.
