@@ -6,7 +6,7 @@ skip-if: you need the whole phase → roadmap/phase-5-billing-bank-integration/R
 # Part 01 — Gateway accounts
 
 **Status:** in-progress · **Phase:** 5 (Billing issuance (gateway)) · **Apps:** billing · **Frontend impact:** none · **Depends on:** phase 4
-**Spec:** [030](../../features/030-gateway-accounts.md)
+**Spec:** [030](../../features/030-gateway-accounts.md), reworked by [037](../../features/037-single-gateway-account.md) (one account per company instead of a sub-account per condominium; draft)
 
 ## Goal
 Every condominium that is billed has an account at the gateway that is the beneficiary of its boletos, and the system holds the credentials to use it safely.
