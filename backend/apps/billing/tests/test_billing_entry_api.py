@@ -136,11 +136,8 @@ def test_preview_answers_the_per_unit_values_without_saving(
     units = make_units(condominium)
 
     response = api_client.post(
-        reverse(PREVIEW),
-        {
-            **entry_payload(condominium, cost_center, units, allocation="fraction", ideal_fraction_number=1),
-            "reference_month": "2026-10-01",
-        },
+        reverse(PREVIEW) + "?reference_month=2026-10-01",
+        entry_payload(condominium, cost_center, units, allocation="fraction", ideal_fraction_number=1),
         format="json",
     )
 
