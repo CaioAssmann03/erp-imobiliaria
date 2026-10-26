@@ -1,23 +1,12 @@
-from typing import Any
+from typing import Any, cast
 
 from apps.billing.models import BillingDocument
-from apps.core.scoping import scope_to_company
-
-from .ranking import LIMIT_PER_TYPE, relevance_rank
-from .term import ClassifiedTerm
-from .text_match import name_matches
+from apps.billing.models.querysets import BillingDocumentQuerySet
+from apps.core.infrastructure.scoping import scope_to_company
+from apps.core.infrastructure.search.ranking import LIMIT_PER_TYPE
+from apps.core.infrastructure.search.term import ClassifiedTerm
 
 
 def search_billing_documents(user: Any, query: ClassifiedTerm) -> list[BillingDocument]:
-    """By the payer's name or the unit's number; the latest month first among equals."""
-    conditions = name_matches(query, "payer__name", "unit__name")
-    if conditions is None:
-        return []
-    contains, starts_with = conditions
-    return list(
-        scope_to_company(BillingDocument.objects.all(), user)
-        .filter(contains)
-        .annotate(rank=relevance_rank([starts_with], None))
-        .select_related("unit__condominium", "payer")
-        .order_by("rank", "-reference_month")[:LIMIT_PER_TYPE]
-    )
+    documents = cast(BillingDocumentQuerySet, scope_to_company(BillingDocument.objects.all(), user))
+    return list(documents.search(query)[:LIMIT_PER_TYPE])

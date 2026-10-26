@@ -43,7 +43,7 @@ class CondominiumFilter(django_filters.FilterSet):
             case CondominiumPending.WITHOUT_COST_CENTERS:
                 return queryset.without_cost_centers()  # type: ignore[attr-defined, no-any-return]
             case CondominiumPending.INCONSISTENT_APPORTIONMENT:
-                return queryset.filter(pk__in=Unit.objects.inconsistent_apportionment_condominium_ids())
+                return queryset.with_inconsistent_apportionment()  # type: ignore[attr-defined, no-any-return]
             case CondominiumPending.OVERDUE_ADJUSTMENT:
                 return queryset.filter(pk__in=contracts.overdue_adjustment_condominium_ids(today))
             case _:
@@ -68,4 +68,4 @@ class UnitFilter(django_filters.FilterSet):
             case UnitPending.LEASE_ENDING:
                 return queryset.filter(active=True).with_lease_ending_soon(today)  # type: ignore[attr-defined, no-any-return]
             case _:
-                return queryset.filter(active=True, is_billing_blocked=True)
+                return queryset.billing_blocked()  # type: ignore[attr-defined, no-any-return]

@@ -1,22 +1,12 @@
-from typing import Any
+from typing import Any, cast
 
 from apps.billing.models import BillingPlan
-from apps.core.scoping import scope_to_company
-
-from .ranking import LIMIT_PER_TYPE, relevance_rank
-from .term import ClassifiedTerm
-from .text_match import name_matches
+from apps.billing.models.querysets import BillingPlanQuerySet
+from apps.core.infrastructure.scoping import scope_to_company
+from apps.core.infrastructure.search.ranking import LIMIT_PER_TYPE
+from apps.core.infrastructure.search.term import ClassifiedTerm
 
 
 def search_billing_plans(user: Any, query: ClassifiedTerm) -> list[BillingPlan]:
-    conditions = name_matches(query, "name")
-    if conditions is None:
-        return []
-    contains, starts_with = conditions
-    return list(
-        scope_to_company(BillingPlan.objects.all(), user)
-        .filter(contains)
-        .annotate(rank=relevance_rank([starts_with], None))
-        .select_related("condominium")
-        .order_by("rank", "name")[:LIMIT_PER_TYPE]
-    )
+    plans = cast(BillingPlanQuerySet, scope_to_company(BillingPlan.objects.all(), user))
+    return list(plans.search(query)[:LIMIT_PER_TYPE])
