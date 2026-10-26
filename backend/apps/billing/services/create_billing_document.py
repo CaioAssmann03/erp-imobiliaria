@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from django.db import transaction
 
-from apps.billing.models import BillingDocument, BillingDocumentItem
+from apps.billing.models import BillingDocument, BillingDocumentItem, BillingEntry
 from apps.condominiums.models import Unit
 from apps.finance.models import CostCenter, EntryTemplate
 from apps.persons.models import Person
@@ -16,6 +16,7 @@ class NewBillingDocumentItem:
     cost_center: CostCenter
     entry_template: EntryTemplate
     amount: Decimal
+    billing_entry: BillingEntry | None = None
 
 
 @dataclass(frozen=True)
@@ -65,6 +66,7 @@ def create_billing_document(new_document: NewBillingDocument) -> BillingDocument
             cost_center=new_item.cost_center,
             entry_template=new_item.entry_template,
             amount=new_item.amount,
+            billing_entry=new_item.billing_entry,
         )
         item.full_clean()
         item.save()

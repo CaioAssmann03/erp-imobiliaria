@@ -9,6 +9,8 @@ from django.utils import timezone
 
 from apps.billing.models import (
     BillingDocument,
+    BillingEntry,
+    BillingEntryUnit,
     BillingPlan,
     BillingPlanItem,
     BillingRun,
@@ -48,7 +50,8 @@ def _issue_units(run: BillingRun) -> None:
     if billing_rules is None:
         return _fail_condominium(run, ProblemCode.NO_BILLING_RULES)
     items = _items_in_force(condominium, reference_month)
-    if not items:
+    entries = _entries_in_force(condominium, reference_month)
+    if not items and not entries:
         return _fail_condominium(run, ProblemCode.NO_PLAN_IN_FORCE)
     units = list(
         condominium.units.filter(active=True).select_related("block").prefetch_related("unit_people__person")
@@ -64,6 +67,7 @@ def _issue_units(run: BillingRun) -> None:
         _record_problem(run, None, ProblemCode.GATEWAY_ACCOUNT_MISSING)
 
     amounts_by_item = [item.amounts_by_unit(units) for item in items]
+    amounts_by_entry = [_entry_amounts(entry, units) for entry in entries]
     already_issued_unit_ids = set(
         BillingDocument.objects.filter(unit__condominium=condominium, reference_month=reference_month)
         .exclude(status=BillingDocument.Status.CANCELLED)
@@ -80,6 +84,13 @@ def _issue_units(run: BillingRun) -> None:
             NewBillingDocumentItem(item.description, item.cost_center, item.entry_template, amounts[unit.pk])
             for item, amounts in zip(items, amounts_by_item, strict=True)
             if amounts[unit.pk] > Decimal(0)
+        ]
+        lines += [
+            NewBillingDocumentItem(
+                entry.line_description(reference_month), entry.cost_center, entry.entry_template, amounts[unit.pk], entry
+            )
+            for entry, amounts in zip(entries, amounts_by_entry, strict=True)
+            if amounts.get(unit.pk, Decimal(0)) > Decimal(0) and entry.entry_template is not None
         ]
         skip_code = _skip_code(unit, billing_rules, has_lines=bool(lines))
         payer = unit.billing_payer(today) if skip_code is None else None
@@ -115,6 +126,25 @@ def _items_in_force(condominium: Condominium, reference_month: date) -> list[Bil
         )
     )
     return [item for plan in plans for item in plan.items.all()]
+
+
+def _entries_in_force(condominium: Condominium, reference_month: date) -> list[BillingEntry]:
+    """The launches the month's boleto carries (spec 039), in the order they were written."""
+    return list(
+        BillingEntry.objects.in_force(reference_month)
+        .filter(condominium=condominium)
+        .select_related("event", "cost_center", "entry_template")
+        .prefetch_related(Prefetch("entry_units", queryset=BillingEntryUnit.objects.select_related("unit")))
+        .order_by("created_at")
+    )
+
+
+def _entry_amounts(entry: BillingEntry, billable_units: list[Unit]) -> dict[uuid.UUID, Decimal]:
+    """What each active unit the entry selects pays; a split is shared only among those units."""
+    active_ids = {unit.pk for unit in billable_units}
+    links = [link for link in entry.entry_units.all() if link.unit_id in active_ids]
+    overrides = {link.unit_id: link.amount for link in links if link.amount is not None}
+    return entry.amounts_by_unit([link.unit for link in links], overrides)
 
 
 def _skip_code(unit: Unit, billing_rules: BillingRules, has_lines: bool) -> BillingRun.ProblemCode | None:

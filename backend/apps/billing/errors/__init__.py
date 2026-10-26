@@ -11,3 +11,5 @@ from .gateway_customer import GatewayCustomerError as GatewayCustomerError
 from .gateway_event import GatewayEventError as GatewayEventError
 from .gateway_reconciliation_run import GatewayReconciliationRunError as GatewayReconciliationRunError
 from .billing_document_delivery import BillingDocumentDeliveryError as BillingDocumentDeliveryError
+from .billing_event import BillingEventError as BillingEventError
+from .billing_entry import BillingEntryError as BillingEntryError

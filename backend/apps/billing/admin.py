@@ -12,6 +12,9 @@ from .models import (
     BillingDocumentDelivery,
     BillingDocumentItem,
     BillingDocumentPayment,
+    BillingEntry,
+    BillingEntryUnit,
+    BillingEvent,
     BillingDocumentRegistration,
     BillingDocumentPdf,
     BillingPlan,
@@ -198,3 +201,26 @@ class BillingDocumentDeliveryAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, 
     list_display = ("document", "channel", "destination", "status", "failure_reason", "sent_at")
     list_filter = ("status", "channel", "failure_reason")
     search_fields = ("destination", "document__unit__name", "provider_message_id")
+
+
+@final
+@admin.register(BillingEvent)
+class BillingEventAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("code", "name", "active")
+    search_fields = ("code", "name")
+    list_filter = ("active",)
+
+
+@final
+class BillingEntryUnitInline(CompanyScopedAdminMixin, TabularInline):
+    model = BillingEntryUnit
+    extra = 0
+
+
+@final
+@admin.register(BillingEntry)
+class BillingEntryAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("condominium", "event", "description", "allocation", "recurrence", "start_month", "amount")
+    list_filter = ("recurrence", "allocation", "condominium")
+    search_fields = ("description", "condominium__name", "event__name")
+    inlines = (BillingEntryUnitInline,)
