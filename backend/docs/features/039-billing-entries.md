@@ -55,10 +55,12 @@ Rules live in the models (`BillingEntryRules`): kind-specific fields as in `Bill
 - Rejected: one row per month per launch (a recurrence would need a task to create future rows); reusing `EntryTemplate` as the event (the user's events are not tied to a subconta).
 
 ## S — Structure
-To be written when the open questions are answered. Expected: `billing-events` and `billing-entries` resources (CRUD, `?condominium=&reference_month=`), `POST /billing-entries/preview/`, `POST /billing-entries/{id}/end/` for "always"; frontend `app/(dashboard)/billing/entries` (grid, drawer form, units step) and a settings tab for events and subcontas.
+- Backend: `apps/billing/models/billing_event.py`, `billing_entry.py`, `billing_entry_unit.py`, `models/rules/billing_entry.py`, `billing_entry_unit.py`, `models/querysets/billing_entry.py`; `errors/billing_event.py`, `billing_entry.py`; `serializers/billing_event_serializers.py`, `billing_entry_serializers.py`; `views/billing_event_views.py`, `billing_entry_views.py`; `services/create_billing_entry.py`, `update_billing_entry.py`, `replace_billing_entry_units.py`, `end_billing_entry.py`, `preview_billing_entry.py`; `services/issue_condominium_billing.py` and `create_billing_document.py` (the line carries its entry); `BillingDocumentItem.billing_entry`; migration `billing.0013`; `apps/finance`: `CostCenter.code` (migrations `0013`–`0014`).
+- Endpoints (all company-scoped): `billing-events` CRUD; `billing-entries` CRUD (nested `units`), `POST /billing-entries/preview/?reference_month=`, `POST /billing-entries/{id}/end/`.
+- Frontend: `app/(dashboard)/billing/entries/` (grid and `NewEntrySheet`), `billing/events/`, the **Cadastros** section of the Configurações dialog, the sub-conta `code` in the cost center screens; `lib/billing-entry-payload.ts`, `lib/schemas/billing-entry.ts`, `billing-event.ts`.
 
 ## O — Operations
-To be written with the structure.
+Done in this order: `CostCenter.code` and its migration; events; entries, rules and API; the issuance; the generated client; the frontend (events, entries screen, settings links). See *Pending before done* for what is left.
 
 ## N — Norms
 `conventions/practices.md` §2–§3b; frontend: `operations/new-resource-page.md` and `norms/forms.md`.
@@ -69,12 +71,26 @@ To be written with the structure.
 - The issuance stays idempotent: the same month issued twice adds nothing.
 
 ## Test plan
-To be filled when the spec is `ready`; each criterion gets a test.
+| Criterion | Test |
+|---|---|
+| R1 | `apps/billing/tests/test_billing_entry_api.py::test_event_crud_and_unique_code`, `::test_events_of_another_company_are_invisible` |
+| R2 | `apps/billing/tests/test_billing_entry_api.py::test_create_an_entry_with_its_units`, `::test_a_bad_unit_is_reported_under_units`, `::test_an_empty_selection_is_refused`, `apps/billing/tests/test_billing_entry.py` (rules, template choice, event of another company, unit amount only individual) |
+| R3 | `apps/billing/tests/test_billing_entry.py::test_individual_gives_each_unit_the_amount_or_its_own`, `::test_collective_splits_equally_and_the_parts_add_up`, `::test_fraction_splits_by_the_selected_units_fractions`, `apps/billing/tests/test_billing_entry_api.py::test_a_fraction_entry_needs_units_with_that_fraction` |
+| R4 | `apps/billing/tests/test_billing_entry.py::test_once_covers_only_its_month`, `::test_installments_cover_n_months_and_say_which`, `::test_always_runs_until_it_is_ended`, `::test_the_queryset_agrees_with_covers` |
+| R5 | `apps/billing/tests/test_issue_condominium_billing.py::test_a_launch_is_added_after_the_plan_in_its_own_cost_center`, `::test_a_launch_only_reaches_the_units_it_selects_and_a_month_with_only_launches_is_issued`, `::test_an_installment_that_is_over_is_not_billed_again` |
+| R6 | `apps/billing/tests/test_billing_entry_api.py::test_preview_answers_the_per_unit_values_without_saving` |
+| R7 | `apps/billing/tests/test_billing_entry_api.py::test_the_list_of_a_month_carries_the_values_of_that_month`; the grid sums: `frontend/tests/billing-entry.test.mjs` |
+| R8 | `apps/billing/tests/test_billing_entry.py::test_an_entry_a_document_was_issued_from_cannot_change_or_go`, `apps/billing/tests/test_billing_entry_api.py::test_a_used_entry_cannot_be_changed_or_deleted_but_can_be_ended` |
+| R9 | `apps/billing/tests/test_billing_entry_api.py::test_entries_of_another_company_are_invisible` |
+| sub-conta code | `apps/finance/tests/test_cost_centers.py::test_the_code_is_assigned_in_order_when_left_out`, `::test_a_code_is_unique_per_condominium`, `::test_the_api_shows_and_accepts_the_code` |
 
 ## Definition of done
-- [ ] Every criterion R1… has a passing test in the Test plan
-- [ ] `pytest apps -q` green; `manage.py check` and `makemigrations --check --dry-run` clean
-- [ ] `python backend/docs/tools/check_docs.py` passes
-- [ ] Frontend client regenerated and callers fixed (`pnpm generate:api`); `pnpm exec tsc --noEmit`, `eslint` and `pnpm build` clean
-- [ ] `docs/apps/billing.md` and the frontend docs updated; `docs/known-gaps.md` row closed (if any)
-- [ ] Roadmap part and phase table updated (if **Roadmap** is set); index in `features/README.md` updated
+- [x] Every criterion R1… has a passing test in the Test plan
+- [x] `pytest apps -q` green; `manage.py check` and `makemigrations --check --dry-run` clean
+- [x] `python backend/docs/tools/check_docs.py` passes
+- [x] Frontend client regenerated and callers fixed (`pnpm generate:api`); `pnpm exec tsc --noEmit`, `eslint` and `pnpm build` clean
+- [x] `docs/apps/billing.md`, `docs/apps/finance.md` and the frontend docs updated; `docs/known-gaps.md` row closed (if any)
+- [x] Roadmap part and phase table updated (if **Roadmap** is set): `N/A — Roadmap: none`; index in `features/README.md` updated
+
+## Pending before `done`
+The spec stays `in-progress` until the user confirms the three decisions marked *agent, to be confirmed* (the per-condominium sub-conta code instead of the company-wide catalog, the fraction/collective split arithmetic, the `billing_entry` link on document items) and has used the screen on real data. Known follow-ups, each its own spec: the company-wide sub-conta catalog; the **Extra** boleto; negative values (discounts); "Definir por %", "Arredondar" and "Lançar em lote" once explained; the registration fee ([038](038-registration-fee.md)). The screen was exercised in a real browser (login, event, launch with preview, grid, delete/end buttons, Configurações → Cadastros), but not yet through a full monthly issuance on a gateway-connected condominium.
