@@ -19,4 +19,5 @@ from .billing_event_serializers import BillingEventSerializer as BillingEventSer
 from .billing_entry_serializers import BillingEntrySerializer as BillingEntrySerializer
 from .billing_entry_serializers import BillingEntryUnitSerializer as BillingEntryUnitSerializer
 from .billing_entry_serializers import BillingEntryEndSerializer as BillingEntryEndSerializer
+from .billing_entry_serializers import BillingEntryPreviewSerializer as BillingEntryPreviewSerializer
 from .billing_entry_serializers import reference_month_of as reference_month_of

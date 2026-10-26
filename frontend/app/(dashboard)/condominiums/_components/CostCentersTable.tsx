@@ -18,6 +18,7 @@ import {
   useCostCentersDestroy,
   useCostCentersList,
 } from "@/lib/api/generated";
+import { formatCode } from "@/lib/billing-entry-payload";
 import { applyServerErrors } from "@/lib/form-errors";
 
 /** Client Component: lista de sub-contas com busca, filtros e exclusão. O condomínio filtrado vem da URL (`?condominium=`). */
@@ -105,6 +106,7 @@ export function CostCentersTable() {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
+                  <TableHead className="hidden w-20 md:table-cell">Cód.</TableHead>
                   <TableHead>Sub-conta</TableHead>
                   <TableHead className="hidden md:table-cell">Condomínio</TableHead>
                   <TableHead className="hidden md:table-cell">Status</TableHead>
@@ -116,10 +118,13 @@ export function CostCentersTable() {
                   const href = `/condominiums/cost-centers/${costCenter.id}`;
                   return (
                     <TableRow key={costCenter.id}>
+                      <TableCell className="hidden tabular-nums text-ink-soft md:table-cell">
+                        {formatCode(costCenter.code)}
+                      </TableCell>
                       <TableCell>
                         <RowLink
                           href={href}
-                          sub={[condominiumName(costCenter.condominium), costCenter.active ? null : "Inativa"]
+                          sub={[formatCode(costCenter.code), condominiumName(costCenter.condominium), costCenter.active ? null : "Inativa"]
                             .filter(Boolean)
                             .join(" · ")}
                         >

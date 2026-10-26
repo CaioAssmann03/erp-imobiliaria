@@ -4,6 +4,8 @@ from typing import Any, final
 import django_filters
 from django.db.models import Prefetch, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -12,7 +14,12 @@ from rest_framework.response import Response
 from apps.core.scoping import CompanyScopedViewSetMixin
 
 from ..models import BillingEntry, BillingEntryUnit
-from ..serializers import BillingEntryEndSerializer, BillingEntrySerializer, reference_month_of
+from ..serializers import (
+    BillingEntryEndSerializer,
+    BillingEntryPreviewSerializer,
+    BillingEntrySerializer,
+    reference_month_of,
+)
 from ..services.end_billing_entry import end_billing_entry
 from ..services.preview_billing_entry import preview_billing_entry
 
@@ -47,15 +54,20 @@ class BillingEntryViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Billi
         context["reference_month"] = reference_month_of(month) if month else None
         return context
 
+    @extend_schema(
+        request=BillingEntrySerializer,
+        responses=BillingEntryPreviewSerializer,
+        parameters=[OpenApiParameter("reference_month", OpenApiTypes.DATE, description="Month to show; the entry's start month by default.")],
+        operation_id="billing_entries_preview",
+    )
     @action(detail=False, methods=["post"])
     def preview(self, request: Request) -> Response:
-        """The per-unit values of an entry that is not saved yet (`reference_month` in the body)."""
+        """The per-unit values of an entry that is not saved yet."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data: dict[str, Any] = dict(serializer.validated_data)
         data["units"] = data.pop("entry_units")
-        body: Any = request.data
-        reference_month = reference_month_of(body.get("reference_month") or data["start_month"])
+        reference_month = reference_month_of(request.query_params.get("reference_month") or data["start_month"])
         amounts = preview_billing_entry(data, reference_month)
         names = {unit_data["unit"].pk: unit_data["unit"].name for unit_data in data["units"]}
         return Response(
@@ -68,6 +80,7 @@ class BillingEntryViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Billi
             }
         )
 
+    @extend_schema(request=BillingEntryEndSerializer, responses=BillingEntrySerializer, operation_id="billing_entries_end")
     @action(detail=True, methods=["post"])
     def end(self, request: Request, pk: str | None = None) -> Response:
         """Stop an entry that repeats always after the given month."""

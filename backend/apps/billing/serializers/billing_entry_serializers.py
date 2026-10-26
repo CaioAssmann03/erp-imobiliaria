@@ -1,6 +1,7 @@
 from datetime import date
 from typing import Any, final, override
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.core.serializers import ModelRulesMixin
@@ -22,6 +23,30 @@ class BillingEntryUnitSerializer(ModelRulesMixin, serializers.ModelSerializer[Bi
         fields = ("id", "unit", "unit_name", "amount")
         read_only_fields = ("id",)
         validators = ()
+
+
+class BillingEntryUnitAmountSerializer(serializers.Serializer[Any]):
+    """What one unit pays for an entry in a month."""
+
+    unit = serializers.UUIDField()
+    unit_name = serializers.CharField()
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+
+
+class BillingEntryMonthSerializer(serializers.Serializer[Any]):
+    """An entry as the boleto of one month carries it."""
+
+    line_description = serializers.CharField()
+    installment = serializers.CharField(help_text="`k/n` for an installment entry, empty otherwise.")
+    unit_amounts = BillingEntryUnitAmountSerializer(many=True)
+
+
+class BillingEntryPreviewSerializer(serializers.Serializer[Any]):
+    """The per-unit values of an entry that is not saved yet."""
+
+    reference_month = serializers.DateField()
+    total = serializers.DecimalField(max_digits=12, decimal_places=2)
+    unit_amounts = BillingEntryUnitAmountSerializer(many=True)
 
 
 class BillingEntrySerializer(ModelRulesMixin, serializers.ModelSerializer[BillingEntry]):
@@ -69,6 +94,7 @@ class BillingEntrySerializer(ModelRulesMixin, serializers.ModelSerializer[Billin
     def get_is_used(self, entry: BillingEntry) -> bool:
         return entry.is_used()
 
+    @extend_schema_field(BillingEntryMonthSerializer(allow_null=True))
     def get_month(self, entry: BillingEntry) -> dict[str, Any] | None:
         """The entry's values in the requested reference month: the boleto line, the installment and each unit's amount."""
         reference_month = self.context.get("reference_month")
