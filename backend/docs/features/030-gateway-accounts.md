@@ -7,6 +7,8 @@ skip-if: charge registration → roadmap/phase-5-billing-bank-integration/02-gat
 
 **Status:** in-progress · **Level:** full · **Roadmap:** phase 5 part 01 · **Apps:** billing · **Frontend impact:** none
 
+> **Superseded in part by [037](037-single-gateway-account.md) (draft, 2026-10-26):** the administradora will use one Asaas account instead of a sub-account per condominium. This spec stays as the record of what was built until 037 is implemented.
+
 ## Open questions
 None.
 
