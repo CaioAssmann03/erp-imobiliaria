@@ -9,7 +9,7 @@ skip-if: code formatting → norms/code-style.md
 |---|---|
 | file/folder/**route** names | titles, labels, placeholders, hints |
 | components, functions, variables, props, types | error and success messages (`toast`) |
-| object keys, filter values, ids (`?status=active`, `/?focus=pending`) | empty-list texts, descriptions |
+| object keys, filter values, ids (`?status=active`, `/dashboard?focus=pending`) | empty-list texts, descriptions |
 | API field names | `aria-label`, `title`, page `metadata` |
 | docs and `AGENTS.md` | |
 

@@ -1,7 +1,7 @@
 ---
 summary: Design tokens, density, glass, components and theming (mode, accent, font).
 read-when: you touch styling, colors, themes or settings
-skip-if: component structure → norms/components.md
+skip-if: component structure → norms/components.md; public pages (landing) → norms/marketing.md
 ---
 # Design system and theming (N — Norms)
 

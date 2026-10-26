@@ -9,8 +9,9 @@ skip-if: component anatomy → structure/component-patterns.md; naming → norms
 app/
   layout.tsx, providers.tsx, globals.css    root: fonts, theme attrs, QueryClientProvider, Toaster
   login/                                     public (page.tsx + _components/)
+  (marketing)/                               public product pages: `/` landing, features, how-it-works (forced light mode + orange accent, Lenis smooth scroll, `motion` animations; the "Agendar demonstração" target is `CONTACT_HREF` in `_components/content.ts`, still a placeholder; the hero is a centered serif title over an orange skyline drawn as horizontal scanlines on a canvas, `_components/hero/skyline-scene.ts`; public-page type, colors and buttons follow norms/marketing.md)
   (dashboard)/                               authenticated (route group, not in the URL)
-    layout.tsx, page.tsx                     AppShell, dashboard home (`_components/home/DashboardHome.tsx` fetches)
+    layout.tsx, dashboard/page.tsx           AppShell, dashboard home (`_components/home/DashboardHome.tsx` fetches)
     _components/shell/                       sidebar, global search, settings
     _components/home/                        widgets, lists, focus modal
     condominiums/  persons/                  one folder per resource, each with _components/
@@ -29,8 +30,10 @@ docs/         REASONS documentation
 
 | URL | File |
 |---|---|
-| `/` | `app/(dashboard)/page.tsx` |
+| `/` | `app/(marketing)/page.tsx` (public landing page, default route) |
+| `/dashboard` | `app/(dashboard)/dashboard/page.tsx` (dashboard home; login and `proxy.ts` send authenticated users here) |
 | `/login` | `app/login/page.tsx` |
+| `/features`, `/how-it-works` | `app/(marketing)/...` (public; content of all marketing pages lives in `_components/content.ts`) |
 | `/condominiums`, `/new`, `/[id]` (`/condominiums?pending=<value>` and `/condominiums/units?pending=<value>` open the lists filtered by a dashboard pendency, linked from *Pendências*) | `app/(dashboard)/condominiums/...` |
 | `/condominiums/blocks`, `/new`, `/[id]` | `app/(dashboard)/condominiums/blocks/...` (block CRUD; `condominiums/layout.tsx` renders the sub-header `CondominiumsSubNav`: Condomínios · Blocos · Unidades) |
 | `/condominiums/units`, `/new` | `app/(dashboard)/condominiums/units/...` (all units; `new` picks the condominium first via `NewUnitForm`; editing reuses `/condominiums/[id]/units/[unitId]`) |
