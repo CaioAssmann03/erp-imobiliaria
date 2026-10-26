@@ -6,14 +6,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
-/**
- * * `condominiums` - Condominiums
- * * `rentals` - Rentals
- */
-export type ModulesEnum = typeof ModulesEnum[keyof typeof ModulesEnum];
+export type PersonsCreatePersonModule = typeof PersonsCreatePersonModule[keyof typeof PersonsCreatePersonModule];
 
 
-export const ModulesEnum = {
+export const PersonsCreatePersonModule = {
   condominiums: 'condominiums',
   rentals: 'rentals',
 } as const;

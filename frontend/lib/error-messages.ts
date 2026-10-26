@@ -194,8 +194,6 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "people_individual.rg.duplicate_in_company": "Já existe uma pessoa com este RG nesta empresa.",
   "people_legal.cnpj.duplicate_in_company": "Já existe uma pessoa com este CNPJ nesta empresa.",
   "people_legal.company.mismatch": "O documento pertence a outra empresa.",
-  "person.modules.empty": "A pessoa precisa pertencer a ao menos um módulo.",
-  "person.modules.unknown": "Módulo desconhecido.",
   "percentage.out_of_range": "O percentual deve ficar entre 0 e 100.",
   permission_denied: "Você não tem permissão para esta ação.",
   required: "Campo obrigatório.",

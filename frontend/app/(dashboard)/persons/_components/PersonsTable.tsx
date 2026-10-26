@@ -33,7 +33,7 @@ export function PersonsTable() {
   const { data, isLoading, isPlaceholderData } = usePersonsList(
     {
       ...params,
-      module: CONDOMINIUMS_MODULE,
+      person_module: CONDOMINIUMS_MODULE,
       ...(filters.status ? { active: filters.status === "active" } : {}),
       ...(filters.type ? { type: filters.type as "individual" | "legal" } : {}),
     },

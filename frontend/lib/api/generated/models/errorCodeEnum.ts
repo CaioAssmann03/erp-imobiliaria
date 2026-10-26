@@ -171,8 +171,6 @@ export const ErrorCodeEnum = {
   people_legalcompanymismatch: 'people_legal.company.mismatch',
   percentageout_of_range: 'percentage.out_of_range',
   permission_denied: 'permission_denied',
-  personmodulesempty: 'person.modules.empty',
-  personmodulesunknown: 'person.modules.unknown',
   required: 'required',
   supplierbank_dataincomplete: 'supplier.bank_data.incomplete',
   throttled: 'throttled',

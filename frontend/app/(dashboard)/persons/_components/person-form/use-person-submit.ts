@@ -14,6 +14,7 @@ import {
 } from "@/lib/api/generated";
 import type { Person } from "@/lib/api/generated/models";
 import { applyServerErrors } from "@/lib/form-errors";
+import { CONDOMINIUMS_MODULE } from "@/lib/person-module";
 import { personToPayload, type PersonFormInput, type PersonFormOutput } from "@/lib/schemas/person";
 
 export function usePersonSubmit(personId: string | undefined, setError: UseFormSetError<PersonFormInput>) {
@@ -49,7 +50,7 @@ export function usePersonSubmit(personId: string | undefined, setError: UseFormS
       );
     } else {
       createMutation.mutate(
-        { data: payload as unknown as Person },
+        { data: payload as unknown as Person, params: { person_module: CONDOMINIUMS_MODULE } },
         {
           onSuccess: (created) => {
             invalidate(created.id);

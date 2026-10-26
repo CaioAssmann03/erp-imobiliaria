@@ -26,7 +26,7 @@ export function PersonPicker({ onSelect, placeholder }: PersonPickerProps) {
   // A number is an ID, so even one digit is worth searching.
   const canSearch = debounced.length >= 2 || /^\d+$/.test(debounced);
   const { data, isFetching } = usePersonsList(
-    { query: debounced, limit: 8, module: CONDOMINIUMS_MODULE },
+    { query: debounced, limit: 8, person_module: CONDOMINIUMS_MODULE },
     { query: { enabled: canSearch } }
   );
 
