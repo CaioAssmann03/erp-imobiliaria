@@ -1,8 +1,8 @@
-"""The migrations that number the rows that already exist (spec 019, R3).
+"""The data migrations of spec 038: the old `modules` arrays become membership rows (and back).
 
-Each test goes back to the schema before the IDs, creates rows with the historical models,
-migrates forward and checks the numbers. The schema is brought back to the latest migration
-afterwards, so the other tests find the tables they expect.
+Each test goes back to the schema before the memberships, creates rows with the historical models,
+migrates forward and checks the result. The schema is brought back to the latest migration
+afterwards, so the other tests find the tables they expect. Delete this file once 038 is deployed.
 """
 
 from collections.abc import Iterator
@@ -17,9 +17,7 @@ from django.db.migrations.state import StateApps
 pytestmark = pytest.mark.django_db(transaction=True)
 
 PERSONS_BEFORE = [("persons", "0004_constraint_error_codes")]
-CONDOMINIUMS_BEFORE = [("condominiums", "0003_constraint_error_codes")]
 SEEDED_CNPJ = "03136483000144"
-SEQUENCES = {"person_code_seq", "condominium_code_seq"}
 
 
 def migrate(targets: list[tuple[str, str]]) -> StateApps:
@@ -61,33 +59,30 @@ def create_people_out_of_order() -> None:
         person_model.objects.filter(pk=person.pk).update(created_at=created_at(day))
 
 
-def test_existing_people_are_numbered_by_creation_order() -> None:
-    create_people_out_of_order()
+def memberships(apps: Any) -> dict[str, list[str]]:
+    """Module key → names of the people released to it, in the state `apps`."""
+    model: Any = apps.get_model("persons", "PersonModuleMembership")
+    result: dict[str, list[str]] = {}
+    for membership in model.objects.select_related("person").order_by("person__name"):
+        result.setdefault(membership.module, []).append(membership.person.name)
+    return result
 
-    new_apps = migrate(latest("persons"))
 
-    person_model: Any = new_apps.get_model("persons", "Person")
-    people = list(person_model.objects.order_by("code"))
-    assert [(person.code, person.name) for person in people] == [
-        (1, "Ana"),
-        (2, "Bia"),
-        (3, "Carla"),
-    ]
+def tables() -> set[str]:
+    with connection.cursor() as cursor:
+        return set(connection.introspection.table_names(cursor))
 
 
 def test_existing_people_become_members_of_condominiums() -> None:
-    """Spec 038, R7: the old `modules` array (default `condominiums`) becomes membership rows."""
+    """Specs 038 and 040: the old `modules` array (default `condominiums`) ends up as membership rows."""
     create_people_out_of_order()
 
     new_apps = migrate(latest("persons", "condominiums", "rentals"))
 
-    condominium_members: Any = new_apps.get_model("condominiums", "CondominiumPersonMember")
-    rental_members: Any = new_apps.get_model("rentals", "RentalPersonMember")
-    assert condominium_members.objects.count() == 3
-    assert rental_members.objects.count() == 0
+    assert memberships(new_apps) == {"condominiums": ["Ana", "Bia", "Carla"]}
 
 
-def test_a_person_marked_rentals_becomes_a_rental_member() -> None:
+def test_a_person_marked_rentals_ends_up_in_the_rentals_module() -> None:
     create_people_out_of_order()
     _ = migrate([("persons", "0005_person_code_and_modules")])
     with connection.cursor() as cursor:
@@ -95,82 +90,21 @@ def test_a_person_marked_rentals_becomes_a_rental_member() -> None:
 
     new_apps = migrate(latest("persons", "condominiums", "rentals"))
 
-    rental_members: Any = new_apps.get_model("rentals", "RentalPersonMember")
-    assert [member.person.name for member in rental_members.objects.select_related("person")] == ["Bia"]
-    condominium_members: Any = new_apps.get_model("condominiums", "CondominiumPersonMember")
-    assert condominium_members.objects.count() == 2
-
-
-def test_the_sequence_continues_after_the_highest_code() -> None:
-    create_people_out_of_order()
-    new_apps = migrate(latest("persons"))
-
-    person_model: Any = new_apps.get_model("persons", "Person")
-    next_person = person_model.objects.create(company=company_of(new_apps), name="Dani")
-
-    assert next_person.code == 4
-
-
-def test_existing_condominiums_are_numbered_by_creation_order() -> None:
-    old_apps = migrate(CONDOMINIUMS_BEFORE)
-    condominium_model: Any = old_apps.get_model("condominiums", "Condominium")
-    company = company_of(old_apps)
-    for name, cnpj, day in (("Sol", "11222333000181", 3), ("Lua", "45723174000110", 1)):
-        condominium = condominium_model.objects.create(company=company, name=name, cnpj=cnpj)
-        condominium_model.objects.filter(pk=condominium.pk).update(created_at=created_at(day))
-
-    new_apps = migrate(latest("condominiums"))
-
-    new_condominium: Any = new_apps.get_model("condominiums", "Condominium")
-    assert [(row.code, row.name) for row in new_condominium.objects.order_by("code")] == [
-        (1, "Lua"),
-        (2, "Sol"),
-    ]
-    assert new_condominium.objects.create(company=company_of(new_apps), name="Mar", cnpj="11444777000161").code == 3
-
-
-def test_units_get_no_code() -> None:
-    new_apps = migrate(latest("condominiums"))
-
-    unit_model: Any = new_apps.get_model("condominiums", "Unit")
-    assert "code" not in {field.name for field in unit_model._meta.get_fields()}
-
-
-def test_the_migrations_reverse() -> None:
-    migrate(PERSONS_BEFORE + CONDOMINIUMS_BEFORE)
-
-    with connection.cursor() as cursor:
-        tables = {
-            table: {column.name for column in connection.introspection.get_table_description(cursor, table)}
-            for table in ("persons_person", "condominiums_condominium")
-        }
-        cursor.execute("SELECT relname FROM pg_class WHERE relkind = 'S'")
-        sequences = {row[0] for row in cursor.fetchall()}
-
-    assert all("code" not in columns for columns in tables.values())
-    assert "modules" not in tables["persons_person"]
-    assert not SEQUENCES & sequences
-
-    migrate(latest("persons", "condominiums"))
-
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT relname FROM pg_class WHERE relkind = 'S'")
-        assert SEQUENCES <= {row[0] for row in cursor.fetchall()}
+    assert memberships(new_apps) == {"condominiums": ["Ana", "Carla"], "rentals": ["Bia"]}
 
 
 def test_going_back_rebuilds_the_modules_array() -> None:
-    """Spec 038, R7: reversing the backfill puts the memberships back in the old array."""
+    """Spec 038, R7: reversing the migrations puts the memberships back in the old array."""
     new_apps = migrate(latest("persons", "condominiums", "rentals"))
     company = company_of(new_apps)
     person_model: Any = new_apps.get_model("persons", "Person")
-    condominium_members: Any = new_apps.get_model("condominiums", "CondominiumPersonMember")
-    rental_members: Any = new_apps.get_model("rentals", "RentalPersonMember")
+    membership_model: Any = new_apps.get_model("persons", "PersonModuleMembership")
     both = person_model.objects.create(company=company, name="Ambas")
     renter = person_model.objects.create(company=company, name="Loc")
     nobody = person_model.objects.create(company=company, name="Nenhuma")
-    _ = condominium_members.objects.create(person=both)
-    _ = rental_members.objects.create(person=both)
-    _ = rental_members.objects.create(person=renter)
+    _ = membership_model.objects.create(person=both, module="condominiums")
+    _ = membership_model.objects.create(person=both, module="rentals")
+    _ = membership_model.objects.create(person=renter, module="rentals")
 
     _ = migrate([("condominiums", "0008_person_member"), ("rentals", "0001_person_member")])
 
@@ -183,3 +117,47 @@ def test_going_back_rebuilds_the_modules_array() -> None:
         "Nenhuma": ["condominiums"],  # the old rule needs at least one module: it gets the old default
     }
     assert nobody.pk is not None
+
+
+WITH_MEMBER_TABLES = [
+    ("persons", "0006_stop_using_modules"),
+    ("condominiums", "0010_apportionment_criteria"),
+    ("rentals", "0002_backfill_person_members"),
+]
+
+
+def test_the_member_tables_are_copied_into_the_persons_table() -> None:
+    """Spec 040, R5: the rows of the two member tables end up in `PersonModuleMembership`, and the tables go."""
+    old_apps = migrate(WITH_MEMBER_TABLES)
+    company = company_of(old_apps)
+    person_model: Any = old_apps.get_model("persons", "Person")
+    both = person_model.objects.create(company=company, name="Ambas")
+    renter = person_model.objects.create(company=company, name="Loc")
+    old_apps.get_model("condominiums", "CondominiumPersonMember").objects.create(person=both)
+    old_apps.get_model("rentals", "RentalPersonMember").objects.create(person=both)
+    old_apps.get_model("rentals", "RentalPersonMember").objects.create(person=renter)
+
+    new_apps = migrate(latest("persons", "condominiums", "rentals"))
+
+    assert memberships(new_apps) == {"condominiums": ["Ambas"], "rentals": ["Ambas", "Loc"]}
+    assert not {"condominiums_condominiumpersonmember", "rentals_rentalpersonmember"} & tables()
+
+
+def test_going_back_recreates_the_member_tables() -> None:
+    """Spec 040, R5: reversing recreates the two tables and fills them from the single one."""
+    new_apps = migrate(latest("persons", "condominiums", "rentals"))
+    company = company_of(new_apps)
+    person_model: Any = new_apps.get_model("persons", "Person")
+    membership_model: Any = new_apps.get_model("persons", "PersonModuleMembership")
+    both = person_model.objects.create(company=company, name="Ambas")
+    renter = person_model.objects.create(company=company, name="Loc")
+    _ = membership_model.objects.create(person=both, module="condominiums")
+    _ = membership_model.objects.create(person=both, module="rentals")
+    _ = membership_model.objects.create(person=renter, module="rentals")
+
+    back_apps = migrate(WITH_MEMBER_TABLES)
+
+    condominium_people = back_apps.get_model("condominiums", "CondominiumPersonMember").objects.values_list("person__name", flat=True)
+    rental_people = back_apps.get_model("rentals", "RentalPersonMember").objects.values_list("person__name", flat=True)
+    assert sorted(condominium_people) == ["Ambas"]
+    assert sorted(rental_people) == ["Ambas", "Loc"]

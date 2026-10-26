@@ -9,8 +9,11 @@ from apps.core.models.base import BaseModel
 from apps.persons.models.querysets import PersonQuerySet
 
 if TYPE_CHECKING:
+    from django.db.models.fields.related_descriptors import RelatedManager
+
     from .people_individual import PeopleIndividual
     from .people_legal import PeopleLegal
+    from .person_module_membership import PersonModuleMembership
 
 
 def default_modules() -> list[str]:
@@ -25,6 +28,7 @@ class Person(SequentialCodeMixin, BaseModel):
     if TYPE_CHECKING:
         people_individual: "PeopleIndividual"
         people_legal: "PeopleLegal"
+        module_memberships: "RelatedManager[PersonModuleMembership]"
 
     company_lookup = "company"
 

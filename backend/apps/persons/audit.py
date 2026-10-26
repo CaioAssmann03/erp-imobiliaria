@@ -1,6 +1,6 @@
 from apps.core.infrastructure.audit import register_audited
 
-from .models import PeopleIndividual, PeopleLegal, Person
+from .models import PeopleIndividual, PeopleLegal, Person, PersonModuleMembership
 
 
 def register() -> None:
@@ -11,3 +11,4 @@ def register() -> None:
         masked_fields=("cpf", "rg", "birthday", "marital_status", "job"),
     )
     register_audited(PeopleLegal, masked_fields=("cnpj", "ie"))
+    register_audited(PersonModuleMembership)

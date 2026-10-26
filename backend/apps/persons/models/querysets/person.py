@@ -5,7 +5,6 @@ from django.db.models import Count, Q, Value
 from django.db.models.functions import Coalesce
 
 from apps.core.infrastructure.search.ranking import any_of, exact_code, relevance_rank
-from apps.persons.modules import membership_relation_name
 
 if TYPE_CHECKING:
     from apps.core.infrastructure.search.term import ClassifiedTerm
@@ -14,8 +13,8 @@ if TYPE_CHECKING:
 
 class PersonQuerySet(models.QuerySet["Person"]):
     def in_module(self, module: str) -> "PersonQuerySet":
-        """The people released to `module`: one join on the module's unique membership, no duplicates."""
-        return self.filter(**{f"{membership_relation_name(module)}__isnull": False})
+        """The people released to `module`: one join on the unique `(person, module)` membership, no duplicates."""
+        return self.filter(module_memberships__module=module)
 
     def totals(self) -> dict[str, int]:
         """How many people there are, how many are active and how many are individuals or legal entities."""
