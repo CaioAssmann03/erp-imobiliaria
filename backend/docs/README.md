@@ -9,7 +9,7 @@ Find your task, open **only** the listed files (usually 2–3). **Read the heade
 
 | Task | Open |
 |---|---|
-| **What is done / what comes next** | `roadmap/README.md` → the phase folder `README.md` → the part file |
+| **What is done / what comes next** · where the last session stopped | `roadmap/current-state.md` → `roadmap/README.md` → the phase folder `README.md` → the part file |
 | **Any new feature** (do this first) | the roadmap part (if any) → `features/README.md` → copy `features/_template.md` (full) or `features/_template-lite.md` (small change); examples: `features/history.md` (finished specs) |
 | Plan a new phase or part | `roadmap/README.md` → copy `roadmap/_template-phase.md` or `roadmap/_template-part.md` |
 | New model, field, constraint, rule | `conventions/practices.md` · `architecture/data.md` · `apps/<app>.md` |
@@ -22,6 +22,7 @@ Find your task, open **only** the listed files (usually 2–3). **Read the heade
 | One app: `accounts`, `core` (dashboard, search, seed, scoping, audit, errors), `persons`, `condominiums`, `finance`, `billing` | `apps/<app>.md` |
 | Run, migrate, reset locally · deploy, production migrations, runbook, backups | `architecture/operations.md` |
 | Stack, env vars, request flow, vocabulary, why it is built this way | `architecture/overview.md` |
+| How the administradora really works (one gateway account, boleto items and sub-contas, the registration fee, events) | `architecture/business-model.md` |
 | Why something was built a certain way, or what `spec NNN, Rn` in a test means | `features/history.md` |
 | Something looks wrong or missing | `known-gaps.md` (then **ask the user**) |
 
@@ -29,7 +30,7 @@ Find your task, open **only** the listed files (usually 2–3). **Read the heade
 | Folder | Holds |
 |---|---|
 | `roadmap/` | `README.md` (status of all phases, open decisions, PDF → code name map, backlog), templates, and `phase-N-<slug>/` (a `README.md` + one `NN-<slug>.md` per part, each with its own **Status**) |
-| `architecture/` | `overview` · `data` · `api` · `structure` · `quality` · `operations` |
+| `architecture/` | `overview` · `business-model` · `data` · `api` · `structure` · `quality` · `operations` |
 | `conventions/` | `practices.md` (pattern book) · `naming.md` |
 | `apps/` | one file per app that has code |
 | `features/` | the spec process and templates, the specs still open, and `history.md` (the finished ones, condensed) |
