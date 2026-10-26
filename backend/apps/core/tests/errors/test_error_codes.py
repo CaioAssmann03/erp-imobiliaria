@@ -9,7 +9,7 @@ from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 
 from apps.condominiums.models import AdministrationContract, Unit, UnitPerson
-from apps.core.errors.registry import (
+from apps.core.infrastructure.errors.registry import (
     GENERIC_ERROR_CODES,
     all_error_codes,
     domain_error_code_enums,

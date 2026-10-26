@@ -39,8 +39,12 @@ def flatten_errors(detail: Any, path: list[str] | None = None) -> list[ErrorItem
     if isinstance(detail, dict):
         items: list[ErrorItem] = []
         for key, value in detail.items():
-            is_general = key in (api_settings.NON_FIELD_ERRORS_KEY, "detail") and not path
-            items.extend(flatten_errors(value, path if is_general else [*path, str(key)]))
+            is_general = (
+                key in (api_settings.NON_FIELD_ERRORS_KEY, "detail") and not path
+            )
+            items.extend(
+                flatten_errors(value, path if is_general else [*path, str(key)])
+            )
         return items
     if isinstance(detail, list):
         has_nested = any(isinstance(entry, (dict, list)) for entry in detail)
@@ -54,7 +58,6 @@ def flatten_errors(detail: Any, path: list[str] | None = None) -> list[ErrorItem
 
 def api_exception_handler(exc: Exception, context: dict[str, Any]) -> Response | None:
     if isinstance(exc, DjangoValidationError):
-        # A model rule raised outside a serializer (a delete rule, code calling the model): same 400.
         exc = serializers.ValidationError(to_drf_errors(exc))
     response = drf_exception_handler(exc, context)
     if response is None:

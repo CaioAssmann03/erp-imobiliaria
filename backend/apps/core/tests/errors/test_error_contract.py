@@ -9,8 +9,8 @@ from rest_framework import status
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.test import APIClient
 
-from apps.core.errors.registry import all_error_codes
-from apps.core.api.exception_handler import api_exception_handler, flatten_errors
+from apps.core.infrastructure.errors.registry import all_error_codes
+from apps.core.infrastructure.api.exception_handler import api_exception_handler, flatten_errors
 
 from ..base import error_codes, errors
 from ..scoping_data import build_company_data

@@ -9,9 +9,9 @@ from rest_framework.exceptions import APIException, NotFound
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from apps.core.api.filters import QuerySearchFilter
-from apps.core.scoping import CompanyScopedViewSetMixin
-from apps.core.storage import object_storage
+from apps.core.infrastructure.api.filters import QuerySearchFilter
+from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin
+from apps.core.infrastructure.storage import object_storage
 
 from ..errors import BillingDocumentPdfError, GatewayAccountError
 from ..filters import BillingDocumentFilter

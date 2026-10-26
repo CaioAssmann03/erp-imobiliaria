@@ -6,6 +6,7 @@ from django.db import models
 from apps.condominiums.models import Condominium
 from apps.core.models.base import BaseModel
 from apps.finance.errors import CostCenterError
+from apps.finance.models.querysets import CostCenterQuerySet
 
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
@@ -15,6 +16,8 @@ if TYPE_CHECKING:
 
 @final
 class CostCenter(BaseModel):
+    objects = CostCenterQuerySet.as_manager()
+
     """Chart-of-accounts entry of a condominium (the PDF's *SubConta*)."""
 
     if TYPE_CHECKING:

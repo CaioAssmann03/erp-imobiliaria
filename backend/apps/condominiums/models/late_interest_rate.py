@@ -7,9 +7,9 @@ from django.db.models import Q
 from apps.condominiums.errors import LateInterestRateError
 from apps.condominiums.models.condominium import Condominium
 from apps.condominiums.models.querysets import LateInterestRateQuerySet
-from apps.core.errors.validators import CoreValidatorError
+from apps.core.infrastructure.errors.validators import CoreValidatorError
 from apps.core.models.base import BaseModel
-from apps.core.validators import validate_percentage
+from apps.core.infrastructure.validators import validate_percentage
 
 
 @final

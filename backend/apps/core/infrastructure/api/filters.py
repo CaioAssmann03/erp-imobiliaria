@@ -7,19 +7,10 @@ from rest_framework import filters
 from rest_framework.request import Request
 from rest_framework.views import APIView
 
-from .codes import code_from_term
+from apps.core.infrastructure.search.term import code_from_term
 
 
 class QuerySearchFilter(filters.SearchFilter):
-    """Busca textual por `?query=termo` (mantém `?search=` como alternativa legada).
-
-    Os campos pesquisados vêm de `search_fields` de cada view; os termos são separados
-    por espaço e todos precisam casar (comportamento padrão do DRF).
-
-    A view que define `search_code_field = "code"` também casa um termo só de dígitos com o ID
-    do cadastro, e lista primeiro quem tem exatamente aquele ID (spec 019).
-    """
-
     search_param = "query"
     search_title = "Busca"
     search_description = "Termo de busca (nome, documento, ID…)."

@@ -1,4 +1,4 @@
-from apps.core.errors.base import RuleError
+from apps.core.infrastructure.errors.base import RuleError
 
 
 class BillingPlanItemError(RuleError):

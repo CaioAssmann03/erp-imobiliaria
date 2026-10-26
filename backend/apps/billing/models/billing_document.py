@@ -10,7 +10,7 @@ from apps.billing.models.rules import BillingDocumentRules
 from apps.billing.validators import validate_first_day_of_month
 from apps.condominiums.models import BillingRules, Unit
 from apps.core.models.base import BaseModel
-from apps.core.validators import validate_percentage
+from apps.core.infrastructure.validators import validate_percentage
 from apps.finance.errors import FinanceValidatorError
 from apps.finance.validators import validate_positive_amount
 from apps.persons.models import Person

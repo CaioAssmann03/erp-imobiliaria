@@ -14,9 +14,9 @@ from apps.condominiums.validators import (
     validate_initial_late_fee_days,
     validate_late_fee_percentage,
 )
-from apps.core.dates import add_months
+from apps.core.infrastructure.dates import add_months
 from apps.core.models.base import UUIDModel
-from apps.core.validators import validate_percentage
+from apps.core.infrastructure.validators import validate_percentage
 
 if TYPE_CHECKING:
     from apps.condominiums.models.unit import Unit

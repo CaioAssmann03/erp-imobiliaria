@@ -7,8 +7,8 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from apps.core.scoping import CompanyScopedViewSetMixin
-from apps.core.storage import object_storage
+from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin
+from apps.core.infrastructure.storage import object_storage
 
 from ..models import PaymentReceipt
 from ..models.payment_receipt import DOWNLOAD_URL_TTL_SECONDS

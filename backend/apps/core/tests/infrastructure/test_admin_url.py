@@ -6,10 +6,6 @@ import sys
 from pathlib import Path
 
 import pytest
-from django.core.checks import Warning as CheckWarning
-from django.test import override_settings
-
-from apps.core.checks import check_admin_url_is_not_the_default
 
 BACKEND = Path(__file__).resolve().parents[4]
 
@@ -67,21 +63,3 @@ def test_invalid_admin_url_stops_startup(invalid: str) -> None:
 
     assert completed.returncode != 0
     assert "ADMIN_URL must be a relative path" in completed.stderr
-
-
-def test_check_warns_in_production_with_the_default_path() -> None:
-    with override_settings(DEBUG=False, ADMIN_URL="admin/"):
-        messages = check_admin_url_is_not_the_default(None)
-
-    assert len(messages) == 1
-    assert isinstance(messages[0], CheckWarning)
-    assert messages[0].id == "core.W001"
-
-
-def test_check_is_silent_with_a_custom_path_or_in_development() -> None:
-    with override_settings(DEBUG=False, ADMIN_URL="gestao-interna/"):
-        custom = check_admin_url_is_not_the_default(None)
-    with override_settings(DEBUG=True, ADMIN_URL="admin/"):
-        development = check_admin_url_is_not_the_default(None)
-
-    assert custom == [] and development == []

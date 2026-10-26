@@ -9,7 +9,7 @@ from apps.condominiums.errors import AdministrationContractError
 from apps.condominiums.models.condominium import Condominium
 from apps.condominiums.models.querysets import AdministrationContractQuerySet
 from apps.condominiums.models.rules import AdministrationContractRules
-from apps.core.dates import add_months
+from apps.core.infrastructure.dates import add_months
 from apps.core.models.base import UUIDModel
 
 

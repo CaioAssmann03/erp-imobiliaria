@@ -2,7 +2,7 @@ from typing import final, override
 
 from django.db import models
 
-from apps.core.validators.cnpj import validate_cnpj
+from apps.core.infrastructure.validators.cnpj import validate_cnpj
 
 from .base import BaseModel
 

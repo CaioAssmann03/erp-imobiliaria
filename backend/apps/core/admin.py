@@ -7,7 +7,7 @@ from django.http import HttpRequest
 from unfold.admin import ModelAdmin
 
 from .models import Company
-from .scoping import CompanyScopedAdminMixin
+from .infrastructure.scoping import CompanyScopedAdminMixin
 
 
 @final
@@ -24,7 +24,6 @@ admin.site.unregister(LogEntry)
 @final
 @admin.register(LogEntry)
 class AuditLogEntryAdmin(LibraryLogEntryAdmin, ModelAdmin):
-    """The audit trail: visible only to superusers (it has no company of its own), read-only for everyone."""
 
     @staticmethod
     def _is_superuser(request: HttpRequest) -> bool:

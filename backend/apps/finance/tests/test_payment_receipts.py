@@ -8,7 +8,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from apps.core.storage import object_storage
+from apps.core.infrastructure.storage import object_storage
 
 from ..models import AccountPayable, PaymentReceipt
 from ..services.cancel_account_payable import cancel_account_payable

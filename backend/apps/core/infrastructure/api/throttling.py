@@ -9,6 +9,7 @@ else can forge it to dodge the limit.
 import hmac
 import logging
 from typing import override
+
 from django.conf import settings
 from rest_framework.request import Request
 from rest_framework.throttling import ScopedRateThrottle
@@ -33,6 +34,8 @@ class TrustedProxyScopedRateThrottle(ScopedRateThrottle):
     def allow_request(self, request: Request, view: APIView) -> bool:
         try:
             return bool(super().allow_request(request, view))
-        except Exception:  # noqa: BLE001  (a cache failure must not make login unavailable)
-            logger.exception("Rate limit unavailable (cache error); letting the request through.")
+        except Exception:  
+            logger.exception(
+                "Rate limit unavailable (cache error); letting the request through."
+            )
             return True

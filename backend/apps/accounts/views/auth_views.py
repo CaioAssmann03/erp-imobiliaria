@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from apps.core.api.throttling import TrustedProxyScopedRateThrottle
+from apps.core.infrastructure.api.throttling import TrustedProxyScopedRateThrottle
 
 from ..serializers import LogoutSerializer
 from ..services.revoke_refresh_token import revoke_refresh_token

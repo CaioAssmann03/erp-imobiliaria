@@ -11,7 +11,7 @@ from django.test import RequestFactory
 
 from apps.accounts.models import User
 from apps.condominiums.models import Block, Condominium
-from apps.core.audit import AUDIT_EXEMPT, is_audited
+from apps.core.infrastructure.audit import AUDIT_EXEMPT, is_audited
 from apps.core.models import Company
 
 pytestmark = pytest.mark.django_db

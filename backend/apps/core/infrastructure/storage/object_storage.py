@@ -16,7 +16,7 @@ from django.conf import settings
 from rest_framework import status
 from rest_framework.exceptions import APIException
 
-from apps.core.errors.object_storage import ObjectStorageError
+from apps.core.infrastructure.errors.object_storage import ObjectStorageError
 
 logger = logging.getLogger(__name__)
 

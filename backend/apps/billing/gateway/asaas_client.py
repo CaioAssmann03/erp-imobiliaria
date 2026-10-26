@@ -6,7 +6,7 @@ import urllib3
 from django.conf import settings
 
 from apps.billing.errors import GatewayAccountError
-from apps.core.errors.base import RuleError
+from apps.core.infrastructure.errors.base import RuleError
 
 REQUEST_TIMEOUT_SECONDS = 15.0
 RATE_LIMITED_STATUS = 429

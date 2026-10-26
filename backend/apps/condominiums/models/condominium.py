@@ -8,7 +8,7 @@ from apps.condominiums.models.address import Address
 from apps.condominiums.models.querysets import CondominiumQuerySet
 from apps.core.models import Company, SequentialCodeMixin, sequential_code_field
 from apps.core.models.base import BaseModel
-from apps.core.validators import validate_cnpj
+from apps.core.infrastructure.validators import validate_cnpj
 from apps.persons.models import Person
 
 if TYPE_CHECKING:

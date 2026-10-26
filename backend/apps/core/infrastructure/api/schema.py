@@ -8,7 +8,7 @@ as a union, and a code the frontend does not translate fails to compile.
 
 from typing import Any
 
-from apps.core.errors.registry import all_error_codes
+from apps.core.infrastructure.errors.registry import all_error_codes
 
 SCHEMAS = "#/components/schemas"
 HTTP_METHODS = ("get", "post", "put", "patch", "delete")

@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.http import HttpRequest
 from unfold.admin import ModelAdmin, TabularInline
 
-from apps.core.scoping import CompanyScopedAdminMixin
+from apps.core.infrastructure.scoping import CompanyScopedAdminMixin
 
 from .models import (
     AccountPayable,

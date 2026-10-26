@@ -2,7 +2,7 @@ from typing import Any, final, override
 
 from rest_framework import serializers
 
-from apps.core.scoping import request_company
+from apps.core.infrastructure.scoping import request_company
 from apps.core.serializers import ModelRulesMixin
 
 from ..models import Condominium

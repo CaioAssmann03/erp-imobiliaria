@@ -3,7 +3,7 @@ from typing import final
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
-from apps.core.scoping import CompanyScopedViewSetMixin
+from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin
 
 from ..models import Block
 from ..serializers import BlockSerializer

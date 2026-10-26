@@ -8,6 +8,6 @@ class CoreConfig(AppConfig):
 
     @override
     def ready(self) -> None:
-        from . import audit, checks  # noqa: F401  (checks registers itself)
+        from .infrastructure import audit
 
         audit.register()

@@ -3,7 +3,7 @@ from typing import Any, override
 from rest_framework.request import Request
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from apps.core.audit import set_audit_actor
+from apps.core.infrastructure.audit import set_audit_actor
 
 
 class AuditedJWTAuthentication(JWTAuthentication):

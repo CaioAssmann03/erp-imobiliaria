@@ -5,8 +5,8 @@ from typing import Any
 import pytest
 
 from apps.condominiums.models import BillingRules
-from apps.core.storage import object_storage
-from apps.core.storage.object_storage import ObjectStorageUnavailable
+from apps.core.infrastructure.storage import object_storage
+from apps.core.infrastructure.storage.object_storage import ObjectStorageUnavailable
 from apps.finance.tests.fake_storage import FakeObjectStorage
 
 from .. import tasks

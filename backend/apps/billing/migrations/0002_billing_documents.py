@@ -6,7 +6,7 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 import apps.billing.validators
-import apps.core.validators.percentage
+import apps.core.infrastructure.validators.percentage
 import apps.finance.validators
 
 
@@ -31,14 +31,14 @@ class Migration(migrations.Migration):
                 ('due_date', models.DateField()),
                 ('amount', models.DecimalField(decimal_places=2, max_digits=12, validators=[apps.finance.validators.validate_positive_amount])),
                 ('status', models.CharField(choices=[('issued', 'Issued'), ('registered', 'Registered'), ('paid', 'Paid'), ('cancelled', 'Cancelled')], default='issued', max_length=12)),
-                ('discount_percentage', models.DecimalField(decimal_places=2, default=0, max_digits=5, validators=[apps.core.validators.percentage.validate_percentage])),
+                ('discount_percentage', models.DecimalField(decimal_places=2, default=0, max_digits=5, validators=[apps.core.infrastructure.validators.percentage.validate_percentage])),
                 ('discount_days', models.PositiveSmallIntegerField(default=0)),
                 ('late_fee_percentage', models.DecimalField(decimal_places=2, default=0, max_digits=5)),
                 ('initial_late_fee_percentage', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
                 ('initial_late_fee_days', models.PositiveSmallIntegerField(blank=True, null=True)),
                 ('interest_calculation', models.CharField(choices=[('full_month', 'Full month'), ('per_day', 'Per day')], max_length=12)),
                 ('interest_grace_days', models.PositiveSmallIntegerField(default=0)),
-                ('monthly_interest_percentage', models.DecimalField(decimal_places=2, default=0, max_digits=5, validators=[apps.core.validators.percentage.validate_percentage])),
+                ('monthly_interest_percentage', models.DecimalField(decimal_places=2, default=0, max_digits=5, validators=[apps.core.infrastructure.validators.percentage.validate_percentage])),
                 ('payer', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='billing_documents', to='persons.person')),
                 ('unit', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='billing_documents', to='condominiums.unit')),
             ],

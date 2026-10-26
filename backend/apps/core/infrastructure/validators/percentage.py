@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from apps.core.errors.validators import CoreValidatorError
+from apps.core.infrastructure.errors.validators import CoreValidatorError
 
 
 def validate_percentage(percentage: Decimal | float | int) -> None:

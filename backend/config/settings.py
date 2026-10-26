@@ -47,11 +47,12 @@ INSTALLED_APPS = [
     "apps.billing",
     "apps.rentals",
     "apps.sales",
+    "apps.seed",
 ]
 
 MIDDLEWARE = [
     # First: the host's health probe is answered before the HTTPS redirect and the host check.
-    "apps.core.api.middleware.HealthCheckMiddleware",
+    "apps.core.infrastructure.api.middleware.HealthCheckMiddleware",
     "django.middleware.security.SecurityMiddleware",
     # Serve os arquivos estáticos (admin) em produção, sem nginx/CDN.
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -145,12 +146,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "EXCEPTION_HANDLER": "apps.core.api.exception_handler.api_exception_handler",
+    "EXCEPTION_HANDLER": "apps.core.infrastructure.api.exception_handler.api_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "apps.accounts.authentication.AuditedJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_PAGINATION_CLASS": "apps.core.api.pagination.StandardPagination",
+    "DEFAULT_PAGINATION_CLASS": "apps.core.infrastructure.api.pagination.StandardPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_THROTTLE_RATES": {
         "auth_login": "5/min",
@@ -175,7 +176,7 @@ SPECTACULAR_SETTINGS = {
     },
     "POSTPROCESSING_HOOKS": [
         "drf_spectacular.hooks.postprocess_schema_enums",
-        "apps.core.api.schema.add_error_contract",
+        "apps.core.infrastructure.api.schema.add_error_contract",
     ],
 }
 

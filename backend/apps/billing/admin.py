@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 from unfold.admin import ModelAdmin, TabularInline
 
-from apps.core.scoping import CompanyScopedAdminMixin
+from apps.core.infrastructure.scoping import CompanyScopedAdminMixin
 
 from .gateway.asaas_client import GatewayError
 from .models import (

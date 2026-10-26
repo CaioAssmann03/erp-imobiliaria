@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Q
 
 from apps.core.models.base import BaseModel
-from apps.core.validators import validate_percentage
+from apps.core.infrastructure.validators import validate_percentage
 from apps.finance.errors import EntryTemplateError
 from apps.finance.models.cost_center import CostCenter
 

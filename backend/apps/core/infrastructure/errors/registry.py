@@ -12,7 +12,6 @@ from pkgutil import iter_modules
 
 from django.apps import apps as django_apps
 
-# The framework's own codes (Django validation, DRF, SimpleJWT) that the API keeps as they are.
 GENERIC_ERROR_CODES: tuple[str, ...] = (
     "authentication_failed",
     "bad_authorization_header",
@@ -50,11 +49,18 @@ GENERIC_ERROR_CODES: tuple[str, ...] = (
 )
 
 
+def _errors_package_names() -> list[str]:
+    """`<app>.errors` of each installed app; `core`'s own live in `core.infrastructure.errors`."""
+    return [
+        "apps.core.infrastructure.errors" if config.name == "apps.core" else f"{config.name}.errors"
+        for config in django_apps.get_app_configs()
+    ]
+
+
 def domain_error_code_enums() -> list[type[StrEnum]]:
     """The `RuleError` enums defined in the modules of the installed apps' `errors` packages."""
     enums: list[type[StrEnum]] = []
-    for config in django_apps.get_app_configs():
-        package_name = f"{config.name}.errors"
+    for package_name in _errors_package_names():
         if find_spec(package_name) is None:
             continue
         package = import_module(package_name)
@@ -65,7 +71,7 @@ def domain_error_code_enums() -> list[type[StrEnum]]:
                 member
                 for member in vars(module).values()
                 if isinstance(member, type)
-                and issubclass(member, StrEnum)
+               and issubclass(member, StrEnum)
                 and len(member) > 0  # the abstract base `RuleError` has no codes
                 and member.__module__ == module_name
             )

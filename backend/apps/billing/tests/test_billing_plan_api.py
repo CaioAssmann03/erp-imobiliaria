@@ -13,7 +13,7 @@ from rest_framework.test import APIClient
 from apps.accounts.models import User
 from apps.condominiums.models import Condominium
 from apps.core.models import Company
-from apps.core.seed.documents import generate_cnpj
+from apps.seed.documents import generate_cnpj
 from apps.finance.models import CostCenter, EntryTemplate
 from apps.finance.tests.base import body, error_codes, results
 

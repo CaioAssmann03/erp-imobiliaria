@@ -32,7 +32,7 @@ class HealthCheckMiddleware:
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT 1")
-        except Exception:  # noqa: BLE001  (any failure means "not healthy"; the detail stays in the log)
+        except Exception:  
             logger.exception("Health check: the database did not answer.")
             response = JsonResponse({"status": "unavailable"}, status=503)
         else:

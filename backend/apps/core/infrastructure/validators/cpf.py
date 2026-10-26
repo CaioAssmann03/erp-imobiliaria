@@ -1,6 +1,6 @@
 import re
 
-from apps.core.errors.validators import CoreValidatorError
+from apps.core.infrastructure.errors.validators import CoreValidatorError
 
 
 def _check_digit(leading_digits: str) -> int:

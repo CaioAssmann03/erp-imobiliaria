@@ -4,7 +4,7 @@ import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.core.api.codes import code_from_term
+from apps.core.infrastructure.search.term import code_from_term
 from apps.core.testing import seeded_company
 from apps.persons.models import Person
 

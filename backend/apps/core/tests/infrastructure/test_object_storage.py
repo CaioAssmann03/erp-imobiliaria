@@ -5,7 +5,7 @@ from typing import Any
 import pytest
 from botocore.exceptions import ClientError
 
-from apps.core.storage.object_storage import (
+from apps.core.infrastructure.storage.object_storage import (
     ObjectStorage,
     ObjectStorageUnavailable,
     content_disposition,

@@ -37,7 +37,7 @@ def register_audited(
     auditlog.register(
         model,
         mask_fields=list(masked_fields) or None,
-        mask_callable="apps.core.audit.mask_personal_value" if masked_fields else None,
+        mask_callable="apps.core.infrastructure.audit.mask_personal_value" if masked_fields else None,
         exclude_fields=list(excluded_fields) or None,
     )
 
@@ -61,6 +61,6 @@ def set_audit_actor(user: Any) -> None:
 
 
 def register() -> None:
-    from .models import Company
+    from apps.core.models import Company
 
     register_audited(Company)

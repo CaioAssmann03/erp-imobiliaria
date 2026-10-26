@@ -1,5 +1,5 @@
 import pytest
-from apps.core.validators import validate_cnpj
+from apps.core.infrastructure.validators import validate_cnpj
 from django.core.exceptions import ValidationError
 
 
