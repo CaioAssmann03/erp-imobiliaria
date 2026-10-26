@@ -1,13 +1,12 @@
 from typing import Any, final
 
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from unfold.admin import ModelAdmin, TabularInline
 
 from apps.core.scoping import CompanyScopedAdminMixin
 
-from .gateway.asaas_client import GatewayError
 from .models import (
     BillingDocument,
     BillingDocumentDelivery,
@@ -24,7 +23,6 @@ from .models import (
     GatewayReconciliationRun,
 )
 from .services.process_gateway_event import process_gateway_event
-from .services.sync_gateway_account_status import sync_gateway_account_status
 
 
 @final
@@ -117,13 +115,12 @@ class BillingDocumentPdfAdmin(CompanyScopedAdminMixin, ModelAdmin):
 @final
 @admin.register(GatewayAccount)
 class GatewayAccountAdmin(CompanyScopedAdminMixin, ModelAdmin):
-    """Read-only: accounts are opened by `onboard_gateway_account`; the credentials are never shown (spec 030)."""
+    """Read-only: the account is set up by `setup_gateway_account`; the credentials are never shown (spec 037)."""
 
-    list_display = ("condominium", "status", "wallet_id", "approved_at")
+    list_display = ("company", "status")
     list_filter = ("status",)
-    search_fields = ("condominium__name",)
+    search_fields = ("company__legal_name", "company__trade_name")
     exclude = ("api_key", "webhook_token")
-    actions = ("sync_status",)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
@@ -133,14 +130,6 @@ class GatewayAccountAdmin(CompanyScopedAdminMixin, ModelAdmin):
 
     def has_delete_permission(self, request: HttpRequest, obj: GatewayAccount | None = None) -> bool:
         return False
-
-    @admin.action(description="Sync status with the gateway")
-    def sync_status(self, request: HttpRequest, queryset: QuerySet[GatewayAccount]) -> None:
-        for account in queryset:
-            try:
-                sync_gateway_account_status(account)
-            except GatewayError as error:
-                self.message_user(request, f"{account.condominium}: {error}", messages.ERROR)
 
 
 class ReadOnlyAdminMixin:

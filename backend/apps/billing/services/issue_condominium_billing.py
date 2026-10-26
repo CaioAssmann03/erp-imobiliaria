@@ -57,7 +57,7 @@ def _issue_units(run: BillingRun) -> None:
     if any(item.uses_inconsistent_apportionment(apportionment_totals) for item in items):
         return _fail_condominium(run, ProblemCode.INCONSISTENT_APPORTIONMENT)
 
-    gateway_account = GatewayAccount.objects.filter(condominium=condominium).first()
+    gateway_account = GatewayAccount.objects.filter(company_id=condominium.company_id).first()
     registers_at_gateway = gateway_account is not None and gateway_account.can_register_charges()
     if not registers_at_gateway:
         # The documents are still issued, as drafts: they are registered once the account is active.

@@ -33,7 +33,7 @@ class GatewayEvent(BaseModel):
     reason = models.CharField(max_length=60, blank=True)
     error_codes = models.JSONField(default=list, blank=True)
 
-    company_lookup = "gateway_account__condominium__company"
+    company_lookup = "gateway_account__company"
 
     class Meta:
         verbose_name = "Gateway Event"

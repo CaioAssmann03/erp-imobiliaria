@@ -25,7 +25,7 @@ def register_billing_document(
         return active
     if document.status != BillingDocument.Status.ISSUED:
         raise GatewayError(BillingDocumentRegistrationError.DOCUMENT_NOT_ISSUED)
-    account = GatewayAccount.objects.filter(condominium_id=document.unit.condominium_id).first()
+    account = GatewayAccount.objects.filter(company_id=document.unit.condominium.company_id).first()
     if account is None or not account.can_register_charges():
         raise GatewayError(BillingDocumentRegistrationError.NO_ACTIVE_GATEWAY_ACCOUNT)
     if document.payer.tax_id is None:

@@ -80,6 +80,14 @@ ssh -N -L 8000:127.0.0.1:8000 root@177.7.63.175   # keep it open while you use t
 ```
 Then open `http://localhost:8000/<ADMIN_URL>` (the path is in the host `.env`). It needs `localhost` in `ALLOWED_HOSTS`. The session and CSRF cookies are `Secure` in production: Chrome and Firefox accept them on `http://localhost`, Safari does not (use another browser). Close the tunnel with Ctrl+C.
 
+## Gateway account (Asaas)
+The company has **one** Asaas account that issues every boleto and receives the money (spec 037). Set it up once per environment:
+1. In the Asaas panel (sandbox: sandbox.asaas.com) create an API key.
+2. Run `python manage.py setup_gateway_account <company_id>` and paste the key when asked (it is not echoed and never goes in an argument or a file). The key is stored encrypted with `GATEWAY_CREDENTIALS_KEY`; running it again replaces only the key.
+3. **The webhook is how Asaas tells us a boleto was paid.** Asaas calls our public URL (`/api/webhooks/asaas/`, set as `ASAAS_WEBHOOK_URL`) and sends the secret token the command generated in the `asaas-access-token` header; without the right token the call is refused. Either run the command with `--register-webhook <e-mail>` (it registers the URL, the token and the payment events at Asaas), or copy the token the command prints and paste it with the URL in the panel (*Integrações → Webhooks*, authentication token). In development the sandbox cannot reach `localhost`: expose the backend with a tunnel and put its URL in `ASAAS_WEBHOOK_URL`.
+4. In the sandbox, issue a boleto and confirm it with the panel's *confirm payment* button (or `POST /v3/sandbox/payment/{id}/confirm`): the webhook arrives, the document becomes `paid` and the credits appear in the condominium's current account.
+`--rotate-webhook-token` replaces the token; register it again right after, or Asaas events are refused until it matches.
+
 ## Migrations in production
 1. Commit them with the feature; CI fails on missing ones.
 2. Keep them **backward compatible** for one deploy (nullable/default first, remove later): old and new containers overlap.

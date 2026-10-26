@@ -17,6 +17,6 @@ class Command(BaseCommand):
         for account in GatewayAccount.objects.filter(status=GatewayAccount.Status.ACTIVE):
             run = reconcile_gateway_account(account, options["days"])
             self.stdout.write(
-                f"{account.condominium}: {run.status} found={run.found_count} posted={run.processed_count} "
+                f"{account.company}: {run.status} found={run.found_count} posted={run.processed_count} "
                 f"already={run.already_posted_count} unprocessed={run.unprocessed_count}"
             )
