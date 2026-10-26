@@ -15,6 +15,8 @@ skip-if: the single gateway account → features/037-single-gateway-account.md; 
 - [ ] Is the fee printed on the boleto PDF and on the e-mail as its own line? (recommended: yes, "Tarifa de registro", so the payer sees why the total is higher)
 - [ ] When a boleto is cancelled or reissued before it is paid, is the fee charged again? (recommended: no, one fee per document, whatever the number of registrations)
 
+- [ ] In the reference system the fee ("TARIFA BANCO", R$ 3.90) is just an event launched on every unit. With the launches of spec 039, does the fee become a launch whose subconta belongs to the administradora? (recommended: no, keep the fee as its own mechanism so it can never reach a condominium)
+
 ## Decisions
 | Date | Decision | Decided by |
 |---|---|---|
