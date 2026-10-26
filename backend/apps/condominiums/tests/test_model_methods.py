@@ -9,6 +9,7 @@ from apps.core.testing import seeded_company
 from apps.persons.models import Person
 
 from ..models import AdministrationContract, BillingRules, Condominium, Unit, UnitPerson
+from ..testing import add_fraction
 
 
 class TestBillingMonths:
@@ -100,7 +101,7 @@ class TestApportionment:
             company=condominium.company, name="Outro", cnpj="45723174000110"
         )
         for name in ("1", "2"):
-            _ = Unit.objects.create(condominium=condominium, name=name, ideal_fraction=Decimal("0.5"))
-        _ = Unit.objects.create(condominium=other, name="1", ideal_fraction=Decimal("0.9"))
+            add_fraction(Unit.objects.create(condominium=condominium, name=name), "0.5")
+        add_fraction(Unit.objects.create(condominium=other, name="1"), "0.9")
 
         assert Unit.objects.inconsistent_apportionment_condominium_ids() == [other.pk]

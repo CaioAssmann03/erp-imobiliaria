@@ -18,7 +18,7 @@ const item = (overrides = {}) => ({
   entry_template: "tpl-1",
   calculation_kind: "fixed_amount",
   amount: "450.00",
-  ideal_fraction_number: "",
+  apportionment_criterion: "",
   unit_value_field: "",
   ...overrides,
 });
@@ -68,16 +68,16 @@ test("a fixed item sends only its amount", () => {
     entry_template: "tpl-1",
     calculation_kind: "fixed_amount",
     amount: "450.00",
-    ideal_fraction_number: null,
+    apportionment_criterion: null,
     unit_value_field: null,
   });
 });
 
-test("a share item sends the total and the fraction number as a number", () => {
-  const payload = itemToPayload(item({ calculation_kind: "ideal_fraction_share", amount: "9000.00", ideal_fraction_number: "2" }));
+test("a share item sends the total and the criterion id", () => {
+  const payload = itemToPayload(item({ calculation_kind: "ideal_fraction_share", amount: "9000.00", apportionment_criterion: "crit-2" }));
 
   assert.equal(payload.amount, "9000.00");
-  assert.equal(payload.ideal_fraction_number, 2);
+  assert.equal(payload.apportionment_criterion, "crit-2");
   assert.equal(payload.unit_value_field, null);
 });
 
@@ -85,7 +85,7 @@ test("a unit value item sends the field and no amount, even if one was typed bef
   const payload = itemToPayload(item({ calculation_kind: "unit_registered_value", amount: "10.00", unit_value_field: "gas" }));
 
   assert.equal(payload.amount, null);
-  assert.equal(payload.ideal_fraction_number, null);
+  assert.equal(payload.apportionment_criterion, null);
   assert.equal(payload.unit_value_field, "gas");
 });
 

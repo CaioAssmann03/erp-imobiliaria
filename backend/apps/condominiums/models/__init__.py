@@ -1,9 +1,10 @@
 from .address import Address as Address
 from .administration_contract import AdministrationContract as AdministrationContract
+from .apportionment_criterion import ApportionmentCriterion as ApportionmentCriterion
 from .billing_rules import BillingRules as BillingRules
 from .block import Block as Block
 from .condominium import Condominium as Condominium
 from .late_interest_rate import LateInterestRate as LateInterestRate
-from .person_member import CondominiumPersonMember as CondominiumPersonMember
 from .unit import Unit as Unit
+from .unit_fraction import UnitFraction as UnitFraction
 from .unit_person import UnitPerson as UnitPerson

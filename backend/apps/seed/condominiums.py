@@ -10,10 +10,12 @@ from dateutil.relativedelta import relativedelta
 from apps.condominiums.models import (
     Address,
     AdministrationContract,
+    ApportionmentCriterion,
     BillingRules,
     Block,
     Condominium,
     Unit,
+    UnitFraction,
     UnitPerson,
 )
 from apps.finance.models import (
@@ -198,9 +200,12 @@ def create_condominium(
 
 
 def assign_ideal_fractions(
-    random_generator: random.Random, units: list[Unit], target_total: Decimal
+    random_generator: random.Random,
+    criterion: ApportionmentCriterion,
+    units: list[Unit],
+    target_total: Decimal,
 ) -> None:
-    """Random shares for the active units, summing to `target_total` (below 1 shows the pendency)."""
+    """Random shares of `criterion` for the active units, summing to `target_total` (below 1 shows the pendency)."""
     weights = [random_generator.uniform(0.8, 1.4) for _ in units]
     fractions = [
         Decimal(f"{weight / sum(weights):.8f}") * target_total for weight in weights
@@ -210,8 +215,12 @@ def assign_ideal_fractions(
             fractions
         )  # rounding: close exactly at the target
     for unit, fraction in zip(units, fractions):
-        unit.ideal_fraction = fraction.quantize(Decimal("0.00000001"))
-        save_validated(unit)
+        _ = create_validated(
+            UnitFraction,
+            unit=unit,
+            criterion=criterion,
+            value=fraction.quantize(Decimal("0.00000001")),
+        )
 
 
 def create_demo_condominiums(context: SeedContext) -> tuple[int, int]:
@@ -232,17 +241,23 @@ def finalize_demo_condominiums(random_generator: random.Random) -> None:
         condominium = Condominium.objects.filter(name=demo.name).first()
         already_finalized = (
             condominium is not None
-            and condominium.units.filter(ideal_fraction__gt=0).exists()
+            and UnitFraction.objects.filter(unit__condominium=condominium).exists()
         )
         if condominium is None or already_finalized:
             continue
         target_total = (
             WRONG_APPORTIONMENT_TOTAL
             if demo.has_wrong_apportionment
-            else Unit.APPORTIONMENT_TOTAL
+            else ApportionmentCriterion.TOTAL
+        )
+        main_criterion = condominium.apportionment_criteria.get(
+            position=ApportionmentCriterion.MAIN_POSITION
         )
         assign_ideal_fractions(
-            random_generator, list(condominium.units.filter(active=True)), target_total
+            random_generator,
+            main_criterion,
+            list(condominium.units.filter(active=True)),
+            target_total,
         )
         if demo.has_cost_centers:
             for name in COST_CENTERS:

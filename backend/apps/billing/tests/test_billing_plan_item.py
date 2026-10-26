@@ -27,7 +27,7 @@ def error_codes(item: BillingPlanItem, field: str) -> list[str | None]:
 
 def test_each_kind_with_its_own_fields_is_valid(build_item) -> None:  # type: ignore[no-untyped-def]
     build_item().full_clean()
-    build_item(calculation_kind=Kind.IDEAL_FRACTION_SHARE, amount=Decimal("9000.00"), ideal_fraction_number=2).full_clean()
+    build_item(calculation_kind=Kind.IDEAL_FRACTION_SHARE, amount=Decimal("9000.00"), criterion_position=2).full_clean()
     build_item(
         calculation_kind=Kind.UNIT_REGISTERED_VALUE, amount=None, unit_value_field=BillingPlanItem.UnitValueField.GAS
     ).full_clean()
@@ -37,12 +37,12 @@ def test_each_kind_with_its_own_fields_is_valid(build_item) -> None:  # type: ig
     ("overrides", "field", "code"),
     [
         ({"amount": None}, "amount", "billing_plan_item.amount.does_not_match_kind"),
-        ({"ideal_fraction_number": 1}, "ideal_fraction_number", "billing_plan_item.ideal_fraction_number.does_not_match_kind"),
+        ({"criterion_position": 1}, "apportionment_criterion", "billing_plan_item.apportionment_criterion.does_not_match_kind"),
         ({"unit_value_field": "water"}, "unit_value_field", "billing_plan_item.unit_value_field.does_not_match_kind"),
         (
             {"calculation_kind": Kind.IDEAL_FRACTION_SHARE},
-            "ideal_fraction_number",
-            "billing_plan_item.ideal_fraction_number.does_not_match_kind",
+            "apportionment_criterion",
+            "billing_plan_item.apportionment_criterion.does_not_match_kind",
         ),
         (
             {"calculation_kind": Kind.UNIT_REGISTERED_VALUE, "unit_value_field": "water"},
@@ -55,11 +55,6 @@ def test_each_kind_with_its_own_fields_is_valid(build_item) -> None:  # type: ig
             "billing_plan_item.unit_value_field.does_not_match_kind",
         ),
         ({"amount": Decimal(0)}, "amount", "amount.not_positive"),
-        (
-            {"calculation_kind": Kind.IDEAL_FRACTION_SHARE, "ideal_fraction_number": 7},
-            "ideal_fraction_number",
-            "ideal_fraction_number.out_of_range",
-        ),
     ],
 )
 def test_fields_that_do_not_match_the_kind_are_rejected(build_item, overrides, field, code) -> None:  # type: ignore[no-untyped-def]
@@ -70,17 +65,22 @@ def test_fields_that_do_not_match_the_kind_are_rejected(build_item, overrides, f
     "overrides",
     [
         {"amount": None},
-        {"ideal_fraction_number": 1},
-        {"calculation_kind": Kind.IDEAL_FRACTION_SHARE},
         {"calculation_kind": Kind.UNIT_REGISTERED_VALUE, "unit_value_field": "gas"},
         {"calculation_kind": Kind.UNIT_REGISTERED_VALUE, "amount": None},
         {"amount": Decimal(-1)},
-        {"calculation_kind": Kind.IDEAL_FRACTION_SHARE, "ideal_fraction_number": 0},
     ],
 )
 def test_fields_that_do_not_match_the_kind_are_refused_by_the_database(build_item, overrides) -> None:  # type: ignore[no-untyped-def]
     with pytest.raises(IntegrityError), transaction.atomic():
         build_item(**overrides).save()
+
+
+def test_a_criterion_of_another_condominium_is_rejected(build_item, other_condominium: Condominium) -> None:  # type: ignore[no-untyped-def]
+    foreign = other_condominium.apportionment_criteria.get(position=1)
+
+    item = build_item(calculation_kind=Kind.IDEAL_FRACTION_SHARE, amount=Decimal("100.00"), apportionment_criterion=foreign)
+
+    assert "billing_plan_item.apportionment_criterion.other_condominium" in error_codes(item, "apportionment_criterion")
 
 
 def test_position_is_unique_per_plan(build_item) -> None:  # type: ignore[no-untyped-def]

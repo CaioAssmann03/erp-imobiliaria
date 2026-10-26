@@ -10,9 +10,13 @@ class BillingPlanItemError(RuleError):
         "billing_plan_item.amount.does_not_match_kind",
         "Fixed and share items need an amount; an item that reads the unit's value has none.",
     )
-    IDEAL_FRACTION_NUMBER_DOES_NOT_MATCH_KIND = (
-        "billing_plan_item.ideal_fraction_number.does_not_match_kind",
-        "A share item names an ideal fraction; the other kinds have none.",
+    APPORTIONMENT_CRITERION_DOES_NOT_MATCH_KIND = (
+        "billing_plan_item.apportionment_criterion.does_not_match_kind",
+        "A share item names an apportionment criterion; the other kinds have none.",
+    )
+    APPORTIONMENT_CRITERION_OTHER_CONDOMINIUM = (
+        "billing_plan_item.apportionment_criterion.other_condominium",
+        "The apportionment criterion belongs to another condominium.",
     )
     UNIT_VALUE_FIELD_DOES_NOT_MATCH_KIND = (
         "billing_plan_item.unit_value_field.does_not_match_kind",

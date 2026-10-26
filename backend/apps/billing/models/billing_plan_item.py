@@ -1,20 +1,15 @@
 import uuid
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from decimal import ROUND_HALF_UP, Decimal
 from typing import final, override
 
 from django.db import models
 from django.db.models import Q
 
-from apps.billing.errors import BillingPlanItemError, BillingValidatorError
+from apps.billing.errors import BillingPlanItemError
 from apps.billing.models.billing_plan import BillingPlan
 from apps.billing.models.rules import BillingPlanItemRules
-from apps.billing.validators import (
-    FIRST_IDEAL_FRACTION_NUMBER,
-    LAST_IDEAL_FRACTION_NUMBER,
-    validate_ideal_fraction_number,
-)
-from apps.condominiums.models import Unit
+from apps.condominiums.models import ApportionmentCriterion, Unit, UnitFraction
 from apps.core.models.base import BaseModel
 from apps.finance.errors import FinanceValidatorError
 from apps.finance.models import CostCenter, EntryTemplate
@@ -53,8 +48,13 @@ class BillingPlanItem(BaseModel):
     amount = models.DecimalField(
         max_digits=12, decimal_places=2, null=True, blank=True, validators=[validate_positive_amount]
     )
-    ideal_fraction_number = models.PositiveSmallIntegerField(
-        null=True, blank=True, validators=[validate_ideal_fraction_number]
+    # Share items only: the condominium's criterion the total is split by.
+    apportionment_criterion = models.ForeignKey(
+        ApportionmentCriterion,
+        on_delete=models.RESTRICT,
+        null=True,
+        blank=True,
+        related_name="billing_plan_items",
     )
     unit_value_field = models.CharField(
         max_length=20, choices=UnitValueField.choices, null=True, blank=True
@@ -80,28 +80,11 @@ class BillingPlanItem(BaseModel):
                 violation_error_code=FinanceValidatorError.AMOUNT_NOT_POSITIVE.value,
             ),
             models.CheckConstraint(
-                name="billing_plan_item_ideal_fraction_number_1_6",
-                condition=Q(ideal_fraction_number__isnull=True)
-                | Q(
-                    ideal_fraction_number__gte=FIRST_IDEAL_FRACTION_NUMBER,
-                    ideal_fraction_number__lte=LAST_IDEAL_FRACTION_NUMBER,
-                ),
-                violation_error_message=BillingValidatorError.IDEAL_FRACTION_NUMBER_OUT_OF_RANGE.message,
-                violation_error_code=BillingValidatorError.IDEAL_FRACTION_NUMBER_OUT_OF_RANGE.value,
-            ),
-            models.CheckConstraint(
                 name="billing_plan_item_amount_matches_kind",
                 condition=Q(calculation_kind="unit_registered_value", amount__isnull=True)
                 | (~Q(calculation_kind="unit_registered_value") & Q(amount__isnull=False)),
                 violation_error_message=BillingPlanItemError.AMOUNT_DOES_NOT_MATCH_KIND.message,
                 violation_error_code=BillingPlanItemError.AMOUNT_DOES_NOT_MATCH_KIND.value,
-            ),
-            models.CheckConstraint(
-                name="billing_plan_item_fraction_matches_kind",
-                condition=Q(calculation_kind="ideal_fraction_share", ideal_fraction_number__isnull=False)
-                | (~Q(calculation_kind="ideal_fraction_share") & Q(ideal_fraction_number__isnull=True)),
-                violation_error_message=BillingPlanItemError.IDEAL_FRACTION_NUMBER_DOES_NOT_MATCH_KIND.message,
-                violation_error_code=BillingPlanItemError.IDEAL_FRACTION_NUMBER_DOES_NOT_MATCH_KIND.value,
             ),
             models.CheckConstraint(
                 name="billing_plan_item_unit_value_field_matches_kind",
@@ -116,14 +99,14 @@ class BillingPlanItem(BaseModel):
     def clean(self) -> None:
         BillingPlanItemRules(self).validate()
 
-    def uses_inconsistent_apportionment(self, apportionment_totals: Sequence[Decimal]) -> bool:
-        """Whether a share item names a fraction that does not close at 1 over the active units
-        (`Unit.objects.apportionment_totals()`); the other kinds never do. A fraction no unit has yet counts."""
+    def uses_inconsistent_apportionment(self, apportionment_totals: Mapping[uuid.UUID, Decimal]) -> bool:
+        """Whether a share item names a criterion that does not close at 1 over the active units
+        (`ApportionmentCriterion.objects.with_total()`); the other kinds never do. A criterion no unit has a fraction in counts."""
         if self.calculation_kind != self.CalculationKind.IDEAL_FRACTION_SHARE:
             return False
-        assert self.ideal_fraction_number is not None
-        total = apportionment_totals[self.ideal_fraction_number - 1]
-        return abs(total - Unit.APPORTIONMENT_TOTAL) > Unit.APPORTIONMENT_TOLERANCE
+        assert self.apportionment_criterion_id is not None
+        total = apportionment_totals.get(self.apportionment_criterion_id, Decimal(0))
+        return ApportionmentCriterion.does_not_close(total)
 
     def amounts_by_unit(self, units: Sequence[Unit]) -> dict[uuid.UUID, Decimal]:
         """What each unit pays for this line; zero when it owes nothing for it.
@@ -142,9 +125,13 @@ class BillingPlanItem(BaseModel):
     def _share_amounts(self, units: Sequence[Unit]) -> dict[uuid.UUID, Decimal]:
         """The total split by the named fraction, each share rounded half-up to the cent; the leftover cents
         go to the unit with the largest fraction (then by name) so a rerun gives the same amounts."""
-        assert self.amount is not None and self.ideal_fraction_number is not None
-        fraction_field = Unit.IDEAL_FRACTION_FIELDS[self.ideal_fraction_number - 1]
-        fractions = {unit.pk: getattr(unit, fraction_field) or Decimal(0) for unit in units}
+        assert self.amount is not None and self.apportionment_criterion_id is not None
+        values_by_unit_id = dict(
+            UnitFraction.objects.filter(
+                criterion_id=self.apportionment_criterion_id, unit_id__in=[unit.pk for unit in units]
+            ).values_list("unit_id", "value")
+        )
+        fractions = {unit.pk: values_by_unit_id.get(unit.pk, Decimal(0)) for unit in units}
         shares = {
             unit_id: (self.amount * fraction).quantize(CENT, rounding=ROUND_HALF_UP)
             for unit_id, fraction in fractions.items()

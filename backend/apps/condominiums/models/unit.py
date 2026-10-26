@@ -11,46 +11,22 @@ from apps.condominiums.models.block import Block
 from apps.condominiums.models.condominium import Condominium
 from apps.condominiums.models.querysets import UnitQuerySet
 from apps.condominiums.models.rules import UnitRules
-from apps.condominiums.validators import validate_ideal_fraction, validate_non_negative
+from apps.condominiums.validators import validate_non_negative
 from apps.core.models.base import BaseModel
 
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
 
+    from apps.condominiums.models.unit_fraction import UnitFraction
     from apps.condominiums.models.unit_person import UnitPerson
     from apps.persons.models import Person
 
 
-def _ideal_fraction_range_check(field_name: str, constraint_name: str) -> models.CheckConstraint:
-    """The fraction is empty or greater than 0 and at most 1 (the same rule as `validate_ideal_fraction`)."""
-    return models.CheckConstraint(
-        name=constraint_name,
-        condition=Q(**{f"{field_name}__isnull": True})
-        | (Q(**{f"{field_name}__gt": 0}) & Q(**{f"{field_name}__lte": 1})),
-        violation_error_message=UnitError.IDEAL_FRACTION_OUT_OF_RANGE.message,
-        violation_error_code=UnitError.IDEAL_FRACTION_OUT_OF_RANGE.value,
-    )
-
-
 @final
 class Unit(BaseModel):
-    APPORTIONMENT_TOTAL = Decimal(1)
-    APPORTIONMENT_TOLERANCE = Decimal("0.0001")
-    # A unit has up to six ideal fractions (the 1st is the main one); each splits the expenses its own way.
-    IDEAL_FRACTION_FIELDS = (
-        "ideal_fraction",
-        "ideal_fraction_2",
-        "ideal_fraction_3",
-        "ideal_fraction_4",
-        "ideal_fraction_5",
-        "ideal_fraction_6",
-    )
-
     objects = UnitQuerySet.as_manager()
 
     class BillingRecipient(models.TextChoices):
-        """Who receives the unit's boleto (the PDF's "sends document to")."""
-
         OWNER = "owner", "Owner"
         TENANT = "tenant", "Tenant"
 
@@ -66,6 +42,7 @@ class Unit(BaseModel):
     if TYPE_CHECKING:
         condominium_id: uuid.UUID
         unit_people: "RelatedManager[UnitPerson]"
+        fractions: "RelatedManager[UnitFraction]"
 
     condominium = models.ForeignKey(
         Condominium, on_delete=models.CASCADE, related_name="units"
@@ -80,55 +57,6 @@ class Unit(BaseModel):
         max_length=20, choices=UnitType.choices, default=UnitType.APARTMENT
     )
     resident_count = models.PositiveSmallIntegerField(default=0)
-    ideal_fraction = models.DecimalField(
-        max_digits=9,
-        decimal_places=8,
-        blank=True,
-        null=True,
-        validators=[validate_ideal_fraction],
-        help_text="Share of common areas, from 0 to 1. Used for expanse apportionment",
-    )
-    ideal_fraction_2 = models.DecimalField(
-        max_digits=9,
-        decimal_places=8,
-        blank=True,
-        null=True,
-        validators=[validate_ideal_fraction],
-        help_text="2nd ideal fraction, optional (from 0 to 1)",
-    )
-    ideal_fraction_3 = models.DecimalField(
-        max_digits=9,
-        decimal_places=8,
-        blank=True,
-        null=True,
-        validators=[validate_ideal_fraction],
-        help_text="3rd ideal fraction, optional (from 0 to 1)",
-    )
-    ideal_fraction_4 = models.DecimalField(
-        max_digits=9,
-        decimal_places=8,
-        blank=True,
-        null=True,
-        validators=[validate_ideal_fraction],
-        help_text="4th ideal fraction, optional (from 0 to 1)",
-    )
-    ideal_fraction_5 = models.DecimalField(
-        max_digits=9,
-        decimal_places=8,
-        blank=True,
-        null=True,
-        validators=[validate_ideal_fraction],
-        help_text="5th ideal fraction, optional (from 0 to 1)",
-    )
-    ideal_fraction_6 = models.DecimalField(
-        max_digits=9,
-        decimal_places=8,
-        blank=True,
-        null=True,
-        validators=[validate_ideal_fraction],
-        help_text="6th ideal fraction, optional (from 0 to 1)",
-    )
-
     is_manager_unit = models.BooleanField(default=False)
     billing_recipient = models.CharField(
         max_length=10,
@@ -158,18 +86,6 @@ class Unit(BaseModel):
         verbose_name_plural = "Units"
         ordering = ("condominium__name", "block__name", "name")
         constraints = (
-            models.CheckConstraint(
-                name="unit_ideal_fraction_0_1",
-                condition=Q(ideal_fraction__isnull=True)
-                | (Q(ideal_fraction__gt=0) & Q(ideal_fraction__lte=1)),
-                violation_error_message=UnitError.IDEAL_FRACTION_OUT_OF_RANGE.message,
-                violation_error_code=UnitError.IDEAL_FRACTION_OUT_OF_RANGE.value,
-            ),
-            _ideal_fraction_range_check("ideal_fraction_2", "unit_ideal_fraction_2_0_1"),
-            _ideal_fraction_range_check("ideal_fraction_3", "unit_ideal_fraction_3_0_1"),
-            _ideal_fraction_range_check("ideal_fraction_4", "unit_ideal_fraction_4_0_1"),
-            _ideal_fraction_range_check("ideal_fraction_5", "unit_ideal_fraction_5_0_1"),
-            _ideal_fraction_range_check("ideal_fraction_6", "unit_ideal_fraction_6_0_1"),
             models.UniqueConstraint(
                 fields=("condominium", "block", "name"),
                 name="unit_unique_per_block",
@@ -197,20 +113,12 @@ class Unit(BaseModel):
     def clean(self) -> None:
         UnitRules(self).validate()
 
-    @classmethod
-    def is_apportionment_inconsistent(cls, fraction_number: int, total: Decimal) -> bool:
-        """Whether the sum of a fraction over the active units of a condominium does not close at 1.
-
-        The 1st fraction always has to; the 2nd to 6th only once some unit uses them (a sum above 0).
-        """
-        if fraction_number > 1 and total == 0:
-            return False
-        return abs(total - cls.APPORTIONMENT_TOTAL) > cls.APPORTIONMENT_TOLERANCE
-
     def billing_payer(self, reference_date: date) -> "Person | None":
         """Who pays the unit's boleto: the current tenant when the unit sends it to the tenant and has one,
         otherwise the current owner with the largest share (the earliest link on a tie); None without an owner."""
-        from apps.condominiums.models.unit_person import UnitPerson  # unit_person imports this module
+        from apps.condominiums.models.unit_person import (
+            UnitPerson,  # unit_person imports this module
+        )
 
         current_links = [
             link
@@ -218,15 +126,25 @@ class Unit(BaseModel):
             if link.end_date is None or link.end_date >= reference_date
         ]
         if self.billing_recipient == self.BillingRecipient.TENANT:
-            tenant_links = [link for link in current_links if link.role == UnitPerson.Role.TENANT]
+            tenant_links = [
+                link for link in current_links if link.role == UnitPerson.Role.TENANT
+            ]
             if tenant_links:
-                return min(tenant_links, key=lambda link: (link.start_date, str(link.pk))).person
-        owner_links = [link for link in current_links if link.role == UnitPerson.Role.OWNER]
+                return min(
+                    tenant_links, key=lambda link: (link.start_date, str(link.pk))
+                ).person
+        owner_links = [
+            link for link in current_links if link.role == UnitPerson.Role.OWNER
+        ]
         if not owner_links:
             return None
         return min(
             owner_links,
-            key=lambda link: (-(link.ownership_percentage or Decimal(0)), link.start_date, str(link.pk)),
+            key=lambda link: (
+                -(link.ownership_percentage or Decimal(0)),
+                link.start_date,
+                str(link.pk),
+            ),
         ).person
 
     @override

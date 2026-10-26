@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import type { BillingPlan, BillingPlanItem } from "@/lib/api/generated/models";
-import { monthFromApi, monthToApi, needsAmount, needsFractionNumber, needsUnitValueField } from "@/lib/billing-plan-payload";
+import { monthFromApi, monthToApi, needsAmount, needsApportionmentCriterion, needsUnitValueField } from "@/lib/billing-plan-payload";
 import { moneyFromApi } from "@/lib/masks";
 
 import { decimalField, enumField, requiredText } from "./fields";
@@ -20,11 +20,6 @@ export const UNIT_VALUE_FIELDS = [
   { value: "electricity", label: "Energia elétrica" },
 ] as const;
 
-export const IDEAL_FRACTIONS = [1, 2, 3, 4, 5, 6].map((number) => ({
-  value: String(number),
-  label: `Fração ideal ${number}`,
-}));
-
 /** Mês e ano digitados ("03/2026"), opcional; vai à API como o primeiro dia do mês. */
 const monthField = (label: string) =>
   z
@@ -39,7 +34,7 @@ export const billingPlanItemSchema = z
     entry_template: z.string().min(1, "Selecione o modelo de lançamento"),
     calculation_kind: enumField(CALCULATION_KINDS.map((item) => item.value) as [string, ...string[]]),
     amount: decimalField("Valor", { min: 0.01, max: MAX_MONEY }),
-    ideal_fraction_number: z.string(),
+    apportionment_criterion: z.string(),
     unit_value_field: z.string(),
   })
   .refine((item) => !needsAmount(item.calculation_kind) || item.amount !== undefined, {
@@ -47,9 +42,9 @@ export const billingPlanItemSchema = z
     message: "Informe o valor",
     when: () => true,
   })
-  .refine((item) => !needsFractionNumber(item.calculation_kind) || item.ideal_fraction_number !== "", {
-    path: ["ideal_fraction_number"],
-    message: "Escolha a fração ideal",
+  .refine((item) => !needsApportionmentCriterion(item.calculation_kind) || item.apportionment_criterion !== "", {
+    path: ["apportionment_criterion"],
+    message: "Escolha o critério de rateio",
     when: () => true,
   })
   .refine((item) => !needsUnitValueField(item.calculation_kind) || item.unit_value_field !== "", {
@@ -83,7 +78,7 @@ export const EMPTY_PLAN_ITEM: BillingPlanItemFormInput = {
   entry_template: "",
   calculation_kind: "fixed_amount",
   amount: "",
-  ideal_fraction_number: "",
+  apportionment_criterion: "",
   unit_value_field: "",
 };
 
@@ -102,7 +97,7 @@ const itemToForm = (item: BillingPlanItem): BillingPlanItemFormInput => ({
   entry_template: item.entry_template,
   calculation_kind: item.calculation_kind,
   amount: moneyFromApi(item.amount),
-  ideal_fraction_number: item.ideal_fraction_number == null ? "" : String(item.ideal_fraction_number),
+  apportionment_criterion: item.apportionment_criterion ?? "",
   unit_value_field: item.unit_value_field ?? "",
 });
 

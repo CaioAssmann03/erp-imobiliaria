@@ -22,7 +22,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def unit(condominium: Condominium) -> Unit:
-    return Unit.objects.create(condominium=condominium, name="101", ideal_fraction=Decimal("0.1"))
+    return Unit.objects.create(condominium=condominium, name="101")
 
 
 @pytest.fixture
@@ -100,7 +100,7 @@ def test_an_entry_may_point_at_a_unit_of_the_condominium(make_entry: Any, unit: 
 
 
 def test_a_unit_of_another_condominium_is_rejected(make_entry: Any, other_condominium: Condominium) -> None:
-    other_unit = Unit.objects.create(condominium=other_condominium, name="9", ideal_fraction=Decimal("0.1"))
+    other_unit = Unit.objects.create(condominium=other_condominium, name="9")
 
     with pytest.raises(ValidationError) as error:
         make_entry(unit=other_unit).full_clean()

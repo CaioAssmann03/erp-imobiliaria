@@ -10,7 +10,6 @@ from ..models import (
     BillingDocumentDelivery,
     BillingDocumentItem,
     BillingDocumentPayment,
-    BillingDocumentPdf,
     BillingDocumentRegistration,
 )
 

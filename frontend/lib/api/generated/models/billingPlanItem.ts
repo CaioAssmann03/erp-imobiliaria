@@ -28,11 +28,7 @@ export interface BillingPlanItem {
      * @pattern ^-?\d{0,10}(?:\.\d{0,2})?$
      */
   amount?: string | null;
-  /**
-     * @minimum 0
-     * @maximum 32767
-     * @nullable
-     */
-  ideal_fraction_number?: number | null;
+  /** @nullable */
+  apportionment_criterion?: string | null;
   unit_value_field?: UnitValueFieldEnum | BlankEnum | NullEnum | null;
 }

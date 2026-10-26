@@ -260,17 +260,6 @@ class TestUnitForm:
         assert response.status_code == status.HTTP_201_CREATED, response.data
         assert Unit.objects.get().water_value == pytest.approx(10.5)
 
-    def test_patch_clears_ideal_fraction(self, client: APIClient, condominium: Condominium) -> None:
-        unit = Unit.objects.create(condominium=condominium, name="101", ideal_fraction="0.5")
-
-        response = client.patch(
-            reverse("unit-detail", args=[unit.pk]), {"ideal_fraction": None}, format="json"
-        )
-
-        assert response.status_code == status.HTTP_200_OK, response.data
-        unit.refresh_from_db()
-        assert unit.ideal_fraction is None
-
     def test_owner_and_tenant_links(self, client: APIClient, condominium: Condominium) -> None:
         unit = Unit.objects.create(condominium=condominium, name="101")
         person = Person.objects.create(company=seeded_company(), name="Maria")

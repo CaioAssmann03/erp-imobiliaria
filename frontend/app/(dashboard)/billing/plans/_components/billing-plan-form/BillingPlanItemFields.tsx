@@ -6,10 +6,10 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { SelectField, TextField } from "@/components/form/fields";
 import { FieldRow } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
-import { useCostCentersList, useEntryTemplatesList } from "@/lib/api/generated";
-import { needsAmount, needsFractionNumber, needsUnitValueField } from "@/lib/billing-plan-payload";
+import { useApportionmentCriteriaList, useCostCentersList, useEntryTemplatesList } from "@/lib/api/generated";
+import { needsAmount, needsApportionmentCriterion, needsUnitValueField } from "@/lib/billing-plan-payload";
 import { maskMoney } from "@/lib/masks";
-import { CALCULATION_KINDS, IDEAL_FRACTIONS, UNIT_VALUE_FIELDS } from "@/lib/schemas/billing-plan";
+import { CALCULATION_KINDS, UNIT_VALUE_FIELDS } from "@/lib/schemas/billing-plan";
 
 interface BillingPlanItemFieldsProps {
   index: number;
@@ -31,6 +31,10 @@ export function BillingPlanItemFields({ index, condominium, isFirst, isLast, can
   const { data: entryTemplates } = useEntryTemplatesList(
     { cost_center: costCenter, active: true, limit: 100 },
     { query: { enabled: costCenter !== "" } }
+  );
+  const { data: criteria } = useApportionmentCriteriaList(
+    { condominium, limit: 100 },
+    { query: { enabled: needsApportionmentCriterion(kind) } }
   );
   const label = `item ${index + 1}`;
 
@@ -76,7 +80,7 @@ export function BillingPlanItemFields({ index, condominium, isFirst, isLast, can
         {needsAmount(kind) && (
           <TextField
             name={`${prefix}.amount`}
-            label={needsFractionNumber(kind) ? "Total do condomínio (R$)" : "Valor por unidade (R$)"}
+            label={needsApportionmentCriterion(kind) ? "Total do condomínio (R$)" : "Valor por unidade (R$)"}
             required
             inputMode="numeric"
             placeholder="0,00"
@@ -87,14 +91,14 @@ export function BillingPlanItemFields({ index, condominium, isFirst, isLast, can
           <SelectField name={`${prefix}.unit_value_field`} label="Valor lido da unidade" required placeholder="Selecione" options={UNIT_VALUE_FIELDS} />
         )}
       </FieldRow>
-      {needsFractionNumber(kind) && (
+      {needsApportionmentCriterion(kind) && (
         <SelectField
-          name={`${prefix}.ideal_fraction_number`}
-          label="Fração ideal"
+          name={`${prefix}.apportionment_criterion`}
+          label="Critério de rateio"
           required
           placeholder="Selecione"
-          hint="O total é dividido entre as unidades por esta fração, que precisa fechar em 1."
-          options={IDEAL_FRACTIONS}
+          hint="O total é dividido entre as unidades pela fração de cada uma neste critério, que precisa fechar em 1."
+          options={(criteria?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
         />
       )}
     </div>

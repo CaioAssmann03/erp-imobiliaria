@@ -9,6 +9,7 @@ from apps.core.models import Company
 from apps.persons.models import Person
 
 from ..models import Condominium, Unit, UnitPerson
+from ..testing import add_fraction
 
 pytestmark = pytest.mark.django_db
 
@@ -19,8 +20,10 @@ def make_condominium(company: Company, name: str, cnpj: str) -> Condominium:
     return Condominium.objects.create(company=company, name=name, cnpj=cnpj)
 
 
-def make_unit(condominium: Condominium, name: str, **fields: object) -> Unit:
-    return Unit.objects.create(condominium=condominium, name=name, **{"ideal_fraction": Decimal(1), **fields})
+def make_unit(condominium: Condominium, name: str, fraction: Decimal = Decimal(1), **fields: object) -> Unit:
+    unit = Unit.objects.create(condominium=condominium, name=name, **fields)
+    add_fraction(unit, fraction)
+    return unit
 
 
 def test_with_inconsistent_apportionment_keeps_only_the_condominiums_whose_fractions_do_not_close(
@@ -29,7 +32,7 @@ def test_with_inconsistent_apportionment_keeps_only_the_condominiums_whose_fract
     closed = make_condominium(company, "Fecha", CNPJS[0])
     make_unit(closed, "101")
     open_sum = make_condominium(company, "Nao fecha", CNPJS[1])
-    make_unit(open_sum, "101", ideal_fraction=Decimal("0.5"))
+    make_unit(open_sum, "101", fraction=Decimal("0.5"))
 
     names = [condominium.name for condominium in Condominium.objects.with_inconsistent_apportionment()]
 
@@ -38,9 +41,9 @@ def test_with_inconsistent_apportionment_keeps_only_the_condominiums_whose_fract
 
 def test_with_inconsistent_apportionment_can_be_chained_on_a_filtered_queryset(company: Company) -> None:
     open_sum = make_condominium(company, "Nao fecha", CNPJS[0])
-    make_unit(open_sum, "101", ideal_fraction=Decimal("0.5"))
+    make_unit(open_sum, "101", fraction=Decimal("0.5"))
     other = make_condominium(company, "Outro", CNPJS[1])
-    make_unit(other, "101", ideal_fraction=Decimal("0.5"))
+    make_unit(other, "101", fraction=Decimal("0.5"))
 
     queryset = Condominium.objects.filter(name="Outro").with_inconsistent_apportionment()
 

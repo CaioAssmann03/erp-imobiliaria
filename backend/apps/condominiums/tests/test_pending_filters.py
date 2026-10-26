@@ -14,6 +14,7 @@ from apps.finance.models import CostCenter
 from apps.persons.models import Person
 
 from ..models import AdministrationContract, Condominium, Unit, UnitPerson
+from ..testing import add_fraction
 from .base import body, results
 
 pytestmark = pytest.mark.django_db
@@ -37,10 +38,14 @@ def make_condominium(company: Company, name: str, cnpj: str, **fields: object) -
     return Condominium.objects.create(company=company, name=name, cnpj=cnpj, **fields)
 
 
-def make_unit(condominium: Condominium, name: str, **fields: object) -> Unit:
-    return Unit.objects.create(
-        condominium=condominium, name=name, ideal_fraction=Decimal("1"), **fields
-    )
+def make_unit(
+    condominium: Condominium, name: str, second_fraction: Decimal | None = None, **fields: object
+) -> Unit:
+    unit = Unit.objects.create(condominium=condominium, name=name, **fields)
+    add_fraction(unit, 1)
+    if second_fraction is not None:
+        add_fraction(unit, second_fraction, position=2)
+    return unit
 
 
 
@@ -58,7 +63,7 @@ def test_condominiums_with_inconsistent_apportionment(api_client: APIClient, com
     exact = make_condominium(company, "Fecha", "11222333000181")
     make_unit(exact, "101")
     short = make_condominium(company, "Nao Fecha", "45723174000110")
-    _ = Unit.objects.create(condominium=short, name="101", ideal_fraction=Decimal("0.5"))
+    add_fraction(Unit.objects.create(condominium=short, name="101"), "0.5")
 
     assert condominium_names(api_client, "inconsistent_apportionment") == ["Nao Fecha"]
 
@@ -67,9 +72,9 @@ def test_inconsistent_apportionment_looks_at_the_fractions_in_use(
     api_client: APIClient, company: Company
 ) -> None:
     both_close = make_condominium(company, "Duas Fecham", "11222333000181")
-    make_unit(both_close, "101", ideal_fraction_2=Decimal("1"))
+    make_unit(both_close, "101", second_fraction=Decimal("1"))
     second_open = make_condominium(company, "Segunda Aberta", "45723174000110")
-    make_unit(second_open, "101", ideal_fraction_2=Decimal("0.5"))
+    make_unit(second_open, "101", second_fraction=Decimal("0.5"))
     second_unused = make_condominium(company, "Segunda Sem Uso", "11444777000161")
     make_unit(second_unused, "101")
 

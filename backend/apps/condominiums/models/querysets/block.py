@@ -6,7 +6,6 @@ from apps.core.infrastructure.search.ranking import relevance_rank
 from apps.core.infrastructure.search.text_match import name_matches
 
 if TYPE_CHECKING:
-    # Used only in the string generic argument below: ruff cannot see it, hence the noqa.
     from apps.condominiums.models.block import Block  # noqa: F401
     from apps.core.infrastructure.search.term import ClassifiedTerm
 

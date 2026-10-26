@@ -32,7 +32,7 @@ def fixed_item(cost_center: CostCenter, entry_template: EntryTemplate, descripti
         "entry_template": str(entry_template.pk),
         "calculation_kind": "fixed_amount",
         "amount": "450.00",
-        "ideal_fraction_number": None,
+        "apportionment_criterion": None,
         "unit_value_field": None,
     }
 
@@ -64,7 +64,7 @@ def test_create_with_items_keeps_their_order(
         **fixed_item(cost_center, entry_template, "Rateio de obras"),
         "calculation_kind": "ideal_fraction_share",
         "amount": "9000.00",
-        "ideal_fraction_number": 2,
+        "apportionment_criterion": str(condominium.apportionment_criteria.get(position=1).pk),
     }
 
     response = api_client.post(

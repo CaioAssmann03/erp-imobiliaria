@@ -7,13 +7,12 @@ from typing import TYPE_CHECKING
 from django.db import models
 
 if TYPE_CHECKING:
-    # Used only in the string generic argument below: ruff cannot see it, hence the noqa.
     from apps.condominiums.models.administration_contract import (
         AdministrationContract,  # noqa: F401
     )
 
 
-ADJUSTMENT_ALERT_DAYS = 30  # days: window of the "adjustment coming up" pendency
+ADJUSTMENT_ALERT_DAYS = 30
 
 
 class AdministrationContractQuerySet(models.QuerySet["AdministrationContract"]):

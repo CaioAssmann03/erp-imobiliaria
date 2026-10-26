@@ -6,8 +6,8 @@ from django.contrib import admin
 from django.http import HttpRequest
 from unfold.admin import ModelAdmin
 
-from .models import Company
 from .infrastructure.scoping import CompanyScopedAdminMixin
+from .models import Company
 
 
 @final
@@ -24,7 +24,6 @@ admin.site.unregister(LogEntry)
 @final
 @admin.register(LogEntry)
 class AuditLogEntryAdmin(LibraryLogEntryAdmin, ModelAdmin):
-
     @staticmethod
     def _is_superuser(request: HttpRequest) -> bool:
         return bool(request.user.is_active and request.user.is_superuser)

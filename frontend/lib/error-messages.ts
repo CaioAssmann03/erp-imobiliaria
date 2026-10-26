@@ -90,8 +90,10 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "billing_plan_item.entry_template.inactive": "O modelo de lançamento está inativo.",
   "billing_plan_item.entry_template.other_cost_center":
     "O modelo de lançamento pertence a outro centro de custo.",
-  "billing_plan_item.ideal_fraction_number.does_not_match_kind":
-    "Só o item de rateio escolhe uma fração ideal.",
+  "billing_plan_item.apportionment_criterion.does_not_match_kind":
+    "Só o item de rateio escolhe um critério de rateio.",
+  "billing_plan_item.apportionment_criterion.other_condominium":
+    "O critério de rateio pertence a outro condomínio.",
   "billing_plan_item.position.duplicate_in_plan": "Já existe um item nesta posição do plano.",
   "billing_plan_item.unit_value_field.does_not_match_kind":
     "Só o item com o valor da unidade escolhe gás, água ou energia.",
@@ -159,7 +161,6 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
     "O centro de custo de um modelo de lançamento não pode ser alterado.",
   "entry_template.name.duplicate_in_cost_center":
     "Já existe um modelo de lançamento com este nome neste centro de custo.",
-  "ideal_fraction_number.out_of_range": "A fração ideal deve ser de 1 a 6.",
   incorrect_type: "Valor em formato inválido.",
   invalid: "Valor inválido.",
   invalid_choice: "Opção inválida.",
@@ -203,6 +204,18 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   unique: "Já existe um cadastro com este valor.",
   unique_together: "Já existe um cadastro com este valor.",
   "unit.block.other_condominium": "O bloco pertence a outro condomínio.",
+  "apportionment_criterion.condominium.immutable":
+    "O condomínio de um critério de rateio não pode ser alterado.",
+  "apportionment_criterion.deletion.in_use":
+    "Um critério usado por uma fração ou por um item de plano não pode ser excluído.",
+  "apportionment_criterion.deletion.is_main": "O critério principal não pode ser excluído.",
+  "apportionment_criterion.name.duplicate": "Este condomínio já tem um critério com esse nome.",
+  "apportionment_criterion.position.duplicate": "Este condomínio já tem um critério nessa posição.",
+  "apportionment_criterion.position.out_of_range": "A posição do critério deve ser 1 ou mais.",
+  "person_module_membership.module.unknown": "Módulo desconhecido.",
+  "person_module_membership.person.already_released": "A pessoa já está liberada para este módulo.",
+  "unit_fraction.criterion.duplicate": "A unidade já tem uma fração para este critério.",
+  "unit_fraction.criterion.other_condominium": "O critério pertence a outro condomínio.",
   "unit.ideal_fraction.out_of_range": "A fração ideal deve ser maior que 0 e no máximo 1.",
   "unit.ideal_fraction.sum_exceeds_total":
     "As frações ideais das unidades ativas do condomínio passariam de 1.",

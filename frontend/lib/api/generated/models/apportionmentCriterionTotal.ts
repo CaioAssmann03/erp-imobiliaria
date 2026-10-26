@@ -6,12 +6,11 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface ApportionmentFraction {
-  /**
-     * @minimum 1
-     * @maximum 6
-     */
-  number: number;
+export interface ApportionmentCriterionTotal {
+  criterion: string;
+  name: string;
+  /** @minimum 1 */
+  position: number;
   /** @pattern ^-?\d{0,6}(?:\.\d{0,8})?$ */
   total: string;
   is_inconsistent: boolean;

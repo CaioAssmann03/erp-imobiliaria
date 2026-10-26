@@ -4,6 +4,7 @@ from decimal import Decimal
 import pytest
 
 from apps.condominiums.models import BillingRules, Condominium, LateInterestRate, Unit
+from apps.condominiums.testing import add_fraction, criterion_at
 from apps.core.models import Company
 from apps.finance.models import CostCenter, EntryTemplate
 from apps.persons.models import Person
@@ -45,11 +46,21 @@ def plan(condominium: Condominium) -> BillingPlan:
     return BillingPlan.objects.create(condominium=condominium, name="Ordinária")
 
 
+def _with_criterion(plan: BillingPlan, overrides: dict):  # type: ignore[no-untyped-def, type-arg]
+    """`criterion_position=N` names the plan's condominium's criterion at position N (created when missing)."""
+    overrides = dict(overrides)
+    position = overrides.pop("criterion_position", None)
+    if position is not None:
+        overrides["apportionment_criterion"] = criterion_at(plan.condominium, position)
+    return overrides
+
+
 @pytest.fixture
 def build_item(plan: BillingPlan, cost_center: CostCenter, entry_template: EntryTemplate):  # type: ignore[no-untyped-def]
     """An unsaved fixed-amount item of the plan; `overrides` change any field."""
 
     def build(**overrides):  # type: ignore[no-untyped-def]
+        overrides = _with_criterion(plan, overrides)
         fields = {
             "plan": plan,
             "description": "Taxa condominial",
@@ -118,6 +129,7 @@ def make_plan_item(plan: BillingPlan, cost_center: CostCenter, entry_template: E
     """A saved item of `plan`; `overrides` change any field (the default is a fixed 450.00)."""
 
     def make(position: int = 1, **overrides):  # type: ignore[no-untyped-def]
+        overrides = _with_criterion(plan, overrides)
         fields = {
             "plan": plan,
             "position": position,
@@ -134,8 +146,13 @@ def make_plan_item(plan: BillingPlan, cost_center: CostCenter, entry_template: E
 
 @pytest.fixture
 def make_unit(condominium: Condominium):  # type: ignore[no-untyped-def]
-    def make(name: str, **overrides) -> Unit:  # type: ignore[no-untyped-def]
-        return Unit.objects.create(condominium=condominium, name=name, **overrides)
+    def make(name: str, fraction=None, second_fraction=None, **overrides) -> Unit:  # type: ignore[no-untyped-def]
+        unit = Unit.objects.create(condominium=condominium, name=name, **overrides)
+        if fraction is not None:
+            add_fraction(unit, fraction)
+        if second_fraction is not None:
+            add_fraction(unit, second_fraction, position=2)
+        return unit
 
     return make
 

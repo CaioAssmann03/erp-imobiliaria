@@ -33,16 +33,20 @@ class CondominiumViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Condom
     @extend_schema(responses=ApportionmentSerializer, operation_id="condominiums_apportionment")
     @action(detail=True, methods=["get"])
     def apportionment(self, request: Request, pk: str | None = None) -> Response:
-        """The sum of each ideal fraction over the active units, and whether it closes at 1."""
-        units = Unit.objects.filter(condominium=self.get_object())
+        """The sum of each criterion's fractions over the active units, and whether it closes at 1."""
+        condominium = self.get_object()
+        units = Unit.objects.filter(condominium=condominium)
         active_units = units.filter(active=True).count()
-        fractions = [
+        criteria = [
             {
-                "number": number,
-                "total": total,
+                "criterion": criterion.pk,
+                "name": criterion.name,
+                "position": criterion.position,
+                "total": criterion.total,
                 # A condominium with no active unit has nothing to apportion yet.
-                "is_inconsistent": active_units > 0 and Unit.is_apportionment_inconsistent(number, total),
+                "is_inconsistent": active_units > 0 and criterion.is_inconsistent(criterion.total),
             }
-            for number, total in enumerate(units.apportionment_totals(), start=1)
+            # A query that sums ignores the model's ordering, so the order is asked for here.
+            for criterion in condominium.apportionment_criteria.with_total().order_by("position")
         ]
-        return Response(ApportionmentSerializer({"active_units": active_units, "fractions": fractions}).data)
+        return Response(ApportionmentSerializer({"active_units": active_units, "criteria": criteria}).data)

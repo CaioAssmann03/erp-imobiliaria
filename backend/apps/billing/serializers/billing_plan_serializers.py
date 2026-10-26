@@ -29,7 +29,7 @@ class BillingPlanItemSerializer(ModelRulesMixin, serializers.ModelSerializer[Bil
             "entry_template_name",
             "calculation_kind",
             "amount",
-            "ideal_fraction_number",
+            "apportionment_criterion",
             "unit_value_field",
         )
         read_only_fields = ("id", "position")

@@ -138,11 +138,11 @@ def test_a_unit_with_nothing_to_bill_gets_no_document(  # type: ignore[no-untype
 def test_shares_split_the_total_among_the_active_units(  # type: ignore[no-untyped-def]
     condominium: Condominium, billing_rules: BillingRules, make_unit, link, make_plan_item
 ) -> None:
-    first = make_unit("101", ideal_fraction=Decimal("0.4"))
-    second = make_unit("102", ideal_fraction=Decimal("0.6"), is_billing_blocked=True)
+    first = make_unit("101", fraction=Decimal("0.4"))
+    second = make_unit("102", fraction=Decimal("0.6"), is_billing_blocked=True)
     link(first, "Maria")
     link(second, "João")
-    _ = make_plan_item(calculation_kind=Kind, amount=Decimal("1000.00"), ideal_fraction_number=1)
+    _ = make_plan_item(calculation_kind=Kind, amount=Decimal("1000.00"), criterion_position=1)
 
     _ = issue_condominium_billing(condominium, OCTOBER)
 
@@ -152,8 +152,8 @@ def test_shares_split_the_total_among_the_active_units(  # type: ignore[no-untyp
 def test_fractions_that_do_not_close_fail_the_condominium(  # type: ignore[no-untyped-def]
     condominium: Condominium, billing_rules: BillingRules, make_unit, link, make_plan_item
 ) -> None:
-    link(make_unit("101", ideal_fraction=Decimal("0.4")), "Maria")
-    _ = make_plan_item(calculation_kind=Kind, amount=Decimal("1000.00"), ideal_fraction_number=1)
+    link(make_unit("101", fraction=Decimal("0.4")), "Maria")
+    _ = make_plan_item(calculation_kind=Kind, amount=Decimal("1000.00"), criterion_position=1)
 
     run = issue_condominium_billing(condominium, OCTOBER)
 

@@ -2,7 +2,7 @@ from typing import Any
 
 from django.db.models import TextChoices
 
-from apps.condominiums.models.querysets import CountsByTypeQuerySet
+from apps.core.models.querysets import CountsByTypeQuerySet
 from apps.persons.models.querysets import PersonQuerySet
 
 

@@ -53,7 +53,7 @@ def _issue_units(run: BillingRun) -> None:
     units = list(
         condominium.units.filter(active=True).select_related("block").prefetch_related("unit_people__person")
     )
-    apportionment_totals = Unit.objects.filter(condominium=condominium).apportionment_totals()
+    apportionment_totals = {criterion.pk: criterion.total for criterion in condominium.apportionment_criteria.with_total()}
     if any(item.uses_inconsistent_apportionment(apportionment_totals) for item in items):
         return _fail_condominium(run, ProblemCode.INCONSISTENT_APPORTIONMENT)
 

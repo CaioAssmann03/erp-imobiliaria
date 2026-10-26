@@ -1,6 +1,5 @@
 """UnitQuerySet.search: the units group of the global search."""
 
-from decimal import Decimal
 
 import pytest
 
@@ -15,7 +14,7 @@ pytestmark = pytest.mark.django_db
 def make_units(company: Company, *names: str) -> None:
     condominium = Condominium.objects.create(company=company, name="Residencial", cnpj="11222333000181")
     for name in names:
-        Unit.objects.create(condominium=condominium, name=name, ideal_fraction=Decimal(1))
+        Unit.objects.create(condominium=condominium, name=name)
 
 
 def found(term: str) -> list[str]:

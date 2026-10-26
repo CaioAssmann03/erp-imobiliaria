@@ -14,6 +14,7 @@ from apps.condominiums.models import (
     Unit,
     UnitPerson,
 )
+from apps.condominiums.testing import add_fraction
 from apps.core.models import Company
 from apps.core.infrastructure.dates import add_months
 from apps.finance.models import AccountPayable, CostCenter, Supplier
@@ -164,27 +165,23 @@ def test_apportionment_must_sum_to_one(api_client: APIClient, company: Company) 
     ok = make_condominium(company, "Ok", "11222333000181")
     wrong = make_condominium(company, "Errado", "45723174000110")
     for name in ("1", "2"):
-        _ = Unit.objects.create(
-            condominium=ok, name=name, ideal_fraction=Decimal("0.5")
-        )
-    _ = Unit.objects.create(
-        condominium=wrong, name="1", ideal_fraction=Decimal("0.9")
-    )
+        add_fraction(Unit.objects.create(condominium=ok, name=name), "0.5")
+    add_fraction(Unit.objects.create(condominium=wrong, name="1"), "0.9")
 
     assert dashboard(api_client)["pending"]["inconsistent_apportionment"] == 1
 
 
-def test_a_partly_filled_second_fraction_is_counted_as_inconsistent(
+def test_a_partly_filled_second_criterion_is_counted_as_inconsistent(
     api_client: APIClient, company: Company
 ) -> None:
     closed = make_condominium(company, "Fecha", "11222333000181")
     partly_filled = make_condominium(company, "Segunda Aberta", "45723174000110")
-    _ = Unit.objects.create(
-        condominium=closed, name="1", ideal_fraction=Decimal("1"), ideal_fraction_2=Decimal("1")
-    )
-    _ = Unit.objects.create(
-        condominium=partly_filled, name="1", ideal_fraction=Decimal("1"), ideal_fraction_2=Decimal("0.4")
-    )
+    closed_unit = Unit.objects.create(condominium=closed, name="1")
+    add_fraction(closed_unit, 1)
+    add_fraction(closed_unit, 1, position=2)
+    partly_filled_unit = Unit.objects.create(condominium=partly_filled, name="1")
+    add_fraction(partly_filled_unit, 1)
+    add_fraction(partly_filled_unit, "0.4", position=2)
 
     assert dashboard(api_client)["pending"]["inconsistent_apportionment"] == 1
 

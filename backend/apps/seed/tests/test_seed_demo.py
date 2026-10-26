@@ -1,4 +1,3 @@
-from decimal import Decimal
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -6,6 +5,7 @@ from django.core.management import call_command
 from django.db import models
 
 from apps.condominiums.models import (
+    UnitFraction,
     Address,
     AdministrationContract,
     BillingRules,
@@ -76,7 +76,7 @@ def test_seed_apportionment_sums_to_one_except_deliberate_cases(
     wrong = [
         condominium.name
         for condominium in Condominium.objects.filter(active=True)
-        if abs((condominium.units.filter(active=True).aggregate(s=Sum("ideal_fraction"))["s"]) - 1)
+        if abs((UnitFraction.objects.filter(unit__condominium=condominium, unit__active=True, criterion__position=1).aggregate(s=Sum("value"))["s"]) - 1)
         > 0.0001
     ]
     assert len(wrong) == 2
@@ -124,7 +124,7 @@ def test_seed_helper_rejects_a_record_that_breaks_a_rule(company: Company) -> No
 
     with pytest.raises(ValidationError):
         _ = create_validated(
-            Unit, condominium=condominium, name="101", ideal_fraction=Decimal(2)
+            Unit, condominium=condominium, name="101", resident_count=-1
         )
 
     assert not Unit.objects.exists()

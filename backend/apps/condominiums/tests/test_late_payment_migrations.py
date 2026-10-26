@@ -90,19 +90,6 @@ def test_due_month_keeps_the_old_column() -> None:
     assert "due_month" not in columns
 
 
-def test_existing_units_keep_their_fraction_and_have_no_other() -> None:
-    old_apps = migrate(BEFORE)
-    condominium = create_condominium(old_apps)
-    unit_model: Any = old_apps.get_model("condominiums", "Unit")
-    _ = unit_model.objects.create(condominium=condominium, name="101", ideal_fraction=Decimal("0.5"))
-
-    new_apps = migrate(latest("condominiums"))
-
-    unit: Any = new_apps.get_model("condominiums", "Unit").objects.get()
-    assert unit.ideal_fraction == Decimal("0.5")
-    assert [getattr(unit, f"ideal_fraction_{number}") for number in range(2, 7)] == [None] * 5
-
-
 def test_the_migrations_reverse() -> None:
     migrate(BEFORE)
 

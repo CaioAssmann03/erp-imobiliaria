@@ -3,11 +3,9 @@ from typing import TYPE_CHECKING
 from django.db.models import Q
 
 from apps.core.infrastructure.search.ranking import any_of, exact_code, relevance_rank
-
-from .counts_by_type import CountsByTypeQuerySet
+from apps.core.models.querysets import CountsByTypeQuerySet
 
 if TYPE_CHECKING:
-    # Used only in the string generic argument below: ruff cannot see it, hence the noqa.
     from apps.condominiums.models.condominium import Condominium  # noqa: F401
     from apps.core.infrastructure.search.term import ClassifiedTerm
 
@@ -21,7 +19,9 @@ class CondominiumQuerySet(CountsByTypeQuerySet["Condominium"]):
         """Condominiums whose active units' ideal fractions do not close at 1 (see `UnitQuerySet`)."""
         from apps.condominiums.models.unit import Unit
 
-        return self.filter(pk__in=Unit.objects.inconsistent_apportionment_condominium_ids())
+        return self.filter(
+            pk__in=Unit.objects.inconsistent_apportionment_condominium_ids()
+        )
 
     def search(self, query: "ClassifiedTerm") -> "CondominiumQuerySet":
         """Condominiums matching the global search term (name, CNPJ or ID), the best match first."""

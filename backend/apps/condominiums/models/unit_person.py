@@ -8,8 +8,8 @@ from apps.condominiums.errors import UnitPersonError
 from apps.condominiums.models.querysets import UnitPersonQuerySet
 from apps.condominiums.models.rules import UnitPersonRules
 from apps.condominiums.models.unit import Unit
-from apps.core.models.base import BaseModel
 from apps.core.infrastructure.validators import validate_percentage
+from apps.core.models.base import BaseModel
 from apps.persons.models import Person
 
 

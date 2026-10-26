@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, final, override
+from typing import TYPE_CHECKING, Any, final, override
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -67,6 +67,19 @@ class Condominium(SequentialCodeMixin, BaseModel):
         verbose_name = "Condominium"
         verbose_name_plural = "Condominiums"
         ordering = ("name",)
+
+    @override
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        creating = self._state.adding
+        super().save(*args, **kwargs)
+        if creating:
+            from .apportionment_criterion import ApportionmentCriterion
+
+            _ = ApportionmentCriterion.objects.get_or_create(
+                condominium=self,
+                position=ApportionmentCriterion.MAIN_POSITION,
+                defaults={"name": ApportionmentCriterion.MAIN_NAME},
+            )
 
     @override
     def clean(self) -> None:

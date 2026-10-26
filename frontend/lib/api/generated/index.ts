@@ -1,4 +1,5 @@
 export * from './accounts-payable/accounts-payable';
+export * from './apportionment-criteria/apportionment-criteria';
 export * from './auth/auth';
 export * from './bank-accounts/bank-accounts';
 export * from './billing-documents/billing-documents';

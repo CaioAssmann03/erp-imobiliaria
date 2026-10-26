@@ -16,6 +16,7 @@ class UnitViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Unit]):
     queryset = Unit.objects.select_related("condominium", "block").prefetch_related(
         "unit_people__person__people_individual",
         "unit_people__person__people_legal",
+        "fractions",
     )
     serializer_class = UnitSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)

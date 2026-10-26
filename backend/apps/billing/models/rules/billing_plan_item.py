@@ -21,13 +21,21 @@ class BillingPlanItemRules(ModelRules["BillingPlanItem"]):
         needs_amount = item.calculation_kind != item.CalculationKind.UNIT_REGISTERED_VALUE
         return needs_amount != (item.amount is not None)
 
-    @rule("ideal_fraction_number", BillingPlanItemError.IDEAL_FRACTION_NUMBER_DOES_NOT_MATCH_KIND)
-    def ideal_fraction_number_does_not_match_kind(self) -> bool:
+    @rule("apportionment_criterion", BillingPlanItemError.APPORTIONMENT_CRITERION_DOES_NOT_MATCH_KIND)
+    def apportionment_criterion_does_not_match_kind(self) -> bool:
         item = self.instance
         if not item.calculation_kind:
             return False
-        needs_fraction = item.calculation_kind == item.CalculationKind.IDEAL_FRACTION_SHARE
-        return needs_fraction != (item.ideal_fraction_number is not None)
+        needs_criterion = item.calculation_kind == item.CalculationKind.IDEAL_FRACTION_SHARE
+        return needs_criterion != (item.apportionment_criterion_id is not None)
+
+    @rule("apportionment_criterion", BillingPlanItemError.APPORTIONMENT_CRITERION_OTHER_CONDOMINIUM)
+    def apportionment_criterion_belongs_to_another_condominium(self) -> bool:
+        item, plan = self.instance, self._plan()
+        criterion = item.apportionment_criterion
+        if plan is None or criterion is None:
+            return False
+        return criterion.condominium_id != plan.condominium_id
 
     @rule("unit_value_field", BillingPlanItemError.UNIT_VALUE_FIELD_DOES_NOT_MATCH_KIND)
     def unit_value_field_does_not_match_kind(self) -> bool:

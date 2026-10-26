@@ -22,6 +22,7 @@ import {
 import { AddressSection } from "./condominium-form/AddressSection";
 import { AdjustmentSection } from "./condominium-form/AdjustmentSection";
 import { ApportionmentCard } from "./condominium-form/ApportionmentCard";
+import { ApportionmentCriteriaCard } from "./condominium-form/ApportionmentCriteriaCard";
 import { BillingSection } from "./condominium-form/BillingSection";
 import { FeeSection } from "./condominium-form/FeeSection";
 import { IdentificationSection } from "./condominium-form/IdentificationSection";
@@ -69,6 +70,7 @@ export function CondominiumForm({
         <FeeSection />
         <BillingSection condominiumId={condominiumId} />
         <AdjustmentSection />
+        {isEdit && <ApportionmentCriteriaCard condominiumId={condominiumId} />}
         {isEdit && <ApportionmentCard condominiumId={condominiumId} />}
         <FormActions isSubmitting={isSubmitting}>
           <Button type="button" variant="secondary" onClick={() => router.push("/condominiums")}>
