@@ -109,8 +109,8 @@ class ModelRulesMixin:
         attrs = super().validate(attrs)  # type: ignore[misc]
         model: type[models.Model] = self.Meta.model  # type: ignore[attr-defined]
         existing_record = (
-            self.instance if isinstance(self.instance, models.Model) else None
-        )  # type: ignore[attr-defined]
+            self.instance if isinstance(self.instance, models.Model) else None  # type: ignore[attr-defined]
+        )
         candidate_input = self._with_owner_company(model, attrs, existing_record)
         candidate = build_candidate(model, candidate_input, existing_record)
         provided_values = _model_field_values(model, candidate_input)

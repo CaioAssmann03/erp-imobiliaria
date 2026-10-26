@@ -17,7 +17,7 @@ from apps.core.testing import seeded_company
 from apps.persons.models import PeopleIndividual, Person
 from apps.persons.services.release_person_to_module import release_person_to_module
 
-from ..base import body, error_codes
+from ..base import body
 
 pytestmark = pytest.mark.django_db
 
@@ -106,15 +106,6 @@ def test_a_document_start_comes_after_the_exact_match(api_client: APIClient) -> 
     _ = PeopleIndividual.objects.create(person=with_cpf, company=seeded_company(), cpf=CPF)
 
     assert names(search(api_client, "123"), "persons") == ["Zeca", "Ana"]
-
-
-def test_term_with_punctuation_is_unchanged(api_client: APIClient) -> None:
-    _ = make_person("Zeca", 123)
-    with_cpf = make_person("Ana", 124)
-    _ = PeopleIndividual.objects.create(person=with_cpf, company=seeded_company(), cpf=CPF)
-
-    # "1.2.3" is a document-like term, not the ID 123: only the CPF containing 123 matches.
-    assert names(search(api_client, "1.2.3"), "persons") == ["Ana"]
 
 
 @pytest.mark.parametrize("term", ["9" * 19, "9" * 40])

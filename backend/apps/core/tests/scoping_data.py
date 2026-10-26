@@ -35,7 +35,7 @@ def build_company_data(company: Company, seed: int) -> CompanyData:
         unit=unit,
         person=person,
         role=UnitPerson.Role.OWNER,
-        ownership_percentage=Decimal("100"),
+        ownership_percentage=Decimal(100),
         start_date=date(2024, 1, 1),
     )
     return CompanyData(company, person, condominium, block, unit, unit_person)

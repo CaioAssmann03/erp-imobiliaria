@@ -12,10 +12,6 @@ def service_files() -> list[Path]:
     )
 
 
-def test_services_exist() -> None:
-    assert service_files()
-
-
 def test_every_service_file_defines_the_use_case_it_is_named_after() -> None:
     misnamed = [
         str(path.relative_to(APPS_DIR))

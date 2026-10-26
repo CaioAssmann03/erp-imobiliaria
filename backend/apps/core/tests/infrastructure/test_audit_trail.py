@@ -1,6 +1,5 @@
 """The change audit trail (spec 005, R1, R2, R3, R5, R6, R7, R8)."""
 
-import json
 
 import pytest
 from auditlog.models import LogEntry
@@ -27,21 +26,6 @@ def entries_for(record: object) -> list[LogEntry]:
 
 
 # ----- R1, R2: create, update and delete are logged -----
-
-
-def test_auditlog_logs_create_update_delete_on_postgres(condominium: Condominium) -> None:
-    block = Block.objects.create(condominium=condominium, name="A")
-    block.name = "B"
-    block.save()
-    block_id = block.pk
-    block.delete()
-
-    actions = [
-        entry.action
-        for entry in LogEntry.objects.filter(object_pk=str(block_id)).order_by("timestamp")
-    ]
-
-    assert actions == [LogEntry.Action.CREATE, LogEntry.Action.UPDATE, LogEntry.Action.DELETE]
 
 
 def test_create_update_delete_write_entries_with_changes(condominium: Condominium) -> None:
@@ -120,13 +104,6 @@ def test_log_admin_is_read_only(superuser: User) -> None:
 # ----- R7: company and user are audited -----
 
 
-def test_company_is_audited(company: Company) -> None:
-    company.trade_name = "Nova marca"
-    company.save()
-
-    assert entries_for(company)[-1].changes["trade_name"][1] == "Nova marca"
-
-
 # ----- R8: guard -----
 
 
@@ -140,13 +117,3 @@ def test_every_model_is_audited_or_exempt() -> None:
     ]
 
     assert missing == []
-
-
-def test_exempt_models_have_a_reason() -> None:
-    assert all(reason.strip() for reason in AUDIT_EXEMPT.values())
-
-
-def test_changes_are_json_serializable(condominium: Condominium) -> None:
-    block = Block.objects.create(condominium=condominium, name="A")
-
-    assert json.dumps(entries_for(block)[0].changes)

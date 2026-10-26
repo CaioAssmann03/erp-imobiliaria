@@ -9,8 +9,6 @@ from .base import BaseModel
 
 @final
 class Company(BaseModel):
-    """Administradora (multiempresa desde o início)."""
-
     # A company is scoped by itself.
     company_lookup = "id"
 

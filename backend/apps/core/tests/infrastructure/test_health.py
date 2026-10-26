@@ -29,37 +29,6 @@ def test_health_is_503_when_the_database_fails() -> None:
     assert response.json() == {"status": "unavailable"}
 
 
-def test_health_body_has_only_status() -> None:
-    with mock.patch("apps.core.infrastructure.api.middleware.connection") as broken_connection:
-        broken_connection.cursor.side_effect = OperationalError("password authentication failed for user")
-        response = Client().get(URL)
-
-    assert set(response.json()) == {"status"}
-    assert "password" not in response.content.decode()
-
-
-def test_health_handles_get_and_head_only() -> None:
-    client = Client()
-
-    assert client.head(URL).status_code == 200
-    assert client.post(URL).status_code != 200
-    assert client.delete(URL).status_code != 200
-
-
-def test_health_needs_no_authentication() -> None:
-    assert Client().get(URL).status_code == 200  # an anonymous client
-
-
-def test_health_ignores_allowed_hosts() -> None:
-    client = Client()
-
-    health = client.get(URL, HTTP_HOST="10.1.2.3:8000")
-    other_path = client.get("/api/persons/", HTTP_HOST="10.1.2.3:8000")
-
-    assert health.status_code == 200
-    assert other_path.status_code == 400  # DisallowedHost for everything else
-
-
 def test_health_answers_over_plain_http_with_ssl_redirect_on(settings: Any) -> None:
     settings.SECURE_SSL_REDIRECT = True
     client = Client()

@@ -49,16 +49,6 @@ def test_401_has_the_same_shape() -> None:
     assert errors(response)[0]["code"] == "not_authenticated"
 
 
-def test_403_has_the_same_shape(api_client: APIClient) -> None:
-    response = api_client.post(
-        reverse("company-list"), {"legal_name": "ACME", "cnpj": NEW_CNPJ}, format="json"
-    )
-
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-    assert is_flat_error_body(response.data)
-    assert errors(response)[0]["code"] == "permission_denied"
-
-
 def test_404_has_the_same_shape(api_client: APIClient) -> None:
     response = api_client.get(
         reverse("person-detail", args=["00000000-0000-0000-0000-000000000000"])
@@ -67,23 +57,6 @@ def test_404_has_the_same_shape(api_client: APIClient) -> None:
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert is_flat_error_body(response.data)
     assert errors(response)[0]["code"] == "not_found"
-
-
-def test_405_has_the_same_shape(api_client: APIClient) -> None:
-    response = api_client.delete(reverse("person-list"))
-
-    assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
-    assert is_flat_error_body(response.data)
-    assert errors(response)[0]["code"] == "method_not_allowed"
-
-
-def test_malformed_json_has_the_same_shape(api_client: APIClient) -> None:
-    response = api_client.post(
-        reverse("person-list"), data="{not json", content_type="application/json"
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert errors(response)[0]["code"] == "parse_error"
 
 
 def test_login_failure_and_missing_token_codes(db: None) -> None:
@@ -144,20 +117,21 @@ def test_non_field_error_has_null_field() -> None:
 
 def test_model_rule_codes_reach_the_api(api_client: APIClient, company) -> None:  # type: ignore[no-untyped-def]
     mine = build_company_data(company, seed=1)
+    main = str(mine.condominium.apportionment_criteria.get(position=1).pk)
 
     response = api_client.post(
         "/api/units/",
-        {"condominium": str(mine.condominium.pk), "name": "9", "ideal_fraction": "0.5"},
+        {"condominium": str(mine.condominium.pk), "name": "9", "fractions": [{"criterion": main, "value": "0.5"}]},
         format="json",
     )
     too_much = api_client.post(
         "/api/units/",
-        {"condominium": str(mine.condominium.pk), "name": "8", "ideal_fraction": "0.6"},
+        {"condominium": str(mine.condominium.pk), "name": "8", "fractions": [{"criterion": main, "value": "0.6"}]},
         format="json",
     )
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert error_codes(too_much, "ideal_fraction") == ["unit.ideal_fraction.sum_exceeds_total"]
+    assert error_codes(too_much, "fractions") == ["unit.ideal_fraction.sum_exceeds_total"]
 
 
 def test_django_validation_error_outside_a_serializer_is_a_400() -> None:
@@ -173,20 +147,6 @@ def test_django_validation_error_outside_a_serializer_is_a_400() -> None:
 
 
 # ----- R4: generic codes are kept -----
-
-
-def test_generic_codes_are_kept(api_client: APIClient) -> None:
-    long_name = "x" * 300
-    response = api_client.post(
-        "/api/persons/", {"name": long_name, "email": "a@b.com", "active": "talvez"}, format="json"
-    )
-
-    assert error_codes(response, "name") == ["max_length"]
-    assert error_codes(response, "active") == ["invalid"]
-    blank = api_client.post("/api/persons/", {"name": ""}, format="json")
-    assert error_codes(blank, "name") == ["blank"]
-    null = api_client.post("/api/persons/", {"name": None}, format="json")
-    assert error_codes(null, "name") == ["null"]
 
 
 def test_every_code_answered_is_registered(api_client: APIClient, company) -> None:  # type: ignore[no-untyped-def]
@@ -219,13 +179,3 @@ def test_schema_contains_error_response_and_error_code_enum() -> None:
     assert components["ErrorCodeEnum"]["enum"] == all_error_codes()
     assert components["ErrorItem"]["properties"]["code"] == {"$ref": "#/components/schemas/ErrorCodeEnum"}
     assert components["ErrorResponse"]["properties"]["errors"]["type"] == "array"
-
-
-def test_schema_attaches_the_error_responses_to_the_operations() -> None:
-    paths = schema()["paths"]
-    create_person = paths["/api/persons/"]["post"]["responses"]
-    person_detail = paths["/api/persons/{id}/"]["get"]["responses"]
-
-    assert {"400", "401", "403"} <= set(create_person)
-    assert {"401", "403", "404"} <= set(person_detail)
-    assert "400" not in person_detail

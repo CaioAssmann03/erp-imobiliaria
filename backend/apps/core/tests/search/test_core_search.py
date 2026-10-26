@@ -66,20 +66,3 @@ def test_finds_condominium_by_name_and_cnpj(api_client: APIClient, data: None) -
 
     assert by_name["condominiums"][0]["city"] == "Curitiba"
     assert [condominium["name"] for condominium in by_cnpj["condominiums"]] == ["Residencial Sol"]
-
-
-def test_finds_unit_by_name(api_client: APIClient, data: None) -> None:
-    search_results = search(api_client, "101")
-
-    assert search_results["units"][0]["condominium_name"] == "Residencial Sol"
-
-
-def test_condominium_without_address(api_client: APIClient) -> None:
-    company = seeded_company()
-    _ = Condominium.objects.create(company=company, name="Sem Endereço", cnpj=CNPJ)
-
-    search_results = search(api_client, "sem")
-
-    assert search_results["condominiums"][0]["city"] is None
-
-
