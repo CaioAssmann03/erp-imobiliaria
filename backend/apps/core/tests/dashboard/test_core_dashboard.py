@@ -15,7 +15,7 @@ from apps.condominiums.models import (
     UnitPerson,
 )
 from apps.core.models import Company
-from apps.core.dates import add_months
+from apps.core.infrastructure.dates import add_months
 from apps.finance.models import AccountPayable, CostCenter, Supplier
 from apps.finance.services.cancel_account_payable import cancel_account_payable
 from apps.finance.services.settle_account_payable import AccountPayablePayment, settle_account_payable

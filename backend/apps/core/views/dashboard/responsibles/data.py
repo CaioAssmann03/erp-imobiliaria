@@ -1,4 +1,4 @@
-from .context import DashboardContext
+from ..context import DashboardContext
 
 
 def count_responsibles(context: DashboardContext) -> dict[str, int]:

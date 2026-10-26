@@ -1,12 +1,12 @@
 from datetime import date
+
 from typing import Any, TypedDict
 
-from django.db import models
+from apps.condominiums.models.querysets import AdministrationContractQuerySet
+from apps.core.infrastructure.dates import add_months
 
-from apps.condominiums.models import AdministrationContract
-from apps.core.dates import add_months
-
-ADJUSTMENT_MONTHS = 6  # meses futuros exibidos no gráfico de reajustes
+ADJUSTMENT_MONTHS = 6 
+UPCOMING_ADJUSTMENTS_LIMIT = 6
 
 
 class Adjustment(TypedDict):
@@ -18,16 +18,19 @@ class Adjustment(TypedDict):
 
 
 def upcoming_adjustments(
-    reference_date: date, all_contracts: models.QuerySet[AdministrationContract]
+    reference_date: date, all_contracts: AdministrationContractQuerySet
 ) -> list[Adjustment]:
     """Próximo reajuste de cada condomínio ativo: base + periodicidade (ordenado por data)."""
-    contracts = all_contracts.filter(
-        condominium__active=True, adjustment_base_date__isnull=False
-    ).select_related("condominium")
+    contracts = (
+        all_contracts.of_active_condominiums()
+        .with_scheduled_adjustment()
+        .select_related("condominium")
+    )
     adjustments: list[Adjustment] = []
     for contract in contracts:
         next_date = contract.next_adjustment_date()
-        assert next_date is not None
+        if next_date is None:
+            continue
         adjustments.append(
             {
                 "id": contract.condominium_id,

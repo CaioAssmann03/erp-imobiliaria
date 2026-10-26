@@ -1,18 +1,18 @@
 from datetime import date
-from typing import Any, cast
+from typing import Any
 
 from django.db import models
 
 from apps.condominiums.models import UnitPerson
 from apps.condominiums.models.querysets import UnitPersonQuerySet
 
-from .constants import TOP_LIST
+ENDING_LEASES_LIMIT = 6  
 
 
 def leases_ending_soon(
-    reference_date: date, unit_people: models.QuerySet[UnitPerson]
+    reference_date: date, unit_people: UnitPersonQuerySet
 ) -> models.QuerySet[UnitPerson]:
-    ending = cast(UnitPersonQuerySet, unit_people).leases_ending_soon(reference_date)
+    ending = unit_people.leases_ending_soon(reference_date)
     return ending.select_related("unit__condominium", "person").order_by("end_date")
 
 
@@ -29,5 +29,5 @@ def lease_entries(
             "end_date": link.end_date,
             "ended": link.end_date is not None and link.end_date < reference_date,
         }
-        for link in leases[:TOP_LIST]
+        for link in leases[:ENDING_LEASES_LIMIT]
     ]
