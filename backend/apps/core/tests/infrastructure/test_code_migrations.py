@@ -75,13 +75,30 @@ def test_existing_people_are_numbered_by_creation_order() -> None:
     ]
 
 
-def test_existing_people_become_condominiums() -> None:
+def test_existing_people_become_members_of_condominiums() -> None:
+    """Spec 038, R7: the old `modules` array (default `condominiums`) becomes membership rows."""
     create_people_out_of_order()
 
-    new_apps = migrate(latest("persons"))
+    new_apps = migrate(latest("persons", "condominiums", "rentals"))
 
-    person_model: Any = new_apps.get_model("persons", "Person")
-    assert [person.modules for person in person_model.objects.all()] == [["condominiums"]] * 3
+    condominium_members: Any = new_apps.get_model("condominiums", "CondominiumPersonMember")
+    rental_members: Any = new_apps.get_model("rentals", "RentalPersonMember")
+    assert condominium_members.objects.count() == 3
+    assert rental_members.objects.count() == 0
+
+
+def test_a_person_marked_rentals_becomes_a_rental_member() -> None:
+    create_people_out_of_order()
+    _ = migrate([("persons", "0005_person_code_and_modules")])
+    with connection.cursor() as cursor:
+        cursor.execute("UPDATE persons_person SET modules = ARRAY['rentals'] WHERE name = 'Bia'")
+
+    new_apps = migrate(latest("persons", "condominiums", "rentals"))
+
+    rental_members: Any = new_apps.get_model("rentals", "RentalPersonMember")
+    assert [member.person.name for member in rental_members.objects.select_related("person")] == ["Bia"]
+    condominium_members: Any = new_apps.get_model("condominiums", "CondominiumPersonMember")
+    assert condominium_members.objects.count() == 2
 
 
 def test_the_sequence_continues_after_the_highest_code() -> None:
@@ -139,3 +156,30 @@ def test_the_migrations_reverse() -> None:
     with connection.cursor() as cursor:
         cursor.execute("SELECT relname FROM pg_class WHERE relkind = 'S'")
         assert SEQUENCES <= {row[0] for row in cursor.fetchall()}
+
+
+def test_going_back_rebuilds_the_modules_array() -> None:
+    """Spec 038, R7: reversing the backfill puts the memberships back in the old array."""
+    new_apps = migrate(latest("persons", "condominiums", "rentals"))
+    company = company_of(new_apps)
+    person_model: Any = new_apps.get_model("persons", "Person")
+    condominium_members: Any = new_apps.get_model("condominiums", "CondominiumPersonMember")
+    rental_members: Any = new_apps.get_model("rentals", "RentalPersonMember")
+    both = person_model.objects.create(company=company, name="Ambas")
+    renter = person_model.objects.create(company=company, name="Loc")
+    nobody = person_model.objects.create(company=company, name="Nenhuma")
+    _ = condominium_members.objects.create(person=both)
+    _ = rental_members.objects.create(person=both)
+    _ = rental_members.objects.create(person=renter)
+
+    _ = migrate([("condominiums", "0008_person_member"), ("rentals", "0001_person_member")])
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT name, modules FROM persons_person WHERE name IN ('Ambas', 'Loc', 'Nenhuma')")
+        modules_by_name = {name: sorted(modules) for name, modules in cursor.fetchall()}
+    assert modules_by_name == {
+        "Ambas": ["condominiums", "rentals"],
+        "Loc": ["rentals"],
+        "Nenhuma": ["condominiums"],  # the old rule needs at least one module: it gets the old default
+    }
+    assert nobody.pk is not None

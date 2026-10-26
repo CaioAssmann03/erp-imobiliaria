@@ -10,6 +10,7 @@ from rest_framework.test import APIClient
 from apps.core.models import Company
 from apps.core.testing import seeded_company
 from apps.persons.models import Person
+from apps.persons.services.release_person_to_module import release_person_to_module
 
 from ..models import Condominium, Unit, UnitPerson
 from .base import body
@@ -54,6 +55,7 @@ def test_unit_person_must_share_the_company(
 def test_unit_person_of_the_same_company_is_accepted(condominium: Condominium) -> None:
     unit = Unit.objects.create(condominium=condominium, name="101")
     person = Person.objects.create(company=seeded_company(), name="Inquilino")
+    release_person_to_module(person, "condominiums")
 
     UnitPerson(unit=unit, person=person, role="tenant", start_date=date(2025, 1, 1)).clean()
 

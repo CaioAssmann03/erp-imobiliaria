@@ -3,7 +3,7 @@ from typing import ClassVar, final
 
 from rest_framework import serializers
 
-from apps.core.validators.cnpj import validate_cnpj
+from apps.core.infrastructure.validators.cnpj import validate_cnpj
 
 from ..models import PeopleLegal
 

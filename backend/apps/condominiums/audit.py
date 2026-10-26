@@ -1,4 +1,4 @@
-from apps.core.audit import register_audited
+from apps.core.infrastructure.audit import register_audited
 
 from .models import (
     Address,
@@ -6,6 +6,7 @@ from .models import (
     BillingRules,
     Block,
     Condominium,
+    CondominiumPersonMember,
     LateInterestRate,
     Unit,
     UnitPerson,
@@ -19,6 +20,7 @@ def register() -> None:
         BillingRules,
         Block,
         Condominium,
+        CondominiumPersonMember,
         LateInterestRate,
         Unit,
         UnitPerson,

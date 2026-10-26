@@ -7,6 +7,8 @@ from django.db import IntegrityError, transaction
 
 from apps.core.testing import seeded_company
 from apps.persons.models import Person
+from apps.persons.services.release_person_to_module import release_person_to_module
+from apps.persons.services.remove_person_from_module import remove_person_from_module
 
 from ..models import Condominium, Unit, UnitPerson
 from ..serializers import UnitPersonSerializer
@@ -65,7 +67,13 @@ def unit(condominium: Condominium) -> Unit:
 
 @pytest.fixture
 def person() -> Person:
-    return Person.objects.create(company=seeded_company(), name="Maria")
+    return condominium_person("Maria")
+
+
+def condominium_person(name: str) -> Person:
+    created = Person.objects.create(company=seeded_company(), name=name)
+    release_person_to_module(created, "condominiums")
+    return created
 
 
 @pytest.mark.django_db
@@ -186,7 +194,7 @@ class TestOwnersCap:
         )
 
     def other_person(self, name: str) -> Person:
-        return Person.objects.create(company=seeded_company(), name=name)
+        return condominium_person(name)
 
     def test_overlapping_owners_over_100_are_rejected(self, unit: Unit, person: Person) -> None:
         self.owner(unit, person, "60", date(2024, 1, 1)).save()
@@ -253,9 +261,9 @@ class TestPersonModuleRule:
 
     @pytest.fixture
     def rentals_person(self) -> Person:
-        return Person.objects.create(
-            company=seeded_company(), name="Locadora", modules=["rentals"]
-        )
+        created = Person.objects.create(company=seeded_company(), name="Locadora")
+        release_person_to_module(created, "rentals")
+        return created
 
     def tenant_link(self, unit: Unit, person: Person) -> UnitPerson:
         return UnitPerson(unit=unit, person=person, role="tenant", start_date=date(2025, 1, 1))
@@ -283,9 +291,8 @@ class TestPersonModuleRule:
         ]
 
     def test_a_person_in_both_modules_can_be_linked(self, unit: Unit) -> None:
-        both = Person.objects.create(
-            company=seeded_company(), name="Ambas", modules=["condominiums", "rentals"]
-        )
+        both = condominium_person("Ambas")
+        release_person_to_module(both, "rentals")
 
         self.tenant_link(unit, both).clean()
 
@@ -304,8 +311,7 @@ class TestPersonModuleRule:
     ) -> None:
         link = self.tenant_link(unit, person)
         link.save()
-        person.modules = ["rentals"]
-        person.save()
+        remove_person_from_module(person, "condominiums")
 
         link.refresh_from_db()
         serializer = UnitPersonSerializer(link, data={"end_date": "2025-06-01"}, partial=True)

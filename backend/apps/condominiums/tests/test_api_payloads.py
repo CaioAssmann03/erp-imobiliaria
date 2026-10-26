@@ -10,6 +10,7 @@ from rest_framework.test import APIClient
 from apps.core.testing import seeded_company
 from apps.core.models import Company
 from apps.persons.models import Person
+from apps.persons.services.release_person_to_module import release_person_to_module
 
 from ..models import AdministrationContract, BillingRules, Condominium, Unit, UnitPerson
 from .base import body, error_codes
@@ -273,6 +274,7 @@ class TestUnitForm:
     def test_owner_and_tenant_links(self, client: APIClient, condominium: Condominium) -> None:
         unit = Unit.objects.create(condominium=condominium, name="101")
         person = Person.objects.create(company=seeded_company(), name="Maria")
+        release_person_to_module(person, "condominiums")
         owner = {
             "unit": str(unit.pk),
             "person": str(person.pk),
@@ -304,6 +306,7 @@ class TestUnitForm:
     ) -> None:
         unit = Unit.objects.create(condominium=condominium, name="101")
         person = Person.objects.create(company=seeded_company(), name="Maria")
+        release_person_to_module(person, "condominiums")
 
         response = client.post(
             reverse("unit-person-list"),
