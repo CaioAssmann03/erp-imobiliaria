@@ -2,7 +2,7 @@
 
 Idempotente: rodar de novo não duplica. Só mexe nos registros criados por este comando
 (identificados por nome de condomínio e por CPF/CNPJ gerados de forma determinística).
-A lógica está em `apps/core/seed/`; aqui ficam só os argumentos e a ordem dos passos.
+A lógica está em `apps/seed/`; aqui ficam só os argumentos e a ordem dos passos.
 """
 
 import random
@@ -15,14 +15,14 @@ from django.utils import timezone
 
 from apps.condominiums.models import Address, Condominium
 from apps.core.models import Company
-from apps.core.seed.condominiums import (
+from apps.seed.condominiums import (
     create_demo_condominiums,
     finalize_demo_condominiums,
 )
-from apps.core.seed.context import SeedContext
-from apps.core.seed.demo_data import DEMO_CONDOMINIUMS
-from apps.core.seed.finance import clear_demo_finance, create_demo_finance
-from apps.core.seed.persons import create_persons, demo_person_definitions
+from apps.seed.context import SeedContext
+from apps.seed.demo_data import DEMO_CONDOMINIUMS
+from apps.seed.finance import clear_demo_finance, create_demo_finance
+from apps.seed.persons import create_persons, demo_person_definitions
 from apps.persons.models import Person
 
 

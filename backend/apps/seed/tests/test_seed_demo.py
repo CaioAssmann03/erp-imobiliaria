@@ -14,7 +14,7 @@ from apps.condominiums.models import (
     Unit,
     UnitPerson,
 )
-from apps.core.seed.validated import create_validated
+from apps.seed.validated import create_validated
 from apps.core.models import Company
 from apps.finance.models import (
     AccountPayable,

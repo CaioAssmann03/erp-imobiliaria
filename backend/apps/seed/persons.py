@@ -7,6 +7,7 @@ from django.db.models import Q
 
 from apps.core.models import Company
 from apps.persons.models import PeopleIndividual, PeopleLegal, Person
+from apps.persons.services.release_person_to_module import release_person_to_module
 
 from .demo_data import COMPANIES, NAMES
 from .documents import generate_cnpj, generate_cpf
@@ -77,6 +78,7 @@ def create_person(
     _ = Person.objects.filter(pk=person.pk).update(
         created_at=random_past_datetime(random_generator, 170)
     )
+    release_person_to_module(person, "condominiums")
     return person
 
 
