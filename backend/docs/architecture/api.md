@@ -13,7 +13,7 @@ skip-if: serializer/view code patterns → conventions/practices.md; permissions
 
 ## Collections
 - **Pagination** (`StandardPagination`): `?page=`, `?limit=` (default 20, max 100); body `{count, next, previous, results}`. Querysets must be **ordered** (`Meta.ordering`).
-- **Search**: `?query=` over the view's `search_fields`; space-separated terms must all match. `?search=` still works (legacy). A view with `search_code_field = "code"` also matches a term of only digits against the record's ID (the "ID" users type) and lists that record first.
+- **Search**: `?query=` over the view's `search_fields`; space-separated terms must all match. A view with `search_code_field = "code"` also matches a term of only digits against the record's ID (the "ID" users type) and lists that record first.
 - **Filters**: `filterset_fields` for exact matches; a `FilterSet` in `filters.py` for derived ones (`persons` `?type=` and `?module=`, `?pending=`).
 - Avoid N+1: `select_related` / `prefetch_related` for everything the serializer reads.
 
