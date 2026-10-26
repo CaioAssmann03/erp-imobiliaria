@@ -60,7 +60,7 @@ The address map (spec 021) is Google's **Maps Embed API** under the condominium 
 |---|---|---|
 | `SECURE_SSL_REDIRECT` | on when `DEBUG=false` | plain HTTP is redirected to HTTPS (the health path is exempt) |
 | `SECURE_HSTS_SECONDS` | `3600` when `DEBUG=false`, `0` in development | no `includeSubDomains`, no `preload`; raise to `31536000` only when the final domain exists |
-| `ADMIN_URL` | `admin/` | set a non-obvious path in production (obscurity only); a check (`core.W001`) warns while it is the default; an empty, absolute (`://`) or `..` value stops startup |
+| `ADMIN_URL` | `admin/` | set a non-obvious path in production (obscurity only); an empty, absolute (`://`) or `..` value stops startup |
 | `INTERNAL_API_KEY` | none | mandatory when `DEBUG=false`; the same value on the backend and the Next server |
 
 **Checklist for a new host** (checked on the VPS on 2026-10-08):

@@ -45,7 +45,7 @@ Constraint: unique `condominium`. Rule in `models/rules/gateway_account.py` only
 
 ## S — Structure
 - `apps/billing/models/gateway_account.py`, `apps/billing/migrations/NNNN_gatewayaccount.py`, `apps/billing/admin.py` (read-only, credentials excluded, "Sync status" action)
-- `apps/core/fields/encrypted_text.py`; `config/settings` reads `GATEWAY_CREDENTIALS_KEY`, `ASAAS_API_KEY`, `ASAAS_BASE_URL`
+- `apps/billing/fields.py` (moved from `core` by the structure cleanup); `config/settings` reads `GATEWAY_CREDENTIALS_KEY`, `ASAAS_API_KEY`, `ASAAS_BASE_URL`
 - `apps/billing/gateway/asaas_client.py`, `apps/billing/services/onboard_condominium_at_gateway.py`, `apps/billing/services/sync_gateway_account_status.py`, `apps/billing/errors/gateway_account.py`
 - `.env.example` (placeholder for `GATEWAY_CREDENTIALS_KEY` with the generation command); `architecture/overview.md`; `apps/billing.md`
 - No endpoint in this spec: onboarding runs from the management command `onboard_gateway_account <condominium_code>`.

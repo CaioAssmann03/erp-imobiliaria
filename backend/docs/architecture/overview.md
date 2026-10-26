@@ -67,7 +67,7 @@ Changing one needs a feature spec.
 | 7 | Documents stored digits-only → one canonical form; masks are UI-only |
 | 8 | `accounts.User` is separate from `persons.Person` → login ≠ business entity; a future `Person.user` lives in `persons`; every user belongs to a `Company` |
 | 9 | OpenAPI is the contract; the frontend client is generated → every API change is followed by regeneration |
-| 10 | Multi-company from the start → every user sees only its company's data (`core/scoping.py`); a superuser bypasses the scope |
+| 10 | Multi-company from the start → every user sees only its company's data (`core/infrastructure/scoping.py`); a superuser bypasses the scope |
 | 11 | Migration history reset to one `0001` per app before production → see `operations.md` |
 | 12 | Spec-first workflow; ask on any gap → `features/` is mandatory for features |
 | 13 | Celery/Redis provisioned but unused → jobs (boleto, mail) are coming; workers disabled on the free plan |

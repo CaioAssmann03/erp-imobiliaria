@@ -23,7 +23,7 @@ skip-if: serializer/view code patterns → conventions/practices.md; permissions
 - Rules live only in the models; serializers inherit `ModelRulesMixin` (runs `full_clean()`), so a broken rule is a **400**, never a 500.
 
 ## Errors
-Every error response (400, 401, 403, 404, 405, 429...) has one body, built by `core/api/exception_handler.py`; the HTTP status is DRF's. A real 500 is left to Django (nothing internal leaves the server).
+Every error response (400, 401, 403, 404, 405, 429...) has one body, built by `core/infrastructure/api/exception_handler.py`; the HTTP status is DRF's. A real 500 is left to Django (nothing internal leaves the server).
 ```json
 {"errors": [
   {"field": "administration_contract.fee_amount", "code": "administration_contract.fee_amount.required_for_fixed", "message": "Fixed fee requires an amount."},
@@ -32,7 +32,7 @@ Every error response (400, 401, 403, 404, 405, 429...) has one body, built by `c
 ```
 - `field` is the dotted path (`address.city`, `unit_people.0.person`) and **null** when the error is not about a field.
 - `code` is the **stable contract**: the frontend translates by code (`frontend/lib/error-messages.ts`); `message` is the English fallback. Generic Django/DRF/SimpleJWT codes (`required`, `blank`, `invalid`, `unique`, `does_not_exist`, `not_authenticated`, `permission_denied`, `throttled`...) stay as they are; domain codes are dotted `model.field.reason` (shared validators `<validator>.<reason>`) and live with their English message in each app's `errors/<entity>.py`. Adding a code is compatible; renaming or removing one is breaking (it needs a spec).
-- The OpenAPI schema carries `ErrorCodeEnum`, `ErrorItem` and `ErrorResponse` (`core/api/schema.py`), so the generated client types the code as a union and an untranslated code fails to compile.
+- The OpenAPI schema carries `ErrorCodeEnum`, `ErrorItem` and `ErrorResponse` (`core/infrastructure/api/schema.py`), so the generated client types the code as a union and an untranslated code fails to compile.
 
 ## Contract with the frontend
 - drf-spectacular builds the schema from serializers and views; orval generates the client. Field names, enums and `read_only` flags **are** the contract. The docstrings of views and serializers become the endpoint descriptions: write them for the API reader.
