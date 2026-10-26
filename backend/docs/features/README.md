@@ -58,5 +58,6 @@ One row per spec; update it in the same change that creates or closes the spec.
 | [036](036-registration-payment-screens.md) | Registration and payment screens | lite | in-progress | phase 5 part 07 |
 | [037](037-single-gateway-account.md) | Single gateway account per company | full | in-progress | phase 5 part 01 |
 | [038](038-registration-fee.md) | Registration fee | full | draft | none |
+| [039](039-billing-entries.md) | Billing entries (Inclusão de valores) | full | draft | none |
 
 The finished specs (001–029) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.
