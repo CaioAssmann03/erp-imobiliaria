@@ -5,21 +5,12 @@ skip-if: the fixed monthly plan → apps/billing.md (BillingPlan); how a documen
 ---
 # 039 — Billing entries (Inclusão de valores)
 
-**Status:** draft · **Level:** full · **Roadmap:** none · **Apps:** billing, finance, frontend · **Frontend impact:** new screens
+**Status:** in-progress · **Level:** full · **Roadmap:** none · **Apps:** billing, finance, frontend · **Frontend impact:** new screens
 
 Reference: the "Inclusão de valores", "Novo lançamento" and "Evento" screens of the system the administradora uses today (five screenshots sent by the user on 2026-10-26).
 
 ## Open questions
-- [ ] **Subconta scope.** Today a subconta (`CostCenter`) belongs to one condominium and has name and active only. In the reference the subconta list (`0000 Conta Normal`, `0002 Fundo de Obras`, `0003 Fundo de Reserva`…) has a **code** and looks shared. Company-wide catalog with a code, applied to every condominium (recommended: catalog by code per company, each condominium gets its own account balance per subconta), or keep one set per condominium?
-- [ ] **What the "settings tab" is.** The settings today are a panel in the shell. Add a tab **Eventos e subcontas** there (recommended), or a page under Cobrança?
-- [ ] **Ledger template.** The ledger needs an entry template (*histórico*) per posting, and a template belongs to a subconta. The launch form has no such field. Pick it automatically: the subconta's only active template, and refuse the launch when it has none or has several? (recommended), or add a field?
-- [ ] **How an event prints on the boleto.** Event 250 "Limpeza do condomínio" with the description "10/2026": the line reads "Limpeza do condomínio - 10/2026" (recommended); with no description, the event name alone.
-- [ ] **Extra boletos.** "Normal / Extra" needs a second boleto per unit and month (today a unit has one non-cancelled document per month). Deliver Normal first and Extra in its own spec (recommended)?
-- [ ] **Negative values.** The reference grid has a "Desconto" column (a negative value on the síndico's units). Items are positive today. Out of this delivery (recommended; the manager-unit exemption already exists), or a discount event that reduces the boleto?
-- [ ] **"Definir por %"** (a value as a percentage of what?) and **"Arredondar"** (round how?) and **"Lançar em lote"** (what does the batch launch?). Left out of the first delivery until explained (recommended).
-- [ ] **Changing a launch after the month was issued.** Refuse editing or deleting a launch whose month already has issued documents; cancel the documents and issue again (recommended).
-- [ ] **Entries without a plan.** Today a month with no plan in force fails the run (`no_plan_in_force`). Accept a month that has launches but no plan (recommended)?
-- [ ] **Fee as a launch.** In the reference, "TARIFA BANCO" (R$ 3.90) is just an event launched on every unit. Keep the registration fee of spec 038 as its own mechanism that never touches a condominium (recommended), or let a launch use a subconta that belongs to the administradora?
+None.
 
 ## Decisions
 | Date | Decision | Decided by |
@@ -30,6 +21,10 @@ Reference: the "Inclusão de valores", "Novo lançamento" and "Evento" screens o
 | 2026-10-26 | Recurrence: **Não repetir** (one month), **Parcelado** (n months, shown "k/n"), **Sempre** (every month until stopped) | the user (screenshots) |
 | 2026-10-26 | A launch picks a **subconta** (default: the condominium's *Conta Normal*, code 0000); the boleto's money is one; the credit goes to that subconta of the condominium (spec 037) | the user |
 | 2026-10-26 | Two settings lists are needed: **events** and **subcontas** | the user |
+| 2026-10-26 | All the open questions of the first draft were answered "recommended" by the user: a settings tab **Eventos e subcontas**; the entry template is chosen automatically (the subconta's only active template; the launch is refused when it has none or several); the event prints as "event name - description" (the name alone without a description); **Normal boleto only** (Extra gets its own spec); **no negative values**; **"Definir por %", "Arredondar" and "Lançar em lote" left out** until explained; a launch already used by an issued document cannot be edited or deleted (a recurrence is stopped with `end`); a month with launches but no plan is issued; the registration fee of spec 038 stays its own mechanism | the user |
+| 2026-10-26 | **Subconta scope (deviation from the recommendation, to be confirmed):** the company-wide catalog with a code would rewrite the `CostCenter` ownership across 55 files of the finance and billing apps and merge existing data by name. This spec only adds a **`code`** to the per-condominium `CostCenter` (unique per condominium, `0` is the *Conta Normal*, the launch form's default). The company-wide catalog becomes its own spec | agent, to be confirmed |
+| 2026-10-26 | A **fraction** launch splits the total over the *selected* units in proportion to their ideal fraction (normalised by the sum of the selected fractions), so the parts always add up to the total; a **collective** launch splits equally, the leftover cents going to the first units by name | agent, to be confirmed |
+| 2026-10-26 | A `BillingDocumentItem` keeps a nullable `billing_entry` link: it is how a launch knows it was used (frozen) and how a recurrence knows the months already issued | agent, to be confirmed |
 
 ## R — Requirements
 The administradora launches, per condominium and reference month, the values that appear on the boletos besides the fixed plan, and sees them by unit before issuing.

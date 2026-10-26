@@ -211,3 +211,34 @@ def test_same_condominium_is_accepted(api_client: APIClient, cost_center: CostCe
     )
 
     assert response.status_code == status.HTTP_200_OK
+
+
+# ----- spec 039: the code of a cost center -----
+
+
+def test_the_code_is_assigned_in_order_when_left_out(condominium: Condominium, other_condominium: Condominium) -> None:
+    first = CostCenter.objects.create(condominium=condominium, name="Conta Normal")
+    second = CostCenter.objects.create(condominium=condominium, name="Fundo de Obras")
+    elsewhere = CostCenter.objects.create(condominium=other_condominium, name="Conta Normal")
+
+    assert (first.code, second.code, elsewhere.code) == (0, 1, 0)
+
+
+def test_a_code_is_unique_per_condominium(condominium: Condominium) -> None:
+    _ = CostCenter.objects.create(condominium=condominium, code=3, name="Fundo de Reserva")
+    duplicate = CostCenter(condominium=condominium, code=3, name="Outra")
+
+    with pytest.raises(ValidationError) as raised:
+        duplicate.full_clean()
+
+    assert "already has a cost center with this code" in str(raised.value)
+
+
+def test_the_api_shows_and_accepts_the_code(api_client: APIClient, condominium: Condominium) -> None:
+    created = api_client.post(
+        reverse(LIST), {"condominium": str(condominium.pk), "code": 2, "name": "Fundo de Obras"}, format="json"
+    )
+    auto = api_client.post(reverse(LIST), {"condominium": str(condominium.pk), "name": "Garagem"}, format="json")
+
+    assert body(created)["code"] == 2
+    assert body(auto)["code"] == 3

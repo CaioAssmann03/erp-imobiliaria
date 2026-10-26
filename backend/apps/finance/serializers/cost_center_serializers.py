@@ -11,5 +11,8 @@ class CostCenterSerializer(ModelRulesMixin, serializers.ModelSerializer[CostCent
     @final
     class Meta:
         model = CostCenter
-        fields = ("id", "condominium", "name", "active", "created_at", "updated_at")
+        fields = ("id", "condominium", "code", "name", "active", "created_at", "updated_at")
         read_only_fields = ("id", "created_at", "updated_at")
+        extra_kwargs = {"code": {"required": False}}
+        # DRF would require `code` for its own unique-together check; the model constraints run in `ModelRulesMixin`.
+        validators = ()
