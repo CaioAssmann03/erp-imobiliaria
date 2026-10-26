@@ -15,7 +15,7 @@ authenticated with a Django user (admins only for now).
 | Login | `/login` | username/password → JWT |
 | Dashboard | `/dashboard` | summary strip (condominiums, units, persons), accounts payable by due window, pending items, adjustments, responsibles, fixed revenue, leases; global search (⌘K) |
 | Condominiums | `/condominiums` | CRUD: identification, address, fee contract, billing rules (due day, due month and competence with an example, late fee with a first-days tier, interest calculation and the interest rates by start date, boleto options, discount), adjustment; the totals of the ideal fractions; a Google map under the address (needs `GOOGLE_MAPS_EMBED_KEY`, otherwise a link) |
-| Units | `/condominiums/[id]/units` | CRUD per condominium, with up to six ideal fractions; owners/tenants linked to each unit |
+| Units | `/condominiums/[id]/units` | CRUD per condominium, with a fraction in each of the condominium's apportionment criteria (managed on the condominium page); owners/tenants linked to each unit |
 | Persons | `/persons` | CRUD of individuals (CPF) and legal entities (CNPJ) |
 | Finance · Accounts payable | `/finance/accounts-payable` | list with filters, register/edit, settle ("baixa", which posts the debit in the condominium's statement) and cancel |
 | Finance · Statement | `/finance/statement` | current account of a condominium: balance and balance by cost center, entries (newest first) with filters (period, reference month, kind), reversal |
