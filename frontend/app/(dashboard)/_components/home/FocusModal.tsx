@@ -17,7 +17,7 @@ export function FocusModal({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const close = () => router.replace("/", { scroll: false });
+  const close = () => router.replace("/dashboard", { scroll: false });
 
   return (
     <Dialog.Root

@@ -4,8 +4,8 @@ import { Suspense } from "react";
 import { ListFallback } from "@/components/data-list";
 import { PageHeader } from "@/components/PageHeader";
 
-import { DashboardHome } from "./_components/home/DashboardHome";
-import { Greeting } from "./_components/home/Greeting";
+import { DashboardHome } from "../_components/home/DashboardHome";
+import { Greeting } from "../_components/home/Greeting";
 
 export const metadata: Metadata = { title: "Painel" };
 

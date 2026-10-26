@@ -6,7 +6,7 @@ export default function DashboardNotFound() {
     <div className="mx-auto max-w-md space-y-4 py-16 text-center">
       <h1 className="text-title">Página não encontrada</h1>
       <p className="text-body text-ink-soft">O endereço não existe ou o registro foi removido.</p>
-      <LinkButton href="/">Ir ao painel</LinkButton>
+      <LinkButton href="/dashboard">Ir ao painel</LinkButton>
     </div>
   );
 }

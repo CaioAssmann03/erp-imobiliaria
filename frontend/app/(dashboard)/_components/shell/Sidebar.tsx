@@ -40,7 +40,7 @@ export function Sidebar() {
     >
       <div className="mb-4 flex items-center justify-between gap-3">
         <Link
-          href="/"
+          href="/dashboard"
           className="flex px-1 py-1 lg:sidebar-closed:w-full lg:sidebar-closed:justify-center lg:sidebar-closed:px-0"
         >
           <Brand />

@@ -52,7 +52,7 @@ export function MobileMenu() {
           ))}
         </nav>
         <div className="mt-auto flex flex-col gap-1 border-t border-line pt-4">
-          <Link href="/" onClick={() => setOpen(false)} className="mb-2 flex w-fit px-1 py-1">
+          <Link href="/dashboard" onClick={() => setOpen(false)} className="mb-2 flex w-fit px-1 py-1">
             <Brand />
           </Link>
           <button
