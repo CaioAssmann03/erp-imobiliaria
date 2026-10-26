@@ -179,7 +179,7 @@ def test_the_line_names_the_event_the_description_and_the_installment(make_entry
 
 def test_an_entry_a_document_was_issued_from_cannot_change_or_go(make_entry, document, entry_template) -> None:  # type: ignore[no-untyped-def]
     entry = make_entry(recurrence=BillingEntry.Recurrence.ALWAYS)
-    item = document.items.first()
+    item = document.items.get(position=1)
     item.billing_entry = entry
     item.save()
 

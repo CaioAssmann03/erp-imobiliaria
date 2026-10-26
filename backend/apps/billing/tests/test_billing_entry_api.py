@@ -185,7 +185,7 @@ def test_a_used_entry_cannot_be_changed_or_deleted_but_can_be_ended(
         reverse(ENTRIES), entry_payload(condominium, cost_center, units, recurrence="always"), format="json"
     )
     entry_id = body(created)["id"]
-    item = document.items.first()
+    item = document.items.get(position=1)
     item.billing_entry = BillingEntry.objects.get(pk=entry_id)
     item.save()
 
