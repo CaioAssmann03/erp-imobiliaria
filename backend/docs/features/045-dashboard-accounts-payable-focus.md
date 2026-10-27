@@ -1,9 +1,9 @@
 ---
-summary: Spec 037 — read-only endpoint with the open accounts to pay by due window, capped by the server, for the dashboard's focus view.
+summary: Spec 045 — read-only endpoint with the open accounts to pay by due window, capped by the server, for the dashboard's focus view.
 read-when: you touch the dashboard's accounts-payable focus view, its endpoint, or the cap on its lists
 skip-if: the dashboard card and its totals → apps/core.md; the paginated accounts-payable list → apps/finance.md; the process → features/README.md
 ---
-# 037 — Dashboard accounts-payable focus
+# 045 — Dashboard accounts-payable focus
 
 **Status:** draft · **Level:** lite · **Roadmap:** none · **Apps:** core · **Frontend impact:** client regeneration
 

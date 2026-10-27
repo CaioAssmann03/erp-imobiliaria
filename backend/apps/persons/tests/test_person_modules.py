@@ -1,4 +1,4 @@
-"""People by module (spec 038): one membership table per module, owned by the module's app."""
+"""People by module (spec 046): one membership table per module, owned by the module's app."""
 
 import re
 from pathlib import Path

@@ -1,4 +1,4 @@
-"""The apportionment criteria of a condominium: a main one always, named by the condominium, unique name and position (spec 039)."""
+"""The apportionment criteria of a condominium: a main one always, named by the condominium, unique name and position (spec 047)."""
 
 import pytest
 from django.db import IntegrityError, transaction

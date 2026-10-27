@@ -1,4 +1,4 @@
-"""The data migrations of spec 039: the six fraction columns become criteria and rows (and back).
+"""The data migrations of spec 047: the six fraction columns become criteria and rows (and back).
 
 Each test goes back to the schema before the criteria, creates rows with the historical models,
 migrates forward and checks the result. The schema is brought back to the latest migration
@@ -31,7 +31,7 @@ def migrate(targets: list[tuple[str, str]]) -> StateApps:
 
 
 def latest() -> list[tuple[str, str]]:
-    """The schema right after spec 039, before the models were renamed (spec 042)."""
+    """The schema right after spec 047, before the models were renamed (spec 042)."""
     return [
         ("condominiums", "0011_person_module_memberships"),
         ("billing", "0011_apportionment_criteria"),

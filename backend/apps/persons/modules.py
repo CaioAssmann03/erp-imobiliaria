@@ -1,4 +1,4 @@
-"""The modules a person can be released to (specs 038 and 040).
+"""The modules a person can be released to (specs 046 and 048).
 
 `persons` knows a module only by its key, which is data in `PersonModuleMembership`; each module's app
 registers its key in `AppConfig.ready()`, so adding a module never touches this app and needs no model.

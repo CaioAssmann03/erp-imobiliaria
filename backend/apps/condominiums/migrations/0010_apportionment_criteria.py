@@ -5,7 +5,7 @@ import django.db.models.deletion
 import uuid
 from django.db import migrations, models
 
-# Hand-written around the generated operations (spec 039): the six `ideal_fraction*` columns are copied
+# Hand-written around the generated operations (spec 047): the six `ideal_fraction*` columns are copied
 # into criteria and fraction rows, and then only leave the model state, so the column (and its check
 # constraints) stay in the database for the previous release during the deploy. A later release drops them.
 

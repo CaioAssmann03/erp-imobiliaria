@@ -1,7 +1,7 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-# Hand-written (spec 039): a share item names its criterion by foreign key instead of by number.
+# Hand-written (spec 047): a share item names its criterion by foreign key instead of by number.
 # The number is mapped to the criterion of that position in the plan's condominium; the old column
 # only leaves the model state, so the previous release keeps working during the deploy (a later
 # release drops it). The two check constraints on the old column are dropped for real: they would

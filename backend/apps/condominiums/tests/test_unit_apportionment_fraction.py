@@ -1,4 +1,4 @@
-"""A unit's fractions, one per apportionment criterion, each closing at 1 over the active units (spec 039)."""
+"""A unit's fractions, one per apportionment criterion, each closing at 1 over the active units (spec 047)."""
 
 import uuid
 from decimal import Decimal

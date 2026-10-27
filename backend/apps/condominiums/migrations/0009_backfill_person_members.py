@@ -1,6 +1,6 @@
 from django.db import migrations
 
-# Hand-written (spec 038): one membership row per person who had `condominiums` in the old `modules`
+# Hand-written (spec 046): one membership row per person who had `condominiums` in the old `modules`
 # array. Safe to run again; the array column stays in the database until a later release drops it.
 # Going back is done once, by the reverse of `persons.0006_stop_using_modules`, which sees every module.
 COPY_ARRAY_TO_MEMBERS = """

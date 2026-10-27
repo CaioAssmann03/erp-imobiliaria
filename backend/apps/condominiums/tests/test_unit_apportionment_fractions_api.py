@@ -1,4 +1,4 @@
-"""A unit's fractions travel in its payload as a list that replaces the set (spec 039, R7)."""
+"""A unit's fractions travel in its payload as a list that replaces the set (spec 047, R7)."""
 
 import pytest
 from django.urls import reverse

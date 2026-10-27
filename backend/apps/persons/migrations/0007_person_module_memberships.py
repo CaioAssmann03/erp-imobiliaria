@@ -4,7 +4,7 @@ import uuid
 from django.db import migrations, models
 
 
-# Hand-written around the generated model (spec 040): the two one-to-one member tables of spec 038 are
+# Hand-written around the generated model (spec 048): the two one-to-one member tables of spec 046 are
 # copied into the single table, and the app migrations that follow drop them. Safe to run again.
 MEMBER_TABLES = (
     ("condominiums", "condominiums", "CondominiumPersonMember"),
@@ -27,7 +27,7 @@ def copy_member_tables_into_memberships(apps, schema_editor):
 
 def copy_memberships_back_into_member_tables(apps, schema_editor):
     """Going back: the member tables (recreated by the reverse of the drops) get their rows again.
-    Only the two modules of spec 038 have a table to go back to."""
+    Only the two modules of spec 046 have a table to go back to."""
     membership_model = apps.get_model("persons", "PersonModuleMembership")
     for module, app_label, model_name in MEMBER_TABLES:
         member_model = apps.get_model(app_label, model_name)

@@ -1,6 +1,6 @@
 from django.db import migrations
 
-# Hand-written (spec 038): the model stops using `modules` (and its two check constraints) but the
+# Hand-written (spec 046): the model stops using `modules` (and its two check constraints) but the
 # column stays in the database, so a container of the previous release that is still running during
 # the deploy keeps inserting people (the column has a database default). A later release drops it.
 

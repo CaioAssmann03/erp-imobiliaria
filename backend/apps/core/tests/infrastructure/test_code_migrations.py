@@ -1,4 +1,4 @@
-"""The data migrations of spec 038: the old `modules` arrays become membership rows (and back).
+"""The data migrations of spec 046: the old `modules` arrays become membership rows (and back).
 
 Each test goes back to the schema before the memberships, creates rows with the historical models,
 migrates forward and checks the result. The schema is brought back to the latest migration
@@ -74,7 +74,7 @@ def tables() -> set[str]:
 
 
 def test_existing_people_become_members_of_condominiums() -> None:
-    """Specs 038 and 040: the old `modules` array (default `condominiums`) ends up as membership rows."""
+    """Specs 046 and 048: the old `modules` array (default `condominiums`) ends up as membership rows."""
     create_people_out_of_order()
 
     new_apps = migrate(latest("persons", "condominiums", "rentals"))
@@ -94,7 +94,7 @@ def test_a_person_marked_rentals_ends_up_in_the_rentals_module() -> None:
 
 
 def test_going_back_rebuilds_the_modules_array() -> None:
-    """Spec 038, R7: reversing the migrations puts the memberships back in the old array."""
+    """Spec 046, R7: reversing the migrations puts the memberships back in the old array."""
     new_apps = migrate(latest("persons", "condominiums", "rentals"))
     company = company_of(new_apps)
     person_model: Any = new_apps.get_model("persons", "Person")
@@ -127,7 +127,7 @@ WITH_MEMBER_TABLES = [
 
 
 def test_the_member_tables_are_copied_into_the_persons_table() -> None:
-    """Spec 040, R5: the rows of the two member tables end up in `PersonModuleMembership`, and the tables go."""
+    """Spec 048, R5: the rows of the two member tables end up in `PersonModuleMembership`, and the tables go."""
     old_apps = migrate(WITH_MEMBER_TABLES)
     company = company_of(old_apps)
     person_model: Any = old_apps.get_model("persons", "Person")
@@ -144,7 +144,7 @@ def test_the_member_tables_are_copied_into_the_persons_table() -> None:
 
 
 def test_going_back_recreates_the_member_tables() -> None:
-    """Spec 040, R5: reversing recreates the two tables and fills them from the single one."""
+    """Spec 048, R5: reversing recreates the two tables and fills them from the single one."""
     new_apps = migrate(latest("persons", "condominiums", "rentals"))
     company = company_of(new_apps)
     person_model: Any = new_apps.get_model("persons", "Person")
