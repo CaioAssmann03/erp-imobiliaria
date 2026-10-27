@@ -15,8 +15,12 @@ class GatewayCustomer(BaseModel):
     The gateway allows duplicate customers, so this record is what keeps one per (person, account).
     """
 
-    person = models.ForeignKey(Person, on_delete=models.PROTECT, related_name="gateway_customers")
-    gateway_account = models.ForeignKey(GatewayAccount, on_delete=models.PROTECT, related_name="customers")
+    person = models.ForeignKey(
+        Person, on_delete=models.PROTECT, related_name="gateway_customers"
+    )
+    gateway_account = models.ForeignKey(
+        GatewayAccount, on_delete=models.PROTECT, related_name="customers"
+    )
     gateway_customer_id = models.CharField(max_length=64)
 
     company_lookup = "gateway_account__condominium__company"

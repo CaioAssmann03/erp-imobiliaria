@@ -19,7 +19,9 @@ class BillingDocumentItem(BaseModel):
     The entry template is the kind of ledger entry the payment will post (phase 5).
     """
 
-    document = models.ForeignKey(BillingDocument, on_delete=models.CASCADE, related_name="items")
+    document = models.ForeignKey(
+        BillingDocument, on_delete=models.CASCADE, related_name="items"
+    )
     position = models.PositiveSmallIntegerField(default=0)
     description = models.CharField(max_length=120)
     cost_center = models.ForeignKey(
@@ -28,7 +30,9 @@ class BillingDocumentItem(BaseModel):
     entry_template = models.ForeignKey(
         EntryTemplate, on_delete=models.PROTECT, related_name="billing_document_items"
     )
-    amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[validate_positive_amount])
+    amount = models.DecimalField(
+        max_digits=12, decimal_places=2, validators=[validate_positive_amount]
+    )
 
     company_lookup = "document__unit__condominium__company"
 
