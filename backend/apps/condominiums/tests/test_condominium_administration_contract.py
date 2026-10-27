@@ -32,9 +32,9 @@ class TestContractModelRules:
     def test_floor_cannot_exceed_ceiling(self) -> None:
         errors = clean_errors(
             contract(
-                fee_amount=Decimal("500"),
-                fee_floor=Decimal("900"),
-                fee_ceiling=Decimal("800"),
+                fee_amount=Decimal(500),
+                fee_floor=Decimal(900),
+                fee_ceiling=Decimal(800),
             )
         )
 

@@ -32,7 +32,7 @@ class TestUnitPersonModelRules:
 
 
     def test_tenant_cannot_have_percentage(self) -> None:
-        errors = clean_errors(link(role="tenant", ownership_percentage=Decimal("10")))
+        errors = clean_errors(link(role="tenant", ownership_percentage=Decimal(10)))
 
         assert "ownership_percentage" in errors
 

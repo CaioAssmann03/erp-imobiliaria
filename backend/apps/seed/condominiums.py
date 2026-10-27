@@ -47,7 +47,7 @@ def random_utility_value(
 ) -> Decimal:
     if random_generator.random() < probability:
         return Decimal(f"{random_generator.uniform(0, maximum):.2f}")
-    return Decimal("0")
+    return Decimal(0)
 
 
 def random_unit_fields(context: SeedContext, condominium_kind: str) -> dict[str, Any]:
@@ -109,7 +109,7 @@ def create_owner_link(context: SeedContext, unit: Unit) -> UnitPerson:
         unit=unit,
         person=random_generator.choice(context.active_persons),
         role=UnitPerson.Role.OWNER,
-        ownership_percentage=Decimal("100"),
+        ownership_percentage=Decimal(100),
         start_date=context.today - timedelta(days=random_generator.randint(700, 2000)),
     )
 

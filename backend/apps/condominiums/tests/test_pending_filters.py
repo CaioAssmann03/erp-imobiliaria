@@ -14,7 +14,6 @@ from apps.finance.models import CostCenter
 from apps.persons.models import Person
 
 from ..models import CondominiumAdministrationContract, Condominium, Unit, UnitPerson
-from .base import results
 from .base import add_fraction, results
 
 pytestmark = pytest.mark.django_db
@@ -74,7 +73,7 @@ def test_condominiums_by_adjustment_window(api_client: APIClient, company: Compa
         _ = CondominiumAdministrationContract.objects.create(
             condominium=condominium,
             fee_type="fixed",
-            fee_amount=Decimal("100"),
+            fee_amount=Decimal(100),
             adjustment_base_date=today() + timedelta(days=days) - timedelta(days=365),
             adjustment_period_months=12,
         )

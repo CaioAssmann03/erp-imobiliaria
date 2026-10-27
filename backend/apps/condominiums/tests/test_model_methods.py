@@ -40,11 +40,11 @@ class TestCurrentLinks:
             unit=unit, person=person, role="tenant", start_date=date(2024, 1, 1)
         )
         ends_on_reference_date = UnitPerson.objects.create(
-            unit=unit, person=person, role="owner", ownership_percentage=Decimal("50"),
+            unit=unit, person=person, role="owner", ownership_percentage=Decimal(50),
             start_date=date(2024, 1, 1), end_date=reference_date,
         )
         _ = UnitPerson.objects.create(  # ended before the reference date: not current
-            unit=unit, person=person, role="owner", ownership_percentage=Decimal("50"),
+            unit=unit, person=person, role="owner", ownership_percentage=Decimal(50),
             start_date=date(2023, 1, 1), end_date=date(2024, 12, 31),
         )
 

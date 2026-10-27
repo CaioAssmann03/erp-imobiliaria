@@ -60,7 +60,7 @@ class TestBillingRulesConstraints:
         with pytest.raises(IntegrityError), transaction.atomic():
             _ = CondominiumBillingRules.objects.create(
                 condominium=condominium,
-                early_payment_discount_percentage=Decimal("101"),
+                early_payment_discount_percentage=Decimal(101),
             )
 
     def test_database_rejects_late_fee_above_2(self, condominium: Condominium) -> None:
@@ -82,7 +82,7 @@ class TestBillingRulesConstraints:
     @pytest.mark.parametrize(
         "half_filled",
         [
-            {"initial_late_fee_percentage": Decimal("1")},
+            {"initial_late_fee_percentage": Decimal(1)},
             {"initial_late_fee_days": 5},
         ],
     )
@@ -96,7 +96,7 @@ class TestBillingRulesConstraints:
         with pytest.raises(IntegrityError), transaction.atomic():
             _ = CondominiumBillingRules.objects.create(
                 condominium=condominium,
-                initial_late_fee_percentage=Decimal("1"),
+                initial_late_fee_percentage=Decimal(1),
                 initial_late_fee_days=0,
             )
 
@@ -188,7 +188,7 @@ class TestBillingRulesDefaults:
 
         assert billing_rules.due_month == CondominiumBillingRules.DueMonth.REFERENCE
         assert billing_rules.competence_month == CondominiumBillingRules.CompetenceMonth.SAME_AS_DUE
-        assert billing_rules.late_fee_percentage == Decimal("0")
+        assert billing_rules.late_fee_percentage == Decimal(0)
         assert billing_rules.initial_late_fee_percentage is None
         assert billing_rules.initial_late_fee_days is None
         assert billing_rules.interest_calculation == CondominiumBillingRules.InterestCalculation.FULL_MONTH
@@ -213,7 +213,7 @@ class TestBillingRulesDefaults:
 
         assert billing_rules.due_month == "following"
         assert billing_rules.competence_month == "same_as_due"
-        assert billing_rules.late_fee_percentage == Decimal("0")
+        assert billing_rules.late_fee_percentage == Decimal(0)
         assert billing_rules.interest_calculation == "full_month"
         assert billing_rules.interest_grace_days == 0
         assert not billing_rules.should_show_qr_code

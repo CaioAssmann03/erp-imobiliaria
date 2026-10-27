@@ -16,7 +16,7 @@ from ..services.onboard_condominium_at_gateway import GatewayApplicant, onboard_
 pytestmark = pytest.mark.django_db
 
 APPLICANT = GatewayApplicant(
-    email="sindico@example.com", mobile_phone="11999990000", monthly_income=Decimal("5000"), company_type="ASSOCIATION"
+    email="sindico@example.com", mobile_phone="11999990000", monthly_income=Decimal(5000), company_type="ASSOCIATION"
 )
 
 

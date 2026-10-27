@@ -68,16 +68,16 @@ def test_fixed_revenue_ignores_variable_and_inactive(
     variable = make_condominium(company, "Variavel", "45723174000110")
     inactive = make_condominium(company, "Inativo", "03136483000144", active=False)
     _ = CondominiumAdministrationContract.objects.create(
-        condominium=fixed, fee_type="fixed", fee_amount=Decimal("500")
+        condominium=fixed, fee_type="fixed", fee_amount=Decimal(500)
     )
     _ = CondominiumAdministrationContract.objects.create(
         condominium=variable,
         fee_type="variable",
-        fee_percentage=Decimal("5"),
+        fee_percentage=Decimal(5),
         fee_basis="revenue",
     )
     _ = CondominiumAdministrationContract.objects.create(
-        condominium=inactive, fee_type="fixed", fee_amount=Decimal("900")
+        condominium=inactive, fee_type="fixed", fee_amount=Decimal(900)
     )
 
     revenue = dashboard(api_client)["fixed_revenue"]
@@ -96,7 +96,7 @@ def test_adjustments_overdue_and_upcoming(
     for condominium, days in ((late, -20), (soon, 18)):
         _ = CondominiumAdministrationContract.objects.create(
             condominium=condominium,
-            fee_amount=Decimal("1"),
+            fee_amount=Decimal(1),
             adjustment_period_months=12,
             adjustment_base_date=today() + timedelta(days=days) - timedelta(days=365),
         )
@@ -120,7 +120,7 @@ def test_units_without_responsible(api_client: APIClient, company: Company) -> N
         unit=with_owner,
         person=person,
         role="owner",
-        ownership_percentage=Decimal("100"),
+        ownership_percentage=Decimal(100),
         start_date=today() - timedelta(days=100),
     )
     _ = UnitPerson.objects.create(

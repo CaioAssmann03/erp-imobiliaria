@@ -82,7 +82,7 @@ def test_due_date_cannot_be_before_issue_date(api_client: APIClient, supplier) -
 def test_the_database_refuses_a_non_positive_amount(company, supplier) -> None:  # type: ignore[no-untyped-def]
     with pytest.raises(IntegrityError), transaction.atomic():
         _ = AccountPayable.objects.create(
-            company=company, supplier=supplier, description="x", amount=Decimal("0"), due_date=date(2026, 10, 20)
+            company=company, supplier=supplier, description="x", amount=Decimal(0), due_date=date(2026, 10, 20)
         )
 
 
@@ -92,7 +92,7 @@ def test_the_database_refuses_due_before_issue(company, supplier) -> None:  # ty
             company=company,
             supplier=supplier,
             description="x",
-            amount=Decimal("1"),
+            amount=Decimal(1),
             issue_date=date(2026, 10, 20),
             due_date=date(2026, 10, 1),
         )
@@ -178,7 +178,7 @@ def test_condominium_and_supplier_must_belong_to_the_company(  # type: ignore[no
 def test_the_database_pairs_the_cost_center_with_the_condominium(company, condominium, supplier) -> None:  # type: ignore[no-untyped-def]
     with pytest.raises(IntegrityError), transaction.atomic():
         _ = AccountPayable.objects.create(
-            company=company, supplier=supplier, condominium=condominium, description="x", amount=Decimal("1"), due_date=date(2026, 10, 20)
+            company=company, supplier=supplier, condominium=condominium, description="x", amount=Decimal(1), due_date=date(2026, 10, 20)
         )
 
 
@@ -269,7 +269,7 @@ def test_model_save_of_a_closed_account_is_refused(make_account, staff_user) -> 
 def test_payment_fields_only_when_paid(company, supplier) -> None:  # type: ignore[no-untyped-def]
     paid_without_data = new_account(company, supplier, status="paid")
     open_with_data = new_account(
-        company, supplier, payment_date=date(2026, 10, 18), amount_paid=Decimal("1"), payment_method="pix"
+        company, supplier, payment_date=date(2026, 10, 18), amount_paid=Decimal(1), payment_method="pix"
     )
 
     with pytest.raises(ValidationError) as missing:
@@ -292,12 +292,12 @@ def test_payment_fields_only_when_paid(company, supplier) -> None:  # type: igno
 def test_the_database_refuses_inconsistent_payment_fields(company, supplier) -> None:  # type: ignore[no-untyped-def]
     with pytest.raises(IntegrityError), transaction.atomic():
         _ = AccountPayable.objects.create(
-            company=company, supplier=supplier, description="x", amount=Decimal("1"), due_date=date(2026, 10, 20), status="paid"
+            company=company, supplier=supplier, description="x", amount=Decimal(1), due_date=date(2026, 10, 20), status="paid"
         )
     with pytest.raises(IntegrityError), transaction.atomic():
         _ = AccountPayable.objects.create(
-            company=company, supplier=supplier, description="x", amount=Decimal("1"), due_date=date(2026, 10, 20),
-            payment_date=date(2026, 10, 18), amount_paid=Decimal("1"), payment_method="pix",
+            company=company, supplier=supplier, description="x", amount=Decimal(1), due_date=date(2026, 10, 20),
+            payment_date=date(2026, 10, 18), amount_paid=Decimal(1), payment_method="pix",
         )
 
 

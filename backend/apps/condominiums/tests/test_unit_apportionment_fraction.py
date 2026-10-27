@@ -94,7 +94,7 @@ def test_inactive_units_do_not_count(condominium: Condominium, main: Condominium
 def test_a_fraction_does_not_count_itself_when_it_changes(condominium: Condominium, main: CondominiumApportionmentCriterion) -> None:
     saved = fraction(add_unit(condominium, "1"), main, "0.9")
 
-    saved.value = Decimal("1")
+    saved.value = Decimal(1)
     saved.full_clean()
 
 
@@ -114,11 +114,11 @@ def test_the_main_criterion_closes_at_one_and_the_others_only_when_in_use(condom
     main = condominium.apportionment_criteria.get(position=1)
     other = add_criterion(condominium, 2, "Elevador")
 
-    assert not main.is_inconsistent(Decimal("1"))
+    assert not main.is_inconsistent(Decimal(1))
     assert not main.is_inconsistent(Decimal("0.99995"))  # inside the tolerance
-    assert main.is_inconsistent(Decimal("0"))  # the main one is always required
+    assert main.is_inconsistent(Decimal(0))  # the main one is always required
     assert main.is_inconsistent(Decimal("0.9"))
-    assert not other.is_inconsistent(Decimal("0"))  # not in use
+    assert not other.is_inconsistent(Decimal(0))  # not in use
     assert other.is_inconsistent(Decimal("0.4"))
 
 
