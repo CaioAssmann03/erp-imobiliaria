@@ -10,10 +10,13 @@ export interface BillingDocumentItem {
   readonly id: string;
   readonly position: number;
   readonly description: string;
-  readonly cost_center: string;
+  /** @nullable */
+  readonly cost_center: string | null;
   readonly cost_center_name: string;
-  readonly entry_template: string;
+  /** @nullable */
+  readonly entry_template: string | null;
   readonly entry_template_name: string;
+  readonly credits_company: boolean;
   /** @pattern ^-?\d{0,10}(?:\.\d{0,2})?$ */
   readonly amount: string;
 }

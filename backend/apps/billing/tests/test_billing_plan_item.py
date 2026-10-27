@@ -119,3 +119,50 @@ def test_entry_template_of_another_cost_center_is_rejected(build_item, condomini
     item = build_item(entry_template=reserve_template)
 
     assert error_codes(item, "entry_template") == ["billing_plan_item.entry_template.other_cost_center"]
+
+
+# ----- spec 038/039: an item may name an event, and the boleto line opens with its code -----
+
+
+def test_an_item_with_an_event_prints_the_code_and_the_name(  # type: ignore[no-untyped-def]
+    make_plan_item, company
+) -> None:
+    from ..models import BillingEvent
+
+    event = BillingEvent.objects.create(company=company, code=52, name="CONDOMINIO")
+    only_event = make_plan_item(event=event, description="")
+    both = make_plan_item(position=2, event=event, description="10/2026")
+    plain = make_plan_item(position=3, description="Taxa condominial")
+
+    assert only_event.line_description() == "0052-CONDOMINIO"
+    assert both.line_description() == "0052-CONDOMINIO - 10/2026"
+    assert plain.line_description() == "Taxa condominial"
+
+
+def test_an_item_needs_an_event_or_a_description_and_never_the_administradora_event(  # type: ignore[no-untyped-def]
+    plan, cost_center, entry_template, company, other_company
+) -> None:
+    import pytest
+    from django.core.exceptions import ValidationError
+
+    from ..models import BillingEvent, BillingPlanItem
+
+    def build(**overrides: object) -> BillingPlanItem:
+        fields: dict[str, object] = {
+            "plan": plan,
+            "position": 1,
+            "description": "",
+            "cost_center": cost_center,
+            "entry_template": entry_template,
+            "calculation_kind": "fixed_amount",
+            "amount": 10,
+        }
+        return BillingPlanItem(**{**fields, **overrides})
+
+    fee = BillingEvent.objects.create(company=company, code=5, name="TARIFA BANCO", credits_company=True)
+    foreign = BillingEvent.objects.create(company=other_company, code=1, name="ALHEIO")
+
+    for overrides, field in (({}, "description"), ({"event": fee}, "event"), ({"event": foreign}, "event")):
+        with pytest.raises(ValidationError) as raised:
+            build(**overrides).full_clean()
+        assert field in raised.value.error_dict, overrides

@@ -41,7 +41,11 @@ class BillingPlanItem(BaseModel):
     plan = models.ForeignKey(BillingPlan, on_delete=models.CASCADE, related_name="items")
     # Order on the boleto: the order of the list the plan was written with.
     position = models.PositiveSmallIntegerField(default=0)
-    description = models.CharField(max_length=120)
+    # Either an event (the boleto prints `0052-CONDOMINIO`, then the description if any) or a description alone.
+    event = models.ForeignKey(
+        "billing.BillingEvent", on_delete=models.PROTECT, null=True, blank=True, related_name="billing_plan_items"
+    )
+    description = models.CharField(max_length=120, blank=True)
     cost_center = models.ForeignKey(
         CostCenter, on_delete=models.PROTECT, related_name="billing_plan_items"
     )
@@ -116,6 +120,11 @@ class BillingPlanItem(BaseModel):
     def clean(self) -> None:
         BillingPlanItemRules(self).validate()
 
+    def line_description(self) -> str:
+        """What the boleto line says: `0052-EVENT NAME` and the description after it, or the description alone."""
+        parts = [self.event.line_label if self.event is not None else "", self.description]
+        return " - ".join(part for part in parts if part)[:120]
+
     def uses_inconsistent_apportionment(self, apportionment_totals: Sequence[Decimal]) -> bool:
         """Whether a share item names a fraction that does not close at 1 over the active units
         (`Unit.objects.apportionment_totals()`); the other kinds never do. A fraction no unit has yet counts."""
@@ -157,4 +166,4 @@ class BillingPlanItem(BaseModel):
 
     @override
     def __str__(self) -> str:
-        return self.description
+        return self.line_description()

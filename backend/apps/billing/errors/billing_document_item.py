@@ -6,6 +6,10 @@ class BillingDocumentItemError(RuleError):
         "billing_document_item.position.duplicate_in_document",
         "This billing document already has an item at this position.",
     )
+    CREDITS_COMPANY_MISMATCH = (
+        "billing_document_item.credits_company.mismatch",
+        "A line that credits the administradora has no cost center or entry template; every other line has both.",
+    )
     COST_CENTER_OTHER_CONDOMINIUM = (
         "billing_document_item.cost_center.other_condominium",
         "The cost center belongs to another condominium.",

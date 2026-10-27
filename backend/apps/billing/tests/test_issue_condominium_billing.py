@@ -223,9 +223,7 @@ def _activate_gateway(condominium: Condominium) -> None:
     from ..models import GatewayAccount
 
     _ = GatewayAccount.objects.create(
-        condominium=condominium,
-        gateway_account_id="acc-1",
-        wallet_id="w",
+        company=condominium.company,
         api_key="k",
         webhook_token="t",
         status=GatewayAccount.Status.ACTIVE,
@@ -260,3 +258,104 @@ def test_payer_without_document_and_missing_account_are_reported(  # type: ignor
     assert not any(p["code"] == Problem.GATEWAY_ACCOUNT_MISSING for p in run.problems)
     document = BillingDocument.objects.get(unit=cpf_unit)
     assert ("apps.billing.tasks.register_billing_document_task", [str(document.pk)]) in sent
+
+
+# ----- spec 039: the launches join the plan in the same boleto -----
+
+
+def test_a_launch_is_added_after_the_plan_in_its_own_cost_center(  # type: ignore[no-untyped-def]
+    condominium: Condominium, billing_rules: BillingRules, make_unit, link, make_plan_item, company
+) -> None:
+    from apps.finance.models import CostCenter, EntryTemplate
+
+    from ..models import BillingEntry, BillingEntryUnit, BillingEvent
+
+    first, second = make_unit("101"), make_unit("102")
+    link(first, "Maria")
+    link(second, "João")
+    _ = make_plan_item()
+    works_fund = CostCenter.objects.create(condominium=condominium, name="Fundo de Obras")
+    _ = EntryTemplate.objects.create(cost_center=works_fund, name="REC Obras")
+    event = BillingEvent.objects.create(company=company, code=3, name="Chamada extra")
+    entry = BillingEntry(
+        condominium=condominium,
+        event=event,
+        description="10/2026",
+        allocation=BillingEntry.Allocation.COLLECTIVE,
+        recurrence=BillingEntry.Recurrence.ONCE,
+        start_month=OCTOBER,
+        cost_center=works_fund,
+        amount=Decimal("100.00"),
+    )
+    entry.full_clean()
+    entry.save()
+    for unit in (first, second):
+        _ = BillingEntryUnit.objects.create(entry=entry, unit=unit)
+
+    run = issue_condominium_billing(condominium, OCTOBER)
+
+    documents = {document.unit.name: document for document in BillingDocument.objects.all()}
+    assert run.status == BillingRun.Status.SUCCEEDED
+    for document in documents.values():
+        lines = list(document.items.all())
+        assert [(line.description, line.amount, line.cost_center and line.cost_center.name) for line in lines] == [
+            ("Taxa condominial", Decimal("450.00"), "Taxa Ordinária"),
+            ("0003-Chamada extra - 10/2026", Decimal("50.00"), "Fundo de Obras"),
+        ]
+        assert lines[1].billing_entry == entry
+        assert document.amount == Decimal("500.00")
+
+
+def test_a_launch_only_reaches_the_units_it_selects_and_a_month_with_only_launches_is_issued(  # type: ignore[no-untyped-def]
+    condominium: Condominium, billing_rules: BillingRules, make_unit, link, cost_center, entry_template
+) -> None:
+    from ..models import BillingEntry, BillingEntryUnit
+
+    chosen, other = make_unit("101"), make_unit("102")
+    link(chosen, "Maria")
+    link(other, "João")
+    entry = BillingEntry(
+        condominium=condominium,
+        allocation=BillingEntry.Allocation.INDIVIDUAL,
+        recurrence=BillingEntry.Recurrence.ALWAYS,
+        start_month=OCTOBER,
+        cost_center=cost_center,
+        description="Taxa de gás",
+        amount=Decimal("30.00"),
+    )
+    entry.full_clean()
+    entry.save()
+    _ = BillingEntryUnit.objects.create(entry=entry, unit=chosen)
+
+    run = issue_condominium_billing(condominium, OCTOBER)
+
+    assert BillingDocument.objects.get().unit == chosen
+    assert (run.issued_count, run.skipped_count) == (1, 1)
+    assert Problem.NO_PLAN_IN_FORCE not in {problem["code"] for problem in run.problems}
+
+
+def test_an_installment_that_is_over_is_not_billed_again(  # type: ignore[no-untyped-def]
+    condominium: Condominium, billing_rules: BillingRules, make_unit, link, make_plan_item, cost_center, entry_template
+) -> None:
+    from ..models import BillingEntry, BillingEntryUnit
+
+    unit = make_unit("101")
+    link(unit, "Maria")
+    _ = make_plan_item()
+    entry = BillingEntry(
+        condominium=condominium,
+        allocation=BillingEntry.Allocation.INDIVIDUAL,
+        recurrence=BillingEntry.Recurrence.INSTALLMENTS,
+        installments_total=2,
+        start_month=date(2026, 8, 1),
+        cost_center=cost_center,
+        description="Reforma",
+        amount=Decimal("10.00"),
+    )
+    entry.full_clean()
+    entry.save()
+    _ = BillingEntryUnit.objects.create(entry=entry, unit=unit)
+
+    _ = issue_condominium_billing(condominium, OCTOBER)
+
+    assert [line.description for line in BillingDocument.objects.get().items.all()] == ["Taxa condominial"]

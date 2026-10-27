@@ -3,3 +3,5 @@ from .billing_plan_views import BillingPlanViewSet as BillingPlanViewSet
 from .billing_run_views import BillingRunViewSet as BillingRunViewSet
 from .gateway_webhook_views import AsaasWebhookView as AsaasWebhookView
 from .resend_webhook_views import ResendWebhookView as ResendWebhookView
+from .billing_event_views import BillingEventViewSet as BillingEventViewSet
+from .billing_entry_views import BillingEntryViewSet as BillingEntryViewSet

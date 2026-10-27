@@ -65,6 +65,15 @@ export function CostCenterForm({ costCenterId }: { costCenterId?: string }) {
               options={(condominiums?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
             />
           )}
+          <TextField
+            name="code"
+            label="Código"
+            inputMode="numeric"
+            maxLength={4}
+            placeholder="Automático"
+            hint="Número pelo qual a equipe conhece a sub-conta (0000 é a Conta Normal). Em branco, o sistema dá o próximo livre."
+            autoComplete="off"
+          />
           <TextField name="name" label="Sub-conta" required maxLength={120} placeholder="Ex.: Fundo de reserva" autoComplete="off" />
           <FieldRow>
             <CheckboxField name="active" label="Cadastro ativo" />
