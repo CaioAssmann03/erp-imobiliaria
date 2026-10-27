@@ -23,7 +23,7 @@ class GatewayCustomer(BaseModel):
     )
     gateway_customer_id = models.CharField(max_length=64)
 
-    company_lookup = "gateway_account__condominium__company"
+    company_lookup = "gateway_account__company"
 
     class Meta:
         verbose_name = "Gateway Customer"

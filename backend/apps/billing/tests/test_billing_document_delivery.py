@@ -41,9 +41,7 @@ class FakeSender:
 @pytest.fixture
 def registration(document: BillingDocument) -> BillingDocumentRegistration:
     account = GatewayAccount.objects.create(
-        condominium=document.unit.condominium,
-        gateway_account_id="acc-1",
-        wallet_id="w",
+        company=document.unit.condominium.company,
         api_key="k",
         webhook_token="t",
         status=GatewayAccount.Status.ACTIVE,
@@ -211,9 +209,7 @@ def test_a_registration_enqueues_the_e_mail_after_the_commit(  # type: ignore[no
     from .test_register_billing_document import FakeChargeGateway
 
     _ = GatewayAccount.objects.create(
-        condominium=document.unit.condominium,
-        gateway_account_id="acc-1",
-        wallet_id="w",
+        company=document.unit.condominium.company,
         api_key="k",
         webhook_token="t",
         status=GatewayAccount.Status.ACTIVE,

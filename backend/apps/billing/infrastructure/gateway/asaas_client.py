@@ -30,18 +30,23 @@ class GatewayUnavailable(GatewayError):
 
 
 class AsaasClient:
-    """Thin client of the Asaas API v3. `api_key` is the parent key unless a sub-account's is given."""
+    """Thin client of the Asaas API v3. `api_key` is the account's key; without it the `ASAAS_API_KEY` setting is used."""
 
     def __init__(self, api_key: str | None = None, base_url: str | None = None) -> None:
         self._api_key = settings.ASAAS_API_KEY if api_key is None else api_key
         self._base_url = (base_url or settings.ASAAS_BASE_URL).rstrip("/")
         self._pool = urllib3.PoolManager()
 
-    def find_accounts_by_document(self, cpf_cnpj: str) -> list[dict[str, Any]]:
-        return _data(self._request("GET", "/accounts", query={"cpfCnpj": cpf_cnpj}))
+    def list_webhooks(self) -> list[dict[str, Any]]:
+        return _data(self._request("GET", "/webhooks"))
 
-    def create_account(self, payload: dict[str, Any]) -> dict[str, Any]:
-        return self._request("POST", "/accounts", payload=payload)
+    def create_webhook(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._request("POST", "/webhooks", payload=payload)
+
+    def update_webhook(
+        self, webhook_id: str, payload: dict[str, Any]
+    ) -> dict[str, Any]:
+        return self._request("PUT", f"/webhooks/{webhook_id}", payload=payload)
 
     def get_account_status(self) -> dict[str, Any]:
         return self._request("GET", "/myAccount/status")

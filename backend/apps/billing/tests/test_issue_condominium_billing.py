@@ -224,9 +224,7 @@ def _activate_gateway(condominium: Condominium) -> None:
     from ..models import GatewayAccount
 
     _ = GatewayAccount.objects.create(
-        condominium=condominium,
-        gateway_account_id="acc-1",
-        wallet_id="w",
+        company=condominium.company,
         api_key="k",
         webhook_token="t",
         status=GatewayAccount.Status.ACTIVE,

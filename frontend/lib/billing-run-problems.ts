@@ -24,7 +24,7 @@ const PROBLEMS: Record<string, { text: string; fix: FixKind }> = {
     fix: "unit",
   },
   gateway_account_missing: {
-    text: "O condomínio não tem conta ativa no gateway: os boletos ficam emitidos, mas não registrados.",
+    text: "A imobiliária não tem conta ativa no gateway: os boletos ficam emitidos, mas não registrados.",
     fix: "condominium",
   },
   document_invalid: {

@@ -7,6 +7,7 @@ import pytest
 
 from apps.billing.errors import GatewayAccountError
 from apps.billing.infrastructure.gateway.asaas_client import GatewayUnavailable
+from apps.core.models import Company
 from apps.finance.models import CurrentAccountEntry
 
 from .. import tasks
@@ -38,9 +39,7 @@ class FakeReceived:
 @pytest.fixture
 def account(document: BillingDocument) -> GatewayAccount:
     return GatewayAccount.objects.create(
-        condominium=document.unit.condominium,
-        gateway_account_id="acc-1",
-        wallet_id="w",
+        company=document.unit.condominium.company,
         api_key="k",
         webhook_token="t",
         status=GatewayAccount.Status.ACTIVE,
@@ -119,11 +118,7 @@ def test_the_daily_task_runs_every_active_account(  # type: ignore[no-untyped-de
     seen: list[tuple[GatewayAccount, int]] = []
     monkeypatch.setattr(tasks, "reconcile_gateway_account", lambda acc, days: seen.append((acc, days)))
     GatewayAccount.objects.create(
-        condominium=document.unit.condominium.__class__.objects.create(
-            company=document.unit.condominium.company, name="Outro", cnpj="45723174000110"
-        ),
-        gateway_account_id="acc-2",
-        wallet_id="w",
+        company=Company.objects.create(legal_name="Outra Administradora", cnpj="45723174000110"),
         api_key="k",
         webhook_token="t2",
     )  # pending: not reconciled
