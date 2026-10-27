@@ -41,11 +41,10 @@ class BillingEntryRules(ModelRules["BillingEntry"]):
     )
     def apportionment_criterion_belongs_to_another_condominium(self) -> bool:
         entry = self.instance
-        if entry.apportionment_criterion_id is None or entry.condominium_id is None:
+        criterion = entry.apportionment_criterion
+        if criterion is None or entry.condominium_id is None:
             return False
-        return (
-            entry.apportionment_criterion.condominium_id != entry.condominium_id
-        )
+        return criterion.condominium_id != entry.condominium_id
 
     @rule(
         "installments_total", BillingEntryError.INSTALLMENTS_TOTAL_DOES_NOT_MATCH_RECURRENCE
@@ -105,16 +104,18 @@ class BillingEntryRules(ModelRules["BillingEntry"]):
     @rule("cost_center", BillingEntryError.COST_CENTER_OTHER_CONDOMINIUM)
     def cost_center_belongs_to_another_condominium(self) -> bool:
         entry = self.instance
-        if entry.cost_center_id is None or entry.condominium_id is None:
+        cost_center = entry.cost_center
+        if cost_center is None or entry.condominium_id is None:
             return False
-        return entry.cost_center.condominium_id != entry.condominium_id
+        return cost_center.condominium_id != entry.condominium_id
 
     @rule("cost_center", BillingEntryError.COST_CENTER_INACTIVE)
     def cost_center_is_inactive(self) -> bool:
         entry = self.instance
+        cost_center = entry.cost_center
         return (
-            entry.cost_center_id is not None
-            and not entry.cost_center.active
+            cost_center is not None
+            and not cost_center.active
             and self._cost_center_changed()
         )
 
