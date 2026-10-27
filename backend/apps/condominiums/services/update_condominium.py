@@ -5,7 +5,6 @@ from django.db import transaction
 from apps.condominiums.models import (
     Address,
     AdministrationContract,
-    BillingRules,
     Condominium,
 )
 
@@ -16,7 +15,6 @@ def update_condominium(condominium: Condominium, condominium_data: dict[str, Any
     condominium_fields = dict(condominium_data)
     address_data = condominium_fields.pop("address", None)
     contract_data = condominium_fields.pop("administration_contract", None)
-    rules_data = condominium_fields.pop("billing_rules", None)
 
     if address_data:
         _save_address(condominium, address_data)
@@ -27,8 +25,6 @@ def update_condominium(condominium: Condominium, condominium_data: dict[str, Any
 
     if contract_data:
         _ = AdministrationContract.objects.update_or_create(condominium=condominium, defaults=contract_data)
-    if rules_data:
-        _ = BillingRules.objects.update_or_create(condominium=condominium, defaults=rules_data)
 
     return condominium
 

@@ -6,10 +6,8 @@ from apps.core.infrastructure.scoping import CompanyScopedAdminMixin
 from .models import (
     Address,
     AdministrationContract,
-    BillingRules,
     Block,
     Condominium,
-    LateInterestRate,
     Unit,
     UnitPerson,
 )
@@ -22,16 +20,6 @@ class BlockInline(TabularInline):
 
 class AdministrationContractInline(TabularInline):
     model = AdministrationContract
-    extra = 0
-
-
-class BillingRulesInline(TabularInline):
-    model = BillingRules
-    extra = 0
-
-
-class LateInterestRateInline(TabularInline):
-    model = LateInterestRate
     extra = 0
 
 
@@ -48,12 +36,7 @@ class CondominiumAdmin(CompanyScopedAdminMixin, ModelAdmin):
     search_fields = ("=code", "name", "cnpj")
     list_filter = ("company", "type", "active")
     raw_id_fields = ("advisor", "address")
-    inlines = (
-        BlockInline,
-        AdministrationContractInline,
-        BillingRulesInline,
-        LateInterestRateInline,
-    )
+    inlines = (BlockInline, AdministrationContractInline)
 
 
 class UnitPersonInline(CompanyScopedAdminMixin, TabularInline):

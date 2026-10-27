@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
-import { useCondominiumsRetrieve } from "@/lib/api/generated";
+import { useCondominiumBillingRulesList, useCondominiumsRetrieve } from "@/lib/api/generated";
 import { throwIfNotFound } from "@/lib/query/not-found";
 import {
   CONDOMINIUM_DEFAULTS,
@@ -44,19 +44,25 @@ export function CondominiumForm({
   });
   throwIfNotFound(loadError);
 
+  const { data: billingRulesPage, isLoading: isLoadingBillingRules } = useCondominiumBillingRulesList(
+    { condominium: condominiumId, limit: 1 },
+    { query: { enabled: isEdit } }
+  );
+  const billingRules = billingRulesPage?.results[0];
+
   const methods = useForm<CondominiumFormInput, unknown, CondominiumFormOutput>({
     resolver: zodResolver(condominiumSchema),
     defaultValues: CONDOMINIUM_DEFAULTS,
     mode: "onTouched",
   });
   const { handleSubmit, reset, setError } = methods;
-  const { submit, isSubmitting } = useCondominiumSubmit(condominiumId, setError);
+  const { submit, isSubmitting } = useCondominiumSubmit(condominiumId, billingRules?.id, setError);
 
   useEffect(() => {
-    if (condominium) reset(condominiumToForm(condominium));
-  }, [condominium, reset]);
+    if (condominium && !isLoadingBillingRules) reset(condominiumToForm(condominium, billingRules));
+  }, [condominium, billingRules, isLoadingBillingRules, reset]);
 
-  if (isEdit && isLoading) return <FormSkeleton sections={3} />;
+  if (isEdit && (isLoading || isLoadingBillingRules)) return <FormSkeleton sections={3} />;
 
   return (
     <FormProvider {...methods}>

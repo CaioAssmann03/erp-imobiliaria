@@ -15,3 +15,9 @@ from .billing_plan_serializers import (
 )
 from .billing_plan_serializers import BillingPlanSerializer as BillingPlanSerializer
 from .billing_run_serializers import BillingRunSerializer as BillingRunSerializer
+from .condominium_billing_rules_serializers import (
+    CondominiumBillingRulesSerializer as CondominiumBillingRulesSerializer,
+)
+from .late_interest_rate_serializers import (
+    LateInterestRateSerializer as LateInterestRateSerializer,
+)

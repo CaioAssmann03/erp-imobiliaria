@@ -4,7 +4,6 @@ from .views import (
     ApportionmentCriterionViewSet,
     BlockViewSet,
     CondominiumViewSet,
-    LateInterestRateViewSet,
     UnitPersonViewSet,
     UnitViewSet,
 )
@@ -15,6 +14,5 @@ router.register("apportionment-criteria", ApportionmentCriterionViewSet, basenam
 router.register("blocks", BlockViewSet, basename="block")
 router.register("units", UnitViewSet, basename="unit")
 router.register("unit-people", UnitPersonViewSet, basename="unit-person")
-router.register("late-interest-rates", LateInterestRateViewSet, basename="late-interest-rate")
 
 urlpatterns = router.urls

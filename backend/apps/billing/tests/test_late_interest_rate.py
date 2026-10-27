@@ -10,10 +10,11 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from apps.condominiums.models import Condominium
 from apps.core.models import Company
+from apps.finance.tests.base import body, error_codes, results
 
-from ..models import Condominium, LateInterestRate
-from .base import body, error_codes, results
+from ..models import LateInterestRate
 
 pytestmark = pytest.mark.django_db
 

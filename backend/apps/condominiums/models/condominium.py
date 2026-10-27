@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
 
     from .administration_contract import AdministrationContract
-    from .billing_rules import BillingRules
     from .unit import Unit
 
 
@@ -29,7 +28,6 @@ class Condominium(SequentialCodeMixin, BaseModel):
 
     if TYPE_CHECKING:
         administration_contract: "AdministrationContract"
-        billing_rules: "BillingRules"
         units: "RelatedManager[Unit]"
 
     company = models.ForeignKey(

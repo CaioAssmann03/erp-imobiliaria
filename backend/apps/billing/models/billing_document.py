@@ -5,10 +5,11 @@ from django.db import models
 from django.db.models import Q
 
 from apps.billing.errors import BillingDocumentError
+from apps.billing.models.condominium_billing_rules import CondominiumBillingRules
 from apps.billing.models.querysets import BillingDocumentQuerySet
 from apps.billing.models.rules import BillingDocumentRules
 from apps.billing.validators import validate_first_day_of_month
-from apps.condominiums.models import BillingRules, Unit
+from apps.condominiums.models import Unit
 from apps.core.models.base import BaseModel
 from apps.core.infrastructure.validators import validate_percentage
 from apps.finance.errors import FinanceValidatorError
@@ -65,7 +66,7 @@ class BillingDocument(BaseModel):
     late_fee_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     initial_late_fee_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     initial_late_fee_days = models.PositiveSmallIntegerField(null=True, blank=True)
-    interest_calculation = models.CharField(max_length=12, choices=BillingRules.InterestCalculation.choices)
+    interest_calculation = models.CharField(max_length=12, choices=CondominiumBillingRules.InterestCalculation.choices)
     interest_grace_days = models.PositiveSmallIntegerField(default=0)
     # 0 when the condominium had no late interest rate in force on the due date.
     monthly_interest_percentage = models.DecimalField(

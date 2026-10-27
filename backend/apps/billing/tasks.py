@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from apps.billing.gateway.asaas_client import GatewayUnavailable
 from apps.billing.gateway.resend_client import EmailUnavailable
-from apps.billing.models import BillingDocument, GatewayAccount, GatewayEvent
+from apps.billing.models import BillingDocument, CondominiumBillingRules, GatewayAccount, GatewayEvent
 from apps.billing.services.generate_billing_document_pdf import (
     generate_billing_document_pdf,
 )
@@ -15,7 +15,7 @@ from apps.billing.services.process_gateway_event import process_gateway_event
 from apps.billing.services.reconcile_gateway_account import reconcile_gateway_account
 from apps.billing.services.send_billing_document_email import send_billing_document_email
 from apps.billing.services.register_billing_document import register_billing_document
-from apps.condominiums.models import BillingRules, Condominium
+from apps.condominiums.models import Condominium
 
 
 @shared_task
@@ -25,7 +25,7 @@ def issue_due_billing() -> int:
     The reference month is the month of today. Returns how many condominiums were enqueued.
     """
     today = timezone.localdate()
-    condominium_ids = BillingRules.objects.filter(
+    condominium_ids = CondominiumBillingRules.objects.filter(
         issuance_day=today.day, condominium__active=True
     ).values_list("condominium_id", flat=True)
     count = 0

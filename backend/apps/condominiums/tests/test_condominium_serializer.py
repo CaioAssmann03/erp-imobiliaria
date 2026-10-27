@@ -4,7 +4,7 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 from apps.accounts.models import User
 from apps.core.models import Company
 
-from ..models import Address, AdministrationContract, BillingRules, Condominium
+from ..models import Address, AdministrationContract, Condominium
 from ..serializers import CondominiumSerializer
 from .conftest import VALID_CNPJ
 
@@ -41,14 +41,12 @@ def test_create_with_all_nested_parts(company: Company) -> None:
             company,
             address={"street": "Rua A", "city": "Curitiba", "state": "PR"},
             administration_contract={"fee_type": "fixed", "fee_amount": "500"},
-            billing_rules={"due_day": 5},
         )
     )
 
     assert condominium.address is not None
     assert condominium.address.city == "Curitiba"
     assert condominium.administration_contract.fee_amount == 500
-    assert condominium.billing_rules.due_day == 5
 
 
 def test_create_without_nested_parts(company: Company) -> None:
@@ -56,7 +54,6 @@ def test_create_without_nested_parts(company: Company) -> None:
 
     assert condominium.address is None
     assert not AdministrationContract.objects.exists()
-    assert not BillingRules.objects.exists()
 
 
 def test_invalid_nested_contract_rejects_the_whole_payload(company: Company) -> None:
@@ -103,21 +100,17 @@ def test_update_changes_existing_address_in_place(condominium: Condominium) -> N
     assert updated.address.state == "PR"
 
 
-def test_update_upserts_contract_and_billing_rules(condominium: Condominium) -> None:
+def test_update_upserts_the_contract(condominium: Condominium) -> None:
     _ = save(condominium.company, {"administration_contract": {"fee_amount": "500"}}, condominium)
     _ = save(condominium.company, {"administration_contract": {"fee_amount": "700"}}, condominium)
-    _ = save(condominium.company, {"billing_rules": {"due_day": 7}}, condominium)
-    _ = save(condominium.company, {"billing_rules": {"due_day": 9}}, condominium)
 
     assert AdministrationContract.objects.count() == 1
     assert AdministrationContract.objects.get().fee_amount == 700
-    assert BillingRules.objects.count() == 1
-    assert BillingRules.objects.get().due_day == 9
 
 
 def test_update_without_nested_parts_keeps_them(condominium: Condominium) -> None:
-    _ = save(condominium.company, {"billing_rules": {"due_day": 7}}, condominium)
+    _ = save(condominium.company, {"administration_contract": {"fee_amount": "500"}}, condominium)
 
     _ = save(condominium.company, {"name": "Novo Nome"}, condominium)
 
-    assert BillingRules.objects.get().due_day == 7
+    assert AdministrationContract.objects.get().fee_amount == 500

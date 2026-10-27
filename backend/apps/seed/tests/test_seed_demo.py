@@ -4,11 +4,11 @@ from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.db import models
 
+from apps.billing.models import CondominiumBillingRules
 from apps.condominiums.models import (
     UnitFraction,
     Address,
     AdministrationContract,
-    BillingRules,
     Block,
     Condominium,
     Unit,
@@ -93,7 +93,7 @@ def test_seed_without_company_does_nothing() -> None:
 SEEDED_MODELS: tuple[type[models.Model], ...] = (
     Address,
     AdministrationContract,
-    BillingRules,
+    CondominiumBillingRules,
     Block,
     Condominium,
     CostCenter,

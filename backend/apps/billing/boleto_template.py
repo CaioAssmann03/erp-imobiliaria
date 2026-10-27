@@ -4,9 +4,8 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
-from apps.billing.models import BillingDocument
-from apps.condominiums.models import BillingRules
 from apps.condominiums.models.address import Address
+from apps.billing.models import BillingDocument, CondominiumBillingRules
 from apps.persons.models import Person
 
 CPF_LENGTH = 11
@@ -97,7 +96,7 @@ def payment_terms(document: BillingDocument) -> list[str]:
     if document.monthly_interest_percentage > 0:
         counting = (
             "calculados por dia de atraso"
-            if document.interest_calculation == BillingRules.InterestCalculation.PER_DAY
+            if document.interest_calculation == CondominiumBillingRules.InterestCalculation.PER_DAY
             else "cobrados pelo mês cheio"
         )
         grace = f", após {format_days(document.interest_grace_days)} de tolerância" if document.interest_grace_days else ""

@@ -10,14 +10,12 @@ from ..services.create_condominium import create_condominium
 from ..services.update_condominium import update_condominium
 from .address_serializers import AddressSerializer
 from .administration_contract_serializers import AdministrationContractSerializer
-from .billing_rules_serializers import BillingRulesSerializer
 
 
 @final
 class CondominiumSerializer(ModelRulesMixin, serializers.ModelSerializer[Condominium]):
     address = AddressSerializer(required=False, allow_null=True)
     administration_contract = AdministrationContractSerializer(required=False)
-    billing_rules = BillingRulesSerializer(required=False)
 
     @final
     class Meta:
@@ -29,7 +27,6 @@ class CondominiumSerializer(ModelRulesMixin, serializers.ModelSerializer[Condomi
             "advisor",
             "address",
             "administration_contract",
-            "billing_rules",
             "type",
             "name",
             "cnpj",

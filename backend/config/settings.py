@@ -306,7 +306,7 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_SCHEDULE = {
-    # Each condominium has its own issuance day (`BillingRules.issuance_day`); the task picks today's.
+    # Each condominium has its own issuance day (`CondominiumBillingRules.issuance_day`); the task picks today's.
     "issue-due-billing": {"task": "apps.billing.tasks.issue_due_billing", "schedule": crontab(hour=6, minute=0)},
     # The safety net of the payment webhook (spec 033): compare what Asaas received with what was posted.
     "reconcile-gateway-payments": {

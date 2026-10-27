@@ -11,3 +11,5 @@ from .gateway_event import GatewayEvent as GatewayEvent
 from .billing_document_payment import BillingDocumentPayment as BillingDocumentPayment
 from .gateway_reconciliation_run import GatewayReconciliationRun as GatewayReconciliationRun
 from .billing_document_delivery import BillingDocumentDelivery as BillingDocumentDelivery
+from .condominium_billing_rules import CondominiumBillingRules as CondominiumBillingRules
+from .late_interest_rate import LateInterestRate as LateInterestRate

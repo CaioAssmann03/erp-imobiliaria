@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from apps.condominiums.models import BillingRules
+from apps.billing.models import CondominiumBillingRules
 from apps.core.infrastructure.storage import object_storage
 from apps.core.infrastructure.storage.object_storage import ObjectStorageUnavailable
 from apps.finance.tests.fake_storage import FakeObjectStorage
@@ -74,7 +74,7 @@ def test_the_task_generates_the_pdf_of_a_document(document: BillingDocument, sto
 
 
 def test_the_issuance_enqueues_a_pdf_per_issued_document_after_it_commits(  # type: ignore[no-untyped-def]
-    condominium, billing_rules: BillingRules, make_unit, link, make_plan_item, monkeypatch: pytest.MonkeyPatch, django_capture_on_commit_callbacks
+    condominium, billing_rules: CondominiumBillingRules, make_unit, link, make_plan_item, monkeypatch: pytest.MonkeyPatch, django_capture_on_commit_callbacks
 ) -> None:
     from datetime import date
 
@@ -97,7 +97,7 @@ def test_the_issuance_enqueues_a_pdf_per_issued_document_after_it_commits(  # ty
 
 
 def test_an_issuance_that_finds_the_unit_issued_enqueues_nothing(  # type: ignore[no-untyped-def]
-    condominium, billing_rules: BillingRules, make_unit, link, make_plan_item, monkeypatch: pytest.MonkeyPatch, django_capture_on_commit_callbacks
+    condominium, billing_rules: CondominiumBillingRules, make_unit, link, make_plan_item, monkeypatch: pytest.MonkeyPatch, django_capture_on_commit_callbacks
 ) -> None:
     from datetime import date
 

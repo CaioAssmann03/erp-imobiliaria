@@ -22,7 +22,6 @@ class CondominiumViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Condom
         "advisor",
         "address",
         "administration_contract",
-        "billing_rules",
     )
     serializer_class = CondominiumSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)

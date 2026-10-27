@@ -2,3 +2,4 @@ from .billing_document import BillingDocumentRules as BillingDocumentRules
 from .billing_document_item import BillingDocumentItemRules as BillingDocumentItemRules
 from .billing_plan import BillingPlanRules as BillingPlanRules
 from .billing_plan_item import BillingPlanItemRules as BillingPlanItemRules
+from .condominium_billing_rules import CondominiumBillingRulesRules as CondominiumBillingRulesRules

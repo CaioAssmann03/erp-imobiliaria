@@ -1,2 +1,3 @@
 from .billing_document import BillingDocumentQuerySet as BillingDocumentQuerySet
 from .billing_plan import BillingPlanQuerySet as BillingPlanQuerySet
+from .late_interest_rate import LateInterestRateQuerySet as LateInterestRateQuerySet

@@ -3,7 +3,8 @@ from decimal import Decimal
 
 import pytest
 
-from apps.condominiums.models import BillingRules, Condominium, LateInterestRate, Unit
+from apps.condominiums.models import Condominium, Unit
+from apps.billing.models import CondominiumBillingRules, LateInterestRate
 from apps.condominiums.testing import add_fraction, criterion_at
 from apps.core.models import Company
 from apps.finance.models import CostCenter, EntryTemplate
@@ -85,11 +86,11 @@ def payer(company: Company) -> Person:
 
 
 @pytest.fixture
-def billing_rules(condominium: Condominium) -> BillingRules:
+def billing_rules(condominium: Condominium) -> CondominiumBillingRules:
     _ = LateInterestRate.objects.create(
         condominium=condominium, start_date=date(2026, 1, 1), monthly_percentage=Decimal("1.00")
     )
-    return BillingRules.objects.create(
+    return CondominiumBillingRules.objects.create(
         condominium=condominium,
         early_payment_discount_percentage=Decimal("5.00"),
         early_payment_discount_days=3,
@@ -120,7 +121,7 @@ def new_document(unit: Unit, payer: Person, cost_center: CostCenter, entry_templ
 
 
 @pytest.fixture
-def document(billing_rules: BillingRules, new_document) -> BillingDocument:  # type: ignore[no-untyped-def]
+def document(billing_rules: CondominiumBillingRules, new_document) -> BillingDocument:  # type: ignore[no-untyped-def]
     return create_billing_document(new_document())
 
 

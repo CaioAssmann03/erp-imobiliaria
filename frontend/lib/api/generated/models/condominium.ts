@@ -7,7 +7,6 @@
  */
 import type { Address } from './address';
 import type { AdministrationContract } from './administrationContract';
-import type { BillingRules } from './billingRules';
 import type { CondominiumTypeEnum } from './condominiumTypeEnum';
 
 /**
@@ -25,7 +24,6 @@ export interface Condominium {
   advisor?: string | null;
   address?: Address | null;
   administration_contract?: AdministrationContract;
-  billing_rules?: BillingRules;
   type?: CondominiumTypeEnum;
   /** @maxLength 255 */
   name: string;

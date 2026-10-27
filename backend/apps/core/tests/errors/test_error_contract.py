@@ -93,12 +93,18 @@ def test_500_is_not_reshaped() -> None:
 def test_nested_error_uses_dotted_path(api_client: APIClient, company) -> None:  # type: ignore[no-untyped-def]
     response = api_client.post(
         "/api/condominiums/",
-        {"name": "X", "cnpj": NEW_CNPJ, "billing_rules": {"due_day": 31}},
+        {
+            "name": "X",
+            "cnpj": NEW_CNPJ,
+            "administration_contract": {"fee_type": "variable", "fee_percentage": "5.00", "fee_basis": None},
+        },
         format="json",
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert error_codes(response, "billing_rules.due_day") == ["billing_rules.due_day.out_of_range"]
+    assert error_codes(response, "administration_contract.fee_basis") == [
+        "administration_contract.variable_fee.requires_percentage_and_basis"
+    ]
 
 
 def test_list_position_is_a_number_in_the_path() -> None:

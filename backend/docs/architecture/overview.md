@@ -52,7 +52,7 @@ core  ←  persons  ←  condominiums  ←  finance  ←  billing  ←  (rentals
 | `ASAAS_API_KEY`, `ASAAS_BASE_URL`, `ASAAS_WEBHOOK_TOKEN` | Asaas payment gateway (boleto issuance). Sandbox key (`$aact_hmlg_…`) and `https://api-sandbox.asaas.com/v3` in development; the webhook token is used from phase 5 (phase 4 part 01) |
 
 ## Vocabulary (code ⇄ business term)
-Condominium, Block, Unit = Condomínio, Bloco, Unidade · Person (individual CPF / legal CNPJ) = Pessoa (física / jurídica) · UnitPerson (`owner`, `tenant`) = vínculo proprietário / locatário · AdministrationContract, BillingRules = contrato de administração, regras de cobrança · `ideal_fraction` = fração ideal (rateio) · CostCenter = centro de custo (antes "sub-conta") · EntryTemplate = modelo de lançamento (antes "histórico") · Advisor = assessor. The full PDF → code name map is in `roadmap/README.md`.
+Condominium, Block, Unit = Condomínio, Bloco, Unidade · Person (individual CPF / legal CNPJ) = Pessoa (física / jurídica) · UnitPerson (`owner`, `tenant`) = vínculo proprietário / locatário · AdministrationContract, CondominiumBillingRules = contrato de administração, regras de cobrança · `ideal_fraction` = fração ideal (rateio) · CostCenter = centro de custo (antes "sub-conta") · EntryTemplate = modelo de lançamento (antes "histórico") · Advisor = assessor. The full PDF → code name map is in `roadmap/README.md`.
 
 ## Decisions
 Changing one needs a feature spec.

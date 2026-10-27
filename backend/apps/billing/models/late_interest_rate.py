@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING, final, override
 from django.db import models
 from django.db.models import Q
 
-from apps.condominiums.errors import LateInterestRateError
-from apps.condominiums.models.condominium import Condominium
-from apps.condominiums.models.querysets import LateInterestRateQuerySet
+from apps.billing.errors import LateInterestRateError
+from apps.billing.models.querysets import LateInterestRateQuerySet
+from apps.condominiums.models import Condominium
 from apps.core.infrastructure.errors.validators import CoreValidatorError
 from apps.core.infrastructure.validators import validate_percentage
 from apps.core.models.base import BaseModel
@@ -42,7 +42,7 @@ class LateInterestRate(BaseModel):
         constraints = (
             models.UniqueConstraint(
                 fields=("condominium", "start_date"),
-                name="late_interest_rate_unique_start_per_condominium",
+                name="billing_late_interest_rate_unique_start_per_condominium",
                 violation_error_message=LateInterestRateError.START_DATE_DUPLICATE_IN_CONDOMINIUM.message,
                 violation_error_code=LateInterestRateError.START_DATE_DUPLICATE_IN_CONDOMINIUM.value,
             ),

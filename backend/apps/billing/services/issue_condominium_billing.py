@@ -12,6 +12,7 @@ from apps.billing.models import (
     BillingPlan,
     BillingPlanItem,
     BillingRun,
+    CondominiumBillingRules,
     GatewayAccount,
 )
 from apps.billing.services.create_billing_document import (
@@ -19,7 +20,7 @@ from apps.billing.services.create_billing_document import (
     NewBillingDocumentItem,
     create_billing_document,
 )
-from apps.condominiums.models import BillingRules, Condominium, Unit
+from apps.condominiums.models import Condominium, Unit
 from config.celery import app as celery_app
 
 ProblemCode = BillingRun.ProblemCode
@@ -44,7 +45,7 @@ def issue_condominium_billing(condominium: Condominium, reference_month: date) -
 
 def _issue_units(run: BillingRun) -> None:
     condominium, reference_month = run.condominium, run.reference_month
-    billing_rules = BillingRules.objects.filter(condominium=condominium).first()
+    billing_rules = CondominiumBillingRules.objects.filter(condominium=condominium).first()
     if billing_rules is None:
         return _fail_condominium(run, ProblemCode.NO_BILLING_RULES)
     items = _items_in_force(condominium, reference_month)
@@ -117,7 +118,7 @@ def _items_in_force(condominium: Condominium, reference_month: date) -> list[Bil
     return [item for plan in plans for item in plan.items.all()]
 
 
-def _skip_code(unit: Unit, billing_rules: BillingRules, has_lines: bool) -> BillingRun.ProblemCode | None:
+def _skip_code(unit: Unit, billing_rules: CondominiumBillingRules, has_lines: bool) -> BillingRun.ProblemCode | None:
     if unit.is_billing_blocked:
         return ProblemCode.UNIT_BILLING_BLOCKED
     if billing_rules.exempts(unit):

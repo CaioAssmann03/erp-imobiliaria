@@ -11,8 +11,8 @@ Company (core) ◄── PROTECT ── Person (persons) ── 1:1 ── Peopl
    │ ▲ PROTECT                          │                  └─ 1:1 ── PeopleLegal (company, cnpj, ie)
    │ └─ accounts.User.company (every user belongs to one company)
 Condominium (condominiums) ── advisor ─┘ SET_NULL
-   ├─ 1:1 Address (SET_NULL)    ├─ 1:1 AdministrationContract (CASCADE)    ├─ 1:1 BillingRules (CASCADE)
-   ├─ 1:N LateInterestRate (CASCADE: the interest history by start date)
+   ├─ 1:1 Address (SET_NULL)    ├─ 1:1 AdministrationContract (CASCADE)    ├─ 1:1 CondominiumBillingRules (CASCADE, billing)
+   ├─ 1:N LateInterestRate (CASCADE, billing: the interest history by start date)
    ├─ 1:N Block (CASCADE) ── RESTRICT ── Unit.block (optional)
    ├─ 1:N Unit (CASCADE) └─ 1:N UnitPerson (CASCADE) ── PROTECT ── Person
    ├─ 1:N CostCenter (finance, CASCADE) ── 1:N EntryTemplate (PROTECT)
@@ -24,7 +24,7 @@ Person ◄── 1:1 PROTECT ── Supplier (finance: payment data)
 Company ◄── PROTECT ── AccountPayable (finance) ── PROTECT ──► Supplier, CostCenter, Condominium (optional: empty = a company expense)
 Company ◄── PROTECT ── CurrentAccount (finance; the holder is a generic relation)
 ```
-**Every model** has a UUID `id` and (except `Block`, `BillingRules`, `AdministrationContract`, and the documents keyed by their `person`) `created_at` / `updated_at`, from the abstract bases in `core/models/base.py`; `@final`; `Meta.verbose_name(_plural)`; `Meta.ordering` when listed; every model declares `company_lookup`.
+**Every model** has a UUID `id` and (except `Block`, `CondominiumBillingRules`, `AdministrationContract`, and the documents keyed by their `person`) `created_at` / `updated_at`, from the abstract bases in `core/models/base.py`; `@final`; `Meta.verbose_name(_plural)`; `Meta.ordering` when listed; every model declares `company_lookup`.
 
 **`on_delete`:** parts owned by a condominium CASCADE; `Condominium` → `Company` PROTECT; advisor and address SET_NULL; `Unit.block` RESTRICT (a block with units cannot go alone, a condominium delete still cascades); `UnitPerson.person` PROTECT (unlink first); `EntryTemplate.cost_center` PROTECT; a billing plan item's cost center and entry template PROTECT (deactivate them instead).
 
@@ -46,7 +46,7 @@ Rules live in the models; the dashboard and API only call them. **Implemented** 
 | Apportionment | Split expenses among units by one of the criteria (the billing plan item names its criterion) | Implemented (phase 4; spec 039) |
 | Billing rules | `due_on_business_day`, early-payment discount (% + days), `credit_limit` | Stored — *confirm*; the due date and the discount terms are read by the monthly issuance, `credit_limit` is not |
 | Monthly issuance | Per condominium and reference month, one document per active, unblocked unit (not the exempt manager unit) from the plans in force; shares rounded half-up with the leftover cents to the largest fraction; a rerun adds nothing; a share whose fraction does not close at 1 fails the run | Implemented (`issue_condominium_billing`, `BillingRun`; spec 026) |
-| Billing months | From a reference month R: the due month is R (`due_month = reference`) or R + 1 (`following`); the competence is the due month (`competence_month = same_as_due`) or the month before it (`before_due`) | Implemented as `BillingRules.due_month_of` / `competence_month_of` (spec 020); used by phase 4 |
+| Billing months | From a reference month R: the due month is R (`due_month = reference`) or R + 1 (`following`); the competence is the due month (`competence_month = same_as_due`) or the month before it (`before_due`) | Implemented as `CondominiumBillingRules.due_month_of` / `competence_month_of` (spec 020); used by phase 4 |
 | Billing document | One non-cancelled document per unit and reference month; the terms are copied from the rules at issuance; amount = sum of the items; only the status changes (issued → registered → paid, or cancelled); overdue is derived from the due date | Implemented (`BillingDocumentRules`; spec 025) |
 | Late payment | Fine `late_fee_percentage` (0–2 %), or the first-days tier (`initial_late_fee_percentage` within the first `initial_late_fee_days` days of delay, both or neither). Interest: the `LateInterestRate` in force on the date (latest start not after it; none = no interest), counted as the whole month (`full_month`) or rate ÷ 30 per day late (`per_day`), after `interest_grace_days`. Monetary correction is not modeled | Stored (spec 020); the calculation is phases 4–5 |
 | Units | `type`, `resident_count`, `registration_number`, utility values, `is_manager_unit`; `is_billing_blocked` is counted in the dashboard, blocking entries is planned | Stored |

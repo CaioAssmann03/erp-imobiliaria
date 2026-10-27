@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { Condominium } from "@/lib/api/generated/models";
+import type { Condominium, CondominiumBillingRules } from "@/lib/api/generated/models";
 import {
   decimalFromApi,
   maskCep,
@@ -179,10 +179,10 @@ export const CONDOMINIUM_DEFAULTS: CondominiumFormInput = {
   adjustment_index: "",
 };
 
-export function condominiumToForm(c: Condominium): CondominiumFormInput {
+/** As regras de cobrança vêm de `condominium-billing-rules`; sem elas o formulário abre com os padrões. */
+export function condominiumToForm(c: Condominium, billing?: CondominiumBillingRules): CondominiumFormInput {
   const address = c.address;
   const contract = c.administration_contract;
-  const billing = c.billing_rules;
   return {
     name: c.name,
     cnpj: c.cnpj ? maskCnpj(c.cnpj) : "",
@@ -242,7 +242,7 @@ const ADDRESS_KEYS = [
 ] as const;
 
 /**
- * Corpo da requisição no formato aninhado da API (endereço, contrato e regras de cobrança).
+ * Corpo da requisição no formato aninhado da API (endereço e contrato; as regras de cobrança vão à parte).
  * Na edição (PATCH) um campo esvaziado vai como `null`, senão o valor antigo permanece.
  */
 export function condominiumToPayload(
@@ -280,25 +280,30 @@ export function condominiumToPayload(
       adjustment_period_months: values.adjustment_period_months ?? 12,
       adjustment_index: values.adjustment_index ?? "",
     },
-    billing_rules: {
-      due_day: values.due_day ?? 10,
-      due_on_business_day: values.due_on_business_day,
-      issuance_day: values.issuance_day ?? 1,
-      exempts_manager_unit: values.exempts_manager_unit,
-      due_month: values.due_month,
-      competence_month: values.competence_month,
-      credit_limit: values.credit_limit ?? "0.00",
-      early_payment_discount_percentage: values.early_payment_discount_percentage ?? "0.00",
-      early_payment_discount_days: values.early_payment_discount_days ?? 0,
-      late_fee_percentage: values.late_fee_percentage ?? "0.00",
-      // Sem a multa dos primeiros dias, os dois vão nulos (limpam um valor que já estava salvo).
-      initial_late_fee_percentage: values.has_initial_late_fee ? values.initial_late_fee_percentage : null,
-      initial_late_fee_days: values.has_initial_late_fee ? values.initial_late_fee_days : null,
-      interest_calculation: values.interest_calculation,
-      interest_grace_days: values.interest_grace_days ?? 0,
-      should_show_qr_code: values.should_show_qr_code,
-      should_show_fee_statement: values.should_show_fee_statement,
-    },
+  };
+}
+
+/** Corpo das regras de cobrança (`condominium-billing-rules`), salvas depois do condomínio. */
+export function billingRulesToPayload(values: CondominiumFormOutput, condominium: string): Record<string, unknown> {
+  return {
+    condominium,
+    due_day: values.due_day ?? 10,
+    due_on_business_day: values.due_on_business_day,
+    issuance_day: values.issuance_day ?? 1,
+    exempts_manager_unit: values.exempts_manager_unit,
+    due_month: values.due_month,
+    competence_month: values.competence_month,
+    credit_limit: values.credit_limit ?? "0.00",
+    early_payment_discount_percentage: values.early_payment_discount_percentage ?? "0.00",
+    early_payment_discount_days: values.early_payment_discount_days ?? 0,
+    late_fee_percentage: values.late_fee_percentage ?? "0.00",
+    // Sem a multa dos primeiros dias, os dois vão nulos (limpam um valor que já estava salvo).
+    initial_late_fee_percentage: values.has_initial_late_fee ? values.initial_late_fee_percentage : null,
+    initial_late_fee_days: values.has_initial_late_fee ? values.initial_late_fee_days : null,
+    interest_calculation: values.interest_calculation,
+    interest_grace_days: values.interest_grace_days ?? 0,
+    should_show_qr_code: values.should_show_qr_code,
+    should_show_fee_statement: values.should_show_fee_statement,
   };
 }
 

@@ -18,10 +18,12 @@ from .models import (
     BillingPlan,
     BillingPlanItem,
     BillingRun,
+    CondominiumBillingRules,
     GatewayAccount,
     GatewayCustomer,
     GatewayEvent,
     GatewayReconciliationRun,
+    LateInterestRate,
 )
 from .services.process_gateway_event import process_gateway_event
 from .services.sync_gateway_account_status import sync_gateway_account_status
@@ -209,3 +211,19 @@ class BillingDocumentDeliveryAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, 
     list_display = ("document", "channel", "destination", "status", "failure_reason", "sent_at")
     list_filter = ("status", "channel", "failure_reason")
     search_fields = ("destination", "document__unit__name", "provider_message_id")
+
+
+@final
+@admin.register(CondominiumBillingRules)
+class CondominiumBillingRulesAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("condominium", "issuance_day", "due_day", "late_fee_percentage")
+    search_fields = ("condominium__name",)
+    raw_id_fields = ("condominium",)
+
+
+@final
+@admin.register(LateInterestRate)
+class LateInterestRateAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("condominium", "start_date", "monthly_percentage")
+    search_fields = ("condominium__name",)
+    raw_id_fields = ("condominium",)

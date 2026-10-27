@@ -1,7 +1,7 @@
 /**
  * O exemplo em datas que a tela de cobrança mostra, como o do Sami: dado o mês de referência
  * (o mês a que a emissão se refere), em que mês cai o vencimento e a qual mês o boleto se refere.
- * É a mesma tabela de `BillingRules.due_month_of` / `competence_month_of` do backend.
+ * É a mesma tabela de `CondominiumBillingRules.due_month_of` / `competence_month_of` do backend.
  * Funções puras, sem imports do app: rodam direto no `node --test`.
  */
 

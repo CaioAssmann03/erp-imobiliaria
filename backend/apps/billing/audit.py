@@ -10,9 +10,11 @@ from .models import (
     BillingPlan,
     BillingPlanItem,
     BillingRun,
+    CondominiumBillingRules,
     GatewayAccount,
     GatewayCustomer,
     GatewayReconciliationRun,
+    LateInterestRate,
 )
 
 
@@ -29,3 +31,5 @@ def register() -> None:
     register_audited(BillingDocumentPayment)
     register_audited(GatewayReconciliationRun)
     register_audited(BillingDocumentDelivery)
+    register_audited(CondominiumBillingRules)
+    register_audited(LateInterestRate)

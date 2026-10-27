@@ -3,3 +3,7 @@ from .billing_plan_views import BillingPlanViewSet as BillingPlanViewSet
 from .billing_run_views import BillingRunViewSet as BillingRunViewSet
 from .gateway_webhook_views import AsaasWebhookView as AsaasWebhookView
 from .resend_webhook_views import ResendWebhookView as ResendWebhookView
+from .condominium_billing_rules_views import (
+    CondominiumBillingRulesViewSet as CondominiumBillingRulesViewSet,
+)
+from .late_interest_rate_views import LateInterestRateViewSet as LateInterestRateViewSet

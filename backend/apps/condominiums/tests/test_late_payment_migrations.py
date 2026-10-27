@@ -19,6 +19,7 @@ from apps.core.testing import SEEDED_COMPANY_CNPJ
 pytestmark = pytest.mark.django_db(transaction=True)
 
 BEFORE = [("condominiums", "0004_condominium_code")]
+AFTER = [("condominiums", "0007_billingrules_exempts_manager_unit_and_more")]  # the billing rules still lived here
 FRACTION_COLUMNS = {f"ideal_fraction_{number}" for number in range(2, 7)}
 
 
@@ -26,11 +27,6 @@ def migrate(targets: list[tuple[str, str]]) -> StateApps:
     executor = MigrationExecutor(connection)
     executor.migrate(targets)
     return executor.loader.project_state(targets).apps
-
-
-def latest(*apps: str) -> list[tuple[str, str]]:
-    leaves = MigrationExecutor(connection).loader.graph.leaf_nodes()
-    return [leaf for leaf in leaves if leaf[0] in apps]
 
 
 @pytest.fixture(autouse=True)
@@ -67,7 +63,7 @@ def test_existing_billing_rules_get_the_defaults() -> None:
         condominium=condominium, due_day=15, calculation_period="following"
     )
 
-    new_apps = migrate(latest("condominiums"))
+    new_apps = migrate(AFTER)
 
     rules: Any = new_apps.get_model("condominiums", "BillingRules").objects.get()
     assert (rules.due_day, rules.due_month) == (15, "following")  # the old value, under the new name
@@ -82,7 +78,7 @@ def test_existing_billing_rules_get_the_defaults() -> None:
 
 
 def test_due_month_keeps_the_old_column() -> None:
-    migrate(latest("condominiums"))
+    migrate(AFTER)
 
     columns = columns_of("condominiums_billingrules")
 
@@ -99,7 +95,7 @@ def test_the_migrations_reverse() -> None:
     assert "competence_month" not in billing_columns
     assert not FRACTION_COLUMNS & columns_of("condominiums_unit")
 
-    migrate(latest("condominiums"))
+    migrate(AFTER)
 
     assert "condominiums_lateinterestrate" in tables()
     assert FRACTION_COLUMNS <= columns_of("condominiums_unit")

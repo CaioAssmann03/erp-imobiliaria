@@ -11,13 +11,13 @@ from apps.condominiums.models import (
     Address,
     AdministrationContract,
     ApportionmentCriterion,
-    BillingRules,
     Block,
     Condominium,
     Unit,
     UnitFraction,
     UnitPerson,
 )
+from apps.billing.models import CondominiumBillingRules
 from apps.finance.models import (
     CostCenter,
 )
@@ -192,7 +192,7 @@ def create_condominium(
     )
     create_administration_contract(context, condominium, demo)
     _ = create_validated(
-        BillingRules,
+        CondominiumBillingRules,
         condominium=condominium,
         due_day=context.random_generator.choice([5, 10, 15]),
     )

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from django.db import models
 
 if TYPE_CHECKING:
-    from apps.condominiums.models.late_interest_rate import LateInterestRate
+    from apps.billing.models.late_interest_rate import LateInterestRate
 
 
 class LateInterestRateQuerySet(models.QuerySet["LateInterestRate"]):

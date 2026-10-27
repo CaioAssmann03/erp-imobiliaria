@@ -11,3 +11,5 @@ from .gateway_customer import GatewayCustomerError as GatewayCustomerError
 from .gateway_event import GatewayEventError as GatewayEventError
 from .gateway_reconciliation_run import GatewayReconciliationRunError as GatewayReconciliationRunError
 from .billing_document_delivery import BillingDocumentDeliveryError as BillingDocumentDeliveryError
+from .condominium_billing_rules import CondominiumBillingRulesError as CondominiumBillingRulesError
+from .late_interest_rate import LateInterestRateError as LateInterestRateError

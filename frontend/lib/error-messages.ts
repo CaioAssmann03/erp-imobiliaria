@@ -97,14 +97,16 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "billing_plan_item.position.duplicate_in_plan": "Já existe um item nesta posição do plano.",
   "billing_plan_item.unit_value_field.does_not_match_kind":
     "Só o item com o valor da unidade escolhe gás, água ou energia.",
-  "billing_rules.due_day.out_of_range": "O dia de vencimento deve ficar entre 1 e 28.",
-  "billing_rules.early_payment_discount_percentage.out_of_range":
+  "condominium_billing_rules.condominium.immutable":
+    "O condomínio das regras de cobrança não pode ser alterado.",
+  "condominium_billing_rules.due_day.out_of_range": "O dia de vencimento deve ficar entre 1 e 28.",
+  "condominium_billing_rules.early_payment_discount_percentage.out_of_range":
     "O desconto deve ficar entre 0 e 100.",
-  "billing_rules.initial_late_fee.incomplete":
+  "condominium_billing_rules.initial_late_fee.incomplete":
     "Informe o percentual e os dias da multa dos primeiros dias.",
-  "billing_rules.initial_late_fee_days.out_of_range": "Informe ao menos 1 dia.",
-  "billing_rules.issuance_day.out_of_range": "O dia de emissão deve estar entre 1 e 28.",
-  "billing_rules.late_fee_percentage.out_of_range": "A multa deve ficar entre 0% e 2%.",
+  "condominium_billing_rules.initial_late_fee_days.out_of_range": "Informe ao menos 1 dia.",
+  "condominium_billing_rules.issuance_day.out_of_range": "O dia de emissão deve estar entre 1 e 28.",
+  "condominium_billing_rules.late_fee_percentage.out_of_range": "A multa deve ficar entre 0% e 2%.",
   "billing_run.finished_at.before_started_at": "Uma execução não pode terminar antes de começar.",
   blank: "Campo obrigatório.",
   "block.name.duplicate_in_condominium": "Já existe um bloco com este nome neste condomínio.",

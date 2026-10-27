@@ -13,11 +13,11 @@ Run a plan for a month: one document + items per unit.
 
 ## Scope
 - [x] Celery task: monthly calculation (fixed, ideal-fraction share or the unit's registered value)
-- [x] Beat schedule with a configurable day per condominium (`BillingRules.issuance_day`)
+- [x] Beat schedule with a configurable day per condominium (`CondominiumBillingRules.issuance_day`)
 - [x] Idempotency: running twice for the same month creates no duplicates
 
 ## Draft for the spec
 Moved to the spec.
 
 ## Result
-Done on 2026-10-21 (spec 026): `issue_condominium_billing` service, `BillingRun` audit (`/api/billing-runs/`, also the manual trigger), daily beat task at 06:00, `Unit.billing_recipient`, `BillingRules.issuance_day` and `exempts_manager_unit`, payer choice and share rounding in the models, client regenerated. National holidays and `credit_limit` are recorded in `known-gaps.md`.
+Done on 2026-10-21 (spec 026): `issue_condominium_billing` service, `BillingRun` audit (`/api/billing-runs/`, also the manual trigger), daily beat task at 06:00, `Unit.billing_recipient`, `CondominiumBillingRules.issuance_day` and `exempts_manager_unit`, payer choice and share rounding in the models, client regenerated. National holidays and `credit_limit` are recorded in `known-gaps.md`.

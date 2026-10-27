@@ -12,7 +12,7 @@ from apps.core.models import Company
 from apps.persons.models import Person
 from apps.persons.services.release_person_to_module import release_person_to_module
 
-from ..models import AdministrationContract, BillingRules, Condominium, Unit, UnitPerson
+from ..models import AdministrationContract, Condominium, Unit, UnitPerson
 from .base import body, error_codes
 
 pytestmark = pytest.mark.django_db
@@ -45,22 +45,6 @@ def create_payload(company: Company, **overrides: object) -> dict[str, object]:
             "adjustment_period_months": 12,
             "adjustment_index": "IGPM",
         },
-        "billing_rules": {
-            "due_day": 10,
-            "due_on_business_day": False,
-            "due_month": "reference",
-            "competence_month": "same_as_due",
-            "credit_limit": "0.00",
-            "early_payment_discount_percentage": "0.00",
-            "early_payment_discount_days": 0,
-            "late_fee_percentage": "0.00",
-            "initial_late_fee_percentage": None,
-            "initial_late_fee_days": None,
-            "interest_calculation": "full_month",
-            "interest_grace_days": 0,
-            "should_show_qr_code": False,
-            "should_show_fee_statement": False,
-        },
         **overrides,
     }
 
@@ -76,7 +60,6 @@ class TestCondominiumForm:
         assert condominium.address is not None
         assert condominium.address.zip_code == "80010000"
         assert condominium.administration_contract.fee_amount == 1850
-        assert condominium.billing_rules.due_day == 10
 
     def test_create_without_address(self, client: APIClient, company: Company) -> None:
         payload = create_payload(company)
@@ -154,82 +137,6 @@ class TestCondominiumForm:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert error_codes(response, "administration_contract.fee_basis") == [
             "administration_contract.variable_fee.requires_percentage_and_basis"
-        ]
-        assert not Condominium.objects.exists()
-        assert not BillingRules.objects.exists()
-
-    def test_billing_rules_validation_error_is_nested(
-        self, client: APIClient, company: Company
-    ) -> None:
-        payload = create_payload(company)
-        payload["billing_rules"] = {"due_day": 31}
-
-        response = client.post(reverse("condominium-list"), payload, format="json")
-
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert error_codes(response, "billing_rules.due_day") == ["billing_rules.due_day.out_of_range"]
-
-    def test_create_with_the_late_payment_rules(self, client: APIClient, company: Company) -> None:
-        payload = create_payload(company)
-        payload["billing_rules"] = {
-            "due_day": 10,
-            "due_month": "following",
-            "competence_month": "before_due",
-            "late_fee_percentage": "2.00",
-            "initial_late_fee_percentage": "1.00",
-            "initial_late_fee_days": 5,
-            "interest_calculation": "per_day",
-            "interest_grace_days": 3,
-            "should_show_qr_code": True,
-            "should_show_fee_statement": True,
-        }
-
-        response = client.post(reverse("condominium-list"), payload, format="json")
-
-        assert response.status_code == status.HTTP_201_CREATED, response.data
-        rules = Condominium.objects.get(cnpj=CNPJ).billing_rules
-        assert (rules.due_month, rules.competence_month) == ("following", "before_due")
-        assert (rules.late_fee_percentage, rules.initial_late_fee_percentage, rules.initial_late_fee_days) == (
-            Decimal("2.00"),
-            Decimal("1.00"),
-            5,
-        )
-        assert (rules.interest_calculation, rules.interest_grace_days) == ("per_day", 3)
-        assert rules.should_show_qr_code and rules.should_show_fee_statement
-        assert body(response)["billing_rules"]["due_month"] == "following"
-
-    def test_patch_clears_the_first_days_tier_with_nulls(self, client: APIClient, company: Company) -> None:
-        payload = create_payload(company)
-        payload["billing_rules"] = {
-            "due_day": 10,
-            "initial_late_fee_percentage": "1.00",
-            "initial_late_fee_days": 5,
-        }
-        created = client.post(reverse("condominium-list"), payload, format="json")
-        url = reverse("condominium-detail", args=[body(created)["id"]])
-
-        response = client.patch(
-            url,
-            {"billing_rules": {"initial_late_fee_percentage": None, "initial_late_fee_days": None}},
-            format="json",
-        )
-
-        assert response.status_code == status.HTTP_200_OK, response.data
-        rules = BillingRules.objects.get()
-        assert rules.initial_late_fee_percentage is None
-        assert rules.initial_late_fee_days is None
-
-    def test_late_fee_above_the_limit_returns_a_nested_error(
-        self, client: APIClient, company: Company
-    ) -> None:
-        payload = create_payload(company)
-        payload["billing_rules"] = {"late_fee_percentage": "3.00"}
-
-        response = client.post(reverse("condominium-list"), payload, format="json")
-
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert error_codes(response, "billing_rules.late_fee_percentage") == [
-            "billing_rules.late_fee_percentage.out_of_range"
         ]
         assert not Condominium.objects.exists()
 

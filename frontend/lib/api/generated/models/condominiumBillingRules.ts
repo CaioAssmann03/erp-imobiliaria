@@ -16,7 +16,7 @@ import type { InterestCalculationEnum } from './interestCalculationEnum';
  * (for example the parent FK of a nested serializer) are excluded from validation.
  * Relations are limited to the user's company (spec 004).
  */
-export interface BillingRules {
+export interface CondominiumBillingRules {
   readonly id: string;
   /**
      * @minimum 0
@@ -62,4 +62,5 @@ export interface BillingRules {
   interest_grace_days?: number;
   should_show_qr_code?: boolean;
   should_show_fee_statement?: boolean;
+  condominium: string;
 }
