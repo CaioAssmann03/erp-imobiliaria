@@ -120,6 +120,6 @@ if ($LASTEXITCODE -ne 0) { Write-Host "(o usuario '$AdminUser' ja existia: tudo 
 Write-Host "`nPronto." -ForegroundColor Green
 Write-Host "  Sistema:  http://localhost:3000   (usuario: $AdminUser   senha: $AdminPassword)"
 Write-Host "  API:      http://localhost:8000/api/docs/"
-Write-Host "  Arquivos: http://localhost:9001   (MinIO, usuario e senha: minioadmin)"
+Write-Host "  Arquivos: armazenamento S3 local em http://localhost:9090 (usado pelo PDF do boleto)"
 Write-Host "  Parar:    docker compose down        Recomecar do zero: .\scripts\local-up.ps1 -Reset"
 Write-Host "  Se http://localhost:3000 nao abrir de primeira, espere 1 minuto (o frontend ainda esta compilando)."
