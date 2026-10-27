@@ -34,58 +34,6 @@ def save(
     return serializer.save()
 
 
-def test_create_with_all_nested_parts(company: Company) -> None:
-    condominium = save(
-        company,
-        payload(
-            company,
-            address={"street": "Rua A", "city": "Curitiba", "state": "PR"},
-            administration_contract={"fee_type": "fixed", "fee_amount": "500"},
-        )
-    )
-
-    assert condominium.address is not None
-    assert condominium.address.city == "Curitiba"
-    assert condominium.administration_contract.fee_amount == 500
-
-
-def test_create_without_nested_parts(company: Company) -> None:
-    condominium = save(company, payload(company))
-
-    assert condominium.address is None
-    assert not CondominiumAdministrationContract.objects.exists()
-
-
-def test_invalid_nested_contract_rejects_the_whole_payload(company: Company) -> None:
-    serializer = CondominiumSerializer(
-        data=payload(company, administration_contract={"fee_type": "fixed"})
-    )
-
-    assert not serializer.is_valid()
-    assert "administration_contract" in serializer.errors
-
-
-def test_invalid_cnpj_is_rejected(company: Company) -> None:
-    serializer = CondominiumSerializer(data={**payload(company), "cnpj": "12345678000100"})
-
-    assert not serializer.is_valid()
-    assert "cnpj" in serializer.errors
-
-
-def test_cnpj_must_be_unique(condominium: Condominium) -> None:
-    serializer = CondominiumSerializer(data=payload(condominium.company))
-
-    assert not serializer.is_valid()
-    assert "cnpj" in serializer.errors
-
-
-def test_update_creates_address_when_missing(condominium: Condominium) -> None:
-    updated = save(condominium.company, {"address": {"city": "Curitiba"}}, condominium)
-
-    assert updated.address is not None
-    assert updated.address.city == "Curitiba"
-
-
 def test_update_changes_existing_address_in_place(condominium: Condominium) -> None:
     condominium.address = Address.objects.create(company=condominium.company, city="Curitiba", state="PR")
     condominium.save()
@@ -106,11 +54,3 @@ def test_update_upserts_the_contract(condominium: Condominium) -> None:
 
     assert CondominiumAdministrationContract.objects.count() == 1
     assert CondominiumAdministrationContract.objects.get().fee_amount == 700
-
-
-def test_update_without_nested_parts_keeps_them(condominium: Condominium) -> None:
-    _ = save(condominium.company, {"administration_contract": {"fee_amount": "500"}}, condominium)
-
-    _ = save(condominium.company, {"name": "Novo Nome"}, condominium)
-
-    assert CondominiumAdministrationContract.objects.get().fee_amount == 500

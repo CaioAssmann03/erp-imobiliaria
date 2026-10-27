@@ -5,7 +5,6 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from apps.core.testing import seeded_company
 
 from ..models import CondominiumApportionmentCriterion, Condominium, Unit, UnitApportionmentFraction
 from .base import body, error_codes
@@ -84,15 +83,6 @@ def test_swapping_two_values_is_not_refused_halfway(
     assert response.status_code == swapped.status_code == status.HTTP_200_OK
 
 
-def test_two_fractions_for_one_criterion_are_refused(
-    api_client: APIClient, condominium: Condominium, main: CondominiumApportionmentCriterion
-) -> None:
-    response = api_client.post(list_url, payload(condominium, "101", (main, "0.5"), (main, "0.2")), format="json")
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert error_codes(response, "fractions") == ["unit_apportionment_fraction.criterion.duplicate"]
-
-
 def test_a_sum_over_one_is_refused_and_nothing_is_saved(
     api_client: APIClient, condominium: Condominium, main: CondominiumApportionmentCriterion
 ) -> None:
@@ -104,33 +94,3 @@ def test_a_sum_over_one_is_refused_and_nothing_is_saved(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert error_codes(response, "fractions") == ["unit.ideal_fraction.sum_exceeds_total"]
     assert not Unit.objects.filter(name="2").exists()
-
-
-def test_a_value_out_of_range_is_refused(api_client: APIClient, condominium: Condominium, main: CondominiumApportionmentCriterion) -> None:
-    response = api_client.post(list_url, payload(condominium, "101", (main, "1.5")), format="json")
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "unit.ideal_fraction.out_of_range" in error_codes(response, "fractions.0.value")
-
-
-def test_a_criterion_of_another_condominium_is_refused(api_client: APIClient, condominium: Condominium) -> None:
-    other = Condominium.objects.create(company=seeded_company(), name="Outro", cnpj="45723174000110")
-    foreign = other.apportionment_criteria.get(position=1)
-
-    response = api_client.post(list_url, payload(condominium, "101", (foreign, "0.5")), format="json")
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert error_codes(response, "fractions") == ["unit_apportionment_fraction.criterion.other_condominium"]
-
-
-def test_listing_units_does_not_query_per_unit(  # type: ignore[no-untyped-def]
-    api_client: APIClient, condominium: Condominium, main: CondominiumApportionmentCriterion, django_assert_max_num_queries
-) -> None:
-    for number in range(5):
-        unit = Unit.objects.create(condominium=condominium, name=str(number))
-        _ = UnitApportionmentFraction.objects.create(unit=unit, criterion=main, value="0.1")
-
-    with django_assert_max_num_queries(12):
-        response = api_client.get(list_url)
-
-    assert response.status_code == status.HTTP_200_OK

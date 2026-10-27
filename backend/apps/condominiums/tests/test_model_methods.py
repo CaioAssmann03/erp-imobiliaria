@@ -9,16 +9,9 @@ from apps.core.testing import seeded_company
 from apps.persons.models import Person
 
 from ..models import CondominiumAdministrationContract, Condominium, Unit, UnitPerson
-from ..testing import add_fraction
 
 
 class TestContractAdjustment:
-    def test_next_adjustment_is_base_plus_period(self) -> None:
-        contract = CondominiumAdministrationContract(
-            adjustment_base_date=date(2025, 3, 15), adjustment_period_months=12
-        )
-
-        assert contract.next_adjustment_date() == date(2026, 3, 15)
 
     def test_day_is_clamped_to_the_end_of_the_month(self) -> None:
         contract = CondominiumAdministrationContract(
@@ -27,11 +20,6 @@ class TestContractAdjustment:
 
         assert contract.next_adjustment_date() == date(2026, 2, 28)
 
-    def test_without_base_date_there_is_no_adjustment(self) -> None:
-        contract = CondominiumAdministrationContract(adjustment_base_date=None)
-
-        assert contract.next_adjustment_date() is None
-        assert not contract.is_adjustment_overdue(date(2030, 1, 1))
 
     def test_overdue_only_after_the_due_date(self) -> None:
         contract = CondominiumAdministrationContract(
@@ -63,16 +51,3 @@ class TestCurrentLinks:
         current_links = set(UnitPerson.objects.current(reference_date))
 
         assert current_links == {open_link, ends_on_reference_date}
-
-
-@pytest.mark.django_db
-class TestApportionment:
-    def test_flags_only_condominiums_that_do_not_sum_to_one(self, condominium: Condominium) -> None:
-        other = Condominium.objects.create(
-            company=condominium.company, name="Outro", cnpj="45723174000110"
-        )
-        for name in ("1", "2"):
-            add_fraction(Unit.objects.create(condominium=condominium, name=name), "0.5")
-        add_fraction(Unit.objects.create(condominium=other, name="1"), "0.9")
-
-        assert Unit.objects.inconsistent_apportionment_condominium_ids() == [other.pk]

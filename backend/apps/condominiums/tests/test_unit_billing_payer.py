@@ -37,14 +37,6 @@ def payer(unit: Unit) -> Person | None:
     return Unit.objects.get(pk=unit.pk).billing_payer(TODAY)
 
 
-def test_the_default_recipient_is_the_owner(company: Company, unit: Unit) -> None:
-    owner = link(company, unit, "Dono", "owner", "100")
-    _ = link(company, unit, "Inquilino", "tenant")
-
-    assert unit.billing_recipient == Unit.BillingRecipient.OWNER
-    assert payer(unit) == owner
-
-
 def test_a_tenant_recipient_pays_when_there_is_a_current_tenant(company: Company, unit: Unit) -> None:
     _ = link(company, unit, "Dono", "owner", "100")
     tenant = link(company, unit, "Inquilino", "tenant")

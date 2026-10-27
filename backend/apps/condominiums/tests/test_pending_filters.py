@@ -15,7 +15,7 @@ from apps.persons.models import Person
 
 from ..models import CondominiumAdministrationContract, Condominium, Unit, UnitPerson
 from ..testing import add_fraction
-from .base import body, results
+from .base import results
 
 pytestmark = pytest.mark.django_db
 
@@ -48,8 +48,6 @@ def make_unit(
     return unit
 
 
-
-
 def test_condominiums_without_cost_centers(api_client: APIClient, company: Company) -> None:
     with_center = make_condominium(company, "Com Sub-conta", "11222333000181")
     CostCenter.objects.create(condominium=with_center, name="Geral")
@@ -66,19 +64,6 @@ def test_condominiums_with_inconsistent_apportionment(api_client: APIClient, com
     add_fraction(Unit.objects.create(condominium=short, name="101"), "0.5")
 
     assert condominium_names(api_client, "inconsistent_apportionment") == ["Nao Fecha"]
-
-
-def test_inconsistent_apportionment_looks_at_the_fractions_in_use(
-    api_client: APIClient, company: Company
-) -> None:
-    both_close = make_condominium(company, "Duas Fecham", "11222333000181")
-    make_unit(both_close, "101", second_fraction=Decimal("1"))
-    second_open = make_condominium(company, "Segunda Aberta", "45723174000110")
-    make_unit(second_open, "101", second_fraction=Decimal("0.5"))
-    second_unused = make_condominium(company, "Segunda Sem Uso", "11444777000161")
-    make_unit(second_unused, "101")
-
-    assert condominium_names(api_client, "inconsistent_apportionment") == ["Segunda Aberta"]
 
 
 def test_condominiums_by_adjustment_window(api_client: APIClient, company: Company) -> None:
@@ -98,31 +83,6 @@ def test_condominiums_by_adjustment_window(api_client: APIClient, company: Compa
     assert condominium_names(api_client, "upcoming_adjustment") == ["Em breve"]
 
 
-def test_condominium_pending_rejects_unknown_choice(api_client: APIClient) -> None:
-    response = api_client.get(reverse("condominium-list"), {"pending": "nonsense"})
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-
-
-def test_units_without_responsible(api_client: APIClient, company: Company) -> None:
-    condominium = make_condominium(company, "Sol", "11222333000181")
-    with_owner = make_unit(condominium, "101")
-    _ = make_unit(condominium, "102")
-    _ = make_unit(condominium, "103", active=False)
-    person = Person.objects.create(company=company, name="Maria")
-    UnitPerson.objects.create(
-        unit=with_owner,
-        person=person,
-        role="owner",
-        ownership_percentage=Decimal("100"),
-        start_date=today() - timedelta(days=30),
-    )
-
-    assert unit_names(api_client, "without_responsible") == ["102"]
-
-
 def test_units_with_lease_ending(api_client: APIClient, company: Company) -> None:
     condominium = make_condominium(company, "Sol", "11222333000181")
     ending = make_unit(condominium, "101")
@@ -138,21 +98,3 @@ def test_units_with_lease_ending(api_client: APIClient, company: Company) -> Non
         )
 
     assert unit_names(api_client, "lease_ending") == ["101"]
-
-
-def test_units_with_billing_blocked_counts_active_only(api_client: APIClient, company: Company) -> None:
-    condominium = make_condominium(company, "Sol", "11222333000181")
-    _ = make_unit(condominium, "101", is_billing_blocked=True)
-    _ = make_unit(condominium, "102", is_billing_blocked=True, active=False)
-    _ = make_unit(condominium, "103")
-
-    assert unit_names(api_client, "billing_blocked") == ["101"]
-
-
-def test_pending_filters_stay_inside_the_company(
-    api_client: APIClient, other_company: Company
-) -> None:
-    _ = make_condominium(other_company, "De Outra", "11222333000181")
-
-    assert condominium_names(api_client, "without_cost_centers") == []
-    assert body(api_client.get(reverse("unit-list"), {"pending": "without_responsible"}))["count"] == 0

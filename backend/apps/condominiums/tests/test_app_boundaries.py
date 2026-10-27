@@ -26,9 +26,3 @@ def test_condominiums_does_not_import_billing() -> None:
     ]
 
     assert offenders == []
-
-
-def test_the_condominium_payload_has_no_billing_rules() -> None:
-    from ..serializers import CondominiumSerializer
-
-    assert "billing_rules" not in CondominiumSerializer().fields

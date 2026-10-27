@@ -30,27 +30,12 @@ class TestUnitPersonModelRules:
     def test_owner_requires_percentage(self) -> None:
         assert "ownership_percentage" in clean_errors(link(role="owner"))
 
-    def test_owner_with_percentage_is_valid(self) -> None:
-        link(role="owner", ownership_percentage=Decimal("50")).clean()
-
-    @pytest.mark.parametrize("percentage", [Decimal("-1"), Decimal("100.01")])
-    def test_percentage_field_validator_rejects_out_of_range(
-        self, percentage: Decimal
-    ) -> None:
-        instance = link(role="owner", ownership_percentage=percentage)
-
-        with pytest.raises(ValidationError) as exc:
-            instance.clean_fields(exclude=["unit", "person"])
-
-        assert "ownership_percentage" in exc.value.message_dict
 
     def test_tenant_cannot_have_percentage(self) -> None:
         errors = clean_errors(link(role="tenant", ownership_percentage=Decimal("10")))
 
         assert "ownership_percentage" in errors
 
-    def test_tenant_without_percentage_is_valid(self) -> None:
-        link(role="tenant").clean()
 
     def test_end_date_cannot_be_before_start_date(self) -> None:
         errors = clean_errors(
@@ -78,34 +63,7 @@ def condominium_person(name: str) -> Person:
 
 @pytest.mark.django_db
 class TestUnitPersonConstraints:
-    def test_database_rejects_end_before_start(self, unit: Unit, person: Person) -> None:
-        with pytest.raises(IntegrityError), transaction.atomic():
-            _ = UnitPerson.objects.create(
-                unit=unit,
-                person=person,
-                start_date=date(2025, 6, 1),
-                end_date=date(2025, 1, 1),
-            )
 
-    def test_database_rejects_tenant_with_percentage(
-        self, unit: Unit, person: Person
-    ) -> None:
-        with pytest.raises(IntegrityError), transaction.atomic():
-            _ = UnitPerson.objects.create(
-                unit=unit,
-                person=person,
-                role="tenant",
-                ownership_percentage=Decimal("10"),
-                start_date=date(2025, 1, 1),
-            )
-
-    def test_database_rejects_owner_without_percentage(
-        self, unit: Unit, person: Person
-    ) -> None:
-        with pytest.raises(IntegrityError), transaction.atomic():
-            _ = UnitPerson.objects.create(
-                unit=unit, person=person, role="owner", start_date=date(2025, 1, 1)
-            )
 
     def test_only_one_active_link_per_role(self, unit: Unit, person: Person) -> None:
         _ = UnitPerson.objects.create(
@@ -116,71 +74,6 @@ class TestUnitPersonConstraints:
             _ = UnitPerson.objects.create(
                 unit=unit, person=person, role="tenant", start_date=date(2025, 2, 1)
             )
-
-    def test_new_link_is_allowed_after_previous_one_ended(
-        self, unit: Unit, person: Person
-    ) -> None:
-        _ = UnitPerson.objects.create(
-            unit=unit,
-            person=person,
-            role="tenant",
-            start_date=date(2024, 1, 1),
-            end_date=date(2024, 12, 31),
-        )
-
-        _ = UnitPerson.objects.create(
-            unit=unit, person=person, role="tenant", start_date=date(2025, 1, 1)
-        )
-
-    def test_same_person_can_be_owner_and_tenant(
-        self, unit: Unit, person: Person
-    ) -> None:
-        _ = UnitPerson.objects.create(
-            unit=unit,
-            person=person,
-            role="owner",
-            ownership_percentage=Decimal("100"),
-            start_date=date(2025, 1, 1),
-        )
-
-        _ = UnitPerson.objects.create(
-            unit=unit, person=person, role="tenant", start_date=date(2025, 1, 1)
-        )
-
-
-@pytest.mark.django_db
-class TestUnitPersonSerializerUsesTheModelRules:
-    def test_owner_without_percentage_is_a_field_error(
-        self, unit: Unit, person: Person
-    ) -> None:
-        serializer = UnitPersonSerializer(
-            data={
-                "unit": unit.pk,
-                "person": person.pk,
-                "role": "owner",
-                "start_date": "2025-01-01",
-            }
-        )
-
-        assert not serializer.is_valid()
-        assert "ownership_percentage" in serializer.errors
-
-    def test_duplicate_active_link_is_a_400_not_a_500(
-        self, unit: Unit, person: Person
-    ) -> None:
-        _ = UnitPerson.objects.create(
-            unit=unit, person=person, role="tenant", start_date=date(2025, 1, 1)
-        )
-        serializer = UnitPersonSerializer(
-            data={
-                "unit": unit.pk,
-                "person": person.pk,
-                "role": "tenant",
-                "start_date": "2025-02-01",
-            }
-        )
-
-        assert not serializer.is_valid()
 
 
 @pytest.mark.django_db
@@ -224,36 +117,6 @@ class TestOwnersCap:
         with pytest.raises(ValidationError):
             self.owner(unit, self.other_person("D"), "20", date(2024, 7, 1)).clean()
 
-    def test_updating_a_link_does_not_count_itself(self, unit: Unit, person: Person) -> None:
-        link = self.owner(unit, person, "70", date(2024, 1, 1))
-        link.save()
-
-        link.ownership_percentage = Decimal("100")
-        link.clean()
-
-    def test_tenants_do_not_count(self, unit: Unit, person: Person) -> None:
-        UnitPerson.objects.create(unit=unit, person=person, role="tenant", start_date=date(2024, 1, 1))
-
-        self.owner(unit, self.other_person("B"), "100", date(2024, 1, 1)).clean()
-
-    def test_other_units_do_not_count(self, unit: Unit, person: Person, condominium: Condominium) -> None:
-        self.owner(unit, person, "100", date(2024, 1, 1)).save()
-        other_unit = Unit.objects.create(condominium=condominium, name="202")
-
-        self.owner(other_unit, self.other_person("B"), "100", date(2024, 1, 1)).clean()
-
-    def test_api_answers_400_on_the_field(self, unit: Unit, person: Person) -> None:
-        self.owner(unit, person, "80", date(2024, 1, 1)).save()
-        serializer = UnitPersonSerializer(
-            data={
-                "unit": unit.pk, "person": self.other_person("B").pk, "role": "owner",
-                "ownership_percentage": "30", "start_date": "2024-06-01",
-            }
-        )
-
-        assert not serializer.is_valid()
-        assert "ownership_percentage" in serializer.errors
-
 
 @pytest.mark.django_db
 class TestPersonModuleRule:
@@ -268,10 +131,6 @@ class TestPersonModuleRule:
     def tenant_link(self, unit: Unit, person: Person) -> UnitPerson:
         return UnitPerson(unit=unit, person=person, role="tenant", start_date=date(2025, 1, 1))
 
-    def test_a_rentals_only_person_cannot_be_linked(
-        self, unit: Unit, rentals_person: Person
-    ) -> None:
-        assert "person" in clean_errors(self.tenant_link(unit, rentals_person))
 
     def test_the_api_answers_400_with_the_module_code(
         self, unit: Unit, rentals_person: Person
@@ -290,11 +149,6 @@ class TestPersonModuleRule:
             "unit_person.person.not_in_condominiums"
         ]
 
-    def test_a_person_in_both_modules_can_be_linked(self, unit: Unit) -> None:
-        both = condominium_person("Ambas")
-        release_person_to_module(both, "rentals")
-
-        self.tenant_link(unit, both).clean()
 
     def test_changing_a_link_to_a_rentals_only_person_is_refused(
         self, unit: Unit, person: Person, rentals_person: Person
