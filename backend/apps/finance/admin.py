@@ -9,6 +9,7 @@ from apps.core.scoping import CompanyScopedAdminMixin
 from .models import (
     AccountPayable,
     BankAccount,
+    CompanyEntry,
     CostCenter,
     CurrentAccount,
     CurrentAccountEntry,
@@ -124,4 +125,23 @@ class PaymentReceiptAdmin(CompanyScopedAdminMixin, ModelAdmin):
         return False
 
     def has_delete_permission(self, request: HttpRequest, obj: PaymentReceipt | None = None) -> bool:
+        return False
+
+
+@final
+@admin.register(CompanyEntry)
+class CompanyEntryAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    """Read-only: the credits of the administradora (the registration fee) are posted when a boleto is paid."""
+
+    list_display = ("entry_date", "amount", "description")
+    search_fields = ("description",)
+    date_hierarchy = "entry_date"
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj: CompanyEntry | None = None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: CompanyEntry | None = None) -> bool:
         return False

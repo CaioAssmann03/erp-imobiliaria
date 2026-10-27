@@ -4,7 +4,7 @@ import type { BillingPlan, BillingPlanItem } from "@/lib/api/generated/models";
 import { monthFromApi, monthToApi, needsAmount, needsFractionNumber, needsUnitValueField } from "@/lib/billing-plan-payload";
 import { moneyFromApi } from "@/lib/masks";
 
-import { decimalField, enumField, requiredText } from "./fields";
+import { decimalField, enumField, optionalText, requiredText } from "./fields";
 
 const MAX_MONEY = 9_999_999_999.99; // numeric(12, 2)
 
@@ -34,13 +34,19 @@ const monthField = (label: string) =>
 
 export const billingPlanItemSchema = z
   .object({
-    description: requiredText("a descrição", { max: 120 }),
+    event: z.string(),
+    description: optionalText("A descrição", 120),
     cost_center: z.string().min(1, "Selecione a sub-conta"),
     entry_template: z.string().min(1, "Selecione o modelo de lançamento"),
     calculation_kind: enumField(CALCULATION_KINDS.map((item) => item.value) as [string, ...string[]]),
     amount: decimalField("Valor", { min: 0.01, max: MAX_MONEY }),
     ideal_fraction_number: z.string(),
     unit_value_field: z.string(),
+  })
+  .refine((item) => item.event !== "" || item.description !== undefined, {
+    path: ["description"],
+    message: "Informe a descrição ou escolha um evento",
+    when: () => true,
   })
   .refine((item) => !needsAmount(item.calculation_kind) || item.amount !== undefined, {
     path: ["amount"],
@@ -78,6 +84,7 @@ export type BillingPlanFormOutput = z.output<typeof billingPlanSchema>;
 export type BillingPlanItemFormInput = z.input<typeof billingPlanItemSchema>;
 
 export const EMPTY_PLAN_ITEM: BillingPlanItemFormInput = {
+  event: "",
   description: "",
   cost_center: "",
   entry_template: "",
@@ -97,7 +104,8 @@ export const BILLING_PLAN_DEFAULTS: BillingPlanFormInput = {
 };
 
 const itemToForm = (item: BillingPlanItem): BillingPlanItemFormInput => ({
-  description: item.description,
+  event: item.event ?? "",
+  description: item.description ?? "",
   cost_center: item.cost_center,
   entry_template: item.entry_template,
   calculation_kind: item.calculation_kind,

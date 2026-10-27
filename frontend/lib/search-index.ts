@@ -22,6 +22,7 @@ export const STATIC_SEARCH_ITEMS: StaticSearchItem[] = [
   { title: "Planos de cobrança", subtitle: "Cobrança", href: "/billing/plans", keywords: "plano itens taxa condominial rateio fracao ideal boleto emissao vigencia" },
   { title: "Inclusão de valores", subtitle: "Cobrança", href: "/billing/entries", keywords: "lancamento valores boleto chamada extra agua tarifa rateio parcelado recorrencia sub-conta fundo obras reserva" },
   { title: "Eventos", subtitle: "Cobrança", href: "/billing/events", keywords: "evento codigo descricao lancamento limpeza" },
+  { title: "Conta da imobiliária", subtitle: "Financeiro", href: "/finance/company-account", keywords: "tarifa registro banco receita imobiliaria saldo credito" },
   { title: "Documentos de cobrança", subtitle: "Cobrança", href: "/billing/documents", keywords: "boleto boletos emitidos unidade pagador vencido pdf cancelar" },
   { title: "Execuções da emissão", subtitle: "Cobrança", href: "/billing/runs", keywords: "emissao mensal problemas unidades puladas falhas" },
   { title: "Emitir mês", subtitle: "Cobrança", href: "/billing/runs", keywords: "emitir boletos agora condominio mes referencia" },

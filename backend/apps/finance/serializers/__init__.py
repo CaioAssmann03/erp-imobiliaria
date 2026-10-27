@@ -5,6 +5,8 @@ from .account_payable_serializers import (
     SettleAccountPayableSerializer as SettleAccountPayableSerializer,
 )
 from .bank_account_serializers import BankAccountSerializer as BankAccountSerializer
+from .company_entry_serializers import CompanyBalanceSerializer as CompanyBalanceSerializer
+from .company_entry_serializers import CompanyEntrySerializer as CompanyEntrySerializer
 from .cost_center_serializers import CostCenterSerializer as CostCenterSerializer
 from .current_account_entry_serializers import (
     BatchEntriesSerializer as BatchEntriesSerializer,

@@ -22,12 +22,14 @@ class BillingDocumentItem(BaseModel):
     document = models.ForeignKey(BillingDocument, on_delete=models.CASCADE, related_name="items")
     position = models.PositiveSmallIntegerField(default=0)
     description = models.CharField(max_length=120)
+    # Both empty on a line that credits the administradora (the registration fee), both set on every other line.
     cost_center = models.ForeignKey(
-        CostCenter, on_delete=models.PROTECT, related_name="billing_document_items"
+        CostCenter, on_delete=models.PROTECT, null=True, blank=True, related_name="billing_document_items"
     )
     entry_template = models.ForeignKey(
-        EntryTemplate, on_delete=models.PROTECT, related_name="billing_document_items"
+        EntryTemplate, on_delete=models.PROTECT, null=True, blank=True, related_name="billing_document_items"
     )
+    credits_company = models.BooleanField(default=False)
     amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[validate_positive_amount])
     # The launch (spec 039) the line comes from; empty for a plan item. It freezes the launch once a document exists.
     billing_entry = models.ForeignKey(
@@ -46,6 +48,13 @@ class BillingDocumentItem(BaseModel):
                 name="billing_document_item_unique_position_per_document",
                 violation_error_message=BillingDocumentItemError.POSITION_DUPLICATE_IN_DOCUMENT.message,
                 violation_error_code=BillingDocumentItemError.POSITION_DUPLICATE_IN_DOCUMENT.value,
+            ),
+            models.CheckConstraint(
+                name="billing_document_item_credits_company_matches_cost_center",
+                condition=Q(credits_company=True, cost_center__isnull=True, entry_template__isnull=True)
+                | Q(credits_company=False, cost_center__isnull=False, entry_template__isnull=False),
+                violation_error_message=BillingDocumentItemError.CREDITS_COMPANY_MISMATCH.message,
+                violation_error_code=BillingDocumentItemError.CREDITS_COMPANY_MISMATCH.value,
             ),
             models.CheckConstraint(
                 name="billing_document_item_amount_positive",

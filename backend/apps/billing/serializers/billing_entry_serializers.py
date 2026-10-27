@@ -55,8 +55,9 @@ class BillingEntrySerializer(ModelRulesMixin, serializers.ModelSerializer[Billin
     condominium_name = serializers.CharField(source="condominium.name", read_only=True)
     event_code = serializers.IntegerField(source="event.code", read_only=True, default=None)
     event_name = serializers.CharField(source="event.name", read_only=True, default=None)
-    cost_center_code = serializers.IntegerField(source="cost_center.code", read_only=True)
-    cost_center_name = serializers.CharField(source="cost_center.name", read_only=True)
+    event_credits_company = serializers.BooleanField(source="event.credits_company", read_only=True, default=False)
+    cost_center_code = serializers.IntegerField(source="cost_center.code", read_only=True, default=None)
+    cost_center_name = serializers.CharField(source="cost_center.name", read_only=True, default=None)
     is_used = serializers.SerializerMethodField()
     month = serializers.SerializerMethodField()
     units = BillingEntryUnitSerializer(source="entry_units", many=True, allow_empty=False)
@@ -71,6 +72,7 @@ class BillingEntrySerializer(ModelRulesMixin, serializers.ModelSerializer[Billin
             "event",
             "event_code",
             "event_name",
+            "event_credits_company",
             "description",
             "allocation",
             "ideal_fraction_number",

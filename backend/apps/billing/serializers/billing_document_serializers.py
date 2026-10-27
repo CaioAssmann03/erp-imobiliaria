@@ -16,8 +16,8 @@ from ..models import (
 
 
 class BillingDocumentItemSerializer(serializers.ModelSerializer[BillingDocumentItem]):
-    cost_center_name = serializers.CharField(source="cost_center.name", read_only=True)
-    entry_template_name = serializers.CharField(source="entry_template.name", read_only=True)
+    cost_center_name = serializers.CharField(source="cost_center.name", read_only=True, default=None)
+    entry_template_name = serializers.CharField(source="entry_template.name", read_only=True, default=None)
 
     @final
     class Meta:
@@ -30,6 +30,7 @@ class BillingDocumentItemSerializer(serializers.ModelSerializer[BillingDocumentI
             "cost_center_name",
             "entry_template",
             "entry_template_name",
+            "credits_company",
             "amount",
         )
         read_only_fields = fields

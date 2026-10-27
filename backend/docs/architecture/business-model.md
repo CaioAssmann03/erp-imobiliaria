@@ -19,9 +19,11 @@ Told by the user (the owner of EVE Administradora de Imóveis) on 2026-10-26, in
 - The reference system also has a second boleto kind, **Extra**, and negative values (**discounts**, e.g. the síndico's unit), plus "Definir por %", "Arredondar" and "Lançar em lote": not built yet, see `features/039-billing-entries.md`.
 
 ## The registration fee (*tarifa de registro bancário*)
-- The administradora **always charges a fee on the boleto** and defines its amount (today R$ 3.90 per boleto). The gateway charges the administradora less (today R$ 1.20 per registration); the difference is the administradora's.
-- **The fee must NEVER be credited to the condominium.** It is a credit of the administradora itself in the system. Today a ledger account exists only per condominium, so the administradora's own ledger is a new piece: spec 038 (draft, open questions).
-- Until 038 exists, boletos carry only items, so nothing wrong can reach a condominium.
+- The administradora **always charges a fee on the boleto** and defines its amount when it launches the charges (today R$ 3.90 per boleto). The gateway charges the administradora less (today R$ 1.20 per registration, **not shown in the system**, it is internal); the difference is the administradora's.
+- On the boleto it is **its own line**: `0005-TARIFA BANCO 3,90` next to `0052-CONDOMINIO 170,00` (an example boleto: Santander, issued in the administradora's own name, with competence, due date, multa and a "pagamento na ADM sem taxa banco" line).
+- **The fee must NEVER be credited to the condominium.** It is a credit of the administradora itself in the system (`CompanyEntry`, screen *Conta da imobiliária*). It is launched with an event marked "receita da imobiliária", which has no sub-conta (spec 038, implemented).
+- **No discount applies to the fee**; the **multa and the interest do include it**. A second copy of a boleto charges the **same** fee, never twice.
+- **Not built, left for later:** the administradora has a cash desk (*caixa*): a boleto paid at the counter costs the total **without** the fee.
 
 ## Vocabulary
 *Subconta* = `CostCenter` (a sub-account of a condominium's current account, with a numeric `code`). *Evento* = `BillingEvent`. *Lançamento* = `BillingEntry`. *Histórico* = `EntryTemplate` (the ledger entry kind a posting uses; a launch picks it automatically: the sub-conta's only active one). *Baixa* = marking a boleto paid.

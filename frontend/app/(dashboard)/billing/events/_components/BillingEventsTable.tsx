@@ -89,7 +89,7 @@ export function BillingEventsTable() {
                     <TableRow key={event.id}>
                       <TableCell className="tabular-nums text-ink-soft">{event.code}</TableCell>
                       <TableCell>
-                        <RowLink href={href} sub={event.active ? undefined : "Inativo"}>
+                        <RowLink href={href} sub={[event.credits_company ? "Receita da imobiliária" : null, event.active ? null : "Inativo"].filter(Boolean).join(" · ") || undefined}>
                           {event.name}
                         </RowLink>
                       </TableCell>

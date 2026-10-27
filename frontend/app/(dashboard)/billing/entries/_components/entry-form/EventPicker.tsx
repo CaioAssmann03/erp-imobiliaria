@@ -27,6 +27,13 @@ export function EventPicker() {
     if (match && match.id !== event) setValue("event", match.id, { shouldDirty: true });
   }, [typedCode, event, events, setValue]);
 
+  // O evento da imobiliária (a tarifa) não tem sub-conta: o formulário esconde o campo e o dinheiro vai só para a imobiliária.
+  const creditsCompany = selected?.credits_company ?? false;
+  useEffect(() => {
+    setValue("credits_company", creditsCompany);
+    if (creditsCompany) setValue("cost_center", "");
+  }, [creditsCompany, setValue]);
+
   return (
     <div className="grid grid-cols-[6rem_1fr] gap-x-3">
       <div className="flex flex-col">

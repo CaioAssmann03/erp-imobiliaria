@@ -8,6 +8,7 @@ export * from './billing-plans/billing-plans';
 export * from './billing-runs/billing-runs';
 export * from './blocks/blocks';
 export * from './companies/companies';
+export * from './company-entries/company-entries';
 export * from './condominiums/condominiums';
 export * from './cost-centers/cost-centers';
 export * from './current-account-entries/current-account-entries';

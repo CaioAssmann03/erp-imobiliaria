@@ -1,3 +1,4 @@
+from decimal import ROUND_HALF_UP, Decimal
 from datetime import date
 from typing import Any, Protocol
 
@@ -67,12 +68,18 @@ def _charge_payload(document: BillingDocument, customer_id: str, due_date: date,
     if document.monthly_interest_percentage > 0:
         payload["interest"] = {"value": float(document.monthly_interest_percentage)}
     if document.discount_percentage > 0:
-        payload["discount"] = {
-            "value": float(document.discount_percentage),
-            "dueDateLimitDays": document.discount_days,
-            "type": "PERCENTAGE",
-        }
+        payload["discount"] = _discount(document)
     return payload
+
+
+def _discount(document: BillingDocument) -> dict[str, Any]:
+    """The early-payment discount. The registration fee never gets one, so with a fee on the boleto the discount is
+    sent as a fixed amount over the rest; without a fee it stays a percentage of the whole."""
+    fee = document.fee_amount()
+    if fee == 0:
+        return {"value": float(document.discount_percentage), "dueDateLimitDays": document.discount_days, "type": "PERCENTAGE"}
+    amount = (document.discountable_amount() * document.discount_percentage / 100).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return {"value": float(amount), "dueDateLimitDays": document.discount_days, "type": "FIXED"}
 
 
 def fetch_boleto_details(payment_id: str, gateway: ChargeGateway) -> dict[str, Any]:

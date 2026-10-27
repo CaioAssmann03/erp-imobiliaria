@@ -6,7 +6,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { SelectField, TextField } from "@/components/form/fields";
 import { FieldRow } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
-import { useCostCentersList, useEntryTemplatesList } from "@/lib/api/generated";
+import { useBillingEventsList, useCostCentersList, useEntryTemplatesList } from "@/lib/api/generated";
 import { needsAmount, needsFractionNumber, needsUnitValueField } from "@/lib/billing-plan-payload";
 import { maskMoney } from "@/lib/masks";
 import { CALCULATION_KINDS, IDEAL_FRACTIONS, UNIT_VALUE_FIELDS } from "@/lib/schemas/billing-plan";
@@ -25,7 +25,8 @@ interface BillingPlanItemFieldsProps {
 export function BillingPlanItemFields({ index, condominium, isFirst, isLast, canRemove, onMove, onRemove }: BillingPlanItemFieldsProps) {
   const { setValue } = useFormContext();
   const prefix = `items.${index}`;
-  const [costCenter, kind] = useWatch({ name: [`${prefix}.cost_center`, `${prefix}.calculation_kind`] }) as [string, string];
+  const [costCenter, kind, event] = useWatch({ name: [`${prefix}.cost_center`, `${prefix}.calculation_kind`, `${prefix}.event`] }) as [string, string, string];
+  const { data: events } = useBillingEventsList({ active: true, limit: 100 });
 
   const { data: costCenters } = useCostCentersList({ condominium, active: true, limit: 100 });
   const { data: entryTemplates } = useEntryTemplatesList(
@@ -52,7 +53,23 @@ export function BillingPlanItemFields({ index, condominium, isFirst, isLast, can
           )}
         </div>
       </div>
-      <TextField name={`${prefix}.description`} label="Descrição no boleto" required maxLength={120} autoComplete="off" />
+      <FieldRow>
+        <SelectField
+          name={`${prefix}.event`}
+          label="Evento"
+          placeholder="Sem evento"
+          hint="O boleto abre a linha com o código e o nome do evento (0052-CONDOMINIO). Cadastre os eventos em Configurações."
+          options={(events?.results ?? []).filter((item) => !item.credits_company).map((item) => ({ value: item.id, label: `(${item.code}) ${item.name}` }))}
+        />
+        <TextField
+          name={`${prefix}.description`}
+          label="Descrição no boleto"
+          required={!event}
+          maxLength={120}
+          hint="Vem depois do evento; sem evento, é a linha inteira."
+          autoComplete="off"
+        />
+      </FieldRow>
       <FieldRow>
         <SelectField
           name={`${prefix}.cost_center`}

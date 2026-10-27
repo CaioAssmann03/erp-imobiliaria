@@ -13,6 +13,7 @@ import {
 const values = (overrides = {}) => ({
   condominium: "c-1",
   event: "",
+  credits_company: false,
   description: "10/2026",
   allocation: "collective",
   ideal_fraction_number: "",
@@ -77,9 +78,17 @@ test("the grid sums in cents, one row per unit in natural order, and totals ever
   assert.equal(grid.grandTotal, "66.77");
 });
 
-test("the column title carries the event code and the installment", () => {
-  const month = { line_description: "Limpeza do condomínio - 10/2026 (2/3)", installment: "2/3" };
+test("a fee entry (event of the administradora) has no sub-account and always previews without one", () => {
+  const fee = values({ credits_company: true, cost_center: "cc-1" });
 
-  assert.deepEqual(entryColumnTitle({ event_code: 250, month }), { title: "(250) Limpeza do condomínio - 10/2026 (2/3)", installment: "2/3" });
-  assert.deepEqual(entryColumnTitle({ event_code: null, event_name: null, description: "Gás", month: null }), { title: "Gás", installment: "" });
+  assert.equal(entryToPayload(fee).cost_center, null);
+  assert.equal(canPreview(values({ credits_company: true, cost_center: "" })), true);
+  assert.equal(canPreview(values({ credits_company: false, cost_center: "" })), false);
+});
+
+test("the column title carries the event code and the installment", () => {
+  const month = { line_description: "0250-Limpeza do condomínio - 10/2026 (2/3)", installment: "2/3" };
+
+  assert.deepEqual(entryColumnTitle({ month }), { title: "0250-Limpeza do condomínio - 10/2026 (2/3)", installment: "2/3" });
+  assert.deepEqual(entryColumnTitle({ event_name: null, description: "Gás", month: null }), { title: "Gás", installment: "" });
 });
