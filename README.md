@@ -47,6 +47,7 @@ docker compose exec backend python manage.py seed_demo         # dados FICTÍCIO
 
 - Frontend: http://localhost:3000 (entre com o usuário criado acima)
 - API: http://localhost:8000/api/docs/ · Admin: http://localhost:8000/admin/
+- Arquivos (PDF do boleto, comprovantes): o `docker compose` já sobe um MinIO local (console em http://localhost:9001, usuário e senha `minioadmin`) e cria o bucket `erp-dev`; assim "Baixar PDF" funciona no notebook. Sem ele o PDF responde 503.
 - Porta 5432 ocupada? Ponha `POSTGRES_HOST_PORT=5434` no `.env` e rode `docker compose up -d` de novo.
 - Parar: `docker compose down` (os dados ficam); apagar tudo: `docker compose down -v`.
 - Só dados de exemplo no seu notebook: **nunca** coloque dados reais de clientes nele.

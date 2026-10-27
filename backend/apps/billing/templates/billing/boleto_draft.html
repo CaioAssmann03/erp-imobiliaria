@@ -30,12 +30,12 @@
 <header>
   <span class="notice">Sem valor para pagamento</span>
   <h1>{{ administrator_name }}</h1>
-  <div class="muted">CNPJ {{ administrator_cnpj }}</div>
+  <div class="muted">Beneficiário · CNPJ {{ administrator_cnpj }}</div>
 </header>
 
 <table class="grid">
   <tr>
-    <td colspan="2"><span class="label">Beneficiário</span>{{ beneficiary_name }}<br>
+    <td colspan="2"><span class="label">Condomínio</span>{{ beneficiary_name }}<br>
       <span class="muted">CNPJ {{ beneficiary_cnpj }}{% if beneficiary_address %} — {{ beneficiary_address }}{% endif %}</span></td>
     <td><span class="label">Vencimento</span><strong>{{ due_date }}</strong></td>
   </tr>

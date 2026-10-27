@@ -18,6 +18,29 @@ services:
     ports:
       - "6379:6379"
 
+  # S3-compatible storage for development, in place of the Cloudflare R2 bucket of production.
+  minio:
+    image: minio/minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  # Creates the bucket once and exits.
+  minio_setup:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "until mc alias set local http://minio:9000 ${AWS_ACCESS_KEY_ID:-minioadmin} ${AWS_SECRET_ACCESS_KEY:-minioadmin}; do sleep 1; done;
+      mc mb --ignore-existing local/${AWS_STORAGE_BUCKET_NAME:-erp-dev}"
+
   backend:
     build: ./backend
     # Built once here; the Celery services run the same image.
@@ -29,6 +52,15 @@ services:
       REDIS_URL: redis://redis:6379/0
       ALLOWED_HOSTS: localhost,127.0.0.1,backend
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
+      # Local file storage (PDFs of the boletos and receipts): the MinIO below; the defaults are for development only.
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-minioadmin}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
+      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-erp-dev}
+      # host.docker.internal reaches MinIO from the container and, on Docker Desktop, from the browser (signed URLs).
+      AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-http://host.docker.internal:9000}
+      AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME:-us-east-1}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./backend:/app
     ports:
@@ -46,6 +78,15 @@ services:
     environment:
       POSTGRES_HOST: db
       REDIS_URL: redis://redis:6379/0
+      # Local file storage (PDFs of the boletos and receipts): the MinIO below; the defaults are for development only.
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-minioadmin}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
+      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-erp-dev}
+      # host.docker.internal reaches MinIO from the container and, on Docker Desktop, from the browser (signed URLs).
+      AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-http://host.docker.internal:9000}
+      AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME:-us-east-1}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./backend:/app
     command: celery -A config worker --loglevel=info
@@ -90,3 +131,4 @@ services:
 
 volumes:
   postgres_data:
+  minio_data:
