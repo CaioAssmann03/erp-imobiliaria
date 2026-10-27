@@ -98,14 +98,31 @@ if ($Reset) {
 
 # A porta do Postgres no seu computador costuma estar ocupada por outro projeto. Se a escolhida estiver, o script
 # acha a proxima livre e grava no .env (so isso muda; dentro do Docker o banco continua na 5432).
-function Test-PortFree([int]$port) {
-    try {
-        $listener = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Any, $port)
-        $listener.Start(); $listener.Stop(); return $true
-    } catch { return $false }
+# No Windows com Docker Desktop o programa que "segura" uma porta publicada nem sempre aparece para quem tenta usar a
+# mesma porta, entao confiar so no teste de rede nao basta: tambem perguntamos ao Docker quais portas os containers
+# (de qualquer projeto) ja publicaram.
+$publishedByDocker = @()
+Native { docker ps --format "{{.Ports}}" } | ForEach-Object {
+    foreach ($match in [regex]::Matches([string]$_, ":(\d+)(?:-(\d+))?->")) {
+        $first = [int]$match.Groups[1].Value
+        $last = if ($match.Groups[2].Success) { [int]$match.Groups[2].Value } else { $first }
+        $publishedByDocker += ($first..$last)
+    }
 }
-$alreadyPublished = Native { docker compose port db 5432 2>$null }
-if (-not $alreadyPublished) {
+function Test-PortFree([int]$port) {
+    if ($publishedByDocker -contains $port) { return $false }
+    foreach ($address in @([System.Net.IPAddress]::Any, [System.Net.IPAddress]::Loopback)) {
+        try {
+            $listener = New-Object System.Net.Sockets.TcpListener($address, $port)
+            $listener.Start(); $listener.Stop()
+        } catch { return $false }
+    }
+    return $true
+}
+# Se o banco deste projeto ja esta rodando, a porta e dele: nao mexe. (Um banco que so foi criado e nao subiu, como
+# depois de um erro de porta, nao conta: a porta dele pode ser a ocupada.)
+$runningServices = @(Native { docker compose ps --status running --services 2>$null })
+if ($runningServices -notcontains "db") {
     $dbPort = Get-EnvValue "POSTGRES_HOST_PORT"
     if (-not $dbPort) { $dbPort = "5432" }
     $port = [int]$dbPort
