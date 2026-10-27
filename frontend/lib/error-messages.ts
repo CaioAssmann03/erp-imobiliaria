@@ -112,6 +112,7 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "cnpj.invalid_check_digits": "CNPJ inválido.",
   "cnpj.invalid_length": "O CNPJ deve ter 14 caracteres, sem pontuação.",
   "condominium.advisor.other_company": "O assessor pertence a outra empresa.",
+  "cost_center.code.duplicate_in_condominium": "Este condomínio já tem uma sub-conta com este código.",
   "cost_center.condominium.immutable": "O condomínio de um centro de custo não pode ser alterado.",
   "cost_center.deletion.has_entry_templates":
     "Este centro de custo tem modelos de lançamento; desative-o em vez de excluir.",

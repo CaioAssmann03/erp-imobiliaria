@@ -16,6 +16,11 @@
 export interface PatchedCostCenter {
   readonly id?: string;
   condominium?: string;
+  /**
+     * @minimum 0
+     * @maximum 32767
+     */
+  code?: number;
   /** @maxLength 120 */
   name?: string;
   active?: boolean;

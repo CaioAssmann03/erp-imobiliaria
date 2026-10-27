@@ -94,6 +94,7 @@ export const ErrorCodeEnum = {
   condominium_billing_rulesinitial_late_fee_daysout_of_range: 'condominium_billing_rules.initial_late_fee_days.out_of_range',
   condominium_billing_rulesissuance_dayout_of_range: 'condominium_billing_rules.issuance_day.out_of_range',
   condominium_billing_ruleslate_fee_percentageout_of_range: 'condominium_billing_rules.late_fee_percentage.out_of_range',
+  cost_centercodeduplicate_in_condominium: 'cost_center.code.duplicate_in_condominium',
   cost_centercondominiumimmutable: 'cost_center.condominium.immutable',
   cost_centerdeletionhas_entry_templates: 'cost_center.deletion.has_entry_templates',
   cost_centernameduplicate_in_condominium: 'cost_center.name.duplicate_in_condominium',

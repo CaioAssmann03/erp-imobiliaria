@@ -26,6 +26,8 @@ class CostCenter(BaseModel):
     condominium = models.ForeignKey(
         Condominium, on_delete=models.CASCADE, related_name="cost_centers"
     )
+    # The number the staff knows it by (0 is the *Conta Normal*); the next free one is assigned when it is left out.
+    code = models.PositiveSmallIntegerField(blank=True)
     name = models.CharField(max_length=120)
     active = models.BooleanField(default=True)
 
@@ -37,12 +39,30 @@ class CostCenter(BaseModel):
         ordering = ("condominium__name", "name")
         constraints = (
             models.UniqueConstraint(
+                fields=("condominium", "code"),
+                name="cost_center_unique_code_per_condominium",
+                violation_error_message=CostCenterError.CODE_DUPLICATE_IN_CONDOMINIUM.message,
+                violation_error_code=CostCenterError.CODE_DUPLICATE_IN_CONDOMINIUM.value,
+            ),
+            models.UniqueConstraint(
                 fields=("condominium", "name"),
                 name="cost_center_unique_name_per_condominium",
                 violation_error_message=CostCenterError.NAME_DUPLICATE_IN_CONDOMINIUM.message,
                 violation_error_code=CostCenterError.NAME_DUPLICATE_IN_CONDOMINIUM.value,
             ),
         )
+
+    @classmethod
+    def next_code_in(cls, condominium_id: Any) -> int:
+        """The first code after the last one of the condominium (0, the *Conta Normal*, when it has none)."""
+        last_code = cls.objects.filter(condominium_id=condominium_id).aggregate(last=models.Max("code"))["last"]
+        return 0 if last_code is None else last_code + 1
+
+    @override
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        if self.code is None:
+            self.code = self.next_code_in(self.condominium_id)
+        super().save(*args, **kwargs)
 
     @override
     def clean(self) -> None:

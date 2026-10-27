@@ -6,6 +6,10 @@ class CostCenterError(RuleError):
         "cost_center.name.duplicate_in_condominium",
         "This condominium already has a cost center with this name.",
     )
+    CODE_DUPLICATE_IN_CONDOMINIUM = (
+        "cost_center.code.duplicate_in_condominium",
+        "This condominium already has a cost center with this code.",
+    )
     CONDOMINIUM_IMMUTABLE = (
         "cost_center.condominium.immutable",
         "The condominium of a cost center cannot be changed.",

@@ -21,6 +21,7 @@ pytestmark = pytest.mark.django_db(transaction=True)
 BEFORE = [
     ("condominiums", "0009_backfill_person_members"),
     ("billing", "0010_billing_document_delivery"),
+    ("finance", "0014_cost_center_code_required"),
 ]
 
 
@@ -77,7 +78,7 @@ def old_condominium_with_units(apps: StateApps) -> tuple[Any, Any, Any]:
 def old_plan_items(apps: StateApps, condominium: Any) -> dict[int | None, Any]:
     """A share item by the 2nd fraction, one by the 5th (nobody has it) and a fixed one."""
     cost_center: Any = apps.get_model("finance", "CostCenter").objects.create(
-        condominium=condominium, name="Geral"
+        condominium=condominium, code=0, name="Geral"
     )
     entry_template: Any = apps.get_model("finance", "EntryTemplate").objects.create(
         name="Taxa", cost_center=cost_center
