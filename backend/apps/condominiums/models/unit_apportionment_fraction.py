@@ -1,16 +1,23 @@
 import uuid
 from collections.abc import Iterable
+from decimal import Decimal
 from typing import TYPE_CHECKING, final, override
 
 from django.db import models
 from django.db.models import Q
 
-from apps.condominiums.errors import UnitError, UnitApportionmentFractionError
-from apps.condominiums.models.condominium_apportionment_criterion import CondominiumApportionmentCriterion
+from apps.condominiums.errors import UnitApportionmentFractionError, UnitError
+from apps.condominiums.models.condominium_apportionment_criterion import (
+    CondominiumApportionmentCriterion,
+)
 from apps.condominiums.models.rules import UnitApportionmentFractionRules
 from apps.condominiums.models.unit import Unit
-from apps.condominiums.validators import validate_ideal_fraction
 from apps.core.models.base import BaseModel
+
+
+def validate_ideal_fraction(ideal_fraction: Decimal) -> None:
+    if not 0 < ideal_fraction <= 1:
+        raise UnitError.IDEAL_FRACTION_OUT_OF_RANGE.to_validation_error()
 
 
 @final
@@ -23,7 +30,9 @@ class UnitApportionmentFraction(BaseModel):
 
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="fractions")
     criterion = models.ForeignKey(
-        CondominiumApportionmentCriterion, on_delete=models.RESTRICT, related_name="unit_fractions"
+        CondominiumApportionmentCriterion,
+        on_delete=models.RESTRICT,
+        related_name="unit_fractions",
     )
     value = models.DecimalField(
         max_digits=9, decimal_places=8, validators=[validate_ideal_fraction]

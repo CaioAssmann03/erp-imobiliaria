@@ -11,15 +11,21 @@ from apps.condominiums.models.block import Block
 from apps.condominiums.models.condominium import Condominium
 from apps.condominiums.models.querysets import UnitQuerySet
 from apps.condominiums.models.rules import UnitRules
-from apps.condominiums.validators import validate_non_negative
 from apps.core.models.base import BaseModel
 
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
 
-    from apps.condominiums.models.unit_apportionment_fraction import UnitApportionmentFraction
+    from apps.condominiums.models.unit_apportionment_fraction import (
+        UnitApportionmentFraction,
+    )
     from apps.condominiums.models.unit_person import UnitPerson
     from apps.persons.models import Person
+
+
+def validate_non_negative(amount: Decimal) -> None:
+    if amount < 0:
+        raise UnitError.UTILITY_VALUES_NEGATIVE.to_validation_error()
 
 
 @final
