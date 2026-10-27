@@ -184,8 +184,15 @@ if (-not $NoSeed) {
 }
 
 Step "Criando o usuario para entrar"
-Native { docker compose exec -T -e DJANGO_SUPERUSER_USERNAME=$AdminUser -e DJANGO_SUPERUSER_PASSWORD=$AdminPassword backend python manage.py createsuperuser --noinput }
-if ($LASTEXITCODE -ne 0) { Write-Host "(o usuario '$AdminUser' ja existia: tudo bem)" -ForegroundColor Yellow }
+# (createsuperuser --noinput exige e-mail e empresa; criar pelo shell do Django evita isso e e repetivel: se o usuario
+# ja existe, so redefine a senha.)
+$createUser = "import os; from apps.accounts.models import User; from apps.core.models import Company; " +
+    "company = Company.objects.order_by('created_at').first(); " +
+    "user, created = User.objects.get_or_create(username=os.environ['ERP_USER'], defaults={'company': company}); " +
+    "user.set_password(os.environ['ERP_PASSWORD']); user.is_staff = True; user.is_superuser = True; user.save(); " +
+    "print('usuario pronto:', user.username)"
+Native { docker compose exec -T -e ERP_USER=$AdminUser -e ERP_PASSWORD=$AdminPassword backend python manage.py shell -c $createUser }
+if ($LASTEXITCODE -ne 0) { Fail "Nao consegui criar o usuario. Veja a mensagem acima e: docker compose logs backend" }
 
 # ---- 5. Pronto ----
 Write-Host "`nPronto." -ForegroundColor Green
