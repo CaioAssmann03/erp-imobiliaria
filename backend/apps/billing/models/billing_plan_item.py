@@ -9,7 +9,7 @@ from django.db.models import Q
 from apps.billing.errors import BillingPlanItemError
 from apps.billing.models.billing_plan import BillingPlan
 from apps.billing.models.rules import BillingPlanItemRules
-from apps.condominiums.models import ApportionmentCriterion, Unit, UnitFraction
+from apps.condominiums.models import CondominiumApportionmentCriterion, Unit, UnitApportionmentFraction
 from apps.core.models.base import BaseModel
 from apps.finance.errors import FinanceValidatorError
 from apps.finance.models import CostCenter, EntryTemplate
@@ -50,7 +50,7 @@ class BillingPlanItem(BaseModel):
     )
     # Share items only: the condominium's criterion the total is split by.
     apportionment_criterion = models.ForeignKey(
-        ApportionmentCriterion,
+        CondominiumApportionmentCriterion,
         on_delete=models.RESTRICT,
         null=True,
         blank=True,
@@ -101,12 +101,12 @@ class BillingPlanItem(BaseModel):
 
     def uses_inconsistent_apportionment(self, apportionment_totals: Mapping[uuid.UUID, Decimal]) -> bool:
         """Whether a share item names a criterion that does not close at 1 over the active units
-        (`ApportionmentCriterion.objects.with_total()`); the other kinds never do. A criterion no unit has a fraction in counts."""
+        (`CondominiumApportionmentCriterion.objects.with_total()`); the other kinds never do. A criterion no unit has a fraction in counts."""
         if self.calculation_kind != self.CalculationKind.IDEAL_FRACTION_SHARE:
             return False
         assert self.apportionment_criterion_id is not None
         total = apportionment_totals.get(self.apportionment_criterion_id, Decimal(0))
-        return ApportionmentCriterion.does_not_close(total)
+        return CondominiumApportionmentCriterion.does_not_close(total)
 
     def amounts_by_unit(self, units: Sequence[Unit]) -> dict[uuid.UUID, Decimal]:
         """What each unit pays for this line; zero when it owes nothing for it.
@@ -127,7 +127,7 @@ class BillingPlanItem(BaseModel):
         go to the unit with the largest fraction (then by name) so a rerun gives the same amounts."""
         assert self.amount is not None and self.apportionment_criterion_id is not None
         values_by_unit_id = dict(
-            UnitFraction.objects.filter(
+            UnitApportionmentFraction.objects.filter(
                 criterion_id=self.apportionment_criterion_id, unit_id__in=[unit.pk for unit in units]
             ).values_list("unit_id", "value")
         )

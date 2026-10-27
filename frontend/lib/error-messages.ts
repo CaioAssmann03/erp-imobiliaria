@@ -206,18 +206,18 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   unique: "Já existe um cadastro com este valor.",
   unique_together: "Já existe um cadastro com este valor.",
   "unit.block.other_condominium": "O bloco pertence a outro condomínio.",
-  "apportionment_criterion.condominium.immutable":
+  "condominium_apportionment_criterion.condominium.immutable":
     "O condomínio de um critério de rateio não pode ser alterado.",
-  "apportionment_criterion.deletion.in_use":
+  "condominium_apportionment_criterion.deletion.in_use":
     "Um critério usado por uma fração ou por um item de plano não pode ser excluído.",
-  "apportionment_criterion.deletion.is_main": "O critério principal não pode ser excluído.",
-  "apportionment_criterion.name.duplicate": "Este condomínio já tem um critério com esse nome.",
-  "apportionment_criterion.position.duplicate": "Este condomínio já tem um critério nessa posição.",
-  "apportionment_criterion.position.out_of_range": "A posição do critério deve ser 1 ou mais.",
+  "condominium_apportionment_criterion.deletion.is_main": "O critério principal não pode ser excluído.",
+  "condominium_apportionment_criterion.name.duplicate": "Este condomínio já tem um critério com esse nome.",
+  "condominium_apportionment_criterion.position.duplicate": "Este condomínio já tem um critério nessa posição.",
+  "condominium_apportionment_criterion.position.out_of_range": "A posição do critério deve ser 1 ou mais.",
   "person_module_membership.module.unknown": "Módulo desconhecido.",
   "person_module_membership.person.already_released": "A pessoa já está liberada para este módulo.",
-  "unit_fraction.criterion.duplicate": "A unidade já tem uma fração para este critério.",
-  "unit_fraction.criterion.other_condominium": "O critério pertence a outro condomínio.",
+  "unit_apportionment_fraction.criterion.duplicate": "A unidade já tem uma fração para este critério.",
+  "unit_apportionment_fraction.criterion.other_condominium": "O critério pertence a outro condomínio.",
   "unit.ideal_fraction.out_of_range": "A fração ideal deve ser maior que 0 e no máximo 1.",
   "unit.ideal_fraction.sum_exceeds_total":
     "As frações ideais das unidades ativas do condomínio passariam de 1.",

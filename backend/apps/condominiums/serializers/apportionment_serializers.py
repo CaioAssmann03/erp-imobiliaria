@@ -3,7 +3,7 @@ from typing import Any
 from rest_framework import serializers
 
 
-class ApportionmentCriterionTotalSerializer(serializers.Serializer[dict[str, Any]]):
+class CondominiumApportionmentCriterionTotalSerializer(serializers.Serializer[dict[str, Any]]):
     criterion = serializers.UUIDField()
     name = serializers.CharField()
     position = serializers.IntegerField(min_value=1)
@@ -16,4 +16,4 @@ class ApportionmentSerializer(serializers.Serializer[dict[str, Any]]):
     """The active units of a condominium and the sum of each apportionment criterion's fractions over them."""
 
     active_units = serializers.IntegerField()
-    criteria = ApportionmentCriterionTotalSerializer(many=True)
+    criteria = CondominiumApportionmentCriterionTotalSerializer(many=True)

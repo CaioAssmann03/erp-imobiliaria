@@ -6,15 +6,15 @@ from django.db.models.functions import Coalesce
 
 if TYPE_CHECKING:
     # Used only in the string generic argument below: ruff cannot see it, hence the noqa.
-    from apps.condominiums.models.apportionment_criterion import ApportionmentCriterion  # noqa: F401
+    from apps.condominiums.models.condominium_apportionment_criterion import CondominiumApportionmentCriterion  # noqa: F401
     from apps.condominiums.models.querysets.unit import UnitQuerySet
 
 
-class ApportionmentCriterionQuerySet(models.QuerySet["ApportionmentCriterion"]):
-    def main(self) -> "ApportionmentCriterionQuerySet":
+class CondominiumApportionmentCriterionQuerySet(models.QuerySet["CondominiumApportionmentCriterion"]):
+    def main(self) -> "CondominiumApportionmentCriterionQuerySet":
         return self.filter(position=self.model.MAIN_POSITION)
 
-    def with_total(self, units: "UnitQuerySet | None" = None) -> "ApportionmentCriterionQuerySet":
+    def with_total(self, units: "UnitQuerySet | None" = None) -> "CondominiumApportionmentCriterionQuerySet":
         """Each criterion with `total`: the sum of its fractions over the active units (0 when nobody has one).
 
         `units` limits the sum to the active units of that queryset instead of every active unit.
@@ -28,9 +28,9 @@ class ApportionmentCriterionQuerySet(models.QuerySet["ApportionmentCriterion"]):
         # `total` is declared on the model for the type checker, which also sees the annotation as a redefinition.
         return self.annotate(total=total)  # type: ignore[no-redef]
 
-    def inconsistent(self, units: "UnitQuerySet | None" = None) -> "ApportionmentCriterionQuerySet":
+    def inconsistent(self, units: "UnitQuerySet | None" = None) -> "CondominiumApportionmentCriterionQuerySet":
         """The criteria that do not close at 1 and have to: the main one always, the others once in use
-        (the same rule as `ApportionmentCriterion.is_inconsistent`, evaluated by the database)."""
+        (the same rule as `CondominiumApportionmentCriterion.is_inconsistent`, evaluated by the database)."""
         lowest_total = self.model.TOTAL - self.model.TOLERANCE
         highest_total = self.model.TOTAL + self.model.TOLERANCE
         has_to_close = Q(position=self.model.MAIN_POSITION) | Q(total__gt=0)

@@ -5,14 +5,14 @@ from django.db.models import Max
 from apps.core.serializers import ModelRulesMixin
 from rest_framework import serializers
 
-from ..models import ApportionmentCriterion
+from ..models import CondominiumApportionmentCriterion
 
 
 @final
-class ApportionmentCriterionSerializer(ModelRulesMixin, serializers.ModelSerializer[ApportionmentCriterion]):
+class CondominiumApportionmentCriterionSerializer(ModelRulesMixin, serializers.ModelSerializer[CondominiumApportionmentCriterion]):
     @final
     class Meta:
-        model = ApportionmentCriterion
+        model = CondominiumApportionmentCriterion
         fields = ("id", "condominium", "name", "position", "created_at", "updated_at")
         read_only_fields = ("id", "position", "created_at", "updated_at")
 

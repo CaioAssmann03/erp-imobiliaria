@@ -4,17 +4,17 @@ from typing import TYPE_CHECKING
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
 
-from apps.condominiums.errors import UnitError, UnitFractionError
-from apps.condominiums.models.apportionment_criterion import ApportionmentCriterion
+from apps.condominiums.errors import UnitError, UnitApportionmentFractionError
+from apps.condominiums.models.condominium_apportionment_criterion import CondominiumApportionmentCriterion
 from apps.core.models.rules import ModelRules, rule
 
 if TYPE_CHECKING:
     # Used only in the string generic argument below: ruff cannot see it, hence the noqa.
-    from apps.condominiums.models.unit_fraction import UnitFraction  # noqa: F401
+    from apps.condominiums.models.unit_apportionment_fraction import UnitApportionmentFraction  # noqa: F401
 
 
-class UnitFractionRules(ModelRules["UnitFraction"]):
-    @rule("criterion", UnitFractionError.CRITERION_OTHER_CONDOMINIUM)
+class UnitApportionmentFractionRules(ModelRules["UnitApportionmentFraction"]):
+    @rule("criterion", UnitApportionmentFractionError.CRITERION_OTHER_CONDOMINIUM)
     def criterion_belongs_to_another_condominium(self) -> bool:
         fraction = self.instance
         if fraction.criterion_id is None or fraction.unit_id is None:
@@ -36,5 +36,5 @@ class UnitFractionRules(ModelRules["UnitFraction"]):
             .exclude(unit_id=fraction.unit_id)
             .aggregate(total=Coalesce(Sum("value"), Decimal(0)))["total"]
         )
-        limit = ApportionmentCriterion.TOTAL + ApportionmentCriterion.TOLERANCE
+        limit = CondominiumApportionmentCriterion.TOTAL + CondominiumApportionmentCriterion.TOLERANCE
         return other_units_total + fraction.value > limit

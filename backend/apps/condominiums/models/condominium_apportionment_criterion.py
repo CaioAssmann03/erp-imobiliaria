@@ -6,21 +6,21 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 
-from apps.condominiums.errors import ApportionmentCriterionError
+from apps.condominiums.errors import CondominiumApportionmentCriterionError
 from apps.condominiums.models.condominium import Condominium
-from apps.condominiums.models.querysets import ApportionmentCriterionQuerySet
+from apps.condominiums.models.querysets import CondominiumApportionmentCriterionQuerySet
 from apps.core.models.base import BaseModel
 
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
 
-    from .unit_fraction import UnitFraction
+    from .unit_apportionment_fraction import UnitApportionmentFraction
 
 
 @final
-class ApportionmentCriterion(BaseModel):
+class CondominiumApportionmentCriterion(BaseModel):
     """One way a condominium splits its expenses (for example "Geral" or "Elevador"); each unit has a
-    fraction of it (`UnitFraction`). The criterion at position 1 is the main one: it always has to close at 1."""
+    fraction of it (`UnitApportionmentFraction`). The criterion at position 1 is the main one: it always has to close at 1."""
 
     MAIN_POSITION = 1
     MAIN_NAME = "Geral"
@@ -28,13 +28,13 @@ class ApportionmentCriterion(BaseModel):
     TOTAL = Decimal(1)
     TOLERANCE = Decimal("0.0001")
 
-    objects = ApportionmentCriterionQuerySet.as_manager()
+    objects = CondominiumApportionmentCriterionQuerySet.as_manager()
 
     if TYPE_CHECKING:
         condominium_id: uuid.UUID
-        unit_fractions: "RelatedManager[UnitFraction]"
+        unit_fractions: "RelatedManager[UnitApportionmentFraction]"
         billing_plan_items: "RelatedManager[Any]"
-        total: Decimal  # only on what `ApportionmentCriterion.objects.with_total()` returns
+        total: Decimal  # only on what `CondominiumApportionmentCriterion.objects.with_total()` returns
 
     condominium = models.ForeignKey(
         Condominium, on_delete=models.CASCADE, related_name="apportionment_criteria"
@@ -52,20 +52,20 @@ class ApportionmentCriterion(BaseModel):
             models.UniqueConstraint(
                 fields=("condominium", "name"),
                 name="apportionment_criterion_unique_name",
-                violation_error_message=ApportionmentCriterionError.NAME_DUPLICATE.message,
-                violation_error_code=ApportionmentCriterionError.NAME_DUPLICATE.value,
+                violation_error_message=CondominiumApportionmentCriterionError.NAME_DUPLICATE.message,
+                violation_error_code=CondominiumApportionmentCriterionError.NAME_DUPLICATE.value,
             ),
             models.UniqueConstraint(
                 fields=("condominium", "position"),
                 name="apportionment_criterion_unique_position",
-                violation_error_message=ApportionmentCriterionError.POSITION_DUPLICATE.message,
-                violation_error_code=ApportionmentCriterionError.POSITION_DUPLICATE.value,
+                violation_error_message=CondominiumApportionmentCriterionError.POSITION_DUPLICATE.message,
+                violation_error_code=CondominiumApportionmentCriterionError.POSITION_DUPLICATE.value,
             ),
             models.CheckConstraint(
                 name="apportionment_criterion_position_from_1",
                 condition=Q(position__gte=1),
-                violation_error_message=ApportionmentCriterionError.POSITION_OUT_OF_RANGE.message,
-                violation_error_code=ApportionmentCriterionError.POSITION_OUT_OF_RANGE.value,
+                violation_error_message=CondominiumApportionmentCriterionError.POSITION_OUT_OF_RANGE.message,
+                violation_error_code=CondominiumApportionmentCriterionError.POSITION_OUT_OF_RANGE.value,
             ),
         )
 
@@ -93,15 +93,15 @@ class ApportionmentCriterion(BaseModel):
         )
         if stored_condominium_id is not None and stored_condominium_id != self.condominium_id:
             raise ValidationError(
-                {"condominium": ApportionmentCriterionError.CONDOMINIUM_IMMUTABLE.to_validation_error()}
+                {"condominium": CondominiumApportionmentCriterionError.CONDOMINIUM_IMMUTABLE.to_validation_error()}
             )
 
     @override
     def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
         if self.is_main:
-            raise ApportionmentCriterionError.DELETION_IS_MAIN.to_validation_error()
+            raise CondominiumApportionmentCriterionError.DELETION_IS_MAIN.to_validation_error()
         if self.unit_fractions.exists() or self.billing_plan_items.exists():
-            raise ApportionmentCriterionError.DELETION_IN_USE.to_validation_error()
+            raise CondominiumApportionmentCriterionError.DELETION_IN_USE.to_validation_error()
         return super().delete(*args, **kwargs)
 
     @override

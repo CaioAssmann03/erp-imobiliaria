@@ -5,17 +5,17 @@ from rest_framework import serializers
 
 from apps.core.serializers import ModelRulesMixin, to_drf_errors
 
-from ..errors import UnitFractionError
+from ..errors import UnitApportionmentFractionError
 from ..models import Unit
 from ..services.create_unit import create_unit
 from ..services.update_unit import update_unit
-from .unit_fraction_serializers import UnitFractionSerializer
+from .unit_apportionment_fraction_serializers import UnitApportionmentFractionSerializer
 from .unit_person_serializers import UnitPersonSerializer
 
 
 class UnitSerializer(ModelRulesMixin, serializers.ModelSerializer[Unit]):
     unit_people = UnitPersonSerializer(many=True, read_only=True)
-    fractions = UnitFractionSerializer(many=True, required=False)
+    fractions = UnitApportionmentFractionSerializer(many=True, required=False)
 
     @final
     class Meta:
@@ -46,7 +46,7 @@ class UnitSerializer(ModelRulesMixin, serializers.ModelSerializer[Unit]):
         criterion_ids = [fraction["criterion"].pk for fraction in fractions]
         if len(criterion_ids) != len(set(criterion_ids)):
             raise serializers.ValidationError(
-                UnitFractionError.CRITERION_DUPLICATE.message, code=UnitFractionError.CRITERION_DUPLICATE.value
+                UnitApportionmentFractionError.CRITERION_DUPLICATE.message, code=UnitApportionmentFractionError.CRITERION_DUPLICATE.value
             )
         return fractions
 

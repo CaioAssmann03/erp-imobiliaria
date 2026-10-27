@@ -31,8 +31,8 @@ def migrate(targets: list[tuple[str, str]]) -> StateApps:
 
 
 def latest() -> list[tuple[str, str]]:
-    leaves = MigrationExecutor(connection).loader.graph.leaf_nodes()
-    return [leaf for leaf in leaves if leaf[0] in {"condominiums", "billing"}]
+    """The schema right after spec 039, before the models were renamed (spec 042)."""
+    return [("condominiums", "0011_person_module_memberships"), ("billing", "0011_apportionment_criteria")]
 
 
 @pytest.fixture(autouse=True)

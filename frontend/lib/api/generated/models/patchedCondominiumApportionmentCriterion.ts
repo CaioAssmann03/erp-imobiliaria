@@ -13,12 +13,12 @@
  * (for example the parent FK of a nested serializer) are excluded from validation.
  * Relations are limited to the user's company (spec 004).
  */
-export interface ApportionmentCriterion {
-  readonly id: string;
-  condominium: string;
+export interface PatchedCondominiumApportionmentCriterion {
+  readonly id?: string;
+  condominium?: string;
   /** @maxLength 100 */
-  name: string;
-  readonly position: number;
-  readonly created_at: string;
-  readonly updated_at: string;
+  name?: string;
+  readonly position?: number;
+  readonly created_at?: string;
+  readonly updated_at?: string;
 }

@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type ApportionmentCriteriaListParams = {
+export type CondominiumApportionmentCriteriaListParams = {
 condominium?: string;
 /**
  * Número de resultados a serem retornados por página.

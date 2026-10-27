@@ -11,13 +11,13 @@ import { TextField } from "@/components/form/fields";
 import { FormSection } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
 import {
-  getApportionmentCriteriaListQueryKey,
-  useApportionmentCriteriaCreate,
-  useApportionmentCriteriaDestroy,
-  useApportionmentCriteriaList,
-  useApportionmentCriteriaPartialUpdate,
+  getCondominiumApportionmentCriteriaListQueryKey,
+  useCondominiumApportionmentCriteriaCreate,
+  useCondominiumApportionmentCriteriaDestroy,
+  useCondominiumApportionmentCriteriaList,
+  useCondominiumApportionmentCriteriaPartialUpdate,
 } from "@/lib/api/generated";
-import type { ApportionmentCriterion } from "@/lib/api/generated/models";
+import type { CondominiumApportionmentCriterion } from "@/lib/api/generated/models";
 import { applyServerErrors, apiErrorMessage } from "@/lib/form-errors";
 import { invalidateApportionment } from "@/lib/query/apportionment";
 import {
@@ -34,10 +34,10 @@ import {
  */
 export function ApportionmentCriteriaCard({ condominiumId }: { condominiumId: string }) {
   const queryClient = useQueryClient();
-  const { data } = useApportionmentCriteriaList({ condominium: condominiumId, limit: 100 });
-  const createMutation = useApportionmentCriteriaCreate();
-  const updateMutation = useApportionmentCriteriaPartialUpdate();
-  const destroyMutation = useApportionmentCriteriaDestroy();
+  const { data } = useCondominiumApportionmentCriteriaList({ condominium: condominiumId, limit: 100 });
+  const createMutation = useCondominiumApportionmentCriteriaCreate();
+  const updateMutation = useCondominiumApportionmentCriteriaPartialUpdate();
+  const destroyMutation = useCondominiumApportionmentCriteriaDestroy();
   const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
   const criteria = data?.results ?? [];
 
@@ -49,13 +49,13 @@ export function ApportionmentCriteriaCard({ condominiumId }: { condominiumId: st
   const { handleSubmit, reset, setError } = methods;
 
   const refresh = () => {
-    queryClient.invalidateQueries({ queryKey: getApportionmentCriteriaListQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getCondominiumApportionmentCriteriaListQueryKey() });
     invalidateApportionment(queryClient);
   };
 
   const onAdd = (values: ApportionmentCriterionFormOutput) => {
     createMutation.mutate(
-      { data: { condominium: condominiumId, name: values.name } as ApportionmentCriterion },
+      { data: { condominium: condominiumId, name: values.name } as CondominiumApportionmentCriterion },
       {
         onSuccess: () => {
           reset();
@@ -82,7 +82,7 @@ export function ApportionmentCriteriaCard({ condominiumId }: { condominiumId: st
     );
   };
 
-  const remove = (criterion: ApportionmentCriterion) => {
+  const remove = (criterion: CondominiumApportionmentCriterion) => {
     destroyMutation.mutate(
       { id: criterion.id },
       {

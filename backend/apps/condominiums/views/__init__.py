@@ -1,5 +1,5 @@
-from .apportionment_criterion_views import (
-    ApportionmentCriterionViewSet as ApportionmentCriterionViewSet,
+from .condominium_apportionment_criterion_views import (
+    CondominiumApportionmentCriterionViewSet as CondominiumApportionmentCriterionViewSet,
 )
 from .block_views import BlockViewSet as BlockViewSet
 from .condominium_views import CondominiumViewSet as CondominiumViewSet

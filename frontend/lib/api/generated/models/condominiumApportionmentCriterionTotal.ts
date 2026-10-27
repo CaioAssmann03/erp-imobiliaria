@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface ApportionmentCriterionTotal {
+export interface CondominiumApportionmentCriterionTotal {
   criterion: string;
   name: string;
   /** @minimum 1 */

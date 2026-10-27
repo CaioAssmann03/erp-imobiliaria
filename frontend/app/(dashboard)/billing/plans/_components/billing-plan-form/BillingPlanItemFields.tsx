@@ -6,7 +6,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { SelectField, TextField } from "@/components/form/fields";
 import { FieldRow } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
-import { useApportionmentCriteriaList, useCostCentersList, useEntryTemplatesList } from "@/lib/api/generated";
+import { useCondominiumApportionmentCriteriaList, useCostCentersList, useEntryTemplatesList } from "@/lib/api/generated";
 import { needsAmount, needsApportionmentCriterion, needsUnitValueField } from "@/lib/billing-plan-payload";
 import { maskMoney } from "@/lib/masks";
 import { CALCULATION_KINDS, UNIT_VALUE_FIELDS } from "@/lib/schemas/billing-plan";
@@ -32,7 +32,7 @@ export function BillingPlanItemFields({ index, condominium, isFirst, isLast, can
     { cost_center: costCenter, active: true, limit: 100 },
     { query: { enabled: costCenter !== "" } }
   );
-  const { data: criteria } = useApportionmentCriteriaList(
+  const { data: criteria } = useCondominiumApportionmentCriteriaList(
     { condominium, limit: 100 },
     { query: { enabled: needsApportionmentCriterion(kind) } }
   );

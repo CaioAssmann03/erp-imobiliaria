@@ -1,4 +1,4 @@
-from .apportionment_criterion import ApportionmentCriterionQuerySet as ApportionmentCriterionQuerySet
+from .condominium_apportionment_criterion import CondominiumApportionmentCriterionQuerySet as CondominiumApportionmentCriterionQuerySet
 from .administration_contract import (
     AdministrationContractQuerySet as AdministrationContractQuerySet,
 )

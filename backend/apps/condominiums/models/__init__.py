@@ -1,8 +1,8 @@
 from .address import Address as Address
 from .administration_contract import AdministrationContract as AdministrationContract
-from .apportionment_criterion import ApportionmentCriterion as ApportionmentCriterion
+from .condominium_apportionment_criterion import CondominiumApportionmentCriterion as CondominiumApportionmentCriterion
 from .block import Block as Block
 from .condominium import Condominium as Condominium
 from .unit import Unit as Unit
-from .unit_fraction import UnitFraction as UnitFraction
+from .unit_apportionment_fraction import UnitApportionmentFraction as UnitApportionmentFraction
 from .unit_person import UnitPerson as UnitPerson

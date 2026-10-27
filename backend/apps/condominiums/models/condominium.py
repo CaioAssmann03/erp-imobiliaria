@@ -71,12 +71,12 @@ class Condominium(SequentialCodeMixin, BaseModel):
         creating = self._state.adding
         super().save(*args, **kwargs)
         if creating:
-            from .apportionment_criterion import ApportionmentCriterion
+            from .condominium_apportionment_criterion import CondominiumApportionmentCriterion
 
-            _ = ApportionmentCriterion.objects.get_or_create(
+            _ = CondominiumApportionmentCriterion.objects.get_or_create(
                 condominium=self,
-                position=ApportionmentCriterion.MAIN_POSITION,
-                defaults={"name": ApportionmentCriterion.MAIN_NAME},
+                position=CondominiumApportionmentCriterion.MAIN_POSITION,
+                defaults={"name": CondominiumApportionmentCriterion.MAIN_NAME},
             )
 
     @override

@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
-import { useApportionmentCriteriaList } from "@/lib/api/generated";
+import { useCondominiumApportionmentCriteriaList } from "@/lib/api/generated";
 import { maskDecimal } from "@/lib/masks";
 
 const fractionMask = (value: string) => maskDecimal(value, 8, 1);
@@ -14,7 +14,7 @@ const fractionMask = (value: string) => maskDecimal(value, 8, 1);
  * precisa somar 1 entre as unidades ativas; os critérios são cadastrados na tela do condomínio.
  */
 export function FractionsSection({ condominiumId }: { condominiumId: string }) {
-  const { data } = useApportionmentCriteriaList({ condominium: condominiumId, limit: 100 });
+  const { data } = useCondominiumApportionmentCriteriaList({ condominium: condominiumId, limit: 100 });
   const criteria = data?.results ?? [];
 
   return (

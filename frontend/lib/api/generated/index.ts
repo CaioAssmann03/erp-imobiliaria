@@ -1,5 +1,4 @@
 export * from './accounts-payable/accounts-payable';
-export * from './apportionment-criteria/apportionment-criteria';
 export * from './auth/auth';
 export * from './bank-accounts/bank-accounts';
 export * from './billing-documents/billing-documents';
@@ -7,6 +6,7 @@ export * from './billing-plans/billing-plans';
 export * from './billing-runs/billing-runs';
 export * from './blocks/blocks';
 export * from './companies/companies';
+export * from './condominium-apportionment-criteria/condominium-apportionment-criteria';
 export * from './condominium-billing-rules/condominium-billing-rules';
 export * from './condominiums/condominiums';
 export * from './cost-centers/cost-centers';

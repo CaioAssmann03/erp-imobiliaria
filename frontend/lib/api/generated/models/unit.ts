@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { BillingRecipientEnum } from './billingRecipientEnum';
-import type { UnitFraction } from './unitFraction';
+import type { UnitApportionmentFraction } from './unitApportionmentFraction';
 import type { UnitPerson } from './unitPerson';
 import type { UnitTypeEnum } from './unitTypeEnum';
 
@@ -45,7 +45,7 @@ export interface Unit {
   electricity_value?: string;
   active?: boolean;
   is_billing_blocked?: boolean;
-  fractions?: UnitFraction[];
+  fractions?: UnitApportionmentFraction[];
   readonly unit_people: readonly UnitPerson[];
   readonly created_at: string;
   readonly updated_at: string;

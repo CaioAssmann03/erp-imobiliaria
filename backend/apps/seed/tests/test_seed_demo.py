@@ -6,8 +6,8 @@ from django.db import models
 
 from apps.billing.models import CondominiumBillingRules
 from apps.condominiums.models import (
-    UnitFraction,
     Address,
+    UnitApportionmentFraction,
     AdministrationContract,
     Block,
     Condominium,
@@ -76,7 +76,7 @@ def test_seed_apportionment_sums_to_one_except_deliberate_cases(
     wrong = [
         condominium.name
         for condominium in Condominium.objects.filter(active=True)
-        if abs((UnitFraction.objects.filter(unit__condominium=condominium, unit__active=True, criterion__position=1).aggregate(s=Sum("value"))["s"]) - 1)
+        if abs((UnitApportionmentFraction.objects.filter(unit__condominium=condominium, unit__active=True, criterion__position=1).aggregate(s=Sum("value"))["s"]) - 1)
         > 0.0001
     ]
     assert len(wrong) == 2

@@ -2,7 +2,7 @@ from typing import Any
 
 from django.db import transaction
 
-from apps.condominiums.models import Unit, UnitFraction
+from apps.condominiums.models import Unit, UnitApportionmentFraction
 
 
 @transaction.atomic
@@ -23,7 +23,7 @@ def set_unit_fractions(unit: Unit, fractions: list[dict[str, Any]]) -> None:
     value_by_criterion_id = {fraction["criterion"].pk: fraction["value"] for fraction in fractions}
     _ = unit.fractions.exclude(criterion_id__in=value_by_criterion_id).delete()
     saved_fractions = [
-        UnitFraction.objects.update_or_create(unit=unit, criterion_id=criterion_id, defaults={"value": value})[0]
+        UnitApportionmentFraction.objects.update_or_create(unit=unit, criterion_id=criterion_id, defaults={"value": value})[0]
         for criterion_id, value in value_by_criterion_id.items()
     ]
     for fraction in saved_fractions:

@@ -9,7 +9,7 @@
 /**
  * One fraction inside a unit's payload; the model rules run when the unit's set is saved.
  */
-export interface UnitFraction {
+export interface UnitApportionmentFraction {
   criterion: string;
   /** @pattern ^-?\d{0,1}(?:\.\d{0,8})?$ */
   value: string;

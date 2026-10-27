@@ -17,7 +17,7 @@ from apps.core.models.base import BaseModel
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
 
-    from apps.condominiums.models.unit_fraction import UnitFraction
+    from apps.condominiums.models.unit_apportionment_fraction import UnitApportionmentFraction
     from apps.condominiums.models.unit_person import UnitPerson
     from apps.persons.models import Person
 
@@ -42,7 +42,7 @@ class Unit(BaseModel):
     if TYPE_CHECKING:
         condominium_id: uuid.UUID
         unit_people: "RelatedManager[UnitPerson]"
-        fractions: "RelatedManager[UnitFraction]"
+        fractions: "RelatedManager[UnitApportionmentFraction]"
 
     condominium = models.ForeignKey(
         Condominium, on_delete=models.CASCADE, related_name="units"

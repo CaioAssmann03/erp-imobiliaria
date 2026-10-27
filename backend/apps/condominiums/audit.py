@@ -3,11 +3,11 @@ from apps.core.infrastructure.audit import register_audited
 from .models import (
     Address,
     AdministrationContract,
-    ApportionmentCriterion,
+    CondominiumApportionmentCriterion,
     Block,
     Condominium,
     Unit,
-    UnitFraction,
+    UnitApportionmentFraction,
     UnitPerson,
 )
 
@@ -16,11 +16,11 @@ def register() -> None:
     for model in (
         Address,
         AdministrationContract,
-        ApportionmentCriterion,
+        CondominiumApportionmentCriterion,
         Block,
         Condominium,
         Unit,
-        UnitFraction,
+        UnitApportionmentFraction,
         UnitPerson,
     ):
         register_audited(model)

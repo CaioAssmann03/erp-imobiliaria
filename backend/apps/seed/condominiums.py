@@ -10,11 +10,11 @@ from dateutil.relativedelta import relativedelta
 from apps.condominiums.models import (
     Address,
     AdministrationContract,
-    ApportionmentCriterion,
+    CondominiumApportionmentCriterion,
     Block,
     Condominium,
     Unit,
-    UnitFraction,
+    UnitApportionmentFraction,
     UnitPerson,
 )
 from apps.billing.models import CondominiumBillingRules
@@ -201,7 +201,7 @@ def create_condominium(
 
 def assign_ideal_fractions(
     random_generator: random.Random,
-    criterion: ApportionmentCriterion,
+    criterion: CondominiumApportionmentCriterion,
     units: list[Unit],
     target_total: Decimal,
 ) -> None:
@@ -216,7 +216,7 @@ def assign_ideal_fractions(
         )  # rounding: close exactly at the target
     for unit, fraction in zip(units, fractions):
         _ = create_validated(
-            UnitFraction,
+            UnitApportionmentFraction,
             unit=unit,
             criterion=criterion,
             value=fraction.quantize(Decimal("0.00000001")),
@@ -241,17 +241,17 @@ def finalize_demo_condominiums(random_generator: random.Random) -> None:
         condominium = Condominium.objects.filter(name=demo.name).first()
         already_finalized = (
             condominium is not None
-            and UnitFraction.objects.filter(unit__condominium=condominium).exists()
+            and UnitApportionmentFraction.objects.filter(unit__condominium=condominium).exists()
         )
         if condominium is None or already_finalized:
             continue
         target_total = (
             WRONG_APPORTIONMENT_TOTAL
             if demo.has_wrong_apportionment
-            else ApportionmentCriterion.TOTAL
+            else CondominiumApportionmentCriterion.TOTAL
         )
         main_criterion = condominium.apportionment_criteria.get(
-            position=ApportionmentCriterion.MAIN_POSITION
+            position=CondominiumApportionmentCriterion.MAIN_POSITION
         )
         assign_ideal_fractions(
             random_generator,

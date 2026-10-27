@@ -4,16 +4,16 @@ from typing import TYPE_CHECKING, final, override
 from django.db import models
 from django.db.models import Q
 
-from apps.condominiums.errors import UnitError, UnitFractionError
-from apps.condominiums.models.apportionment_criterion import ApportionmentCriterion
-from apps.condominiums.models.rules import UnitFractionRules
+from apps.condominiums.errors import UnitError, UnitApportionmentFractionError
+from apps.condominiums.models.condominium_apportionment_criterion import CondominiumApportionmentCriterion
+from apps.condominiums.models.rules import UnitApportionmentFractionRules
 from apps.condominiums.models.unit import Unit
 from apps.condominiums.validators import validate_ideal_fraction
 from apps.core.models.base import BaseModel
 
 
 @final
-class UnitFraction(BaseModel):
+class UnitApportionmentFraction(BaseModel):
     """The share of one unit in one apportionment criterion, from 0 (excluded) to 1."""
 
     if TYPE_CHECKING:
@@ -22,7 +22,7 @@ class UnitFraction(BaseModel):
 
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="fractions")
     criterion = models.ForeignKey(
-        ApportionmentCriterion, on_delete=models.RESTRICT, related_name="unit_fractions"
+        CondominiumApportionmentCriterion, on_delete=models.RESTRICT, related_name="unit_fractions"
     )
     value = models.DecimalField(
         max_digits=9, decimal_places=8, validators=[validate_ideal_fraction]
@@ -38,8 +38,8 @@ class UnitFraction(BaseModel):
             models.UniqueConstraint(
                 fields=("unit", "criterion"),
                 name="unit_fraction_unique_criterion",
-                violation_error_message=UnitFractionError.CRITERION_DUPLICATE.message,
-                violation_error_code=UnitFractionError.CRITERION_DUPLICATE.value,
+                violation_error_message=UnitApportionmentFractionError.CRITERION_DUPLICATE.message,
+                violation_error_code=UnitApportionmentFractionError.CRITERION_DUPLICATE.value,
             ),
             models.CheckConstraint(
                 name="unit_fraction_value_0_1",
@@ -51,7 +51,7 @@ class UnitFraction(BaseModel):
 
     @override
     def clean(self) -> None:
-        UnitFractionRules(self).validate()
+        UnitApportionmentFractionRules(self).validate()
 
     @override
     def __str__(self) -> str:

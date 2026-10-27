@@ -11,19 +11,19 @@ from rest_framework.test import APIClient
 
 from apps.core.testing import seeded_company
 
-from ..models import ApportionmentCriterion, Condominium, Unit, UnitFraction
+from ..models import CondominiumApportionmentCriterion, Condominium, Unit, UnitApportionmentFraction
 from .base import body
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def main(condominium: Condominium) -> ApportionmentCriterion:
-    return condominium.apportionment_criteria.get(position=ApportionmentCriterion.MAIN_POSITION)
+def main(condominium: Condominium) -> CondominiumApportionmentCriterion:
+    return condominium.apportionment_criteria.get(position=CondominiumApportionmentCriterion.MAIN_POSITION)
 
 
-def add_criterion(condominium: Condominium, position: int, name: str | None = None) -> ApportionmentCriterion:
-    return ApportionmentCriterion.objects.create(
+def add_criterion(condominium: Condominium, position: int, name: str | None = None) -> CondominiumApportionmentCriterion:
+    return CondominiumApportionmentCriterion.objects.create(
         condominium=condominium, position=position, name=name or f"Critério {position}"
     )
 
@@ -32,15 +32,15 @@ def add_unit(condominium: Condominium, name: str, active: bool = True) -> Unit:
     return Unit.objects.create(condominium=condominium, name=name, active=active)
 
 
-def fraction(unit: Unit, criterion: ApportionmentCriterion, value: str) -> UnitFraction:
-    return UnitFraction.objects.create(unit=unit, criterion=criterion, value=Decimal(value))
+def fraction(unit: Unit, criterion: CondominiumApportionmentCriterion, value: str) -> UnitApportionmentFraction:
+    return UnitApportionmentFraction.objects.create(unit=unit, criterion=criterion, value=Decimal(value))
 
 
 def apportionment_url(condominium: Condominium) -> str:
     return reverse("condominium-apportionment", args=[condominium.pk])
 
 
-def test_a_unit_has_a_fraction_per_criterion_and_not_two(condominium: Condominium, main: ApportionmentCriterion) -> None:
+def test_a_unit_has_a_fraction_per_criterion_and_not_two(condominium: Condominium, main: CondominiumApportionmentCriterion) -> None:
     unit = add_unit(condominium, "101")
     _ = fraction(unit, main, "0.5")
 
@@ -49,8 +49,8 @@ def test_a_unit_has_a_fraction_per_criterion_and_not_two(condominium: Condominiu
 
 
 @pytest.mark.parametrize("value", ["0", "-0.1", "1.1"])
-def test_a_value_out_of_range_is_refused(condominium: Condominium, main: ApportionmentCriterion, value: str) -> None:
-    candidate = UnitFraction(unit=add_unit(condominium, "101"), criterion=main, value=Decimal(value))
+def test_a_value_out_of_range_is_refused(condominium: Condominium, main: CondominiumApportionmentCriterion, value: str) -> None:
+    candidate = UnitApportionmentFraction(unit=add_unit(condominium, "101"), criterion=main, value=Decimal(value))
 
     with pytest.raises(ValidationError) as error:
         candidate.full_clean()
@@ -58,7 +58,7 @@ def test_a_value_out_of_range_is_refused(condominium: Condominium, main: Apporti
     assert error.value.error_dict["value"][0].code == "unit.ideal_fraction.out_of_range"
 
 
-def test_the_database_refuses_a_value_out_of_range(condominium: Condominium, main: ApportionmentCriterion) -> None:
+def test_the_database_refuses_a_value_out_of_range(condominium: Condominium, main: CondominiumApportionmentCriterion) -> None:
     with pytest.raises(IntegrityError), transaction.atomic():
         _ = fraction(add_unit(condominium, "101"), main, "1.5")
 
@@ -66,17 +66,17 @@ def test_the_database_refuses_a_value_out_of_range(condominium: Condominium, mai
 def test_the_criterion_must_belong_to_the_units_condominium(condominium: Condominium) -> None:
     other = Condominium.objects.create(company=seeded_company(), name="Outro", cnpj="45723174000110")
     other_criterion = other.apportionment_criteria.get(position=1)
-    candidate = UnitFraction(unit=add_unit(condominium, "101"), criterion=other_criterion, value=Decimal("0.5"))
+    candidate = UnitApportionmentFraction(unit=add_unit(condominium, "101"), criterion=other_criterion, value=Decimal("0.5"))
 
     with pytest.raises(ValidationError) as error:
         candidate.full_clean()
 
-    assert error.value.error_dict["criterion"][0].code == "unit_fraction.criterion.other_condominium"
+    assert error.value.error_dict["criterion"][0].code == "unit_apportionment_fraction.criterion.other_condominium"
 
 
-def test_the_sum_over_the_active_units_cannot_pass_one(condominium: Condominium, main: ApportionmentCriterion) -> None:
+def test_the_sum_over_the_active_units_cannot_pass_one(condominium: Condominium, main: CondominiumApportionmentCriterion) -> None:
     _ = fraction(add_unit(condominium, "1"), main, "0.6")
-    candidate = UnitFraction(unit=add_unit(condominium, "2"), criterion=main, value=Decimal("0.5"))
+    candidate = UnitApportionmentFraction(unit=add_unit(condominium, "2"), criterion=main, value=Decimal("0.5"))
 
     with pytest.raises(ValidationError) as error:
         candidate.full_clean()
@@ -84,34 +84,34 @@ def test_the_sum_over_the_active_units_cannot_pass_one(condominium: Condominium,
     assert error.value.error_dict["value"][0].code == "unit.ideal_fraction.sum_exceeds_total"
 
 
-def test_each_criterion_is_summed_on_its_own(condominium: Condominium, main: ApportionmentCriterion) -> None:
+def test_each_criterion_is_summed_on_its_own(condominium: Condominium, main: CondominiumApportionmentCriterion) -> None:
     elevator = add_criterion(condominium, 2, "Elevador")
     first = add_unit(condominium, "1")
     _ = fraction(first, main, "0.6")
     _ = fraction(first, elevator, "0.9")
     second = add_unit(condominium, "2")
 
-    UnitFraction(unit=second, criterion=main, value=Decimal("0.4")).full_clean()
-    UnitFraction(unit=second, criterion=elevator, value=Decimal("0.1")).full_clean()
+    UnitApportionmentFraction(unit=second, criterion=main, value=Decimal("0.4")).full_clean()
+    UnitApportionmentFraction(unit=second, criterion=elevator, value=Decimal("0.1")).full_clean()
     with pytest.raises(ValidationError) as error:
-        UnitFraction(unit=second, criterion=main, value=Decimal("0.5")).full_clean()
+        UnitApportionmentFraction(unit=second, criterion=main, value=Decimal("0.5")).full_clean()
     assert set(error.value.error_dict) == {"value"}
 
 
-def test_inactive_units_do_not_count(condominium: Condominium, main: ApportionmentCriterion) -> None:
+def test_inactive_units_do_not_count(condominium: Condominium, main: CondominiumApportionmentCriterion) -> None:
     _ = fraction(add_unit(condominium, "1", active=False), main, "0.9")
 
-    UnitFraction(unit=add_unit(condominium, "2"), criterion=main, value=Decimal("0.9")).full_clean()
+    UnitApportionmentFraction(unit=add_unit(condominium, "2"), criterion=main, value=Decimal("0.9")).full_clean()
 
 
-def test_a_fraction_does_not_count_itself_when_it_changes(condominium: Condominium, main: ApportionmentCriterion) -> None:
+def test_a_fraction_does_not_count_itself_when_it_changes(condominium: Condominium, main: CondominiumApportionmentCriterion) -> None:
     saved = fraction(add_unit(condominium, "1"), main, "0.9")
 
     saved.value = Decimal("1")
     saved.full_clean()
 
 
-def test_reactivating_a_unit_counts_its_fractions_again(condominium: Condominium, main: ApportionmentCriterion) -> None:
+def test_reactivating_a_unit_counts_its_fractions_again(condominium: Condominium, main: CondominiumApportionmentCriterion) -> None:
     sleeping = add_unit(condominium, "1", active=False)
     _ = fraction(sleeping, main, "0.9")
     _ = fraction(add_unit(condominium, "2"), main, "0.9")
@@ -124,7 +124,7 @@ def test_reactivating_a_unit_counts_its_fractions_again(condominium: Condominium
 
 
 def test_the_main_criterion_must_close_and_the_others_only_once_in_use(
-    condominium: Condominium, main: ApportionmentCriterion
+    condominium: Condominium, main: CondominiumApportionmentCriterion
 ) -> None:
     unused = add_criterion(condominium, 2, "Elevador")
     unit = add_unit(condominium, "1")
@@ -155,7 +155,7 @@ def test_the_main_criterion_closes_at_one_and_the_others_only_when_in_use(condom
 
 
 def test_with_total_sums_the_fractions_of_the_active_units_only(
-    condominium: Condominium, main: ApportionmentCriterion
+    condominium: Condominium, main: CondominiumApportionmentCriterion
 ) -> None:
     elevator = add_criterion(condominium, 2, "Elevador")
     _ = fraction(add_unit(condominium, "1"), main, "0.6")
@@ -168,7 +168,7 @@ def test_with_total_sums_the_fractions_of_the_active_units_only(
     assert elevator.pk is not None
 
 
-def test_with_total_can_be_limited_to_some_units(condominium: Condominium, main: ApportionmentCriterion) -> None:
+def test_with_total_can_be_limited_to_some_units(condominium: Condominium, main: CondominiumApportionmentCriterion) -> None:
     first = add_unit(condominium, "1")
     _ = fraction(first, main, "0.6")
     _ = fraction(add_unit(condominium, "2"), main, "0.3")
@@ -181,11 +181,11 @@ def test_with_total_can_be_limited_to_some_units(condominium: Condominium, main:
 def test_main_keeps_only_the_first_criterion_of_each_condominium(condominium: Condominium) -> None:
     _ = add_criterion(condominium, 2, "Elevador")
 
-    assert [criterion.name for criterion in ApportionmentCriterion.objects.main()] == ["Geral"]
+    assert [criterion.name for criterion in CondominiumApportionmentCriterion.objects.main()] == ["Geral"]
 
 
 def test_inconsistent_keeps_the_main_that_does_not_close_and_the_others_in_use_that_do_not(
-    condominium: Condominium, main: ApportionmentCriterion
+    condominium: Condominium, main: CondominiumApportionmentCriterion
 ) -> None:
     unused = add_criterion(condominium, 2, "Sem uso")
     open_sum = add_criterion(condominium, 3, "Aberto")
@@ -211,7 +211,7 @@ def test_a_seventh_criterion_needs_no_change(condominium: Condominium) -> None:
 
 
 def test_the_apportionment_endpoint_reports_each_criterion(
-    api_client: APIClient, condominium: Condominium, main: ApportionmentCriterion
+    api_client: APIClient, condominium: Condominium, main: CondominiumApportionmentCriterion
 ) -> None:
     elevator = add_criterion(condominium, 2, "Elevador")
     first, second = add_unit(condominium, "1"), add_unit(condominium, "2")

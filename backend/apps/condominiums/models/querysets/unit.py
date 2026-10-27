@@ -18,11 +18,11 @@ class UnitQuerySet(CountsByTypeQuerySet["Unit"]):
         return self.filter(active=True)
 
     def inconsistent_apportionment_condominium_ids(self) -> list[uuid.UUID]:
-        """Ids of condominiums with an active unit whose criteria have a pendency (`ApportionmentCriterion.is_inconsistent`)."""
-        from apps.condominiums.models.apportionment_criterion import ApportionmentCriterion
+        """Ids of condominiums with an active unit whose criteria have a pendency (`CondominiumApportionmentCriterion.is_inconsistent`)."""
+        from apps.condominiums.models.condominium_apportionment_criterion import CondominiumApportionmentCriterion
 
         active_units = self.active().filter(condominium__active=True)
-        criteria = ApportionmentCriterion.objects.filter(
+        criteria = CondominiumApportionmentCriterion.objects.filter(
             condominium__in=active_units.values("condominium")
         ).inconsistent(active_units)
         return list(criteria.order_by().values_list("condominium_id", flat=True).distinct())
