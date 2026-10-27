@@ -8,3 +8,4 @@ from .entry_batch import EntryBatch as EntryBatch
 from .entry_template import EntryTemplate as EntryTemplate
 from .payment_receipt import PaymentReceipt as PaymentReceipt
 from .supplier import Supplier as Supplier
+from .company_entry import CompanyEntry as CompanyEntry

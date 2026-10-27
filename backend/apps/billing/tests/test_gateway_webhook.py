@@ -201,7 +201,8 @@ def test_a_refused_posting_leaves_nothing_posted(
 ) -> None:
     item = document.items.first()
     assert item is not None
-    type(item.cost_center).objects.filter(pk=item.cost_center_id).update(active=False)
+    assert item.cost_center is not None
+    CostCenter.objects.filter(pk=item.cost_center.pk).update(active=False)
 
     event = process_gateway_event(make_event(account, received(document)))
 

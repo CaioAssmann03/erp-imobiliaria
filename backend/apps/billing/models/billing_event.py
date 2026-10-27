@@ -18,6 +18,9 @@ class BillingEvent(BaseModel):
     code = models.PositiveIntegerField()
     name = models.CharField(max_length=120)
     active = models.BooleanField(default=True)
+    # The event of money that belongs to the administradora (0005 TARIFA BANCO): a launch with it has no sub-conta and
+    # its money is credited to the administradora's own ledger, never to a condominium (spec 038).
+    credits_company = models.BooleanField(default=False)
 
     company_lookup = "company"
 
@@ -33,6 +36,11 @@ class BillingEvent(BaseModel):
                 violation_error_code=BillingEventError.CODE_DUPLICATE_IN_COMPANY.value,
             ),
         )
+
+    @property
+    def line_label(self) -> str:
+        """How the event opens a boleto line: its code in four digits, a dash and its name (`0052-CONDOMINIO`)."""
+        return f"{self.code:04d}-{self.name}"
 
     @override
     def __str__(self) -> str:

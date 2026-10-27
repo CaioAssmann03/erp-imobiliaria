@@ -32,6 +32,7 @@ export const billingEntrySchema = z
   .object({
     condominium: z.string().min(1, "Selecione o condomínio"),
     event: z.string(),
+    credits_company: z.boolean(),
     description: z.string().trim().max(120, "A descrição deve ter no máximo 120 caracteres"),
     allocation: enumField(ALLOCATIONS.map((item) => item.value) as [string, ...string[]]),
     ideal_fraction_number: z.string(),
@@ -42,11 +43,16 @@ export const billingEntrySchema = z
       .string()
       .refine((value) => monthToApi(value) !== undefined, "Mês inválido. Use mês/ano, ex.: 10/2026")
       .transform((value) => monthToApi(value) as string),
-    cost_center: z.string().min(1, "Selecione a sub-conta"),
+    cost_center: z.string(),
     amount: decimalField("Valor", { min: 0.01, max: MAX_MONEY }),
     units: z
       .array(z.object({ unit: z.string(), amount: decimalField("Valor da unidade", { min: 0.01, max: MAX_MONEY }) }))
       .min(1, "Selecione ao menos uma unidade"),
+  })
+  .refine((entry) => entry.credits_company || entry.cost_center !== "", {
+    path: ["cost_center"],
+    message: "Selecione a sub-conta",
+    when: () => true,
   })
   .refine((entry) => entry.amount !== undefined, { path: ["amount"], message: "Informe o valor", when: () => true })
   .refine((entry) => !needsFractionNumber(entry.allocation) || entry.ideal_fraction_number !== "", {
@@ -74,6 +80,7 @@ export type BillingEntryFormOutput = z.output<typeof billingEntrySchema>;
 export const billingEntryDefaults = (condominium: string, month = currentMonthTyped()): BillingEntryFormInput => ({
   condominium,
   event: "",
+  credits_company: false,
   description: "",
   allocation: "individual",
   ideal_fraction_number: "",
@@ -89,6 +96,7 @@ export const billingEntryDefaults = (condominium: string, month = currentMonthTy
 export const billingEntryFormToValues = (values: BillingEntryFormOutput): EntryValues => ({
   condominium: values.condominium,
   event: values.event,
+  credits_company: values.credits_company,
   description: values.description,
   allocation: values.allocation as EntryValues["allocation"],
   ideal_fraction_number: values.ideal_fraction_number,

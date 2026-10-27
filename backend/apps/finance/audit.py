@@ -3,6 +3,7 @@ from apps.core.audit import register_audited
 from .models import (
     AccountPayable,
     BankAccount,
+    CompanyEntry,
     CostCenter,
     EntryBatch,
     EntryTemplate,
@@ -22,3 +23,5 @@ def register() -> None:
     register_audited(EntryBatch)
     # Who attached and who deleted a proof of payment.
     register_audited(PaymentReceipt)
+    # The administradora's own credits (the registration fee).
+    register_audited(CompanyEntry)

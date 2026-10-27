@@ -13,6 +13,7 @@ import {
 } from "../lib/billing-plan-payload.ts";
 
 const item = (overrides = {}) => ({
+  event: "",
   description: "Taxa condominial",
   cost_center: "cc-1",
   entry_template: "tpl-1",
@@ -63,6 +64,7 @@ test("fixed and share items need an amount, the unit value item does not", () =>
 
 test("a fixed item sends only its amount", () => {
   assert.deepEqual(itemToPayload(item()), {
+    event: null,
     description: "Taxa condominial",
     cost_center: "cc-1",
     entry_template: "tpl-1",

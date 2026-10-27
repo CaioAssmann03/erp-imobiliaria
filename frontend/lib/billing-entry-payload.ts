@@ -16,6 +16,8 @@ export interface EntryValues {
   condominium: string;
   /** Id do evento; "" = sem evento. */
   event: string;
+  /** O evento escolhido é da imobiliária (a tarifa): sem sub-conta, o dinheiro nunca vai para o condomínio. */
+  credits_company: boolean;
   description: string;
   allocation: Allocation;
   /** "1" a "6" no rateio por fração; "" nos outros. */
@@ -45,7 +47,7 @@ export function entryToPayload(values: EntryValues): Record<string, unknown> {
     recurrence: values.recurrence,
     installments_total: needsInstallments(values.recurrence) ? Number(values.installments_total) : null,
     start_month: values.start_month,
-    cost_center: values.cost_center,
+    cost_center: values.credits_company ? null : values.cost_center,
     amount: values.amount,
     units: values.units.map((unit) => ({
       unit: unit.unit,
@@ -56,7 +58,7 @@ export function entryToPayload(values: EntryValues): Record<string, unknown> {
 
 /** Já dá para pedir a pré-visualização dos valores à API (o resto das regras é do backend). */
 export function canPreview(values: EntryValues): boolean {
-  if (!values.condominium || !values.cost_center || !values.start_month || values.units.length === 0) return false;
+  if (!values.condominium || (!values.credits_company && !values.cost_center) || !values.start_month || values.units.length === 0) return false;
   if (!(Number(values.amount) > 0)) return false;
   if (needsFractionNumber(values.allocation) && !/^[1-6]$/.test(values.ideal_fraction_number)) return false;
   if (needsInstallments(values.recurrence) && !(Number(values.installments_total) >= 2)) return false;
@@ -127,15 +129,14 @@ export function buildGrid(entries: readonly EntryOfMonth[]): { rows: GridRow[]; 
 }
 
 export interface EntryHeaderSource {
-  event_code?: number | null;
+  event_credits_company?: boolean;
   event_name?: string | null;
   description?: string;
   month: { line_description: string; installment: string } | null | undefined;
 }
 
-/** O que a coluna mostra no cabeçalho: "(250) Limpeza do condomínio - 10/2026" e a parcela ("2/3"), se houver. */
+/** O que a coluna mostra no cabeçalho: a linha do boleto ("0005-TARIFA BANCO - 10/2026") e a parcela ("2/3"), se houver. */
 export function entryColumnTitle(entry: EntryHeaderSource): { title: string; installment: string } {
-  const text = entry.month?.line_description || [entry.event_name, entry.description].filter(Boolean).join(" - ");
-  const title = entry.event_code != null ? `(${entry.event_code}) ${text}` : text;
+  const title = entry.month?.line_description || [entry.event_name, entry.description].filter(Boolean).join(" - ");
   return { title, installment: entry.month?.installment ?? "" };
 }

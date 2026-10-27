@@ -24,8 +24,8 @@ import { UnitsPicker } from "./UnitsPicker";
 /** O formulário "Novo lançamento": condomínio e mês, evento e descrição, rateio, recorrência, sub-conta, valor e unidades. */
 export function EntryFormFields() {
   const { setValue, getValues } = useFormContext<BillingEntryFormInput>();
-  const [condominium, allocation, recurrence, costCenter] = useWatch({
-    name: ["condominium", "allocation", "recurrence", "cost_center"],
+  const [condominium, allocation, recurrence, costCenter, creditsCompany] = useWatch({
+    name: ["condominium", "allocation", "recurrence", "cost_center", "credits_company"],
   });
   const { data: condominiums } = useCondominiumsList({ limit: 100 });
   const { data: costCenters } = useCostCentersList({ condominium, active: true, limit: 100 }, { query: { enabled: condominium !== "" } });
@@ -33,7 +33,7 @@ export function EntryFormFields() {
 
   // A Conta Normal (código 0) já vem escolhida; trocar de condomínio refaz a escolha e a seleção de unidades.
   useEffect(() => {
-    if (costCenterOptions.length > 0 && !costCenterOptions.some((item) => item.id === getValues("cost_center"))) {
+    if (!getValues("credits_company") && costCenterOptions.length > 0 && !costCenterOptions.some((item) => item.id === getValues("cost_center"))) {
       setValue("cost_center", defaultCostCenterId(costCenterOptions));
     }
   }, [costCenterOptions, getValues, setValue]);
@@ -81,15 +81,23 @@ export function EntryFormFields() {
         <TextField name="installments_total" label="Parcelas" required inputMode="numeric" maxLength={3} placeholder="Ex.: 12" autoComplete="off" />
       )}
       <FieldRow>
-        <SelectField
-          name="cost_center"
-          label="Sub-conta"
-          required
-          placeholder={condominium ? "Selecione" : "Escolha o condomínio"}
-          disabled={!condominium}
-          hint="Onde o valor entra no extrato do condomínio quando o boleto é pago."
-          options={costCenterOptions.map((item) => ({ value: item.id, label: `(${formatCode(item.code)}) ${item.name}` }))}
-        />
+        {creditsCompany ? (
+          <div className="flex flex-col">
+            <span className="mb-1.5 text-caption font-medium text-ink-soft">Destino</span>
+            <p className="flex h-9 items-center rounded-control bg-surface-muted px-3 text-body">Conta da imobiliária</p>
+            <p className="mt-1.5 text-caption text-ink-soft">Este valor é da imobiliária: nunca entra na conta de um condomínio.</p>
+          </div>
+        ) : (
+          <SelectField
+            name="cost_center"
+            label="Sub-conta"
+            required
+            placeholder={condominium ? "Selecione" : "Escolha o condomínio"}
+            disabled={!condominium}
+            hint="Onde o valor entra no extrato do condomínio quando o boleto é pago."
+            options={costCenterOptions.map((item) => ({ value: item.id, label: `(${formatCode(item.code)}) ${item.name}` }))}
+          />
+        )}
         <TextField
           name="amount"
           label={allocation === "individual" ? "Valor por unidade (R$)" : "Total a ratear (R$)"}
@@ -100,7 +108,7 @@ export function EntryFormFields() {
           autoComplete="off"
         />
       </FieldRow>
-      {costCenter === "" && condominium !== "" && costCenterOptions.length === 0 && (
+      {!creditsCompany && costCenter === "" && condominium !== "" && costCenterOptions.length === 0 && (
         <p className="text-caption text-danger">Este condomínio ainda não tem sub-contas: cadastre uma em Configurações → Sub-contas.</p>
       )}
       <UnitsPicker condominium={condominium} />

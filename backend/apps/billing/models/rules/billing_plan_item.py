@@ -37,6 +37,23 @@ class BillingPlanItemRules(ModelRules["BillingPlanItem"]):
         needs_unit_value_field = item.calculation_kind == item.CalculationKind.UNIT_REGISTERED_VALUE
         return needs_unit_value_field != bool(item.unit_value_field)
 
+    @rule("description", BillingPlanItemError.DESCRIPTION_OR_EVENT_REQUIRED)
+    def has_neither_event_nor_description(self) -> bool:
+        item = self.instance
+        return item.event is None and not item.description.strip()
+
+    @rule("event", BillingPlanItemError.EVENT_OTHER_COMPANY)
+    def event_belongs_to_another_company(self) -> bool:
+        item, plan = self.instance, self._plan()
+        if item.event is None or plan is None:
+            return False
+        return item.event.company_id != plan.condominium.company_id
+
+    @rule("event", BillingPlanItemError.EVENT_CREDITS_COMPANY)
+    def event_credits_the_company(self) -> bool:
+        item = self.instance
+        return item.event is not None and item.event.credits_company
+
     @rule("cost_center", BillingPlanItemError.COST_CENTER_OTHER_CONDOMINIUM)
     def cost_center_belongs_to_another_condominium(self) -> bool:
         item, plan = self.instance, self._plan()

@@ -8,3 +8,4 @@ from .entry_template import EntryTemplateError as EntryTemplateError
 from .payment_receipt import PaymentReceiptError as PaymentReceiptError
 from .supplier import SupplierError as SupplierError
 from .validators import FinanceValidatorError as FinanceValidatorError
+from .company_entry import CompanyEntryError as CompanyEntryError

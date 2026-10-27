@@ -21,6 +21,7 @@ export interface PatchedBillingEntry {
   event?: string | null;
   readonly event_code?: number;
   readonly event_name?: string;
+  readonly event_credits_company?: boolean;
   /** @maxLength 120 */
   description?: string;
   allocation?: AllocationEnum;
@@ -40,7 +41,8 @@ export interface PatchedBillingEntry {
   start_month?: string;
   /** @nullable */
   end_month?: string | null;
-  cost_center?: string;
+  /** @nullable */
+  cost_center?: string | null;
   readonly cost_center_code?: number;
   readonly cost_center_name?: string;
   /** @nullable */

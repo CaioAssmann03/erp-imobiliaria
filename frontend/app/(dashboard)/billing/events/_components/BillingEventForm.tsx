@@ -54,6 +54,11 @@ export function BillingEventForm({ billingEventId }: { billingEventId?: string }
           <TextField name="name" label="Nome do evento" required maxLength={120} placeholder="Ex.: Limpeza do condomínio" autoComplete="off" />
           <FieldRow>
             <CheckboxField name="active" label="Cadastro ativo" />
+            <CheckboxField
+              name="credits_company"
+              label="Receita da imobiliária"
+              hint="Marque para a tarifa de registro bancário (ex.: 0005 TARIFA BANCO). O valor lançado com este evento cai na conta da imobiliária, nunca na conta de um condomínio, e o lançamento não tem sub-conta."
+            />
           </FieldRow>
         </FormSection>
         <FormActions isSubmitting={isSubmitting}>

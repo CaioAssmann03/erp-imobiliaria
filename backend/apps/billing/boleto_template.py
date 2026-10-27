@@ -84,7 +84,8 @@ def payment_terms(document: BillingDocument) -> list[str]:
             if document.discount_days
             else "até o vencimento"
         )
-        terms.append(f"Desconto de {format_percentage(document.discount_percentage)} para pagamento {deadline}.")
+        over_fee = " (sobre o valor sem a tarifa)" if document.fee_amount() > 0 else ""
+        terms.append(f"Desconto de {format_percentage(document.discount_percentage)}{over_fee} para pagamento {deadline}.")
     if document.late_fee_percentage > 0:
         if document.initial_late_fee_percentage is not None and document.initial_late_fee_days:
             terms.append(
@@ -125,7 +126,7 @@ def template_context(document: BillingDocument) -> dict[str, Any]:
         "items": [
             {
                 "description": item.description,
-                "cost_center": item.cost_center.name,
+                "cost_center": item.cost_center.name if item.cost_center else "",
                 "amount": format_money(item.amount),
             }
             for item in document.items.all()

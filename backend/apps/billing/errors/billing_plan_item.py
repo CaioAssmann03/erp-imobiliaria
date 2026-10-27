@@ -18,6 +18,18 @@ class BillingPlanItemError(RuleError):
         "billing_plan_item.unit_value_field.does_not_match_kind",
         "An item that reads the unit's value names gas, water or electricity; the other kinds have none.",
     )
+    DESCRIPTION_OR_EVENT_REQUIRED = (
+        "billing_plan_item.description.or_event_required",
+        "Give the item an event or a description.",
+    )
+    EVENT_OTHER_COMPANY = (
+        "billing_plan_item.event.other_company",
+        "The event belongs to another company.",
+    )
+    EVENT_CREDITS_COMPANY = (
+        "billing_plan_item.event.credits_company",
+        "An event of the administradora cannot be a plan item: the plan credits the condominium's sub-contas.",
+    )
     COST_CENTER_OTHER_CONDOMINIUM = (
         "billing_plan_item.cost_center.other_condominium",
         "The cost center belongs to another condominium.",

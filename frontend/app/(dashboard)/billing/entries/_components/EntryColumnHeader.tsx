@@ -34,7 +34,7 @@ export function EntryColumnHeader({ entry, total, referenceMonth }: EntryColumnH
     <div className="min-w-36 space-y-0.5 text-left font-normal">
       <p className="font-medium text-ink">{title}</p>
       <p className="text-caption text-ink-soft">
-        ({formatCode(entry.cost_center_code)}) {entry.cost_center_name}
+        {entry.event_credits_company ? "Conta da imobiliária" : `(${formatCode(entry.cost_center_code)}) ${entry.cost_center_name}`}
         {installment && ` · ${installment}`}
         {entry.recurrence === "always" && " · sempre"}
       </p>

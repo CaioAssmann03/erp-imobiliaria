@@ -298,9 +298,9 @@ def test_a_launch_is_added_after_the_plan_in_its_own_cost_center(  # type: ignor
     assert run.status == BillingRun.Status.SUCCEEDED
     for document in documents.values():
         lines = list(document.items.all())
-        assert [(line.description, line.amount, line.cost_center.name) for line in lines] == [
+        assert [(line.description, line.amount, line.cost_center and line.cost_center.name) for line in lines] == [
             ("Taxa condominial", Decimal("450.00"), "Taxa Ordinária"),
-            ("Chamada extra - 10/2026", Decimal("50.00"), "Fundo de Obras"),
+            ("0003-Chamada extra - 10/2026", Decimal("50.00"), "Fundo de Obras"),
         ]
         assert lines[1].billing_entry == entry
         assert document.amount == Decimal("500.00")

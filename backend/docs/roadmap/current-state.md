@@ -12,8 +12,8 @@ Read first: [`architecture/business-model.md`](../architecture/business-model.md
 |---|---|---|
 | `main` | phases 1–4 done, phase 5 coded (sub-account design) | untouched by these sessions |
 | `claude/project-status-6vp4iv` | spec 037 as a draft only (docs) | superseded by the two below |
-| `feat/single-gateway-account` | **spec 037 implemented** (one Asaas account per company, `setup_gateway_account`, migrations `billing.0011–0012`), spec 038 draft; **PR #29, draft** | tests green; sandbox validation pending |
-| `feat/billing-entries` | everything above **plus spec 039 implemented** (events, launches, *Inclusão de valores* screen, sub-conta `code`) | tests green; no PR yet |
+| `feat/single-gateway-account` | **spec 037 implemented** (one Asaas account per company, `setup_gateway_account`, migrations `billing.0011–0012`), the spec 038 draft; **PR #29, draft** | tests green; sandbox validation pending |
+| `feat/billing-entries` | everything above **plus spec 039 implemented** (events, launches, *Inclusão de valores* screen, sub-conta `code`) **and spec 038 implemented** (the registration fee, `CompanyEntry`, *Conta da imobiliária*, events on plan items); **PR #30, draft** (base: `feat/single-gateway-account`) | tests green |
 
 `feat/billing-entries` is built on top of `feat/single-gateway-account`: merge them in that order (037 first). Both change `issue_condominium_billing`.
 
@@ -22,11 +22,11 @@ Read first: [`architecture/business-model.md`](../architecture/business-model.md
 |---|---|---|
 | 030 | `dropped` (sub-account per condominium) | — |
 | 037 single gateway account | `in-progress`, implemented | sandbox validation with the CPF account (key, webhook, a charge, a confirmed payment, postings in three sub-contas); Asaas confirmation that the use is allowed; the user's OK on 2 decisions marked *agent, to be confirmed* |
-| 038 registration fee | `draft` | the user's answers to its open questions (where the administradora's credit lives — recommended: a company ledger `CompanyEntry`; where the amount is defined; whether the R$ 1.20 cost shows; discount/interest on the fee; PDF line; reissue) |
+| 038 registration fee | `in-progress`, implemented (backend + frontend) | the user's use on real data; the PDF discount sentence checked by eye; the payment at the administradora's counter (*caixa*) and the reversal of a company entry on a refund are left for later |
 | 039 billing entries | `in-progress`, implemented (backend + frontend) | the user's OK on 3 decisions marked *agent, to be confirmed*; use on real data |
 
 ## What the user decided (all recorded in the specs' *Decisions*)
-Launches complement the plans; rateio individual/coletivo/fração; events are an independent catalog; Normal boleto only; no negative values yet; "Definir por %", "Arredondar", "Lançar em lote" left out until explained; a launch used by a document is frozen (only ended); the webhook is registered by our command (`setup_gateway_account --register-webhook`) with the Asaas panel as the alternative; the user wants to be **taught how the webhook works before using it** (see `architecture/operations.md` → *Gateway account (Asaas)*); the fee is never credited to a condominium.
+Launches complement the plans; rateio individual/coletivo/fração; events are an independent catalog; Normal boleto only; no negative values yet; "Definir por %", "Arredondar", "Lançar em lote" left out until explained; a launch used by a document is frozen (only ended); the webhook is registered by our command (`setup_gateway_account --register-webhook`) with the Asaas panel as the alternative; the user wants to be **taught how the webhook works before using it** (see `architecture/operations.md` → *Gateway account (Asaas)*); the fee is never credited to a condominium: it is a launch with an event marked "receita da imobiliária" (no sub-conta), credited to the administradora's own ledger (`CompanyEntry`, Financeiro → Conta da imobiliária); no discount on it, but multa and interest include it; a second copy charges it once; the R$ 1.20 cost is not shown; the payment at the counter is left for later; "Definir por %" and "Arredondar" are dropped and "Lançar em lote" is not needed for now.
 
 ## Known deviations to confirm with the user
 - **Sub-conta scope:** the user answered "recommended" to a company-wide sub-conta catalog with a code. It would rewrite `CostCenter` ownership across ~55 files and merge existing data by name, so spec 039 only added a per-condominium `code`. The catalog needs its own spec.
@@ -34,10 +34,10 @@ Launches complement the plans; rateio individual/coletivo/fração; events are a
 
 ## Next steps, in order
 1. Merge or review PR #29 (037); open a PR for `feat/billing-entries` against it or after it.
-2. The user answers spec 038's questions → write its Approach/Test plan → implement (company ledger entry for the fee, the fee line on the boleto).
+2. Use the fee on real data: launch the event 0005 on a condominium, issue the month and check the boleto PDF.
 3. Sandbox validation (needs the user's Asaas sandbox key and a tunnel for the webhook).
 4. Ask Asaas whether collecting on the administradora's own CPF account is allowed.
-5. Follow-ups, each its own spec: company-wide sub-conta catalog; Extra boleto; discounts (negative values); the three unexplained launch options.
+5. Follow-ups, each its own spec: company-wide sub-conta catalog; Extra boleto; discounts (negative values); the administradora's cash desk (payment at the counter without the fee) and the reversal of a company entry on a refund.
 6. Before real data: database backup (`known-gaps.md` #19), structured logs (#15).
 
 ## How to run it (from a fresh clone)

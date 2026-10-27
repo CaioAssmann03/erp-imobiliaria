@@ -69,7 +69,10 @@ class BillingEntry(BaseModel):
     installments_total = models.PositiveSmallIntegerField(null=True, blank=True)
     start_month = models.DateField(validators=[validate_first_day_of_month])
     end_month = models.DateField(null=True, blank=True, validators=[validate_first_day_of_month])
-    cost_center = models.ForeignKey(CostCenter, on_delete=models.PROTECT, related_name="billing_entries")
+    # Empty only for an event that credits the administradora (`BillingEntryRules`).
+    cost_center = models.ForeignKey(
+        CostCenter, on_delete=models.PROTECT, null=True, blank=True, related_name="billing_entries"
+    )
     # Chosen from the cost center when the entry is saved: its only active template (`BillingEntryRules`).
     entry_template = models.ForeignKey(
         EntryTemplate, on_delete=models.PROTECT, null=True, blank=True, related_name="billing_entries"
@@ -137,6 +140,11 @@ class BillingEntry(BaseModel):
         if self.is_used():
             raise BillingEntryError.ALREADY_USED.to_validation_error()
 
+    @property
+    def credits_company(self) -> bool:
+        """Whether the money is the administradora's (its event says so) instead of a condominium's."""
+        return self.event is not None and self.event.credits_company
+
     def is_used(self) -> bool:
         """Whether a document was issued from this entry: from then on it is frozen."""
         return not self._state.adding and self.document_items.exists()
@@ -167,8 +175,8 @@ class BillingEntry(BaseModel):
         return f"{self.month_index(reference_month.replace(day=1)) + 1}/{self.installments_total}"
 
     def line_description(self, reference_month: date) -> str:
-        """What the boleto line says: the event name and the description, and the installment when there is one."""
-        parts = [self.event.name if self.event is not None else "", self.description]
+        """What the boleto line says: `0005-EVENT NAME`, then the description, and the installment when there is one."""
+        parts = [self.event.line_label if self.event is not None else "", self.description]
         text = " - ".join(part for part in parts if part)
         label = self.installment_label(reference_month)
         text = f"{text} ({label})" if label and text else text or label
