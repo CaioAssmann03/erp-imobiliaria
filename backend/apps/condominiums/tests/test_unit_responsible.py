@@ -9,7 +9,7 @@ from apps.core.models import Company
 from apps.persons.models import Person
 
 from ..models import Condominium, Unit, UnitPerson
-from ..testing import add_fraction
+from .base import add_fraction
 
 pytestmark = pytest.mark.django_db
 

@@ -14,8 +14,8 @@ from apps.finance.models import CostCenter
 from apps.persons.models import Person
 
 from ..models import CondominiumAdministrationContract, Condominium, Unit, UnitPerson
-from ..testing import add_fraction
 from .base import results
+from .base import add_fraction, results
 
 pytestmark = pytest.mark.django_db
 

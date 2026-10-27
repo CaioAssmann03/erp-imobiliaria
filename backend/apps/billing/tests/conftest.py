@@ -5,7 +5,7 @@ import pytest
 
 from apps.condominiums.models import Condominium, Unit
 from apps.billing.models import CondominiumBillingRules, LateInterestRate
-from apps.condominiums.testing import add_fraction, criterion_at
+from apps.condominiums.tests.base import add_fraction, criterion_at
 from apps.core.models import Company
 from apps.finance.models import CostCenter, EntryTemplate
 from apps.persons.models import Person

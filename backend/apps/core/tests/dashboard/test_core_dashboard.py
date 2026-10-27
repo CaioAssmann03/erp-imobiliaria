@@ -14,7 +14,7 @@ from apps.condominiums.models import (
     Unit,
     UnitPerson,
 )
-from apps.condominiums.testing import add_fraction
+from apps.condominiums.tests.base import add_fraction
 from apps.core.models import Company
 from apps.core.infrastructure.dates import add_months
 from apps.finance.models import AccountPayable, CostCenter, Supplier
