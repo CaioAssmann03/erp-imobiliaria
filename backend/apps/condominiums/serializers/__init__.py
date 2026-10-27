@@ -1,5 +1,5 @@
-from .administration_contract_serializers import (
-    AdministrationContractSerializer as AdministrationContractSerializer,
+from .condominium_administration_contract_serializers import (
+    CondominiumAdministrationContractSerializer as CondominiumAdministrationContractSerializer,
 )
 from .apportionment_serializers import ApportionmentSerializer as ApportionmentSerializer
 from .condominium_apportionment_criterion_serializers import (

@@ -4,7 +4,7 @@ from unfold.admin import ModelAdmin, TabularInline
 from apps.core.infrastructure.scoping import CompanyScopedAdminMixin
 
 from .models import (
-    AdministrationContract,
+    CondominiumAdministrationContract,
     Block,
     Condominium,
     Unit,
@@ -17,8 +17,8 @@ class BlockInline(TabularInline):
     extra = 0
 
 
-class AdministrationContractInline(TabularInline):
-    model = AdministrationContract
+class CondominiumAdministrationContractInline(TabularInline):
+    model = CondominiumAdministrationContract
     extra = 0
 
 
@@ -29,7 +29,7 @@ class CondominiumAdmin(CompanyScopedAdminMixin, ModelAdmin):
     search_fields = ("=code", "name", "cnpj")
     list_filter = ("company", "type", "active")
     raw_id_fields = ("advisor", "address")
-    inlines = (BlockInline, AdministrationContractInline)
+    inlines = (BlockInline, CondominiumAdministrationContractInline)
 
 
 class UnitPersonInline(CompanyScopedAdminMixin, TabularInline):

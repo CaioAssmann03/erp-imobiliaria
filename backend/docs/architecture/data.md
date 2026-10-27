@@ -11,7 +11,7 @@ Company (core) ◄── PROTECT ── Person (persons) ── 1:1 ── Peopl
    │ ▲ PROTECT                          │                  └─ 1:1 ── PeopleLegal (company, cnpj, ie)
    │ └─ accounts.User.company (every user belongs to one company)
 Condominium (condominiums) ── advisor ─┘ SET_NULL
-   ├─ 1:1 Address (core, SET_NULL)    ├─ 1:1 AdministrationContract (CASCADE)    ├─ 1:1 CondominiumBillingRules (CASCADE, billing)
+   ├─ 1:1 Address (core, SET_NULL)    ├─ 1:1 CondominiumAdministrationContract (CASCADE)    ├─ 1:1 CondominiumBillingRules (CASCADE, billing)
    ├─ 1:N LateInterestRate (CASCADE, billing: the interest history by start date)
    ├─ 1:N Block (CASCADE) ── RESTRICT ── Unit.block (optional)
    ├─ 1:N Unit (CASCADE) └─ 1:N UnitPerson (CASCADE) ── PROTECT ── Person
@@ -24,7 +24,7 @@ Person ◄── 1:1 PROTECT ── Supplier (finance: payment data)
 Company ◄── PROTECT ── AccountPayable (finance) ── PROTECT ──► Supplier, CostCenter, Condominium (optional: empty = a company expense)
 Company ◄── PROTECT ── CurrentAccount (finance; the holder is a generic relation)
 ```
-**Every model** has a UUID `id` and (except `Block`, `CondominiumBillingRules`, `AdministrationContract`, and the documents keyed by their `person`) `created_at` / `updated_at`, from the abstract bases in `core/models/base.py`; `@final`; `Meta.verbose_name(_plural)`; `Meta.ordering` when listed; every model declares `company_lookup`.
+**Every model** has a UUID `id` and (except `Block`, `CondominiumBillingRules`, `CondominiumAdministrationContract`, and the documents keyed by their `person`) `created_at` / `updated_at`, from the abstract bases in `core/models/base.py`; `@final`; `Meta.verbose_name(_plural)`; `Meta.ordering` when listed; every model declares `company_lookup`.
 
 **`on_delete`:** parts owned by a condominium CASCADE; `Condominium` → `Company` PROTECT; advisor and address SET_NULL; `Unit.block` RESTRICT (a block with units cannot go alone, a condominium delete still cascades); `UnitPerson.person` PROTECT (unlink first); `EntryTemplate.cost_center` PROTECT; a billing plan item's cost center and entry template PROTECT (deactivate them instead).
 
@@ -40,7 +40,7 @@ Rules live in the models; the dashboard and API only call them. **Implemented** 
 |---|---|---|
 | Fee | Monthly fixed revenue = sum of `fee_amount` of **active** condominiums with a fixed fee (top 8 shown) | Implemented (dashboard) |
 | Fee | Variable fee = percentage of the period's revenue/expense, limited by floor and ceiling; `charges_iss_on_fee` | Stored — *confirm* (needs finance entries) |
-| Adjustment | Next date = `adjustment_base_date` + `adjustment_period_months` (day clamped to month end); overdue when before today; "next 30 days" within `[today, today+30]`; chart = next 6 months + overdue | Implemented (`AdministrationContract.next_adjustment_date()`, dashboard) |
+| Adjustment | Next date = `adjustment_base_date` + `adjustment_period_months` (day clamped to month end); overdue when before today; "next 30 days" within `[today, today+30]`; chart = next 6 months + overdue | Implemented (`CondominiumAdministrationContract.next_adjustment_date()`, dashboard) |
 | Adjustment | `adjustment_index` is free text; no index values, no recalculated fee, base date not advanced | Stored / Planned — *confirm* |
 | Apportionment | For each apportionment criterion of a condominium, the active units' fractions cannot sum more than 1 (+ tolerance 0.0001). A pendency (dashboard, `?pending=`): the main criterion (position 1) does not sum 1, or another one is in use (sum > 0) and does not sum 1 (`|sum − 1| > 0.0001`). Criteria are named by the condominium and unlimited | Implemented (`UnitApportionmentFractionRules`, `CondominiumApportionmentCriterion.is_inconsistent`; specs 020 and 039) |
 | Apportionment | Split expenses among units by one of the criteria (the billing plan item names its criterion) | Implemented (phase 4; spec 039) |

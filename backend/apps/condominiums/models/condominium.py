@@ -13,7 +13,7 @@ from apps.persons.models import Person
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
 
-    from .administration_contract import AdministrationContract
+    from .condominium_administration_contract import CondominiumAdministrationContract
     from .unit import Unit
 
 
@@ -26,7 +26,7 @@ class Condominium(SequentialCodeMixin, BaseModel):
         COMMERCIAL = ("commercial", "Commercial")
 
     if TYPE_CHECKING:
-        administration_contract: "AdministrationContract"
+        administration_contract: "CondominiumAdministrationContract"
         units: "RelatedManager[Unit]"
 
     company = models.ForeignKey(

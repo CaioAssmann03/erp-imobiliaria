@@ -1,10 +1,10 @@
 from apps.core.infrastructure.audit import register_audited
 
 from .models import (
-    AdministrationContract,
-    CondominiumApportionmentCriterion,
     Block,
     Condominium,
+    CondominiumAdministrationContract,
+    CondominiumApportionmentCriterion,
     Unit,
     UnitApportionmentFraction,
     UnitPerson,
@@ -13,7 +13,7 @@ from .models import (
 
 def register() -> None:
     for model in (
-        AdministrationContract,
+        CondominiumAdministrationContract,
         CondominiumApportionmentCriterion,
         Block,
         Condominium,

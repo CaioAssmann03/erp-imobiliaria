@@ -1,6 +1,6 @@
 from .condominium_apportionment_criterion import CondominiumApportionmentCriterionQuerySet as CondominiumApportionmentCriterionQuerySet
-from .administration_contract import (
-    AdministrationContractQuerySet as AdministrationContractQuerySet,
+from .condominium_administration_contract import (
+    CondominiumAdministrationContractQuerySet as CondominiumAdministrationContractQuerySet,
 )
 from .block import BlockQuerySet as BlockQuerySet
 from .condominium import CondominiumQuerySet as CondominiumQuerySet

@@ -1,10 +1,10 @@
-from apps.condominiums.models.querysets import AdministrationContractQuerySet
+from apps.condominiums.models.querysets import CondominiumAdministrationContractQuerySet
 
 LARGEST_FEES_LIMIT = 8
 
 
 def fixed_revenue(
-    all_contracts: AdministrationContractQuerySet,
+    all_contracts: CondominiumAdministrationContractQuerySet,
 ) -> dict[str, object]:
     contracts = all_contracts.of_active_condominiums()
     return {

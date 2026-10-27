@@ -12,7 +12,7 @@ from apps.core.models import Company
 from apps.persons.models import Person
 from apps.persons.services.release_person_to_module import release_person_to_module
 
-from ..models import AdministrationContract, Condominium, Unit, UnitPerson
+from ..models import CondominiumAdministrationContract, Condominium, Unit, UnitPerson
 from .base import body, error_codes
 
 pytestmark = pytest.mark.django_db
@@ -88,7 +88,7 @@ class TestCondominiumForm:
         response = client.patch(url, {"administration_contract": contract}, format="json")
 
         assert response.status_code == status.HTTP_200_OK, response.data
-        saved = AdministrationContract.objects.get()
+        saved = CondominiumAdministrationContract.objects.get()
         assert saved.fee_type == "variable"
         assert saved.fee_amount is None
         assert saved.fee_basis == "revenue"
@@ -136,7 +136,7 @@ class TestCondominiumForm:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert error_codes(response, "administration_contract.fee_basis") == [
-            "administration_contract.variable_fee.requires_percentage_and_basis"
+            "condominium_administration_contract.variable_fee.requires_percentage_and_basis"
         ]
         assert not Condominium.objects.exists()
 

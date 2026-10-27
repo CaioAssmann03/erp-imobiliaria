@@ -103,7 +103,7 @@ def test_nested_error_uses_dotted_path(api_client: APIClient, company) -> None: 
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert error_codes(response, "administration_contract.fee_basis") == [
-        "administration_contract.variable_fee.requires_percentage_and_basis"
+        "condominium_administration_contract.variable_fee.requires_percentage_and_basis"
     ]
 
 

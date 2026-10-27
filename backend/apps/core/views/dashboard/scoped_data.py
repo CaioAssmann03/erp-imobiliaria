@@ -2,13 +2,13 @@ from dataclasses import dataclass
 from typing import Any, cast
 
 from apps.condominiums.models import (
-    AdministrationContract,
+    CondominiumAdministrationContract,
     Condominium,
     Unit,
     UnitPerson,
 )
 from apps.condominiums.models.querysets import (
-    AdministrationContractQuerySet,
+    CondominiumAdministrationContractQuerySet,
     CondominiumQuerySet,
     UnitPersonQuerySet,
     UnitQuerySet,
@@ -27,7 +27,7 @@ class ScopedData:
     condominiums: CondominiumQuerySet
     units: UnitQuerySet
     persons: PersonQuerySet
-    contracts: AdministrationContractQuerySet
+    contracts: CondominiumAdministrationContractQuerySet
     unit_people: UnitPersonQuerySet
     accounts_payable: AccountPayableQuerySet
 
@@ -40,8 +40,8 @@ class ScopedData:
             units=cast(UnitQuerySet, scope_to_company(Unit.objects.all(), user)),
             persons=cast(PersonQuerySet, scope_to_company(Person.objects.all(), user)),
             contracts=cast(
-                AdministrationContractQuerySet,
-                scope_to_company(AdministrationContract.objects.all(), user),
+                CondominiumAdministrationContractQuerySet,
+                scope_to_company(CondominiumAdministrationContract.objects.all(), user),
             ),
             unit_people=cast(
                 UnitPersonQuerySet, scope_to_company(UnitPerson.objects.all(), user)

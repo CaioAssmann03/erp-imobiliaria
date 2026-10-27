@@ -4,22 +4,22 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
-from ..models import AdministrationContract, Condominium
-from ..serializers import AdministrationContractSerializer
+from ..models import CondominiumAdministrationContract, Condominium
+from ..serializers import CondominiumAdministrationContractSerializer
 
 
-def contract(**fields: object) -> AdministrationContract:
-    return AdministrationContract(**{"fee_type": "fixed", **fields})
+def contract(**fields: object) -> CondominiumAdministrationContract:
+    return CondominiumAdministrationContract(**{"fee_type": "fixed", **fields})
 
 
-def clean_errors(instance: AdministrationContract) -> dict[str, list[str]]:
+def clean_errors(instance: CondominiumAdministrationContract) -> dict[str, list[str]]:
     with pytest.raises(ValidationError) as exc:
         instance.clean()
     return exc.value.message_dict
 
 
 class TestContractModelRules:
-    """The rules live in `AdministrationContract.clean()` (no database needed)."""
+    """The rules live in `CondominiumAdministrationContract.clean()` (no database needed)."""
 
     def test_fixed_fee_requires_amount(self) -> None:
         assert "fee_amount" in clean_errors(contract())
@@ -59,13 +59,13 @@ class TestContractSerializerUsesTheModelRules:
     """The serializer adds no rules of its own: it returns the model's errors as a 400."""
 
     def test_model_error_becomes_field_error(self) -> None:
-        serializer = AdministrationContractSerializer(data={"fee_type": "fixed"})
+        serializer = CondominiumAdministrationContractSerializer(data={"fee_type": "fixed"})
 
         assert not serializer.is_valid()
         assert "fee_amount" in serializer.errors
 
     def test_valid_data_passes(self) -> None:
-        serializer = AdministrationContractSerializer(
+        serializer = CondominiumAdministrationContractSerializer(
             data={"fee_type": "fixed", "fee_amount": "500.00"}
         )
 
@@ -77,7 +77,7 @@ class TestContractConstraints:
         self, condominium: Condominium
     ) -> None:
         with pytest.raises(IntegrityError), transaction.atomic():
-            _ = AdministrationContract.objects.create(
+            _ = CondominiumAdministrationContract.objects.create(
                 condominium=condominium, fee_type="fixed"
             )
 
@@ -85,7 +85,7 @@ class TestContractConstraints:
         self, condominium: Condominium
     ) -> None:
         with pytest.raises(IntegrityError), transaction.atomic():
-            _ = AdministrationContract.objects.create(
+            _ = CondominiumAdministrationContract.objects.create(
                 condominium=condominium,
                 fee_type="variable",
                 fee_percentage=Decimal("5"),
@@ -95,7 +95,7 @@ class TestContractConstraints:
         self, condominium: Condominium
     ) -> None:
         with pytest.raises(IntegrityError), transaction.atomic():
-            _ = AdministrationContract.objects.create(
+            _ = CondominiumAdministrationContract.objects.create(
                 condominium=condominium,
                 fee_amount=Decimal("500"),
                 fee_floor=Decimal("900"),
@@ -103,11 +103,11 @@ class TestContractConstraints:
             )
 
     def test_condominium_has_a_single_contract(self, condominium: Condominium) -> None:
-        _ = AdministrationContract.objects.create(
+        _ = CondominiumAdministrationContract.objects.create(
             condominium=condominium, fee_amount=Decimal("500")
         )
 
         with pytest.raises(IntegrityError), transaction.atomic():
-            _ = AdministrationContract.objects.create(
+            _ = CondominiumAdministrationContract.objects.create(
                 condominium=condominium, fee_amount=Decimal("600")
             )

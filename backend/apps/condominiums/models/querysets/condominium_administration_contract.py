@@ -7,26 +7,26 @@ from typing import TYPE_CHECKING
 from django.db import models
 
 if TYPE_CHECKING:
-    from apps.condominiums.models.administration_contract import (
-        AdministrationContract,  # noqa: F401
+    from apps.condominiums.models.condominium_administration_contract import (
+        CondominiumAdministrationContract,  # noqa: F401
     )
 
 
 ADJUSTMENT_ALERT_DAYS = 30
 
 
-class AdministrationContractQuerySet(models.QuerySet["AdministrationContract"]):
-    def of_active_condominiums(self) -> "AdministrationContractQuerySet":
+class CondominiumAdministrationContractQuerySet(models.QuerySet["CondominiumAdministrationContract"]):
+    def of_active_condominiums(self) -> "CondominiumAdministrationContractQuerySet":
         return self.filter(condominium__active=True)
 
-    def with_scheduled_adjustment(self) -> "AdministrationContractQuerySet":
+    def with_scheduled_adjustment(self) -> "CondominiumAdministrationContractQuerySet":
         """Contracts with an adjustment base date, so a next adjustment date can be computed."""
         return self.filter(adjustment_base_date__isnull=False)
 
-    def with_fixed_fee(self) -> "AdministrationContractQuerySet":
+    def with_fixed_fee(self) -> "CondominiumAdministrationContractQuerySet":
         return self.filter(fee_type=self.model.FeeType.FIXED)
 
-    def with_variable_fee(self) -> "AdministrationContractQuerySet":
+    def with_variable_fee(self) -> "CondominiumAdministrationContractQuerySet":
         return self.filter(fee_type=self.model.FeeType.VARIABLE)
 
     def fixed_fee_total(self) -> Decimal:
@@ -34,7 +34,7 @@ class AdministrationContractQuerySet(models.QuerySet["AdministrationContract"]):
         total = self.with_fixed_fee().aggregate(total=models.Sum("fee_amount"))["total"]
         return total or Decimal(0)
 
-    def largest_fixed_fees(self) -> "AdministrationContractQuerySet":
+    def largest_fixed_fees(self) -> "CondominiumAdministrationContractQuerySet":
         """Fixed fees above zero, the largest first, with the condominium loaded."""
         return (
             self.with_fixed_fee()

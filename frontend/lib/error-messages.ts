@@ -25,9 +25,9 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "account_payable.payment.required_when_paid": "Uma conta paga precisa de data, valor e forma de pagamento.",
   "account_payable.status.not_open": "Só uma conta a pagar em aberto pode ser alterada, baixada ou cancelada.",
   "account_payable.supplier.other_company": "O fornecedor pertence a outra empresa.",
-  "administration_contract.fee_amount.required_for_fixed": "Informe o valor da taxa fixa.",
-  "administration_contract.fee_floor.exceeds_ceiling": "O piso não pode ser maior que o teto.",
-  "administration_contract.variable_fee.requires_percentage_and_basis":
+  "condominium_administration_contract.fee_amount.required_for_fixed": "Informe o valor da taxa fixa.",
+  "condominium_administration_contract.fee_floor.exceeds_ceiling": "O piso não pode ser maior que o teto.",
+  "condominium_administration_contract.variable_fee.requires_percentage_and_basis":
     "A taxa variável exige percentual e base de cálculo.",
   "amount.not_positive": "O valor deve ser maior que zero.",
   authentication_failed: "Falha na autenticação.",

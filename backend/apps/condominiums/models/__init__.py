@@ -1,4 +1,4 @@
-from .administration_contract import AdministrationContract as AdministrationContract
+from .condominium_administration_contract import CondominiumAdministrationContract as CondominiumAdministrationContract
 from .condominium_apportionment_criterion import CondominiumApportionmentCriterion as CondominiumApportionmentCriterion
 from .block import Block as Block
 from .condominium import Condominium as Condominium

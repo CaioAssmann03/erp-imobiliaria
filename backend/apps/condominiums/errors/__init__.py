@@ -1,5 +1,5 @@
-from .administration_contract import (
-    AdministrationContractError as AdministrationContractError,
+from .condominium_administration_contract import (
+    CondominiumAdministrationContractError as CondominiumAdministrationContractError,
 )
 from .condominium_apportionment_criterion import (
     CondominiumApportionmentCriterionError as CondominiumApportionmentCriterionError,

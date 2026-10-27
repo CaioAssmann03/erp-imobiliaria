@@ -4,7 +4,7 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 from apps.accounts.models import User
 from apps.core.models import Address, Company
 
-from ..models import AdministrationContract, Condominium
+from ..models import CondominiumAdministrationContract, Condominium
 from ..serializers import CondominiumSerializer
 from .conftest import VALID_CNPJ
 
@@ -53,7 +53,7 @@ def test_create_without_nested_parts(company: Company) -> None:
     condominium = save(company, payload(company))
 
     assert condominium.address is None
-    assert not AdministrationContract.objects.exists()
+    assert not CondominiumAdministrationContract.objects.exists()
 
 
 def test_invalid_nested_contract_rejects_the_whole_payload(company: Company) -> None:
@@ -104,8 +104,8 @@ def test_update_upserts_the_contract(condominium: Condominium) -> None:
     _ = save(condominium.company, {"administration_contract": {"fee_amount": "500"}}, condominium)
     _ = save(condominium.company, {"administration_contract": {"fee_amount": "700"}}, condominium)
 
-    assert AdministrationContract.objects.count() == 1
-    assert AdministrationContract.objects.get().fee_amount == 700
+    assert CondominiumAdministrationContract.objects.count() == 1
+    assert CondominiumAdministrationContract.objects.get().fee_amount == 700
 
 
 def test_update_without_nested_parts_keeps_them(condominium: Condominium) -> None:
@@ -113,4 +113,4 @@ def test_update_without_nested_parts_keeps_them(condominium: Condominium) -> Non
 
     _ = save(condominium.company, {"name": "Novo Nome"}, condominium)
 
-    assert AdministrationContract.objects.get().fee_amount == 500
+    assert CondominiumAdministrationContract.objects.get().fee_amount == 500

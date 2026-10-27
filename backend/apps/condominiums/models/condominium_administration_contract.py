@@ -5,17 +5,17 @@ from typing import TYPE_CHECKING, final, override
 from django.db import models
 from django.db.models import F, Q
 
-from apps.condominiums.errors import AdministrationContractError
+from apps.condominiums.errors import CondominiumAdministrationContractError
 from apps.condominiums.models.condominium import Condominium
-from apps.condominiums.models.querysets import AdministrationContractQuerySet
-from apps.condominiums.models.rules import AdministrationContractRules
+from apps.condominiums.models.querysets import CondominiumAdministrationContractQuerySet
+from apps.condominiums.models.rules import CondominiumAdministrationContractRules
 from apps.core.infrastructure.dates import add_months
 from apps.core.models.base import UUIDModel
 
 
 @final
-class AdministrationContract(UUIDModel):
-    objects = AdministrationContractQuerySet.as_manager()
+class CondominiumAdministrationContract(UUIDModel):
+    objects = CondominiumAdministrationContractQuerySet.as_manager()
 
     class FeeType(models.TextChoices):
         FIXED = "fixed", "Fixed"
@@ -68,30 +68,30 @@ class AdministrationContract(UUIDModel):
             models.CheckConstraint(
                 name="contract_fixed_needs_amount",
                 condition=~Q(fee_type="fixed") | Q(fee_amount__isnull=False),
-                violation_error_message=AdministrationContractError.FEE_AMOUNT_REQUIRED_FOR_FIXED.message,
-                violation_error_code=AdministrationContractError.FEE_AMOUNT_REQUIRED_FOR_FIXED.value,
+                violation_error_message=CondominiumAdministrationContractError.FEE_AMOUNT_REQUIRED_FOR_FIXED.message,
+                violation_error_code=CondominiumAdministrationContractError.FEE_AMOUNT_REQUIRED_FOR_FIXED.value,
             ),
             models.CheckConstraint(
                 name="contract_variable_needs_pct_basis",
                 condition=~Q(fee_type="variable")
                 | (Q(fee_percentage__isnull=False) & Q(fee_basis__isnull=False)),
-                violation_error_message=AdministrationContractError.VARIABLE_FEE_INCOMPLETE.message,
-                violation_error_code=AdministrationContractError.VARIABLE_FEE_INCOMPLETE.value,
+                violation_error_message=CondominiumAdministrationContractError.VARIABLE_FEE_INCOMPLETE.message,
+                violation_error_code=CondominiumAdministrationContractError.VARIABLE_FEE_INCOMPLETE.value,
             ),
             models.CheckConstraint(
                 name="contract_floor_lte_ceiling",
                 condition=Q(fee_floor__isnull=True)
                 | Q(fee_ceiling__isnull=True)
                 | Q(fee_floor__lte=F("fee_ceiling")),
-                violation_error_message=AdministrationContractError.FEE_FLOOR_EXCEEDS_CEILING.message,
-                violation_error_code=AdministrationContractError.FEE_FLOOR_EXCEEDS_CEILING.value,
+                violation_error_message=CondominiumAdministrationContractError.FEE_FLOOR_EXCEEDS_CEILING.message,
+                violation_error_code=CondominiumAdministrationContractError.FEE_FLOOR_EXCEEDS_CEILING.value,
             ),
         )
 
     @override
     def clean(self) -> None:
         """Also guarded by the check constraints above."""
-        AdministrationContractRules(self).validate()
+        CondominiumAdministrationContractRules(self).validate()
 
     def next_adjustment_date(self) -> date | None:
         if self.adjustment_base_date is None:

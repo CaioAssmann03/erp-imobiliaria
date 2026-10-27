@@ -2,7 +2,7 @@ from datetime import date
 
 from typing import Any, TypedDict
 
-from apps.condominiums.models.querysets import AdministrationContractQuerySet
+from apps.condominiums.models.querysets import CondominiumAdministrationContractQuerySet
 from apps.core.infrastructure.dates import add_months
 
 ADJUSTMENT_MONTHS = 6 
@@ -18,7 +18,7 @@ class Adjustment(TypedDict):
 
 
 def upcoming_adjustments(
-    reference_date: date, all_contracts: AdministrationContractQuerySet
+    reference_date: date, all_contracts: CondominiumAdministrationContractQuerySet
 ) -> list[Adjustment]:
     """Próximo reajuste de cada condomínio ativo: base + periodicidade (ordenado por data)."""
     contracts = (

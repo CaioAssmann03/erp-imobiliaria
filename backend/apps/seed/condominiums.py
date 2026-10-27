@@ -8,7 +8,7 @@ from typing import Any
 from dateutil.relativedelta import relativedelta
 
 from apps.condominiums.models import (
-    AdministrationContract,
+    CondominiumAdministrationContract,
     CondominiumApportionmentCriterion,
     Block,
     Condominium,
@@ -90,7 +90,7 @@ def create_administration_contract(
         else None
     )
     _ = create_validated(
-        AdministrationContract,
+        CondominiumAdministrationContract,
         condominium=condominium,
         fee_type=demo.fee_type,
         fee_amount=Decimal(demo.fee_value) if is_fixed else None,

@@ -8,33 +8,33 @@ import pytest
 from apps.core.testing import seeded_company
 from apps.persons.models import Person
 
-from ..models import AdministrationContract, Condominium, Unit, UnitPerson
+from ..models import CondominiumAdministrationContract, Condominium, Unit, UnitPerson
 from ..testing import add_fraction
 
 
 class TestContractAdjustment:
     def test_next_adjustment_is_base_plus_period(self) -> None:
-        contract = AdministrationContract(
+        contract = CondominiumAdministrationContract(
             adjustment_base_date=date(2025, 3, 15), adjustment_period_months=12
         )
 
         assert contract.next_adjustment_date() == date(2026, 3, 15)
 
     def test_day_is_clamped_to_the_end_of_the_month(self) -> None:
-        contract = AdministrationContract(
+        contract = CondominiumAdministrationContract(
             adjustment_base_date=date(2025, 8, 31), adjustment_period_months=6
         )
 
         assert contract.next_adjustment_date() == date(2026, 2, 28)
 
     def test_without_base_date_there_is_no_adjustment(self) -> None:
-        contract = AdministrationContract(adjustment_base_date=None)
+        contract = CondominiumAdministrationContract(adjustment_base_date=None)
 
         assert contract.next_adjustment_date() is None
         assert not contract.is_adjustment_overdue(date(2030, 1, 1))
 
     def test_overdue_only_after_the_due_date(self) -> None:
-        contract = AdministrationContract(
+        contract = CondominiumAdministrationContract(
             adjustment_base_date=date(2025, 1, 10), adjustment_period_months=12
         )
 

@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from apps.accounts.models import User
 from apps.core.testing import seeded_company
 from apps.condominiums.models import (
-    AdministrationContract,
+    CondominiumAdministrationContract,
     Condominium,
     Unit,
     UnitPerson,
@@ -67,16 +67,16 @@ def test_fixed_revenue_ignores_variable_and_inactive(
     fixed = make_condominium(company, "Fixo", "11222333000181")
     variable = make_condominium(company, "Variavel", "45723174000110")
     inactive = make_condominium(company, "Inativo", "03136483000144", active=False)
-    _ = AdministrationContract.objects.create(
+    _ = CondominiumAdministrationContract.objects.create(
         condominium=fixed, fee_type="fixed", fee_amount=Decimal("500")
     )
-    _ = AdministrationContract.objects.create(
+    _ = CondominiumAdministrationContract.objects.create(
         condominium=variable,
         fee_type="variable",
         fee_percentage=Decimal("5"),
         fee_basis="revenue",
     )
-    _ = AdministrationContract.objects.create(
+    _ = CondominiumAdministrationContract.objects.create(
         condominium=inactive, fee_type="fixed", fee_amount=Decimal("900")
     )
 
@@ -94,7 +94,7 @@ def test_adjustments_overdue_and_upcoming(
     late = make_condominium(company, "Atrasado", "11222333000181")
     soon = make_condominium(company, "Em breve", "45723174000110")
     for condominium, days in ((late, -20), (soon, 18)):
-        _ = AdministrationContract.objects.create(
+        _ = CondominiumAdministrationContract.objects.create(
             condominium=condominium,
             fee_amount=Decimal("1"),
             adjustment_period_months=12,
@@ -202,7 +202,7 @@ def test_cost_centers_and_billing_block(api_client: APIClient, company: Company)
 
 def test_upcoming_adjustments_expose_adjustment_index(api_client: APIClient, company: Company) -> None:
     condominium = make_condominium(company, "A", "11222333000181")
-    _ = AdministrationContract.objects.create(
+    _ = CondominiumAdministrationContract.objects.create(
         condominium=condominium,
         fee_type="fixed",
         fee_amount=100,

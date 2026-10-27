@@ -13,7 +13,7 @@ from apps.core.models import Company
 from apps.finance.models import CostCenter
 from apps.persons.models import Person
 
-from ..models import AdministrationContract, Condominium, Unit, UnitPerson
+from ..models import CondominiumAdministrationContract, Condominium, Unit, UnitPerson
 from ..testing import add_fraction
 from .base import body, results
 
@@ -86,7 +86,7 @@ def test_condominiums_by_adjustment_window(api_client: APIClient, company: Compa
     soon = make_condominium(company, "Em breve", "45723174000110")
     far = make_condominium(company, "Longe", "11444777000161")
     for condominium, days in ((late, -10), (soon, 10), (far, 200)):
-        _ = AdministrationContract.objects.create(
+        _ = CondominiumAdministrationContract.objects.create(
             condominium=condominium,
             fee_type="fixed",
             fee_amount=Decimal("100"),

@@ -52,7 +52,7 @@ Current position: phases 1, 2, **3a** (closed on 2026-10-19: hosting docs, `rend
 | UnidadeParte | `UnitPerson` |
 | SubConta | `CostCenter` |
 | Historico | `EntryTemplate` |
-| ContratoAdministracao (condominium) | `AdministrationContract` |
+| ContratoAdministracao (condominium) | `CondominiumAdministrationContract` |
 
 Names of later entities are proposals in each part's **Entities** table.
 
