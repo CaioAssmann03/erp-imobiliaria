@@ -11,7 +11,7 @@ Company (core) ◄── PROTECT ── Person (persons) ── 1:1 ── Peopl
    │ ▲ PROTECT                          │                  └─ 1:1 ── PeopleLegal (company, cnpj, ie)
    │ └─ accounts.User.company (every user belongs to one company)
 Condominium (condominiums) ── advisor ─┘ SET_NULL
-   ├─ 1:1 Address (SET_NULL)    ├─ 1:1 AdministrationContract (CASCADE)    ├─ 1:1 CondominiumBillingRules (CASCADE, billing)
+   ├─ 1:1 Address (core, SET_NULL)    ├─ 1:1 AdministrationContract (CASCADE)    ├─ 1:1 CondominiumBillingRules (CASCADE, billing)
    ├─ 1:N LateInterestRate (CASCADE, billing: the interest history by start date)
    ├─ 1:N Block (CASCADE) ── RESTRICT ── Unit.block (optional)
    ├─ 1:N Unit (CASCADE) └─ 1:N UnitPerson (CASCADE) ── PROTECT ── Person

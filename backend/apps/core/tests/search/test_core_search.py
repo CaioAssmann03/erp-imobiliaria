@@ -3,7 +3,8 @@ import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.condominiums.models import Address, Condominium, Unit
+from apps.condominiums.models import Condominium, Unit
+from apps.core.models import Address
 from apps.core.testing import seeded_company
 from apps.persons.models import PeopleIndividual, Person
 
@@ -18,7 +19,7 @@ CNPJ = "11222333000181"
 @pytest.fixture
 def data() -> None:
     company = seeded_company()
-    address = Address.objects.create(city="Curitiba", state="PR")
+    address = Address.objects.create(company=company, city="Curitiba", state="PR")
     condominium = Condominium.objects.create(
         company=company, address=address, name="Residencial Sol", cnpj=CNPJ
     )

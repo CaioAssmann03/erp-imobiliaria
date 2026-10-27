@@ -1,4 +1,3 @@
-from .address import Address as Address
 from .administration_contract import AdministrationContract as AdministrationContract
 from .condominium_apportionment_criterion import CondominiumApportionmentCriterion as CondominiumApportionmentCriterion
 from .block import Block as Block

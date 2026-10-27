@@ -13,7 +13,8 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from apps.condominiums.models import Address, Condominium
+from apps.condominiums.models import Condominium
+from apps.core.models import Address
 from apps.core.models import Company
 from apps.seed.condominiums import (
     create_demo_condominiums,

@@ -6,7 +6,6 @@ from django.db import models
 
 from apps.billing.models import CondominiumBillingRules
 from apps.condominiums.models import (
-    Address,
     UnitApportionmentFraction,
     AdministrationContract,
     Block,
@@ -15,7 +14,7 @@ from apps.condominiums.models import (
     UnitPerson,
 )
 from apps.seed.validated import create_validated
-from apps.core.models import Company
+from apps.core.models import Address, Company
 from apps.finance.models import (
     AccountPayable,
     CostCenter,

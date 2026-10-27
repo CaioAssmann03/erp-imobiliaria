@@ -2,11 +2,8 @@ from typing import final
 
 from rest_framework import serializers
 
-from apps.core.serializers import ModelRulesMixin
-
-from ..models import (
-    Address,
-)
+from ..models import Address
+from .model_rules import ModelRulesMixin
 
 
 class AddressSerializer(ModelRulesMixin, serializers.ModelSerializer[Address]):

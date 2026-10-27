@@ -7,7 +7,7 @@ from django.http import HttpRequest
 from unfold.admin import ModelAdmin
 
 from .infrastructure.scoping import CompanyScopedAdminMixin
-from .models import Company
+from .models import Address, Company
 
 
 @final
@@ -16,6 +16,13 @@ class CompanyAdmin(CompanyScopedAdminMixin, ModelAdmin):
     list_display = ("legal_name", "trade_name", "cnpj", "city", "state", "active")
     search_fields = ("legal_name", "trade_name", "cnpj")
     list_filter = ("active", "state")
+
+
+@final
+@admin.register(Address)
+class AddressAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("street", "number", "city", "state", "zip_code")
+    search_fields = ("street", "city", "zip_code")
 
 
 admin.site.unregister(LogEntry)

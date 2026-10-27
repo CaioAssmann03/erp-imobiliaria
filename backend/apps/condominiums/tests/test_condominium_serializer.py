@@ -2,9 +2,9 @@ import pytest
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from apps.accounts.models import User
-from apps.core.models import Company
+from apps.core.models import Address, Company
 
-from ..models import Address, AdministrationContract, Condominium
+from ..models import AdministrationContract, Condominium
 from ..serializers import CondominiumSerializer
 from .conftest import VALID_CNPJ
 
@@ -87,7 +87,7 @@ def test_update_creates_address_when_missing(condominium: Condominium) -> None:
 
 
 def test_update_changes_existing_address_in_place(condominium: Condominium) -> None:
-    condominium.address = Address.objects.create(city="Curitiba", state="PR")
+    condominium.address = Address.objects.create(company=condominium.company, city="Curitiba", state="PR")
     condominium.save()
     address_id = condominium.address.pk
 

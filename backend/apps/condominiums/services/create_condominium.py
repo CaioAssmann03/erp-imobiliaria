@@ -3,11 +3,10 @@ from typing import Any
 from django.db import transaction
 
 from apps.condominiums.models import (
-    Address,
     AdministrationContract,
     Condominium,
 )
-from apps.core.models import Company
+from apps.core.models import Address, Company
 
 
 @transaction.atomic
@@ -18,7 +17,7 @@ def create_condominium(company: Company, condominium_data: dict[str, Any]) -> Co
     contract_data = condominium_fields.pop("administration_contract", None)
 
     if address_data:
-        condominium_fields["address"] = Address.objects.create(**address_data)
+        condominium_fields["address"] = Address.objects.create(company=company, **address_data)
 
     condominium = Condominium.objects.create(company=company, **condominium_fields)
 

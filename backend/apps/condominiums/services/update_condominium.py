@@ -3,10 +3,10 @@ from typing import Any
 from django.db import transaction
 
 from apps.condominiums.models import (
-    Address,
     AdministrationContract,
     Condominium,
 )
+from apps.core.models import Address
 
 
 @transaction.atomic
@@ -31,7 +31,7 @@ def update_condominium(condominium: Condominium, condominium_data: dict[str, Any
 
 def _save_address(condominium: Condominium, address_data: dict[str, Any]) -> None:
     if condominium.address is None:
-        condominium.address = Address.objects.create(**address_data)
+        condominium.address = Address.objects.create(company=condominium.company, **address_data)
         return
     for field_name, field_value in address_data.items():
         setattr(condominium.address, field_name, field_value)

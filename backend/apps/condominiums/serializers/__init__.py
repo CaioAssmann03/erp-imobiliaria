@@ -1,4 +1,3 @@
-from .address_serializers import AddressSerializer as AddressSerializer
 from .administration_contract_serializers import (
     AdministrationContractSerializer as AdministrationContractSerializer,
 )

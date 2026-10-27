@@ -7,7 +7,8 @@ import pytest
 
 from apps.billing.errors import GatewayAccountError
 from apps.billing.gateway.asaas_client import GatewayError
-from apps.condominiums.models import Address, Condominium
+from apps.condominiums.models import Condominium
+from apps.core.models import Address
 
 from ..models import GatewayAccount
 from ..services.onboard_condominium_at_gateway import GatewayApplicant, onboard_condominium_at_gateway
@@ -38,7 +39,7 @@ class FakeGateway:
 @pytest.fixture
 def addressed_condominium(condominium: Condominium) -> Condominium:
     condominium.address = Address.objects.create(
-        zip_code="01310100", street="Av. Paulista", number="1000", district="Bela Vista", city="São Paulo", state="SP"
+        company=condominium.company, zip_code="01310100", street="Av. Paulista", number="1000", district="Bela Vista", city="São Paulo", state="SP"
     )
     condominium.save()
     return condominium

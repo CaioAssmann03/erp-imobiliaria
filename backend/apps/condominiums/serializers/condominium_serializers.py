@@ -3,12 +3,11 @@ from typing import Any, final, override
 from rest_framework import serializers
 
 from apps.core.infrastructure.scoping import request_company
-from apps.core.serializers import ModelRulesMixin
+from apps.core.serializers import AddressSerializer, ModelRulesMixin
 
 from ..models import Condominium
 from ..services.create_condominium import create_condominium
 from ..services.update_condominium import update_condominium
-from .address_serializers import AddressSerializer
 from .administration_contract_serializers import AdministrationContractSerializer
 
 

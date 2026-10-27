@@ -4,8 +4,8 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
-from apps.condominiums.models.address import Address
 from apps.billing.models import BillingDocument, CondominiumBillingRules
+from apps.core.models import Address
 from apps.persons.models import Person
 
 CPF_LENGTH = 11

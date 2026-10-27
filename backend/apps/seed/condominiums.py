@@ -8,7 +8,6 @@ from typing import Any
 from dateutil.relativedelta import relativedelta
 
 from apps.condominiums.models import (
-    Address,
     AdministrationContract,
     CondominiumApportionmentCriterion,
     Block,
@@ -18,6 +17,7 @@ from apps.condominiums.models import (
     UnitPerson,
 )
 from apps.billing.models import CondominiumBillingRules
+from apps.core.models import Address
 from apps.finance.models import (
     CostCenter,
 )
@@ -69,6 +69,7 @@ def create_address(
         return None
     return create_validated(
         Address,
+        company=context.company,
         zip_code=demo.zip_code.replace("-", "") or None,
         street=STREETS[position % len(STREETS)],
         number=str(context.random_generator.randint(100, 2500)),

@@ -4,11 +4,10 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from apps.condominiums.errors import CondominiumError
-from apps.condominiums.models.address import Address
 from apps.condominiums.models.querysets import CondominiumQuerySet
-from apps.core.models import Company, SequentialCodeMixin, sequential_code_field
-from apps.core.models.base import BaseModel
 from apps.core.infrastructure.validators import validate_cnpj
+from apps.core.models import Address, Company, SequentialCodeMixin, sequential_code_field
+from apps.core.models.base import BaseModel
 from apps.persons.models import Person
 
 if TYPE_CHECKING:

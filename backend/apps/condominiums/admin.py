@@ -4,7 +4,6 @@ from unfold.admin import ModelAdmin, TabularInline
 from apps.core.infrastructure.scoping import CompanyScopedAdminMixin
 
 from .models import (
-    Address,
     AdministrationContract,
     Block,
     Condominium,
@@ -21,12 +20,6 @@ class BlockInline(TabularInline):
 class AdministrationContractInline(TabularInline):
     model = AdministrationContract
     extra = 0
-
-
-@admin.register(Address)
-class AddressAdmin(CompanyScopedAdminMixin, ModelAdmin):
-    list_display = ("street", "number", "city", "state", "zip_code")
-    search_fields = ("street", "city", "zip_code")
 
 
 @admin.register(Condominium)

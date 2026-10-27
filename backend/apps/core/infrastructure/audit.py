@@ -61,6 +61,7 @@ def set_audit_actor(user: Any) -> None:
 
 
 def register() -> None:
-    from apps.core.models import Company
+    from apps.core.models import Address, Company
 
+    register_audited(Address)
     register_audited(Company)
