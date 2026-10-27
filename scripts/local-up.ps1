@@ -95,6 +95,26 @@ if ($Reset) {
     Step "Apagando o banco e os arquivos locais (-Reset)"
     Native { docker compose down -v }
 }
+
+# A porta do Postgres no seu computador costuma estar ocupada por outro projeto. Se a escolhida estiver, o script
+# acha a proxima livre e grava no .env (so isso muda; dentro do Docker o banco continua na 5432).
+function Test-PortFree([int]$port) {
+    try {
+        $listener = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Any, $port)
+        $listener.Start(); $listener.Stop(); return $true
+    } catch { return $false }
+}
+$alreadyPublished = Native { docker compose port db 5432 2>$null }
+if (-not $alreadyPublished) {
+    $dbPort = Get-EnvValue "POSTGRES_HOST_PORT"
+    if (-not $dbPort) { $dbPort = "5432" }
+    $port = [int]$dbPort
+    if (-not (Test-PortFree $port)) {
+        while (-not (Test-PortFree $port)) { $port++ }
+        Set-EnvValue "POSTGRES_HOST_PORT" "$port"
+        Write-Host "A porta $dbPort do Postgres estava ocupada: usando a $port (gravado no .env)." -ForegroundColor Yellow
+    }
+}
 Step "Subindo os containers (a primeira vez demora alguns minutos)"
 Native { docker compose up -d --build }
 if ($LASTEXITCODE -ne 0) {
