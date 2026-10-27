@@ -56,5 +56,6 @@ One row per spec; update it in the same change that creates or closes the spec.
 | [034](034-overdue-handling-reissue.md) | Overdue handling and reissue | full | in-progress | phase 5 part 05 |
 | [035](035-email-delivery.md) | E-mail delivery | full | in-progress | phase 5 part 06 |
 | [036](036-registration-payment-screens.md) | Registration and payment screens | lite | in-progress | phase 5 part 07 |
+| [040](040-database-backup.md) | Database backup | full | in-progress | none |
 
 The finished specs (001–029) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.

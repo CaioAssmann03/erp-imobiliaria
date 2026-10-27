@@ -90,6 +90,10 @@ jobs:
         working-directory: backend
         run: pytest apps -q
 
+      # The nightly backup (spec 040): retention, failures and a real pg_dump / openssl / pg_restore round trip.
+      - name: Backup tests
+        run: python -m unittest discover -s deploy/vps/backup/tests -v
+
   frontend:
     runs-on: ubuntu-latest
 
