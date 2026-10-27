@@ -49,7 +49,7 @@ Decided on 2026-10-08 (it replaces the Supabase, Vercel and Render plans of phas
 | Environment | `/root/erp-imobiliaria/.env` (mode 600, never in git): the variables of `architecture/overview.md`. Differences from local: `DEBUG=false`, `ALLOWED_HOSTS=<name>,backend,localhost` (`localhost` for the Admin tunnel), `SECURE_SSL_REDIRECT=false` (TLS ends at Caddy; the Next server calls Django over plain HTTP on the private network), `API_INTERNAL_URL=http://backend:8000`, generated `SECRET_KEY`, `JWT_SIGNING_KEY` (Ed25519, spec 022; changing it logs everybody out), `INTERNAL_API_KEY`, database password and first-admin password |
 | Code | `/root/erp-imobiliaria/app` is a git clone of the repository (read-only *Deploy key* `erp_deploy`); `./deploy.sh --pull` resets it to `origin/main` and rebuilds. CI does not deploy (a push-to-deploy workflow was set aside on 2026-10-19) |
 | Deploy | `cd /root/erp-imobiliaria && ./deploy.sh --pull` (creates `erp_edge` if missing, then `docker compose up -d --build`). Migrations run on container start |
-| Versioned files | `docker-compose.yml`, `deploy.sh` and `deploy.env` are in [`deploy/vps/`](../../../deploy/vps/README.md) (copied from the VPS on 2026-10-19, plus the backend health check); after changing one, copy it to `/root/erp-imobiliaria/`. The `.env` and the deploy key stay only on the VPS; the Caddy block is in the other project's repository |
+| Files on the VPS | `docker-compose.yml`, `deploy.sh` and `deploy.env` live only on the VPS (`/root/erp-imobiliaria/`): they are **no longer versioned in this repository** (the copy that was in `deploy/vps/` was removed on 2026-10-27). The `.env` and the deploy key also stay only on the VPS; the Caddy block is in the other project's repository |
 
 Receipts (spec 018) live in a private **Cloudflare R2** bucket, not on the VPS: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_STORAGE_BUCKET_NAME` and `AWS_S3_ENDPOINT_URL` in `.env` (without them the receipt endpoints answer 503). The bucket needs a CORS rule that allows `PUT` and `GET` from the ERP origin with the `Content-Type` header, otherwise the browser upload is blocked.
 
@@ -65,7 +65,7 @@ The address map (spec 021) is Google's **Maps Embed API** under the condominium 
 
 **Checklist for a new host** (checked on the VPS on 2026-10-08):
 - [x] TLS is terminated in front: Caddy serves the browser over HTTPS and proxies to the Next server. Django is not reached by the browser at all; it listens only on the private Docker network.
-- [x] The health path answers: `GET /api/health/` returned 200 from inside the stack (`docker compose exec backend`). The compose file (`deploy/vps/docker-compose.yml`) checks it every 15 s and the frontend waits for a healthy backend.
+- [x] The health path answers: `GET /api/health/` returned 200 from inside the stack (`docker compose exec backend`). The VPS compose file checks it every 15 s and the frontend waits for a healthy backend.
 - [x] The frontend's `API_INTERNAL_URL` is plain `http://backend:8000` on the private network, so `SECURE_SSL_REDIRECT=false` there (with the redirect on, that URL would loop on 301).
 - [x] `INTERNAL_API_KEY` and `SECRET_KEY` are set and `REDIS_URL` is reachable (the login rate limit lives there).
 - [ ] `JWT_SIGNING_KEY` (spec 022) is set in the host `.env` **before** deploying the EdDSA change: without it the backend and Celery do not start. Every user logs in again after that deploy.
@@ -74,7 +74,7 @@ The address map (spec 021) is Google's **Maps Embed API** under the condominium 
 - [ ] After every deploy, smoke test that the proxy cannot leave `/api`: `curl -s -o /dev/null -w '%{http_code}' --path-as-is https://<name>/api/..%2fadmin/login/` must print `404` (it printed `200`, the Django Admin login page, until the segment check was added).
 
 ### Django Admin through an SSH tunnel
-The backend publishes port 8000 on the VPS **loopback only** (`127.0.0.1:8000`, `deploy/vps/docker-compose.yml`); nothing new is reachable from the internet. From your computer:
+The backend publishes port 8000 on the VPS **loopback only** (`127.0.0.1:8000`, in the VPS `docker-compose.yml`); nothing new is reachable from the internet. From your computer:
 ```bash
 ssh -N -L 8000:127.0.0.1:8000 root@177.7.63.175   # keep it open while you use the Admin
 ```

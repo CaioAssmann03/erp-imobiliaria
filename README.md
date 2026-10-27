@@ -37,7 +37,7 @@ HTTPS vem do Caddy que já existe na VPS (um bloco no `Caddyfile` aponta o domí
 nome provisório é `erp.177-7-63-175.sslip.io`. Os comprovantes de pagamento ficam num bucket Cloudflare R2
 (variáveis `AWS_*`; sem elas só a parte de comprovantes fica indisponível). O passo a passo, as variáveis e o
 que fazer quando algo falha estão em [`backend/docs/architecture/operations.md`](backend/docs/architecture/operations.md)
-(seção *Production on the VPS*). O compose de produção e o `deploy.sh` estão versionados em [`deploy/vps/`](deploy/vps/README.md).
+(seção *Production on the VPS*). O compose de produção e o `deploy.sh` ficam só na VPS: não são mais versionados neste repositório.
 
 ## Client da API no frontend
 
