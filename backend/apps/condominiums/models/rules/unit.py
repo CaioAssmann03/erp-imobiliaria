@@ -5,7 +5,9 @@ from django.db.models import Sum
 from django.db.models.functions import Coalesce
 
 from apps.condominiums.errors import UnitError
-from apps.condominiums.models.condominium_apportionment_criterion import CondominiumApportionmentCriterion
+from apps.condominiums.models.condominium_apportionment_criterion import (
+    CondominiumApportionmentCriterion,
+)
 from apps.core.models.rules import ModelRules, rule
 
 if TYPE_CHECKING:
@@ -30,7 +32,10 @@ class UnitRules(ModelRules["Unit"]):
             return False
         if not type(unit).objects.filter(pk=unit.pk, active=False).exists():
             return False
-        limit = CondominiumApportionmentCriterion.TOTAL + CondominiumApportionmentCriterion.TOLERANCE
+        limit = (
+            CondominiumApportionmentCriterion.TOTAL
+            + CondominiumApportionmentCriterion.TOLERANCE
+        )
         for fraction in unit.fractions.all():
             other_units_total: Decimal = (
                 type(fraction)

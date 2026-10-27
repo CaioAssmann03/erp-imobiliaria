@@ -3,7 +3,9 @@ from typing import Any
 from rest_framework import serializers
 
 
-class CondominiumApportionmentCriterionTotalSerializer(serializers.Serializer[dict[str, Any]]):
+class CondominiumApportionmentCriterionTotalSerializer(
+    serializers.Serializer[dict[str, Any]]
+):
     criterion = serializers.UUIDField()
     name = serializers.CharField()
     position = serializers.IntegerField(min_value=1)

@@ -10,9 +10,8 @@ class CondominiumsConfig(AppConfig):
     def ready(self) -> None:
         from apps.persons.modules import register_person_module
 
-        from .modules import MODULE
-
         from . import audit
+        from .modules import MODULE
 
         audit.register()
         register_person_module(MODULE)
