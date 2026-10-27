@@ -3,7 +3,6 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, NamedTuple
 
 from apps.condominiums.errors import UnitPersonError
-from apps.condominiums.modules import MODULE
 from apps.core.models.rules import ModelRules, rule
 
 if TYPE_CHECKING:
@@ -55,7 +54,7 @@ class UnitPersonRules(ModelRules["UnitPerson"]):
         link = self.instance
         if link.person_id is None or not self._person_is_new_or_changed():
             return False
-        return not link.person.module_memberships.filter(module=MODULE).exists()
+        return not link.person.module_memberships.filter(module="condominiums").exists()
 
     def _person_is_new_or_changed(self) -> bool:
         link = self.instance

@@ -10,6 +10,4 @@ class RentalsConfig(AppConfig):
     def ready(self) -> None:
         from apps.persons.modules import register_person_module
 
-        from .modules import MODULE
-
-        register_person_module(MODULE)
+        register_person_module("rentals")
