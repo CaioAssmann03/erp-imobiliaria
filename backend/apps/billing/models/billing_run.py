@@ -1,4 +1,4 @@
-from typing import final, override
+from typing import Any, final, override
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -6,7 +6,7 @@ from django.db.models import F, Q
 from django.utils import timezone
 
 from apps.billing.errors import BillingRunError
-from apps.condominiums.models import Condominium
+from apps.condominiums.models import Condominium, Unit
 from apps.core.infrastructure.validators import validate_first_day_of_month
 from apps.core.models.base import BaseModel
 
@@ -64,6 +64,13 @@ class BillingRun(BaseModel):
                 violation_error_code=BillingRunError.FINISHED_BEFORE_STARTED.value,
             ),
         )
+
+    def problems_with_unit_names(self) -> list[dict[str, Any]]:
+        """The stored problems with the unit's display name (null for a whole-condominium problem), from one query."""
+        unit_ids = [problem["unit"] for problem in self.problems if problem["unit"]]
+        units = Unit.objects.filter(pk__in=unit_ids).select_related("block") if unit_ids else Unit.objects.none()
+        names = {str(unit.pk): unit.display_name for unit in units}
+        return [{**problem, "unit_name": names.get(problem["unit"] or "")} for problem in self.problems]
 
     @override
     def clean(self) -> None:

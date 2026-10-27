@@ -153,6 +153,11 @@ class Unit(BaseModel):
             ),
         ).person
 
+    @property
+    def display_name(self) -> str:
+        """The unit as it is told inside its condominium: `<block> - <name>`, or just the name without a block."""
+        return f"{self.block.name} - {self.name}" if self.block else self.name
+
     @override
     def __str__(self) -> str:
         block = f" - Block {self.block.name}" if self.block else ""

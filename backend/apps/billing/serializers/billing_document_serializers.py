@@ -119,21 +119,12 @@ class BillingDocumentSerializer(serializers.ModelSerializer[BillingDocument]):
 
     @extend_schema_field(BillingDocumentRegistrationSerializer(allow_null=True))
     def get_registration(self, document: BillingDocument) -> dict[str, Any] | None:
-        active = getattr(document, "active_registrations", None)
-        if active is None:
-            registration = document.registrations.filter(status=BillingDocumentRegistration.Status.ACTIVE).first()
-        else:
-            registration = active[0] if active else None
+        registration = document.active_registration
         return None if registration is None else dict(BillingDocumentRegistrationSerializer(registration).data)
 
     @extend_schema_field(BillingDocumentDeliverySerializer(allow_null=True))
     def get_delivery(self, document: BillingDocument) -> dict[str, Any] | None:
-        """The latest delivery of the active registration (the e-mail of the boleto the payer holds now)."""
-        registration = getattr(document, "active_registrations", None)
-        active = registration[0] if registration else None
-        if active is None:
-            return None
-        delivery = active.deliveries.order_by("-created_at").first()
+        delivery = document.latest_delivery
         return None if delivery is None else dict(BillingDocumentDeliverySerializer(delivery).data)
 
     @extend_schema_field(serializers.BooleanField())

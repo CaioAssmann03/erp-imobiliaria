@@ -21,6 +21,7 @@ from apps.persons.models import Person
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
 
+    from .billing_document_delivery import BillingDocumentDelivery
     from .billing_document_item import BillingDocumentItem
     from .billing_document_registration import BillingDocumentRegistration
 
@@ -118,6 +119,32 @@ class BillingDocument(BaseModel):
         return (
             self.status in self.AWAITING_PAYMENT_STATUSES
             and self.due_date < reference_date
+        )
+
+    @property
+    def active_registration(self) -> "BillingDocumentRegistration | None":
+        """The registration of the boleto the payer holds now; `active_registrations` is the view's prefetch of it."""
+        prefetched = getattr(self, "active_registrations", None)
+        if prefetched is not None:
+            return prefetched[0] if prefetched else None
+        from .billing_document_registration import (
+            BillingDocumentRegistration,  # circular at import time
+        )
+
+        return self.registrations.filter(
+            status=BillingDocumentRegistration.Status.ACTIVE
+        ).first()
+
+    @property
+    def latest_delivery(self) -> "BillingDocumentDelivery | None":
+        """The latest e-mail of the active registration: the one that carried the boleto the payer holds now."""
+        registration = self.active_registration
+        if registration is None:
+            return None
+        return max(
+            registration.deliveries.all(),
+            key=lambda delivery: delivery.created_at,
+            default=None,
         )
 
     @override

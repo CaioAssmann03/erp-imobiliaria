@@ -3,7 +3,6 @@ from typing import Any, final, override
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from apps.condominiums.models import Unit
 from apps.core.serializers import ModelRulesMixin
 
 from ..models import BillingRun
@@ -59,11 +58,7 @@ class BillingRunSerializer(ModelRulesMixin, serializers.ModelSerializer[BillingR
 
     @extend_schema_field(BillingRunProblemSerializer(many=True))
     def get_problems(self, run: BillingRun) -> list[dict[str, Any]]:
-        """The stored problems with the unit's name (block and number), from one query per run."""
-        unit_ids = [problem["unit"] for problem in run.problems if problem["unit"]]
-        units = Unit.objects.filter(pk__in=unit_ids).select_related("block") if unit_ids else Unit.objects.none()
-        names = {str(unit.pk): f"{unit.block.name} - {unit.name}" if unit.block else unit.name for unit in units}
-        return [{**problem, "unit_name": names.get(problem["unit"] or "")} for problem in run.problems]
+        return run.problems_with_unit_names()
 
     @override
     def create(self, validated_data: dict[str, Any]) -> BillingRun:

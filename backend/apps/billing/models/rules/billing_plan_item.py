@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 class BillingPlanItemRules(ModelRules["BillingPlanItem"]):
     """An item validated without its plan (a nested item before the plan exists) skips the plan's rule;
-    the plan serializer runs these rules again with the plan attached."""
+    `BillingPlan.collect_item_errors` runs these rules again with the plan attached."""
 
     @rule("amount", BillingPlanItemError.AMOUNT_DOES_NOT_MATCH_KIND)
     def amount_does_not_match_kind(self) -> bool:
@@ -70,7 +70,7 @@ class BillingPlanItemRules(ModelRules["BillingPlanItem"]):
         return item.entry_template_id is not None and not item.entry_template.active
 
     def _plan(self) -> "BillingPlan | None":
-        """The plan, saved or not yet (a candidate attached by the plan serializer); None when unknown."""
+        """The plan, saved or not yet (a candidate attached by `BillingPlan.collect_item_errors`); None when unknown."""
         item = self.instance
         if item.plan_id is None and not item._meta.get_field("plan").is_cached(item):
             return None

@@ -5,7 +5,10 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 
 from apps.billing.infrastructure.gateway.asaas_client import GatewayError
-from apps.billing.services.onboard_condominium_at_gateway import GatewayApplicant, onboard_condominium_at_gateway
+from apps.billing.services.onboard_condominium_at_gateway import (
+    GatewayApplicant,
+    onboard_condominium_at_gateway,
+)
 from apps.condominiums.models import Condominium
 
 
@@ -17,12 +20,22 @@ class Command(BaseCommand):
         parser.add_argument("--email", required=True)
         parser.add_argument("--mobile-phone", required=True)
         parser.add_argument("--monthly-income", type=Decimal, required=True)
-        parser.add_argument("--company-type", default="ASSOCIATION", help="MEI, LIMITED, INDIVIDUAL or ASSOCIATION")
-        parser.add_argument("--yes", action="store_true", help="Confirm outside the sandbox (the gateway charges a fee per sub-account)")
+        parser.add_argument(
+            "--company-type",
+            default="ASSOCIATION",
+            help="MEI, LIMITED, INDIVIDUAL or ASSOCIATION",
+        )
+        parser.add_argument(
+            "--yes",
+            action="store_true",
+            help="Confirm outside the sandbox (the gateway charges a fee per sub-account)",
+        )
 
     def handle(self, *args: Any, **options: Any) -> None:
         if "sandbox" not in settings.ASAAS_BASE_URL and not options["yes"]:
-            raise CommandError("Production creates a sub-account with a fixed fee; pass --yes to confirm.")
+            raise CommandError(
+                "Production creates a sub-account with a fixed fee; pass --yes to confirm."
+            )
         try:
             condominium = Condominium.objects.get(code=options["condominium_code"])
         except Condominium.DoesNotExist:
