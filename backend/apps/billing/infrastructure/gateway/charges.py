@@ -4,7 +4,7 @@ from typing import Any, Protocol
 from django.conf import settings
 
 from apps.billing.errors import GatewayAccountError
-from apps.billing.gateway.asaas_client import GatewayError
+from apps.billing.infrastructure.gateway.asaas_client import GatewayError
 from apps.billing.models import BillingDocument, GatewayAccount, GatewayCustomer
 from apps.persons.models import Person
 

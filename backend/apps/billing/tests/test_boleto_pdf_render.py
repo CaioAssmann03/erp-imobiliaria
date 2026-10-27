@@ -7,8 +7,8 @@ import pytest
 from django.template.loader import render_to_string
 
 from apps.billing.models import CondominiumBillingRules
+from apps.billing.infrastructure.rendering import boleto_template
 
-from .. import boleto_template
 from ..models import BillingDocument
 from ..services.render_billing_document_pdf import (
     TEMPLATE,

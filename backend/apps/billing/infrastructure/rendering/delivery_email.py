@@ -2,7 +2,7 @@
 
 from django.utils.html import escape
 
-from apps.billing.boleto_template import format_date, format_money, format_month
+from apps.billing.infrastructure.rendering.boleto_template import format_date, format_money, format_month
 from apps.billing.models import BillingDocument, BillingDocumentRegistration
 
 

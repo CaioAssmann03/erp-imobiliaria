@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.billing.errors import BillingDocumentRegistrationError, GatewayAccountError
-from apps.billing.gateway.asaas_client import GatewayError, GatewayUnavailable
+from apps.billing.infrastructure.gateway.asaas_client import GatewayError, GatewayUnavailable
 from apps.finance.tests.base import body, error_codes
 from apps.persons.models import PeopleIndividual
 

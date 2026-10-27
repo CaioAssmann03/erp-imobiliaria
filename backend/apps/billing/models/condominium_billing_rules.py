@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from decimal import Decimal
 from typing import TYPE_CHECKING, final, override
 
 from django.db import models
@@ -6,13 +7,6 @@ from django.db.models import Q
 
 from apps.billing.errors import CondominiumBillingRulesError
 from apps.billing.models.rules import CondominiumBillingRulesRules
-from apps.billing.validators import (
-    MAX_LATE_FEE_PERCENTAGE,
-    validate_due_day,
-    validate_initial_late_fee_days,
-    validate_issuance_day,
-    validate_late_fee_percentage,
-)
 from apps.condominiums.models import Condominium
 from apps.core.infrastructure.dates import add_months
 from apps.core.infrastructure.validators import validate_percentage
@@ -23,6 +17,29 @@ if TYPE_CHECKING:
 
 
 SATURDAY = 5  # date.weekday(): Monday is 0
+
+# The Civil Code (art. 1.336 §1) lets a condominium charge a fine of up to 2 % on a late contribution.
+MAX_LATE_FEE_PERCENTAGE = Decimal(2)
+
+
+def validate_due_day(due_day: int) -> None:
+    if not 1 <= due_day <= 28:
+        raise CondominiumBillingRulesError.DUE_DAY_OUT_OF_RANGE.to_validation_error()
+
+
+def validate_issuance_day(issuance_day: int) -> None:
+    if not 1 <= issuance_day <= 28:
+        raise CondominiumBillingRulesError.ISSUANCE_DAY_OUT_OF_RANGE.to_validation_error()
+
+
+def validate_late_fee_percentage(late_fee_percentage: Decimal) -> None:
+    if not 0 <= late_fee_percentage <= MAX_LATE_FEE_PERCENTAGE:
+        raise CondominiumBillingRulesError.LATE_FEE_OUT_OF_RANGE.to_validation_error()
+
+
+def validate_initial_late_fee_days(days: int) -> None:
+    if days < 1:
+        raise CondominiumBillingRulesError.INITIAL_LATE_FEE_DAYS_OUT_OF_RANGE.to_validation_error()
 
 
 @final

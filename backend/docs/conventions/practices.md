@@ -13,7 +13,7 @@ A business rule is anything the domain says must be true. **Write it in the mode
 
 | Kind of rule | Where in the model | Example |
 |---|---|---|
-| One field's value (range, format) | a **validator** on the field (functions in `validators.py`) | `validate_due_day`, `validate_cpf` |
+| One field's value (range, format) | a **validator** on the field (functions in `validators.py`) | `validate_due_day` (in its model), `validate_cpf` (shared, in `core`) |
 | Several fields, or other records | `clean()` raising `ValidationError({"field": ...})` on the field the user must fix; with **two or more** rules, `clean()` only calls a rules class (below) | `UnitPersonRules`, `AccountPayableRules` |
 | Uniqueness, exclusion, last line of defence | `Meta.constraints` with `violation_error_message` and `violation_error_code` | `unit_person_unique_active_link` |
 | A calculation or behaviour the domain owns | a **model or queryset method** | `next_adjustment_date()`, `UnitPerson.objects.current()` |

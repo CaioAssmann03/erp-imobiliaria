@@ -4,9 +4,9 @@ from typing import Any, Protocol
 from django.db import transaction
 
 from apps.billing.errors import BillingDocumentRegistrationError, GatewayAccountError
-from apps.billing.gateway.asaas_client import AsaasClient, GatewayError
+from apps.billing.infrastructure.gateway.asaas_client import AsaasClient, GatewayError
 from apps.billing.models import BillingDocument, BillingDocumentRegistration, GatewayAccount
-from apps.billing.gateway.charges import (
+from apps.billing.infrastructure.gateway.charges import (
     ChargeGateway,
     ensure_customer,
     fetch_boleto_details,

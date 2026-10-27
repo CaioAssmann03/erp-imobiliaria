@@ -4,17 +4,24 @@ from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
 
-from apps.billing.gateway.asaas_client import GatewayUnavailable
-from apps.billing.gateway.resend_client import EmailUnavailable
-from apps.billing.models import BillingDocument, CondominiumBillingRules, GatewayAccount, GatewayEvent
+from apps.billing.infrastructure.gateway.asaas_client import GatewayUnavailable
+from apps.billing.infrastructure.gateway.resend_client import EmailUnavailable
+from apps.billing.models import (
+    BillingDocument,
+    CondominiumBillingRules,
+    GatewayAccount,
+    GatewayEvent,
+)
 from apps.billing.services.generate_billing_document_pdf import (
     generate_billing_document_pdf,
 )
 from apps.billing.services.issue_condominium_billing import issue_condominium_billing
 from apps.billing.services.process_gateway_event import process_gateway_event
 from apps.billing.services.reconcile_gateway_account import reconcile_gateway_account
-from apps.billing.services.send_billing_document_email import send_billing_document_email
 from apps.billing.services.register_billing_document import register_billing_document
+from apps.billing.services.send_billing_document_email import (
+    send_billing_document_email,
+)
 from apps.condominiums.models import Condominium
 
 
@@ -30,7 +37,9 @@ def issue_due_billing() -> int:
     ).values_list("condominium_id", flat=True)
     count = 0
     for condominium_id in condominium_ids:
-        _ = issue_condominium_billing_task.delay(str(condominium_id), today.replace(day=1).isoformat())
+        _ = issue_condominium_billing_task.delay(
+            str(condominium_id), today.replace(day=1).isoformat()
+        )
         count += 1
     return count
 
@@ -50,9 +59,16 @@ def generate_billing_document_pdf_task(document_id: str) -> str:
     Retried with backoff; once the retries run out the error stays in the task log, and the issuance that
     enqueued it is not affected.
     """
-    document = BillingDocument.objects.select_related(
-        "unit__block", "unit__condominium__company", "unit__condominium__address", "payer"
-    ).prefetch_related("items__cost_center").get(pk=document_id)
+    document = (
+        BillingDocument.objects.select_related(
+            "unit__block",
+            "unit__condominium__company",
+            "unit__condominium__address",
+            "payer",
+        )
+        .prefetch_related("items__cost_center")
+        .get(pk=document_id)
+    )
     return str(generate_billing_document_pdf(document).pk)
 
 
@@ -82,7 +98,9 @@ def reconcile_gateway_accounts() -> int:
     """
     accounts = list(GatewayAccount.objects.filter(status=GatewayAccount.Status.ACTIVE))
     for account in accounts:
-        _ = reconcile_gateway_account(account, settings.GATEWAY_RECONCILIATION_WINDOW_DAYS)
+        _ = reconcile_gateway_account(
+            account, settings.GATEWAY_RECONCILIATION_WINDOW_DAYS
+        )
     return len(accounts)
 
 
@@ -92,6 +110,8 @@ def send_billing_document_email_task(document_id: str) -> str:
 
     Retried with backoff only while the provider is unavailable; every other failure is a `failed` delivery.
     """
-    document = BillingDocument.objects.select_related("unit__condominium", "payer").get(pk=document_id)
+    document = BillingDocument.objects.select_related("unit__condominium", "payer").get(
+        pk=document_id
+    )
     delivery = send_billing_document_email(document)
     return delivery.status if delivery else ""

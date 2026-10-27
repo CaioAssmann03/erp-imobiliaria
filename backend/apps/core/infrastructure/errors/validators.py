@@ -9,3 +9,4 @@ class CoreValidatorError(RuleError):
     CNPJ_INVALID_LENGTH = ("cnpj.invalid_length", "CNPJ must have 14 characters, without punctuation.")
     CNPJ_INVALID_CHECK_DIGITS = ("cnpj.invalid_check_digits", "Invalid CNPJ.")
     PERCENTAGE_OUT_OF_RANGE = ("percentage.out_of_range", "Percentage must be between 0 and 100.")
+    MONTH_NOT_FIRST_DAY = ("month.not_first_day", "A month is written as its first day.")

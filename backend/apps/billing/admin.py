@@ -7,14 +7,14 @@ from unfold.admin import ModelAdmin, TabularInline
 
 from apps.core.infrastructure.scoping import CompanyScopedAdminMixin
 
-from .gateway.asaas_client import GatewayError
+from .infrastructure.gateway.asaas_client import GatewayError
 from .models import (
     BillingDocument,
     BillingDocumentDelivery,
     BillingDocumentItem,
     BillingDocumentPayment,
-    BillingDocumentRegistration,
     BillingDocumentPdf,
+    BillingDocumentRegistration,
     BillingPlan,
     BillingPlanItem,
     BillingRun,
@@ -52,10 +52,14 @@ class BillingDocumentItemInline(CompanyScopedAdminMixin, TabularInline):
     ordering = ("position",)
     can_delete = False
 
-    def has_add_permission(self, request: HttpRequest, obj: BillingDocument | None = None) -> bool:
+    def has_add_permission(
+        self, request: HttpRequest, obj: BillingDocument | None = None
+    ) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj: BillingDocument | None = None) -> bool:
+    def has_change_permission(
+        self, request: HttpRequest, obj: BillingDocument | None = None
+    ) -> bool:
         return False
 
 
@@ -72,10 +76,14 @@ class BillingDocumentAdmin(CompanyScopedAdminMixin, ModelAdmin):
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj: BillingDocument | None = None) -> bool:
+    def has_change_permission(
+        self, request: HttpRequest, obj: BillingDocument | None = None
+    ) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: BillingDocument | None = None) -> bool:
+    def has_delete_permission(
+        self, request: HttpRequest, obj: BillingDocument | None = None
+    ) -> bool:
         return False
 
 
@@ -84,17 +92,29 @@ class BillingDocumentAdmin(CompanyScopedAdminMixin, ModelAdmin):
 class BillingRunAdmin(CompanyScopedAdminMixin, ModelAdmin):
     """Read-only: runs are recorded by the monthly issuance."""
 
-    list_display = ("condominium", "reference_month", "status", "issued_count", "skipped_count", "failed_count", "started_at")
+    list_display = (
+        "condominium",
+        "reference_month",
+        "status",
+        "issued_count",
+        "skipped_count",
+        "failed_count",
+        "started_at",
+    )
     list_filter = ("status", "reference_month")
     search_fields = ("condominium__name",)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj: BillingRun | None = None) -> bool:
+    def has_change_permission(
+        self, request: HttpRequest, obj: BillingRun | None = None
+    ) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: BillingRun | None = None) -> bool:
+    def has_delete_permission(
+        self, request: HttpRequest, obj: BillingRun | None = None
+    ) -> bool:
         return False
 
 
@@ -109,10 +129,14 @@ class BillingDocumentPdfAdmin(CompanyScopedAdminMixin, ModelAdmin):
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj: BillingDocumentPdf | None = None) -> bool:
+    def has_change_permission(
+        self, request: HttpRequest, obj: BillingDocumentPdf | None = None
+    ) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: BillingDocumentPdf | None = None) -> bool:
+    def has_delete_permission(
+        self, request: HttpRequest, obj: BillingDocumentPdf | None = None
+    ) -> bool:
         return False
 
 
@@ -130,19 +154,27 @@ class GatewayAccountAdmin(CompanyScopedAdminMixin, ModelAdmin):
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj: GatewayAccount | None = None) -> bool:
+    def has_change_permission(
+        self, request: HttpRequest, obj: GatewayAccount | None = None
+    ) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: GatewayAccount | None = None) -> bool:
+    def has_delete_permission(
+        self, request: HttpRequest, obj: GatewayAccount | None = None
+    ) -> bool:
         return False
 
     @admin.action(description="Sync status with the gateway")
-    def sync_status(self, request: HttpRequest, queryset: QuerySet[GatewayAccount]) -> None:
+    def sync_status(
+        self, request: HttpRequest, queryset: QuerySet[GatewayAccount]
+    ) -> None:
         for account in queryset:
             try:
                 sync_gateway_account_status(account)
             except GatewayError as error:
-                self.message_user(request, f"{account.condominium}: {error}", messages.ERROR)
+                self.message_user(
+                    request, f"{account.condominium}: {error}", messages.ERROR
+                )
 
 
 class ReadOnlyAdminMixin:
@@ -167,15 +199,26 @@ class GatewayCustomerAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdm
 
 @final
 @admin.register(BillingDocumentRegistration)
-class BillingDocumentRegistrationAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin):
-    list_display = ("document", "status", "reason", "gateway_payment_id", "registered_due_date", "created_at")
+class BillingDocumentRegistrationAdmin(
+    ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin
+):
+    list_display = (
+        "document",
+        "status",
+        "reason",
+        "gateway_payment_id",
+        "registered_due_date",
+        "created_at",
+    )
     list_filter = ("status", "reason")
     search_fields = ("gateway_payment_id", "document__unit__name")
 
 
 @final
 @admin.register(BillingDocumentPayment)
-class BillingDocumentPaymentAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin):
+class BillingDocumentPaymentAdmin(
+    ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin
+):
     list_display = ("document", "paid_on", "amount", "net_amount")
     search_fields = ("document__unit__name",)
 
@@ -193,22 +236,43 @@ class GatewayEventAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin)
     @admin.action(description="Reprocess the selected unprocessed events")
     def reprocess(self, request: HttpRequest, queryset: QuerySet[GatewayEvent]) -> None:
         for event in queryset.filter(outcome=GatewayEvent.Outcome.UNPROCESSED):
-            GatewayEvent.objects.filter(pk=event.pk).update(outcome=GatewayEvent.Outcome.PENDING)
+            GatewayEvent.objects.filter(pk=event.pk).update(
+                outcome=GatewayEvent.Outcome.PENDING
+            )
             event.refresh_from_db()
             _ = process_gateway_event(event)
 
 
 @final
 @admin.register(GatewayReconciliationRun)
-class GatewayReconciliationRunAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin):
-    list_display = ("gateway_account", "window_start", "window_end", "status", "found_count", "processed_count", "unprocessed_count")
+class GatewayReconciliationRunAdmin(
+    ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin
+):
+    list_display = (
+        "gateway_account",
+        "window_start",
+        "window_end",
+        "status",
+        "found_count",
+        "processed_count",
+        "unprocessed_count",
+    )
     list_filter = ("status",)
 
 
 @final
 @admin.register(BillingDocumentDelivery)
-class BillingDocumentDeliveryAdmin(ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin):
-    list_display = ("document", "channel", "destination", "status", "failure_reason", "sent_at")
+class BillingDocumentDeliveryAdmin(
+    ReadOnlyAdminMixin, CompanyScopedAdminMixin, ModelAdmin
+):
+    list_display = (
+        "document",
+        "channel",
+        "destination",
+        "status",
+        "failure_reason",
+        "sent_at",
+    )
     list_filter = ("status", "channel", "failure_reason")
     search_fields = ("destination", "document__unit__name", "provider_message_id")
 

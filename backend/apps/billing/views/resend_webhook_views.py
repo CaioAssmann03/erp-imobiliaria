@@ -9,7 +9,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ..gateway.svix_signature import verify_svix_signature
+from ..infrastructure.gateway.svix_signature import verify_svix_signature
 from ..models import BillingDocumentDelivery
 
 # Resend event -> what it means for the delivery. `delivered` only moves a `sent` delivery; a bounce or complaint fails it.

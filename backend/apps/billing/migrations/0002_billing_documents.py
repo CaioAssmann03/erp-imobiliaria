@@ -5,7 +5,7 @@ import uuid
 import django.db.models.deletion
 from django.db import migrations, models
 
-import apps.billing.validators
+import apps.core.infrastructure.validators.first_day_of_month
 import apps.core.infrastructure.validators.percentage
 import apps.finance.validators
 
@@ -26,8 +26,8 @@ class Migration(migrations.Migration):
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('reference_month', models.DateField(validators=[apps.billing.validators.validate_first_day_of_month])),
-                ('competence_month', models.DateField(validators=[apps.billing.validators.validate_first_day_of_month])),
+                ('reference_month', models.DateField(validators=[apps.core.infrastructure.validators.first_day_of_month.validate_first_day_of_month])),
+                ('competence_month', models.DateField(validators=[apps.core.infrastructure.validators.first_day_of_month.validate_first_day_of_month])),
                 ('due_date', models.DateField()),
                 ('amount', models.DecimalField(decimal_places=2, max_digits=12, validators=[apps.finance.validators.validate_positive_amount])),
                 ('status', models.CharField(choices=[('issued', 'Issued'), ('registered', 'Registered'), ('paid', 'Paid'), ('cancelled', 'Cancelled')], default='issued', max_length=12)),

@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from apps.billing.errors import GatewayAccountError
-from apps.billing.gateway.asaas_client import GatewayError
+from apps.billing.infrastructure.gateway.asaas_client import GatewayError
 from apps.condominiums.models import Condominium
 from apps.core.models import Address
 

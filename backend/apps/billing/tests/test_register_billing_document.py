@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from apps.billing.errors import BillingDocumentRegistrationError, GatewayAccountError
-from apps.billing.gateway.asaas_client import GatewayError, GatewayUnavailable
+from apps.billing.infrastructure.gateway.asaas_client import GatewayError, GatewayUnavailable
 from apps.persons.models import PeopleIndividual
 
 from ..models import BillingDocument, BillingDocumentRegistration, GatewayAccount, GatewayCustomer

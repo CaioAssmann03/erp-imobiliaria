@@ -3,7 +3,7 @@ from typing import Any, Protocol
 from django.db import transaction
 from django.utils import timezone
 
-from apps.billing.gateway.asaas_client import AsaasClient
+from apps.billing.infrastructure.gateway.asaas_client import AsaasClient
 from apps.billing.models import GatewayAccount
 
 APPROVED = "APPROVED"

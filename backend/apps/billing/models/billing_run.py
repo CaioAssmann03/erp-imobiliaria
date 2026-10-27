@@ -6,8 +6,8 @@ from django.db.models import F, Q
 from django.utils import timezone
 
 from apps.billing.errors import BillingRunError
-from apps.billing.validators import validate_first_day_of_month
 from apps.condominiums.models import Condominium
+from apps.core.infrastructure.validators import validate_first_day_of_month
 from apps.core.models.base import BaseModel
 
 

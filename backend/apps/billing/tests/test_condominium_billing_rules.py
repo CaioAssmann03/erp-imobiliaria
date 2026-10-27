@@ -8,8 +8,8 @@ from django.db import IntegrityError, connection, transaction
 from apps.condominiums.models import Condominium
 
 from ..models import CondominiumBillingRules
+from ..models.condominium_billing_rules import validate_due_day
 from ..serializers import CondominiumBillingRulesSerializer
-from ..validators import validate_due_day
 
 
 pytestmark = pytest.mark.django_db  # the serializer runs the model rules (uniqueness, relations)

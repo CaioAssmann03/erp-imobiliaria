@@ -6,7 +6,7 @@ from typing import Any, Protocol
 from django.db import transaction
 
 from apps.billing.errors import GatewayAccountError
-from apps.billing.gateway.asaas_client import AsaasClient, GatewayError
+from apps.billing.infrastructure.gateway.asaas_client import AsaasClient, GatewayError
 from apps.billing.models import GatewayAccount
 from apps.condominiums.models import Condominium
 from django.conf import settings

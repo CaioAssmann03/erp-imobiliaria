@@ -4,7 +4,7 @@ from typing import Any
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 
-from apps.billing.gateway.asaas_client import GatewayError
+from apps.billing.infrastructure.gateway.asaas_client import GatewayError
 from apps.billing.services.onboard_condominium_at_gateway import GatewayApplicant, onboard_condominium_at_gateway
 from apps.condominiums.models import Condominium
 

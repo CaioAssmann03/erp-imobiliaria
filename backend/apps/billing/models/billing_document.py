@@ -8,10 +8,12 @@ from apps.billing.errors import BillingDocumentError
 from apps.billing.models.condominium_billing_rules import CondominiumBillingRules
 from apps.billing.models.querysets import BillingDocumentQuerySet
 from apps.billing.models.rules import BillingDocumentRules
-from apps.billing.validators import validate_first_day_of_month
 from apps.condominiums.models import Unit
+from apps.core.infrastructure.validators import (
+    validate_first_day_of_month,
+    validate_percentage,
+)
 from apps.core.models.base import BaseModel
-from apps.core.infrastructure.validators import validate_percentage
 from apps.finance.errors import FinanceValidatorError
 from apps.finance.validators import validate_positive_amount
 from apps.persons.models import Person
@@ -39,7 +41,10 @@ class BillingDocument(BaseModel):
         CANCELLED = ("cancelled", "Cancelled")
 
     # Overdue is derived from the due date (`overdue_on`), not stored.
-    AWAITING_PAYMENT_STATUSES: ClassVar[tuple[str, ...]] = (Status.ISSUED, Status.REGISTERED)
+    AWAITING_PAYMENT_STATUSES: ClassVar[tuple[str, ...]] = (
+        Status.ISSUED,
+        Status.REGISTERED,
+    )
     ALLOWED_NEXT_STATUSES: ClassVar[dict[str, tuple[str, ...]]] = {
         Status.ISSUED: (Status.REGISTERED, Status.CANCELLED),
         Status.REGISTERED: (Status.PAID, Status.CANCELLED),
@@ -51,22 +56,34 @@ class BillingDocument(BaseModel):
         items: "RelatedManager[BillingDocumentItem]"
         registrations: "RelatedManager[BillingDocumentRegistration]"
 
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name="billing_documents")
-    payer = models.ForeignKey(Person, on_delete=models.PROTECT, related_name="billing_documents")
+    unit = models.ForeignKey(
+        Unit, on_delete=models.PROTECT, related_name="billing_documents"
+    )
+    payer = models.ForeignKey(
+        Person, on_delete=models.PROTECT, related_name="billing_documents"
+    )
     reference_month = models.DateField(validators=[validate_first_day_of_month])
     competence_month = models.DateField(validators=[validate_first_day_of_month])
     due_date = models.DateField()
-    amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[validate_positive_amount])
-    status = models.CharField(max_length=12, choices=Status.choices, default=Status.ISSUED)
+    amount = models.DecimalField(
+        max_digits=12, decimal_places=2, validators=[validate_positive_amount]
+    )
+    status = models.CharField(
+        max_length=12, choices=Status.choices, default=Status.ISSUED
+    )
 
     discount_percentage = models.DecimalField(
         max_digits=5, decimal_places=2, default=0, validators=[validate_percentage]
     )
     discount_days = models.PositiveSmallIntegerField(default=0)
     late_fee_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    initial_late_fee_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    initial_late_fee_percentage = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True
+    )
     initial_late_fee_days = models.PositiveSmallIntegerField(null=True, blank=True)
-    interest_calculation = models.CharField(max_length=12, choices=CondominiumBillingRules.InterestCalculation.choices)
+    interest_calculation = models.CharField(
+        max_length=12, choices=CondominiumBillingRules.InterestCalculation.choices
+    )
     interest_grace_days = models.PositiveSmallIntegerField(default=0)
     # 0 when the condominium had no late interest rate in force on the due date.
     monthly_interest_percentage = models.DecimalField(
@@ -98,7 +115,10 @@ class BillingDocument(BaseModel):
         )
 
     def is_overdue_on(self, reference_date: date) -> bool:
-        return self.status in self.AWAITING_PAYMENT_STATUSES and self.due_date < reference_date
+        return (
+            self.status in self.AWAITING_PAYMENT_STATUSES
+            and self.due_date < reference_date
+        )
 
     @override
     def clean(self) -> None:

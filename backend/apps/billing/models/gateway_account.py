@@ -2,8 +2,8 @@ from typing import final, override
 
 from django.db import models
 
-from apps.billing.fields import EncryptedTextField
 from apps.condominiums.models import Condominium
+from apps.core.infrastructure.fields import EncryptedTextField
 from apps.core.models.base import BaseModel
 
 

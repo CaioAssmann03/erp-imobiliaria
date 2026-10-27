@@ -15,7 +15,7 @@ from apps.core.infrastructure.storage import object_storage
 
 from ..errors import BillingDocumentPdfError, GatewayAccountError
 from ..filters import BillingDocumentFilter
-from ..gateway.asaas_client import GatewayError, GatewayUnavailable
+from ..infrastructure.gateway.asaas_client import GatewayError, GatewayUnavailable
 from ..models import BillingDocument, BillingDocumentItem, BillingDocumentPdf, BillingDocumentRegistration
 from ..models.billing_document_pdf import DOWNLOAD_URL_TTL_SECONDS
 from ..serializers import (
