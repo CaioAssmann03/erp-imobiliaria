@@ -22,13 +22,22 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
+# O Docker escreve avisos e o progresso no canal de erro (stderr). No PowerShell isso vira "erro" e, com
+# $ErrorActionPreference = "Stop", derruba o script mesmo quando o comando deu certo. Por isso todo comando
+# do Docker passa por aqui; quem decide se falhou e o codigo de saida ($LASTEXITCODE).
+function Native([scriptblock]$Command) {
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try { & $Command } finally { $ErrorActionPreference = $previous }
+}
+
 function Step($text) { Write-Host "`n==> $text" -ForegroundColor Cyan }
 function Fail($text) { Write-Host "`nERRO: $text" -ForegroundColor Red; exit 1 }
 
 # ---- 1. Docker ----
 Step "Conferindo o Docker"
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { Fail "Docker nao encontrado. Instale o Docker Desktop e abra-o." }
-docker info *> $null
+Native { docker info *> $null }
 if ($LASTEXITCODE -ne 0) { Fail "O Docker Desktop esta fechado. Abra-o, espere ficar verde e rode de novo." }
 
 # ---- 2. .env ----
@@ -66,7 +75,7 @@ pem = K.generate().private_bytes(s.Encoding.PEM, s.PrivateFormat.PKCS8, s.NoEncr
 print(pem.replace(chr(10), chr(92) + "n"))
 print(Fernet.generate_key().decode())
 '@
-    $output = $python | docker run --rm -i python:3.12-slim sh -c "pip install -q cryptography >/dev/null 2>&1 && python -"
+    $output = Native { $python | docker run --rm -i python:3.12-slim sh -c "pip install -q cryptography >/dev/null 2>&1 && python -" 2>$null }
     if ($LASTEXITCODE -ne 0) { Fail "Nao consegui gerar as chaves. Confira a internet e rode de novo." }
     $keys = @($output | Where-Object { $_ -and $_.Trim() })
     if ($keys.Count -ne 2) { Fail "Resposta inesperada ao gerar as chaves: $output" }
@@ -84,10 +93,10 @@ if ((Get-EnvValue "INTERNAL_API_KEY") -eq "") {
 # ---- 3. Containers ----
 if ($Reset) {
     Step "Apagando o banco e os arquivos locais (-Reset)"
-    docker compose down -v
+    Native { docker compose down -v }
 }
 Step "Subindo os containers (a primeira vez demora alguns minutos)"
-docker compose up -d --build
+Native { docker compose up -d --build }
 if ($LASTEXITCODE -ne 0) { Fail "docker compose falhou. Se for 'port is already allocated', ponha POSTGRES_HOST_PORT=5434 no .env e rode de novo." }
 
 Step "Esperando o backend responder"
@@ -103,17 +112,17 @@ if (-not $ready) { Fail "O backend nao respondeu em 3 minutos. Veja: docker comp
 
 # ---- 4. Banco e dados ----
 Step "Criando as tabelas (migrate)"
-docker compose exec -T backend python manage.py migrate
+Native { docker compose exec -T backend python manage.py migrate }
 if ($LASTEXITCODE -ne 0) { Fail "migrate falhou. Veja: docker compose logs backend" }
 
 if (-not $NoSeed) {
     Step "Carregando os dados de exemplo (ficticios)"
-    docker compose exec -T backend python manage.py seed_demo
+    Native { docker compose exec -T backend python manage.py seed_demo }
     if ($LASTEXITCODE -ne 0) { Fail "seed_demo falhou. Veja: docker compose logs backend" }
 }
 
 Step "Criando o usuario para entrar"
-docker compose exec -T -e DJANGO_SUPERUSER_USERNAME=$AdminUser -e DJANGO_SUPERUSER_PASSWORD=$AdminPassword backend python manage.py createsuperuser --noinput
+Native { docker compose exec -T -e DJANGO_SUPERUSER_USERNAME=$AdminUser -e DJANGO_SUPERUSER_PASSWORD=$AdminPassword backend python manage.py createsuperuser --noinput }
 if ($LASTEXITCODE -ne 0) { Write-Host "(o usuario '$AdminUser' ja existia: tudo bem)" -ForegroundColor Yellow }
 
 # ---- 5. Pronto ----
