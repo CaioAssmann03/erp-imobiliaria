@@ -1,27 +1,26 @@
 import uuid
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from decimal import ROUND_HALF_UP, Decimal
 from typing import final, override
 
 from django.db import models
 from django.db.models import Q
 
-from apps.billing.errors import BillingPlanItemError, BillingValidatorError
+from apps.billing.errors import BillingPlanItemError
 from apps.billing.models.billing_plan import BillingPlan
 from apps.billing.models.rules import BillingPlanItemRules
-from apps.billing.validators import (
-    FIRST_IDEAL_FRACTION_NUMBER,
-    LAST_IDEAL_FRACTION_NUMBER,
-    validate_ideal_fraction_number,
+from apps.condominiums.models import (
+    CondominiumApportionmentCriterion,
+    Unit,
+    UnitApportionmentFraction,
 )
-from apps.condominiums.models import Unit
 from apps.core.models.base import BaseModel
 from apps.finance.errors import FinanceValidatorError
 from apps.finance.models import CostCenter, EntryTemplate
 from apps.finance.validators import validate_positive_amount
 
-
 CENT = Decimal("0.01")
+LINE_DESCRIPTION_MAX_LENGTH = 120
 
 
 @final
@@ -38,10 +37,20 @@ class BillingPlanItem(BaseModel):
         WATER = "water", "Water"
         ELECTRICITY = "electricity", "Electricity"
 
-    plan = models.ForeignKey(BillingPlan, on_delete=models.CASCADE, related_name="items")
+    plan = models.ForeignKey(
+        BillingPlan, on_delete=models.CASCADE, related_name="items"
+    )
     # Order on the boleto: the order of the list the plan was written with.
     position = models.PositiveSmallIntegerField(default=0)
-    description = models.CharField(max_length=120)
+    # Either an event (the boleto prints `0052-CONDOMINIO`, then the description if any) or a description alone.
+    event = models.ForeignKey(
+        "billing.BillingEvent",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="billing_plan_items",
+    )
+    description = models.CharField(max_length=120, blank=True)
     cost_center = models.ForeignKey(
         CostCenter, on_delete=models.PROTECT, related_name="billing_plan_items"
     )
@@ -51,10 +60,19 @@ class BillingPlanItem(BaseModel):
     calculation_kind = models.CharField(max_length=30, choices=CalculationKind.choices)
     # Fixed: what each unit pays. Share: the condominium's total for the month, split by the fraction.
     amount = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True, validators=[validate_positive_amount]
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[validate_positive_amount],
     )
-    ideal_fraction_number = models.PositiveSmallIntegerField(
-        null=True, blank=True, validators=[validate_ideal_fraction_number]
+    # Share items only: the condominium's criterion the total is split by.
+    apportionment_criterion = models.ForeignKey(
+        CondominiumApportionmentCriterion,
+        on_delete=models.RESTRICT,
+        null=True,
+        blank=True,
+        related_name="billing_plan_items",
     )
     unit_value_field = models.CharField(
         max_length=20, choices=UnitValueField.choices, null=True, blank=True
@@ -80,33 +98,27 @@ class BillingPlanItem(BaseModel):
                 violation_error_code=FinanceValidatorError.AMOUNT_NOT_POSITIVE.value,
             ),
             models.CheckConstraint(
-                name="billing_plan_item_ideal_fraction_number_1_6",
-                condition=Q(ideal_fraction_number__isnull=True)
-                | Q(
-                    ideal_fraction_number__gte=FIRST_IDEAL_FRACTION_NUMBER,
-                    ideal_fraction_number__lte=LAST_IDEAL_FRACTION_NUMBER,
-                ),
-                violation_error_message=BillingValidatorError.IDEAL_FRACTION_NUMBER_OUT_OF_RANGE.message,
-                violation_error_code=BillingValidatorError.IDEAL_FRACTION_NUMBER_OUT_OF_RANGE.value,
-            ),
-            models.CheckConstraint(
                 name="billing_plan_item_amount_matches_kind",
-                condition=Q(calculation_kind="unit_registered_value", amount__isnull=True)
-                | (~Q(calculation_kind="unit_registered_value") & Q(amount__isnull=False)),
+                condition=Q(
+                    calculation_kind="unit_registered_value", amount__isnull=True
+                )
+                | (
+                    ~Q(calculation_kind="unit_registered_value")
+                    & Q(amount__isnull=False)
+                ),
                 violation_error_message=BillingPlanItemError.AMOUNT_DOES_NOT_MATCH_KIND.message,
                 violation_error_code=BillingPlanItemError.AMOUNT_DOES_NOT_MATCH_KIND.value,
             ),
             models.CheckConstraint(
-                name="billing_plan_item_fraction_matches_kind",
-                condition=Q(calculation_kind="ideal_fraction_share", ideal_fraction_number__isnull=False)
-                | (~Q(calculation_kind="ideal_fraction_share") & Q(ideal_fraction_number__isnull=True)),
-                violation_error_message=BillingPlanItemError.IDEAL_FRACTION_NUMBER_DOES_NOT_MATCH_KIND.message,
-                violation_error_code=BillingPlanItemError.IDEAL_FRACTION_NUMBER_DOES_NOT_MATCH_KIND.value,
-            ),
-            models.CheckConstraint(
                 name="billing_plan_item_unit_value_field_matches_kind",
-                condition=Q(calculation_kind="unit_registered_value", unit_value_field__isnull=False)
-                | (~Q(calculation_kind="unit_registered_value") & Q(unit_value_field__isnull=True)),
+                condition=Q(
+                    calculation_kind="unit_registered_value",
+                    unit_value_field__isnull=False,
+                )
+                | (
+                    ~Q(calculation_kind="unit_registered_value")
+                    & Q(unit_value_field__isnull=True)
+                ),
                 violation_error_message=BillingPlanItemError.UNIT_VALUE_FIELD_DOES_NOT_MATCH_KIND.message,
                 violation_error_code=BillingPlanItemError.UNIT_VALUE_FIELD_DOES_NOT_MATCH_KIND.value,
             ),
@@ -116,14 +128,21 @@ class BillingPlanItem(BaseModel):
     def clean(self) -> None:
         BillingPlanItemRules(self).validate()
 
-    def uses_inconsistent_apportionment(self, apportionment_totals: Sequence[Decimal]) -> bool:
-        """Whether a share item names a fraction that does not close at 1 over the active units
-        (`Unit.objects.apportionment_totals()`); the other kinds never do. A fraction no unit has yet counts."""
+    def line_description(self) -> str:
+        """What the boleto line says: `0052-EVENT NAME` and the description after it, or the description alone."""
+        parts = [self.event.line_label if self.event is not None else "", self.description]
+        return " - ".join(part for part in parts if part)[:LINE_DESCRIPTION_MAX_LENGTH]
+
+    def uses_inconsistent_apportionment(
+        self, apportionment_totals: Mapping[uuid.UUID, Decimal]
+    ) -> bool:
+        """Whether a share item names a criterion that does not close at 1 over the active units
+        (`CondominiumApportionmentCriterion.objects.with_total()`); the other kinds never do. A criterion no unit has a fraction in counts."""
         if self.calculation_kind != self.CalculationKind.IDEAL_FRACTION_SHARE:
             return False
-        assert self.ideal_fraction_number is not None
-        total = apportionment_totals[self.ideal_fraction_number - 1]
-        return abs(total - Unit.APPORTIONMENT_TOTAL) > Unit.APPORTIONMENT_TOLERANCE
+        assert self.apportionment_criterion_id is not None
+        total = apportionment_totals.get(self.apportionment_criterion_id, Decimal(0))
+        return CondominiumApportionmentCriterion.does_not_close(total)
 
     def amounts_by_unit(self, units: Sequence[Unit]) -> dict[uuid.UUID, Decimal]:
         """What each unit pays for this line; zero when it owes nothing for it.
@@ -136,25 +155,37 @@ class BillingPlanItem(BaseModel):
             assert self.amount is not None
             return {unit.pk: self.amount for unit in units}
         if self.calculation_kind == self.CalculationKind.UNIT_REGISTERED_VALUE:
-            return {unit.pk: getattr(unit, f"{self.unit_value_field}_value") for unit in units}
+            return {
+                unit.pk: getattr(unit, f"{self.unit_value_field}_value")
+                for unit in units
+            }
         return self._share_amounts(units)
 
     def _share_amounts(self, units: Sequence[Unit]) -> dict[uuid.UUID, Decimal]:
         """The total split by the named fraction, each share rounded half-up to the cent; the leftover cents
         go to the unit with the largest fraction (then by name) so a rerun gives the same amounts."""
-        assert self.amount is not None and self.ideal_fraction_number is not None
-        fraction_field = Unit.IDEAL_FRACTION_FIELDS[self.ideal_fraction_number - 1]
-        fractions = {unit.pk: getattr(unit, fraction_field) or Decimal(0) for unit in units}
+        assert self.amount is not None and self.apportionment_criterion_id is not None
+        values_by_unit_id = dict(
+            UnitApportionmentFraction.objects.filter(
+                criterion_id=self.apportionment_criterion_id,
+                unit_id__in=[unit.pk for unit in units],
+            ).values_list("unit_id", "value")
+        )
+        fractions = {
+            unit.pk: values_by_unit_id.get(unit.pk, Decimal(0)) for unit in units
+        }
         shares = {
             unit_id: (self.amount * fraction).quantize(CENT, rounding=ROUND_HALF_UP)
             for unit_id, fraction in fractions.items()
         }
         leftover = self.amount - sum(shares.values(), Decimal(0))
         if leftover and any(fractions.values()):
-            largest = min(units, key=lambda unit: (-fractions[unit.pk], unit.name, str(unit.pk)))
+            largest = min(
+                units, key=lambda unit: (-fractions[unit.pk], unit.name, str(unit.pk))
+            )
             shares[largest.pk] += leftover
         return shares
 
     @override
     def __str__(self) -> str:
-        return self.description
+        return self.line_description()

@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.utils import timezone
 
-from apps.core.storage import object_storage
+from apps.core.infrastructure.storage import object_storage
 from apps.finance.errors import PaymentReceiptError
 from apps.finance.models import PaymentReceipt
 from apps.finance.validators import MAX_RECEIPT_SIZE_BYTES

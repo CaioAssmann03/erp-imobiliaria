@@ -2,7 +2,7 @@ import uuid
 from dataclasses import dataclass
 
 from apps.accounts.models import User
-from apps.core.storage import object_storage
+from apps.core.infrastructure.storage import object_storage
 from apps.finance.models import AccountPayable, PaymentReceipt
 from apps.finance.models.payment_receipt import UPLOAD_URL_TTL_SECONDS
 

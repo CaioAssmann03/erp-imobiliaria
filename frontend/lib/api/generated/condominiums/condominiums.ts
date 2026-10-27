@@ -528,7 +528,7 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getCondominiumsDestroyMutationOptions(options), queryClient);
     }
     /**
- * The sum of each ideal fraction over the active units, and whether it closes at 1.
+ * The sum of each criterion's fractions over the active units, and whether it closes at 1.
  */
 export const condominiumsApportionment = (
     id: string,

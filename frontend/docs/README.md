@@ -16,6 +16,7 @@ Organized by the SPDD REASONS canvas. Find your task, open **only** the listed f
 | Create or move a component | `norms/components.md` · `structure/folders-and-routes.md` |
 | Call the API, fetch on the client, invalidate | `norms/data-and-cache.md` (+ `norms/tanstack-query.md` for advanced use) |
 | Styling, colors, theme, accent | `norms/design-system.md` |
+| Public pages (landing, features, how-it-works) | `norms/marketing.md` · `structure/folders-and-routes.md` |
 | Login, token, cookie, `proxy.ts` | `safeguards/auth-and-tokens.md` (+ `safeguards/http-hardening.md`) |
 | Input, URLs, redirects, PII | `safeguards/secure-coding.md` |
 | Speed, bundle, re-renders | `safeguards/performance.md` |

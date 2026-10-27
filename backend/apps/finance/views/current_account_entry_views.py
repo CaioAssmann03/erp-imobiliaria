@@ -8,8 +8,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from apps.accounts.models import User
-from apps.core.api.filters import QuerySearchFilter
-from apps.core.scoping import CompanyScopedViewSetMixin
+from apps.core.infrastructure.api.filters import QuerySearchFilter
+from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin
 
 from ..filters import CurrentAccountEntryFilter
 from ..models import CurrentAccountEntry

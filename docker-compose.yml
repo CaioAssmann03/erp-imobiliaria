@@ -15,8 +15,17 @@ services:
   redis:
     image: redis:7
     restart: unless-stopped
+    # Not published on the host: only the other containers use it (a Redis of another project often holds 6379).
+
+  # S3-compatible storage for development (PDFs of the boletos and receipts), in place of the Cloudflare R2 bucket of
+  # production. It creates the bucket by itself and accepts any key; MinIO no longer publishes images on Docker Hub.
+  s3:
+    image: adobe/s3mock:5
+    restart: unless-stopped
+    environment:
+      COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS: ${AWS_STORAGE_BUCKET_NAME:-erp-dev}
     ports:
-      - "6379:6379"
+      - "9090:9090"
 
   backend:
     build: ./backend
@@ -29,6 +38,15 @@ services:
       REDIS_URL: redis://redis:6379/0
       ALLOWED_HOSTS: localhost,127.0.0.1,backend
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
+      # Local file storage (PDFs of the boletos and receipts): the `s3` service below; the defaults are for development only.
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-dev}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-dev}
+      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-erp-dev}
+      # host.docker.internal reaches the s3 service from the container and, on Docker Desktop, from the browser (signed URLs).
+      AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-http://host.docker.internal:9090}
+      AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME:-us-east-1}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./backend:/app
     ports:
@@ -46,6 +64,15 @@ services:
     environment:
       POSTGRES_HOST: db
       REDIS_URL: redis://redis:6379/0
+      # Local file storage (PDFs of the boletos and receipts): the `s3` service below; the defaults are for development only.
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-dev}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-dev}
+      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-erp-dev}
+      # host.docker.internal reaches the s3 service from the container and, on Docker Desktop, from the browser (signed URLs).
+      AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-http://host.docker.internal:9090}
+      AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME:-us-east-1}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./backend:/app
     command: celery -A config worker --loglevel=info

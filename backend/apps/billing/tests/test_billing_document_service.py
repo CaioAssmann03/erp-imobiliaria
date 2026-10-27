@@ -6,7 +6,8 @@ from decimal import Decimal
 import pytest
 from django.core.exceptions import ValidationError
 
-from apps.condominiums.models import BillingRules, Condominium, LateInterestRate
+from apps.condominiums.models import Condominium
+from apps.billing.models import CondominiumBillingRules, LateInterestRate
 from apps.finance.models import CostCenter, EntryTemplate
 
 from ..models import BillingDocument, BillingDocumentItem
@@ -30,7 +31,7 @@ def test_the_amount_is_the_sum_of_the_items_in_their_order(document: BillingDocu
     ]
 
 
-def test_the_terms_are_copied_from_the_rules_at_issuance(document: BillingDocument, billing_rules: BillingRules) -> None:
+def test_the_terms_are_copied_from_the_rules_at_issuance(document: BillingDocument, billing_rules: CondominiumBillingRules) -> None:
     billing_rules.late_fee_percentage = Decimal("1.00")
     billing_rules.save()
 
@@ -44,7 +45,7 @@ def test_the_terms_are_copied_from_the_rules_at_issuance(document: BillingDocume
 
 
 def test_the_interest_rate_is_the_one_in_force_on_the_due_date(  # type: ignore[no-untyped-def]
-    condominium: Condominium, billing_rules: BillingRules, new_document
+    condominium: Condominium, billing_rules: CondominiumBillingRules, new_document
 ) -> None:
     _ = LateInterestRate.objects.create(
         condominium=condominium, start_date=date(2026, 10, 5), monthly_percentage=Decimal("1.50")
@@ -56,7 +57,7 @@ def test_the_interest_rate_is_the_one_in_force_on_the_due_date(  # type: ignore[
 
 
 def test_no_interest_rate_in_force_means_no_interest(  # type: ignore[no-untyped-def]
-    condominium: Condominium, billing_rules: BillingRules, new_document
+    condominium: Condominium, billing_rules: CondominiumBillingRules, new_document
 ) -> None:
     _ = condominium.late_interest_rates.all().delete()
 
@@ -66,7 +67,7 @@ def test_no_interest_rate_in_force_means_no_interest(  # type: ignore[no-untyped
 
 
 def test_an_invalid_item_saves_nothing(  # type: ignore[no-untyped-def]
-    billing_rules: BillingRules, new_document, other_condominium: Condominium
+    billing_rules: CondominiumBillingRules, new_document, other_condominium: Condominium
 ) -> None:
     foreign_cost_center = CostCenter.objects.create(condominium=other_condominium, name="Outro")
     foreign_template = EntryTemplate.objects.create(cost_center=foreign_cost_center, name="Outro")
@@ -80,7 +81,7 @@ def test_an_invalid_item_saves_nothing(  # type: ignore[no-untyped-def]
     assert not BillingDocumentItem.objects.exists()
 
 
-def test_a_document_without_items_is_refused(billing_rules: BillingRules, new_document) -> None:  # type: ignore[no-untyped-def]
+def test_a_document_without_items_is_refused(billing_rules: CondominiumBillingRules, new_document) -> None:  # type: ignore[no-untyped-def]
     with pytest.raises(ValidationError):
         _ = create_billing_document(new_document(items=()))
 

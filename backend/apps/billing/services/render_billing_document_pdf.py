@@ -3,7 +3,7 @@ from typing import Never
 from django.template.loader import render_to_string
 from weasyprint import HTML  # pyright: ignore[reportMissingTypeStubs]
 
-from apps.billing.boleto_template import template_context
+from apps.billing.infrastructure.rendering.boleto_template import template_context
 from apps.billing.models import BillingDocument
 
 TEMPLATE = "billing/boleto_draft.html"

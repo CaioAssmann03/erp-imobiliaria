@@ -76,7 +76,7 @@ export function UnitForm({ condominiumId, unitId, listUrl }: UnitFormProps) {
           className="space-y-4"
         >
           <IdentificationSection condominiumId={condominiumId} />
-          <FractionsSection />
+          <FractionsSection condominiumId={condominiumId} />
           <MetersSection />
           <FormActions isSubmitting={isSubmitting}>
             <Button

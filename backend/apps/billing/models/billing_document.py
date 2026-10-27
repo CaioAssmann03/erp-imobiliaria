@@ -1,16 +1,20 @@
 from datetime import date
+from decimal import Decimal
 from typing import TYPE_CHECKING, ClassVar, final, override
 
 from django.db import models
 from django.db.models import Q
 
 from apps.billing.errors import BillingDocumentError
+from apps.billing.models.condominium_billing_rules import CondominiumBillingRules
 from apps.billing.models.querysets import BillingDocumentQuerySet
 from apps.billing.models.rules import BillingDocumentRules
-from apps.billing.validators import validate_first_day_of_month
-from apps.condominiums.models import BillingRules, Unit
+from apps.condominiums.models import Unit
+from apps.core.infrastructure.validators import (
+    validate_first_day_of_month,
+    validate_percentage,
+)
 from apps.core.models.base import BaseModel
-from apps.core.validators import validate_percentage
 from apps.finance.errors import FinanceValidatorError
 from apps.finance.validators import validate_positive_amount
 from apps.persons.models import Person
@@ -18,6 +22,7 @@ from apps.persons.models import Person
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
 
+    from .billing_document_delivery import BillingDocumentDelivery
     from .billing_document_item import BillingDocumentItem
     from .billing_document_registration import BillingDocumentRegistration
 
@@ -38,7 +43,10 @@ class BillingDocument(BaseModel):
         CANCELLED = ("cancelled", "Cancelled")
 
     # Overdue is derived from the due date (`overdue_on`), not stored.
-    AWAITING_PAYMENT_STATUSES: ClassVar[tuple[str, ...]] = (Status.ISSUED, Status.REGISTERED)
+    AWAITING_PAYMENT_STATUSES: ClassVar[tuple[str, ...]] = (
+        Status.ISSUED,
+        Status.REGISTERED,
+    )
     ALLOWED_NEXT_STATUSES: ClassVar[dict[str, tuple[str, ...]]] = {
         Status.ISSUED: (Status.REGISTERED, Status.CANCELLED),
         Status.REGISTERED: (Status.PAID, Status.CANCELLED),
@@ -50,22 +58,34 @@ class BillingDocument(BaseModel):
         items: "RelatedManager[BillingDocumentItem]"
         registrations: "RelatedManager[BillingDocumentRegistration]"
 
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name="billing_documents")
-    payer = models.ForeignKey(Person, on_delete=models.PROTECT, related_name="billing_documents")
+    unit = models.ForeignKey(
+        Unit, on_delete=models.PROTECT, related_name="billing_documents"
+    )
+    payer = models.ForeignKey(
+        Person, on_delete=models.PROTECT, related_name="billing_documents"
+    )
     reference_month = models.DateField(validators=[validate_first_day_of_month])
     competence_month = models.DateField(validators=[validate_first_day_of_month])
     due_date = models.DateField()
-    amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[validate_positive_amount])
-    status = models.CharField(max_length=12, choices=Status.choices, default=Status.ISSUED)
+    amount = models.DecimalField(
+        max_digits=12, decimal_places=2, validators=[validate_positive_amount]
+    )
+    status = models.CharField(
+        max_length=12, choices=Status.choices, default=Status.ISSUED
+    )
 
     discount_percentage = models.DecimalField(
         max_digits=5, decimal_places=2, default=0, validators=[validate_percentage]
     )
     discount_days = models.PositiveSmallIntegerField(default=0)
     late_fee_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    initial_late_fee_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    initial_late_fee_percentage = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True
+    )
     initial_late_fee_days = models.PositiveSmallIntegerField(null=True, blank=True)
-    interest_calculation = models.CharField(max_length=12, choices=BillingRules.InterestCalculation.choices)
+    interest_calculation = models.CharField(
+        max_length=12, choices=CondominiumBillingRules.InterestCalculation.choices
+    )
     interest_grace_days = models.PositiveSmallIntegerField(default=0)
     # 0 when the condominium had no late interest rate in force on the due date.
     monthly_interest_percentage = models.DecimalField(
@@ -96,8 +116,48 @@ class BillingDocument(BaseModel):
             ),
         )
 
+    def fee_amount(self) -> Decimal:
+        """What the document charges for the administradora itself (the registration fee), never a condominium's."""
+        return sum(
+            (item.amount for item in self.items.all() if item.credits_company),
+            Decimal(0),
+        )
+
+    def discountable_amount(self) -> Decimal:
+        """The part the early-payment discount applies to: the items of the condominium, never the fee."""
+        return self.amount - self.fee_amount()
+
     def is_overdue_on(self, reference_date: date) -> bool:
-        return self.status in self.AWAITING_PAYMENT_STATUSES and self.due_date < reference_date
+        return (
+            self.status in self.AWAITING_PAYMENT_STATUSES
+            and self.due_date < reference_date
+        )
+
+    @property
+    def active_registration(self) -> "BillingDocumentRegistration | None":
+        """The registration of the boleto the payer holds now; `active_registrations` is the view's prefetch of it."""
+        prefetched = getattr(self, "active_registrations", None)
+        if prefetched is not None:
+            return prefetched[0] if prefetched else None
+        from .billing_document_registration import (
+            BillingDocumentRegistration,  # circular at import time
+        )
+
+        return self.registrations.filter(
+            status=BillingDocumentRegistration.Status.ACTIVE
+        ).first()
+
+    @property
+    def latest_delivery(self) -> "BillingDocumentDelivery | None":
+        """The latest e-mail of the active registration: the one that carried the boleto the payer holds now."""
+        registration = self.active_registration
+        if registration is None:
+            return None
+        return max(
+            registration.deliveries.all(),
+            key=lambda delivery: delivery.created_at,
+            default=None,
+        )
 
     @override
     def clean(self) -> None:

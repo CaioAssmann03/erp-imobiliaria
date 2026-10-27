@@ -1,22 +1,12 @@
-from typing import Any
+from typing import Any, cast
 
-from apps.core.scoping import scope_to_company
+from apps.core.infrastructure.scoping import scope_to_company
+from apps.core.infrastructure.search.ranking import LIMIT_PER_TYPE
+from apps.core.infrastructure.search.term import ClassifiedTerm
 from apps.finance.models import CostCenter
-
-from .ranking import LIMIT_PER_TYPE, relevance_rank
-from .term import ClassifiedTerm
-from .text_match import name_matches
+from apps.finance.models.querysets import CostCenterQuerySet
 
 
 def search_cost_centers(user: Any, query: ClassifiedTerm) -> list[CostCenter]:
-    conditions = name_matches(query, "name")
-    if conditions is None:
-        return []
-    contains, starts_with = conditions
-    return list(
-        scope_to_company(CostCenter.objects.all(), user)
-        .filter(contains)
-        .annotate(rank=relevance_rank([starts_with], None))
-        .select_related("condominium")
-        .order_by("rank", "name")[:LIMIT_PER_TYPE]
-    )
+    cost_centers = cast(CostCenterQuerySet, scope_to_company(CostCenter.objects.all(), user))
+    return list(cost_centers.search(query)[:LIMIT_PER_TYPE])

@@ -7,7 +7,7 @@ from django.test import RequestFactory
 
 from apps.accounts.models import User
 from apps.condominiums.models import Condominium
-from apps.core.seed.documents import generate_cnpj
+from apps.seed.documents import generate_cnpj
 from apps.core.models import Company
 
 from ..admin import EntryTemplateInline

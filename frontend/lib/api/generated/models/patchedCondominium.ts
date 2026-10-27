@@ -6,8 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { Address } from './address';
-import type { AdministrationContract } from './administrationContract';
-import type { BillingRules } from './billingRules';
+import type { CondominiumAdministrationContract } from './condominiumAdministrationContract';
 import type { CondominiumTypeEnum } from './condominiumTypeEnum';
 
 /**
@@ -24,8 +23,7 @@ export interface PatchedCondominium {
   /** @nullable */
   advisor?: string | null;
   address?: Address | null;
-  administration_contract?: AdministrationContract;
-  billing_rules?: BillingRules;
+  administration_contract?: CondominiumAdministrationContract;
   type?: CondominiumTypeEnum;
   /** @maxLength 255 */
   name?: string;

@@ -8,6 +8,9 @@ class CondominiumsConfig(AppConfig):
 
     @override
     def ready(self) -> None:
+        from apps.persons.modules import register_person_module
+
         from . import audit
 
         audit.register()
+        register_person_module("condominiums")

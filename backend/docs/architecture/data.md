@@ -11,8 +11,8 @@ Company (core) ◄── PROTECT ── Person (persons) ── 1:1 ── Peopl
    │ ▲ PROTECT                          │                  └─ 1:1 ── PeopleLegal (company, cnpj, ie)
    │ └─ accounts.User.company (every user belongs to one company)
 Condominium (condominiums) ── advisor ─┘ SET_NULL
-   ├─ 1:1 Address (SET_NULL)    ├─ 1:1 AdministrationContract (CASCADE)    ├─ 1:1 BillingRules (CASCADE)
-   ├─ 1:N LateInterestRate (CASCADE: the interest history by start date)
+   ├─ 1:1 Address (core, SET_NULL)    ├─ 1:1 CondominiumAdministrationContract (CASCADE)    ├─ 1:1 CondominiumBillingRules (CASCADE, billing)
+   ├─ 1:N LateInterestRate (CASCADE, billing: the interest history by start date)
    ├─ 1:N Block (CASCADE) ── RESTRICT ── Unit.block (optional)
    ├─ 1:N Unit (CASCADE) └─ 1:N UnitPerson (CASCADE) ── PROTECT ── Person
    ├─ 1:N CostCenter (finance, CASCADE) ── 1:N EntryTemplate (PROTECT)
@@ -24,7 +24,7 @@ Person ◄── 1:1 PROTECT ── Supplier (finance: payment data)
 Company ◄── PROTECT ── AccountPayable (finance) ── PROTECT ──► Supplier, CostCenter, Condominium (optional: empty = a company expense)
 Company ◄── PROTECT ── CurrentAccount (finance; the holder is a generic relation)
 ```
-**Every model** has a UUID `id` and (except `Block`, `BillingRules`, `AdministrationContract`, and the documents keyed by their `person`) `created_at` / `updated_at`, from the abstract bases in `core/models/base.py`; `@final`; `Meta.verbose_name(_plural)`; `Meta.ordering` when listed; every model declares `company_lookup`.
+**Every model** has a UUID `id` and (except `Block`, `CondominiumBillingRules`, `CondominiumAdministrationContract`, and the documents keyed by their `person`) `created_at` / `updated_at`, from the abstract bases in `core/models/base.py`; `@final`; `Meta.verbose_name(_plural)`; `Meta.ordering` when listed; every model declares `company_lookup`.
 
 **`on_delete`:** parts owned by a condominium CASCADE; `Condominium` → `Company` PROTECT; advisor and address SET_NULL; `Unit.block` RESTRICT (a block with units cannot go alone, a condominium delete still cascades); `UnitPerson.person` PROTECT (unlink first); `EntryTemplate.cost_center` PROTECT; a billing plan item's cost center and entry template PROTECT (deactivate them instead).
 
@@ -40,13 +40,13 @@ Rules live in the models; the dashboard and API only call them. **Implemented** 
 |---|---|---|
 | Fee | Monthly fixed revenue = sum of `fee_amount` of **active** condominiums with a fixed fee (top 8 shown) | Implemented (dashboard) |
 | Fee | Variable fee = percentage of the period's revenue/expense, limited by floor and ceiling; `charges_iss_on_fee` | Stored — *confirm* (needs finance entries) |
-| Adjustment | Next date = `adjustment_base_date` + `adjustment_period_months` (day clamped to month end); overdue when before today; "next 30 days" within `[today, today+30]`; chart = next 6 months + overdue | Implemented (`AdministrationContract.next_adjustment_date()`, dashboard) |
+| Adjustment | Next date = `adjustment_base_date` + `adjustment_period_months` (day clamped to month end); overdue when before today; "next 30 days" within `[today, today+30]`; chart = next 6 months + overdue | Implemented (`CondominiumAdministrationContract.next_adjustment_date()`, dashboard) |
 | Adjustment | `adjustment_index` is free text; no index values, no recalculated fee, base date not advanced | Stored / Planned — *confirm* |
-| Apportionment | For each of the six ideal fractions, the active units of a condominium cannot sum more than 1 (+ tolerance 0.0001). A pendency (dashboard, `?pending=`): the 1st fraction does not sum 1, or a 2nd–6th one is in use (sum > 0) and does not sum 1 (`|sum − 1| > 0.0001`) | Implemented (`UnitRules`, `Unit.is_apportionment_inconsistent`; spec 020) |
-| Apportionment | Split expenses among units by one of the fractions (the billing plan item names its number) | Planned (phase 4) |
+| Apportionment | For each apportionment criterion of a condominium, the active units' fractions cannot sum more than 1 (+ tolerance 0.0001). A pendency (dashboard, `?pending=`): the main criterion (position 1) does not sum 1, or another one is in use (sum > 0) and does not sum 1 (`|sum − 1| > 0.0001`). Criteria are named by the condominium and unlimited | Implemented (`UnitApportionmentFractionRules`, `CondominiumApportionmentCriterion.is_inconsistent`; specs 020 and 039) |
+| Apportionment | Split expenses among units by one of the criteria (the billing plan item names its criterion) | Implemented (phase 4; spec 047) |
 | Billing rules | `due_on_business_day`, early-payment discount (% + days), `credit_limit` | Stored — *confirm*; the due date and the discount terms are read by the monthly issuance, `credit_limit` is not |
 | Monthly issuance | Per condominium and reference month, one document per active, unblocked unit (not the exempt manager unit) from the plans in force; shares rounded half-up with the leftover cents to the largest fraction; a rerun adds nothing; a share whose fraction does not close at 1 fails the run | Implemented (`issue_condominium_billing`, `BillingRun`; spec 026) |
-| Billing months | From a reference month R: the due month is R (`due_month = reference`) or R + 1 (`following`); the competence is the due month (`competence_month = same_as_due`) or the month before it (`before_due`) | Implemented as `BillingRules.due_month_of` / `competence_month_of` (spec 020); used by phase 4 |
+| Billing months | From a reference month R: the due month is R (`due_month = reference`) or R + 1 (`following`); the competence is the due month (`competence_month = same_as_due`) or the month before it (`before_due`) | Implemented as `CondominiumBillingRules.due_month_of` / `competence_month_of` (spec 020); used by phase 4 |
 | Billing document | One non-cancelled document per unit and reference month; the terms are copied from the rules at issuance; amount = sum of the items; only the status changes (issued → registered → paid, or cancelled); overdue is derived from the due date | Implemented (`BillingDocumentRules`; spec 025) |
 | Late payment | Fine `late_fee_percentage` (0–2 %), or the first-days tier (`initial_late_fee_percentage` within the first `initial_late_fee_days` days of delay, both or neither). Interest: the `LateInterestRate` in force on the date (latest start not after it; none = no interest), counted as the whole month (`full_month`) or rate ÷ 30 per day late (`per_day`), after `interest_grace_days`. Monetary correction is not modeled | Stored (spec 020); the calculation is phases 4–5 |
 | Units | `type`, `resident_count`, `registration_number`, utility values, `is_manager_unit`; `is_billing_blocked` is counted in the dashboard, blocking entries is planned | Stored |
@@ -55,7 +55,7 @@ Rules live in the models; the dashboard and API only call them. **Implemented** 
 | Links | Lease ending = tenant link with `end_date` in [today−30, today+60] | Implemented (dashboard) |
 | Person | Individual (CPF) or legal (CNPJ), kind fixed after creation (UI rule); documents digits-only with check digits | Implemented |
 | IDs | `Condominium` and `Person` have a `code` (their "ID"); a unit has none (it is its condominium plus its number); owners and tenants are identified by the person's `code`; a numeric search finds the exact `code` first | Implemented (spec 019) |
-| Modules | A person belongs to one or more modules (`condominiums`, `rentals`); lists, pickers and search show only the module's people, and a unit link needs `condominiums`; the same person keeps one `code` in every module | Implemented (spec 019); the rentals models follow in phase 8 |
+| Modules | A person is released to zero or more modules by one `PersonModuleMembership` row per module (a text key the registry validates; `persons` imports no module app); lists, pickers and search show only the module's people, and a unit link needs `condominiums`; the same person keeps one `code` in every module | Implemented (specs 019, 038 and 040); the rentals models follow in phase 8 |
 | Finance | `CostCenter` (was "sub-conta") groups entries per condominium; condominiums with none are flagged. `EntryTemplate` (was "histórico"): `admin_fee_incidence_percentage`, `accumulate_to_balance`, `has_accumulation_history`, `is_subject_to_social_security` | Models only — meanings inferred from Sami, *confirm* |
 
 **Dashboard counters** (over **active** condominiums and units; changing a definition changes the API contract): `units_without_responsible`, `inconsistent_apportionment`, `overdue_adjustments`, `adjustments_next_30_days`, `leases_ending`, `without_cost_centers`, `billing_blocked_units`.

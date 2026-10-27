@@ -41,6 +41,6 @@ An app omits what it does not need (`accounts` has only auth views). Other code 
 
 **Filter/search:** `filterset_fields` for exact, `filters.py` for derived, `search_fields` (`icontains`; add a trigram index when the table is large).
 
-**Data migration/seed:** one-off data = an idempotent `RunPython` with a reverse; demo data = `seed_demo` (deterministic, idempotent, `--clear` removes only what it created).
+**Data migration/seed:** one-off data = an idempotent `RunPython` with a reverse; demo data = `seed_demo`, in the `seed` app (deterministic, idempotent, `--clear` removes only what it created).
 
 Celery tasks, external integrations (the bank API) and roles have no recipe yet: write it with the first one, in a spec.

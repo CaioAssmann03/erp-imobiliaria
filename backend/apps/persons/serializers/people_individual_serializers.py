@@ -3,7 +3,7 @@ from typing import ClassVar, final
 
 from rest_framework import serializers
 
-from apps.core.validators.cpf import validate_cpf
+from apps.core.infrastructure.validators.cpf import validate_cpf
 
 from ..models import PeopleIndividual
 

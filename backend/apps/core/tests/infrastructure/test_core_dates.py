@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 
-from apps.core.dates import add_months
+from apps.core.infrastructure.dates import add_months
 
 
 @pytest.mark.parametrize(

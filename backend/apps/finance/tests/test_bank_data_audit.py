@@ -5,7 +5,7 @@ import re
 import pytest
 from auditlog.models import LogEntry
 
-from apps.core.audit import MASKED_VALUE
+from apps.core.infrastructure.audit import MASKED_VALUE
 from apps.core.models import Company
 from apps.persons.models import Person
 

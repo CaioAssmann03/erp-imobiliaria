@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from apps.billing.errors import BillingDocumentRegistrationError, GatewayAccountError
-from apps.billing.gateway.asaas_client import GatewayError, GatewayUnavailable
+from apps.billing.infrastructure.gateway.asaas_client import GatewayError, GatewayUnavailable
 from apps.persons.models import PeopleIndividual
 
 from ..models import BillingDocument, BillingDocumentRegistration, GatewayAccount, GatewayCustomer
@@ -58,9 +58,7 @@ class FakeChargeGateway:
 @pytest.fixture
 def account(document: BillingDocument) -> GatewayAccount:
     return GatewayAccount.objects.create(
-        condominium=document.unit.condominium,
-        gateway_account_id="acc-1",
-        wallet_id="w",
+        company=document.unit.condominium.company,
         api_key="k",
         webhook_token="t",
         status=GatewayAccount.Status.ACTIVE,
@@ -191,3 +189,34 @@ def test_preconditions_are_refused(document: BillingDocument, account: GatewayAc
         _ = register_billing_document(document, FakeChargeGateway())
 
     assert raised.value.error is expected
+
+
+def test_uses_the_company_account_for_any_condominium(  # type: ignore[no-untyped-def]
+    account: GatewayAccount, other_condominium, billing_rules, new_document, document: BillingDocument
+) -> None:
+    """One account serves every condominium of the company, and one person is one customer across them (spec 037, R3, R4)."""
+    from decimal import Decimal
+
+    from apps.billing.services.create_billing_document import NewBillingDocumentItem, create_billing_document
+    from apps.billing.models import CondominiumBillingRules
+    from apps.condominiums.models import Unit
+    from apps.finance.models import CostCenter, EntryTemplate
+
+    _ = CondominiumBillingRules.objects.create(condominium=other_condominium)
+    center = CostCenter.objects.create(condominium=other_condominium, name="Taxa Ordinária")
+    template = EntryTemplate.objects.create(cost_center=center, name="REC Taxa Ordinária")
+    other_document = create_billing_document(
+        new_document(
+            unit=Unit.objects.create(condominium=other_condominium, name="1"),
+            items=(NewBillingDocumentItem("Taxa condominial", center, template, Decimal("300.00")),),
+        )
+    )
+    gateway = FakeChargeGateway()
+
+    first = register_billing_document(document, gateway)
+    gateway.payment_id = "pay_2"
+    second = register_billing_document(other_document, gateway)
+
+    assert first.gateway_account == second.gateway_account == account
+    assert GatewayCustomer.objects.count() == 1
+    assert len(gateway.created_customers) == 1

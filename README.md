@@ -17,18 +17,41 @@ Documentação completa:
 
 ## Rodando localmente
 
-Pré-requisitos: Docker Desktop.
+Pré-requisitos: Docker Desktop (com `docker compose`) e Git.
 
 ```bash
+git clone https://github.com/CaioAssmann03/erp-imobiliaria.git
+cd erp-imobiliaria
 cp .env.example .env
-docker-compose up -d
-docker-compose exec backend python manage.py migrate
-docker-compose exec backend python manage.py createsuperuser
 ```
 
-- API: http://localhost:8000/api/docs/
-- Admin: http://localhost:8000/admin/
-- Frontend: http://localhost:3000 (login com o usuário criado acima)
+Duas chaves são obrigatórias e vêm com `change-me` no `.env`; gere as duas sem instalar nada (só Docker) e cole no `.env`:
+
+```bash
+# JWT_SIGNING_KEY (uma linha, com \n literal)
+docker run --rm python:3.12-slim sh -c "pip install -q cryptography >/dev/null 2>&1 && python -c \"from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey as K; from cryptography.hazmat.primitives import serialization as s; print(K.generate().private_bytes(s.Encoding.PEM, s.PrivateFormat.PKCS8, s.NoEncryption()).decode().strip().replace(chr(10), chr(92) + 'n'))\""
+
+# GATEWAY_CREDENTIALS_KEY
+docker run --rm python:3.12-slim sh -c "pip install -q cryptography >/dev/null 2>&1 && python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""
+```
+
+No Windows, o script `scripts/local-up.ps1` faz tudo isso de uma vez (chaves, containers, migrate, usuário e dados de exemplo): `powershell -ExecutionPolicy Bypass -File .\scripts\local-up.ps1`.
+
+Depois:
+
+```bash
+docker compose up -d --build
+docker compose exec backend python manage.py migrate
+docker compose exec backend python manage.py createsuperuser   # usuário e senha para entrar
+docker compose exec backend python manage.py seed_demo         # dados FICTÍCIOS de exemplo (--clear remove)
+```
+
+- Frontend: http://localhost:3000 (entre com o usuário criado acima)
+- API: http://localhost:8000/api/docs/ · Admin: http://localhost:8000/admin/
+- Arquivos (PDF do boleto, comprovantes): o `docker compose` já sobe um armazenamento S3 local (serviço `s3`, porta 9090) com o bucket `erp-dev`; assim "Baixar PDF" funciona no notebook. Sem ele o PDF responde 503.
+- Porta 5432 ocupada? Ponha `POSTGRES_HOST_PORT=5434` no `.env` e rode `docker compose up -d` de novo.
+- Parar: `docker compose down` (os dados ficam); apagar tudo: `docker compose down -v`.
+- Só dados de exemplo no seu notebook: **nunca** coloque dados reais de clientes nele.
 
 ## Deploy na VPS
 
@@ -37,7 +60,7 @@ HTTPS vem do Caddy que já existe na VPS (um bloco no `Caddyfile` aponta o domí
 nome provisório é `erp.177-7-63-175.sslip.io`. Os comprovantes de pagamento ficam num bucket Cloudflare R2
 (variáveis `AWS_*`; sem elas só a parte de comprovantes fica indisponível). O passo a passo, as variáveis e o
 que fazer quando algo falha estão em [`backend/docs/architecture/operations.md`](backend/docs/architecture/operations.md)
-(seção *Production on the VPS*). O compose de produção e o `deploy.sh` estão versionados em [`deploy/vps/`](deploy/vps/README.md).
+(seção *Production on the VPS*). O compose de produção e o `deploy.sh` ficam só na VPS: não são mais versionados neste repositório.
 
 ## Client da API no frontend
 

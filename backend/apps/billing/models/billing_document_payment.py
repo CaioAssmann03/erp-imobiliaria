@@ -3,7 +3,9 @@ from typing import final, override
 from django.db import models
 
 from apps.billing.models.billing_document import BillingDocument
-from apps.billing.models.billing_document_registration import BillingDocumentRegistration
+from apps.billing.models.billing_document_registration import (
+    BillingDocumentRegistration,
+)
 from apps.billing.models.gateway_event import GatewayEvent
 from apps.core.models.base import BaseModel
 from apps.finance.errors import FinanceValidatorError
@@ -14,13 +16,23 @@ from apps.finance.validators import validate_positive_amount
 class BillingDocumentPayment(BaseModel):
     """The payment of a billing document as the gateway reported it (spec 032); one per document."""
 
-    document = models.OneToOneField(BillingDocument, on_delete=models.PROTECT, related_name="payment")
-    registration = models.ForeignKey(BillingDocumentRegistration, on_delete=models.PROTECT, related_name="payments")
-    gateway_event = models.ForeignKey(GatewayEvent, on_delete=models.PROTECT, related_name="payments")
+    document = models.OneToOneField(
+        BillingDocument, on_delete=models.PROTECT, related_name="payment"
+    )
+    registration = models.ForeignKey(
+        BillingDocumentRegistration, on_delete=models.PROTECT, related_name="payments"
+    )
+    gateway_event = models.ForeignKey(
+        GatewayEvent, on_delete=models.PROTECT, related_name="payments"
+    )
     paid_on = models.DateField()
-    amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[validate_positive_amount])
+    amount = models.DecimalField(
+        max_digits=12, decimal_places=2, validators=[validate_positive_amount]
+    )
     # What reaches the condominium after the gateway fee; informational.
-    net_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    net_amount = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
 
     company_lookup = "document__unit__condominium__company"
 

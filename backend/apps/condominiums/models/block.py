@@ -4,11 +4,14 @@ from django.db import models
 
 from apps.condominiums.errors import BlockError
 from apps.condominiums.models.condominium import Condominium
+from apps.condominiums.models.querysets import BlockQuerySet
 from apps.core.models.base import UUIDModel
 
 
 @final
 class Block(UUIDModel):
+    objects = BlockQuerySet.as_manager()
+
     condominium = models.ForeignKey(
         Condominium, on_delete=models.CASCADE, related_name="blocks"
     )

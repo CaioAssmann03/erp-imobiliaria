@@ -5,7 +5,9 @@ skip-if: charge registration → roadmap/phase-5-billing-bank-integration/02-gat
 ---
 # 030 — Gateway accounts
 
-**Status:** in-progress · **Level:** full · **Roadmap:** phase 5 part 01 · **Apps:** billing · **Frontend impact:** none
+**Status:** dropped · **Level:** full · **Roadmap:** phase 5 part 01 · **Apps:** billing · **Frontend impact:** none
+
+> **Dropped on 2026-10-26, replaced by [037](037-single-gateway-account.md):** the administradora uses one Asaas account instead of a sub-account per condominium. The onboarding and status sync this spec built were removed; the text below is the record of that design.
 
 ## Open questions
 None.
@@ -45,7 +47,7 @@ Constraint: unique `condominium`. Rule in `models/rules/gateway_account.py` only
 
 ## S — Structure
 - `apps/billing/models/gateway_account.py`, `apps/billing/migrations/NNNN_gatewayaccount.py`, `apps/billing/admin.py` (read-only, credentials excluded, "Sync status" action)
-- `apps/core/fields/encrypted_text.py`; `config/settings` reads `GATEWAY_CREDENTIALS_KEY`, `ASAAS_API_KEY`, `ASAAS_BASE_URL`
+- `apps/billing/fields.py` (moved from `core` by the structure cleanup); `config/settings` reads `GATEWAY_CREDENTIALS_KEY`, `ASAAS_API_KEY`, `ASAAS_BASE_URL`
 - `apps/billing/gateway/asaas_client.py`, `apps/billing/services/onboard_condominium_at_gateway.py`, `apps/billing/services/sync_gateway_account_status.py`, `apps/billing/errors/gateway_account.py`
 - `.env.example` (placeholder for `GATEWAY_CREDENTIALS_KEY` with the generation command); `architecture/overview.md`; `apps/billing.md`
 - No endpoint in this spec: onboarding runs from the management command `onboard_gateway_account <condominium_code>`.

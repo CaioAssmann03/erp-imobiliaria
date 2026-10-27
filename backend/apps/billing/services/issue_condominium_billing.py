@@ -9,9 +9,12 @@ from django.utils import timezone
 
 from apps.billing.models import (
     BillingDocument,
+    BillingEntry,
+    BillingEntryUnit,
     BillingPlan,
     BillingPlanItem,
     BillingRun,
+    CondominiumBillingRules,
     GatewayAccount,
 )
 from apps.billing.services.create_billing_document import (
@@ -19,7 +22,7 @@ from apps.billing.services.create_billing_document import (
     NewBillingDocumentItem,
     create_billing_document,
 )
-from apps.condominiums.models import BillingRules, Condominium, Unit
+from apps.condominiums.models import Condominium, Unit
 from config.celery import app as celery_app
 
 ProblemCode = BillingRun.ProblemCode
@@ -44,26 +47,28 @@ def issue_condominium_billing(condominium: Condominium, reference_month: date) -
 
 def _issue_units(run: BillingRun) -> None:
     condominium, reference_month = run.condominium, run.reference_month
-    billing_rules = BillingRules.objects.filter(condominium=condominium).first()
+    billing_rules = CondominiumBillingRules.objects.filter(condominium=condominium).first()
     if billing_rules is None:
         return _fail_condominium(run, ProblemCode.NO_BILLING_RULES)
     items = _items_in_force(condominium, reference_month)
-    if not items:
+    entries = _entries_in_force(condominium, reference_month)
+    if not items and not entries:
         return _fail_condominium(run, ProblemCode.NO_PLAN_IN_FORCE)
     units = list(
         condominium.units.filter(active=True).select_related("block").prefetch_related("unit_people__person")
     )
-    apportionment_totals = Unit.objects.filter(condominium=condominium).apportionment_totals()
+    apportionment_totals = {criterion.pk: criterion.total for criterion in condominium.apportionment_criteria.with_total()}
     if any(item.uses_inconsistent_apportionment(apportionment_totals) for item in items):
         return _fail_condominium(run, ProblemCode.INCONSISTENT_APPORTIONMENT)
 
-    gateway_account = GatewayAccount.objects.filter(condominium=condominium).first()
+    gateway_account = GatewayAccount.objects.filter(company_id=condominium.company_id).first()
     registers_at_gateway = gateway_account is not None and gateway_account.can_register_charges()
     if not registers_at_gateway:
         # The documents are still issued, as drafts: they are registered once the account is active.
         _record_problem(run, None, ProblemCode.GATEWAY_ACCOUNT_MISSING)
 
     amounts_by_item = [item.amounts_by_unit(units) for item in items]
+    amounts_by_entry = [entry.amounts_for_selected_units() for entry in entries]
     already_issued_unit_ids = set(
         BillingDocument.objects.filter(unit__condominium=condominium, reference_month=reference_month)
         .exclude(status=BillingDocument.Status.CANCELLED)
@@ -77,9 +82,21 @@ def _issue_units(run: BillingRun) -> None:
             run.already_issued_count += 1
             continue
         lines = [
-            NewBillingDocumentItem(item.description, item.cost_center, item.entry_template, amounts[unit.pk])
+            NewBillingDocumentItem(item.line_description(), item.cost_center, item.entry_template, amounts[unit.pk])
             for item, amounts in zip(items, amounts_by_item, strict=True)
             if amounts[unit.pk] > Decimal(0)
+        ]
+        lines += [
+            NewBillingDocumentItem(
+                entry.line_description(reference_month),
+                entry.cost_center,
+                entry.entry_template,
+                amounts[unit.pk],
+                entry,
+            )
+            for entry, amounts in zip(entries, amounts_by_entry, strict=True)
+            if (entry.entry_template is not None or entry.credits_company)
+            and amounts.get(unit.pk, Decimal(0)) > Decimal(0)
         ]
         skip_code = _skip_code(unit, billing_rules, has_lines=bool(lines))
         payer = unit.billing_payer(today) if skip_code is None else None
@@ -111,13 +128,24 @@ def _items_in_force(condominium: Condominium, reference_month: date) -> list[Bil
     plans = BillingPlan.objects.in_force(reference_month).filter(condominium=condominium).prefetch_related(
         Prefetch(
             "items",
-            queryset=BillingPlanItem.objects.select_related("cost_center", "entry_template").order_by("position"),
+            queryset=BillingPlanItem.objects.select_related("event", "cost_center", "entry_template").order_by("position"),
         )
     )
     return [item for plan in plans for item in plan.items.all()]
 
 
-def _skip_code(unit: Unit, billing_rules: BillingRules, has_lines: bool) -> BillingRun.ProblemCode | None:
+def _entries_in_force(condominium: Condominium, reference_month: date) -> list[BillingEntry]:
+    """The launches the month's boleto carries (spec 039), in the order they were written."""
+    return list(
+        BillingEntry.objects.in_force(reference_month)
+        .filter(condominium=condominium)
+        .select_related("event", "cost_center", "entry_template")
+        .prefetch_related(Prefetch("entry_units", queryset=BillingEntryUnit.objects.select_related("unit")))
+        .order_by("created_at")
+    )
+
+
+def _skip_code(unit: Unit, billing_rules: CondominiumBillingRules, has_lines: bool) -> BillingRun.ProblemCode | None:
     if unit.is_billing_blocked:
         return ProblemCode.UNIT_BILLING_BLOCKED
     if billing_rules.exempts(unit):

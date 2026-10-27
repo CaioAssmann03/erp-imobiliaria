@@ -1,14 +1,14 @@
-from apps.core.errors.base import RuleError
+from apps.core.infrastructure.errors.base import RuleError
 
 
 class GatewayAccountError(RuleError):
-    CONDOMINIUM_ADDRESS_INCOMPLETE = (
-        "gateway_account.condominium.address_incomplete",
-        "The condominium needs a complete address (street, number, district, zip code) to open a gateway account.",
+    API_KEY_INVALID = (
+        "gateway_account.api_key.invalid",
+        "The gateway did not accept this API key.",
     )
-    ALREADY_REGISTERED_REMOTELY = (
-        "gateway_account.condominium.already_registered_remotely",
-        "The gateway already has an account for this CNPJ but the credentials are not stored here; handle it manually.",
+    WEBHOOK_URL_MISSING = (
+        "gateway_account.webhook_url.missing",
+        "ASAAS_WEBHOOK_URL is not set, so there is no address to register at the gateway.",
     )
     GATEWAY_UNAVAILABLE = (
         "gateway_account.gateway.unavailable",

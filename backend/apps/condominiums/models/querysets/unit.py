@@ -1,61 +1,54 @@
 import uuid
-from collections.abc import Mapping
 from datetime import date
-from decimal import Decimal
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from django.db import models
-from django.db.models import Exists, OuterRef, Sum
-from django.db.models.functions import Coalesce
+from django.db.models import Exists, OuterRef, Q
+
+from apps.core.infrastructure.search.ranking import relevance_rank
+from apps.core.models.querysets import CountsByTypeQuerySet
 
 if TYPE_CHECKING:
     # Used only in the string generic argument below: ruff cannot see it, hence the noqa.
     from apps.condominiums.models.unit import Unit  # noqa: F401
+    from apps.core.infrastructure.search.term import ClassifiedTerm
 
 
-def _fraction_total_alias(fraction_number: int) -> str:
-    return f"fraction_{fraction_number}_total"
-
-
-class UnitQuerySet(models.QuerySet["Unit"]):
-    def _fraction_numbers(self) -> range:
-        return range(1, len(self.model.IDEAL_FRACTION_FIELDS) + 1)
-
-    def _fraction_totals(self) -> dict[str, Any]:
-        """The sum of each ideal fraction, under the alias `fraction_<number>_total` (1 to 6)."""
-        return {
-            _fraction_total_alias(number): Coalesce(Sum(field_name), Decimal(0))
-            for number, field_name in enumerate(self.model.IDEAL_FRACTION_FIELDS, start=1)
-        }
-
-    def apportionment_totals(self) -> list[Decimal]:
-        """Sum of each of the six ideal fractions (the 1st first) over the active units of the queryset."""
-        aggregates: dict[str, Decimal] = self.filter(active=True).aggregate(**self._fraction_totals())
-        return [aggregates[_fraction_total_alias(number)] for number in self._fraction_numbers()]
+class UnitQuerySet(CountsByTypeQuerySet["Unit"]):
+    def active(self) -> "UnitQuerySet":
+        return self.filter(active=True)
 
     def inconsistent_apportionment_condominium_ids(self) -> list[uuid.UUID]:
-        """Ids of condominiums whose active units' ideal fractions do not close at 1 (`Unit.is_apportionment_inconsistent`)."""
-        sums = (
-            self.filter(active=True, condominium__active=True)
-            .values("condominium")
-            .annotate(**self._fraction_totals())
+        """Ids of condominiums with an active unit whose criteria have a pendency (`CondominiumApportionmentCriterion.is_inconsistent`)."""
+        from apps.condominiums.models.condominium_apportionment_criterion import (
+            CondominiumApportionmentCriterion,
         )
-        return [row["condominium"] for row in sums if self._has_inconsistent_fraction(row)]
 
-    def _has_inconsistent_fraction(self, totals_by_alias: Mapping[str, Any]) -> bool:
-        return any(
-            self.model.is_apportionment_inconsistent(number, totals_by_alias[_fraction_total_alias(number)])
-            for number in self._fraction_numbers()
+        active_units = self.active().filter(condominium__active=True)
+        criteria = CondominiumApportionmentCriterion.objects.filter(
+            condominium__in=active_units.values("condominium")
+        ).inconsistent(active_units)
+        return list(
+            criteria.order_by().values_list("condominium_id", flat=True).distinct()
         )
+
+    def _has_current_link(self, reference_date: date) -> Exists:
+        from apps.condominiums.models.unit_person import UnitPerson
+
+        return Exists(
+            UnitPerson.objects.current(reference_date).filter(unit=OuterRef("pk"))
+        )
+
+    def with_responsible(self, reference_date: date) -> "UnitQuerySet":
+        """Active units with a current owner or tenant."""
+        return self.active().filter(self._has_current_link(reference_date))
 
     def without_responsible(self, reference_date: date) -> "UnitQuerySet":
         """Active units with no current owner or tenant: there is nobody to bill."""
-        from apps.condominiums.models.unit_person import UnitPerson
+        return self.active().filter(~self._has_current_link(reference_date))
 
-        has_current_link = Exists(
-            UnitPerson.objects.current(reference_date).filter(unit=OuterRef("pk"))
-        )
-        return self.filter(active=True).filter(~has_current_link)
+    def billing_blocked(self) -> "UnitQuerySet":
+        """Active units whose billing is blocked."""
+        return self.active().filter(is_billing_blocked=True)
 
     def with_lease_ending_soon(self, reference_date: date) -> "UnitQuerySet":
         """Units that have a tenant link ending soon (see `UnitPersonQuerySet.leases_ending_soon`)."""
@@ -63,3 +56,17 @@ class UnitQuerySet(models.QuerySet["Unit"]):
 
         ending = UnitPerson.objects.leases_ending_soon(reference_date)
         return self.filter(pk__in=ending.values("unit"))
+
+    def search(self, query: "ClassifiedTerm") -> "UnitQuerySet":
+        """Units whose number matches the global search term, the best match first.
+
+        A unit has no ID, so a term that only asks for an ID (a single digit) finds none.
+        """
+        if not query.matches_text:
+            return self.none()
+        return (
+            self.filter(name__icontains=query.text)
+            .annotate(rank=relevance_rank([Q(name__istartswith=query.text)], None))
+            .select_related("condominium")
+            .order_by("rank", "name")
+        )

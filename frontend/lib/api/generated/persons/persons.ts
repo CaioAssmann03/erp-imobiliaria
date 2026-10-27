@@ -29,6 +29,7 @@ import type {
   PaginatedPersonList,
   PatchedPerson,
   Person,
+  PersonsCreateParams,
   PersonsListParams
 } from '../models';
 
@@ -178,6 +179,7 @@ export function usePersonsList<TData = Awaited<ReturnType<typeof personsList>>, 
  */
 export const personsCreate = (
     person: NonReadonly<Person>,
+    params?: PersonsCreateParams,
  signal?: AbortSignal
 ) => {
 
@@ -185,7 +187,8 @@ export const personsCreate = (
       return customInstance<Person>(
       {url: `/api/persons/`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: person, signal
+      data: person,
+        params, signal
     },
       );
     }
@@ -210,9 +213,9 @@ const {mutation: mutationOptions} = options ?
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof personsCreate>>, PersonsCreateMutationVariables> = (props) => {
-          const {data} = props ?? {};
+          const {data,params} = props ?? {};
 
-          return  personsCreate(data,)
+          return  personsCreate(data,params,)
         }
 
 
@@ -225,7 +228,7 @@ const {mutation: mutationOptions} = options ?
     export type PersonsCreateMutationResult = NonNullable<Awaited<ReturnType<typeof personsCreate>>>
     export type PersonsCreateMutationBody = NonReadonly<Person>
     export type PersonsCreateMutationError = ErrorResponse
-    export type PersonsCreateMutationVariables = {data: NonReadonly<Person>}
+    export type PersonsCreateMutationVariables = {data: NonReadonly<Person>;params?: PersonsCreateParams}
 
     export const usePersonsCreate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof personsCreate>>, TError,PersonsCreateMutationVariables, TContext>, }
@@ -525,4 +528,130 @@ const {mutation: mutationOptions} = options ?
         TContext
       > => {
       return useMutation(getPersonsDestroyMutationOptions(options), queryClient);
+    }
+    /**
+ * PUT releases the person to the module, DELETE takes them out; both are idempotent.
+ */
+export const personsModulesUpdate = (
+    id: string,
+    module: string,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<void>(
+      {url: `/api/persons/${id}/modules/${module}/`, method: 'PUT', signal
+    },
+      );
+    }
+
+
+
+
+export const getPersonsModulesUpdateMutationKey = () => ['personsModulesUpdate'] as const;
+
+export const getPersonsModulesUpdateMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof personsModulesUpdate>>, TError,PersonsModulesUpdateMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof personsModulesUpdate>>, TError,PersonsModulesUpdateMutationVariables, TContext> => {
+
+const mutationKey = getPersonsModulesUpdateMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof personsModulesUpdate>>, PersonsModulesUpdateMutationVariables> = (props) => {
+          const {id,module} = props ?? {};
+
+          return  personsModulesUpdate(id,module,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PersonsModulesUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof personsModulesUpdate>>>
+
+    export type PersonsModulesUpdateMutationError = ErrorResponse
+    export type PersonsModulesUpdateMutationVariables = {id: string;module: string}
+
+    export const usePersonsModulesUpdate = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof personsModulesUpdate>>, TError,PersonsModulesUpdateMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof personsModulesUpdate>>,
+        TError,
+        PersonsModulesUpdateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPersonsModulesUpdateMutationOptions(options), queryClient);
+    }
+    /**
+ * PUT releases the person to the module, DELETE takes them out; both are idempotent.
+ */
+export const personsModulesDestroy = (
+    id: string,
+    module: string,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<void>(
+      {url: `/api/persons/${id}/modules/${module}/`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+
+export const getPersonsModulesDestroyMutationKey = () => ['personsModulesDestroy'] as const;
+
+export const getPersonsModulesDestroyMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof personsModulesDestroy>>, TError,PersonsModulesDestroyMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof personsModulesDestroy>>, TError,PersonsModulesDestroyMutationVariables, TContext> => {
+
+const mutationKey = getPersonsModulesDestroyMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof personsModulesDestroy>>, PersonsModulesDestroyMutationVariables> = (props) => {
+          const {id,module} = props ?? {};
+
+          return  personsModulesDestroy(id,module,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PersonsModulesDestroyMutationResult = NonNullable<Awaited<ReturnType<typeof personsModulesDestroy>>>
+
+    export type PersonsModulesDestroyMutationError = ErrorResponse
+    export type PersonsModulesDestroyMutationVariables = {id: string;module: string}
+
+    export const usePersonsModulesDestroy = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof personsModulesDestroy>>, TError,PersonsModulesDestroyMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof personsModulesDestroy>>,
+        TError,
+        PersonsModulesDestroyMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPersonsModulesDestroyMutationOptions(options), queryClient);
     }

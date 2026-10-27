@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Boleto - rascunho</title>
+<style>
+  @page { size: A4; margin: 18mm 15mm; }
+  body { font-family: "Liberation Sans", Arial, Helvetica, sans-serif; font-size: 10pt; color: #1a1a1a; }
+  .watermark { position: fixed; top: 38%; left: 0; width: 100%; text-align: center; font-size: 70pt; font-weight: bold;
+               color: rgba(200, 0, 0, 0.12); transform: rotate(-30deg); letter-spacing: 4pt; }
+  header { border-bottom: 2px solid #1a1a1a; padding-bottom: 6pt; margin-bottom: 10pt; }
+  header .notice { float: right; color: #b00000; font-weight: bold; }
+  h1 { font-size: 15pt; margin: 0 0 2pt 0; }
+  .muted { color: #555; }
+  .grid { width: 100%; border-collapse: collapse; margin-bottom: 10pt; }
+  .grid td { border: 1px solid #999; padding: 4pt 6pt; vertical-align: top; }
+  .label { display: block; font-size: 7.5pt; color: #555; text-transform: uppercase; }
+  table.items { width: 100%; border-collapse: collapse; margin-bottom: 8pt; }
+  table.items th { text-align: left; background: #eee; border: 1px solid #999; padding: 4pt 6pt; }
+  table.items td { border: 1px solid #ccc; padding: 4pt 6pt; }
+  .amount { text-align: right; white-space: nowrap; }
+  .total td { font-weight: bold; border-top: 2px solid #1a1a1a; }
+  .terms { margin: 8pt 0; padding-left: 14pt; }
+  .barcode { border: 1px dashed #999; padding: 14pt; text-align: center; color: #666; margin-top: 14pt; }
+</style>
+</head>
+<body>
+<div class="watermark">RASCUNHO</div>
+
+<header>
+  <span class="notice">Sem valor para pagamento</span>
+  <h1>{{ administrator_name }}</h1>
+  <div class="muted">Beneficiário · CNPJ {{ administrator_cnpj }}</div>
+</header>
+
+<table class="grid">
+  <tr>
+    <td colspan="2"><span class="label">Condomínio</span>{{ beneficiary_name }}<br>
+      <span class="muted">CNPJ {{ beneficiary_cnpj }}{% if beneficiary_address %} — {{ beneficiary_address }}{% endif %}</span></td>
+    <td><span class="label">Vencimento</span><strong>{{ due_date }}</strong></td>
+  </tr>
+  <tr>
+    <td colspan="2"><span class="label">Pagador</span>{{ payer_name }}{% if payer_document %}<br>
+      <span class="muted">{{ payer_document }}</span>{% endif %}</td>
+    <td><span class="label">Valor do documento</span><strong>{{ total }}</strong></td>
+  </tr>
+  <tr>
+    <td><span class="label">Unidade</span>{{ unit_label }}</td>
+    <td><span class="label">Referência</span>{{ reference_month }}</td>
+    <td><span class="label">Competência</span>{{ competence_month }}</td>
+  </tr>
+</table>
+
+<table class="items">
+  <thead><tr><th>Descrição</th><th>Centro de custo</th><th class="amount">Valor</th></tr></thead>
+  <tbody>
+  {% for item in items %}
+    <tr><td>{{ item.description }}</td><td>{{ item.cost_center }}</td><td class="amount">{{ item.amount }}</td></tr>
+  {% endfor %}
+    <tr class="total"><td colspan="2">Total</td><td class="amount">{{ total }}</td></tr>
+  </tbody>
+</table>
+
+{% if payment_terms %}
+<ul class="terms">
+  {% for term in payment_terms %}<li>{{ term }}</li>{% endfor %}
+</ul>
+{% endif %}
+
+<div class="barcode">
+  A linha digitável e o código de barras aparecem quando o título for registrado.
+</div>
+</body>
+</html>

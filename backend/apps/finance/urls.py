@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     AccountPayableViewSet,
     BankAccountViewSet,
+    CompanyEntryViewSet,
     CostCenterViewSet,
     CurrentAccountEntryViewSet,
     CurrentAccountViewSet,
@@ -21,6 +22,7 @@ router.register("current-accounts", CurrentAccountViewSet, basename="current-acc
 router.register("entry-batches", EntryBatchViewSet, basename="entry-batch")
 router.register("current-account-entries", CurrentAccountEntryViewSet, basename="current-account-entry")
 router.register("payment-receipts", PaymentReceiptViewSet, basename="payment-receipt")
+router.register("company-entries", CompanyEntryViewSet, basename="company-entry")
 router.register("accounts-payable", AccountPayableViewSet, basename="account-payable")
 
 urlpatterns = router.urls

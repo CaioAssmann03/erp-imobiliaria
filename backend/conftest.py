@@ -7,12 +7,11 @@ that belongs to it; the isolation tests add `other_company` and `other_api_clien
 from typing import Any
 
 import pytest
-from django.core.cache import cache
-from rest_framework.test import APIClient
-
 from apps.accounts.models import User
 from apps.core.models import Company
 from apps.core.testing import seeded_company
+from django.core.cache import cache
+from rest_framework.test import APIClient
 
 OTHER_COMPANY_CNPJ = "11222333000181"
 
@@ -24,7 +23,9 @@ def local_memory_cache(settings: Any) -> None:
     The rate limit counters live in the cache; that they hold across workers on Redis is
     checked by hand (spec 007, R5).
     """
-    settings.CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+    settings.CACHES = {
+        "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}
+    }
     cache.clear()
 
 
@@ -53,12 +54,16 @@ def api_client(staff_user: User) -> APIClient:
 
 @pytest.fixture
 def other_company(db: None) -> Company:
-    return Company.objects.create(legal_name="Outra Administradora", cnpj=OTHER_COMPANY_CNPJ)
+    return Company.objects.create(
+        legal_name="Outra Administradora", cnpj=OTHER_COMPANY_CNPJ
+    )
 
 
 @pytest.fixture
 def other_api_client(other_company: Company) -> APIClient:
-    user = User.objects.create_user(username="other", password="x", company=other_company)
+    user = User.objects.create_user(
+        username="other", password="x", company=other_company
+    )
     client = APIClient()
     client.force_authenticate(user=user)
     return client
@@ -83,7 +88,9 @@ def jwt_api_client(staff_user: User) -> APIClient:
     staff_user.set_password("segredo123")
     staff_user.save()
     tokens = APIClient().post(
-        reverse("token_obtain_pair"), {"username": staff_user.username, "password": "segredo123"}, format="json"
+        reverse("token_obtain_pair"),
+        {"username": staff_user.username, "password": "segredo123"},
+        format="json",
     )
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION=f"Bearer {tokens.data['access']}")

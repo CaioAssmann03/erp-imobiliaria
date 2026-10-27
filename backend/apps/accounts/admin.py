@@ -7,7 +7,7 @@ from django.contrib.auth.models import Group
 from unfold.admin import ModelAdmin
 from unfold.forms import AdminPasswordChangeForm, UserChangeForm, UserCreationForm
 
-from apps.core.scoping import CompanyScopedAdminMixin
+from apps.core.infrastructure.scoping import CompanyScopedAdminMixin
 
 from .models import User
 

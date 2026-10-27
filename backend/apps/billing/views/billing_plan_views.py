@@ -4,8 +4,8 @@ from django.db.models import Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
-from apps.core.api.filters import QuerySearchFilter
-from apps.core.scoping import CompanyScopedViewSetMixin
+from apps.core.infrastructure.api.filters import QuerySearchFilter
+from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin
 
 from ..models import BillingPlan, BillingPlanItem
 from ..serializers import BillingPlanSerializer
@@ -18,7 +18,7 @@ class BillingPlanViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Billin
     queryset = BillingPlan.objects.select_related("condominium").prefetch_related(
         Prefetch(
             "items",
-            queryset=BillingPlanItem.objects.select_related("cost_center", "entry_template"),
+            queryset=BillingPlanItem.objects.select_related("event", "cost_center", "entry_template"),
         )
     )
     serializer_class = BillingPlanSerializer

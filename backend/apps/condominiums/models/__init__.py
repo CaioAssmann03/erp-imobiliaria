@@ -1,8 +1,7 @@
-from .address import Address as Address
-from .administration_contract import AdministrationContract as AdministrationContract
-from .billing_rules import BillingRules as BillingRules
+from .condominium_administration_contract import CondominiumAdministrationContract as CondominiumAdministrationContract
+from .condominium_apportionment_criterion import CondominiumApportionmentCriterion as CondominiumApportionmentCriterion
 from .block import Block as Block
 from .condominium import Condominium as Condominium
-from .late_interest_rate import LateInterestRate as LateInterestRate
 from .unit import Unit as Unit
+from .unit_apportionment_fraction import UnitApportionmentFraction as UnitApportionmentFraction
 from .unit_person import UnitPerson as UnitPerson

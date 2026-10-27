@@ -15,3 +15,4 @@ skip-if: tokens and theme → norms/design-system.md
 | `cva`, `clsx`, `tailwind-merge` | variants/classes | use `cn()` from `lib/utils.ts` |
 | `tw-animate-css` | enter/exit animation | utilities like `animate-in fade-in-0` |
 | `next-themes` | only the shadcn `sonner` wrapper | the app theme is cookie-driven (norms/design-system.md); do not use it for the theme |
+| `motion`, `lenis` | public marketing pages only (`app/(marketing)`) | never in the ERP shell; respect `prefers-reduced-motion` (Lenis is skipped); import from `motion/react` |

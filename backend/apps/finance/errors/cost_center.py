@@ -1,10 +1,14 @@
-from apps.core.errors.base import RuleError
+from apps.core.infrastructure.errors.base import RuleError
 
 
 class CostCenterError(RuleError):
     NAME_DUPLICATE_IN_CONDOMINIUM = (
         "cost_center.name.duplicate_in_condominium",
         "This condominium already has a cost center with this name.",
+    )
+    CODE_DUPLICATE_IN_CONDOMINIUM = (
+        "cost_center.code.duplicate_in_condominium",
+        "This condominium already has a cost center with this code.",
     )
     CONDOMINIUM_IMMUTABLE = (
         "cost_center.condominium.immutable",

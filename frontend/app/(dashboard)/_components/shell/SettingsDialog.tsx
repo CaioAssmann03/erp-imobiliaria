@@ -11,6 +11,7 @@ import { AccentSection } from "./settings/AccentSection";
 import { applyAppearance, readAppearance } from "./settings/apply-appearance";
 import { FontSection } from "./settings/FontSection";
 import { ModeSection } from "./settings/ModeSection";
+import { RegistersSection } from "./settings/RegistersSection";
 
 const TRIGGER_COMPACT =
   "flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink";
@@ -72,11 +73,12 @@ export function SettingsDialog({
             <header className="mb-6 sm:mb-7">
               <Dialog.Title className="text-title">Configurações</Dialog.Title>
               <Dialog.Description className="mt-1 text-body text-ink-soft">
-                Aparência do sistema. Fica salva neste navegador.
+                Cadastros de apoio e aparência do sistema (a aparência fica salva neste navegador).
               </Dialog.Description>
             </header>
 
             <div className="space-y-7">
+              <RegistersSection />
               <ModeSection appearance={appearance} onChange={update} />
               <AccentSection appearance={appearance} onChange={update} />
               <FontSection appearance={appearance} onChange={update} />

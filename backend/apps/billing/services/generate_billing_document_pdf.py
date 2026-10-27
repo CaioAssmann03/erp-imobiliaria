@@ -8,7 +8,7 @@ from apps.billing.models import BillingDocument, BillingDocumentPdf
 from apps.billing.services.render_billing_document_pdf import (
     render_billing_document_pdf,
 )
-from apps.core.storage import object_storage
+from apps.core.infrastructure.storage import object_storage
 
 logger = logging.getLogger(__name__)
 

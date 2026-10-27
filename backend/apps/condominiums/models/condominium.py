@@ -1,21 +1,19 @@
-from typing import TYPE_CHECKING, final, override
+from typing import TYPE_CHECKING, Any, final, override
 
 from django.core.exceptions import ValidationError
 from django.db import models
 
 from apps.condominiums.errors import CondominiumError
-from apps.condominiums.models.address import Address
 from apps.condominiums.models.querysets import CondominiumQuerySet
-from apps.core.models import Company, SequentialCodeMixin, sequential_code_field
+from apps.core.infrastructure.validators import validate_cnpj
+from apps.core.models import Address, Company, SequentialCodeMixin, sequential_code_field
 from apps.core.models.base import BaseModel
-from apps.core.validators import validate_cnpj
 from apps.persons.models import Person
 
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
 
-    from .administration_contract import AdministrationContract
-    from .billing_rules import BillingRules
+    from .condominium_administration_contract import CondominiumAdministrationContract
     from .unit import Unit
 
 
@@ -28,8 +26,7 @@ class Condominium(SequentialCodeMixin, BaseModel):
         COMMERCIAL = ("commercial", "Commercial")
 
     if TYPE_CHECKING:
-        administration_contract: "AdministrationContract"
-        billing_rules: "BillingRules"
+        administration_contract: "CondominiumAdministrationContract"
         units: "RelatedManager[Unit]"
 
     company = models.ForeignKey(
@@ -67,6 +64,19 @@ class Condominium(SequentialCodeMixin, BaseModel):
         verbose_name = "Condominium"
         verbose_name_plural = "Condominiums"
         ordering = ("name",)
+
+    @override
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        creating = self._state.adding
+        super().save(*args, **kwargs)
+        if creating:
+            from .condominium_apportionment_criterion import CondominiumApportionmentCriterion
+
+            _ = CondominiumApportionmentCriterion.objects.get_or_create(
+                condominium=self,
+                position=CondominiumApportionmentCriterion.MAIN_POSITION,
+                defaults={"name": CondominiumApportionmentCriterion.MAIN_NAME},
+            )
 
     @override
     def clean(self) -> None:

@@ -2,14 +2,18 @@ import copy
 from collections.abc import Collection, Mapping
 from typing import Any, ClassVar
 
-from django.core.exceptions import NON_FIELD_ERRORS, ValidationError as DjangoValidationError
+from django.core.exceptions import NON_FIELD_ERRORS
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import models
 from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.relations import RelatedField
 from rest_framework.settings import api_settings
 
-from apps.core.scoping import CompanyScopedPrimaryKeyRelatedField, request_company_or_none
+from apps.core.infrastructure.scoping import (
+    CompanyScopedPrimaryKeyRelatedField,
+    request_company_or_none,
+)
 
 
 def _model_field_values(
@@ -63,16 +67,22 @@ def _error_details(errors: list[DjangoValidationError]) -> list[ErrorDetail]:
 def to_drf_errors(error: DjangoValidationError) -> dict[str, Any]:
     """The model's errors as DRF details, keeping every rule's code (spec 006)."""
     if hasattr(error, "error_dict"):
-        details = {field: _error_details(errors) for field, errors in error.error_dict.items()}
+        details = {
+            field: _error_details(errors) for field, errors in error.error_dict.items()
+        }
     else:
         details = {NON_FIELD_ERRORS: _error_details(error.error_list)}
     return {
-        (api_settings.NON_FIELD_ERRORS_KEY if field == NON_FIELD_ERRORS else field): messages
+        (
+            api_settings.NON_FIELD_ERRORS_KEY if field == NON_FIELD_ERRORS else field
+        ): messages
         for field, messages in details.items()
     }
 
 
-def run_model_rules(candidate: models.Model, excluded_fields: Collection[str] = ()) -> None:
+def run_model_rules(
+    candidate: models.Model, excluded_fields: Collection[str] = ()
+) -> None:
     """Run the model's own rules (field validators, `clean()`, constraints, uniqueness).
 
     Business rules live in the models; this turns a Django `ValidationError` into a DRF 400.
@@ -91,12 +101,16 @@ class ModelRulesMixin:
     Relations are limited to the user's company (spec 004).
     """
 
-    serializer_related_field: ClassVar[type[RelatedField[Any, Any, Any]]] = CompanyScopedPrimaryKeyRelatedField
+    serializer_related_field: ClassVar[type[RelatedField[Any, Any, Any]]] = (
+        CompanyScopedPrimaryKeyRelatedField
+    )
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)  # type: ignore[misc]
         model: type[models.Model] = self.Meta.model  # type: ignore[attr-defined]
-        existing_record = self.instance if isinstance(self.instance, models.Model) else None  # type: ignore[attr-defined]
+        existing_record = (
+            self.instance if isinstance(self.instance, models.Model) else None  # type: ignore[attr-defined]
+        )
         candidate_input = self._with_owner_company(model, attrs, existing_record)
         candidate = build_candidate(model, candidate_input, existing_record)
         provided_values = _model_field_values(model, candidate_input)
@@ -118,7 +132,9 @@ class ModelRulesMixin:
         existing_record: models.Model | None,
     ) -> dict[str, Any]:
         """On create the record belongs to the user's company, so the rules see it (spec 004)."""
-        has_company_field = any(field.name == "company" for field in model._meta.concrete_fields)
+        has_company_field = any(
+            field.name == "company" for field in model._meta.concrete_fields
+        )
         if existing_record is not None or "company" in attrs or not has_company_field:
             return attrs
         company = request_company_or_none(self)  # type: ignore[arg-type]

@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.billing.errors import BillingDocumentRegistrationError, GatewayAccountError
-from apps.billing.gateway.asaas_client import GatewayError, GatewayUnavailable
+from apps.billing.infrastructure.gateway.asaas_client import GatewayError, GatewayUnavailable
 from apps.finance.tests.base import body, error_codes
 from apps.persons.models import PeopleIndividual
 
@@ -40,9 +40,7 @@ class FakeReissueGateway(FakeChargeGateway):
 @pytest.fixture
 def account(document: BillingDocument) -> GatewayAccount:
     return GatewayAccount.objects.create(
-        condominium=document.unit.condominium,
-        gateway_account_id="acc-1",
-        wallet_id="w",
+        company=document.unit.condominium.company,
         api_key="k",
         webhook_token="t",
         status=GatewayAccount.Status.ACTIVE,

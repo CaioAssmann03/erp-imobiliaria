@@ -4,7 +4,7 @@ from typing import Generic, TypeVar
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from apps.core.errors.base import RuleError
+from apps.core.infrastructure.errors.base import RuleError
 
 ModelT = TypeVar("ModelT", bound=models.Model)
 RuleMethod = Callable[..., bool]

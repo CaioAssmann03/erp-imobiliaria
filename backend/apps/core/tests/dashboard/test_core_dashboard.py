@@ -9,13 +9,14 @@ from rest_framework.test import APIClient
 from apps.accounts.models import User
 from apps.core.testing import seeded_company
 from apps.condominiums.models import (
-    AdministrationContract,
+    CondominiumAdministrationContract,
     Condominium,
     Unit,
     UnitPerson,
 )
+from apps.condominiums.tests.base import add_fraction
 from apps.core.models import Company
-from apps.core.dates import add_months
+from apps.core.infrastructure.dates import add_months
 from apps.finance.models import AccountPayable, CostCenter, Supplier
 from apps.finance.services.cancel_account_payable import cancel_account_payable
 from apps.finance.services.settle_account_payable import AccountPayablePayment, settle_account_payable
@@ -66,17 +67,17 @@ def test_fixed_revenue_ignores_variable_and_inactive(
     fixed = make_condominium(company, "Fixo", "11222333000181")
     variable = make_condominium(company, "Variavel", "45723174000110")
     inactive = make_condominium(company, "Inativo", "03136483000144", active=False)
-    _ = AdministrationContract.objects.create(
-        condominium=fixed, fee_type="fixed", fee_amount=Decimal("500")
+    _ = CondominiumAdministrationContract.objects.create(
+        condominium=fixed, fee_type="fixed", fee_amount=Decimal(500)
     )
-    _ = AdministrationContract.objects.create(
+    _ = CondominiumAdministrationContract.objects.create(
         condominium=variable,
         fee_type="variable",
-        fee_percentage=Decimal("5"),
+        fee_percentage=Decimal(5),
         fee_basis="revenue",
     )
-    _ = AdministrationContract.objects.create(
-        condominium=inactive, fee_type="fixed", fee_amount=Decimal("900")
+    _ = CondominiumAdministrationContract.objects.create(
+        condominium=inactive, fee_type="fixed", fee_amount=Decimal(900)
     )
 
     revenue = dashboard(api_client)["fixed_revenue"]
@@ -93,9 +94,9 @@ def test_adjustments_overdue_and_upcoming(
     late = make_condominium(company, "Atrasado", "11222333000181")
     soon = make_condominium(company, "Em breve", "45723174000110")
     for condominium, days in ((late, -20), (soon, 18)):
-        _ = AdministrationContract.objects.create(
+        _ = CondominiumAdministrationContract.objects.create(
             condominium=condominium,
-            fee_amount=Decimal("1"),
+            fee_amount=Decimal(1),
             adjustment_period_months=12,
             adjustment_base_date=today() + timedelta(days=days) - timedelta(days=365),
         )
@@ -119,7 +120,7 @@ def test_units_without_responsible(api_client: APIClient, company: Company) -> N
         unit=with_owner,
         person=person,
         role="owner",
-        ownership_percentage=Decimal("100"),
+        ownership_percentage=Decimal(100),
         start_date=today() - timedelta(days=100),
     )
     _ = UnitPerson.objects.create(
@@ -164,27 +165,23 @@ def test_apportionment_must_sum_to_one(api_client: APIClient, company: Company) 
     ok = make_condominium(company, "Ok", "11222333000181")
     wrong = make_condominium(company, "Errado", "45723174000110")
     for name in ("1", "2"):
-        _ = Unit.objects.create(
-            condominium=ok, name=name, ideal_fraction=Decimal("0.5")
-        )
-    _ = Unit.objects.create(
-        condominium=wrong, name="1", ideal_fraction=Decimal("0.9")
-    )
+        add_fraction(Unit.objects.create(condominium=ok, name=name), "0.5")
+    add_fraction(Unit.objects.create(condominium=wrong, name="1"), "0.9")
 
     assert dashboard(api_client)["pending"]["inconsistent_apportionment"] == 1
 
 
-def test_a_partly_filled_second_fraction_is_counted_as_inconsistent(
+def test_a_partly_filled_second_criterion_is_counted_as_inconsistent(
     api_client: APIClient, company: Company
 ) -> None:
     closed = make_condominium(company, "Fecha", "11222333000181")
     partly_filled = make_condominium(company, "Segunda Aberta", "45723174000110")
-    _ = Unit.objects.create(
-        condominium=closed, name="1", ideal_fraction=Decimal("1"), ideal_fraction_2=Decimal("1")
-    )
-    _ = Unit.objects.create(
-        condominium=partly_filled, name="1", ideal_fraction=Decimal("1"), ideal_fraction_2=Decimal("0.4")
-    )
+    closed_unit = Unit.objects.create(condominium=closed, name="1")
+    add_fraction(closed_unit, 1)
+    add_fraction(closed_unit, 1, position=2)
+    partly_filled_unit = Unit.objects.create(condominium=partly_filled, name="1")
+    add_fraction(partly_filled_unit, 1)
+    add_fraction(partly_filled_unit, "0.4", position=2)
 
     assert dashboard(api_client)["pending"]["inconsistent_apportionment"] == 1
 
@@ -205,7 +202,7 @@ def test_cost_centers_and_billing_block(api_client: APIClient, company: Company)
 
 def test_upcoming_adjustments_expose_adjustment_index(api_client: APIClient, company: Company) -> None:
     condominium = make_condominium(company, "A", "11222333000181")
-    _ = AdministrationContract.objects.create(
+    _ = CondominiumAdministrationContract.objects.create(
         condominium=condominium,
         fee_type="fixed",
         fee_amount=100,

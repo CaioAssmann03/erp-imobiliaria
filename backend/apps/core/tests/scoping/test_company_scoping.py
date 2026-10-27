@@ -10,7 +10,7 @@ from rest_framework import status, viewsets
 from rest_framework.test import APIClient
 
 from apps.core.models import Company
-from apps.core.scoping import CompanyScopedViewSetMixin, company_lookup_of
+from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin, company_lookup_of
 
 from ..base import error_codes, errors, results
 from ..scoping_data import CompanyData, build_company_data

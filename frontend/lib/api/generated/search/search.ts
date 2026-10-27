@@ -46,12 +46,6 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-/**
- * Busca global: poucos resultados de cada cadastro e documento, em uma única requisição.
- *
- * Cada consulta é limitada a `LIMIT_PER_TYPE` linhas. O cadastro cujo ID foi digitado vem primeiro,
- * depois quem começa com o termo.
- */
 export const searchRetrieve = (
     params: SearchRetrieveParams,
  signal?: AbortSignal

@@ -16,7 +16,7 @@ None.
 | 2026-10-22 | Our own e-mail through Resend (Asaas notifications stay off), carrying a **link** to the boleto, the digitable line and the Pix copy-and-paste, never an attachment | the user (the part's recommendation) |
 | 2026-10-22 | One `BillingDocumentDelivery` per registration and channel (a reissue is a new registration, so it is e-mailed again); the provider's idempotency key is the delivery id; only an unavailable provider is retried, every other failure is a `failed` delivery with a reason | agent, decided under the user's go-ahead to finish phase 5 (to review in the PR) |
 | 2026-10-22 | The Resend webhook is verified with the Svix signature (`RESEND_WEBHOOK_SECRET`); `email.delivered` only moves a `sent` delivery, a bounce or complaint fails it, a failed delivery is never promoted | agent, decided under the user's go-ahead (to review in the PR) |
-| 2026-10-22 | The e-mail text is Portuguese and lives in the backend (`delivery_email.py`), like the boleto PDF template | agent, decided under the user's go-ahead (to review in the PR) |
+| 2026-10-22 | The e-mail text is Portuguese and lives in the backend (`infrastructure/rendering/delivery_email.py`), like the boleto PDF template | agent, decided under the user's go-ahead (to review in the PR) |
 
 ## R — Requirements
 - [x] R1 — After a registration commits, the payer is e-mailed a link to the boleto, the digitable line and the Pix code; the sending never blocks the registration
@@ -37,7 +37,7 @@ None.
 `ResendClient` (`urllib3`; no new dependency) sends; `services/send_billing_document_email.py` decides; `tasks.send_billing_document_email_task` retries only `EmailUnavailable`; the registration service enqueues it on commit. Rejected: attaching the PDF (heavier, not trackable); Asaas's own e-mail (we could not control the text).
 
 ## S — Structure
-`models/billing_document_delivery.py` + migration `0010`, `gateway/resend_client.py`, `gateway/svix_signature.py`, `delivery_email.py`, `services/send_billing_document_email.py`, `tasks.py`, `views/resend_webhook_views.py` (`POST /api/webhooks/resend/`), serializers (`delivery`), `admin.py`, `config/settings.py` (`RESEND_API_KEY`, `RESEND_FROM`, `RESEND_WEBHOOK_SECRET`), `.env.example`.
+`models/billing_document_delivery.py` + migration `0010`, `infrastructure/gateway/resend_client.py`, `infrastructure/gateway/svix_signature.py`, `infrastructure/rendering/delivery_email.py`, `services/send_billing_document_email.py`, `tasks.py`, `views/resend_webhook_views.py` (`POST /api/webhooks/resend/`), serializers (`delivery`), `admin.py`, `config/settings.py` (`RESEND_API_KEY`, `RESEND_FROM`, `RESEND_WEBHOOK_SECRET`), `.env.example`.
 
 ## O — Operations
 1. Model and migration. 2. Client and signature check. 3. E-mail text and service. 4. Task and the enqueue. 5. Webhook. 6. Serializer, Admin. 7. Docs, client.

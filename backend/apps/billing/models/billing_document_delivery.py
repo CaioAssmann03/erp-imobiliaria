@@ -5,7 +5,9 @@ from django.db.models import Q
 
 from apps.billing.errors import BillingDocumentDeliveryError
 from apps.billing.models.billing_document import BillingDocument
-from apps.billing.models.billing_document_registration import BillingDocumentRegistration
+from apps.billing.models.billing_document_registration import (
+    BillingDocumentRegistration,
+)
 from apps.core.models.base import BaseModel
 
 
@@ -29,10 +31,18 @@ class BillingDocumentDelivery(BaseModel):
         DELIVERED = ("delivered", "Delivered")
         FAILED = ("failed", "Failed")
 
-    document = models.ForeignKey(BillingDocument, on_delete=models.PROTECT, related_name="deliveries")
-    registration = models.ForeignKey(BillingDocumentRegistration, on_delete=models.PROTECT, related_name="deliveries")
-    channel = models.CharField(max_length=10, choices=Channel.choices, default=Channel.EMAIL)
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    document = models.ForeignKey(
+        BillingDocument, on_delete=models.PROTECT, related_name="deliveries"
+    )
+    registration = models.ForeignKey(
+        BillingDocumentRegistration, on_delete=models.PROTECT, related_name="deliveries"
+    )
+    channel = models.CharField(
+        max_length=10, choices=Channel.choices, default=Channel.EMAIL
+    )
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.PENDING
+    )
     destination = models.CharField(max_length=254, blank=True)
     provider_message_id = models.CharField(max_length=120, blank=True)
     sent_at = models.DateTimeField(null=True, blank=True)
@@ -54,12 +64,17 @@ class BillingDocumentDelivery(BaseModel):
             ),
             models.CheckConstraint(
                 name="billing_document_delivery_sent_has_provider_id",
-                condition=~Q(status__in=("sent", "delivered")) | ~Q(provider_message_id=""),
+                condition=~Q(status__in=("sent", "delivered"))
+                | ~Q(provider_message_id=""),
                 violation_error_message=BillingDocumentDeliveryError.PROVIDER_ID_REQUIRED.message,
                 violation_error_code=BillingDocumentDeliveryError.PROVIDER_ID_REQUIRED.value,
             ),
         )
-        indexes = (models.Index(fields=("provider_message_id",), name="billing_delivery_msg_idx"),)
+        indexes = (
+            models.Index(
+                fields=("provider_message_id",), name="billing_delivery_msg_idx"
+            ),
+        )
 
     @override
     def __str__(self) -> str:

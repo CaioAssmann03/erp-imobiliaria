@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Q
 
 from apps.core.models import Company
-from apps.core.validators import validate_cpf
+from apps.core.infrastructure.validators import validate_cpf
 from apps.persons.errors import PeopleIndividualError
 
 from .person import Person

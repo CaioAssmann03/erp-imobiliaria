@@ -19,10 +19,14 @@ class GatewayReconciliationRun(BaseModel):
         SUCCEEDED = ("succeeded", "Succeeded")
         FAILED = ("failed", "Failed")
 
-    gateway_account = models.ForeignKey(GatewayAccount, on_delete=models.PROTECT, related_name="reconciliation_runs")
+    gateway_account = models.ForeignKey(
+        GatewayAccount, on_delete=models.PROTECT, related_name="reconciliation_runs"
+    )
     window_start = models.DateField()
     window_end = models.DateField()
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.RUNNING)
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.RUNNING
+    )
     found_count = models.PositiveIntegerField(default=0)
     already_posted_count = models.PositiveIntegerField(default=0)
     processed_count = models.PositiveIntegerField(default=0)
@@ -32,7 +36,7 @@ class GatewayReconciliationRun(BaseModel):
     started_at = models.DateTimeField(default=timezone.now)
     finished_at = models.DateTimeField(null=True, blank=True)
 
-    company_lookup = "gateway_account__condominium__company"
+    company_lookup = "gateway_account__company"
 
     class Meta:
         verbose_name = "Gateway Reconciliation Run"
@@ -47,7 +51,8 @@ class GatewayReconciliationRun(BaseModel):
             ),
             models.CheckConstraint(
                 name="gateway_reconciliation_run_finished_not_before_started",
-                condition=Q(finished_at__isnull=True) | Q(finished_at__gte=F("started_at")),
+                condition=Q(finished_at__isnull=True)
+                | Q(finished_at__gte=F("started_at")),
                 violation_error_message=GatewayReconciliationRunError.FINISHED_BEFORE_STARTED.message,
                 violation_error_code=GatewayReconciliationRunError.FINISHED_BEFORE_STARTED.value,
             ),
@@ -56,9 +61,17 @@ class GatewayReconciliationRun(BaseModel):
     @override
     def clean(self) -> None:
         if self.window_end < self.window_start:
-            raise ValidationError({"window_end": GatewayReconciliationRunError.WINDOW_INVERTED.to_validation_error()})
+            raise ValidationError(
+                {
+                    "window_end": GatewayReconciliationRunError.WINDOW_INVERTED.to_validation_error()
+                }
+            )
         if self.finished_at is not None and self.finished_at < self.started_at:
-            raise ValidationError({"finished_at": GatewayReconciliationRunError.FINISHED_BEFORE_STARTED.to_validation_error()})
+            raise ValidationError(
+                {
+                    "finished_at": GatewayReconciliationRunError.FINISHED_BEFORE_STARTED.to_validation_error()
+                }
+            )
 
     @override
     def __str__(self) -> str:

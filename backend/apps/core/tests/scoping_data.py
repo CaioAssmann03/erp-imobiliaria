@@ -5,9 +5,9 @@ from datetime import date
 from decimal import Decimal
 
 from apps.condominiums.models import Block, Condominium, Unit, UnitPerson
-from apps.core.seed.documents import generate_cnpj, generate_cpf
 from apps.core.models import Company
 from apps.persons.models import PeopleIndividual, Person
+from apps.seed.documents import generate_cnpj, generate_cpf
 
 
 @dataclass(frozen=True)
@@ -23,7 +23,9 @@ class CompanyData:
 def build_company_data(company: Company, seed: int) -> CompanyData:
     """Distinct documents per `seed`, so two companies can both have data."""
     person = Person.objects.create(company=company, name=f"Pessoa {seed}")
-    _ = PeopleIndividual.objects.create(person=person, company=company, cpf=generate_cpf(seed))
+    _ = PeopleIndividual.objects.create(
+        person=person, company=company, cpf=generate_cpf(seed)
+    )
     condominium = Condominium.objects.create(
         company=company, name=f"Condominio {seed}", cnpj=generate_cnpj(seed)
     )
@@ -33,7 +35,7 @@ def build_company_data(company: Company, seed: int) -> CompanyData:
         unit=unit,
         person=person,
         role=UnitPerson.Role.OWNER,
-        ownership_percentage=Decimal("100"),
+        ownership_percentage=Decimal(100),
         start_date=date(2024, 1, 1),
     )
     return CompanyData(company, person, condominium, block, unit, unit_person)

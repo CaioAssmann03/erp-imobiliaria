@@ -3,7 +3,7 @@ from typing import Any, Protocol
 
 from django.utils import timezone
 
-from apps.billing.gateway.asaas_client import AsaasClient, GatewayError
+from apps.billing.infrastructure.gateway.asaas_client import AsaasClient, GatewayError
 from apps.billing.models import BillingDocument, BillingDocumentRegistration, GatewayAccount, GatewayEvent, GatewayReconciliationRun
 from apps.billing.services.process_gateway_event import PAYMENT_RECEIVED, process_gateway_event
 

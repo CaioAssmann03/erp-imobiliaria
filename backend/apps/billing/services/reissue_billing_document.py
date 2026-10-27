@@ -4,9 +4,9 @@ from typing import Any, Protocol
 from django.db import transaction
 
 from apps.billing.errors import BillingDocumentRegistrationError, GatewayAccountError
-from apps.billing.gateway.asaas_client import AsaasClient, GatewayError
+from apps.billing.infrastructure.gateway.asaas_client import AsaasClient, GatewayError
 from apps.billing.models import BillingDocument, BillingDocumentRegistration, GatewayAccount
-from apps.billing.gateway.charges import (
+from apps.billing.infrastructure.gateway.charges import (
     ChargeGateway,
     ensure_customer,
     fetch_boleto_details,
@@ -36,7 +36,7 @@ def reissue_billing_document(
     current = document.registrations.filter(status__in=(Status.ACTIVE, Status.CANCELLED)).order_by("-created_at").first()
     if current is None:
         raise GatewayError(BillingDocumentRegistrationError.NOTHING_TO_REISSUE)
-    account = GatewayAccount.objects.filter(condominium_id=document.unit.condominium_id).first()
+    account = GatewayAccount.objects.filter(company_id=document.unit.condominium.company_id).first()
     if account is None or not account.can_register_charges():
         raise GatewayError(BillingDocumentRegistrationError.NO_ACTIVE_GATEWAY_ACCOUNT)
     if document.payer.tax_id is None:

@@ -39,7 +39,7 @@ core  ←  persons  ←  condominiums  ←  finance  ←  billing  ←  (rentals
 | `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS` | Django basics. **`SECRET_KEY` is mandatory when `DEBUG=false`** (≥ 32 chars) |
 | `JWT_SIGNING_KEY` | Ed25519 private key (PKCS#8 PEM, one line with literal `\n` allowed) that signs the JWTs with EdDSA; the public key is derived from it. **Mandatory in every environment, development included**; generate it with the command in `.env.example` (spec 022) |
 | `GATEWAY_CREDENTIALS_KEY` | Fernet key that encrypts the gateway API keys and webhook tokens in the database (spec 030); mandatory, also in development and tests (`pytest.ini` has a test-only one). Losing it makes the stored credentials unreadable |
-| `ASAAS_API_KEY`, `ASAAS_BASE_URL`, `ASAAS_WEBHOOK_URL` | The Asaas parent account that creates the sub-accounts, the API base (sandbox by default) and the public URL where Asaas posts events (empty: sub-accounts without a webhook) |
+| `ASAAS_API_KEY`, `ASAAS_BASE_URL`, `ASAAS_WEBHOOK_URL` | A development fallback key for the Asaas client, the API base (sandbox by default) and the public URL where Asaas posts events (used by `setup_gateway_account --register-webhook`). The company's real key is stored encrypted in the database, not here |
 | `RESEND_API_KEY`, `RESEND_FROM`, `RESEND_WEBHOOK_SECRET` | The Resend account that e-mails the boletos (spec 035), its verified sender, and the signing secret (`whsec_…`) of the webhook that reports delivered and bounced e-mails; empty: deliveries are recorded as `failed` |
 | `GATEWAY_RECONCILIATION_WINDOW_DAYS`, `ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS` | Days back the daily reconciliation looks for received payments (default 3, spec 033) and the business days after the due date that Asaas keeps a boleto registered (default 60, spec 031) |
 | `POSTGRES_DB/USER/PASSWORD/HOST/PORT` | database. **`POSTGRES_DB` is mandatory** (no SQLite fallback) |
@@ -52,7 +52,7 @@ core  ←  persons  ←  condominiums  ←  finance  ←  billing  ←  (rentals
 | `ASAAS_API_KEY`, `ASAAS_BASE_URL`, `ASAAS_WEBHOOK_TOKEN` | Asaas payment gateway (boleto issuance). Sandbox key (`$aact_hmlg_…`) and `https://api-sandbox.asaas.com/v3` in development; the webhook token is used from phase 5 (phase 4 part 01) |
 
 ## Vocabulary (code ⇄ business term)
-Condominium, Block, Unit = Condomínio, Bloco, Unidade · Person (individual CPF / legal CNPJ) = Pessoa (física / jurídica) · UnitPerson (`owner`, `tenant`) = vínculo proprietário / locatário · AdministrationContract, BillingRules = contrato de administração, regras de cobrança · `ideal_fraction` = fração ideal (rateio) · CostCenter = centro de custo (antes "sub-conta") · EntryTemplate = modelo de lançamento (antes "histórico") · Advisor = assessor. The full PDF → code name map is in `roadmap/README.md`.
+Condominium, Block, Unit = Condomínio, Bloco, Unidade · Person (individual CPF / legal CNPJ) = Pessoa (física / jurídica) · UnitPerson (`owner`, `tenant`) = vínculo proprietário / locatário · CondominiumAdministrationContract, CondominiumBillingRules = contrato de administração, regras de cobrança · `ideal_fraction` = fração ideal (rateio) · CostCenter = centro de custo (antes "sub-conta") · EntryTemplate = modelo de lançamento (antes "histórico") · Advisor = assessor. The full PDF → code name map is in `roadmap/README.md`.
 
 ## Decisions
 Changing one needs a feature spec.
@@ -67,7 +67,7 @@ Changing one needs a feature spec.
 | 7 | Documents stored digits-only → one canonical form; masks are UI-only |
 | 8 | `accounts.User` is separate from `persons.Person` → login ≠ business entity; a future `Person.user` lives in `persons`; every user belongs to a `Company` |
 | 9 | OpenAPI is the contract; the frontend client is generated → every API change is followed by regeneration |
-| 10 | Multi-company from the start → every user sees only its company's data (`core/scoping.py`); a superuser bypasses the scope |
+| 10 | Multi-company from the start → every user sees only its company's data (`core/infrastructure/scoping.py`); a superuser bypasses the scope |
 | 11 | Migration history reset to one `0001` per app before production → see `operations.md` |
 | 12 | Spec-first workflow; ask on any gap → `features/` is mandatory for features |
 | 13 | Celery/Redis provisioned but unused → jobs (boleto, mail) are coming; workers disabled on the free plan |

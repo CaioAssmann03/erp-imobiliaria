@@ -16,8 +16,12 @@ import type { UnitValueFieldEnum } from './unitValueFieldEnum';
 export interface BillingPlanItem {
   readonly id: string;
   readonly position: number;
+  /** @nullable */
+  event?: string | null;
+  readonly event_code: number;
+  readonly event_name: string;
   /** @maxLength 120 */
-  description: string;
+  description?: string;
   cost_center: string;
   readonly cost_center_name: string;
   entry_template: string;
@@ -28,11 +32,7 @@ export interface BillingPlanItem {
      * @pattern ^-?\d{0,10}(?:\.\d{0,2})?$
      */
   amount?: string | null;
-  /**
-     * @minimum 0
-     * @maximum 32767
-     * @nullable
-     */
-  ideal_fraction_number?: number | null;
+  /** @nullable */
+  apportionment_criterion?: string | null;
   unit_value_field?: UnitValueFieldEnum | BlankEnum | NullEnum | null;
 }

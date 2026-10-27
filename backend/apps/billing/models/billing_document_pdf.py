@@ -16,7 +16,9 @@ class BillingDocumentPdf(BaseModel):
     Generating again replaces it, so a document has at most one.
     """
 
-    document = models.OneToOneField(BillingDocument, on_delete=models.CASCADE, related_name="pdf")
+    document = models.OneToOneField(
+        BillingDocument, on_delete=models.CASCADE, related_name="pdf"
+    )
     # Built by the service from the company and document ids and a random id, never from user input.
     file_key = models.CharField(max_length=255, unique=True, editable=False)
     size_bytes = models.PositiveBigIntegerField()

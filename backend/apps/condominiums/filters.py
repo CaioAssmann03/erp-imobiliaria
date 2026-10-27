@@ -4,14 +4,17 @@ import django_filters
 from django.db.models import QuerySet, TextChoices
 from django.utils import timezone
 
-from .models import AdministrationContract, Condominium, Unit
+from .models import Condominium, CondominiumAdministrationContract, Unit
 
 
 class CondominiumPending(TextChoices):
     """The condominium pendencies of the dashboard (`?pending=`), each with its own list."""
 
     WITHOUT_COST_CENTERS = ("without_cost_centers", "Without cost centers")
-    INCONSISTENT_APPORTIONMENT = ("inconsistent_apportionment", "Apportionment not 100%")
+    INCONSISTENT_APPORTIONMENT = (
+        "inconsistent_apportionment",
+        "Apportionment not 100%",
+    )
     OVERDUE_ADJUSTMENT = ("overdue_adjustment", "Overdue adjustment")
     UPCOMING_ADJUSTMENT = ("upcoming_adjustment", "Adjustment in 30 days")
 
@@ -28,7 +31,9 @@ class UnitPending(TextChoices):
 class CondominiumFilter(django_filters.FilterSet):
     """Exact filters plus `?pending=` (the dashboard's pendencies, same definitions)."""
 
-    pending = django_filters.ChoiceFilter(choices=CondominiumPending.choices, method="filter_pending")
+    pending = django_filters.ChoiceFilter(
+        choices=CondominiumPending.choices, method="filter_pending"
+    )
 
     class Meta:
         model = Condominium
@@ -38,29 +43,37 @@ class CondominiumFilter(django_filters.FilterSet):
         self, queryset: QuerySet[Condominium], name: str, value: str
     ) -> QuerySet[Condominium]:
         today = timezone.localdate()
-        contracts = AdministrationContract.objects
+        contracts = CondominiumAdministrationContract.objects
         match value:
             case CondominiumPending.WITHOUT_COST_CENTERS:
                 return queryset.without_cost_centers()  # type: ignore[attr-defined, no-any-return]
             case CondominiumPending.INCONSISTENT_APPORTIONMENT:
-                return queryset.filter(pk__in=Unit.objects.inconsistent_apportionment_condominium_ids())
+                return queryset.with_inconsistent_apportionment()  # type: ignore[attr-defined, no-any-return]
             case CondominiumPending.OVERDUE_ADJUSTMENT:
-                return queryset.filter(pk__in=contracts.overdue_adjustment_condominium_ids(today))
+                return queryset.filter(
+                    pk__in=contracts.overdue_adjustment_condominium_ids(today)
+                )
             case _:
-                return queryset.filter(pk__in=contracts.upcoming_adjustment_condominium_ids(today))
+                return queryset.filter(
+                    pk__in=contracts.upcoming_adjustment_condominium_ids(today)
+                )
 
 
 @final
 class UnitFilter(django_filters.FilterSet):
     """Exact filters plus `?pending=` (the dashboard's pendencies, same definitions)."""
 
-    pending = django_filters.ChoiceFilter(choices=UnitPending.choices, method="filter_pending")
+    pending = django_filters.ChoiceFilter(
+        choices=UnitPending.choices, method="filter_pending"
+    )
 
     class Meta:
         model = Unit
         fields = ("condominium", "block", "active", "type", "is_billing_blocked")
 
-    def filter_pending(self, queryset: QuerySet[Unit], name: str, value: str) -> QuerySet[Unit]:
+    def filter_pending(
+        self, queryset: QuerySet[Unit], name: str, value: str
+    ) -> QuerySet[Unit]:
         today = timezone.localdate()
         match value:
             case UnitPending.WITHOUT_RESPONSIBLE:
@@ -68,4 +81,4 @@ class UnitFilter(django_filters.FilterSet):
             case UnitPending.LEASE_ENDING:
                 return queryset.filter(active=True).with_lease_ending_soon(today)  # type: ignore[attr-defined, no-any-return]
             case _:
-                return queryset.filter(active=True, is_billing_blocked=True)
+                return queryset.billing_blocked()  # type: ignore[attr-defined, no-any-return]

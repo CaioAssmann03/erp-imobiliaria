@@ -3,7 +3,7 @@ from typing import Any, final, override
 from rest_framework import serializers
 
 from apps.core.serializers import ModelRulesMixin
-from apps.core.serializers.model_rules import build_candidate, run_model_rules
+from apps.core.serializers.model_rules import build_candidate, to_drf_errors
 
 from ..models import BillingPlan, BillingPlanItem
 from ..services.create_billing_plan import create_billing_plan
@@ -13,6 +13,8 @@ from ..services.update_billing_plan import update_billing_plan
 class BillingPlanItemSerializer(ModelRulesMixin, serializers.ModelSerializer[BillingPlanItem]):
     """One item of a plan. `position` is the item's place in the list it was sent in."""
 
+    event_code = serializers.IntegerField(source="event.code", read_only=True, default=None)
+    event_name = serializers.CharField(source="event.name", read_only=True, default=None)
     cost_center_name = serializers.CharField(source="cost_center.name", read_only=True)
     entry_template_name = serializers.CharField(source="entry_template.name", read_only=True)
 
@@ -22,6 +24,9 @@ class BillingPlanItemSerializer(ModelRulesMixin, serializers.ModelSerializer[Bil
         fields = (
             "id",
             "position",
+            "event",
+            "event_code",
+            "event_name",
             "description",
             "cost_center",
             "cost_center_name",
@@ -29,7 +34,7 @@ class BillingPlanItemSerializer(ModelRulesMixin, serializers.ModelSerializer[Bil
             "entry_template_name",
             "calculation_kind",
             "amount",
-            "ideal_fraction_number",
+            "apportionment_criterion",
             "unit_value_field",
         )
         read_only_fields = ("id", "position")
@@ -77,15 +82,10 @@ class BillingPlanSerializer(ModelRulesMixin, serializers.ModelSerializer[Billing
         """The item rules that need the plan (its condominium) could not run in the nested serializer."""
         existing_plan = self.instance if isinstance(self.instance, BillingPlan) else None
         plan_candidate = build_candidate(BillingPlan, attrs, existing_plan)
-        item_errors: list[Any] = []
-        for item_values in attrs["items"]:
-            item_candidate = build_candidate(BillingPlanItem, item_values)
-            item_candidate.plan = plan_candidate  # type: ignore[attr-defined]
-            try:
-                run_model_rules(item_candidate, excluded_fields=("plan",))
-            except serializers.ValidationError as error:
-                item_errors.append(error.detail)
-            else:
-                item_errors.append({})
+        assert isinstance(plan_candidate, BillingPlan)
+        item_errors = [
+            {} if error is None else to_drf_errors(error)
+            for error in plan_candidate.collect_item_errors(attrs["items"])
+        ]
         if any(item_errors):
             raise serializers.ValidationError({"items": item_errors})

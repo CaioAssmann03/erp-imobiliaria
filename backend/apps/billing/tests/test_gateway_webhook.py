@@ -9,7 +9,16 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from apps.finance.models import CurrentAccount, CurrentAccountEntry
+from apps.billing.services.create_billing_document import (
+    NewBillingDocumentItem,
+    create_billing_document,
+)
+from apps.finance.models import (
+    CostCenter,
+    CurrentAccount,
+    CurrentAccountEntry,
+    EntryTemplate,
+)
 
 from ..models import (
     BillingDocument,
@@ -29,9 +38,7 @@ TOKEN = "webhook-token-of-the-account-0123456789"
 @pytest.fixture
 def account(document: BillingDocument) -> GatewayAccount:
     return GatewayAccount.objects.create(
-        condominium=document.unit.condominium,
-        gateway_account_id="acc-1",
-        wallet_id="w",
+        company=document.unit.condominium.company,
         api_key="k",
         webhook_token=TOKEN,
         status=GatewayAccount.Status.ACTIVE,
@@ -202,7 +209,8 @@ def test_a_refused_posting_leaves_nothing_posted(
 ) -> None:
     item = document.items.first()
     assert item is not None
-    type(item.cost_center).objects.filter(pk=item.cost_center_id).update(active=False)
+    assert item.cost_center is not None
+    CostCenter.objects.filter(pk=item.cost_center.pk).update(active=False)
 
     event = process_gateway_event(make_event(account, received(document)))
 
@@ -221,3 +229,61 @@ def test_the_documents_api_shows_the_payment(api_client: APIClient, document: Bi
 
     payment = api_client.get(detail).json()["payment"]
     assert (payment["paid_on"], payment["amount"], payment["net_amount"]) == ("2026-10-20", str(document.amount), "448.00")
+
+
+def test_paid_document_credits_each_item_in_its_own_cost_center(  # type: ignore[no-untyped-def]
+    new_document, billing_rules, cost_center: CostCenter, entry_template: EntryTemplate, account: GatewayAccount
+) -> None:
+    """The fee goes to the current account and an extra charge to the works fund; the money is one boleto (spec 037, R6)."""
+    works_fund = CostCenter.objects.create(condominium=cost_center.condominium, name="Fundo de Obras")
+    works_template = EntryTemplate.objects.create(cost_center=works_fund, name="REC Fundo de Obras")
+    document = create_billing_document(
+        new_document(
+            reference_month=date(2026, 11, 1),
+            competence_month=date(2026, 11, 1),
+            due_date=date(2026, 11, 10),
+            items=(
+                NewBillingDocumentItem("Taxa condominial", cost_center, entry_template, Decimal("400.00")),
+                NewBillingDocumentItem("Fundo de obras", works_fund, works_template, Decimal("100.00")),
+            )
+        )
+    )
+    _ = BillingDocumentRegistration.objects.create(
+        document=document, gateway_account=account, registered_due_date=document.due_date, gateway_payment_id="pay_1"
+    )
+    document.status = BillingDocument.Status.REGISTERED
+    document.save()
+
+    _ = process_gateway_event(make_event(account, received(document)))
+
+    credits = {entry.cost_center: entry.amount for entry in CurrentAccountEntry.objects.all()}
+    assert credits == {cost_center: Decimal("400.00"), works_fund: Decimal("100.00")}
+    assert CurrentAccount.objects.get().balance == Decimal("500.00")
+
+
+def test_payment_is_found_by_reference_across_condominiums(  # type: ignore[no-untyped-def]
+    account: GatewayAccount, other_condominium, billing_rules, new_document, payer
+) -> None:
+    """One account serves every condominium of the company: the payment is matched by its reference alone (spec 037, R5)."""
+    from apps.billing.models import CondominiumBillingRules
+    from apps.condominiums.models import Unit
+
+    _ = CondominiumBillingRules.objects.create(condominium=other_condominium)
+    other_center = CostCenter.objects.create(condominium=other_condominium, name="Taxa Ordinária")
+    other_template = EntryTemplate.objects.create(cost_center=other_center, name="REC Taxa Ordinária")
+    document = create_billing_document(
+        new_document(
+            unit=Unit.objects.create(condominium=other_condominium, name="1"),
+            items=(NewBillingDocumentItem("Taxa condominial", other_center, other_template, Decimal("300.00")),),
+        )
+    )
+    _ = BillingDocumentRegistration.objects.create(
+        document=document, gateway_account=account, registered_due_date=document.due_date, gateway_payment_id="pay_1"
+    )
+    document.status = BillingDocument.Status.REGISTERED
+    document.save()
+
+    event = process_gateway_event(make_event(account, received(document)))
+
+    assert event.outcome == GatewayEvent.Outcome.PROCESSED
+    assert CurrentAccount.objects.get().condominium == other_condominium

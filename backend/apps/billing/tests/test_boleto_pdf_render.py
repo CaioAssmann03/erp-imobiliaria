@@ -6,9 +6,9 @@ from decimal import Decimal
 import pytest
 from django.template.loader import render_to_string
 
-from apps.condominiums.models import BillingRules
+from apps.billing.models import CondominiumBillingRules
+from apps.billing.infrastructure.rendering import boleto_template
 
-from .. import boleto_template
 from ..models import BillingDocument
 from ..services.render_billing_document_pdf import (
     TEMPLATE,
@@ -67,7 +67,7 @@ def test_the_terms_come_from_the_document(document: BillingDocument) -> None:
 def test_the_first_days_fine_and_per_day_interest_are_described(document: BillingDocument) -> None:
     document.initial_late_fee_percentage = Decimal("1.00")
     document.initial_late_fee_days = 5
-    document.interest_calculation = BillingRules.InterestCalculation.PER_DAY
+    document.interest_calculation = CondominiumBillingRules.InterestCalculation.PER_DAY
     document.interest_grace_days = 0
     document.discount_percentage = Decimal(0)
 

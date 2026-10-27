@@ -6,7 +6,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from apps.core.storage import object_storage
+from apps.core.infrastructure.storage import object_storage
 from apps.finance.tests.base import body, errors
 from apps.finance.tests.fake_storage import FakeObjectStorage
 

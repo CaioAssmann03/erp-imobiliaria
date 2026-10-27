@@ -1,13 +1,14 @@
-from typing import TYPE_CHECKING, final, override
+from typing import TYPE_CHECKING, Any, final, override
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Q
 
 from apps.billing.errors import BillingPlanError
 from apps.billing.models.querysets import BillingPlanQuerySet
 from apps.billing.models.rules import BillingPlanRules
-from apps.billing.validators import validate_first_day_of_month
 from apps.condominiums.models import Condominium
+from apps.core.infrastructure.validators import validate_first_day_of_month
 from apps.core.models.base import BaseModel
 
 if TYPE_CHECKING:
@@ -62,6 +63,25 @@ class BillingPlan(BaseModel):
     @override
     def clean(self) -> None:
         BillingPlanRules(self).validate()
+
+    def collect_item_errors(self, items_values: list[dict[str, Any]]) -> list[ValidationError | None]:
+        """Each item validated as it would be saved with this plan, saved or only a candidate; None when valid.
+
+        The item rules that need the plan's condominium cannot run in the item alone, before the plan exists.
+        """
+        from .billing_plan_item import BillingPlanItem  # circular at import time
+
+        errors: list[ValidationError | None] = []
+        for item_values in items_values:
+            item = BillingPlanItem(**item_values)
+            item.plan = self
+            try:
+                item.full_clean(exclude=["plan"])
+            except ValidationError as error:
+                errors.append(error)
+            else:
+                errors.append(None)
+        return errors
 
     @override
     def __str__(self) -> str:

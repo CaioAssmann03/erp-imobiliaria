@@ -6,7 +6,6 @@ JsonObject = dict[str, Any]
 
 
 def body(response: Response) -> JsonObject:
-    """`response.data` vem como Any; o cast fica concentrado aqui."""
     return cast(JsonObject, response.data)  # pyright: ignore[reportAny]
 
 

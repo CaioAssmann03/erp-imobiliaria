@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
 from apps.condominiums.models import Condominium
-from apps.core.seed.documents import generate_cnpj
+from apps.seed.documents import generate_cnpj
 from apps.core.models import Company
 
 from ..models import CurrentAccount

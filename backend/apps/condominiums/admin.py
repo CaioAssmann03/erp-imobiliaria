@@ -1,15 +1,12 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin, TabularInline
 
-from apps.core.scoping import CompanyScopedAdminMixin
+from apps.core.infrastructure.scoping import CompanyScopedAdminMixin
 
 from .models import (
-    Address,
-    AdministrationContract,
-    BillingRules,
     Block,
     Condominium,
-    LateInterestRate,
+    CondominiumAdministrationContract,
     Unit,
     UnitPerson,
 )
@@ -20,25 +17,9 @@ class BlockInline(TabularInline):
     extra = 0
 
 
-class AdministrationContractInline(TabularInline):
-    model = AdministrationContract
+class CondominiumAdministrationContractInline(TabularInline):
+    model = CondominiumAdministrationContract
     extra = 0
-
-
-class BillingRulesInline(TabularInline):
-    model = BillingRules
-    extra = 0
-
-
-class LateInterestRateInline(TabularInline):
-    model = LateInterestRate
-    extra = 0
-
-
-@admin.register(Address)
-class AddressAdmin(CompanyScopedAdminMixin, ModelAdmin):
-    list_display = ("street", "number", "city", "state", "zip_code")
-    search_fields = ("street", "city", "zip_code")
 
 
 @admin.register(Condominium)
@@ -48,12 +29,7 @@ class CondominiumAdmin(CompanyScopedAdminMixin, ModelAdmin):
     search_fields = ("=code", "name", "cnpj")
     list_filter = ("company", "type", "active")
     raw_id_fields = ("advisor", "address")
-    inlines = (
-        BlockInline,
-        AdministrationContractInline,
-        BillingRulesInline,
-        LateInterestRateInline,
-    )
+    inlines = (BlockInline, CondominiumAdministrationContractInline)
 
 
 class UnitPersonInline(CompanyScopedAdminMixin, TabularInline):
