@@ -95,7 +95,36 @@ The company has **one** Asaas account that issues every boleto and receives the 
 4. **History reset:** migrations were reset to one `0001` per app before production. A database that applied the *old* ones must be recreated (or its `django_migrations` reconciled) first; confirm with the user before touching a shared DB.
 
 ## Seeding, logs, backups
-`seed_demo` is local/demo only: **never in production** with real data (the initial company comes from `core.0002_seed_company`). Logs go to stdout; no structured logging, error tracker or alerts yet (use `logging.getLogger(__name__)`, log ids and outcomes, never personal data). No backup policy yet: a real deployment needs scheduled `pg_dump` (or the provider's plan), a tested restore and retention, which needs a spec before go-live. The ERP database on the VPS has **no** backup (the other project there has a daily dump in `/root/backups`; do not assume it covers the ERP volume), and the receipt files live in R2, outside any Postgres dump.
+`seed_demo` is local/demo only: **never in production** with real data (the initial company comes from `core.0002_seed_company`). Logs go to stdout; no structured logging, error tracker or alerts yet (use `logging.getLogger(__name__)`, log ids and outcomes, never personal data). The database backup is described in *Database backup* below (spec 040). The receipt files live in R2, outside any Postgres dump, and are **not** covered by it.
+
+## Database backup
+A `backup` container in the production stack (`deploy/vps/backup/`) dumps the ERP database **every night at 03:00** (`America/Sao_Paulo`), encrypts it and uploads it to a **private R2 bucket outside the VPS**; it keeps the **last 30 days plus the first backup of each of the last 12 months** and prunes only after a successful upload (spec 040).
+
+**Enable it (once):**
+1. In Cloudflare R2 create a **private bucket just for backups** and an API token limited to it (read, write, list, delete). Do not reuse the receipts' bucket or token.
+2. Invent a passphrase of 16+ random characters. Save it in a password manager **and** in the VPS `.env`: losing it makes every backup unreadable.
+3. Add to the VPS `.env`: `BACKUP_S3_ENDPOINT_URL` (the account's `https://<account id>.r2.cloudflarestorage.com`), `BACKUP_S3_BUCKET`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY`, `BACKUP_PASSPHRASE`.
+4. Copy `docker-compose.yml` and the `backup/` folder to the VPS (`deploy/vps/README.md`) and `./deploy.sh`.
+5. Take the first one now and look at it: `docker compose exec backup python3 backup.py run-once`, then `docker compose exec backup python3 backup.py status`.
+6. **Do a restore drill before trusting it** (below). Real data must not enter the database before steps 1–6 are done.
+
+**Check it:** `docker compose exec backup python3 backup.py status` lists the latest backups and exits non-zero when the newest is older than 26 hours; `docker compose logs backup` shows each night's `backup ok` or `BACKUP FAILED` (a failure retries 4 times, 30 minutes apart, and deletes nothing).
+
+**Restore drill (into a scratch database, never over production):**
+```bash
+docker compose exec db createdb -U "$POSTGRES_USER" erp_restore_drill
+docker compose exec backup python3 backup.py status                      # pick a name, e.g. erp-20261027-030000.dump.enc
+docker compose exec backup python3 backup.py restore erp-20261027-030000.dump.enc --database erp_restore_drill
+docker compose exec db psql -U "$POSTGRES_USER" -d erp_restore_drill -c "select count(*) from persons_person"   # compare with production
+docker compose exec db dropdb -U "$POSTGRES_USER" erp_restore_drill
+```
+
+**Disaster restore with standard tools only** (no code of this project needed; any machine with `openssl` and PostgreSQL 16 client tools): download the `db/erp-….dump.enc` file from the bucket, create an empty database, and
+```bash
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -pass env:BACKUP_PASSPHRASE -in erp-YYYYMMDD-HHMMSS.dump.enc \
+  | pg_restore --no-owner --no-acl --dbname <the empty database>
+```
+Then point the stack's `.env` at it and start the backend (`migrate` runs on start). The receipts are in their own R2 bucket and are untouched.
 
 ## Runbook
 | Symptom | Cause → action |
