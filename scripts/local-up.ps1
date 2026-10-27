@@ -132,6 +132,27 @@ if ($runningServices -notcontains "db") {
         Write-Host "A porta $dbPort do Postgres estava ocupada: usando a $port (gravado no .env)." -ForegroundColor Yellow
     }
 }
+# As portas 3000 (frontend), 8000 (backend) e 9090 (arquivos) sao fixas: o sistema depende delas. Se outro container
+# (por exemplo uma versao antiga deste mesmo projeto, rodando de outra pasta) ja as usa, mostramos quem e e
+# perguntamos se pode ser parado. So containers do Docker: um programa fora do Docker precisa ser fechado a mao.
+$ourIds = @(Native { docker compose ps -q 2>$null } | Where-Object { $_ })
+$conflicts = @()
+foreach ($fixedPort in 3000, 8000, 9090) {
+    $rows = @(Native { docker ps --filter "publish=$fixedPort" --format "{{.ID}}|{{.Names}}|{{.Ports}}" } | Where-Object { $_ })
+    foreach ($row in $rows) {
+        $id = ($row -split "\|")[0]
+        if (-not ($ourIds | Where-Object { $_ -like "$id*" })) { $conflicts += $row }
+    }
+}
+$conflicts = @($conflicts | Select-Object -Unique)
+if ($conflicts.Count -gt 0) {
+    Write-Host "`nEstes containers de outro projeto usam portas de que o sistema precisa:" -ForegroundColor Yellow
+    foreach ($row in $conflicts) { $parts = $row -split "\|"; Write-Host ("  {0}  ({1})" -f $parts[1], $parts[2]) }
+    $answer = Read-Host "Parar esses containers agora? Eles nao sao apagados, e voce pode liga-los de novo depois (s/N)"
+    if ($answer -notmatch "^[sSyY]") { Fail "Pare esses containers (docker stop <nome>) e rode o script de novo." }
+    foreach ($row in $conflicts) { Native { docker stop ($row -split "\|")[0] } | Out-Null }
+}
+
 Step "Subindo os containers (a primeira vez demora alguns minutos)"
 Native { docker compose up -d --build }
 if ($LASTEXITCODE -ne 0) {
