@@ -6,8 +6,8 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { AllocationEnum } from './allocationEnum';
+import type { BillingEntryMonth } from './billingEntryMonth';
 import type { BillingEntryUnit } from './billingEntryUnit';
-import type { PatchedBillingEntryMonth } from './patchedBillingEntryMonth';
 import type { RecurrenceEnum } from './recurrenceEnum';
 
 /**
@@ -48,11 +48,7 @@ export interface PatchedBillingEntry {
   amount?: string;
   units?: BillingEntryUnit[];
   readonly is_used?: boolean;
-  /**
-     * The entry's values in the requested reference month: the boleto line, the installment and each unit's amount.
-     * @nullable
-     */
-  readonly month?: PatchedBillingEntryMonth;
+  readonly month?: BillingEntryMonth | null;
   readonly created_at?: string;
   readonly updated_at?: string;
 }

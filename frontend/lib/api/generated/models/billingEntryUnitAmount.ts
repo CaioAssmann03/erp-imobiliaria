@@ -7,7 +7,11 @@
  */
 
 /**
- * The entry's values in the requested reference month: the boleto line, the installment and each unit's amount.
- * @nullable
+ * What one unit pays for an entry in a month.
  */
-export type PatchedBillingEntryMonth = {[key: string]: unknown} | null;
+export interface BillingEntryUnitAmount {
+  unit: string;
+  unit_name: string;
+  /** @pattern ^-?\d{0,10}(?:\.\d{0,2})?$ */
+  amount: string;
+}

@@ -5,9 +5,14 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { BillingEntryUnitAmount } from './billingEntryUnitAmount';
 
 /**
- * The entry's values in the requested reference month: the boleto line, the installment and each unit's amount.
- * @nullable
+ * An entry as the boleto of one month carries it.
  */
-export type BillingEntryMonth = {[key: string]: unknown} | null;
+export interface BillingEntryMonth {
+  line_description: string;
+  /** `k/n` for an installment entry, empty otherwise. */
+  installment: string;
+  unit_amounts: BillingEntryUnitAmount[];
+}

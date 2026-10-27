@@ -48,11 +48,7 @@ export interface BillingEntry {
   amount: string;
   units: BillingEntryUnit[];
   readonly is_used: boolean;
-  /**
-     * The entry's values in the requested reference month: the boleto line, the installment and each unit's amount.
-     * @nullable
-     */
-  readonly month: BillingEntryMonth;
+  readonly month: BillingEntryMonth | null;
   readonly created_at: string;
   readonly updated_at: string;
 }

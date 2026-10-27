@@ -29,4 +29,7 @@ from .billing_entry_serializers import (
 from .billing_entry_serializers import (
     BillingEntryEndSerializer as BillingEntryEndSerializer,
 )
+from .billing_entry_serializers import (
+    BillingEntryPreviewSerializer as BillingEntryPreviewSerializer,
+)
 from .billing_entry_serializers import reference_month_of as reference_month_of

@@ -13,7 +13,7 @@ export default function CostCentersPage() {
     <div>
       <PageHeader
         title="Sub-contas"
-        description="Plano de contas de cada condomínio, usado para classificar lançamentos."
+        description="Plano de contas de cada condomínio (conta normal, fundo de reserva, obras...), usado para classificar lançamentos."
         actions={<LinkButton href="/condominiums/cost-centers/new">Nova sub-conta</LinkButton>}
       />
       <Suspense fallback={<ListFallback />}>

@@ -26,7 +26,10 @@ import type {
 
 import type {
   BillingEntriesListParams,
+  BillingEntriesPreviewParams,
   BillingEntry,
+  BillingEntryEnd,
+  BillingEntryPreview,
   ErrorResponse,
   PaginatedBillingEntryList,
   PatchedBillingEntry
@@ -517,9 +520,9 @@ const {mutation: mutationOptions} = options ?
     /**
  * Stop an entry that repeats always after the given month.
  */
-export const billingEntriesEndCreate = (
+export const billingEntriesEnd = (
     id: string,
-    billingEntry: NonReadonly<BillingEntry>,
+    billingEntryEnd: BillingEntryEnd,
  signal?: AbortSignal
 ) => {
 
@@ -527,7 +530,7 @@ export const billingEntriesEndCreate = (
       return customInstance<BillingEntry>(
       {url: `/api/billing-entries/${id}/end/`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: billingEntry, signal
+      data: billingEntryEnd, signal
     },
       );
     }
@@ -535,13 +538,13 @@ export const billingEntriesEndCreate = (
 
 
 
-export const getBillingEntriesEndCreateMutationKey = () => ['billingEntriesEndCreate'] as const;
+export const getBillingEntriesEndMutationKey = () => ['billingEntriesEnd'] as const;
 
-export const getBillingEntriesEndCreateMutationOptions = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof billingEntriesEndCreate>>, TError,BillingEntriesEndCreateMutationVariables, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof billingEntriesEndCreate>>, TError,BillingEntriesEndCreateMutationVariables, TContext> => {
+export const getBillingEntriesEndMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof billingEntriesEnd>>, TError,BillingEntriesEndMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof billingEntriesEnd>>, TError,BillingEntriesEndMutationVariables, TContext> => {
 
-const mutationKey = getBillingEntriesEndCreateMutationKey();
+const mutationKey = getBillingEntriesEndMutationKey();
 const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -551,10 +554,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof billingEntriesEndCreate>>, BillingEntriesEndCreateMutationVariables> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof billingEntriesEnd>>, BillingEntriesEndMutationVariables> = (props) => {
           const {id,data} = props ?? {};
 
-          return  billingEntriesEndCreate(id,data,)
+          return  billingEntriesEnd(id,data,)
         }
 
 
@@ -564,34 +567,36 @@ const {mutation: mutationOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type BillingEntriesEndCreateMutationResult = NonNullable<Awaited<ReturnType<typeof billingEntriesEndCreate>>>
-    export type BillingEntriesEndCreateMutationBody = NonReadonly<BillingEntry>
-    export type BillingEntriesEndCreateMutationError = ErrorResponse
-    export type BillingEntriesEndCreateMutationVariables = {id: string;data: NonReadonly<BillingEntry>}
+    export type BillingEntriesEndMutationResult = NonNullable<Awaited<ReturnType<typeof billingEntriesEnd>>>
+    export type BillingEntriesEndMutationBody = BillingEntryEnd
+    export type BillingEntriesEndMutationError = ErrorResponse
+    export type BillingEntriesEndMutationVariables = {id: string;data: BillingEntryEnd}
 
-    export const useBillingEntriesEndCreate = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof billingEntriesEndCreate>>, TError,BillingEntriesEndCreateMutationVariables, TContext>, }
+    export const useBillingEntriesEnd = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof billingEntriesEnd>>, TError,BillingEntriesEndMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof billingEntriesEndCreate>>,
+        Awaited<ReturnType<typeof billingEntriesEnd>>,
         TError,
-        BillingEntriesEndCreateMutationVariables,
+        BillingEntriesEndMutationVariables,
         TContext
       > => {
-      return useMutation(getBillingEntriesEndCreateMutationOptions(options), queryClient);
+      return useMutation(getBillingEntriesEndMutationOptions(options), queryClient);
     }
     /**
- * The per-unit values of an entry that is not saved yet (`reference_month` in the body).
+ * The per-unit values of an entry that is not saved yet.
  */
-export const billingEntriesPreviewCreate = (
+export const billingEntriesPreview = (
     billingEntry: NonReadonly<BillingEntry>,
+    params?: BillingEntriesPreviewParams,
  signal?: AbortSignal
 ) => {
 
 
-      return customInstance<BillingEntry>(
+      return customInstance<BillingEntryPreview>(
       {url: `/api/billing-entries/preview/`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: billingEntry, signal
+      data: billingEntry,
+        params, signal
     },
       );
     }
@@ -599,13 +604,13 @@ export const billingEntriesPreviewCreate = (
 
 
 
-export const getBillingEntriesPreviewCreateMutationKey = () => ['billingEntriesPreviewCreate'] as const;
+export const getBillingEntriesPreviewMutationKey = () => ['billingEntriesPreview'] as const;
 
-export const getBillingEntriesPreviewCreateMutationOptions = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof billingEntriesPreviewCreate>>, TError,BillingEntriesPreviewCreateMutationVariables, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof billingEntriesPreviewCreate>>, TError,BillingEntriesPreviewCreateMutationVariables, TContext> => {
+export const getBillingEntriesPreviewMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof billingEntriesPreview>>, TError,BillingEntriesPreviewMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof billingEntriesPreview>>, TError,BillingEntriesPreviewMutationVariables, TContext> => {
 
-const mutationKey = getBillingEntriesPreviewCreateMutationKey();
+const mutationKey = getBillingEntriesPreviewMutationKey();
 const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -615,10 +620,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof billingEntriesPreviewCreate>>, BillingEntriesPreviewCreateMutationVariables> = (props) => {
-          const {data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof billingEntriesPreview>>, BillingEntriesPreviewMutationVariables> = (props) => {
+          const {data,params} = props ?? {};
 
-          return  billingEntriesPreviewCreate(data,)
+          return  billingEntriesPreview(data,params,)
         }
 
 
@@ -628,18 +633,18 @@ const {mutation: mutationOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type BillingEntriesPreviewCreateMutationResult = NonNullable<Awaited<ReturnType<typeof billingEntriesPreviewCreate>>>
-    export type BillingEntriesPreviewCreateMutationBody = NonReadonly<BillingEntry>
-    export type BillingEntriesPreviewCreateMutationError = ErrorResponse
-    export type BillingEntriesPreviewCreateMutationVariables = {data: NonReadonly<BillingEntry>}
+    export type BillingEntriesPreviewMutationResult = NonNullable<Awaited<ReturnType<typeof billingEntriesPreview>>>
+    export type BillingEntriesPreviewMutationBody = NonReadonly<BillingEntry>
+    export type BillingEntriesPreviewMutationError = ErrorResponse
+    export type BillingEntriesPreviewMutationVariables = {data: NonReadonly<BillingEntry>;params?: BillingEntriesPreviewParams}
 
-    export const useBillingEntriesPreviewCreate = <TError = ErrorResponse,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof billingEntriesPreviewCreate>>, TError,BillingEntriesPreviewCreateMutationVariables, TContext>, }
+    export const useBillingEntriesPreview = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof billingEntriesPreview>>, TError,BillingEntriesPreviewMutationVariables, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof billingEntriesPreviewCreate>>,
+        Awaited<ReturnType<typeof billingEntriesPreview>>,
         TError,
-        BillingEntriesPreviewCreateMutationVariables,
+        BillingEntriesPreviewMutationVariables,
         TContext
       > => {
-      return useMutation(getBillingEntriesPreviewCreateMutationOptions(options), queryClient);
+      return useMutation(getBillingEntriesPreviewMutationOptions(options), queryClient);
     }

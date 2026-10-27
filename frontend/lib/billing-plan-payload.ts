@@ -6,7 +6,10 @@
 export type CalculationKind = "fixed_amount" | "ideal_fraction_share" | "unit_registered_value";
 
 export interface PlanItemValues {
-  description: string;
+  /** Id do evento ("" = sem evento): o boleto abre a linha com "0052-NOME" e a descrição vem depois. */
+  event: string;
+  /** Vazio quando o evento basta (`undefined`). */
+  description: string | undefined;
   cost_center: string;
   entry_template: string;
   calculation_kind: string;
@@ -61,7 +64,8 @@ export const needsUnitValueField = (kind: string): boolean => kind === "unit_reg
 /** Um item para a API: só os campos do tipo de cálculo escolhido; os outros vão `null`. */
 export function itemToPayload(item: PlanItemValues): Record<string, unknown> {
   return {
-    description: item.description,
+    event: item.event || null,
+    description: item.description ?? "",
     cost_center: item.cost_center,
     entry_template: item.entry_template,
     calculation_kind: item.calculation_kind,

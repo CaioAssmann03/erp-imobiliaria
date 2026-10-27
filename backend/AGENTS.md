@@ -40,6 +40,7 @@ This file is only the **index**; knowledge lives in [`docs/`](docs/README.md).
 |---|---|
 | **Roadmap: what is done, what is next** (8 phases, parts, status, backlog) | [roadmap/README.md](docs/roadmap/README.md) |
 | Product, stack, vocabulary, decisions | [architecture/overview.md](docs/architecture/overview.md) |
+| **How the administradora really works** (one gateway account, items and sub-contas on a boleto, the registration fee) | [architecture/business-model.md](docs/architecture/business-model.md) |
 | How an app is built · recurring recipes | [architecture/structure.md](docs/architecture/structure.md) · [conventions/practices.md](docs/conventions/practices.md) |
 | Naming (Clean Code) | [conventions/naming.md](docs/conventions/naming.md) |
 | API rules | [architecture/api.md](docs/architecture/api.md) |

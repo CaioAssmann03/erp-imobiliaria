@@ -54,14 +54,6 @@ class BillingEntryError(RuleError):
         "billing_entry.already_used",
         "A document was already issued from this entry; end it and create a new one instead.",
     )
-    DESCRIPTION_TOO_LONG = (
-        "billing_entry.description.too_long",
-        "Event name and description together are too long for a boleto line.",
-    )
-    UNITS_EMPTY = (
-        "billing_entry.units.empty",
-        "Select at least one unit.",
-    )
     UNIT_OTHER_CONDOMINIUM = (
         "billing_entry.unit.other_condominium",
         "The unit belongs to another condominium.",
