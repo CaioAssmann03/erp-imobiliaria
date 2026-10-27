@@ -97,7 +97,11 @@ if ($Reset) {
 }
 Step "Subindo os containers (a primeira vez demora alguns minutos)"
 Native { docker compose up -d --build }
-if ($LASTEXITCODE -ne 0) { Fail "docker compose falhou. Se for 'port is already allocated', ponha POSTGRES_HOST_PORT=5434 no .env e rode de novo." }
+if ($LASTEXITCODE -ne 0) {
+    Fail ("docker compose falhou. Leia a mensagem acima. Se for 'port is already allocated': a porta citada esta ocupada por outro programa " +
+          "(8000 = outro backend, 3000 = outro frontend, 9090 = outro armazenamento, 5432 = outro Postgres: nesse caso ponha POSTGRES_HOST_PORT=5434 no .env). " +
+          "Feche o programa que usa a porta (docker ps mostra os containers) e rode de novo.")
+}
 
 Step "Esperando o backend responder"
 $ready = $false
