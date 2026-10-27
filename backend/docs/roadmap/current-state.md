@@ -13,6 +13,7 @@ Read first: [`architecture/business-model.md`](../architecture/business-model.md
 | `main` | phases 1–4 done, phase 5 coded (sub-account design) | untouched by these sessions |
 | `claude/project-status-6vp4iv` | spec 037 as a draft only (docs) | superseded by the two below |
 | `feat/single-gateway-account` | **spec 037 implemented** (one Asaas account per company, `setup_gateway_account`, migrations `billing.0011–0012`), the spec 038 draft; **PR #29, draft** | tests green; sandbox validation pending |
+| `feat/database-backup` | **spec 040**: the nightly encrypted database backup to a private R2 bucket (`deploy/vps/backup/`, runbook in `architecture/operations.md`); branched from `main` on purpose, so it can be deployed without waiting for the two PRs above | tests green; **not enabled on the VPS yet**: until it is and one restore drill is done, **real data must not enter the production database** (gap #19) |
 | `feat/billing-entries` | everything above **plus spec 039 implemented** (events, launches, *Inclusão de valores* screen, sub-conta `code`) **and spec 038 implemented** (the registration fee, `CompanyEntry`, *Conta da imobiliária*, events on plan items); **PR #30, draft** (base: `feat/single-gateway-account`) | tests green |
 
 `feat/billing-entries` is built on top of `feat/single-gateway-account`: merge them in that order (037 first). Both change `issue_condominium_billing`.
@@ -33,6 +34,7 @@ Launches complement the plans; rateio individual/coletivo/fração; events are a
 - **Settings tab:** the Configurações dialog only holds appearance; "Eventos e subcontas" is a **Cadastros** section with two links (to `/billing/events` and `/condominiums/cost-centers`), not a data tab.
 
 ## Next steps, in order
+0. **Backup first** (branch `feat/database-backup`, spec 040): merge it, create the private R2 bucket and the passphrase, deploy, `run-once`, restore drill. Asaas is postponed by the user (2026-10-27): the other business rules come first. To try a boleto with real data: after the backup, in production register condominium, units, people, sub-contas and plan, the events (0052 CONDOMINIO; 0005 TARIFA BANCO marked as the administradora's), launches, then *Emitir mês* (without the gateway the documents stay issued as drafts) and *Baixar PDF (RASCUNHO). The code for this lives on the unmerged branches above: merge and deploy them first.
 1. Merge or review PR #29 (037); open a PR for `feat/billing-entries` against it or after it.
 2. Use the fee on real data: launch the event 0005 on a condominium, issue the month and check the boleto PDF.
 3. Sandbox validation (needs the user's Asaas sandbox key and a tunnel for the webhook).
