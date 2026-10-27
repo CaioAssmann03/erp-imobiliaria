@@ -79,6 +79,11 @@ class CostCenter(BaseModel):
                 }
             )
 
+    def sole_active_entry_template(self) -> "EntryTemplate | None":
+        """The cost center's only active entry template; None when it has none or several."""
+        templates = list(self.entry_templates.filter(active=True)[:2])
+        return templates[0] if len(templates) == 1 else None
+
     @override
     def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
         if self.entry_templates.exists():

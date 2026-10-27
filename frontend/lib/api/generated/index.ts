@@ -2,6 +2,8 @@ export * from './accounts-payable/accounts-payable';
 export * from './auth/auth';
 export * from './bank-accounts/bank-accounts';
 export * from './billing-documents/billing-documents';
+export * from './billing-entries/billing-entries';
+export * from './billing-events/billing-events';
 export * from './billing-plans/billing-plans';
 export * from './billing-runs/billing-runs';
 export * from './blocks/blocks';

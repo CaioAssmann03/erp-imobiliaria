@@ -7,6 +7,9 @@ from .models import (
     BillingDocumentPayment,
     BillingDocumentPdf,
     BillingDocumentRegistration,
+    BillingEntry,
+    BillingEntryUnit,
+    BillingEvent,
     BillingPlan,
     BillingPlanItem,
     BillingRun,
@@ -21,6 +24,9 @@ from .models import (
 def register() -> None:
     register_audited(BillingPlan)
     register_audited(BillingPlanItem)
+    register_audited(BillingEvent)
+    register_audited(BillingEntry)
+    register_audited(BillingEntryUnit)
     register_audited(BillingDocument)
     register_audited(BillingDocumentItem)
     register_audited(BillingDocumentPdf)

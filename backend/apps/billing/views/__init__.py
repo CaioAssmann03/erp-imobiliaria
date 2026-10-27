@@ -7,3 +7,5 @@ from .condominium_billing_rules_views import (
     CondominiumBillingRulesViewSet as CondominiumBillingRulesViewSet,
 )
 from .late_interest_rate_views import LateInterestRateViewSet as LateInterestRateViewSet
+from .billing_event_views import BillingEventViewSet as BillingEventViewSet
+from .billing_entry_views import BillingEntryViewSet as BillingEntryViewSet

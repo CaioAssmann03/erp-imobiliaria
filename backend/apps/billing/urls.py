@@ -4,6 +4,8 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     AsaasWebhookView,
     BillingDocumentViewSet,
+    BillingEntryViewSet,
+    BillingEventViewSet,
     BillingPlanViewSet,
     BillingRunViewSet,
     CondominiumBillingRulesViewSet,
@@ -15,6 +17,8 @@ router = DefaultRouter()
 router.register("billing-plans", BillingPlanViewSet, basename="billing-plan")
 router.register("billing-documents", BillingDocumentViewSet, basename="billing-document")
 router.register("billing-runs", BillingRunViewSet, basename="billing-run")
+router.register("billing-events", BillingEventViewSet, basename="billing-event")
+router.register("billing-entries", BillingEntryViewSet, basename="billing-entry")
 router.register(
     "condominium-billing-rules", CondominiumBillingRulesViewSet, basename="condominium-billing-rules"
 )

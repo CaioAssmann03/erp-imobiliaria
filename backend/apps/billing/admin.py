@@ -14,6 +14,9 @@ from .models import (
     BillingDocumentPayment,
     BillingDocumentPdf,
     BillingDocumentRegistration,
+    BillingEntry,
+    BillingEntryUnit,
+    BillingEvent,
     BillingPlan,
     BillingPlanItem,
     BillingRun,
@@ -276,3 +279,34 @@ class LateInterestRateAdmin(CompanyScopedAdminMixin, ModelAdmin):
     list_display = ("condominium", "start_date", "monthly_percentage")
     search_fields = ("condominium__name",)
     raw_id_fields = ("condominium",)
+
+
+@final
+@admin.register(BillingEvent)
+class BillingEventAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("code", "name", "active")
+    search_fields = ("code", "name")
+    list_filter = ("active",)
+
+
+@final
+class BillingEntryUnitInline(CompanyScopedAdminMixin, TabularInline):
+    model = BillingEntryUnit
+    extra = 0
+
+
+@final
+@admin.register(BillingEntry)
+class BillingEntryAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    list_display = (
+        "condominium",
+        "event",
+        "description",
+        "allocation",
+        "recurrence",
+        "start_month",
+        "amount",
+    )
+    list_filter = ("recurrence", "allocation", "condominium")
+    search_fields = ("description", "condominium__name", "event__name")
+    inlines = (BillingEntryUnitInline,)

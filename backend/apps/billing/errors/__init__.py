@@ -12,3 +12,5 @@ from .gateway_reconciliation_run import GatewayReconciliationRunError as Gateway
 from .billing_document_delivery import BillingDocumentDeliveryError as BillingDocumentDeliveryError
 from .condominium_billing_rules import CondominiumBillingRulesError as CondominiumBillingRulesError
 from .late_interest_rate import LateInterestRateError as LateInterestRateError
+from .billing_event import BillingEventError as BillingEventError
+from .billing_entry import BillingEntryError as BillingEntryError

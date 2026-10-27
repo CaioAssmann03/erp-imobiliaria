@@ -8,6 +8,9 @@ from .billing_document_pdf import BillingDocumentPdf as BillingDocumentPdf
 from .billing_document_registration import (
     BillingDocumentRegistration as BillingDocumentRegistration,
 )
+from .billing_entry import BillingEntry as BillingEntry
+from .billing_entry_unit import BillingEntryUnit as BillingEntryUnit
+from .billing_event import BillingEvent as BillingEvent
 from .billing_plan import BillingPlan as BillingPlan
 from .billing_plan_item import BillingPlanItem as BillingPlanItem
 from .billing_run import BillingRun as BillingRun

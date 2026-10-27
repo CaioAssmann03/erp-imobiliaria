@@ -33,6 +33,14 @@ class BillingDocumentItem(BaseModel):
     amount = models.DecimalField(
         max_digits=12, decimal_places=2, validators=[validate_positive_amount]
     )
+    # The launch (spec 039) the line comes from; empty for a plan item. It freezes the launch once a document exists.
+    billing_entry = models.ForeignKey(
+        "billing.BillingEntry",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="document_items",
+    )
 
     company_lookup = "document__unit__condominium__company"
 
