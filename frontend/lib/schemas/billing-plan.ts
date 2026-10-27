@@ -92,7 +92,7 @@ export const BILLING_PLAN_DEFAULTS: BillingPlanFormInput = {
 };
 
 const itemToForm = (item: BillingPlanItem): BillingPlanItemFormInput => ({
-  description: item.description,
+  description: item.description ?? "",
   cost_center: item.cost_center,
   entry_template: item.entry_template,
   calculation_kind: item.calculation_kind,

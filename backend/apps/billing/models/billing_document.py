@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 from typing import TYPE_CHECKING, ClassVar, final, override
 
 from django.db import models
@@ -114,6 +115,17 @@ class BillingDocument(BaseModel):
                 violation_error_code=FinanceValidatorError.AMOUNT_NOT_POSITIVE.value,
             ),
         )
+
+    def fee_amount(self) -> Decimal:
+        """What the document charges for the administradora itself (the registration fee), never a condominium's."""
+        return sum(
+            (item.amount for item in self.items.all() if item.credits_company),
+            Decimal(0),
+        )
+
+    def discountable_amount(self) -> Decimal:
+        """The part the early-payment discount applies to: the items of the condominium, never the fee."""
+        return self.amount - self.fee_amount()
 
     def is_overdue_on(self, reference_date: date) -> bool:
         return (

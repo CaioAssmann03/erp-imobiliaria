@@ -12,7 +12,7 @@ class BillingEventSerializer(ModelRulesMixin, serializers.ModelSerializer[Billin
     @final
     class Meta:
         model = BillingEvent
-        fields = ("id", "company", "code", "name", "active", "created_at", "updated_at")
+        fields = ("id", "company", "code", "name", "active", "credits_company", "created_at", "updated_at")
         read_only_fields = ("id", "company", "created_at", "updated_at")
         # DRF would demand the whole unique-together (it includes the read-only company); the model constraint runs in the mixin.
         validators = ()

@@ -34,6 +34,14 @@ class BillingEntryError(RuleError):
         "billing_entry.cost_center.other_condominium",
         "The cost center belongs to another condominium.",
     )
+    COST_CENTER_REQUIRED = (
+        "billing_entry.cost_center.required",
+        "Choose the sub-conta where this value is credited.",
+    )
+    COST_CENTER_NOT_ALLOWED_FOR_COMPANY_EVENT = (
+        "billing_entry.cost_center.not_allowed_for_company_event",
+        "An event that credits the administradora has no sub-conta: its money never goes to a condominium.",
+    )
     COST_CENTER_INACTIVE = (
         "billing_entry.cost_center.inactive",
         "The cost center is inactive.",

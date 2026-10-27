@@ -16,8 +16,12 @@ import type { UnitValueFieldEnum } from './unitValueFieldEnum';
 export interface BillingPlanItem {
   readonly id: string;
   readonly position: number;
+  /** @nullable */
+  event?: string | null;
+  readonly event_code: number;
+  readonly event_name: string;
   /** @maxLength 120 */
-  description: string;
+  description?: string;
   cost_center: string;
   readonly cost_center_name: string;
   entry_template: string;

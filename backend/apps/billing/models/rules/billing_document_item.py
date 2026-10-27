@@ -9,7 +9,7 @@ if TYPE_CHECKING:
         BillingDocumentItem,  # noqa: F401
     )
 
-ITEM_FIELDS = ("document_id", "position", "description", "cost_center_id", "entry_template_id", "amount")
+ITEM_FIELDS = ("document_id", "position", "description", "cost_center_id", "entry_template_id", "credits_company", "amount")
 
 
 class BillingDocumentItemRules(ModelRules["BillingDocumentItem"]):

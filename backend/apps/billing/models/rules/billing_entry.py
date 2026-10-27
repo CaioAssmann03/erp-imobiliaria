@@ -92,6 +92,16 @@ class BillingEntryRules(ModelRules["BillingEntry"]):
             and self._event_changed()
         )
 
+    @rule("cost_center", BillingEntryError.COST_CENTER_REQUIRED)
+    def cost_center_is_missing(self) -> bool:
+        entry = self.instance
+        return entry.cost_center_id is None and not entry.credits_company
+
+    @rule("cost_center", BillingEntryError.COST_CENTER_NOT_ALLOWED_FOR_COMPANY_EVENT)
+    def cost_center_on_an_event_that_credits_the_company(self) -> bool:
+        entry = self.instance
+        return entry.cost_center_id is not None and entry.credits_company
+
     @rule("cost_center", BillingEntryError.COST_CENTER_OTHER_CONDOMINIUM)
     def cost_center_belongs_to_another_condominium(self) -> bool:
         entry = self.instance
@@ -112,7 +122,7 @@ class BillingEntryRules(ModelRules["BillingEntry"]):
     def cost_center_has_not_exactly_one_active_entry_template(self) -> bool:
         """The template is the cost center's only active one; `BillingEntry.clean` then takes it."""
         entry = self.instance
-        if entry.cost_center_id is None or not self._cost_center_changed():
+        if entry.cost_center is None or not self._cost_center_changed():
             return False
         return entry.cost_center.sole_active_entry_template() is None
 

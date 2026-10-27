@@ -20,6 +20,7 @@ from apps.finance.models import CostCenter, EntryTemplate
 from apps.finance.validators import validate_positive_amount
 
 CENT = Decimal("0.01")
+LINE_DESCRIPTION_MAX_LENGTH = 120
 
 
 @final
@@ -41,7 +42,15 @@ class BillingPlanItem(BaseModel):
     )
     # Order on the boleto: the order of the list the plan was written with.
     position = models.PositiveSmallIntegerField(default=0)
-    description = models.CharField(max_length=120)
+    # Either an event (the boleto prints `0052-CONDOMINIO`, then the description if any) or a description alone.
+    event = models.ForeignKey(
+        "billing.BillingEvent",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="billing_plan_items",
+    )
+    description = models.CharField(max_length=120, blank=True)
     cost_center = models.ForeignKey(
         CostCenter, on_delete=models.PROTECT, related_name="billing_plan_items"
     )
@@ -119,6 +128,11 @@ class BillingPlanItem(BaseModel):
     def clean(self) -> None:
         BillingPlanItemRules(self).validate()
 
+    def line_description(self) -> str:
+        """What the boleto line says: `0052-EVENT NAME` and the description after it, or the description alone."""
+        parts = [self.event.line_label if self.event is not None else "", self.description]
+        return " - ".join(part for part in parts if part)[:LINE_DESCRIPTION_MAX_LENGTH]
+
     def uses_inconsistent_apportionment(
         self, apportionment_totals: Mapping[uuid.UUID, Decimal]
     ) -> bool:
@@ -174,4 +188,4 @@ class BillingPlanItem(BaseModel):
 
     @override
     def __str__(self) -> str:
-        return self.description
+        return self.line_description()

@@ -18,7 +18,7 @@ class BillingPlanViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Billin
     queryset = BillingPlan.objects.select_related("condominium").prefetch_related(
         Prefetch(
             "items",
-            queryset=BillingPlanItem.objects.select_related("cost_center", "entry_template"),
+            queryset=BillingPlanItem.objects.select_related("event", "cost_center", "entry_template"),
         )
     )
     serializer_class = BillingPlanSerializer

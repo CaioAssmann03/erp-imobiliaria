@@ -24,6 +24,7 @@ export interface PatchedBillingEvent {
   /** @maxLength 120 */
   name?: string;
   active?: boolean;
+  credits_company?: boolean;
   readonly created_at?: string;
   readonly updated_at?: string;
 }

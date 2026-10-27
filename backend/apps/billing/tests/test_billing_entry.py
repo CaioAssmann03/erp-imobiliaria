@@ -178,8 +178,8 @@ def test_the_line_names_the_event_the_description_and_the_installment(make_entry
         event=event, recurrence=BillingEntry.Recurrence.INSTALLMENTS, installments_total=3, start_month=date(2026, 9, 1)
     )
 
-    assert plain.line_description(OCTOBER) == "Limpeza do condomínio - 10/2026"
-    assert parcelled.line_description(OCTOBER) == "Limpeza do condomínio (2/3)"
+    assert plain.line_description(OCTOBER) == "0250-Limpeza do condomínio - 10/2026"
+    assert parcelled.line_description(OCTOBER) == "0250-Limpeza do condomínio (2/3)"
 
 
 # ----- R8: a used entry is frozen -----

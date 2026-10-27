@@ -13,6 +13,8 @@ from ..services.update_billing_plan import update_billing_plan
 class BillingPlanItemSerializer(ModelRulesMixin, serializers.ModelSerializer[BillingPlanItem]):
     """One item of a plan. `position` is the item's place in the list it was sent in."""
 
+    event_code = serializers.IntegerField(source="event.code", read_only=True, default=None)
+    event_name = serializers.CharField(source="event.name", read_only=True, default=None)
     cost_center_name = serializers.CharField(source="cost_center.name", read_only=True)
     entry_template_name = serializers.CharField(source="entry_template.name", read_only=True)
 
@@ -22,6 +24,9 @@ class BillingPlanItemSerializer(ModelRulesMixin, serializers.ModelSerializer[Bil
         fields = (
             "id",
             "position",
+            "event",
+            "event_code",
+            "event_name",
             "description",
             "cost_center",
             "cost_center_name",

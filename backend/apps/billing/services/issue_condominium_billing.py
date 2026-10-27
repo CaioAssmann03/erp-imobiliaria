@@ -82,7 +82,7 @@ def _issue_units(run: BillingRun) -> None:
             run.already_issued_count += 1
             continue
         lines = [
-            NewBillingDocumentItem(item.description, item.cost_center, item.entry_template, amounts[unit.pk])
+            NewBillingDocumentItem(item.line_description(), item.cost_center, item.entry_template, amounts[unit.pk])
             for item, amounts in zip(items, amounts_by_item, strict=True)
             if amounts[unit.pk] > Decimal(0)
         ]
@@ -95,7 +95,7 @@ def _issue_units(run: BillingRun) -> None:
                 entry,
             )
             for entry, amounts in zip(entries, amounts_by_entry, strict=True)
-            if entry.entry_template is not None
+            if (entry.entry_template is not None or entry.credits_company)
             and amounts.get(unit.pk, Decimal(0)) > Decimal(0)
         ]
         skip_code = _skip_code(unit, billing_rules, has_lines=bool(lines))
@@ -128,7 +128,7 @@ def _items_in_force(condominium: Condominium, reference_month: date) -> list[Bil
     plans = BillingPlan.objects.in_force(reference_month).filter(condominium=condominium).prefetch_related(
         Prefetch(
             "items",
-            queryset=BillingPlanItem.objects.select_related("cost_center", "entry_template").order_by("position"),
+            queryset=BillingPlanItem.objects.select_related("event", "cost_center", "entry_template").order_by("position"),
         )
     )
     return [item for plan in plans for item in plan.items.all()]

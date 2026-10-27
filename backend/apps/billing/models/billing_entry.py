@@ -86,8 +86,13 @@ class BillingEntry(BaseModel):
     end_month = models.DateField(
         null=True, blank=True, validators=[validate_first_day_of_month]
     )
+    # Empty only for an event that credits the administradora (`BillingEntryRules`).
     cost_center = models.ForeignKey(
-        CostCenter, on_delete=models.PROTECT, related_name="billing_entries"
+        CostCenter,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="billing_entries",
     )
     # Chosen from the cost center when the entry is saved: its only active template (`clean`).
     entry_template = models.ForeignKey(
@@ -140,7 +145,11 @@ class BillingEntry(BaseModel):
     @override
     def clean(self) -> None:
         BillingEntryRules(self).validate()
-        template = self.cost_center.sole_active_entry_template()
+        template = (
+            self.cost_center.sole_active_entry_template()
+            if self.cost_center is not None
+            else None
+        )
         if template is not None:
             self.entry_template = template
 
@@ -148,6 +157,11 @@ class BillingEntry(BaseModel):
     def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
         self.assert_not_used()
         return super().delete(*args, **kwargs)
+
+    @property
+    def credits_company(self) -> bool:
+        """Whether the money is the administradora's (its event says so) instead of a condominium's."""
+        return self.event is not None and self.event.credits_company
 
     def assert_not_used(self) -> None:
         """A used entry cannot be deleted, nor can its selection of units change: it would rewrite what was issued."""
@@ -184,8 +198,8 @@ class BillingEntry(BaseModel):
         return f"{self.month_index(reference_month.replace(day=1)) + 1}/{self.installments_total}"
 
     def line_description(self, reference_month: date) -> str:
-        """What the boleto line says: the event name and the description, and the installment when there is one."""
-        parts = [self.event.name if self.event is not None else "", self.description]
+        """What the boleto line says: `0005-EVENT NAME`, then the description, and the installment when there is one."""
+        parts = [self.event.line_label if self.event is not None else "", self.description]
         text = " - ".join(part for part in parts if part)
         label = self.installment_label(reference_month)
         text = f"{text} ({label})" if label and text else text or label
