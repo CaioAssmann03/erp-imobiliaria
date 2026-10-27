@@ -4,9 +4,9 @@ from unfold.admin import ModelAdmin, TabularInline
 from apps.core.infrastructure.scoping import CompanyScopedAdminMixin
 
 from .models import (
-    CondominiumAdministrationContract,
     Block,
     Condominium,
+    CondominiumAdministrationContract,
     Unit,
     UnitPerson,
 )
