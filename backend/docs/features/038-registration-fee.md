@@ -8,21 +8,26 @@ skip-if: the single gateway account → features/037-single-gateway-account.md; 
 **Status:** draft · **Level:** full · **Roadmap:** none · **Apps:** billing, finance · **Frontend impact:** client regeneration
 
 ## Open questions
-- [ ] Where does the fee credit live? Today only a condominium has a current account. (recommended: a new **company ledger** — `CompanyEntry`, one credit per paid boleto, with a balance computed by summing, shown in the Admin and in a read-only endpoint later; it does not touch the rules of the condominium ledger)
-- [ ] Where is the amount defined? (recommended: a company setting, `registration_fee` (R$ 3.90 today), copied onto each document when it is issued so a later change does not alter a boleto already issued; a per-condominium override only if needed)
-- [ ] Does the real cost of the gateway (R$ 1.20 per boleto, then what Asaas charges) appear in the system? (recommended: no; the credit is the fee charged, and the cost stays on the Asaas statement. `net_amount` of the payment already records what Asaas reports)
-- [ ] Do the early-payment discount, the late fee and the interest apply to the fee? (recommended: no, they apply only to the items; the fee is a flat amount added to the boleto total)
-- [ ] Is the fee printed on the boleto PDF and on the e-mail as its own line? (recommended: yes, "Tarifa de registro", so the payer sees why the total is higher)
-- [ ] When a boleto is cancelled or reissued before it is paid, is the fee charged again? (recommended: no, one fee per document, whatever the number of registrations)
-
-- [ ] In the reference system the fee ("TARIFA BANCO", R$ 3.90) is just an event launched on every unit. With the launches of spec 039, does the fee become a launch whose subconta belongs to the administradora? (recommended: no, keep the fee as its own mechanism so it can never reach a condominium)
+- [ ] **The fee as a launch.** The boleto the user sent (below) lists the fee as an ordinary line, `0005-TARIFA BANCO 3,90`, next to `2772-PINTURA FACHADA 30,00` and `0052-CONDOMINIO 170,00`: the staff launches it like any value, with an **event**, when they launch the charges (answer 2). Proposal (replaces the earlier "own mechanism" recommendation): an **event can be marked "receita da imobiliária"** (`BillingEvent.credits_company`, e.g. 0005 TARIFA BANCO); a launch with such an event has **no sub-conta** and its money is credited to the administradora's own ledger, **never to a condominium** (a rule in the models refuses a sub-conta on it and refuses the credit to a condominium). OK? (recommended: yes, it is how the staff already works)
+- [ ] **"PAGAMENTO NA ADM. SEM TAXA BANCO ATÉ 10/10/2026: 200,00".** The boleto says that paying at the administradora's counter costs the total **without the fee** (203,90 − 3,90). Is that a manual payment entry (*baixa manual*) the system must support, crediting the items but not the fee? (recommended: yes, as its own spec after this one; the gateway boleto and the counter payment are different paths)
+- [ ] **The late fee base.** The boleto prints `MULTA APÓS 10/10/2026: 4,04` on a total of 203,90 (2% of 203,90 would be 4,08; 2% of 200,00 is 4,00). Is the fee left out of the base of the multa and interest? (recommended: yes, the fee is a flat amount; please tell how 4,04 is computed)
+- [ ] **How a line prints.** The boleto prints `<event code, 4 digits>-<EVENT NAME>` (`0005-TARIFA BANCO`, `0052-CONDOMINIO`): even the fixed monthly fee is an event. Print every line this way (event code and name, then the description), and let a **plan item** name an event too? (recommended: yes; today a plan item has only a free description and a launch prints "name - description" without the code)
 
 ## Decisions
 | Date | Decision | Decided by |
 |---|---|---|
+| 2026-10-27 | The fee is credited to an account **of the administradora in the system**, never to a condominium's current account | the user |
+| 2026-10-27 | **Who sets the amount:** the administradora, when it launches the charges of the condominiums' boletos (as a launch, see the first question), not a fixed company setting | the user |
+| 2026-10-27 | The real cost of the gateway (R$ 1.20) **is not shown in the system**; it is internal | the user |
+| 2026-10-27 | **No discount** applies to the fee | the user |
+| 2026-10-27 | The fee **is detailed on the boleto** as its own line | the user |
+| 2026-10-27 | A **second copy** (*segunda via*) of a boleto charges **the same fee**, never twice: one fee per document, whatever the number of registrations | the user |
 | 2026-10-26 | The administradora always charges a bank registration fee on the boleto and defines its amount (for example R$ 3.90, while the gateway charges it R$ 1.20 per registration) | the user |
-| 2026-10-26 | The fee must **never** be credited to the condominium's accounts; it is a credit of the administradora in the system | the user |
+| 2026-10-26 | The fee must **never** be credited to the condominium's accounts | the user |
 | 2026-10-26 | Spec 037 ships without a fee: the documents carry only items, and a payment credits only items, so nothing wrong can reach a condominium meanwhile | agent |
+
+## Example sent by the user (2026-10-27)
+A Santander boleto issued in the administradora's own name (beneficiary EVE ADM DE IMOVEIS COND E VENDAS), competence SET/2026, due 10/10/2026, unit "Apto 103", "SÉRIE: 195 REGISTRO: 6518". Lines: `0005-TARIFA BANCO 3,90`, `2772-PINTURA FACHADA 30,00`, `0052-CONDOMINIO 170,00`; `TOTAL ATÉ 10/10/2026 203,90`; `MULTA APÓS 10/10/2026 4,04`; `TOTAL C/MULTA APÓS 10/10/2026 207,94`; `PAGAMENTO NA ADM. SEM TAXA BANCO ATÉ 10/10/2026 200,00`; "APÓS VENCIMENTO ACRESCER CORREÇÃO MONETÁRIA, JUROS DE 1% A.M E MULTA DE 2%".
 
 ## R — Requirements
 A boleto total is the sum of its items plus the fee. When it is paid, the items are credited to the condominium's cost centers (spec 032) and the fee is credited to the administradora, in the same transaction.
