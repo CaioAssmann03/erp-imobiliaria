@@ -107,7 +107,7 @@ docker compose exec -T backend python manage.py migrate
 if ($LASTEXITCODE -ne 0) { Fail "migrate falhou. Veja: docker compose logs backend" }
 
 if (-not $NoSeed) {
-    Step "Carregando os dados de exemplo (fficticios)"
+    Step "Carregando os dados de exemplo (ficticios)"
     docker compose exec -T backend python manage.py seed_demo
     if ($LASTEXITCODE -ne 0) { Fail "seed_demo falhou. Veja: docker compose logs backend" }
 }
