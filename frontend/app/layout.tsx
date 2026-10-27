@@ -38,7 +38,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: APPEARANCE_INIT_SCRIPT }} />
       </head>
-      <body className="min-h-full flex flex-col">
+      {/* suppressHydrationWarning: extensões do navegador (ColorZilla, tradutores...) acrescentam atributos ao <body> antes do React carregar. */}
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <Providers>
           <TooltipProvider>{children}</TooltipProvider>
           <Toaster position="top-right" />

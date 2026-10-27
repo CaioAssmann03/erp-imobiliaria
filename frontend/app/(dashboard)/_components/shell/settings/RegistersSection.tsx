@@ -17,6 +17,8 @@ export function RegistersSection() {
         {REGISTERS.map((register) => (
           <li key={register.href}>
             <Dialog.Close
+              // O botão de fechar é desenhado como um link (Next): sem isto o Base UI espera um <button> de verdade.
+              nativeButton={false}
               render={
                 <Link
                   href={register.href}
