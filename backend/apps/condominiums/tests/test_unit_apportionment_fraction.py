@@ -1,5 +1,6 @@
 """A unit's fractions, one per apportionment criterion, each closing at 1 over the active units (spec 039)."""
 
+import uuid
 from decimal import Decimal
 
 import pytest
@@ -242,3 +243,14 @@ def test_the_apportionment_endpoint_flags_nothing_without_active_units(
 
 def test_the_apportionment_endpoint_is_company_scoped(other_api_client: APIClient, condominium: Condominium) -> None:
     assert other_api_client.get(apportionment_url(condominium)).status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_a_set_of_fractions_repeating_a_criterion_is_refused_with_its_code() -> None:
+    first, second = uuid.uuid4(), uuid.uuid4()
+
+    with pytest.raises(ValidationError) as error:
+        UnitApportionmentFraction.validate_distinct_criteria([first, second, first])
+
+    assert error.value.code == "unit_apportionment_fraction.criterion.duplicate"
+    UnitApportionmentFraction.validate_distinct_criteria([first, second])
+    UnitApportionmentFraction.validate_distinct_criteria([])

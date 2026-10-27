@@ -1,4 +1,5 @@
 import uuid
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, final, override
 
 from django.db import models
@@ -48,6 +49,15 @@ class UnitApportionmentFraction(BaseModel):
                 violation_error_code=UnitError.IDEAL_FRACTION_OUT_OF_RANGE.value,
             ),
         )
+
+    @classmethod
+    def validate_distinct_criteria(cls, criterion_ids: Iterable[uuid.UUID]) -> None:
+        """A unit has one fraction per criterion, so a set of fractions cannot name a criterion twice.
+
+        The same rule as the unique constraint, for a set not yet written."""
+        criterion_ids = list(criterion_ids)
+        if len(criterion_ids) != len(set(criterion_ids)):
+            raise UnitApportionmentFractionError.CRITERION_DUPLICATE.to_validation_error()
 
     @override
     def clean(self) -> None:

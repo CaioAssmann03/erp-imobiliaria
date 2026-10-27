@@ -69,6 +69,12 @@ class CondominiumApportionmentCriterion(BaseModel):
             ),
         )
 
+    @classmethod
+    def next_position_in(cls, condominium: Condominium) -> int:
+        """The first position after the last one of the condominium (1 when it has none)."""
+        last_position = cls.objects.filter(condominium=condominium).aggregate(last=models.Max("position"))["last"]
+        return (last_position or 0) + 1
+
     @property
     def is_main(self) -> bool:
         return self.position == self.MAIN_POSITION

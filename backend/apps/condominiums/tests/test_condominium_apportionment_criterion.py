@@ -6,6 +6,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from apps.core.models import Company
 from apps.core.testing import seeded_company
 
 from ..models import CondominiumApportionmentCriterion, Condominium, Unit, UnitApportionmentFraction
@@ -98,3 +99,11 @@ def test_the_list_filters_by_condominium_and_is_company_scoped(
     assert [item["name"] for item in mine] == ["Geral"]
     assert foreign == []
     assert other.apportionment_criteria.count() == 1
+
+
+def test_the_next_position_follows_the_last_one_of_the_condominium(condominium: Condominium, company: Company) -> None:
+    other = Condominium.objects.create(company=company, name="Outro", cnpj="45723174000110")
+    _ = CondominiumApportionmentCriterion.objects.create(condominium=condominium, name="Elevador", position=5)
+
+    assert CondominiumApportionmentCriterion.next_position_in(condominium) == 6
+    assert CondominiumApportionmentCriterion.next_position_in(other) == 2  # the main criterion is at position 1

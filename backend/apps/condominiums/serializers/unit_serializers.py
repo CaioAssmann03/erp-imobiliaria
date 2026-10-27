@@ -5,8 +5,7 @@ from rest_framework import serializers
 
 from apps.core.serializers import ModelRulesMixin, to_drf_errors
 
-from ..errors import UnitApportionmentFractionError
-from ..models import Unit
+from ..models import Unit, UnitApportionmentFraction
 from ..services.create_unit import create_unit
 from ..services.update_unit import update_unit
 from .unit_apportionment_fraction_serializers import UnitApportionmentFractionSerializer
@@ -42,12 +41,15 @@ class UnitSerializer(ModelRulesMixin, serializers.ModelSerializer[Unit]):
         )
         read_only_fields = ("id", "created_at", "updated_at")
 
-    def validate_fractions(self, fractions: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        criterion_ids = [fraction["criterion"].pk for fraction in fractions]
-        if len(criterion_ids) != len(set(criterion_ids)):
-            raise serializers.ValidationError(
-                UnitApportionmentFractionError.CRITERION_DUPLICATE.message, code=UnitApportionmentFractionError.CRITERION_DUPLICATE.value
+    def validate_fractions(
+        self, fractions: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        try:
+            UnitApportionmentFraction.validate_distinct_criteria(
+                fraction["criterion"].pk for fraction in fractions
             )
+        except DjangoValidationError as error:
+            raise serializers.ValidationError(_error_details(error)) from error
         return fractions
 
     @override
@@ -65,7 +67,11 @@ class UnitSerializer(ModelRulesMixin, serializers.ModelSerializer[Unit]):
             raise _fractions_error(error) from error
 
 
+def _error_details(error: DjangoValidationError) -> list[Any]:
+    """What the model refused, as one list of DRF details that keep each rule's code."""
+    return [detail for problems in to_drf_errors(error).values() for detail in problems]
+
+
 def _fractions_error(error: DjangoValidationError) -> serializers.ValidationError:
-    """What a fraction row's rules refused, reported on `fractions` (the field the client sent) with each rule's code."""
-    details = to_drf_errors(error)
-    return serializers.ValidationError({"fractions": [detail for problems in details.values() for detail in problems]})
+    """What a fraction row's rules refused, reported on `fractions` (the field the client sent)."""
+    return serializers.ValidationError({"fractions": _error_details(error)})
