@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.http import HttpRequest
 from unfold.admin import ModelAdmin, TabularInline
 
-from apps.core.scoping import CompanyScopedAdminMixin
+from apps.core.infrastructure.scoping import CompanyScopedAdminMixin
 
 from .models import (
     AccountPayable,
@@ -140,8 +140,12 @@ class CompanyEntryAdmin(CompanyScopedAdminMixin, ModelAdmin):
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj: CompanyEntry | None = None) -> bool:
+    def has_change_permission(
+        self, request: HttpRequest, obj: CompanyEntry | None = None
+    ) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: CompanyEntry | None = None) -> bool:
+    def has_delete_permission(
+        self, request: HttpRequest, obj: CompanyEntry | None = None
+    ) -> bool:
         return False

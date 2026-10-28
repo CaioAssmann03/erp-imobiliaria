@@ -8,11 +8,11 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
-from apps.condominiums.models import BillingRules, Condominium, Unit
+from apps.condominiums.models import Condominium
 from apps.core.models import Company
 from apps.finance.models import CompanyEntry, CostCenter, CurrentAccount, CurrentAccountEntry, EntryTemplate
 
-from ..gateway.charges import _charge_payload
+from ..infrastructure.gateway.charges import _charge_payload
 from ..models import (
     BillingDocument,
     BillingDocumentItem,
@@ -20,6 +20,7 @@ from ..models import (
     BillingEntryUnit,
     BillingEvent,
     BillingRun,
+    CondominiumBillingRules,
     GatewayAccount,
     GatewayEvent,
 )
@@ -82,7 +83,7 @@ def test_the_line_opens_with_the_code_and_the_name(fee_event: BillingEvent) -> N
 
 
 def test_a_line_that_credits_the_company_has_no_cost_center_and_the_others_have_both(  # type: ignore[no-untyped-def]
-    billing_rules: BillingRules, new_document, cost_center: CostCenter, entry_template: EntryTemplate
+    billing_rules: CondominiumBillingRules, new_document, cost_center: CostCenter, entry_template: EntryTemplate
 ) -> None:
     document = create_billing_document(
         new_document(
@@ -106,7 +107,7 @@ def test_a_line_that_credits_the_company_has_no_cost_center_and_the_others_have_
 
 
 def test_the_issuance_adds_the_fee_as_its_own_line(  # type: ignore[no-untyped-def]
-    condominium: Condominium, billing_rules: BillingRules, make_unit, link, make_plan_item, fee_event: BillingEvent
+    condominium: Condominium, billing_rules: CondominiumBillingRules, make_unit, link, make_plan_item, fee_event: BillingEvent
 ) -> None:
     unit = make_unit("101")
     link(unit, "Maria")
@@ -126,7 +127,7 @@ def test_the_issuance_adds_the_fee_as_its_own_line(  # type: ignore[no-untyped-d
 
 
 def test_the_discount_never_applies_to_the_fee(  # type: ignore[no-untyped-def]
-    billing_rules: BillingRules, new_document, cost_center: CostCenter, entry_template: EntryTemplate
+    billing_rules: CondominiumBillingRules, new_document, cost_center: CostCenter, entry_template: EntryTemplate
 ) -> None:
     document = create_billing_document(
         new_document(
@@ -156,7 +157,7 @@ def test_without_a_fee_the_discount_stays_a_percentage(document: BillingDocument
 
 @pytest.fixture
 def fee_document(  # type: ignore[no-untyped-def]
-    billing_rules: BillingRules, new_document, cost_center: CostCenter, entry_template: EntryTemplate
+    billing_rules: CondominiumBillingRules, new_document, cost_center: CostCenter, entry_template: EntryTemplate
 ) -> BillingDocument:
     return create_billing_document(
         new_document(

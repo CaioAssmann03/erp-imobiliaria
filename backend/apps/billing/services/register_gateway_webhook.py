@@ -3,7 +3,7 @@ from typing import Any, Protocol
 from django.conf import settings
 
 from apps.billing.errors import GatewayAccountError
-from apps.billing.gateway.asaas_client import AsaasClient, GatewayError
+from apps.billing.infrastructure.gateway.asaas_client import AsaasClient, GatewayError
 from apps.billing.models import GatewayAccount
 
 WEBHOOK_NAME = "ERP Imobiliária"
@@ -22,10 +22,14 @@ WEBHOOK_EVENTS = (
 class WebhookRegistry(Protocol):
     def list_webhooks(self) -> list[dict[str, Any]]: ...
     def create_webhook(self, payload: dict[str, Any]) -> dict[str, Any]: ...
-    def update_webhook(self, webhook_id: str, payload: dict[str, Any]) -> dict[str, Any]: ...
+    def update_webhook(
+        self, webhook_id: str, payload: dict[str, Any]
+    ) -> dict[str, Any]: ...
 
 
-def register_gateway_webhook(account: GatewayAccount, email: str, client: WebhookRegistry | None = None) -> str:
+def register_gateway_webhook(
+    account: GatewayAccount, email: str, client: WebhookRegistry | None = None
+) -> str:
     """Make the gateway post its payment events to `ASAAS_WEBHOOK_URL` with the account's token; returns the webhook id.
 
     Idempotent: a webhook already registered for the same URL is updated instead of duplicated.
@@ -44,7 +48,14 @@ def register_gateway_webhook(account: GatewayAccount, email: str, client: Webhoo
         "sendType": "SEQUENTIALLY",
         "events": list(WEBHOOK_EVENTS),
     }
-    existing = next((hook for hook in gateway.list_webhooks() if hook.get("url") == settings.ASAAS_WEBHOOK_URL), None)
+    existing = next(
+        (
+            hook
+            for hook in gateway.list_webhooks()
+            if hook.get("url") == settings.ASAAS_WEBHOOK_URL
+        ),
+        None,
+    )
     if existing is not None:
         gateway.update_webhook(str(existing["id"]), payload)
         return str(existing["id"])

@@ -80,7 +80,9 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * Company (administradora): staff sees and edits only their own; creating or deleting is superuser-only.
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
  */
 export const companiesList = (
     params?: CompaniesListParams,
@@ -170,7 +172,9 @@ export function useCompaniesList<TData = Awaited<ReturnType<typeof companiesList
 
 
 /**
- * Company (administradora): staff sees and edits only their own; creating or deleting is superuser-only.
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
  */
 export const companiesCreate = (
     company: NonReadonly<Company>,
@@ -234,7 +238,9 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getCompaniesCreateMutationOptions(options), queryClient);
     }
     /**
- * Company (administradora): staff sees and edits only their own; creating or deleting is superuser-only.
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
  */
 export const companiesRetrieve = (
     id: string,
@@ -323,7 +329,9 @@ export function useCompaniesRetrieve<TData = Awaited<ReturnType<typeof companies
 
 
 /**
- * Company (administradora): staff sees and edits only their own; creating or deleting is superuser-only.
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
  */
 export const companiesUpdate = (
     id: string,
@@ -388,7 +396,9 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getCompaniesUpdateMutationOptions(options), queryClient);
     }
     /**
- * Company (administradora): staff sees and edits only their own; creating or deleting is superuser-only.
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
  */
 export const companiesPartialUpdate = (
     id: string,
@@ -453,7 +463,9 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getCompaniesPartialUpdateMutationOptions(options), queryClient);
     }
     /**
- * Company (administradora): staff sees and edits only their own; creating or deleting is superuser-only.
+ * DRF viewset mixin: `get_queryset` is always limited to the user's company.
+ *
+ * Put it before the DRF base class in the bases.
  */
 export const companiesDestroy = (
     id: string,

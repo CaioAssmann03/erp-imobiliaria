@@ -7,6 +7,7 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from apps.condominiums.models import Condominium, Unit
+from apps.condominiums.tests.base import add_fraction, criterion_at
 from apps.finance.models import CostCenter, EntryTemplate
 
 from ..models import BillingEntry, BillingEntryUnit, BillingEvent
@@ -36,11 +37,15 @@ def make_entry(condominium: Condominium, cost_center: CostCenter, entry_template
 
 
 def units_of(*fractions: str) -> list[Unit]:
+    """Units of the condominium, each with its fraction in the main criterion."""
     condominium = Condominium.objects.get()
-    return [
-        Unit.objects.create(condominium=condominium, name=f"10{index}", ideal_fraction=Decimal(fraction))
-        for index, fraction in enumerate(fractions, start=1)
+    units = [
+        Unit.objects.create(condominium=condominium, name=f"10{index}")
+        for index, _ in enumerate(fractions, start=1)
     ]
+    for unit, fraction in zip(units, fractions, strict=True):
+        _ = add_fraction(unit, fraction)
+    return units
 
 
 # ----- R3: allocation -----
@@ -67,7 +72,11 @@ def test_collective_splits_equally_and_the_parts_add_up(make_entry) -> None:  # 
 
 def test_fraction_splits_by_the_selected_units_fractions(make_entry) -> None:  # type: ignore[no-untyped-def]
     first, second, third = units_of("0.2", "0.3", "0.5")
-    entry = make_entry(allocation=BillingEntry.Allocation.FRACTION, ideal_fraction_number=1, amount=Decimal("100.00"))
+    entry = make_entry(
+        allocation=BillingEntry.Allocation.FRACTION,
+        apportionment_criterion=criterion_at(Condominium.objects.get()),
+        amount=Decimal("100.00"),
+    )
 
     selected = entry.amounts_by_unit([second, third])
 
@@ -138,8 +147,7 @@ def test_a_cost_center_without_exactly_one_template_is_refused(  # type: ignore[
 @pytest.mark.parametrize(
     "overrides, field",
     [
-        ({"allocation": "fraction"}, "ideal_fraction_number"),
-        ({"ideal_fraction_number": 2}, "ideal_fraction_number"),
+        ({"allocation": "fraction"}, "apportionment_criterion"),
         ({"recurrence": "installments"}, "installments_total"),
         ({"recurrence": "installments", "installments_total": 1}, "installments_total"),
         ({"installments_total": 3}, "installments_total"),
@@ -206,3 +214,22 @@ def test_a_unit_amount_only_for_an_individual_entry(make_entry) -> None:  # type
     with pytest.raises(ValidationError) as raised:
         link.full_clean()
     assert "amount" in raised.value.error_dict
+
+
+def test_a_criterion_only_for_a_fraction_entry(make_entry, condominium: Condominium) -> None:  # type: ignore[no-untyped-def]
+    with pytest.raises(ValidationError) as raised:
+        make_entry(apportionment_criterion=criterion_at(condominium))
+
+    assert "apportionment_criterion" in raised.value.error_dict
+
+
+def test_the_criterion_must_belong_to_the_entrys_condominium(make_entry, other_condominium: Condominium) -> None:  # type: ignore[no-untyped-def]
+    with pytest.raises(ValidationError) as raised:
+        make_entry(
+            allocation=BillingEntry.Allocation.FRACTION,
+            apportionment_criterion=criterion_at(other_condominium),
+        )
+
+    assert "billing_entry.apportionment_criterion.other_condominium" in [
+        error.code for error in raised.value.error_dict["apportionment_criterion"]
+    ]

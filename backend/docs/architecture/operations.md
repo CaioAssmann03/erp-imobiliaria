@@ -15,7 +15,7 @@ docker compose exec backend python manage.py seed_demo         # demo data (--cl
 ```
 **System libraries (WeasyPrint renders the boleto PDF, spec 027):** the backend image installs `libpango-1.0-0`, `libpangoft2-1.0-0` and `fonts-liberation` (the `Dockerfile` and the CI job); running `manage.py` or pytest outside Docker needs them too (`brew install pango` on macOS, `apt install libpango-1.0-0 libpangoft2-1.0-0 fonts-liberation` on Debian/Ubuntu). Without them the PDF tests and `generate_billing_document_pdf` fail at import or render time.
 
-Local file storage: the compose also starts an S3-compatible **`s3` service** (Adobe S3Mock, port 9090; it creates the bucket `erp-dev` itself and accepts any key), so the boleto PDF and the receipts work in development; production uses the Cloudflare R2 bucket. (MinIO no longer publishes images on Docker Hub, which broke the first version of this.) `AWS_S3_ENDPOINT_URL` defaults to `http://host.docker.internal:9090` (it must be reachable from the container *and* from the browser, which opens the signed URLs); on Linux without Docker Desktop add `127.0.0.1 host.docker.internal` to `/etc/hosts`. Without a bucket the PDF endpoints answer 503.
+Local file storage: the compose also starts an S3-compatible **`s3` service** (Adobe S3Mock, port 9090; it creates the bucket `erp-dev` itself and accepts any key), so the boleto PDF and the receipts work in development; production uses the Cloudflare R2 bucket. (MinIO no longer publishes images on Docker Hub, which broke the first version of this.) `AWS_S3_ENDPOINT_URL` defaults to `http://host.docker.internal:9090` (it must be reachable from the container *and* from the browser, which opens the signed URLs); on Linux without Docker Desktop add `127.0.0.1 host.docker.internal` to `/etc/hosts`. Without a bucket the PDF endpoints answer 503. On Windows, `scripts/local-up.ps1` does the whole first run (keys, containers, migrate, admin user, demo data): `powershell -ExecutionPolicy Bypass -File .\scripts\local-up.ps1` (`-Reset` starts over, `-NoSeed` skips the demo data).
 
 URLs: API docs `localhost:8000/api/docs/` · schema `/api/schema/` · admin `/admin/` · frontend `localhost:3000`.
 
@@ -51,7 +51,7 @@ Decided on 2026-10-08 (it replaces the Supabase, Vercel and Render plans of phas
 | Environment | `/root/erp-imobiliaria/.env` (mode 600, never in git): the variables of `architecture/overview.md`. Differences from local: `DEBUG=false`, `ALLOWED_HOSTS=<name>,backend,localhost` (`localhost` for the Admin tunnel), `SECURE_SSL_REDIRECT=false` (TLS ends at Caddy; the Next server calls Django over plain HTTP on the private network), `API_INTERNAL_URL=http://backend:8000`, generated `SECRET_KEY`, `JWT_SIGNING_KEY` (Ed25519, spec 022; changing it logs everybody out), `INTERNAL_API_KEY`, database password and first-admin password |
 | Code | `/root/erp-imobiliaria/app` is a git clone of the repository (read-only *Deploy key* `erp_deploy`); `./deploy.sh --pull` resets it to `origin/main` and rebuilds. CI does not deploy (a push-to-deploy workflow was set aside on 2026-10-19) |
 | Deploy | `cd /root/erp-imobiliaria && ./deploy.sh --pull` (creates `erp_edge` if missing, then `docker compose up -d --build`). Migrations run on container start |
-| Versioned files | `docker-compose.yml`, `deploy.sh` and `deploy.env` are in [`deploy/vps/`](../../../deploy/vps/README.md) (copied from the VPS on 2026-10-19, plus the backend health check); after changing one, copy it to `/root/erp-imobiliaria/`. The `.env` and the deploy key stay only on the VPS; the Caddy block is in the other project's repository |
+| Files on the VPS | `docker-compose.yml`, `deploy.sh` and `deploy.env` live only on the VPS (`/root/erp-imobiliaria/`): they are **no longer versioned in this repository** (the copy that was in `deploy/vps/` was removed on 2026-10-27). The `.env` and the deploy key also stay only on the VPS; the Caddy block is in the other project's repository |
 
 Receipts (spec 018) live in a private **Cloudflare R2** bucket, not on the VPS: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_STORAGE_BUCKET_NAME` and `AWS_S3_ENDPOINT_URL` in `.env` (without them the receipt endpoints answer 503). The bucket needs a CORS rule that allows `PUT` and `GET` from the ERP origin with the `Content-Type` header, otherwise the browser upload is blocked.
 
@@ -62,12 +62,12 @@ The address map (spec 021) is Google's **Maps Embed API** under the condominium 
 |---|---|---|
 | `SECURE_SSL_REDIRECT` | on when `DEBUG=false` | plain HTTP is redirected to HTTPS (the health path is exempt) |
 | `SECURE_HSTS_SECONDS` | `3600` when `DEBUG=false`, `0` in development | no `includeSubDomains`, no `preload`; raise to `31536000` only when the final domain exists |
-| `ADMIN_URL` | `admin/` | set a non-obvious path in production (obscurity only); a check (`core.W001`) warns while it is the default; an empty, absolute (`://`) or `..` value stops startup |
+| `ADMIN_URL` | `admin/` | set a non-obvious path in production (obscurity only); an empty, absolute (`://`) or `..` value stops startup |
 | `INTERNAL_API_KEY` | none | mandatory when `DEBUG=false`; the same value on the backend and the Next server |
 
 **Checklist for a new host** (checked on the VPS on 2026-10-08):
 - [x] TLS is terminated in front: Caddy serves the browser over HTTPS and proxies to the Next server. Django is not reached by the browser at all; it listens only on the private Docker network.
-- [x] The health path answers: `GET /api/health/` returned 200 from inside the stack (`docker compose exec backend`). The compose file (`deploy/vps/docker-compose.yml`) checks it every 15 s and the frontend waits for a healthy backend.
+- [x] The health path answers: `GET /api/health/` returned 200 from inside the stack (`docker compose exec backend`). The VPS compose file checks it every 15 s and the frontend waits for a healthy backend.
 - [x] The frontend's `API_INTERNAL_URL` is plain `http://backend:8000` on the private network, so `SECURE_SSL_REDIRECT=false` there (with the redirect on, that URL would loop on 301).
 - [x] `INTERNAL_API_KEY` and `SECRET_KEY` are set and `REDIS_URL` is reachable (the login rate limit lives there).
 - [ ] `JWT_SIGNING_KEY` (spec 022) is set in the host `.env` **before** deploying the EdDSA change: without it the backend and Celery do not start. Every user logs in again after that deploy.
@@ -76,7 +76,7 @@ The address map (spec 021) is Google's **Maps Embed API** under the condominium 
 - [ ] After every deploy, smoke test that the proxy cannot leave `/api`: `curl -s -o /dev/null -w '%{http_code}' --path-as-is https://<name>/api/..%2fadmin/login/` must print `404` (it printed `200`, the Django Admin login page, until the segment check was added).
 
 ### Django Admin through an SSH tunnel
-The backend publishes port 8000 on the VPS **loopback only** (`127.0.0.1:8000`, `deploy/vps/docker-compose.yml`); nothing new is reachable from the internet. From your computer:
+The backend publishes port 8000 on the VPS **loopback only** (`127.0.0.1:8000`, in the VPS `docker-compose.yml`); nothing new is reachable from the internet. From your computer:
 ```bash
 ssh -N -L 8000:127.0.0.1:8000 root@177.7.63.175   # keep it open while you use the Admin
 ```
@@ -100,13 +100,13 @@ The company has **one** Asaas account that issues every boleto and receives the 
 `seed_demo` is local/demo only: **never in production** with real data (the initial company comes from `core.0002_seed_company`). Logs go to stdout; no structured logging, error tracker or alerts yet (use `logging.getLogger(__name__)`, log ids and outcomes, never personal data). The database backup is described in *Database backup* below (spec 040). The receipt files live in R2, outside any Postgres dump, and are **not** covered by it.
 
 ## Database backup
-A `backup` container in the production stack (`deploy/vps/backup/`) dumps the ERP database **every night at 03:00** (`America/Sao_Paulo`), encrypts it and uploads it to a **private R2 bucket outside the VPS**; it keeps the **last 30 days plus the first backup of each of the last 12 months** and prunes only after a successful upload (spec 040).
+A `backup` container in the production stack (`backup/`) dumps the ERP database **every night at 03:00** (`America/Sao_Paulo`), encrypts it and uploads it to a **private R2 bucket outside the VPS**; it keeps the **last 30 days plus the first backup of each of the last 12 months** and prunes only after a successful upload (spec 040).
 
 **Enable it (once):**
 1. In Cloudflare R2 create a **private bucket just for backups** and an API token limited to it (read, write, list, delete). Do not reuse the receipts' bucket or token.
 2. Invent a passphrase of 16+ random characters. Save it in a password manager **and** in the VPS `.env`: losing it makes every backup unreadable.
 3. Add to the VPS `.env`: `BACKUP_S3_ENDPOINT_URL` (the account's `https://<account id>.r2.cloudflarestorage.com`), `BACKUP_S3_BUCKET`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY`, `BACKUP_PASSPHRASE`.
-4. Copy `docker-compose.yml` and the `backup/` folder to the VPS (`deploy/vps/README.md`) and `./deploy.sh`.
+4. Copy the `backup/` folder to the VPS next to the compose file, add the `backup` service from [`backup/README.md`](../../../backup/README.md) to the VPS `docker-compose.yml`, and `./deploy.sh`.
 5. Take the first one now and look at it: `docker compose exec backup python3 backup.py run-once`, then `docker compose exec backup python3 backup.py status`.
 6. **Do a restore drill before trusting it** (below). Real data must not enter the database before steps 1–6 are done.
 

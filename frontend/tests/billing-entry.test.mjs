@@ -16,7 +16,7 @@ const values = (overrides = {}) => ({
   credits_company: false,
   description: "10/2026",
   allocation: "collective",
-  ideal_fraction_number: "",
+  apportionment_criterion: "",
   recurrence: "once",
   installments_total: "",
   start_month: "2026-10-01",
@@ -27,19 +27,19 @@ const values = (overrides = {}) => ({
 });
 
 test("the payload keeps only the fields of the chosen allocation and recurrence", () => {
-  const payload = entryToPayload(values({ ideal_fraction_number: "2", installments_total: "5" }));
+  const payload = entryToPayload(values({ apportionment_criterion: "criterion-2", installments_total: "5" }));
 
-  assert.equal(payload.ideal_fraction_number, null);
+  assert.equal(payload.apportionment_criterion, null);
   assert.equal(payload.installments_total, null);
   assert.equal(payload.event, null);
   assert.deepEqual(payload.units, [{ unit: "u-1", amount: null }]);
 });
 
 test("a fraction and an installment entry send their numbers; only individual keeps a unit amount", () => {
-  const fraction = entryToPayload(values({ allocation: "fraction", ideal_fraction_number: "2", recurrence: "installments", installments_total: "12" }));
+  const fraction = entryToPayload(values({ allocation: "fraction", apportionment_criterion: "criterion-2", recurrence: "installments", installments_total: "12" }));
   const individual = entryToPayload(values({ allocation: "individual", units: [{ unit: "u-1", amount: "80.00" }] }));
 
-  assert.equal(fraction.ideal_fraction_number, 2);
+  assert.equal(fraction.apportionment_criterion, "criterion-2");
   assert.equal(fraction.installments_total, 12);
   assert.deepEqual(individual.units, [{ unit: "u-1", amount: "80.00" }]);
 });
@@ -50,7 +50,7 @@ test("the preview waits for what it needs", () => {
   assert.equal(canPreview(values({ amount: "0.00" })), false);
   assert.equal(canPreview(values({ cost_center: "" })), false);
   assert.equal(canPreview(values({ allocation: "fraction" })), false);
-  assert.equal(canPreview(values({ allocation: "fraction", ideal_fraction_number: "3" })), true);
+  assert.equal(canPreview(values({ allocation: "fraction", apportionment_criterion: "criterion-3" })), true);
   assert.equal(canPreview(values({ recurrence: "installments", installments_total: "1" })), false);
   assert.equal(canPreview(values({ recurrence: "installments", installments_total: "2" })), true);
 });

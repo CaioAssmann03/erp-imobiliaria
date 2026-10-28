@@ -1,4 +1,4 @@
-from typing import final, override
+from typing import Any, final, override
 
 from django.db import models
 
@@ -14,7 +14,9 @@ class BillingEvent(BaseModel):
     It is not tied to a cost center: it only names what the launch is about (spec 039).
     """
 
-    company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name="billing_events")
+    company = models.ForeignKey(
+        Company, on_delete=models.PROTECT, related_name="billing_events"
+    )
     code = models.PositiveIntegerField()
     name = models.CharField(max_length=120)
     active = models.BooleanField(default=True)
@@ -41,6 +43,12 @@ class BillingEvent(BaseModel):
     def line_label(self) -> str:
         """How the event opens a boleto line: its code in four digits, a dash and its name (`0052-CONDOMINIO`)."""
         return f"{self.code:04d}-{self.name}"
+
+    @override
+    def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
+        if self.entries.exists():
+            raise BillingEventError.DELETION_HAS_ENTRIES.to_validation_error()
+        return super().delete(*args, **kwargs)
 
     @override
     def __str__(self) -> str:

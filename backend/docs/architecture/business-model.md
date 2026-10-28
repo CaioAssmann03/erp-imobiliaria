@@ -1,7 +1,7 @@
 ---
 summary: How the administradora really works (money, boletos, ledger, fees, events) — the business model every billing spec assumes.
 read-when: you design or change anything about billing, the gateway, the ledger split, fees, launches or events, or you need the why behind specs 037–039
-skip-if: a table of fields → architecture/data.md; the stack and env vars → architecture/overview.md; what is done or next → roadmap/current-state.md
+skip-if: a table of fields → architecture/data.md; the stack and env vars → architecture/overview.md; what is done or next → roadmap/README.md
 ---
 # Business model of the administradora
 

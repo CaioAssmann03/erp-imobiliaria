@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 class BillingPlanItemRules(ModelRules["BillingPlanItem"]):
     """An item validated without its plan (a nested item before the plan exists) skips the plan's rule;
-    the plan serializer runs these rules again with the plan attached."""
+    `BillingPlan.collect_item_errors` runs these rules again with the plan attached."""
 
     @rule("amount", BillingPlanItemError.AMOUNT_DOES_NOT_MATCH_KIND)
     def amount_does_not_match_kind(self) -> bool:
@@ -21,21 +21,21 @@ class BillingPlanItemRules(ModelRules["BillingPlanItem"]):
         needs_amount = item.calculation_kind != item.CalculationKind.UNIT_REGISTERED_VALUE
         return needs_amount != (item.amount is not None)
 
-    @rule("ideal_fraction_number", BillingPlanItemError.IDEAL_FRACTION_NUMBER_DOES_NOT_MATCH_KIND)
-    def ideal_fraction_number_does_not_match_kind(self) -> bool:
+    @rule("apportionment_criterion", BillingPlanItemError.APPORTIONMENT_CRITERION_DOES_NOT_MATCH_KIND)
+    def apportionment_criterion_does_not_match_kind(self) -> bool:
         item = self.instance
         if not item.calculation_kind:
             return False
-        needs_fraction = item.calculation_kind == item.CalculationKind.IDEAL_FRACTION_SHARE
-        return needs_fraction != (item.ideal_fraction_number is not None)
+        needs_criterion = item.calculation_kind == item.CalculationKind.IDEAL_FRACTION_SHARE
+        return needs_criterion != (item.apportionment_criterion_id is not None)
 
-    @rule("unit_value_field", BillingPlanItemError.UNIT_VALUE_FIELD_DOES_NOT_MATCH_KIND)
-    def unit_value_field_does_not_match_kind(self) -> bool:
-        item = self.instance
-        if not item.calculation_kind:
+    @rule("apportionment_criterion", BillingPlanItemError.APPORTIONMENT_CRITERION_OTHER_CONDOMINIUM)
+    def apportionment_criterion_belongs_to_another_condominium(self) -> bool:
+        item, plan = self.instance, self._plan()
+        criterion = item.apportionment_criterion
+        if plan is None or criterion is None:
             return False
-        needs_unit_value_field = item.calculation_kind == item.CalculationKind.UNIT_REGISTERED_VALUE
-        return needs_unit_value_field != bool(item.unit_value_field)
+        return criterion.condominium_id != plan.condominium_id
 
     @rule("description", BillingPlanItemError.DESCRIPTION_OR_EVENT_REQUIRED)
     def has_neither_event_nor_description(self) -> bool:
@@ -53,6 +53,14 @@ class BillingPlanItemRules(ModelRules["BillingPlanItem"]):
     def event_credits_the_company(self) -> bool:
         item = self.instance
         return item.event is not None and item.event.credits_company
+
+    @rule("unit_value_field", BillingPlanItemError.UNIT_VALUE_FIELD_DOES_NOT_MATCH_KIND)
+    def unit_value_field_does_not_match_kind(self) -> bool:
+        item = self.instance
+        if not item.calculation_kind:
+            return False
+        needs_unit_value_field = item.calculation_kind == item.CalculationKind.UNIT_REGISTERED_VALUE
+        return needs_unit_value_field != bool(item.unit_value_field)
 
     @rule("cost_center", BillingPlanItemError.COST_CENTER_OTHER_CONDOMINIUM)
     def cost_center_belongs_to_another_condominium(self) -> bool:
@@ -79,7 +87,7 @@ class BillingPlanItemRules(ModelRules["BillingPlanItem"]):
         return item.entry_template_id is not None and not item.entry_template.active
 
     def _plan(self) -> "BillingPlan | None":
-        """The plan, saved or not yet (a candidate attached by the plan serializer); None when unknown."""
+        """The plan, saved or not yet (a candidate attached by `BillingPlan.collect_item_errors`); None when unknown."""
         item = self.instance
         if item.plan_id is None and not item._meta.get_field("plan").is_cached(item):
             return None

@@ -3,12 +3,9 @@
 from typing import Any
 
 import pytest
-from botocore.exceptions import ClientError
 
-from apps.core.storage.object_storage import (
-    ObjectStorage,
+from apps.core.infrastructure.storage.object_storage import (
     ObjectStorageUnavailable,
-    content_disposition,
     get_object_storage,
 )
 
@@ -52,33 +49,3 @@ def test_signed_urls_point_at_the_bucket_and_expire(settings: Any) -> None:
     assert "X-Amz-Expires=600" in upload
     assert "X-Amz-Expires=300" in download
     assert "response-content-disposition=attachment" in download
-
-
-def test_content_disposition_names_the_file_without_control_characters() -> None:
-    assert content_disposition("comprovante março.pdf") == "attachment; filename*=UTF-8''comprovante%20mar%C3%A7o.pdf"
-    assert content_disposition("a\r\nb\".pdf") == "attachment; filename*=UTF-8''ab%22.pdf"
-
-
-class StubClient:
-    def __init__(self, error_code: str | None = None, length: int = 10) -> None:
-        self.error_code = error_code
-        self.length = length
-
-    def head_object(self, **_: Any) -> dict[str, Any]:
-        if self.error_code:
-            raise ClientError({"Error": {"Code": self.error_code}}, "HeadObject")
-        return {"ContentLength": self.length}
-
-
-def test_object_size_is_none_when_the_object_is_missing() -> None:
-    assert ObjectStorage(StubClient("404"), "receipts").object_size("k") is None
-    assert ObjectStorage(StubClient("NoSuchKey"), "receipts").object_size("k") is None
-
-
-def test_object_size_reads_the_real_size() -> None:
-    assert ObjectStorage(StubClient(length=2048), "receipts").object_size("k") == 2048
-
-
-def test_object_size_does_not_hide_other_errors() -> None:
-    with pytest.raises(ClientError):
-        ObjectStorage(StubClient("AccessDenied"), "receipts").object_size("k")

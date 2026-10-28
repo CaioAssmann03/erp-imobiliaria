@@ -1,5 +1,5 @@
-import apps.core.validators.cnpj
-import apps.core.validators.cpf
+import apps.core.infrastructure.validators.cnpj
+import apps.core.infrastructure.validators.cpf
 import django.db.models.deletion
 from django.db import migrations, models
 
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="peopleindividual",
             name="cpf",
-            field=models.CharField(max_length=11, validators=[apps.core.validators.cpf.validate_cpf]),
+            field=models.CharField(max_length=11, validators=[apps.core.infrastructure.validators.cpf.validate_cpf]),
         ),
         migrations.AlterField(
             model_name="peopleindividual",
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="peoplelegal",
             name="cnpj",
-            field=models.CharField(max_length=14, validators=[apps.core.validators.cnpj.validate_cnpj]),
+            field=models.CharField(max_length=14, validators=[apps.core.infrastructure.validators.cnpj.validate_cnpj]),
         ),
         migrations.AddConstraint(
             model_name="peopleindividual",

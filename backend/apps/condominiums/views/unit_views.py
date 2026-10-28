@@ -3,9 +3,8 @@ from typing import final
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
-from apps.core.api.filters import QuerySearchFilter
-
-from apps.core.scoping import CompanyScopedViewSetMixin
+from apps.core.infrastructure.api.filters import QuerySearchFilter
+from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin
 
 from ..filters import UnitFilter
 from ..models import Unit
@@ -17,6 +16,7 @@ class UnitViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Unit]):
     queryset = Unit.objects.select_related("condominium", "block").prefetch_related(
         "unit_people__person__people_individual",
         "unit_people__person__people_legal",
+        "fractions",
     )
     serializer_class = UnitSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)

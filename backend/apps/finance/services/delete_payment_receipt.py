@@ -2,7 +2,7 @@ import logging
 
 from django.db import transaction
 
-from apps.core.storage import object_storage
+from apps.core.infrastructure.storage import object_storage
 from apps.finance.models import PaymentReceipt
 
 logger = logging.getLogger(__name__)

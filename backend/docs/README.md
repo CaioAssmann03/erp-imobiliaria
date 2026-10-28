@@ -19,7 +19,7 @@ Find your task, open **only** the listed files (usually 2–3). **Read the heade
 | Business formula or definition | `architecture/data.md` |
 | Naming anything | `conventions/naming.md` |
 | Tests · security, personal data (LGPD), secrets | `architecture/quality.md` |
-| One app: `accounts`, `core` (dashboard, search, seed, scoping, audit, errors), `persons`, `condominiums`, `finance`, `billing` | `apps/<app>.md` |
+| One app: `accounts`, `core` (dashboard, search, scoping, audit, errors), `seed`, `persons`, `condominiums`, `finance`, `billing` | `apps/<app>.md` |
 | Run, migrate, reset locally · deploy, production migrations, runbook, backups | `architecture/operations.md` |
 | Stack, env vars, request flow, vocabulary, why it is built this way | `architecture/overview.md` |
 | How the administradora really works (one gateway account, boleto items and sub-contas, the registration fee, events) | `architecture/business-model.md` |

@@ -9,8 +9,16 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from apps.billing.services.create_billing_document import NewBillingDocumentItem, create_billing_document
-from apps.finance.models import CostCenter, CurrentAccount, CurrentAccountEntry, EntryTemplate
+from apps.billing.services.create_billing_document import (
+    NewBillingDocumentItem,
+    create_billing_document,
+)
+from apps.finance.models import (
+    CostCenter,
+    CurrentAccount,
+    CurrentAccountEntry,
+    EntryTemplate,
+)
 
 from ..models import (
     BillingDocument,
@@ -257,9 +265,10 @@ def test_payment_is_found_by_reference_across_condominiums(  # type: ignore[no-u
     account: GatewayAccount, other_condominium, billing_rules, new_document, payer
 ) -> None:
     """One account serves every condominium of the company: the payment is matched by its reference alone (spec 037, R5)."""
-    from apps.condominiums.models import BillingRules, Unit
+    from apps.billing.models import CondominiumBillingRules
+    from apps.condominiums.models import Unit
 
-    _ = BillingRules.objects.create(condominium=other_condominium)
+    _ = CondominiumBillingRules.objects.create(condominium=other_condominium)
     other_center = CostCenter.objects.create(condominium=other_condominium, name="Taxa Ordinária")
     other_template = EntryTemplate.objects.create(cost_center=other_center, name="REC Taxa Ordinária")
     document = create_billing_document(

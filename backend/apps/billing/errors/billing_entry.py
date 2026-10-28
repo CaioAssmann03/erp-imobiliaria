@@ -1,10 +1,14 @@
-from apps.core.errors.base import RuleError
+from apps.core.infrastructure.errors.base import RuleError
 
 
 class BillingEntryError(RuleError):
-    IDEAL_FRACTION_NUMBER_DOES_NOT_MATCH_ALLOCATION = (
-        "billing_entry.ideal_fraction_number.does_not_match_allocation",
-        "A fraction entry names an ideal fraction; the other allocations have none.",
+    APPORTIONMENT_CRITERION_DOES_NOT_MATCH_ALLOCATION = (
+        "billing_entry.apportionment_criterion.does_not_match_allocation",
+        "A fraction entry names an apportionment criterion; the other allocations have none.",
+    )
+    APPORTIONMENT_CRITERION_OTHER_CONDOMINIUM = (
+        "billing_entry.apportionment_criterion.other_condominium",
+        "The apportionment criterion belongs to another condominium.",
     )
     INSTALLMENTS_TOTAL_DOES_NOT_MATCH_RECURRENCE = (
         "billing_entry.installments_total.does_not_match_recurrence",
@@ -58,9 +62,9 @@ class BillingEntryError(RuleError):
         "billing_entry.unit.amount_only_for_individual",
         "Only an individual entry can give a unit its own amount.",
     )
-    UNIT_WITHOUT_IDEAL_FRACTION = (
-        "billing_entry.unit.without_ideal_fraction",
-        "A selected unit has no value for the ideal fraction of this entry.",
+    UNIT_WITHOUT_FRACTION = (
+        "billing_entry.unit.without_fraction",
+        "A selected unit has no fraction in the apportionment criterion of this entry.",
     )
     UNIT_DUPLICATE_IN_ENTRY = (
         "billing_entry.unit.duplicate_in_entry",

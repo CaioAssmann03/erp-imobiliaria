@@ -54,11 +54,11 @@ A boleto total is the sum of its lines. A line can credit a condominium's sub-co
 ## A — Approach
 - The fee reuses the launch (spec 039): same screen, same rateio and recurrence; only the event decides where the money goes, so the staff keeps working as today and a condominium can never receive the fee by a wrong choice of sub-conta (there is none to choose).
 - `post_billing_document_payment` splits the lines: the condominium lines go to `post_entries` as before, the company lines become `CompanyEntry` rows. The condominium ledger code is untouched.
-- The discount is a fixed amount at the gateway when a fee exists because the gateway applies a percentage to the whole value (`gateway/charges.py::_discount`).
+- The discount is a fixed amount at the gateway when a fee exists because the gateway applies a percentage to the whole value (`infrastructure/gateway/charges.py::_discount`).
 - Rejected: a company setting for the amount (the user sets it when launching); the fee as a field of the document (it would not be a line, the PDF and the gateway value would need special cases); reusing the condominium's current account with a special sub-conta (it is the thing that must never happen).
 
 ## S — Structure
-- billing: `models/billing_event.py`, `billing_entry.py`, `billing_document_item.py`, `billing_plan_item.py`, `models/rules/billing_entry.py`, `billing_document_item.py`, `billing_plan_item.py`, `billing_document.py` (`fee_amount`, `discountable_amount`), `services/post_billing_document_payment.py`, `create_billing_document.py`, `issue_condominium_billing.py`, `gateway/charges.py`, `boleto_template.py`, serializers of events, entries, plan items and documents; migration `billing.0014`, `0015`.
+- billing: `models/billing_event.py`, `billing_entry.py`, `billing_document_item.py`, `billing_plan_item.py`, `models/rules/billing_entry.py`, `billing_document_item.py`, `billing_plan_item.py`, `billing_document.py` (`fee_amount`, `discountable_amount`), `services/post_billing_document_payment.py`, `create_billing_document.py`, `issue_condominium_billing.py`, `infrastructure/gateway/charges.py`, `infrastructure/rendering/boleto_template.py`, serializers of events, entries, plan items and documents; migration `billing.0016`.
 - finance: `models/company_entry.py`, `errors/company_entry.py`, `serializers/company_entry_serializers.py`, `views/company_entry_views.py`, Admin (read-only), audit; migration `finance.0015`.
 - frontend: the **Receita da imobiliária** checkbox of the event form, the entry form hiding the sub-conta (destination "Conta da imobiliária"), `app/(dashboard)/finance/company-account/`, the Evento field of a plan item.
 

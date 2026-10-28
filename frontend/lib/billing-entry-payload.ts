@@ -20,8 +20,8 @@ export interface EntryValues {
   credits_company: boolean;
   description: string;
   allocation: Allocation;
-  /** "1" a "6" no rateio por fração; "" nos outros. */
-  ideal_fraction_number: string;
+  /** Id do critério de rateio no rateio por fração; "" nos outros. */
+  apportionment_criterion: string;
   recurrence: Recurrence;
   /** Número de parcelas ("12") no parcelado; "" nos outros. */
   installments_total: string;
@@ -33,7 +33,7 @@ export interface EntryValues {
   units: EntryUnitValues[];
 }
 
-export const needsFractionNumber = (allocation: string): boolean => allocation === "fraction";
+export const needsApportionmentCriterion = (allocation: string): boolean => allocation === "fraction";
 export const needsInstallments = (recurrence: string): boolean => recurrence === "installments";
 
 /** O corpo do lançamento: só os campos do rateio e da recorrência escolhidos; os outros vão `null`. */
@@ -43,7 +43,7 @@ export function entryToPayload(values: EntryValues): Record<string, unknown> {
     event: values.event || null,
     description: values.description,
     allocation: values.allocation,
-    ideal_fraction_number: needsFractionNumber(values.allocation) ? Number(values.ideal_fraction_number) : null,
+    apportionment_criterion: needsApportionmentCriterion(values.allocation) ? values.apportionment_criterion : null,
     recurrence: values.recurrence,
     installments_total: needsInstallments(values.recurrence) ? Number(values.installments_total) : null,
     start_month: values.start_month,
@@ -60,7 +60,7 @@ export function entryToPayload(values: EntryValues): Record<string, unknown> {
 export function canPreview(values: EntryValues): boolean {
   if (!values.condominium || (!values.credits_company && !values.cost_center) || !values.start_month || values.units.length === 0) return false;
   if (!(Number(values.amount) > 0)) return false;
-  if (needsFractionNumber(values.allocation) && !/^[1-6]$/.test(values.ideal_fraction_number)) return false;
+  if (needsApportionmentCriterion(values.allocation) && values.apportionment_criterion === "") return false;
   if (needsInstallments(values.recurrence) && !(Number(values.installments_total) >= 2)) return false;
   return true;
 }

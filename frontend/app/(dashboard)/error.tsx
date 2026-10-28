@@ -13,7 +13,7 @@ export default function DashboardError({ reset }: { error: Error & { digest?: st
         <Button type="button" onClick={reset}>
           Tentar de novo
         </Button>
-        <LinkButton variant="secondary" href="/">
+        <LinkButton variant="secondary" href="/dashboard">
           Ir ao painel
         </LinkButton>
       </div>

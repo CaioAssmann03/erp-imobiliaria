@@ -3,9 +3,9 @@ from typing import final, override
 from rest_framework import viewsets
 from rest_framework.permissions import BasePermission, IsAuthenticated
 
-from apps.core.api.filters import QuerySearchFilter
-from apps.core.api.permissions import IsSuperuser
-from apps.core.scoping import CompanyScopedViewSetMixin
+from apps.core.infrastructure.api.filters import QuerySearchFilter
+from apps.core.infrastructure.api.permissions import IsSuperuser
+from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin
 
 from ..models import Company
 from ..serializers import CompanySerializer
@@ -13,8 +13,6 @@ from ..serializers import CompanySerializer
 
 @final
 class CompanyViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Company]):
-    """Company (administradora): staff sees and edits only their own; creating or deleting is superuser-only."""
-
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     filter_backends = (QuerySearchFilter,)

@@ -5,14 +5,13 @@ import { useFormContext, useWatch } from "react-hook-form";
 
 import { SelectField, TextField } from "@/components/form/fields";
 import { FieldRow } from "@/components/form/FormSection";
-import { useCondominiumsList, useCostCentersList } from "@/lib/api/generated";
-import { defaultCostCenterId, formatCode, needsFractionNumber, needsInstallments } from "@/lib/billing-entry-payload";
+import { useCondominiumApportionmentCriteriaList, useCondominiumsList, useCostCentersList } from "@/lib/api/generated";
+import { defaultCostCenterId, formatCode, needsApportionmentCriterion, needsInstallments } from "@/lib/billing-entry-payload";
 import { maskMonthYear } from "@/lib/billing-plan-payload";
 import { maskMoney } from "@/lib/masks";
 import {
   ALLOCATION_HINT,
   ALLOCATIONS,
-  IDEAL_FRACTION_OPTIONS,
   RECURRENCES,
   type BillingEntryFormInput,
 } from "@/lib/schemas/billing-entry";
@@ -29,6 +28,10 @@ export function EntryFormFields() {
   });
   const { data: condominiums } = useCondominiumsList({ limit: 100 });
   const { data: costCenters } = useCostCentersList({ condominium, active: true, limit: 100 }, { query: { enabled: condominium !== "" } });
+  const { data: criteria } = useCondominiumApportionmentCriteriaList(
+    { condominium, limit: 100 },
+    { query: { enabled: condominium !== "" && needsApportionmentCriterion(allocation) } }
+  );
   const costCenterOptions = [...(costCenters?.results ?? [])].sort((a, b) => (a.code ?? 0) - (b.code ?? 0));
 
   // A Conta Normal (código 0) já vem escolhida; trocar de condomínio refaz a escolha e a seleção de unidades.
@@ -48,6 +51,7 @@ export function EntryFormFields() {
         onValueChange={() => {
           setValue("units", [], { shouldDirty: true });
           setValue("cost_center", "");
+          setValue("apportionment_criterion", "");
         }}
         options={(condominiums?.results ?? []).map((item) => ({ value: item.id, label: `${item.code} - ${item.name}` }))}
       />
@@ -73,8 +77,15 @@ export function EntryFormFields() {
         autoComplete="off"
       />
       <SegmentedField name="allocation" label="Rateio" hint={ALLOCATION_HINT} options={ALLOCATIONS} />
-      {needsFractionNumber(allocation) && (
-        <SelectField name="ideal_fraction_number" label="Fração ideal" required placeholder="Selecione" options={IDEAL_FRACTION_OPTIONS} />
+      {needsApportionmentCriterion(allocation) && (
+        <SelectField
+          name="apportionment_criterion"
+          label="Critério de rateio"
+          required
+          placeholder="Selecione"
+          hint="O total é dividido entre as unidades selecionadas pela fração de cada uma neste critério."
+          options={(criteria?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
+        />
       )}
       <SegmentedField name="recurrence" label="Recorrência" options={RECURRENCES} />
       {needsInstallments(recurrence) && (

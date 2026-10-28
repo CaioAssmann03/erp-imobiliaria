@@ -25,12 +25,9 @@ export interface PatchedBillingEntry {
   /** @maxLength 120 */
   description?: string;
   allocation?: AllocationEnum;
-  /**
-     * @minimum 0
-     * @maximum 32767
-     * @nullable
-     */
-  ideal_fraction_number?: number | null;
+  /** @nullable */
+  apportionment_criterion?: string | null;
+  readonly apportionment_criterion_name?: string;
   recurrence?: RecurrenceEnum;
   /**
      * @minimum 0

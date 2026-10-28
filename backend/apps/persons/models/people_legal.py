@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models.functions import Upper
 
 from apps.core.models import Company
-from apps.core.validators import validate_cnpj
+from apps.core.infrastructure.validators import validate_cnpj
 from apps.persons.errors import PeopleLegalError
 
 from .person import Person

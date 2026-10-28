@@ -5,7 +5,7 @@ from auditlog.models import LogEntry
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from apps.core.audit import MASKED_VALUE
+from apps.core.infrastructure.audit import MASKED_VALUE
 from apps.core.testing import seeded_company
 
 from ..models import PeopleIndividual, PeopleLegal, Person

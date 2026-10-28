@@ -9,6 +9,8 @@ export * from './billing-runs/billing-runs';
 export * from './blocks/blocks';
 export * from './companies/companies';
 export * from './company-entries/company-entries';
+export * from './condominium-apportionment-criteria/condominium-apportionment-criteria';
+export * from './condominium-billing-rules/condominium-billing-rules';
 export * from './condominiums/condominiums';
 export * from './cost-centers/cost-centers';
 export * from './current-account-entries/current-account-entries';

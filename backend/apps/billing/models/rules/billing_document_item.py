@@ -19,26 +19,30 @@ class BillingDocumentItemRules(ModelRules["BillingDocumentItem"]):
     @rule("cost_center", BillingDocumentItemError.COST_CENTER_OTHER_CONDOMINIUM)
     def cost_center_belongs_to_another_condominium(self) -> bool:
         item = self.instance
-        if item.document_id is None or item.cost_center is None:
+        cost_center = item.cost_center
+        if item.document_id is None or cost_center is None:
             return False
-        return item.cost_center.condominium_id != item.document.unit.condominium_id
+        return cost_center.condominium_id != item.document.unit.condominium_id
 
     @rule("cost_center", BillingDocumentItemError.COST_CENTER_INACTIVE)
     def cost_center_is_inactive(self) -> bool:
         item = self.instance
-        return item._state.adding and item.cost_center is not None and not item.cost_center.active
+        cost_center = item.cost_center
+        return item._state.adding and cost_center is not None and not cost_center.active
 
     @rule("entry_template", BillingDocumentItemError.ENTRY_TEMPLATE_OTHER_COST_CENTER)
     def entry_template_belongs_to_another_cost_center(self) -> bool:
         item = self.instance
-        if item.entry_template is None or item.cost_center_id is None:
+        entry_template = item.entry_template
+        if entry_template is None or item.cost_center_id is None:
             return False
-        return item.entry_template.cost_center_id != item.cost_center_id
+        return entry_template.cost_center_id != item.cost_center_id
 
     @rule("entry_template", BillingDocumentItemError.ENTRY_TEMPLATE_INACTIVE)
     def entry_template_is_inactive(self) -> bool:
         item = self.instance
-        return item._state.adding and item.entry_template is not None and not item.entry_template.active
+        entry_template = item.entry_template
+        return item._state.adding and entry_template is not None and not entry_template.active
 
     @rule("amount", BillingDocumentItemError.DATA_IMMUTABLE)
     def item_changed_after_creation(self) -> bool:

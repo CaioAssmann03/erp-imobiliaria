@@ -1,6 +1,7 @@
 from .account_payable import AccountPayable as AccountPayable
 from .bank_account import AccountKind as AccountKind
 from .bank_account import BankAccount as BankAccount
+from .company_entry import CompanyEntry as CompanyEntry
 from .cost_center import CostCenter as CostCenter
 from .current_account import CurrentAccount as CurrentAccount
 from .current_account_entry import CurrentAccountEntry as CurrentAccountEntry
@@ -8,4 +9,3 @@ from .entry_batch import EntryBatch as EntryBatch
 from .entry_template import EntryTemplate as EntryTemplate
 from .payment_receipt import PaymentReceipt as PaymentReceipt
 from .supplier import Supplier as Supplier
-from .company_entry import CompanyEntry as CompanyEntry

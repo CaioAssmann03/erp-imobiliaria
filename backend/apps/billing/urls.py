@@ -8,6 +8,8 @@ from .views import (
     BillingEventViewSet,
     BillingPlanViewSet,
     BillingRunViewSet,
+    CondominiumBillingRulesViewSet,
+    LateInterestRateViewSet,
     ResendWebhookView,
 )
 
@@ -17,6 +19,10 @@ router.register("billing-documents", BillingDocumentViewSet, basename="billing-d
 router.register("billing-runs", BillingRunViewSet, basename="billing-run")
 router.register("billing-events", BillingEventViewSet, basename="billing-event")
 router.register("billing-entries", BillingEntryViewSet, basename="billing-entry")
+router.register(
+    "condominium-billing-rules", CondominiumBillingRulesViewSet, basename="condominium-billing-rules"
+)
+router.register("late-interest-rates", LateInterestRateViewSet, basename="late-interest-rate")
 
 urlpatterns = [
     path("webhooks/asaas/", AsaasWebhookView.as_view(), name="asaas-webhook"),

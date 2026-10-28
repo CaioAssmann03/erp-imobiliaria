@@ -1,26 +1,24 @@
-from apps.core.audit import register_audited
+from apps.core.infrastructure.audit import register_audited
 
 from .models import (
-    Address,
-    AdministrationContract,
-    BillingRules,
     Block,
     Condominium,
-    LateInterestRate,
+    CondominiumAdministrationContract,
+    CondominiumApportionmentCriterion,
     Unit,
+    UnitApportionmentFraction,
     UnitPerson,
 )
 
 
 def register() -> None:
     for model in (
-        Address,
-        AdministrationContract,
-        BillingRules,
+        CondominiumAdministrationContract,
+        CondominiumApportionmentCriterion,
         Block,
         Condominium,
-        LateInterestRate,
         Unit,
+        UnitApportionmentFraction,
         UnitPerson,
     ):
         register_audited(model)

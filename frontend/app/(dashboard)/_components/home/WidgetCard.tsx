@@ -11,7 +11,7 @@ import { MENU_WIDTH, WidgetViewMenu } from "./WidgetViewMenu";
 /**
  * Client Component: card do painel. Ao clicar nele (fora de links e botões), aparece uma
  * opção flutuante "Ver", que abre o elemento em destaque (o mesmo efeito de escolhê-lo no
- * Spotlight: `/?focus=<id>`). O card em si não é marcado.
+ * Spotlight: `/dashboard?focus=<id>`). O card em si não é marcado.
  */
 export function WidgetCard({
   id,
@@ -35,7 +35,7 @@ export function WidgetCard({
 
   const view = () => {
     setMenu(null);
-    router.push(`/?focus=${id}`, { scroll: false });
+    router.push(`/dashboard?focus=${id}`, { scroll: false });
   };
 
   return (

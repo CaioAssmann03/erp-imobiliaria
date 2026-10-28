@@ -30,10 +30,18 @@ class BillingDocumentRegistration(BaseModel):
         INITIAL_ISSUE = ("initial_issue", "Initial issue")
         REISSUE = ("reissue", "Reissue")
 
-    document = models.ForeignKey(BillingDocument, on_delete=models.PROTECT, related_name="registrations")
-    gateway_account = models.ForeignKey(GatewayAccount, on_delete=models.PROTECT, related_name="registrations")
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
-    reason = models.CharField(max_length=15, choices=Reason.choices, default=Reason.INITIAL_ISSUE)
+    document = models.ForeignKey(
+        BillingDocument, on_delete=models.PROTECT, related_name="registrations"
+    )
+    gateway_account = models.ForeignKey(
+        GatewayAccount, on_delete=models.PROTECT, related_name="registrations"
+    )
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.ACTIVE
+    )
+    reason = models.CharField(
+        max_length=15, choices=Reason.choices, default=Reason.INITIAL_ISSUE
+    )
     registered_due_date = models.DateField()
     gateway_payment_id = models.CharField(max_length=64, blank=True)
     our_number = models.CharField(max_length=40, blank=True)
@@ -73,7 +81,9 @@ class BillingDocumentRegistration(BaseModel):
         is_new_reissue = self._state.adding and self.reason == self.Reason.REISSUE
         if is_new_reissue and self.registered_due_date < timezone.localdate():
             raise ValidationError(
-                {"registered_due_date": BillingDocumentRegistrationError.REISSUE_DUE_DATE_IN_PAST.to_validation_error()}
+                {
+                    "registered_due_date": BillingDocumentRegistrationError.REISSUE_DUE_DATE_IN_PAST.to_validation_error()
+                }
             )
 
     @override

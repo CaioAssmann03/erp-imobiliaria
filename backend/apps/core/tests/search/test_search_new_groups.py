@@ -13,7 +13,8 @@ from apps.billing.services.create_billing_document import (
     NewBillingDocumentItem,
     create_billing_document,
 )
-from apps.condominiums.models import BillingRules, Block, Condominium, Unit
+from apps.condominiums.models import Block, Condominium, Unit
+from apps.billing.models import CondominiumBillingRules
 from apps.core.models import Company
 from apps.finance.models import AccountPayable, CostCenter, EntryTemplate, Supplier
 from apps.persons.models import Person
@@ -83,7 +84,7 @@ def test_finds_an_account_payable_by_description_document_or_supplier(
 def test_finds_a_billing_document_by_payer_or_unit(api_client: APIClient, company: Company, condominium: Condominium) -> None:
     unit = Unit.objects.create(condominium=condominium, name="1204")
     payer = Person.objects.create(company=company, name="Beatriz Nogueira")
-    _ = BillingRules.objects.create(condominium=condominium)
+    _ = CondominiumBillingRules.objects.create(condominium=condominium)
     center = CostCenter.objects.create(condominium=condominium, name="Taxa")
     template = EntryTemplate.objects.create(cost_center=center, name="REC")
     _ = create_billing_document(

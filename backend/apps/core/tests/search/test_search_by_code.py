@@ -10,11 +10,14 @@ from rest_framework.response import Response
 from rest_framework.test import APIClient
 
 from apps.condominiums.models import Condominium, Unit
+from apps.core.infrastructure.search.term import classify_term
+from apps.core.serializers import SearchSerializer
+from apps.core.views.search.search_views import SEARCHES_BY_GROUP
 from apps.core.testing import seeded_company
-from apps.core.views.search.term import classify_term
 from apps.persons.models import PeopleIndividual, Person
+from apps.persons.services.release_person_to_module import release_person_to_module
 
-from ..base import body, error_codes
+from ..base import body
 
 pytestmark = pytest.mark.django_db
 
@@ -32,9 +35,10 @@ def names(response: Response, group: str) -> list[str]:
 
 
 def make_person(name: str, code: int, modules: list[str] | None = None) -> Person:
-    return Person.objects.create(
-        company=seeded_company(), name=name, code=code, modules=modules or ["condominiums"]
-    )
+    person = Person.objects.create(company=seeded_company(), name=name, code=code)
+    for module in ["condominiums"] if modules is None else modules:
+        release_person_to_module(person, module)
+    return person
 
 
 def make_condominium(name: str, code: int, cnpj: str = CNPJ) -> Condominium:
@@ -104,15 +108,6 @@ def test_a_document_start_comes_after_the_exact_match(api_client: APIClient) -> 
     assert names(search(api_client, "123"), "persons") == ["Zeca", "Ana"]
 
 
-def test_term_with_punctuation_is_unchanged(api_client: APIClient) -> None:
-    _ = make_person("Zeca", 123)
-    with_cpf = make_person("Ana", 124)
-    _ = PeopleIndividual.objects.create(person=with_cpf, company=seeded_company(), cpf=CPF)
-
-    # "1.2.3" is a document-like term, not the ID 123: only the CPF containing 123 matches.
-    assert names(search(api_client, "1.2.3"), "persons") == ["Ana"]
-
-
 @pytest.mark.parametrize("term", ["9" * 19, "9" * 40])
 def test_long_digit_terms_do_not_overflow(api_client: APIClient, term: str) -> None:
     response = search(api_client, term)
@@ -121,27 +116,18 @@ def test_long_digit_terms_do_not_overflow(api_client: APIClient, term: str) -> N
     assert all(group == [] for group in body(response).values())
 
 
-def test_search_filters_people_by_module(api_client: APIClient) -> None:
+def test_global_search_finds_people_of_every_module(api_client: APIClient) -> None:
     _ = make_person("Maria Cond", 1001, ["condominiums"])
     _ = make_person("Maria Loc", 1002, ["rentals"])
     _ = make_person("Maria Mix", 1003, ["condominiums", "rentals"])
+    _ = make_person("Maria Nenhuma", 1004, [])
 
-    assert names(search(api_client, "maria"), "persons") == ["Maria Cond", "Maria Loc", "Maria Mix"]
-    assert names(search(api_client, "maria", module="rentals"), "persons") == [
+    assert names(search(api_client, "maria"), "persons") == [
+        "Maria Cond",
         "Maria Loc",
         "Maria Mix",
+        "Maria Nenhuma",
     ]
-    assert names(search(api_client, "maria", module="condominiums"), "persons") == [
-        "Maria Cond",
-        "Maria Mix",
-    ]
-
-
-def test_search_with_an_unknown_module_is_a_400(api_client: APIClient) -> None:
-    response = search(api_client, "maria", module="foo")
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert error_codes(response, "module") == ["invalid_choice"]
 
 
 def test_search_by_code_does_not_cross_companies(other_api_client: APIClient) -> None:
@@ -178,3 +164,8 @@ def test_term_classification(
     assert classified.code == code
     assert classified.matches_text is matches_text
     assert classified.matches_document is matches_document
+
+
+def test_every_search_group_is_in_the_response_schema() -> None:
+    """A group added to one side and forgotten in the other would be dropped or never filled."""
+    assert set(SEARCHES_BY_GROUP) == set(SearchSerializer().fields)

@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.condominiums.models import Condominium
-from apps.core.seed.documents import generate_cnpj
+from apps.seed.documents import generate_cnpj
 from apps.core.models import Company
 
 from ..models import BankAccount

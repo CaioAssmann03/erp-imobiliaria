@@ -6,6 +6,7 @@ from django.db import models
 from apps.condominiums.models import Condominium
 from apps.core.models.base import BaseModel
 from apps.finance.errors import CostCenterError
+from apps.finance.models.querysets import CostCenterQuerySet
 
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
@@ -15,6 +16,8 @@ if TYPE_CHECKING:
 
 @final
 class CostCenter(BaseModel):
+    objects = CostCenterQuerySet.as_manager()
+
     """Chart-of-accounts entry of a condominium (the PDF's *SubConta*)."""
 
     if TYPE_CHECKING:
@@ -49,11 +52,16 @@ class CostCenter(BaseModel):
             ),
         )
 
+    @classmethod
+    def next_code_in(cls, condominium_id: Any) -> int:
+        """The first code after the last one of the condominium (0, the *Conta Normal*, when it has none)."""
+        last_code = cls.objects.filter(condominium_id=condominium_id).aggregate(last=models.Max("code"))["last"]
+        return 0 if last_code is None else last_code + 1
+
     @override
     def save(self, *args: Any, **kwargs: Any) -> None:
         if self.code is None:
-            last_code = type(self).objects.filter(condominium_id=self.condominium_id).aggregate(models.Max("code"))["code__max"]
-            self.code = 0 if last_code is None else last_code + 1
+            self.code = self.next_code_in(self.condominium_id)
         super().save(*args, **kwargs)
 
     @override
@@ -70,6 +78,11 @@ class CostCenter(BaseModel):
                     "condominium": CostCenterError.CONDOMINIUM_IMMUTABLE.to_validation_error()
                 }
             )
+
+    def sole_active_entry_template(self) -> "EntryTemplate | None":
+        """The cost center's only active entry template; None when it has none or several."""
+        templates = list(self.entry_templates.filter(active=True)[:2])
+        return templates[0] if len(templates) == 1 else None
 
     @override
     def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:

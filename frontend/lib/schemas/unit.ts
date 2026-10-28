@@ -33,22 +33,11 @@ export const UNIT_TYPES = [
 export const unitTypeLabel = (type: string | undefined) =>
   UNIT_TYPES.find((item) => item.value === type)?.label ?? type ?? "";
 
-/** As seis frações ideais da unidade, com o nome do campo na API; a 1ª é a principal, as outras são opcionais. */
-export const UNIT_FRACTIONS = [
-  { name: "ideal_fraction", label: "1ª fração" },
-  { name: "ideal_fraction_2", label: "2ª fração" },
-  { name: "ideal_fraction_3", label: "3ª fração" },
-  { name: "ideal_fraction_4", label: "4ª fração" },
-  { name: "ideal_fraction_5", label: "5ª fração" },
-  { name: "ideal_fraction_6", label: "6ª fração" },
-] as const;
-
 // numeric(9, 8): fração de 0 a 1, usada no rateio das despesas
-const idealFraction = (label: string) =>
-  decimalField(label, { max: 1, decimals: 8 }).refine(
-    (value) => value === undefined || Number(value) > 0,
-    `A ${label.toLowerCase()} deve ser maior que zero`
-  );
+const idealFraction = decimalField("Fração", { max: 1, decimals: 8 }).refine(
+  (value) => value === undefined || Number(value) > 0,
+  "A fração deve ser maior que zero"
+);
 
 export const unitSchema = z.object({
   name: requiredText("a unidade", { max: 30 }),
@@ -56,12 +45,8 @@ export const unitSchema = z.object({
   type: enumField(UNIT_TYPES.map((t) => t.value) as [string, ...string[]]),
   registration_number: optionalText("Matrícula do imóvel", 60),
   resident_count: intField("Nº de moradores", 0, 999),
-  ideal_fraction: idealFraction("1ª fração"),
-  ideal_fraction_2: idealFraction("2ª fração"),
-  ideal_fraction_3: idealFraction("3ª fração"),
-  ideal_fraction_4: idealFraction("4ª fração"),
-  ideal_fraction_5: idealFraction("5ª fração"),
-  ideal_fraction_6: idealFraction("6ª fração"),
+  /** Fração da unidade em cada critério de rateio do condomínio, por id do critério; vazio = sem fração ali. */
+  fractions: z.record(z.string(), idealFraction),
   is_manager_unit: z.boolean(),
   billing_recipient: enumField(BILLING_RECIPIENTS.map((item) => item.value) as [string, ...string[]]),
   is_billing_blocked: z.boolean(),
@@ -80,12 +65,7 @@ export const UNIT_DEFAULTS: UnitFormInput = {
   type: "apartment",
   registration_number: "",
   resident_count: "0",
-  ideal_fraction: "",
-  ideal_fraction_2: "",
-  ideal_fraction_3: "",
-  ideal_fraction_4: "",
-  ideal_fraction_5: "",
-  ideal_fraction_6: "",
+  fractions: {},
   is_manager_unit: false,
   billing_recipient: "owner",
   is_billing_blocked: false,
@@ -102,12 +82,9 @@ export function unitToForm(u: Unit): UnitFormInput {
     type: u.type ?? "apartment",
     registration_number: u.registration_number ?? "",
     resident_count: String(u.resident_count ?? 0),
-    ideal_fraction: decimalFromApi(u.ideal_fraction, 8),
-    ideal_fraction_2: decimalFromApi(u.ideal_fraction_2, 8),
-    ideal_fraction_3: decimalFromApi(u.ideal_fraction_3, 8),
-    ideal_fraction_4: decimalFromApi(u.ideal_fraction_4, 8),
-    ideal_fraction_5: decimalFromApi(u.ideal_fraction_5, 8),
-    ideal_fraction_6: decimalFromApi(u.ideal_fraction_6, 8),
+    fractions: Object.fromEntries(
+      (u.fractions ?? []).map((fraction) => [fraction.criterion, decimalFromApi(fraction.value, 8)])
+    ),
     is_manager_unit: u.is_manager_unit ?? false,
     billing_recipient: u.billing_recipient ?? "owner",
     is_billing_blocked: u.is_billing_blocked ?? false,
@@ -118,13 +95,27 @@ export function unitToForm(u: Unit): UnitFormInput {
   };
 }
 
+/**
+ * A lista de frações da unidade: só os critérios preenchidos. Na edição ela sempre vai, mesmo vazia,
+ * porque enviar a lista substitui o conjunto (é assim que uma fração é removida); na criação, sem
+ * frações, a lista é omitida.
+ */
+export function fractionsToPayload(
+  fractions: Record<string, string | undefined>,
+  isEdit: boolean
+): { criterion: string; value: string }[] | undefined {
+  const filled = Object.entries(fractions).flatMap(([criterion, value]) =>
+    value === undefined ? [] : [{ criterion, value }]
+  );
+  return isEdit || filled.length > 0 ? filled : undefined;
+}
+
 /** Corpo da requisição; na edição (PATCH) um campo esvaziado vai como `null` / "" para limpar. */
 export function unitToPayload(
   values: UnitFormOutput,
   condominiumId: string,
   isEdit: boolean
 ): Record<string, unknown> {
-  const empty = isEdit ? null : undefined;
   return {
     condominium: condominiumId,
     block: values.block,
@@ -132,12 +123,7 @@ export function unitToPayload(
     type: values.type,
     registration_number: values.registration_number ?? (isEdit ? "" : undefined),
     resident_count: values.resident_count,
-    ideal_fraction: values.ideal_fraction ?? empty,
-    ideal_fraction_2: values.ideal_fraction_2 ?? empty,
-    ideal_fraction_3: values.ideal_fraction_3 ?? empty,
-    ideal_fraction_4: values.ideal_fraction_4 ?? empty,
-    ideal_fraction_5: values.ideal_fraction_5 ?? empty,
-    ideal_fraction_6: values.ideal_fraction_6 ?? empty,
+    fractions: fractionsToPayload(values.fractions, isEdit),
     is_manager_unit: values.is_manager_unit,
     billing_recipient: values.billing_recipient,
     is_billing_blocked: values.is_billing_blocked,

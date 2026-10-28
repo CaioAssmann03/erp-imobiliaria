@@ -5,7 +5,6 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { PersonsListModule } from './personsListModule';
 import type { PersonsListType } from './personsListType';
 
 export type PersonsListParams = {
@@ -15,14 +14,10 @@ active?: boolean;
  */
 limit?: number;
 /**
- * * `condominiums` - Condominiums
- * * `rentals` - Rentals
- */
-module?: PersonsListModule;
-/**
  * Um número de página dentro do conjunto de resultados paginado.
  */
 page?: number;
+person_module?: string;
 /**
  * Termo de busca (nome, documento, ID…).
  */

@@ -6,8 +6,8 @@ from django.contrib import admin
 from django.http import HttpRequest
 from unfold.admin import ModelAdmin
 
-from .models import Company
-from .scoping import CompanyScopedAdminMixin
+from .infrastructure.scoping import CompanyScopedAdminMixin
+from .models import Address, Company
 
 
 @final
@@ -18,14 +18,19 @@ class CompanyAdmin(CompanyScopedAdminMixin, ModelAdmin):
     list_filter = ("active", "state")
 
 
+@final
+@admin.register(Address)
+class AddressAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("street", "number", "city", "state", "zip_code")
+    search_fields = ("street", "city", "zip_code")
+
+
 admin.site.unregister(LogEntry)
 
 
 @final
 @admin.register(LogEntry)
 class AuditLogEntryAdmin(LibraryLogEntryAdmin, ModelAdmin):
-    """The audit trail: visible only to superusers (it has no company of its own), read-only for everyone."""
-
     @staticmethod
     def _is_superuser(request: HttpRequest) -> bool:
         return bool(request.user.is_active and request.user.is_superuser)

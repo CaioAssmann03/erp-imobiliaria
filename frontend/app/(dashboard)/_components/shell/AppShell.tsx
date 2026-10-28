@@ -20,7 +20,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen min-w-0 flex-1 flex-col bg-shell">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-2 bg-shell/90 px-4 backdrop-blur-md lg:h-16 lg:justify-center lg:px-8">
           <MobileMenu />
-          <Link href="/" className="lg:hidden">
+          <Link href="/dashboard" className="lg:hidden">
             <Brand />
           </Link>
           <div className="ml-auto flex items-center gap-0.5 lg:ml-0 lg:w-full lg:max-w-xl">

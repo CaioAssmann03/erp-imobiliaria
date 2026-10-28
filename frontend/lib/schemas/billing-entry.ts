@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { needsFractionNumber, needsInstallments, type EntryValues } from "@/lib/billing-entry-payload";
+import { needsApportionmentCriterion, needsInstallments, type EntryValues } from "@/lib/billing-entry-payload";
 import { currentMonthTyped, monthToApi } from "@/lib/billing-plan-payload";
 
 import { decimalField, enumField } from "./fields";
@@ -21,12 +21,7 @@ export const RECURRENCES = [
 ] as const;
 
 export const ALLOCATION_HINT =
-  "Individual: o mesmo valor em cada unidade. Coletivo: um total dividido por igual entre as unidades. Fração: um total dividido pela fração ideal de cada unidade.";
-
-export const IDEAL_FRACTION_OPTIONS = [1, 2, 3, 4, 5, 6].map((number) => ({
-  value: String(number),
-  label: `Fração ideal ${number}`,
-}));
+  "Individual: o mesmo valor em cada unidade. Coletivo: um total dividido por igual entre as unidades. Fração: um total dividido pela fração de cada unidade no critério de rateio escolhido.";
 
 export const billingEntrySchema = z
   .object({
@@ -35,7 +30,7 @@ export const billingEntrySchema = z
     credits_company: z.boolean(),
     description: z.string().trim().max(120, "A descrição deve ter no máximo 120 caracteres"),
     allocation: enumField(ALLOCATIONS.map((item) => item.value) as [string, ...string[]]),
-    ideal_fraction_number: z.string(),
+    apportionment_criterion: z.string(),
     recurrence: enumField(RECURRENCES.map((item) => item.value) as [string, ...string[]]),
     installments_total: z.string(),
     // Mês e ano digitados ("10/2026"); vai à API como o primeiro dia do mês.
@@ -55,9 +50,9 @@ export const billingEntrySchema = z
     when: () => true,
   })
   .refine((entry) => entry.amount !== undefined, { path: ["amount"], message: "Informe o valor", when: () => true })
-  .refine((entry) => !needsFractionNumber(entry.allocation) || entry.ideal_fraction_number !== "", {
-    path: ["ideal_fraction_number"],
-    message: "Escolha a fração ideal",
+  .refine((entry) => !needsApportionmentCriterion(entry.allocation) || entry.apportionment_criterion !== "", {
+    path: ["apportionment_criterion"],
+    message: "Escolha o critério de rateio",
     when: () => true,
   })
   .refine(
@@ -83,7 +78,7 @@ export const billingEntryDefaults = (condominium: string, month = currentMonthTy
   credits_company: false,
   description: "",
   allocation: "individual",
-  ideal_fraction_number: "",
+  apportionment_criterion: "",
   recurrence: "once",
   installments_total: "",
   start_month: month,
@@ -99,7 +94,7 @@ export const billingEntryFormToValues = (values: BillingEntryFormOutput): EntryV
   credits_company: values.credits_company,
   description: values.description,
   allocation: values.allocation as EntryValues["allocation"],
-  ideal_fraction_number: values.ideal_fraction_number,
+  apportionment_criterion: values.apportionment_criterion,
   recurrence: values.recurrence as EntryValues["recurrence"],
   installments_total: values.installments_total,
   start_month: values.start_month,

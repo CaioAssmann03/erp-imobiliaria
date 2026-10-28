@@ -26,7 +26,7 @@ A phase is `done` only when every part is `done` or `moved`.
 | 7 | [Client portal](phase-7-client-portal/README.md) | todo | 0/3 | Sprint 7 |
 | 8 | [Rentals](phase-8-rentals/README.md) | todo | 0/5 | Sprint 8 |
 
-Current position (2026-10-26; the full hand-off is in [`current-state.md`](current-state.md)): phases 1, 2, **3a**, **3** and **4** are **done**. **Phase 5** (Asaas) is **implemented but not closed**: all seven parts are coded and tested (specs 031–036), and the gateway account was reworked by **spec 037** into **one Asaas account for the administradora** (no sub-accounts, no CNPJ per condominium; PR #29 draft, branch `feat/single-gateway-account`). They stay `in-progress` until validated against the Asaas sandbox (the existing **CPF** sandbox account is enough, plus a tunnel for the webhook; for e-mail a verified Resend domain and keys). Alongside, **spec 039** (*Inclusão de valores*: events, launches added to the boleto, the screen) is implemented on `feat/billing-entries`, and **spec 038** (the registration fee: an event of the administradora, credited to its own ledger and never to a condominium) is implemented too. Then phase 6. Also pending: a manual browser run of the Cobrança screens.
+Current position: phases 1, 2, **3a** (closed on 2026-10-19: hosting docs, `render.yaml` retired, VPS compose versioned in `deploy/vps/` with a health check, spec 008 closed), **3** (finance base, Sprint 3) and **4** (billing issuance, Sprint 4: Asaas sandbox account, billing plans, documents, monthly issuance, draft boleto PDF and the three screens groups, specs 024–029; closed on 2026-10-21) are **done**. **Next:** phase 5 (Asaas) is **implemented but not closed**: all seven parts are coded and tested (specs 030–036: gateway account (reworked by spec 037 into **one Asaas account for the company**, no sub-accounts), charge registration, the payment webhook and ledger posting, the daily reconciliation, the manual reissue, the e-mail delivery and the screens), and stay `in-progress` until they are validated against the Asaas sandbox (the existing **CPF** sandbox account is enough now, plus a tunnel to the webhook endpoints, and for the e-mail a verified Resend domain and keys). Then phase 6. Also pending: a manual browser run of the Cobrança screens.
 
 ## How to use
 1. Pick the next `todo` part in the lowest unfinished phase (respect **Depends on**).
@@ -52,7 +52,7 @@ Current position (2026-10-26; the full hand-off is in [`current-state.md`](curre
 | UnidadeParte | `UnitPerson` |
 | SubConta | `CostCenter` |
 | Historico | `EntryTemplate` |
-| ContratoAdministracao (condominium) | `AdministrationContract` |
+| ContratoAdministracao (condominium) | `CondominiumAdministrationContract` |
 
 Names of later entities are proposals in each part's **Entities** table.
 

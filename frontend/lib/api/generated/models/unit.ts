@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { BillingRecipientEnum } from './billingRecipientEnum';
+import type { UnitApportionmentFraction } from './unitApportionmentFraction';
 import type { UnitPerson } from './unitPerson';
 import type { UnitTypeEnum } from './unitTypeEnum';
 
@@ -32,42 +33,6 @@ export interface Unit {
      * @maximum 32767
      */
   resident_count?: number;
-  /**
-     * Share of common areas, from 0 to 1. Used for expanse apportionment
-     * @nullable
-     * @pattern ^-?\d{0,1}(?:\.\d{0,8})?$
-     */
-  ideal_fraction?: string | null;
-  /**
-     * 2nd ideal fraction, optional (from 0 to 1)
-     * @nullable
-     * @pattern ^-?\d{0,1}(?:\.\d{0,8})?$
-     */
-  ideal_fraction_2?: string | null;
-  /**
-     * 3rd ideal fraction, optional (from 0 to 1)
-     * @nullable
-     * @pattern ^-?\d{0,1}(?:\.\d{0,8})?$
-     */
-  ideal_fraction_3?: string | null;
-  /**
-     * 4th ideal fraction, optional (from 0 to 1)
-     * @nullable
-     * @pattern ^-?\d{0,1}(?:\.\d{0,8})?$
-     */
-  ideal_fraction_4?: string | null;
-  /**
-     * 5th ideal fraction, optional (from 0 to 1)
-     * @nullable
-     * @pattern ^-?\d{0,1}(?:\.\d{0,8})?$
-     */
-  ideal_fraction_5?: string | null;
-  /**
-     * 6th ideal fraction, optional (from 0 to 1)
-     * @nullable
-     * @pattern ^-?\d{0,1}(?:\.\d{0,8})?$
-     */
-  ideal_fraction_6?: string | null;
   is_manager_unit?: boolean;
   billing_recipient?: BillingRecipientEnum;
   /** @maxLength 60 */
@@ -80,6 +45,7 @@ export interface Unit {
   electricity_value?: string;
   active?: boolean;
   is_billing_blocked?: boolean;
+  fractions?: UnitApportionmentFraction[];
   readonly unit_people: readonly UnitPerson[];
   readonly created_at: string;
   readonly updated_at: string;

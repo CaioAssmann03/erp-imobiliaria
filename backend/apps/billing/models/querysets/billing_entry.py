@@ -24,7 +24,11 @@ class BillingEntryQuerySet(models.QuerySet["BillingEntry"]):
         )
         return self.annotate(months_since_start=months_since_start).filter(
             Q(recurrence="once", months_since_start=0)
-            | Q(recurrence="installments", months_since_start__gte=0, months_since_start__lt=F("installments_total"))
+            | Q(
+                recurrence="installments",
+                months_since_start__gte=0,
+                months_since_start__lt=F("installments_total"),
+            )
             | Q(recurrence="always", months_since_start__gte=0)
             & (Q(end_month__isnull=True) | Q(end_month__gte=month))
         )

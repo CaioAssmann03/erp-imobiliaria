@@ -13,8 +13,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from apps.billing.delivery_email import build_boleto_email
-from apps.billing.gateway.resend_client import EmailNotConfigured, EmailRejected, EmailUnavailable
+from apps.billing.infrastructure.rendering.delivery_email import build_boleto_email
+from apps.billing.infrastructure.gateway.resend_client import EmailNotConfigured, EmailRejected, EmailUnavailable
 from apps.finance.tests.base import body
 
 from ..models import BillingDocument, BillingDocumentDelivery, BillingDocumentRegistration, GatewayAccount

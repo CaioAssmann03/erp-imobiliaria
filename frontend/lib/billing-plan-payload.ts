@@ -15,8 +15,8 @@ export interface PlanItemValues {
   calculation_kind: string;
   /** Valor da API ("450.00"); `undefined` quando vazio. */
   amount: string | undefined;
-  /** "1" a "6" para o rateio; "" nos outros tipos. */
-  ideal_fraction_number: string;
+  /** Id do critério de rateio do condomínio, no rateio; "" nos outros tipos. */
+  apportionment_criterion: string;
   /** `gas`, `water` ou `electricity` para o valor cadastrado; "" nos outros tipos. */
   unit_value_field: string;
 }
@@ -58,7 +58,7 @@ export function currentMonthTyped(today: Date = new Date()): string {
 
 /** Fixo e rateio levam valor; o valor cadastrado da unidade não. */
 export const needsAmount = (kind: string): boolean => kind !== "unit_registered_value";
-export const needsFractionNumber = (kind: string): boolean => kind === "ideal_fraction_share";
+export const needsApportionmentCriterion = (kind: string): boolean => kind === "ideal_fraction_share";
 export const needsUnitValueField = (kind: string): boolean => kind === "unit_registered_value";
 
 /** Um item para a API: só os campos do tipo de cálculo escolhido; os outros vão `null`. */
@@ -70,7 +70,7 @@ export function itemToPayload(item: PlanItemValues): Record<string, unknown> {
     entry_template: item.entry_template,
     calculation_kind: item.calculation_kind,
     amount: needsAmount(item.calculation_kind) ? (item.amount ?? null) : null,
-    ideal_fraction_number: needsFractionNumber(item.calculation_kind) ? Number(item.ideal_fraction_number) : null,
+    apportionment_criterion: needsApportionmentCriterion(item.calculation_kind) ? item.apportionment_criterion : null,
     unit_value_field: needsUnitValueField(item.calculation_kind) ? item.unit_value_field : null,
   };
 }

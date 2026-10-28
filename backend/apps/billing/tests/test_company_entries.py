@@ -8,11 +8,11 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from apps.accounts.models import User
-from ..models import BillingDocument, BillingDocumentItem
 from apps.core.models import Company
-
 from apps.finance.models import CompanyEntry
 from apps.finance.tests.base import body, results
+
+from ..models import BillingDocument, BillingDocumentItem
 
 pytestmark = pytest.mark.django_db
 

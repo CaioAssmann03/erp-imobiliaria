@@ -7,11 +7,13 @@ import { refreshTokens } from "./lib/backend";
 import { isTokenExpiring } from "./lib/jwt";
 
 const PUBLIC_PATHS = ["/login"];
+// Páginas de apresentação do produto: abertas a todos, sem redirecionar quem já está logado.
+const MARKETING_PATHS = ["/", "/features", "/how-it-works"];
 
 function redirectToLogin(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const loginUrl = new URL("/login", request.url);
-  if (pathname !== "/") loginUrl.searchParams.set("next", pathname);
+  if (pathname !== "/dashboard") loginUrl.searchParams.set("next", pathname);
   const response = NextResponse.redirect(loginUrl);
   clearAuthCookies(response);
   return response;
@@ -23,9 +25,11 @@ export async function proxy(request: NextRequest) {
   const access = request.cookies.get(ACCESS_COOKIE)?.value;
   const refresh = request.cookies.get(REFRESH_COOKIE)?.value;
 
+  if (MARKETING_PATHS.includes(pathname)) return NextResponse.next();
+
   if (isPublicPath) {
     return access
-      ? NextResponse.redirect(new URL("/", request.url))
+      ? NextResponse.redirect(new URL("/dashboard", request.url))
       : NextResponse.next();
   }
 

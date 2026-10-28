@@ -4,20 +4,21 @@ from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 from typing import TYPE_CHECKING, Any, final, override
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 
-from apps.billing.errors import BillingEntryError, BillingValidatorError
+from apps.billing.errors import BillingEntryError
 from apps.billing.models.billing_event import BillingEvent
 from apps.billing.models.querysets import BillingEntryQuerySet
 from apps.billing.models.rules import BillingEntryRules
-from apps.billing.validators import (
-    FIRST_IDEAL_FRACTION_NUMBER,
-    LAST_IDEAL_FRACTION_NUMBER,
-    validate_first_day_of_month,
-    validate_ideal_fraction_number,
+from apps.condominiums.models import (
+    Condominium,
+    CondominiumApportionmentCriterion,
+    Unit,
+    UnitApportionmentFraction,
 )
-from apps.condominiums.models import Condominium, Unit
+from apps.core.infrastructure.validators import validate_first_day_of_month
 from apps.core.models.base import BaseModel
 from apps.finance.errors import FinanceValidatorError
 from apps.finance.models import CostCenter, EntryTemplate
@@ -32,6 +33,7 @@ if TYPE_CHECKING:
 CENT = Decimal("0.01")
 LINE_DESCRIPTION_MAX_LENGTH = 120
 MONTHS_PER_YEAR = 12
+MINIMUM_INSTALLMENTS = 2
 
 
 @final
@@ -58,27 +60,52 @@ class BillingEntry(BaseModel):
 
     objects = BillingEntryQuerySet.as_manager()
 
-    condominium = models.ForeignKey(Condominium, on_delete=models.PROTECT, related_name="billing_entries")
-    event = models.ForeignKey(BillingEvent, on_delete=models.PROTECT, null=True, blank=True, related_name="entries")
+    condominium = models.ForeignKey(
+        Condominium, on_delete=models.PROTECT, related_name="billing_entries"
+    )
+    event = models.ForeignKey(
+        BillingEvent,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="entries",
+    )
     description = models.CharField(max_length=120, blank=True)
     allocation = models.CharField(max_length=12, choices=Allocation.choices)
-    ideal_fraction_number = models.PositiveSmallIntegerField(
-        null=True, blank=True, validators=[validate_ideal_fraction_number]
+    # Fraction entries only: the condominium's criterion the total is split by.
+    apportionment_criterion = models.ForeignKey(
+        CondominiumApportionmentCriterion,
+        on_delete=models.RESTRICT,
+        null=True,
+        blank=True,
+        related_name="billing_entries",
     )
     recurrence = models.CharField(max_length=12, choices=Recurrence.choices)
     installments_total = models.PositiveSmallIntegerField(null=True, blank=True)
     start_month = models.DateField(validators=[validate_first_day_of_month])
-    end_month = models.DateField(null=True, blank=True, validators=[validate_first_day_of_month])
+    end_month = models.DateField(
+        null=True, blank=True, validators=[validate_first_day_of_month]
+    )
     # Empty only for an event that credits the administradora (`BillingEntryRules`).
     cost_center = models.ForeignKey(
-        CostCenter, on_delete=models.PROTECT, null=True, blank=True, related_name="billing_entries"
+        CostCenter,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="billing_entries",
     )
-    # Chosen from the cost center when the entry is saved: its only active template (`BillingEntryRules`).
+    # Chosen from the cost center when the entry is saved: its only active template (`clean`).
     entry_template = models.ForeignKey(
-        EntryTemplate, on_delete=models.PROTECT, null=True, blank=True, related_name="billing_entries"
+        EntryTemplate,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="billing_entries",
     )
     # Individual: what each unit pays. Collective and fraction: the total split among the selected units.
-    amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[validate_positive_amount])
+    amount = models.DecimalField(
+        max_digits=12, decimal_places=2, validators=[validate_positive_amount]
+    )
 
     company_lookup = "condominium__company"
 
@@ -94,25 +121,15 @@ class BillingEntry(BaseModel):
                 violation_error_code=FinanceValidatorError.AMOUNT_NOT_POSITIVE.value,
             ),
             models.CheckConstraint(
-                name="billing_entry_ideal_fraction_number_1_6",
-                condition=Q(ideal_fraction_number__isnull=True)
-                | Q(
-                    ideal_fraction_number__gte=FIRST_IDEAL_FRACTION_NUMBER,
-                    ideal_fraction_number__lte=LAST_IDEAL_FRACTION_NUMBER,
-                ),
-                violation_error_message=BillingValidatorError.IDEAL_FRACTION_NUMBER_OUT_OF_RANGE.message,
-                violation_error_code=BillingValidatorError.IDEAL_FRACTION_NUMBER_OUT_OF_RANGE.value,
-            ),
-            models.CheckConstraint(
-                name="billing_entry_fraction_matches_allocation",
-                condition=Q(allocation="fraction", ideal_fraction_number__isnull=False)
-                | (~Q(allocation="fraction") & Q(ideal_fraction_number__isnull=True)),
-                violation_error_message=BillingEntryError.IDEAL_FRACTION_NUMBER_DOES_NOT_MATCH_ALLOCATION.message,
-                violation_error_code=BillingEntryError.IDEAL_FRACTION_NUMBER_DOES_NOT_MATCH_ALLOCATION.value,
+                name="billing_entry_criterion_matches_allocation",
+                condition=Q(allocation="fraction", apportionment_criterion__isnull=False)
+                | (~Q(allocation="fraction") & Q(apportionment_criterion__isnull=True)),
+                violation_error_message=BillingEntryError.APPORTIONMENT_CRITERION_DOES_NOT_MATCH_ALLOCATION.message,
+                violation_error_code=BillingEntryError.APPORTIONMENT_CRITERION_DOES_NOT_MATCH_ALLOCATION.value,
             ),
             models.CheckConstraint(
                 name="billing_entry_installments_match_recurrence",
-                condition=Q(recurrence="installments", installments_total__gte=2)
+                condition=Q(recurrence="installments", installments_total__gte=MINIMUM_INSTALLMENTS)
                 | (~Q(recurrence="installments") & Q(installments_total__isnull=True)),
                 violation_error_message=BillingEntryError.INSTALLMENTS_TOTAL_DOES_NOT_MATCH_RECURRENCE.message,
                 violation_error_code=BillingEntryError.INSTALLMENTS_TOTAL_DOES_NOT_MATCH_RECURRENCE.value,
@@ -128,22 +145,28 @@ class BillingEntry(BaseModel):
     @override
     def clean(self) -> None:
         BillingEntryRules(self).validate()
+        template = (
+            self.cost_center.sole_active_entry_template()
+            if self.cost_center is not None
+            else None
+        )
+        if template is not None:
+            self.entry_template = template
 
     @override
     def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
-        if self.is_used():
-            raise BillingEntryError.ALREADY_USED.to_validation_error()
+        self.assert_not_used()
         return super().delete(*args, **kwargs)
-
-    def assert_unchanged_by_units(self) -> None:
-        """The selection of a used entry cannot change either: it would rewrite what was issued."""
-        if self.is_used():
-            raise BillingEntryError.ALREADY_USED.to_validation_error()
 
     @property
     def credits_company(self) -> bool:
         """Whether the money is the administradora's (its event says so) instead of a condominium's."""
         return self.event is not None and self.event.credits_company
+
+    def assert_not_used(self) -> None:
+        """A used entry cannot be deleted, nor can its selection of units change: it would rewrite what was issued."""
+        if self.is_used():
+            raise BillingEntryError.ALREADY_USED.to_validation_error()
 
     def is_used(self) -> bool:
         """Whether a document was issued from this entry: from then on it is frozen."""
@@ -182,12 +205,17 @@ class BillingEntry(BaseModel):
         text = f"{text} ({label})" if label and text else text or label
         return text[:LINE_DESCRIPTION_MAX_LENGTH]
 
-    def amounts_by_unit(self, units: Sequence[Unit], overrides: dict[uuid.UUID, Decimal] | None = None) -> dict[uuid.UUID, Decimal]:
+    def amounts_by_unit(
+        self,
+        units: Sequence[Unit],
+        overrides: dict[uuid.UUID, Decimal] | None = None,
+    ) -> dict[uuid.UUID, Decimal]:
         """What each of the selected `units` pays for this entry.
 
         Individual: the entry's amount (or the unit's own override). Collective: the total split equally. Fraction: the
-        total split in proportion to the unit's ideal fraction. A split is rounded half-up to the cent and the
-        leftover cents go to one unit (the first by name, or the largest fraction) so the parts add up to the total.
+        total split in proportion to the unit's fraction in the entry's criterion. A split is rounded half-up to the
+        cent and the leftover cents go to one unit (the first by name, or the largest fraction) so the parts add up
+        to the total.
         """
         if self.allocation == self.Allocation.INDIVIDUAL:
             given = overrides or {}
@@ -195,24 +223,66 @@ class BillingEntry(BaseModel):
         if self.allocation == self.Allocation.COLLECTIVE:
             weights = {unit.pk: Decimal(1) for unit in units}
         else:
-            weights = {unit.pk: self.ideal_fraction_of(unit) for unit in units}
+            weights = self.fractions_of(units)
         return self._split(units, weights)
 
-    def ideal_fraction_of(self, unit: Unit) -> Decimal:
-        assert self.ideal_fraction_number is not None
-        return getattr(unit, Unit.IDEAL_FRACTION_FIELDS[self.ideal_fraction_number - 1]) or Decimal(0)
+    def amounts_for_selected_units(self) -> dict[uuid.UUID, Decimal]:
+        """What each selected unit that is active pays (the units come with their own override, if any)."""
+        links = [link for link in self.entry_units.all() if link.unit.active]
+        return self.amounts_by_unit(
+            [link.unit for link in links],
+            {link.unit_id: link.amount for link in links if link.amount is not None},
+        )
 
-    def _split(self, units: Sequence[Unit], weights: dict[uuid.UUID, Decimal]) -> dict[uuid.UUID, Decimal]:
+    def fractions_of(self, units: Sequence[Unit]) -> dict[uuid.UUID, Decimal]:
+        """The units' fractions in the entry's criterion (0 for a unit that has none)."""
+        assert self.apportionment_criterion_id is not None
+        values_by_unit_id = dict(
+            UnitApportionmentFraction.objects.filter(
+                criterion_id=self.apportionment_criterion_id,
+                unit_id__in=[unit.pk for unit in units],
+            ).values_list("unit_id", "value")
+        )
+        return {unit.pk: values_by_unit_id.get(unit.pk, Decimal(0)) for unit in units}
+
+    def collect_unit_errors(
+        self, units_values: list[dict[str, Any]]
+    ) -> list[ValidationError | None]:
+        """Each selected unit validated as it would be saved with this entry, saved or only a candidate; None when valid.
+
+        The unit rules that need the entry (its condominium, its allocation) cannot run in the unit alone.
+        """
+        from .billing_entry_unit import BillingEntryUnit  # circular at import time
+
+        errors: list[ValidationError | None] = []
+        for unit_values in units_values:
+            link = BillingEntryUnit(**unit_values)
+            link.entry = self
+            try:
+                link.full_clean(exclude=["entry"])
+            except ValidationError as error:
+                errors.append(error)
+            else:
+                errors.append(None)
+        return errors
+
+    def _split(
+        self, units: Sequence[Unit], weights: dict[uuid.UUID, Decimal]
+    ) -> dict[uuid.UUID, Decimal]:
         total_weight = sum(weights.values(), Decimal(0))
         if not units or total_weight <= 0:
             return {unit.pk: Decimal(0) for unit in units}
         shares = {
-            unit_id: (self.amount * weight / total_weight).quantize(CENT, rounding=ROUND_HALF_UP)
+            unit_id: (self.amount * weight / total_weight).quantize(
+                CENT, rounding=ROUND_HALF_UP
+            )
             for unit_id, weight in weights.items()
         }
         leftover = self.amount - sum(shares.values(), Decimal(0))
         if leftover:
-            first = min(units, key=lambda unit: (-weights[unit.pk], unit.name, str(unit.pk)))
+            first = min(
+                units, key=lambda unit: (-weights[unit.pk], unit.name, str(unit.pk))
+            )
             shares[first.pk] += leftover
         return shares
 

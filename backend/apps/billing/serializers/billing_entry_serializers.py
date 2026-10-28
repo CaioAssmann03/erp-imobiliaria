@@ -5,7 +5,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.core.serializers import ModelRulesMixin
-from apps.core.serializers.model_rules import build_candidate, run_model_rules
+from apps.core.serializers.model_rules import build_candidate, to_drf_errors
 
 from ..models import BillingEntry, BillingEntryUnit
 from ..services.create_billing_entry import create_billing_entry
@@ -55,6 +55,9 @@ class BillingEntrySerializer(ModelRulesMixin, serializers.ModelSerializer[Billin
     condominium_name = serializers.CharField(source="condominium.name", read_only=True)
     event_code = serializers.IntegerField(source="event.code", read_only=True, default=None)
     event_name = serializers.CharField(source="event.name", read_only=True, default=None)
+    apportionment_criterion_name = serializers.CharField(
+        source="apportionment_criterion.name", read_only=True, default=None
+    )
     event_credits_company = serializers.BooleanField(source="event.credits_company", read_only=True, default=False)
     cost_center_code = serializers.IntegerField(source="cost_center.code", read_only=True, default=None)
     cost_center_name = serializers.CharField(source="cost_center.name", read_only=True, default=None)
@@ -75,7 +78,8 @@ class BillingEntrySerializer(ModelRulesMixin, serializers.ModelSerializer[Billin
             "event_credits_company",
             "description",
             "allocation",
-            "ideal_fraction_number",
+            "apportionment_criterion",
+            "apportionment_criterion_name",
             "recurrence",
             "installments_total",
             "start_month",
@@ -102,16 +106,14 @@ class BillingEntrySerializer(ModelRulesMixin, serializers.ModelSerializer[Billin
         reference_month = self.context.get("reference_month")
         if reference_month is None or not entry.covers(reference_month):
             return None
-        links = [link for link in entry.entry_units.all() if link.unit.active]
-        amounts = entry.amounts_by_unit(
-            [link.unit for link in links],
-            {link.unit_id: link.amount for link in links if link.amount is not None},
-        )
+        amounts = entry.amounts_for_selected_units()
         return {
             "line_description": entry.line_description(reference_month),
             "installment": entry.installment_label(reference_month),
             "unit_amounts": [
-                {"unit": link.unit_id, "unit_name": link.unit.name, "amount": amounts[link.unit_id]} for link in links
+                {"unit": link.unit_id, "unit_name": link.unit.name, "amount": amounts[link.unit_id]}
+                for link in entry.entry_units.all()
+                if link.unit.active
             ],
         }
 
@@ -141,16 +143,11 @@ class BillingEntrySerializer(ModelRulesMixin, serializers.ModelSerializer[Billin
         """The unit rules that need the entry (its condominium, its allocation) could not run in the nested serializer."""
         existing_entry = self.instance if isinstance(self.instance, BillingEntry) else None
         entry_candidate = build_candidate(BillingEntry, attrs, existing_entry)
-        unit_errors: list[Any] = []
-        for unit_values in attrs["entry_units"]:
-            link_candidate = build_candidate(BillingEntryUnit, unit_values)
-            link_candidate.entry = entry_candidate  # type: ignore[attr-defined]
-            try:
-                run_model_rules(link_candidate, excluded_fields=("entry",))
-            except serializers.ValidationError as error:
-                unit_errors.append(error.detail)
-            else:
-                unit_errors.append({})
+        assert isinstance(entry_candidate, BillingEntry)
+        unit_errors = [
+            {} if error is None else to_drf_errors(error)
+            for error in entry_candidate.collect_unit_errors(attrs["entry_units"])
+        ]
         if any(unit_errors):
             raise serializers.ValidationError({"units": unit_errors})
 

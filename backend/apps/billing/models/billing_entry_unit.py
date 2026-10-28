@@ -16,10 +16,18 @@ from apps.finance.validators import validate_positive_amount
 class BillingEntryUnit(BaseModel):
     """A unit selected by a billing entry, with its own amount only when the entry is individual."""
 
-    entry = models.ForeignKey(BillingEntry, on_delete=models.CASCADE, related_name="entry_units")
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name="billing_entry_units")
+    entry = models.ForeignKey(
+        BillingEntry, on_delete=models.CASCADE, related_name="entry_units"
+    )
+    unit = models.ForeignKey(
+        Unit, on_delete=models.PROTECT, related_name="billing_entry_units"
+    )
     amount = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True, validators=[validate_positive_amount]
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[validate_positive_amount],
     )
 
     company_lookup = "entry__condominium__company"

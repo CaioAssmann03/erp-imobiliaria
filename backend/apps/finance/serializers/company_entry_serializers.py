@@ -8,9 +8,15 @@ from ..models import CompanyEntry
 class CompanyEntrySerializer(serializers.ModelSerializer[CompanyEntry]):
     """A credit of the administradora (the registration fee), with where it came from."""
 
-    condominium_name = serializers.CharField(source="billing_document_item.document.unit.condominium.name", read_only=True)
-    unit_name = serializers.CharField(source="billing_document_item.document.unit.name", read_only=True)
-    reference_month = serializers.DateField(source="billing_document_item.document.reference_month", read_only=True)
+    condominium_name = serializers.CharField(
+        source="billing_document_item.document.unit.condominium.name", read_only=True
+    )
+    unit_name = serializers.CharField(
+        source="billing_document_item.document.unit.name", read_only=True
+    )
+    reference_month = serializers.DateField(
+        source="billing_document_item.document.reference_month", read_only=True
+    )
 
     @final
     class Meta:

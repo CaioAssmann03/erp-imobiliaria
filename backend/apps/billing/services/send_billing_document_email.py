@@ -3,8 +3,8 @@ from typing import Protocol
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
-from apps.billing.delivery_email import build_boleto_email
-from apps.billing.gateway.resend_client import EmailNotConfigured, EmailRejected, ResendClient
+from apps.billing.infrastructure.rendering.delivery_email import build_boleto_email
+from apps.billing.infrastructure.gateway.resend_client import EmailNotConfigured, EmailRejected, ResendClient
 from apps.billing.models import BillingDocument, BillingDocumentDelivery, BillingDocumentRegistration
 
 Status = BillingDocumentDelivery.Status

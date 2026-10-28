@@ -19,7 +19,7 @@ export function Rail() {
 
   return (
     <aside className="sticky top-0 hidden h-screen w-[4.5rem] shrink-0 flex-col items-center gap-1.5 bg-canvas py-4 lg:flex">
-      <Link href="/" aria-label="ERP Imobiliária" title="ERP Imobiliária" className="mb-4">
+      <Link href="/dashboard" aria-label="ERP Imobiliária" title="ERP Imobiliária" className="mb-4">
         <Brand compact />
       </Link>
 

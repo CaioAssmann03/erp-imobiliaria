@@ -22,7 +22,6 @@ Pré-requisitos: Docker Desktop (com `docker compose`) e Git.
 ```bash
 git clone https://github.com/CaioAssmann03/erp-imobiliaria.git
 cd erp-imobiliaria
-git checkout dev                 # a branch com tudo junto, para testar antes da main
 cp .env.example .env
 ```
 
@@ -35,6 +34,8 @@ docker run --rm python:3.12-slim sh -c "pip install -q cryptography >/dev/null 2
 # GATEWAY_CREDENTIALS_KEY
 docker run --rm python:3.12-slim sh -c "pip install -q cryptography >/dev/null 2>&1 && python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""
 ```
+
+No Windows, o script `scripts/local-up.ps1` faz tudo isso de uma vez (chaves, containers, migrate, usuário e dados de exemplo): `powershell -ExecutionPolicy Bypass -File .\scripts\local-up.ps1`.
 
 Depois:
 
@@ -59,7 +60,7 @@ HTTPS vem do Caddy que já existe na VPS (um bloco no `Caddyfile` aponta o domí
 nome provisório é `erp.177-7-63-175.sslip.io`. Os comprovantes de pagamento ficam num bucket Cloudflare R2
 (variáveis `AWS_*`; sem elas só a parte de comprovantes fica indisponível). O passo a passo, as variáveis e o
 que fazer quando algo falha estão em [`backend/docs/architecture/operations.md`](backend/docs/architecture/operations.md)
-(seção *Production on the VPS*). O compose de produção e o `deploy.sh` estão versionados em [`deploy/vps/`](deploy/vps/README.md).
+(seção *Production on the VPS*). O compose de produção e o `deploy.sh` ficam só na VPS: não são mais versionados neste repositório.
 
 ## Client da API no frontend
 

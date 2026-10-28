@@ -3,7 +3,9 @@ from typing import Any
 from django.db import transaction
 
 from apps.billing.models import BillingEntry
-from apps.billing.services.replace_billing_entry_units import replace_billing_entry_units
+from apps.billing.services.replace_billing_entry_units import (
+    replace_billing_entry_units,
+)
 
 
 @transaction.atomic

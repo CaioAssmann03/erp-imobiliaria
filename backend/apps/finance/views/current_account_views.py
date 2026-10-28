@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from apps.core.scoping import CompanyScopedViewSetMixin
+from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin
 
 from ..models import CurrentAccount
 from ..serializers import CurrentAccountBalancesSerializer, CurrentAccountSerializer

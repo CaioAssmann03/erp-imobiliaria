@@ -10,6 +10,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.condominiums.models import Condominium, Unit
+from apps.condominiums.tests.base import add_fraction, criterion_at
 from apps.core.models import Company
 from apps.finance.models import CostCenter, EntryTemplate
 from apps.finance.tests.base import body, errors, results
@@ -27,10 +28,11 @@ END = "billing-entry-end"
 
 
 def make_units(condominium: Condominium, names: tuple[str, ...] = ("101", "102", "103")) -> list[Unit]:
-    return [
-        Unit.objects.create(condominium=condominium, name=name, ideal_fraction=Decimal(fraction))
-        for name, fraction in zip(names, ("0.2", "0.3", "0.5"), strict=True)
-    ]
+    """Units with the fractions 0.2, 0.3 and 0.5 in the main criterion."""
+    units = [Unit.objects.create(condominium=condominium, name=name) for name in names]
+    for unit, fraction in zip(units, ("0.2", "0.3", "0.5"), strict=True):
+        _ = add_fraction(unit, fraction)
+    return units
 
 
 def error_codes(response: object) -> list[str | None]:
@@ -119,12 +121,14 @@ def test_a_fraction_entry_needs_units_with_that_fraction(
 
     response = api_client.post(
         reverse(ENTRIES),
-        entry_payload(condominium, cost_center, [bare], allocation="fraction", ideal_fraction_number=1),
+        entry_payload(
+            condominium, cost_center, [bare], allocation="fraction", apportionment_criterion=str(criterion_at(condominium).pk)
+        ),
         format="json",
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "billing_entry.unit.without_ideal_fraction" in error_codes(response)
+    assert "billing_entry.unit.without_fraction" in error_codes(response)
 
 
 # ----- R6: preview, R7: the month view -----
@@ -137,7 +141,9 @@ def test_preview_answers_the_per_unit_values_without_saving(
 
     response = api_client.post(
         reverse(PREVIEW) + "?reference_month=2026-10-01",
-        entry_payload(condominium, cost_center, units, allocation="fraction", ideal_fraction_number=1),
+        entry_payload(
+            condominium, cost_center, units, allocation="fraction", apportionment_criterion=str(criterion_at(condominium).pk)
+        ),
         format="json",
     )
 

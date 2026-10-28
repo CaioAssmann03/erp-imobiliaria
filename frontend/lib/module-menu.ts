@@ -42,7 +42,7 @@ export interface AppModule {
 }
 
 export const APP_MODULES: readonly AppModule[] = [
-  { key: "home", label: "Painel", icon: "dashboard", prefix: "/", href: "/", groups: [] },
+  { key: "home", label: "Painel", icon: "dashboard", prefix: "/dashboard", href: "/dashboard", groups: [] },
   {
     key: "condominiums",
     label: "Condomínios",
@@ -112,8 +112,7 @@ export const APP_MODULES: readonly AppModule[] = [
 /** Módulo da rota aberta (ou `null` na tela de login e em rotas desconhecidas). */
 export function activeModule(pathname: string | null): ModuleKey | null {
   if (!pathname) return null;
-  if (pathname === "/") return "home";
-  const found = APP_MODULES.find((appModule) => appModule.key !== "home" && pathname.startsWith(appModule.prefix));
+  const found = APP_MODULES.find((appModule) => pathname.startsWith(appModule.prefix));
   return found?.key ?? null;
 }
 

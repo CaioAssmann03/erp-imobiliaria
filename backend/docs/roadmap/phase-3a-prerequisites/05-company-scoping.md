@@ -22,7 +22,7 @@ Every logged-in user sees only the data of their company, before any money model
 Moved to the spec.
 
 ## Result
-Done on 2026-10-05 (spec 004 `done`). `apps/core/scoping.py` holds the single decision (`scope_to_company`, superuser bypass) and its three adapters; every model declares `company_lookup`; `User.company`, `Person.company` and the denormalized `company` on the person documents are required, with CPF/CNPJ/RG unique per company; the same-company rules are model `clean()`s; the viewsets, relation fields, admins, dashboard, search and `/api/companies/` follow the scope.
+Done on 2026-10-05 (spec 004 `done`). `apps/core/infrastructure/scoping.py` holds the single decision (`scope_to_company`, superuser bypass) and its three adapters; every model declares `company_lookup`; `User.company`, `Person.company` and the denormalized `company` on the person documents are required, with CPF/CNPJ/RG unique per company; the same-company rules are model `clean()`s; the viewsets, relation fields, admins, dashboard, search and `/api/companies/` follow the scope.
 Migrations: `accounts.0002/0003` and `persons.0002/0003` (nullable + backfill, then required + constraints); verified on a scratch database with existing users, people and documents (all got the only company).
 Checked: `pytest apps -q` 280 passed, `mypy apps config` clean, frontend `tsc`, `eslint` and `build` clean with the regenerated client; the condominium form no longer shows or sends the company.
 Deviations to confirm with the user (recorded in the spec's Decisions): `rg` is unique per company too; duplicate documents in one company are now a non-field 400 (it comes from a constraint); the seed and the test suite use the migration-seeded company (`core.testing.seeded_company`).

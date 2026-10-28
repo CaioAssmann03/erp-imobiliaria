@@ -1,4 +1,4 @@
-from apps.core.audit import register_audited
+from apps.core.infrastructure.audit import register_audited
 
 from .models import (
     AccountPayable,

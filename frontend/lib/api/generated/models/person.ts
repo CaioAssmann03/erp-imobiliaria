@@ -5,7 +5,6 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { ModulesEnum } from './modulesEnum';
 import type { PeopleIndividual } from './peopleIndividual';
 import type { PeopleLegal } from './peopleLegal';
 
@@ -39,7 +38,6 @@ export interface Person {
   cell_number?: string | null;
   email?: string;
   active?: boolean;
-  modules?: ModulesEnum[];
   people_individual?: PeopleIndividual;
   people_legal?: PeopleLegal;
   readonly created_at: string;

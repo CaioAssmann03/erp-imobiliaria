@@ -2,7 +2,7 @@ from typing import final, override
 
 from django.db import models
 
-from apps.core.fields.encrypted_text import EncryptedTextField
+from apps.core.infrastructure.fields import EncryptedTextField
 from apps.core.models import Company
 from apps.core.models.base import BaseModel
 
@@ -19,8 +19,12 @@ class GatewayAccount(BaseModel):
         ACTIVE = ("active", "Active")
         BLOCKED = ("blocked", "Blocked")
 
-    company = models.OneToOneField(Company, on_delete=models.PROTECT, related_name="gateway_account")
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    company = models.OneToOneField(
+        Company, on_delete=models.PROTECT, related_name="gateway_account"
+    )
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.PENDING
+    )
     api_key = EncryptedTextField()
     webhook_token = EncryptedTextField()
 

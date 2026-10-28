@@ -29,7 +29,7 @@ Defaults: `staleTime 60s`, `refetchOnWindowFocus false`, and `retry: shouldRetry
 ## Fetching on the client
 ERP pages do not prefetch or hydrate: the table or form calls the generated hook in the browser and shows a skeleton (`ListState`, `FormSkeleton`) while it loads. A page that reads the URL in a client component wraps it in `<Suspense fallback={<ListFallback/>}>`. A page that waits for nothing on the server paints its shell at once; the cache keeps `staleTime 60s`, so going back to a list is instant.
 
-This includes the home (`/`): `DashboardHome` reads `useDashboardRetrieve()`. Do not add `prefetchQuery` / `HydrationBoundary` to any page.
+This includes the home (`/dashboard`): `DashboardHome` reads `useDashboardRetrieve()`. Do not add `prefetchQuery` / `HydrationBoundary` to any page.
 
 ## Detail pages
 A `[id]` page only passes the `id`. The form (or a `…Detail` component for a read-only page) loads the record with `use…Retrieve(id)` and calls `throwIfNotFound(error)` (`lib/query/not-found.ts`) during render: a 404 (missing, or another company's) renders `app/(dashboard)/not-found.tsx` instead of an empty form, and any other error is retried per `shouldRetry` and then shown by the form or `app/(dashboard)/error.tsx`. A page header that needs the record (the `ID` of a person or condominium) uses a tiny client component with the same hook (`PersonCode`, `CondominiumCode`): same key, one request. `app/(dashboard)/loading.tsx` is the skeleton shown at once on a page change. A read-only view that used `router.refresh()` must invalidate the record key instead (`getBillingDocumentsRetrieveQueryKey(id)`).

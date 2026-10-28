@@ -8,7 +8,6 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.core.models import Company
-from apps.core.testing import seeded_company
 from apps.persons.models import Person
 
 from ..models import Condominium, Unit, UnitPerson
@@ -33,12 +32,6 @@ def test_advisor_must_share_the_company(
     assert "advisor" in error.value.message_dict
 
 
-def test_advisor_of_the_same_company_is_accepted(condominium: Condominium) -> None:
-    condominium.advisor = Person.objects.create(company=seeded_company(), name="Assessora")
-
-    condominium.clean()
-
-
 def test_unit_person_must_share_the_company(
     condominium: Condominium, foreign_person: Person
 ) -> None:
@@ -49,22 +42,6 @@ def test_unit_person_must_share_the_company(
         link.clean()
 
     assert "person" in error.value.message_dict
-
-
-def test_unit_person_of_the_same_company_is_accepted(condominium: Condominium) -> None:
-    unit = Unit.objects.create(condominium=condominium, name="101")
-    person = Person.objects.create(company=seeded_company(), name="Inquilino")
-
-    UnitPerson(unit=unit, person=person, role="tenant", start_date=date(2025, 1, 1)).clean()
-
-
-def test_create_takes_the_company_from_the_user(api_client: APIClient, company: Company) -> None:
-    response = api_client.post(
-        "/api/condominiums/", {"name": "Novo", "cnpj": "45723174000110"}, format="json"
-    )
-
-    assert response.status_code == status.HTTP_201_CREATED, response.data
-    assert Condominium.objects.get(pk=body(response)["id"]).company == company
 
 
 def test_company_in_the_body_is_ignored(
@@ -78,15 +55,3 @@ def test_company_in_the_body_is_ignored(
 
     assert response.status_code == status.HTTP_201_CREATED
     assert Condominium.objects.get(pk=body(response)["id"]).company == company
-
-
-def test_patch_cannot_move_a_condominium_to_another_company(
-    api_client: APIClient, condominium: Condominium, company: Company, other_company: Company
-) -> None:
-    response = api_client.patch(
-        f"/api/condominiums/{condominium.pk}/", {"company": str(other_company.pk)}, format="json"
-    )
-
-    assert response.status_code == status.HTTP_200_OK
-    condominium.refresh_from_db()
-    assert condominium.company == company

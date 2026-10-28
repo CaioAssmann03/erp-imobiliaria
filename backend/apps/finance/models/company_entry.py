@@ -18,12 +18,18 @@ class CompanyEntry(BaseModel):
     written when the boleto is paid and never changed afterwards.
     """
 
-    company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name="company_entries")
+    company = models.ForeignKey(
+        Company, on_delete=models.PROTECT, related_name="company_entries"
+    )
     billing_document_item = models.OneToOneField(
-        "billing.BillingDocumentItem", on_delete=models.PROTECT, related_name="company_entry"
+        "billing.BillingDocumentItem",
+        on_delete=models.PROTECT,
+        related_name="company_entry",
     )
     entry_date = models.DateField()
-    amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[validate_positive_amount])
+    amount = models.DecimalField(
+        max_digits=12, decimal_places=2, validators=[validate_positive_amount]
+    )
     description = models.CharField(max_length=255)
 
     company_lookup = "company"

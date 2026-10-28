@@ -5,7 +5,7 @@ skip-if: deploy and runbook → architecture/operations.md; the receipts bucket 
 ---
 # 040 — Database backup
 
-**Status:** in-progress · **Level:** full · **Roadmap:** none · **Apps:** deploy (no Django app) · **Frontend impact:** none
+**Status:** in-progress · **Level:** full · **Roadmap:** none · **Apps:** backup (no Django app) · **Frontend impact:** none
 
 ## Open questions
 None.
@@ -33,19 +33,19 @@ Losing the VPS, its disk or the database by mistake must cost at most one day of
 None (no table, no migration).
 
 ## A — Approach
-- A `backup` service in `deploy/vps/docker-compose.yml`, built from `postgres:16` (the same major version as the `db` container, so `pg_dump` always matches) plus Python 3 and `boto3`. It sleeps until the daily time, runs the job, and repeats; `restart: unless-stopped` brings it back after a reboot.
+- A `backup` service in the production compose (see `backup/README.md`), built from `postgres:16` (the same major version as the `db` container, so `pg_dump` always matches) plus Python 3 and `boto3`. It sleeps until the daily time, runs the job, and repeats; `restart: unless-stopped` brings it back after a reboot.
 - The job: `pg_dump -Fc` (custom format, already compressed) piped into `openssl enc`, to a temporary file, then uploaded with `boto3` to `s3://<bucket>/db/erp-YYYYMMDD-HHMMSS.dump.enc`; then the retention prune.
 - The decisions are pure functions (`select_backups_to_delete`, `is_stale`) with unit tests; the subprocess and S3 parts are thin and injectable.
 - Rejected: a Celery task in the backend (the backend image has no `pg_dump` of the right version and a backup that depends on the app being healthy is a weaker backup); a provider snapshot (the VPS plan is not known to offer one); the `db` container's volume copied by hand (not consistent while running).
 
 ## S — Structure
-- `deploy/vps/backup/Dockerfile`, `backup.py`, `tests/test_backup.py` (stdlib `unittest`, run in CI)
-- `deploy/vps/docker-compose.yml` (the `backup` service), `deploy/vps/README.md`, `.env.example` (`BACKUP_*`)
+- `backup/Dockerfile`, `backup.py`, `tests/test_backup.py` (stdlib `unittest`, run in CI), `backup/README.md` (the `backup` service to add to the production compose, which the repository no longer versions)
+- `.env.example` (`BACKUP_*`)
 - `backend/docs/architecture/operations.md` (backup and restore runbook), `known-gaps.md` (#19), `.github/workflows/ci.yml` (one step)
 
 ## O — Operations
 1. The user creates a **private R2 bucket** for the backups and an API token limited to it, and a long random passphrase kept in a password manager **and** in the VPS `.env`.
-2. Copy `docker-compose.yml` and `backup/` to the VPS, add the `BACKUP_*` variables to the `.env`, `./deploy.sh`.
+2. Copy `backup/` to the VPS, add the `backup` service to its compose file and the `BACKUP_*` variables to the `.env`, `./deploy.sh`.
 3. Run `docker compose exec backup python backup.py run-once` and then `python backup.py status`.
 4. Do **one restore drill** into a scratch database and check the row counts (see the runbook) before trusting it.
 
@@ -62,10 +62,10 @@ None (no table, no migration).
 ## Test plan
 | Criterion | Test |
 |---|---|
-| R1, R2, R6 | `deploy/vps/backup/tests/test_backup.py::DumpAndRestoreTest` (a real `pg_dump`, `openssl` and `pg_restore` round trip on a scratch PostgreSQL database; skipped when no server is reachable) |
-| R3 | `deploy/vps/backup/tests/test_backup.py::RetentionTest` |
-| R4 | `deploy/vps/backup/tests/test_backup.py::FailureTest` (nothing is deleted when the dump or the upload fails) |
-| R5 | `deploy/vps/backup/tests/test_backup.py::StatusTest` |
+| R1, R2, R6 | `backup/tests/test_backup.py::DumpAndRestoreTest` (a real `pg_dump`, `openssl` and `pg_restore` round trip on a scratch PostgreSQL database; skipped when no server is reachable) |
+| R3 | `backup/tests/test_backup.py::RetentionTest` |
+| R4 | `backup/tests/test_backup.py::FailureTest` (nothing is deleted when the dump or the upload fails) |
+| R5 | `backup/tests/test_backup.py::StatusTest` |
 | R7 | review: no secret in git; `.env.example` has placeholders |
 
 ## Definition of done

@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from apps.billing.errors import BillingDocumentRegistrationError, GatewayAccountError
-from apps.billing.gateway.asaas_client import GatewayError, GatewayUnavailable
+from apps.billing.infrastructure.gateway.asaas_client import GatewayError, GatewayUnavailable
 from apps.persons.models import PeopleIndividual
 
 from ..models import BillingDocument, BillingDocumentRegistration, GatewayAccount, GatewayCustomer
@@ -198,10 +198,11 @@ def test_uses_the_company_account_for_any_condominium(  # type: ignore[no-untype
     from decimal import Decimal
 
     from apps.billing.services.create_billing_document import NewBillingDocumentItem, create_billing_document
-    from apps.condominiums.models import BillingRules, Unit
+    from apps.billing.models import CondominiumBillingRules
+    from apps.condominiums.models import Unit
     from apps.finance.models import CostCenter, EntryTemplate
 
-    _ = BillingRules.objects.create(condominium=other_condominium)
+    _ = CondominiumBillingRules.objects.create(condominium=other_condominium)
     center = CostCenter.objects.create(condominium=other_condominium, name="Taxa Ordinária")
     template = EntryTemplate.objects.create(cost_center=center, name="REC Taxa Ordinária")
     other_document = create_billing_document(

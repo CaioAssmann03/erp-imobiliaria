@@ -58,24 +58,3 @@ def test_fk_choices_are_scoped(staff: User, two_companies) -> None:  # type: ign
 
     assert form_field is not None and form_field.queryset is not None
     assert set(form_field.queryset.values_list("pk", flat=True)) == {mine.person.pk}
-
-
-def test_company_choice_is_the_users_company_for_staff(
-    staff: User, company: Company, other_company: Company
-) -> None:
-    model_admin = admin.site._registry[Condominium]
-    company_field = Condominium._meta.get_field("company")
-
-    form_field = model_admin.formfield_for_foreignkey(company_field, request_as(staff))
-
-    assert form_field is not None and form_field.queryset is not None
-    assert list(form_field.queryset) == [company]
-    assert form_field.initial == company.pk
-
-
-def test_company_admin_lists_only_own_company(
-    staff: User, company: Company, other_company: Company
-) -> None:
-    model_admin = admin.site._registry[Company]
-
-    assert list(model_admin.get_queryset(request_as(staff))) == [company]

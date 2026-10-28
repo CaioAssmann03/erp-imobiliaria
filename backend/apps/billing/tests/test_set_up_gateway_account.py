@@ -8,7 +8,7 @@ from django.core.management import call_command
 from apps.core.models import Company
 
 from ..errors import GatewayAccountError
-from ..gateway.asaas_client import GatewayError
+from ..infrastructure.gateway.asaas_client import GatewayError
 from ..models import GatewayAccount
 from ..services.register_gateway_webhook import register_gateway_webhook
 from ..services.rotate_gateway_webhook_token import rotate_gateway_webhook_token

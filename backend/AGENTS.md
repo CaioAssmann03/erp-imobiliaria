@@ -40,8 +40,8 @@ This file is only the **index**; knowledge lives in [`docs/`](docs/README.md).
 |---|---|
 | **Where the last session stopped** (branches, PRs, specs in flight, what waits on the user) | [roadmap/current-state.md](docs/roadmap/current-state.md) |
 | **Roadmap: what is done, what is next** (8 phases, parts, status, backlog) | [roadmap/README.md](docs/roadmap/README.md) |
-| **How the administradora really works** (one gateway account, items and sub-contas on a boleto, the registration fee) | [architecture/business-model.md](docs/architecture/business-model.md) |
 | Product, stack, vocabulary, decisions | [architecture/overview.md](docs/architecture/overview.md) |
+| **How the administradora really works** (one gateway account, items and sub-contas on a boleto, the registration fee) | [architecture/business-model.md](docs/architecture/business-model.md) |
 | How an app is built · recurring recipes | [architecture/structure.md](docs/architecture/structure.md) · [conventions/practices.md](docs/conventions/practices.md) |
 | Naming (Clean Code) | [conventions/naming.md](docs/conventions/naming.md) |
 | API rules | [architecture/api.md](docs/architecture/api.md) |
@@ -50,6 +50,6 @@ This file is only the **index**; knowledge lives in [`docs/`](docs/README.md).
 | Security · personal data | [architecture/quality.md](docs/architecture/quality.md) |
 | Deploy · production · runbook | [architecture/operations.md](docs/architecture/operations.md) |
 | Business rules and formulas | [architecture/data.md](docs/architecture/data.md) |
-| Each app | [apps/](docs/apps/) — `accounts`, `core`, `persons`, `condominiums`, `finance`, `billing` (apps with no code yet get their doc when they start) |
+| Each app | [apps/](docs/apps/) — `accounts`, `core`, `persons`, `condominiums`, `finance`, `billing`, `seed` (apps with no code yet get their doc when they start) |
 | New feature process | [features/README.md](docs/features/README.md) |
 | Known gaps | [known-gaps.md](docs/known-gaps.md) |

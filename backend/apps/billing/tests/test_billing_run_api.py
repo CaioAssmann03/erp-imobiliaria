@@ -10,7 +10,8 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from apps.condominiums.models import BillingRules, Condominium
+from apps.condominiums.models import Condominium
+from apps.billing.models import CondominiumBillingRules
 from apps.finance.tests.base import body, error_codes, results
 
 from .. import tasks
@@ -23,7 +24,7 @@ DETAIL = "billing-run-detail"
 
 
 @pytest.fixture
-def issuable(billing_rules: BillingRules, make_unit, link, make_plan_item) -> None:  # type: ignore[no-untyped-def]
+def issuable(billing_rules: CondominiumBillingRules, make_unit, link, make_plan_item) -> None:  # type: ignore[no-untyped-def]
     link(make_unit("101"), "Maria")
     _ = make_plan_item()
 
@@ -91,8 +92,8 @@ def test_the_daily_task_enqueues_only_the_condominiums_of_the_day(
 ) -> None:
     today = timezone.localdate()
     other_day = 1 if today.day != 1 else 2
-    _ = BillingRules.objects.create(condominium=condominium, issuance_day=today.day)
-    _ = BillingRules.objects.create(condominium=other_condominium, issuance_day=other_day)
+    _ = CondominiumBillingRules.objects.create(condominium=condominium, issuance_day=today.day)
+    _ = CondominiumBillingRules.objects.create(condominium=other_condominium, issuance_day=other_day)
 
     with mock.patch.object(tasks.issue_condominium_billing_task, "delay") as delay:
         enqueued = tasks.issue_due_billing()
@@ -102,7 +103,7 @@ def test_the_daily_task_enqueues_only_the_condominiums_of_the_day(
 
 
 def test_the_daily_task_skips_inactive_condominiums(condominium: Condominium) -> None:
-    _ = BillingRules.objects.create(condominium=condominium, issuance_day=timezone.localdate().day)
+    _ = CondominiumBillingRules.objects.create(condominium=condominium, issuance_day=timezone.localdate().day)
     _ = Condominium.objects.filter(pk=condominium.pk).update(active=False)
 
     with mock.patch.object(tasks.issue_condominium_billing_task, "delay") as delay:
@@ -125,7 +126,7 @@ def test_the_beat_schedule_runs_the_daily_task_at_six(settings) -> None:  # type
 
 
 def test_a_runs_problems_carry_the_name_of_their_unit(  # type: ignore[no-untyped-def]
-    api_client: APIClient, condominium: Condominium, billing_rules: BillingRules, make_unit, make_plan_item
+    api_client: APIClient, condominium: Condominium, billing_rules: CondominiumBillingRules, make_unit, make_plan_item
 ) -> None:
     without_owner = make_unit("101")
     _ = make_plan_item()
@@ -141,7 +142,7 @@ def test_a_runs_problems_carry_the_name_of_their_unit(  # type: ignore[no-untype
     assert listed == problems
 
 
-def test_a_whole_condominium_problem_has_no_unit_name(api_client: APIClient, condominium: Condominium, billing_rules: BillingRules) -> None:
+def test_a_whole_condominium_problem_has_no_unit_name(api_client: APIClient, condominium: Condominium, billing_rules: CondominiumBillingRules) -> None:
     created = api_client.post(reverse(LIST), {"condominium": str(condominium.pk), "reference_month": "2026-10-01"}, format="json")
 
     assert body(created)["problems"] == [{"unit": None, "unit_name": None, "code": "no_plan_in_force"}]

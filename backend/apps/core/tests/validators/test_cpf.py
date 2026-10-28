@@ -1,6 +1,6 @@
 from typing import final
 
-from apps.core.validators import validate_cpf
+from apps.core.infrastructure.validators import validate_cpf
 from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase
 

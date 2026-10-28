@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from apps.billing.errors import BillingEntryError
+from apps.condominiums.models import UnitApportionmentFraction
 from apps.core.models.rules import ModelRules, rule
 
 if TYPE_CHECKING:
@@ -10,8 +11,8 @@ if TYPE_CHECKING:
 
 
 class BillingEntryUnitRules(ModelRules["BillingEntryUnit"]):
-    """A unit validated before its entry is saved skips these rules; the entry serializer runs them again with the
-    entry candidate attached."""
+    """A unit validated before its entry is saved skips these rules; `BillingEntry.collect_unit_errors` runs them
+    again with the entry attached."""
 
     @rule("unit", BillingEntryError.UNIT_OTHER_CONDOMINIUM)
     def unit_belongs_to_another_condominium(self) -> bool:
@@ -27,15 +28,22 @@ class BillingEntryUnitRules(ModelRules["BillingEntryUnit"]):
             return False
         return entry.allocation != entry.Allocation.INDIVIDUAL
 
-    @rule("unit", BillingEntryError.UNIT_WITHOUT_IDEAL_FRACTION)
-    def unit_has_no_value_for_the_entry_fraction(self) -> bool:
+    @rule("unit", BillingEntryError.UNIT_WITHOUT_FRACTION)
+    def unit_has_no_fraction_in_the_entry_criterion(self) -> bool:
         link, entry = self.instance, self._entry()
-        if link.unit_id is None or entry is None or entry.allocation != entry.Allocation.FRACTION:
+        if (
+            link.unit_id is None
+            or entry is None
+            or entry.allocation != entry.Allocation.FRACTION
+            or entry.apportionment_criterion_id is None
+        ):
             return False
-        return not entry.ideal_fraction_of(link.unit) > 0
+        return not UnitApportionmentFraction.objects.filter(
+            unit_id=link.unit_id, criterion_id=entry.apportionment_criterion_id
+        ).exists()
 
     def _entry(self) -> "BillingEntry | None":
-        """The entry, saved or not yet (a candidate attached by the entry serializer); None when unknown."""
+        """The entry, saved or not yet (a candidate attached by `BillingEntry.collect_unit_errors`); None when unknown."""
         link = self.instance
         if link.entry_id is None and not link._meta.get_field("entry").is_cached(link):
             return None

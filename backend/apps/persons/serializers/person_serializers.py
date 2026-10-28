@@ -2,7 +2,7 @@ from typing import Any, final, override
 
 from rest_framework import serializers
 
-from apps.core.scoping import request_company, request_company_or_none
+from apps.core.infrastructure.scoping import request_company, request_company_or_none
 from apps.core.serializers import ModelRulesMixin, build_candidate, run_model_rules
 
 from ..models import PeopleIndividual, PeopleLegal, Person
@@ -30,7 +30,6 @@ class PersonSerializer(ModelRulesMixin, serializers.ModelSerializer[Person]):
             "cell_number",
             "email",
             "active",
-            "modules",
             "people_individual",
             "people_legal",
             "created_at",

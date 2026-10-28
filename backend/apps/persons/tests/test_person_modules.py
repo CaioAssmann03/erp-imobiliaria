@@ -1,138 +1,223 @@
-"""People by module (spec 019, R7, R8, R10): condominium people and rental people stay apart."""
+"""People by module (spec 046): one membership table per module, owned by the module's app."""
 
-from collections.abc import Callable
-from uuid import uuid4
+import re
+from pathlib import Path
 
 import pytest
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError, connection, transaction
+from django.db import IntegrityError, transaction
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.test import APIClient
 
 from apps.core.testing import seeded_company
 
-from ..models import Person
-from .base import body, error_codes, errors, results
+from ..models import Person, PersonModuleMembership
+from ..modules import register_person_module, registered_modules, unregister_person_module
+from ..services.release_person_to_module import release_person_to_module
+from .base import body, error_codes, results
 
 pytestmark = pytest.mark.django_db
 
+PERSONS_APP = Path(__file__).resolve().parents[1]
+MODULE_APPS = ("condominiums", "rentals", "sales")
 
-def make_person(name: str = "Maria", **fields: object) -> Person:
-    return Person.objects.create(company=seeded_company(), name=name, **fields)
+
+def make_person(name: str = "Maria", *modules: str) -> Person:
+    person = Person.objects.create(company=seeded_company(), name=name)
+    for module in modules:
+        release_person_to_module(person, module)
+    return person
 
 
 def listed_names(response: Response) -> list[str]:
     return sorted(person["name"] for person in results(response))
 
 
-def test_default_modules() -> None:
-    assert make_person().modules == ["condominiums"]
+def membership_url(person: Person, module: str) -> str:
+    return reverse("person-module-membership", args=[person.pk, module])
 
 
-def test_the_database_defaults_modules_for_writers_that_do_not_know_the_field() -> None:
-    """An old container during a deploy, or plain SQL, inserts a person without `modules`."""
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "INSERT INTO persons_person (id, created_at, updated_at, name, email, active, company_id)"
-            " VALUES (%s, now(), now(), 'SQL', '', true, %s) RETURNING modules",
-            [uuid4(), seeded_company().pk],
-        )
-        row = cursor.fetchone()
-
-    assert row == (["condominiums"],)
+def test_the_registered_modules_come_from_the_apps() -> None:
+    assert registered_modules() == ["condominiums", "rentals"]
 
 
-def test_default_modules_through_the_api(api_client: APIClient, list_url: str) -> None:
+def test_persons_app_imports_no_module_app() -> None:
+    """R2: adding a module never touches `persons`; the module's app registers itself."""
+    pattern = re.compile(rf"\b(?:from|import)\s+apps\.({'|'.join(MODULE_APPS)})\b")
+    offenders = [
+        f"{source.relative_to(PERSONS_APP)}: {match.group(0)}"
+        for source in PERSONS_APP.rglob("*.py")
+        if "migrations" not in source.parts and "tests" not in source.parts
+        for match in pattern.finditer(source.read_text())
+    ]
+
+    assert offenders == []
+
+
+def test_a_person_is_born_in_no_module() -> None:
+    person = make_person()
+
+    assert not person.module_memberships.filter(module="condominiums").exists()
+    assert not person.module_memberships.filter(module="rentals").exists()
+
+
+def test_the_payload_has_no_modules_field(api_client: APIClient, list_url: str) -> None:
     created = api_client.post(list_url, {"name": "Maria"}, format="json")
 
     assert created.status_code == status.HTTP_201_CREATED
-    assert body(created)["modules"] == ["condominiums"]
+    assert "modules" not in body(created)
 
 
-def test_empty_modules_fail_the_rule() -> None:
-    person = Person(company=seeded_company(), name="Maria", modules=[])
-
-    with pytest.raises(ValidationError) as exc:
-        person.full_clean()
-
-    assert [error.code for error in exc.value.error_dict["modules"]] == ["person.modules.empty"]
-
-
-@pytest.mark.parametrize("modules", [[], ["foo"], ["condominiums", "foo"]])
-def test_database_refuses_empty_and_unknown_modules(modules: list[str]) -> None:
-    with pytest.raises(IntegrityError), transaction.atomic():
-        _ = make_person("Maria", modules=modules)
-
-
-def test_api_writes_and_reads_modules(
-    api_client: APIClient, list_url: str, detail_url: Callable[[Person], str]
-) -> None:
-    created = api_client.post(list_url, {"name": "Maria", "modules": ["rentals"]}, format="json")
+def test_a_person_may_have_no_module(api_client: APIClient, list_url: str) -> None:
+    created = api_client.post(list_url, {"name": "Maria"}, format="json")
 
     assert created.status_code == status.HTTP_201_CREATED
-    person = Person.objects.get(pk=body(created)["id"])
-    assert person.modules == ["rentals"]
-
-    patched = api_client.patch(
-        detail_url(person), {"modules": ["condominiums", "rentals"]}, format="json"
-    )
-
-    assert body(patched)["modules"] == ["condominiums", "rentals"]
-    person.refresh_from_db()
-    assert person.modules == ["condominiums", "rentals"]
+    assert listed_names(api_client.get(list_url)) == ["Maria"]
+    assert listed_names(api_client.get(list_url, {"person_module": "condominiums"})) == []
+    assert listed_names(api_client.get(list_url, {"person_module": "rentals"})) == []
 
 
-def test_api_refuses_empty_and_unknown_modules(api_client: APIClient, list_url: str) -> None:
-    empty = api_client.post(list_url, {"name": "Maria", "modules": []}, format="json")
-    unknown = api_client.post(list_url, {"name": "Maria", "modules": ["foo"]}, format="json")
+def test_creating_with_a_module_releases_the_person(api_client: APIClient, list_url: str) -> None:
+    created = api_client.post(f"{list_url}?person_module=rentals", {"name": "Maria"}, format="json")
 
-    assert empty.status_code == status.HTTP_400_BAD_REQUEST
-    assert error_codes(empty, "modules") == ["person.modules.empty"]
-    assert unknown.status_code == status.HTTP_400_BAD_REQUEST
-    assert "invalid_choice" in [item["code"] for item in errors(unknown)]
+    assert created.status_code == status.HTTP_201_CREATED
+    assert PersonModuleMembership.objects.filter(person_id=body(created)["id"], module="rentals").exists()
+    assert not PersonModuleMembership.objects.filter(person_id=body(created)["id"], module="condominiums").exists()
 
 
-def test_a_patch_cannot_empty_the_modules(
-    api_client: APIClient, detail_url: Callable[[Person], str]
+def test_creating_with_an_unknown_module_creates_nothing(
+    api_client: APIClient, list_url: str
 ) -> None:
+    response = api_client.post(f"{list_url}?person_module=foo", {"name": "Maria"}, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert error_codes(response, "person_module") == ["invalid_choice"]
+    assert not Person.objects.filter(name="Maria").exists()
+
+
+def test_put_releases_and_delete_removes_a_module(api_client: APIClient) -> None:
     person = make_person("Maria")
 
-    response = api_client.patch(detail_url(person), {"modules": []}, format="json")
+    released = api_client.put(membership_url(person, "condominiums"))
+    again = api_client.put(membership_url(person, "condominiums"))
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert error_codes(response, "modules") == ["person.modules.empty"]
-    person.refresh_from_db()
-    assert person.modules == ["condominiums"]
+    assert released.status_code == status.HTTP_204_NO_CONTENT
+    assert again.status_code == status.HTTP_204_NO_CONTENT
+    assert person.module_memberships.filter(module="condominiums").count() == 1
 
+    removed = api_client.delete(membership_url(person, "condominiums"))
+    removed_again = api_client.delete(membership_url(person, "condominiums"))
 
-def test_module_filter_lists_only_that_module(api_client: APIClient, list_url: str) -> None:
-    _ = make_person("Cond", modules=["condominiums"])
-    _ = make_person("Loc", modules=["rentals"])
-    _ = make_person("Ambas", modules=["condominiums", "rentals"])
-
-    assert listed_names(api_client.get(list_url, {"module": "rentals"})) == ["Ambas", "Loc"]
-    assert listed_names(api_client.get(list_url, {"module": "condominiums"})) == ["Ambas", "Cond"]
-    assert listed_names(api_client.get(list_url)) == ["Ambas", "Cond", "Loc"]
+    assert removed.status_code == status.HTTP_204_NO_CONTENT
+    assert removed_again.status_code == status.HTTP_204_NO_CONTENT
+    assert not person.module_memberships.filter(module="condominiums").exists()
 
 
-def test_unknown_module_filter_is_a_400(api_client: APIClient, list_url: str) -> None:
-    response = api_client.get(list_url, {"module": "foo"})
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-def test_releasing_to_rentals_keeps_the_code(
-    api_client: APIClient, detail_url: Callable[[Person], str]
-) -> None:
+def test_a_person_can_be_in_both_modules_with_one_code(api_client: APIClient) -> None:
+    """R8: one person, one `code`, two membership rows."""
     person = make_person("Maria")
     code_before = person.code
 
-    response = api_client.patch(
-        detail_url(person), {"modules": ["condominiums", "rentals"]}, format="json"
-    )
+    _ = api_client.put(membership_url(person, "condominiums"))
+    _ = api_client.put(membership_url(person, "rentals"))
 
-    assert response.status_code == status.HTTP_200_OK
-    assert body(response)["code"] == code_before
     person.refresh_from_db()
     assert person.code == code_before
+    assert person.module_memberships.filter(module="condominiums").exists()
+    assert person.module_memberships.filter(module="rentals").exists()
+
+
+def test_an_unknown_module_in_the_path_is_a_400(api_client: APIClient) -> None:
+    person = make_person("Maria")
+
+    response = api_client.put(membership_url(person, "foo"))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert error_codes(response, "module") == ["invalid_choice"]
+
+
+def test_a_person_of_another_company_is_not_found(
+    api_client: APIClient, other_company_person: Person
+) -> None:
+    response = api_client.put(membership_url(other_company_person, "condominiums"))
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.fixture
+def other_company_person(other_company: object) -> Person:
+    return Person.objects.create(company=other_company, name="Alheia")  # type: ignore[misc]
+
+
+def test_a_membership_is_unique_per_person_and_module() -> None:
+    person = make_person("Maria", "condominiums")
+
+    with pytest.raises(IntegrityError), transaction.atomic():
+        _ = PersonModuleMembership.objects.create(person=person, module="condominiums")
+
+
+def test_deleting_a_person_deletes_the_memberships() -> None:
+    person = make_person("Maria", "condominiums", "rentals")
+
+    _ = person.delete()
+
+    assert PersonModuleMembership.objects.count() == 0
+
+
+def test_module_filter_lists_only_that_module(api_client: APIClient, list_url: str) -> None:
+    _ = make_person("Cond", "condominiums")
+    _ = make_person("Loc", "rentals")
+    _ = make_person("Ambas", "condominiums", "rentals")
+    _ = make_person("Nenhuma")
+
+    assert listed_names(api_client.get(list_url, {"person_module": "rentals"})) == ["Ambas", "Loc"]
+    assert listed_names(api_client.get(list_url, {"person_module": "condominiums"})) == ["Ambas", "Cond"]
+    assert listed_names(api_client.get(list_url)) == ["Ambas", "Cond", "Loc", "Nenhuma"]
+
+
+def test_unknown_module_filter_is_a_400(api_client: APIClient, list_url: str) -> None:
+    response = api_client.get(list_url, {"person_module": "foo"})
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_the_module_filter_does_not_query_per_person(api_client, list_url, django_assert_max_num_queries) -> None:  # type: ignore[no-untyped-def]
+    for position in range(5):
+        _ = make_person(f"Pessoa {position}", "condominiums", "rentals")
+
+    with django_assert_max_num_queries(8):
+        response = api_client.get(list_url, {"person_module": "condominiums"})
+
+    assert len(results(response)) == 5
+
+
+def test_an_unregistered_module_cannot_be_written() -> None:
+    person = make_person("Maria")
+
+    with pytest.raises(ValidationError) as error:
+        release_person_to_module(person, "foo")
+
+    assert error.value.error_dict["module"][0].code == "person_module_membership.module.unknown"
+    assert not person.module_memberships.exists()
+
+
+def test_a_module_needs_only_its_key() -> None:
+    register_person_module("sales")
+    try:
+        person = make_person("Maria", "sales")
+
+        assert registered_modules() == ["condominiums", "rentals", "sales"]
+        assert list(Person.objects.in_module("sales")) == [person]
+    finally:
+        unregister_person_module("sales")
+
+
+def test_a_stored_key_that_is_no_longer_registered_is_ignored_by_the_filter(api_client: APIClient, list_url: str) -> None:
+    person = make_person("Maria", "condominiums")
+    _ = PersonModuleMembership.objects.create(person=person, module="gone")  # written when the module still existed
+
+    listed = listed_names(api_client.get(list_url, {"person_module": "condominiums"}))
+
+    assert listed == ["Maria"]

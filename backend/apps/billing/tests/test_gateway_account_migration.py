@@ -6,8 +6,8 @@ import pytest
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 
-BEFORE = [("billing", "0010_billing_document_delivery")]
-AFTER = [("billing", "0012_gateway_account_company_required")]
+BEFORE = [("billing", "0012_condominium_billing_rules_in_billing")]
+AFTER = [("billing", "0014_gateway_account_company_required")]
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

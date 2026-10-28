@@ -14,6 +14,7 @@ from apps.billing.models import (
     BillingPlan,
     BillingPlanItem,
     BillingRun,
+    CondominiumBillingRules,
     GatewayAccount,
 )
 from apps.billing.services.create_billing_document import (
@@ -21,7 +22,7 @@ from apps.billing.services.create_billing_document import (
     NewBillingDocumentItem,
     create_billing_document,
 )
-from apps.condominiums.models import BillingRules, Condominium, Unit
+from apps.condominiums.models import Condominium, Unit
 from config.celery import app as celery_app
 
 ProblemCode = BillingRun.ProblemCode
@@ -46,7 +47,7 @@ def issue_condominium_billing(condominium: Condominium, reference_month: date) -
 
 def _issue_units(run: BillingRun) -> None:
     condominium, reference_month = run.condominium, run.reference_month
-    billing_rules = BillingRules.objects.filter(condominium=condominium).first()
+    billing_rules = CondominiumBillingRules.objects.filter(condominium=condominium).first()
     if billing_rules is None:
         return _fail_condominium(run, ProblemCode.NO_BILLING_RULES)
     items = _items_in_force(condominium, reference_month)
@@ -56,7 +57,7 @@ def _issue_units(run: BillingRun) -> None:
     units = list(
         condominium.units.filter(active=True).select_related("block").prefetch_related("unit_people__person")
     )
-    apportionment_totals = Unit.objects.filter(condominium=condominium).apportionment_totals()
+    apportionment_totals = {criterion.pk: criterion.total for criterion in condominium.apportionment_criteria.with_total()}
     if any(item.uses_inconsistent_apportionment(apportionment_totals) for item in items):
         return _fail_condominium(run, ProblemCode.INCONSISTENT_APPORTIONMENT)
 
@@ -67,7 +68,7 @@ def _issue_units(run: BillingRun) -> None:
         _record_problem(run, None, ProblemCode.GATEWAY_ACCOUNT_MISSING)
 
     amounts_by_item = [item.amounts_by_unit(units) for item in items]
-    amounts_by_entry = [_entry_amounts(entry, units) for entry in entries]
+    amounts_by_entry = [entry.amounts_for_selected_units() for entry in entries]
     already_issued_unit_ids = set(
         BillingDocument.objects.filter(unit__condominium=condominium, reference_month=reference_month)
         .exclude(status=BillingDocument.Status.CANCELLED)
@@ -87,10 +88,15 @@ def _issue_units(run: BillingRun) -> None:
         ]
         lines += [
             NewBillingDocumentItem(
-                entry.line_description(reference_month), entry.cost_center, entry.entry_template, amounts[unit.pk], entry
+                entry.line_description(reference_month),
+                entry.cost_center,
+                entry.entry_template,
+                amounts[unit.pk],
+                entry,
             )
             for entry, amounts in zip(entries, amounts_by_entry, strict=True)
-            if amounts.get(unit.pk, Decimal(0)) > Decimal(0) and (entry.entry_template is not None or entry.credits_company)
+            if (entry.entry_template is not None or entry.credits_company)
+            and amounts.get(unit.pk, Decimal(0)) > Decimal(0)
         ]
         skip_code = _skip_code(unit, billing_rules, has_lines=bool(lines))
         payer = unit.billing_payer(today) if skip_code is None else None
@@ -139,15 +145,7 @@ def _entries_in_force(condominium: Condominium, reference_month: date) -> list[B
     )
 
 
-def _entry_amounts(entry: BillingEntry, billable_units: list[Unit]) -> dict[uuid.UUID, Decimal]:
-    """What each active unit the entry selects pays; a split is shared only among those units."""
-    active_ids = {unit.pk for unit in billable_units}
-    links = [link for link in entry.entry_units.all() if link.unit_id in active_ids]
-    overrides = {link.unit_id: link.amount for link in links if link.amount is not None}
-    return entry.amounts_by_unit([link.unit for link in links], overrides)
-
-
-def _skip_code(unit: Unit, billing_rules: BillingRules, has_lines: bool) -> BillingRun.ProblemCode | None:
+def _skip_code(unit: Unit, billing_rules: CondominiumBillingRules, has_lines: bool) -> BillingRun.ProblemCode | None:
     if unit.is_billing_blocked:
         return ProblemCode.UNIT_BILLING_BLOCKED
     if billing_rules.exempts(unit):

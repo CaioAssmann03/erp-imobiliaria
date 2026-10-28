@@ -4,7 +4,8 @@ import { test } from "node:test";
 import { activeModule, APP_MODULES, isItemActive } from "../lib/module-menu.ts";
 
 test("the active module follows the URL", () => {
-  assert.equal(activeModule("/"), "home");
+  assert.equal(activeModule("/dashboard"), "home");
+  assert.equal(activeModule("/"), null);
   assert.equal(activeModule("/condominiums/abc"), "condominiums");
   assert.equal(activeModule("/finance/statement"), "finance");
   assert.equal(activeModule("/billing/entries"), "billing");

@@ -9,7 +9,6 @@ import { condominiumUrl } from "@/lib/condominium-registry";
 import type { Search } from "@/lib/api/generated/models";
 import { brl, formatDate, formatMonth } from "@/lib/format";
 import { documentStatusLabel } from "@/lib/billing-documents";
-import { CONDOMINIUMS_MODULE } from "@/lib/person-module";
 import { payableStatusLabel } from "@/lib/schemas/account-payable";
 import { isSearchable, searchStatic } from "@/lib/search-index";
 
@@ -95,7 +94,7 @@ export function useSearchResults(query: string) {
   const enabled = isSearchable(term);
 
   const { data, isFetching } = useSearchRetrieve(
-    { q: term, module: CONDOMINIUMS_MODULE },
+    { q: term },
     { query: { enabled, placeholderData: keepPreviousData, staleTime: 30_000 } }
   );
 
