@@ -11,7 +11,7 @@ export default async function EditBlockPage({ params }: { params: Promise<{ id: 
 
   return (
     <FormPage>
-      <PageHeader back={{ href: "/condominiums/blocks", label: "Blocos" }} title="Editar bloco" />
+      <PageHeader back={{ href: "/condominiums", label: "Condomínios" }} title="Editar bloco" />
       <BlockForm blockId={id} />
     </FormPage>
   );

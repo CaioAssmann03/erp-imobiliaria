@@ -43,7 +43,7 @@ Edit pages: the page awaits `params` and passes the `id`; the form loads the rec
 ## Rendering and routing
 
 - `page.tsx`/`layout.tsx` are server components, but a page does not fetch: `params` is a Promise (`await`), and `searchParams` is read on the client with `useSearchParams` (no page reads it on the server, so list routes stay static).
-- The root layout and `AppShell` read no cookie: the theme and the sidebar state are applied to `<html>` by an inline script before the first paint (norms/design-system.md), so the HTML is the same for every user and can be prerendered. `[id]` routes stay dynamic only because Next renders unknown params on demand.
+- The root layout and `AppShell` read no cookie: the theme is applied to `<html>` by an inline script before the first paint (norms/design-system.md), so the HTML is the same for every user and can be prerendered. `[id]` routes stay dynamic only because Next renders unknown params on demand.
 - `proxy.ts` (before every request): no token → `/login?next=`; token expiring (< 30 s) → refresh and forward new
   cookies to the server render and the browser; refresh failure → `/login`.
 - Every page exports `metadata` (Portuguese title; root template `"%s · ERP Imobiliária"`).

@@ -64,25 +64,20 @@ export function CondominiumForm({
         onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))}
         className="space-y-4"
       >
-        <IdentificationSection />
-        <AddressSection mapsEmbedKey={mapsEmbedKey} />
-        <FeeSection />
-        <BillingSection condominiumId={condominiumId} />
-        <AdjustmentSection />
-        {isEdit && <ApportionmentCard condominiumId={condominiumId} />}
+        <div id="dados-gerais" className="scroll-mt-20 space-y-4">
+          <IdentificationSection />
+          <AddressSection mapsEmbedKey={mapsEmbedKey} />
+        </div>
+        <div id="taxa-e-cobranca" className="scroll-mt-20 space-y-4">
+          <FeeSection />
+          <BillingSection condominiumId={condominiumId} />
+          <AdjustmentSection />
+          {isEdit && <ApportionmentCard condominiumId={condominiumId} />}
+        </div>
         <FormActions isSubmitting={isSubmitting}>
           <Button type="button" variant="secondary" onClick={() => router.push("/condominiums")}>
             Cancelar
           </Button>
-          {isEdit && (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => router.push(`/condominiums/${condominiumId}/units`)}
-            >
-              Ver unidades
-            </Button>
-          )}
         </FormActions>
       </form>
     </FormProvider>

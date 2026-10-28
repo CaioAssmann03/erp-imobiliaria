@@ -11,7 +11,7 @@ app/
   login/                                     public (page.tsx + _components/)
   (dashboard)/                               authenticated (route group, not in the URL)
     layout.tsx, page.tsx                     AppShell, dashboard home (`_components/home/DashboardHome.tsx` fetches)
-    _components/shell/                       sidebar, global search, settings
+    _components/shell/                       rail + module menu, mobile menu, global search, settings
     _components/home/                        widgets, lists, focus modal
     condominiums/  persons/                  one folder per resource, each with _components/
 components/   ui/ (shadcn) · data-list/ · form/ · shared *.tsx
@@ -31,12 +31,12 @@ docs/         REASONS documentation
 |---|---|
 | `/` | `app/(dashboard)/page.tsx` |
 | `/login` | `app/login/page.tsx` |
-| `/condominiums`, `/new`, `/[id]` (`/condominiums?pending=<value>` and `/condominiums/units?pending=<value>` open the lists filtered by a dashboard pendency, linked from *Pendências*) | `app/(dashboard)/condominiums/...` |
-| `/condominiums/blocks`, `/new`, `/[id]` | `app/(dashboard)/condominiums/blocks/...` (block CRUD; `condominiums/layout.tsx` renders the sub-header `CondominiumsSubNav`: Condomínios · Blocos · Unidades) |
+| `/condominiums`, `/new`, `/[id]` | `app/(dashboard)/condominiums/...` (**registry**, spec 041: `layout.tsx` wraps these three routes in `CondominiumsFrame`, the list column `CondominiumsList` (search by code or name, `?pending=<value>` from the dashboard *Pendências* filters it) beside the page; `/condominiums` is an empty state; `/[id]` is one page: the form (`dados-gerais`, `taxa-e-cobranca`), then **Blocos e unidades** and **Sub-contas** (`BlocksTable` / `CostCentersTable` with `condominiumId`) and the right index `SectionIndex`; section ids and URLs in `lib/condominium-registry.ts`) |
+| `/condominiums/blocks`, `/new`, `/[id]` | `app/(dashboard)/condominiums/blocks/...` (the list **redirects** to the condominium's *Blocos e unidades* section, or to `/condominiums`; the create and edit forms stay and return to the section) |
 | `/condominiums/units`, `/new` | `app/(dashboard)/condominiums/units/...` (all units; `new` picks the condominium first via `NewUnitForm`; editing reuses `/condominiums/[id]/units/[unitId]`) |
 | `/condominiums/[id]/units`, `/new`, `/[unitId]` | `app/(dashboard)/condominiums/[id]/units/...` |
-| `/condominiums/[id]/blocks`, `/condominiums/[id]/units` | redirect to `/condominiums/blocks?condominium=<id>` / `/condominiums/units?condominium=<id>`: a condominium's lists are the global lists with the condominium filter applied (`?block=<id>` also pre-filters units) |
-| `/condominiums/cost-centers`, `/new`, `/[id]` | `app/(dashboard)/condominiums/cost-centers/...` ("Sub-contas": cost center CRUD; `code` (optional, the next free one when left out; 0000 is the Conta Normal), name and active; condominium chosen on create; `?condominium=<id>` pre-filters) |
+| `/condominiums/[id]/blocks`, `/condominiums/[id]/units`, `/condominiums/[id]/cost-centers/new` | the first redirects to the *Blocos e unidades* section; the second to `/condominiums/units?condominium=<id>` (`?block=<id>` also pre-filters); the third is the new sub-conta form with the condominium fixed |
+| `/condominiums/cost-centers`, `/new`, `/[id]` | `app/(dashboard)/condominiums/cost-centers/...` ("Sub-contas": the list **redirects** to the condominium's *Sub-contas* section; the forms stay and return there; cost center CRUD; `code` (optional, the next free one when left out; 0000 is the Conta Normal), name and active; condominium chosen on create; `?condominium=<id>` pre-filters) |
 | `/persons`, `/new`, `/[id]` | `app/(dashboard)/persons/...` |
 | `/finance` | redirects to `/finance/accounts-payable` (`finance/layout.tsx` renders the sub-header `FinanceSubNav`: Contas a pagar · Extrato · Lançamento manual) |
 | `/finance/accounts-payable`, `/new`, `/[id]` | `app/(dashboard)/finance/accounts-payable/...` (a paid or cancelled account opens read-only; settling is a dialog, `SettleAccountPayableDialog`, cancelling is a row action) |

@@ -11,7 +11,7 @@ export default async function EditCostCenterPage({ params }: { params: Promise<{
 
   return (
     <FormPage>
-      <PageHeader back={{ href: "/condominiums/cost-centers", label: "Sub-contas" }} title="Editar sub-conta" />
+      <PageHeader back={{ href: "/condominiums", label: "Condomínios" }} title="Editar sub-conta" />
       <CostCenterForm costCenterId={id} />
     </FormPage>
   );

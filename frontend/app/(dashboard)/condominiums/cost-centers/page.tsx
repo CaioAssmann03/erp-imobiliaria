@@ -1,24 +1,9 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
+import { redirect } from "next/navigation";
 
-import { CostCentersTable } from "../_components/CostCentersTable";
-import { ListFallback } from "@/components/data-list";
-import { LinkButton } from "@/components/LinkButton";
-import { PageHeader } from "@/components/PageHeader";
+import { condominiumUrl } from "@/lib/condominium-registry";
 
-export const metadata: Metadata = { title: "Sub-contas" };
-
-export default function CostCentersPage() {
-  return (
-    <div>
-      <PageHeader
-        title="Sub-contas"
-        description="Plano de contas de cada condomínio (conta normal, fundo de reserva, obras...), usado para classificar lançamentos."
-        actions={<LinkButton href="/condominiums/cost-centers/new">Nova sub-conta</LinkButton>}
-      />
-      <Suspense fallback={<ListFallback />}>
-        <CostCentersTable />
-      </Suspense>
-    </div>
-  );
+/** As sub-contas são uma seção da página do condomínio: um link antigo com `?condominium=` abre a seção; sem ele, a lista de condomínios. */
+export default async function CostCentersPage({ searchParams }: { searchParams: Promise<{ condominium?: string }> }) {
+  const { condominium } = await searchParams;
+  redirect(condominium ? condominiumUrl(condominium, "sub-contas") : "/condominiums");
 }

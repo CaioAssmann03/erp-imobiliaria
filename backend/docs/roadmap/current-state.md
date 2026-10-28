@@ -18,6 +18,9 @@ Read first: [`architecture/business-model.md`](../architecture/business-model.md
 
 `feat/billing-entries` is built on top of `feat/single-gateway-account`: merge them in that order (037 first). Both change `issue_condominium_billing`.
 
+## `dev` (the branch the user tests locally)
+All the feature branches above are merged into `dev`, with commits authored as the user (no Claude trailers). **Spec 041** (new app shell and condominium registry, layout 2) is built on `dev`: the narrow rail with the module menu card, the condominium page as one scrolling page with a section index, Blocos and Sub-contas moved inside it. It reads the existing appearance tokens, so mode, accent and font from *Configurações* keep working. Not in it yet (no backend data): síndico, dados bancários, documents, history and the KPI cards of the prototype. Waiting on the user: use on the real screens and the 2 decisions marked *agent, to be confirmed* in the spec.
+
 ## Specs
 | Spec | State | Waiting on |
 |---|---|---|

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 /** Client Component: o servidor revoga o refresh token e apaga os cookies; aqui limpa o cache do usuário. */
-export function LogoutButton({ compact = false }: { compact?: boolean }) {
+export function LogoutButton({ compact = false, rail = false }: { compact?: boolean; rail?: boolean }) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -20,14 +20,18 @@ export function LogoutButton({ compact = false }: { compact?: boolean }) {
     }
   };
 
-  if (compact) {
+  if (compact || rail) {
     return (
       <button
         type="button"
         title="Sair"
         aria-label="Sair"
         onClick={handleLogout}
-        className="flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink"
+        className={
+          rail
+            ? "flex size-11 items-center justify-center rounded-control text-ink-soft transition-colors hover:bg-surface hover:text-ink"
+            : "flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink"
+        }
       >
         <LogOut className="size-5" />
       </button>
@@ -39,11 +43,11 @@ export function LogoutButton({ compact = false }: { compact?: boolean }) {
       variant="ghost"
       title="Sair"
       aria-label="Sair"
-      className="h-9 w-full justify-start gap-3 rounded-control px-3 hover:bg-surface lg:sidebar-closed:justify-center lg:sidebar-closed:px-0"
+      className="h-10 w-full justify-start gap-3 rounded-control px-3 hover:bg-surface"
       onClick={handleLogout}
     >
       <LogOut className="size-[1.125rem] shrink-0" />
-      <span className="lg:sidebar-closed:hidden">Sair</span>
+      Sair
     </Button>
   );
 }

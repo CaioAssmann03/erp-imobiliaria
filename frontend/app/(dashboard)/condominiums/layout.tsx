@@ -1,10 +1,5 @@
-import { CondominiumsSubNav } from "./_components/CondominiumsSubNav";
+import { CondominiumsFrame } from "./_components/CondominiumsFrame";
 
-export default function CondominiumsListsLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div>
-      <CondominiumsSubNav />
-      {children}
-    </div>
-  );
+export default function CondominiumsLayout({ children }: { children: React.ReactNode }) {
+  return <CondominiumsFrame>{children}</CondominiumsFrame>;
 }

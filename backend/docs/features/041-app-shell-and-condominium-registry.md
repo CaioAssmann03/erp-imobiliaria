@@ -25,14 +25,14 @@ None.
 
 ## R — Requirements
 The administradora's staff open one condominium and need everything about it on one page, and move between modules without a wide sidebar.
-- [ ] R1 — The shell has a narrow rail with the brand, one icon per module (Painel, Condomínios, Financeiro, Cobrança, Pessoas), and *Configurações* and *Sair* at the bottom; the active module is highlighted
-- [ ] R2 — Clicking Condomínios, Financeiro or Cobrança opens the module menu (a card anchored to the icon, groups in two columns, Escape and outside click close it, keyboard navigable); Painel and Pessoas navigate directly
-- [ ] R3 — A menu item without a screen is disabled and says "Em breve"; the others are links
-- [ ] R4 — `/condominiums` and `/condominiums/[id]` show the list column (search by name or code, the active condominium highlighted, **Novo**); `/condominiums` without a selection says to pick one
-- [ ] R5 — `/condominiums/[id]` is one page with the sections of the decision above and a right index that follows the scroll and jumps to a section
-- [ ] R6 — Blocos e unidades and Sub-contas on that page list only that condominium, with the same create/edit/delete as the old screens; the old routes redirect with the condominium kept
-- [ ] R7 — Changing mode, accent or font in *Configurações* changes the new shell and the registry (no hard-coded color)
-- [ ] R8 — On a phone the rail becomes the top bar with the existing side menu (now listing the same modules and items); the list column is a screen of its own before the page
+- [x] R1 — The shell has a narrow rail with the brand, one icon per module (Painel, Condomínios, Financeiro, Cobrança, Pessoas), and *Configurações* and *Sair* at the bottom; the active module is highlighted
+- [x] R2 — Clicking Condomínios, Financeiro or Cobrança opens the module menu (a card anchored to the icon, groups in two columns, Escape and outside click close it, keyboard navigable); Painel and Pessoas navigate directly
+- [x] R3 — A menu item without a screen is disabled and says "Em breve"; the others are links
+- [x] R4 — `/condominiums` and `/condominiums/[id]` show the list column (search by name or code, the active condominium highlighted, **Novo**); `/condominiums` without a selection says to pick one
+- [x] R5 — `/condominiums/[id]` is one page with the sections of the decision above and a right index that follows the scroll and jumps to a section
+- [x] R6 — Blocos e unidades and Sub-contas on that page list only that condominium, with the same create/edit/delete as the old screens; the old routes redirect with the condominium kept
+- [x] R7 — Changing mode, accent or font in *Configurações* changes the new shell and the registry (no hard-coded color)
+- [x] R8 — On a phone the rail becomes the top bar with the existing side menu (now listing the same modules and items); the list column is a screen of its own before the page
 
 ## E — Entities
 N/A — no API change, no new model.
@@ -86,9 +86,9 @@ Tokens only, no hex; Portuguese text, English code; client-rendered pages (`fron
 | R4–R8 | none automated (rendering and interaction, checked by hand in the browser in each mode and accent, and on a phone-width screen): a gap written down |
 
 ## Definition of done
-- [ ] Every criterion R1… has a passing test in the Test plan, or a written gap
-- [ ] `pytest apps -q` green; `manage.py check` and `makemigrations --check --dry-run` clean — N/A, no backend change
-- [ ] `python backend/docs/tools/check_docs.py` passes
-- [ ] Frontend client regenerated and callers fixed (`pnpm generate:api`), or `N/A — no API change`
-- [ ] `docs/apps/<app>.md` updated — N/A, frontend only; frontend docs updated; `docs/known-gaps.md` row closed (if any)
-- [ ] Roadmap part and phase table updated — N/A (Roadmap: none); index in `features/README.md` updated
+- [x] Every criterion R1… has a passing test in the Test plan, or a written gap
+- [x] `pytest apps -q` green; `manage.py check` and `makemigrations --check --dry-run` clean — N/A, no backend change
+- [x] `python backend/docs/tools/check_docs.py` passes
+- [x] Frontend client regenerated and callers fixed (`pnpm generate:api`), or `N/A — no API change` — N/A, no API change
+- [x] `docs/apps/<app>.md` updated — N/A, frontend only; frontend docs updated; `docs/known-gaps.md` row closed (if any) — none
+- [x] Roadmap part and phase table updated — N/A (Roadmap: none); index in `features/README.md` updated

@@ -31,7 +31,7 @@ The browser never sees a token. The Next server holds them in `HttpOnly` cookies
 - **Errors in the API's own shape** (`{errors: [{field, code, message}]}`): `401` session ended, `403` blocked origin, `404`, `415`, `502` (`bad_gateway`, Django unreachable).
 
 ## Where a token may live
-Only in the `HttpOnly` cookies and in server memory for the length of one request. `localStorage`/`sessionStorage`, React state/query cache, URL, logs, toasts and error text: **never**. `lib/cookies.ts` is for preference cookies only (sidebar, appearance), never tokens.
+Only in the `HttpOnly` cookies and in server memory for the length of one request. `localStorage`/`sessionStorage`, React state/query cache, URL, logs, toasts and error text: **never**. `lib/cookies.ts` is for preference cookies only (appearance), never tokens.
 
 ## Known limits
 | Item | Risk / note |

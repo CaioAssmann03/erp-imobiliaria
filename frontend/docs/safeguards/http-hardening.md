@@ -21,7 +21,7 @@ frame-src https://www.google.com; frame-ancestors 'none'; base-uri 'self'; form-
 When receipts are enabled, add the bucket origin (`https://<account id>.r2.cloudflarestorage.com`) to `connect-src`: the browser `PUT`s the file straight to it. `connect-src 'self'` is enough for the API (the browser only calls its own origin, `/api/...`; Django is reached by the Next server); add `https://viacep.com.br` (CEP lookup runs in the browser). `frame-src https://www.google.com` is for the address map (spec 021, an iframe of the Maps Embed API). Fonts are
 self-hosted (`next/font`). Roll out with `Content-Security-Policy-Report-Only`, fix violations, then enforce.
 
-**Cookies:** tokens → `HttpOnly` + `Secure` (prod) + `SameSite=Lax` + `Path=/` + `Max-Age` = token life (implemented: safeguards/auth-and-tokens.md). Preference cookies (`ui_*`, sidebar) are non-sensitive and may stay JS-readable.
+**Cookies:** tokens → `HttpOnly` + `Secure` (prod) + `SameSite=Lax` + `Path=/` + `Max-Age` = token life (implemented: safeguards/auth-and-tokens.md). Preference cookies (`ui_*`) are non-sensitive and may stay JS-readable.
 
 **CORS:** backend's job (`CORS_ALLOWED_ORIGINS` = frontend URL). If API calls go through a Next proxy, the browser talks only to the frontend origin.
 **Other:** HTTPS everywhere in production (redirect at the edge); do not expose source maps publicly unless needed for error tracking.

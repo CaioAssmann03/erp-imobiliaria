@@ -12,6 +12,7 @@ import { FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useBlocksRetrieve, useCondominiumsList } from "@/lib/api/generated";
+import { condominiumUrl } from "@/lib/condominium-registry";
 import { throwIfNotFound } from "@/lib/query/not-found";
 import {
   BLOCK_DEFAULTS,
@@ -21,17 +22,18 @@ import {
   type BlockFormOutput,
 } from "@/lib/schemas/block";
 
-import { BLOCKS_URL, useBlockSubmit } from "./block-form/use-block-submit";
+import { useBlockSubmit } from "./block-form/use-block-submit";
 
 /** Cadastro e edição de bloco. O condomínio só é escolhido no cadastro. */
 export function BlockForm({
   blockId,
   condominiumId,
-  returnUrl = BLOCKS_URL,
+  returnUrl,
 }: {
   blockId?: string;
   /** Cadastro a partir de um condomínio: já vem escolhido e o campo some. */
   condominiumId?: string;
+  /** Para onde volta ao salvar ou cancelar; sem ele, à seção de blocos do condomínio. */
   returnUrl?: string;
 }) {
   const router = useRouter();
@@ -75,7 +77,7 @@ export function BlockForm({
           <TextField name="name" label="Bloco" required maxLength={60} placeholder="Ex.: Bloco A" autoComplete="off" />
         </FormSection>
         <FormActions isSubmitting={isSubmitting}>
-          <Button type="button" variant="secondary" onClick={() => router.push(returnUrl)}>
+          <Button type="button" variant="secondary" onClick={() => router.push(returnUrl ?? (block ? condominiumUrl(block.condominium, "blocos-e-unidades") : "/condominiums"))}>
             Cancelar
           </Button>
         </FormActions>

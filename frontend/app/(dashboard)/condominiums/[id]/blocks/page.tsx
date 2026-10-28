@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 
-/** A lista de blocos de um condomínio é a lista geral com o filtro de condomínio aplicado. */
+import { condominiumUrl } from "@/lib/condominium-registry";
+
+/** Os blocos de um condomínio são uma seção da página dele. */
 export default async function CondominiumBlocksPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  redirect(`/condominiums/blocks?condominium=${id}`);
+  redirect(condominiumUrl(id, "blocos-e-unidades"));
 }

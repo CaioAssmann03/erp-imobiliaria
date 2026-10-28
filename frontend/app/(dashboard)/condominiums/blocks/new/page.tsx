@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Novo bloco" };
 export default function NewBlockPage() {
   return (
     <FormPage>
-      <PageHeader back={{ href: "/condominiums/blocks", label: "Blocos" }} title="Novo bloco" />
+      <PageHeader back={{ href: "/condominiums", label: "Condomínios" }} title="Novo bloco" />
       <BlockForm />
     </FormPage>
   );

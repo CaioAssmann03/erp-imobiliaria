@@ -12,6 +12,7 @@ import {
   useCostCentersPartialUpdate,
 } from "@/lib/api/generated";
 import type { CostCenter } from "@/lib/api/generated/models";
+import { condominiumUrl } from "@/lib/condominium-registry";
 import { applyServerErrors } from "@/lib/form-errors";
 import {
   costCenterToPayload,
@@ -19,11 +20,11 @@ import {
   type CostCenterFormOutput,
 } from "@/lib/schemas/cost-center";
 
-export const COST_CENTERS_URL = "/condominiums/cost-centers";
-
 export function useCostCenterSubmit(
   costCenterId: string | undefined,
-  setError: UseFormSetError<CostCenterFormInput>
+  setError: UseFormSetError<CostCenterFormInput>,
+  /** Sem ele, volta à seção de sub-contas do condomínio da sub-conta salva. */
+  returnUrl?: string
 ) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -31,11 +32,12 @@ export function useCostCenterSubmit(
   const updateMutation = useCostCentersPartialUpdate();
   const isEdit = costCenterId !== undefined;
 
-  const done = (message: string, id: string) => {
+  const done = (message: string, saved: CostCenter) => {
+    const id = saved.id;
     queryClient.invalidateQueries({ queryKey: getCostCentersListQueryKey() });
     queryClient.invalidateQueries({ queryKey: getCostCentersRetrieveQueryKey(id) });
     toast.success(message);
-    router.push(COST_CENTERS_URL);
+    router.push(returnUrl ?? condominiumUrl(saved.condominium, "sub-contas"));
   };
   const onError = (error: unknown) => toast.error(applyServerErrors(error, setError));
 
@@ -44,12 +46,12 @@ export function useCostCenterSubmit(
     if (isEdit) {
       updateMutation.mutate(
         { id: costCenterId, data: payload as Partial<CostCenter> },
-        { onSuccess: () => done("Sub-conta salva.", costCenterId), onError }
+        { onSuccess: (saved) => done("Sub-conta salva.", saved), onError }
       );
     } else {
       createMutation.mutate(
         { data: payload as unknown as CostCenter },
-        { onSuccess: (created) => done("Sub-conta cadastrada.", created.id), onError }
+        { onSuccess: (created) => done("Sub-conta cadastrada.", created), onError }
       );
     }
   };

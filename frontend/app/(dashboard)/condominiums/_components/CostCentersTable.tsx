@@ -1,7 +1,6 @@
 "use client";
 
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
@@ -21,24 +20,23 @@ import {
 import { formatCode } from "@/lib/billing-entry-payload";
 import { applyServerErrors } from "@/lib/form-errors";
 
-/** Client Component: lista de sub-contas com busca, filtros e exclusão. O condomínio filtrado vem da URL (`?condominium=`). */
-export function CostCentersTable() {
-  const initialCondominium = useSearchParams().get("condominium") ?? undefined;
+/** Client Component: lista de sub-contas com busca, filtros e exclusão. Sem `condominiumId` o condomínio vira filtro (e coluna); com ele, a lista é só do condomínio (a seção da página do condomínio). */
+export function CostCentersTable({ condominiumId }: { condominiumId?: string }) {
   const queryClient = useQueryClient();
   const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
     useListParams({
-      filterKeys: ["status", "condominium"],
-      initialFilters: { condominium: initialCondominium ?? "" },
+      filterKeys: ["status"],
     });
+  const isOverview = !condominiumId;
   const { data, isLoading, isPlaceholderData } = useCostCentersList(
     {
       ...params,
-      ...(filters.condominium ? { condominium: filters.condominium } : {}),
+      ...(condominiumId ? { condominium: condominiumId } : {}),
       ...(filters.status ? { active: filters.status === "active" } : {}),
     },
     { query: { placeholderData: keepPreviousData } }
   );
-  const { data: condominiumsData } = useCondominiumsList({ limit: 100 });
+  const { data: condominiumsData } = useCondominiumsList({ limit: 100 }, { query: { enabled: isOverview } });
   const condominiums = condominiumsData?.results ?? [];
   const condominiumName = (id: string) => condominiums.find((item) => item.id === id)?.name ?? "—";
   const destroyMutation = useCostCentersDestroy();
@@ -74,14 +72,6 @@ export function CostCentersTable() {
           onClear={clearFilters}
           groups={[
             {
-              key: "condominium",
-              label: "Condomínio",
-              searchable: true,
-              value: filters.condominium,
-              onChange: (value) => setFilter("condominium", value),
-              options: condominiums.map((item) => ({ value: item.id, label: item.name })),
-            },
-            {
               key: "status",
               label: "Status",
               value: filters.status,
@@ -108,7 +98,7 @@ export function CostCentersTable() {
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="hidden w-20 md:table-cell">Cód.</TableHead>
                   <TableHead>Sub-conta</TableHead>
-                  <TableHead className="hidden md:table-cell">Condomínio</TableHead>
+                  {isOverview && <TableHead className="hidden md:table-cell">Condomínio</TableHead>}
                   <TableHead className="hidden md:table-cell">Status</TableHead>
                   <TableHead />
                 </TableRow>
@@ -124,16 +114,18 @@ export function CostCentersTable() {
                       <TableCell>
                         <RowLink
                           href={href}
-                          sub={[formatCode(costCenter.code), condominiumName(costCenter.condominium), costCenter.active ? null : "Inativa"]
+                          sub={[formatCode(costCenter.code), isOverview ? condominiumName(costCenter.condominium) : null, costCenter.active ? null : "Inativa"]
                             .filter(Boolean)
                             .join(" · ")}
                         >
                           {costCenter.name}
                         </RowLink>
                       </TableCell>
-                      <TableCell className="hidden max-w-[16rem] truncate text-ink-soft md:table-cell">
-                        {condominiumName(costCenter.condominium)}
-                      </TableCell>
+                      {isOverview && (
+                        <TableCell className="hidden max-w-[16rem] truncate text-ink-soft md:table-cell">
+                          {condominiumName(costCenter.condominium)}
+                        </TableCell>
+                      )}
                       <TableCell className="hidden md:table-cell">
                         <StatusBadge active={costCenter.active} />
                       </TableCell>

@@ -26,7 +26,7 @@ Source of truth: `app/globals.css` (Tailwind v4 `@theme`). shadcn tokens map to 
 
 ## Theming (Settings)
 Preferences are **cookies** (`ui_mode`, `ui_accent`, `ui_font`) → attributes on `<html>` (`data-mode`, `data-accent`, `data-font`);
-CSS swaps variables only. The server does not read them (the HTML is the same for everyone): an inline script in the root layout's `<head>` (`APPEARANCE_INIT_SCRIPT`, `lib/appearance.ts`) copies the cookies to `<html>` before the first paint, so there is no flash. The sidebar works the same way (`sidebar_open` → `data-sidebar` on `<html>`, CSS variant `sidebar-closed` in `app/globals.css`).
+CSS swaps variables only. The server does not read them (the HTML is the same for everyone): an inline script in the root layout's `<head>` (`APPEARANCE_INIT_SCRIPT`, `lib/appearance.ts`) copies the cookies to `<html>` before the first paint, so there is no flash. The shell is the same for every mode and accent (spec 041): a narrow icon **rail** (`shell/Rail.tsx`) whose modules open a **module menu** card (`shell/ModuleMenu.tsx`, data in `lib/module-menu.ts`); both use only the tokens above, so a new mode or accent reaches them with no extra CSS.
 
 | Preference | Values | Default |
 |---|---|---|

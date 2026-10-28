@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Nova sub-conta" };
 export default function NewCostCenterPage() {
   return (
     <FormPage>
-      <PageHeader back={{ href: "/condominiums/cost-centers", label: "Sub-contas" }} title="Nova sub-conta" />
+      <PageHeader back={{ href: "/condominiums", label: "Condomínios" }} title="Nova sub-conta" />
       <CostCenterForm />
     </FormPage>
   );
