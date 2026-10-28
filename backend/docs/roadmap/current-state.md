@@ -11,11 +11,11 @@ Read first: [`architecture/business-model.md`](../architecture/business-model.md
 | Branch | What it holds | State |
 |---|---|---|
 | `main` | phases 1–4, phase 5 coded, **and the PR #31 merge** (the persons/core/billing refactor, specs 037–040 implemented: one Asaas account per company, the registration fee, *Inclusão de valores*, the backup tool in `backup/`), the landing page and the dashboard at `/dashboard` | up to date |
-| `dev` | `main` + **spec 046** (new app shell and condominium registry, layout 2); the branch the user tests locally | PR not opened on purpose: the user tests first |
+| `dev` | `main` + **spec 049** (new app shell and condominium registry, layout 2) and **spec 050** (unit workspace: pick a condominium, its units, the unit page); the branch the user tests locally | PR not opened on purpose: the user tests first |
 | older `feat/*`, `refactor/*`, `chore/*`, `fix/*` | already in `main` (or superseded) | can be deleted |
 
 ## `dev` (the branch the user tests locally)
-**Spec 046** (new app shell and condominium registry, layout 2) is built on `dev`, commits authored as the user (no Claude trailers): the narrow rail with the module menu card, the condominium page as one scrolling page with a section index, Blocos and Sub-contas moved inside it. It reads the existing appearance tokens, so mode, accent and font from *Configurações* keep working. Not in it yet (no backend data): síndico, dados bancários, documents, history and the KPI cards of the prototype. Waiting on the user: use on the real screens and the 2 decisions marked *agent, to be confirmed* in the spec.
+**Spec 049** (new app shell and condominium registry, layout 2) is built on `dev`, commits authored as the user (no Claude trailers): the narrow rail with the module menu card, the condominium page as one scrolling page with a section index, Blocos and Sub-contas moved inside it. It reads the existing appearance tokens, so mode, accent and font from *Configurações* keep working. Not in it yet (no backend data): síndico, dados bancários, documents, history and the KPI cards of the prototype. Waiting on the user: use on the real screens and the 2 decisions marked *agent, to be confirmed* in the spec.
 
 ## Specs
 | Spec | State | Waiting on |
@@ -30,7 +30,7 @@ Launches complement the plans; rateio individual/coletivo/fração; events are a
 
 ## Known deviations to confirm with the user
 - **Sub-conta scope:** the user answered "recommended" to a company-wide sub-conta catalog with a code. It would rewrite `CostCenter` ownership across ~55 files and merge existing data by name, so spec 039 only added a per-condominium `code`. The catalog needs its own spec.
-- **Settings tab:** the Configurações dialog only holds appearance; "Eventos e subcontas" is a **Cadastros** section with one link (`/billing/events`; the sub-contas live inside each condominium's page, spec 046), not a data tab.
+- **Settings tab:** the Configurações dialog only holds appearance; "Eventos e subcontas" is a **Cadastros** section with one link (`/billing/events`; the sub-contas live inside each condominium's page, spec 049), not a data tab.
 
 ## Next steps, in order
 0. **Backup first** (`backup/`, spec 040, already in `main`): create the private R2 bucket and the passphrase, deploy, `run-once`, restore drill. Asaas is postponed by the user (2026-10-27): the other business rules come first. To try a boleto with real data: after the backup, in production register condominium, units, people, sub-contas and plan, the events (0052 CONDOMINIO; 0005 TARIFA BANCO marked as the administradora's), launches, then *Emitir mês* (without the gateway the documents stay issued as drafts) and *Baixar PDF (RASCUNHO). The code for this lives on the unmerged branches above: merge and deploy them first.

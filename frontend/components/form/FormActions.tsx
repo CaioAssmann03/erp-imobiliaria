@@ -15,10 +15,13 @@ import { FormErrorSummary } from "./FormErrorSummary";
 export function FormActions({
   isSubmitting,
   submitLabel = "Salvar",
+  formId,
   children,
 }: {
   isSubmitting: boolean;
   submitLabel?: string;
+  /** `id` de um `<form>` fora da barra (a barra não precisa estar dentro dele). */
+  formId?: string;
   children?: React.ReactNode;
 }) {
   const {
@@ -35,7 +38,7 @@ export function FormActions({
           </p>
           <div className="ml-auto flex items-center gap-2">
             {children}
-            <Button type="submit" disabled={isSubmitting} className="min-w-24">
+            <Button type="submit" form={formId} disabled={isSubmitting} className="min-w-24">
               {isSubmitting && <Loader2 className="size-4 animate-spin" />}
               {isSubmitting ? "Salvando…" : submitLabel}
             </Button>

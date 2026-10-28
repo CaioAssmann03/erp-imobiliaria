@@ -4,7 +4,7 @@ import { CheckboxField, SelectField, TextField } from "@/components/form/fields"
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { useBlocksList } from "@/lib/api/generated";
 import { maskInteger } from "@/lib/masks";
-import { BILLING_RECIPIENTS, UNIT_TYPES } from "@/lib/schemas/unit";
+import { UNIT_TYPES } from "@/lib/schemas/unit";
 
 export function IdentificationSection({ condominiumId }: { condominiumId: string }) {
   const { data: blocks } = useBlocksList({ condominium: condominiumId, limit: 100 });
@@ -38,18 +38,7 @@ export function IdentificationSection({ condominiumId }: { condominiumId: string
         />
       </FieldRow>
       <FieldRow>
-        <SelectField
-          name="billing_recipient"
-          label="Quem recebe o boleto"
-          options={BILLING_RECIPIENTS}
-          hint="Sem inquilino atual, o boleto vai para o proprietário."
-        />
-      </FieldRow>
-      <FieldRow>
         <CheckboxField name="is_manager_unit" label="Unidade do síndico" />
-        <CheckboxField name="is_billing_blocked" label="Bloquear lançamentos" />
-      </FieldRow>
-      <FieldRow>
         <CheckboxField name="active" label="Cadastro ativo" />
       </FieldRow>
     </FormSection>

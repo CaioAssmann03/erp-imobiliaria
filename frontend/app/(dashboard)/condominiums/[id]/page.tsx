@@ -6,9 +6,10 @@ import { CondominiumForm } from "../_components/CondominiumForm";
 import { CondominiumHeader } from "../_components/CondominiumHeader";
 import { CostCentersTable } from "../_components/CostCentersTable";
 import { RegistrySection } from "../_components/RegistrySection";
-import { SectionIndex } from "../_components/SectionIndex";
 import { ListFallback } from "@/components/data-list";
 import { LinkButton } from "@/components/LinkButton";
+import { SectionIndex } from "@/components/SectionIndex";
+import { REGISTRY_SECTIONS } from "@/lib/condominium-registry";
 import { getMapsEmbedKey } from "@/lib/maps-embed-key";
 
 export const metadata: Metadata = { title: "Condomínio" };
@@ -62,7 +63,7 @@ export default async function CondominiumPage({ params }: { params: Promise<{ id
         </RegistrySection>
       </div>
 
-      <SectionIndex />
+      <SectionIndex sections={REGISTRY_SECTIONS} label="Seções do condomínio" title="Neste condomínio" />
     </div>
   );
 }

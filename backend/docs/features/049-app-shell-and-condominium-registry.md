@@ -1,9 +1,9 @@
 ---
-summary: Spec 046 — the new app shell (icon rail with a module menu card) and the condominium registry as one page (list, sections, side index), in the dark layout 2, driven by the existing appearance tokens.
+summary: Spec 049 — the new app shell (icon rail with a module menu card) and the condominium registry as one page (list, sections, side index), in the dark layout 2, driven by the existing appearance tokens.
 read-when: you change the app shell, the rail, the module menu, or the condominium registry screens (list column, sections, index)
 skip-if: the appearance settings themselves (mode, accent, font) → frontend/docs/norms/design-system.md; billing screens → features/039-billing-entries.md; backend rules → the backend docs index
 ---
-# 046 — App shell and condominium registry (layout 2)
+# 049 — App shell and condominium registry (layout 2)
 
 **Status:** in-progress · **Level:** full · **Roadmap:** none · **Apps:** frontend · **Frontend impact:** new screens
 

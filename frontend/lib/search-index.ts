@@ -13,7 +13,7 @@ export const STATIC_SEARCH_ITEMS: StaticSearchItem[] = [
   { title: "Blocos", subtitle: "Dentro de cada condomínio", href: "/condominiums", keywords: "torre bloco lista cadastro condominio" },
   { title: "Unidades", subtitle: "Condomínios", href: "/condominiums/units", keywords: "apartamento sala loja lista cadastro condominio fracao ideal" },
   { title: "Sub-contas", subtitle: "Dentro de cada condomínio", href: "/condominiums", keywords: "centro de custo plano de contas fundo reserva obras agua lista cadastro" },
-  { title: "Nova unidade", subtitle: "Cadastro", href: "/condominiums/units/new", keywords: "criar adicionar cadastrar apartamento" },
+  { title: "Nova unidade", subtitle: "Escolha o condomínio e use Nova", href: "/condominiums/units", keywords: "criar adicionar cadastrar apartamento" },
   { title: "Contas a pagar", subtitle: "Financeiro", href: "/finance/accounts-payable", keywords: "despesas baixa pagamento fornecedor vencimento cancelar" },
   { title: "Extrato", subtitle: "Financeiro", href: "/finance/statement", keywords: "conta corrente saldo lancamentos estorno condominio" },
   { title: "Lançamento manual", subtitle: "Financeiro", href: "/finance/entries/new", keywords: "lote tarifa ajuste credito debito conta corrente criar adicionar" },

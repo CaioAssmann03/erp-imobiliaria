@@ -1,16 +1,8 @@
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { NewUnitForm } from "../../_components/NewUnitForm";
-import { FormPage } from "@/components/form/FormPage";
-import { PageHeader } from "@/components/PageHeader";
+import { unitsUrl } from "@/lib/unit-workspace";
 
-export const metadata: Metadata = { title: "Nova unidade" };
-
+/** Uma unidade nova nasce dentro de um condomínio: a tela de unidades pede o condomínio e tem o botão Nova. */
 export default function NewUnitFromListPage() {
-  return (
-    <FormPage>
-      <PageHeader back={{ href: "/condominiums/units", label: "Unidades" }} title="Nova unidade" />
-      <NewUnitForm />
-    </FormPage>
-  );
+  redirect(unitsUrl());
 }

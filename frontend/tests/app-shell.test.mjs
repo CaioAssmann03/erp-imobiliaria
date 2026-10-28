@@ -60,7 +60,7 @@ test("no module menu label is repeated inside one module", () => {
 });
 
 test("the old list routes that became sections still exist, as redirects", () => {
-  for (const route of ["condominiums/blocks", "condominiums/cost-centers", "condominiums/[id]/blocks"]) {
+  for (const route of ["condominiums/blocks", "condominiums/cost-centers", "condominiums/[id]/blocks", "condominiums/[id]/units", "condominiums/units/new"]) {
     const page = readFileSync(join(DASHBOARD, ...route.split("/"), "page.tsx"), "utf8");
     assert.match(page, /redirect\(/, route);
   }

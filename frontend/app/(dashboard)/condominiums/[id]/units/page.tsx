@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 
-/** A lista de unidades de um condomínio é a lista geral com o filtro de condomínio aplicado. */
+import { unitsUrl } from "@/lib/unit-workspace";
+
+/** As unidades de um condomínio são o cadastro de unidades com o condomínio já escolhido (`?block=` também filtra a lista). */
 export default async function CondominiumUnitsPage({
   params,
   searchParams,
@@ -9,6 +11,5 @@ export default async function CondominiumUnitsPage({
   searchParams: Promise<{ block?: string }>;
 }) {
   const [{ id }, { block }] = await Promise.all([params, searchParams]);
-  const query = new URLSearchParams({ condominium: id, ...(block ? { block } : {}) });
-  redirect(`/condominiums/units?${query}`);
+  redirect(`${unitsUrl(id)}${block ? `&block=${block}` : ""}`);
 }

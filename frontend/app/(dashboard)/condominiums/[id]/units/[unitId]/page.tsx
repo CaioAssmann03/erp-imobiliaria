@@ -1,25 +1,23 @@
 import type { Metadata } from "next";
 
-import { FormPage } from "@/components/form/FormPage";
-import { PageHeader } from "@/components/PageHeader";
+import { SectionIndex } from "@/components/SectionIndex";
+import { UNIT_SECTIONS } from "@/lib/unit-workspace";
 import { UnitForm } from "../_components/UnitForm";
+import { UnitHeader } from "../_components/UnitHeader";
 
-export const metadata: Metadata = { title: "Editar unidade" };
+export const metadata: Metadata = { title: "Unidade" };
 
-export default async function EditUnitPage({
-  params,
-}: {
-  params: Promise<{ id: string; unitId: string }>;
-}) {
+/** A página de uma unidade: dados gerais, proprietário, inquilino e cobrança, e o índice das seções à direita. */
+export default async function UnitPage({ params }: { params: Promise<{ id: string; unitId: string }> }) {
   const { id, unitId } = await params;
 
   return (
-    <FormPage>
-      <PageHeader
-        back={{ href: `/condominiums/${id}/units`, label: "Unidades" }}
-        title="Editar unidade"
-      />
-      <UnitForm condominiumId={id} unitId={unitId} />
-    </FormPage>
+    <div className="flex items-start gap-8">
+      <div className="min-w-0 flex-1 pb-24">
+        <UnitHeader condominiumId={id} unitId={unitId} />
+        <UnitForm condominiumId={id} unitId={unitId} />
+      </div>
+      <SectionIndex sections={UNIT_SECTIONS} label="Seções da unidade" title="Nesta unidade" />
+    </div>
   );
 }

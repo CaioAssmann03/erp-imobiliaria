@@ -34,8 +34,11 @@ export function selectedCondominiumId(pathname: string | null) {
 }
 
 /** A seção do índice marcada como atual: a última (na ordem da página) que toca a faixa de leitura, porque a seguinte já começou nela. */
-export function currentSection(visibleIds: ReadonlySet<string>): RegistrySectionId | null {
-  return REGISTRY_SECTIONS.findLast((section) => visibleIds.has(section.id))?.id ?? null;
+export function currentSection<Id extends string = RegistrySectionId>(
+  visibleIds: ReadonlySet<string>,
+  sections: readonly { id: Id }[] = REGISTRY_SECTIONS as unknown as readonly { id: Id }[]
+): Id | null {
+  return sections.findLast((section) => visibleIds.has(section.id))?.id ?? null;
 }
 
 /**

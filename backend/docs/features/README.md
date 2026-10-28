@@ -61,6 +61,7 @@ One row per spec; update it in the same change that creates or closes the spec.
 | [039](039-billing-entries.md) | Billing entries (Inclusão de valores) | full | in-progress | none |
 | [040](040-database-backup.md) | Database backup | full | in-progress | none |
 | [045](045-dashboard-accounts-payable-focus.md) | Dashboard accounts-payable focus | lite | draft | none |
-| [046](046-app-shell-and-condominium-registry.md) | App shell and condominium registry (layout 2) | full | in-progress | none |
+| [049](049-app-shell-and-condominium-registry.md) | App shell and condominium registry (layout 2) | full | in-progress | none |
+| [050](050-unit-workspace.md) | Unit workspace | full | in-progress | none |
 
 The finished specs (001–029) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.
