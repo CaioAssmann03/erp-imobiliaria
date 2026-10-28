@@ -32,3 +32,22 @@ export function selectedCondominiumId(pathname: string | null) {
   const segment = pathname?.split("/")[2];
   return segment && !RESERVED_SEGMENTS.includes(segment) ? segment : null;
 }
+
+/** A seção do índice marcada como atual: a última (na ordem da página) que toca a faixa de leitura, porque a seguinte já começou nela. */
+export function currentSection(visibleIds: ReadonlySet<string>): RegistrySectionId | null {
+  return REGISTRY_SECTIONS.findLast((section) => visibleIds.has(section.id))?.id ?? null;
+}
+
+/**
+ * O que a moldura do cadastro mostra: a coluna da lista só nas telas do cadastro; no celular, a lista e a página aberta
+ * são telas separadas (a lista na tela vazia, a página quando há um condomínio ou o cadastro novo aberto).
+ */
+export function registryLayout(pathname: string | null) {
+  const hasFrame = isRegistryPath(pathname);
+  const hasOpenPage = hasFrame && pathname !== "/condominiums";
+  return {
+    hasFrame,
+    showListOnPhone: hasFrame && !hasOpenPage,
+    showPageOnPhone: !hasFrame || hasOpenPage,
+  };
+}

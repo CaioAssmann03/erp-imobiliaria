@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 
-import { isRegistryPath } from "@/lib/condominium-registry";
+import { registryLayout } from "@/lib/condominium-registry";
 import { cn } from "@/lib/utils";
 import { CondominiumsList } from "./CondominiumsList";
 
@@ -13,16 +13,15 @@ import { CondominiumsList } from "./CondominiumsList";
  */
 export function CondominiumsFrame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  if (!isRegistryPath(pathname)) return <>{children}</>;
-
-  const hasOpenPage = pathname !== "/condominiums";
+  const { hasFrame, showListOnPhone, showPageOnPhone } = registryLayout(pathname);
+  if (!hasFrame) return <>{children}</>;
 
   return (
     <div className="lg:flex lg:items-start lg:gap-8">
       <Suspense>
-        <CondominiumsList className={hasOpenPage ? "hidden lg:flex" : "flex"} />
+        <CondominiumsList className={showListOnPhone ? "flex" : "hidden lg:flex"} />
       </Suspense>
-      <div className={cn("min-w-0 flex-1", !hasOpenPage && "hidden lg:block")}>{children}</div>
+      <div className={cn("min-w-0 flex-1", !showPageOnPhone && "hidden lg:block")}>{children}</div>
     </div>
   );
 }

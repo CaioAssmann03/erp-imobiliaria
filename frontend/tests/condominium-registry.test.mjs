@@ -3,8 +3,10 @@ import { test } from "node:test";
 
 import {
   condominiumUrl,
+  currentSection,
   isRegistryPath,
   REGISTRY_SECTIONS,
+  registryLayout,
   selectedCondominiumId,
 } from "../lib/condominium-registry.ts";
 
@@ -41,4 +43,19 @@ test("a condominium URL can point at a section", () => {
     "blocos-e-unidades",
     "sub-contas",
   ]);
+});
+
+test("the section in view is the last one that touches the reading band", () => {
+  assert.equal(currentSection(new Set()), null);
+  assert.equal(currentSection(new Set(["dados-gerais"])), "dados-gerais");
+  // a tall section still touching the band does not hide the one that already started below it
+  assert.equal(currentSection(new Set(["taxa-e-cobranca", "blocos-e-unidades"])), "blocos-e-unidades");
+  assert.equal(currentSection(new Set(["sub-contas", "dados-gerais"])), "sub-contas");
+});
+
+test("on a phone the list and the open page are separate screens", () => {
+  assert.deepEqual(registryLayout("/condominiums"), { hasFrame: true, showListOnPhone: true, showPageOnPhone: false });
+  assert.deepEqual(registryLayout("/condominiums/0a1b"), { hasFrame: true, showListOnPhone: false, showPageOnPhone: true });
+  assert.deepEqual(registryLayout("/condominiums/new"), { hasFrame: true, showListOnPhone: false, showPageOnPhone: true });
+  assert.deepEqual(registryLayout("/condominiums/units"), { hasFrame: false, showListOnPhone: false, showPageOnPhone: true });
 });

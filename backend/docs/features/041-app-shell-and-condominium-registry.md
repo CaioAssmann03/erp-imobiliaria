@@ -82,8 +82,12 @@ Tokens only, no hex; Portuguese text, English code; client-rendered pages (`fron
 ## Test plan
 | Criterion | Test |
 |---|---|
-| R1, R2, R3 | `frontend/tests/module-menu.test.mjs` (`activeModule`, items with `soon` have no `href`) |
-| R4–R8 | none automated (rendering and interaction, checked by hand in the browser in each mode and accent, and on a phone-width screen): a gap written down |
+| R1, R2, R3 | `frontend/tests/module-menu.test.mjs` (`activeModule`, items with `soon` have no `href`, the most specific item is active) · `frontend/tests/app-shell.test.mjs::every link of the module menu opens an existing page` |
+| R4, R8 | `frontend/tests/condominium-registry.test.mjs` (`isRegistryPath`, `selectedCondominiumId`, `registryLayout`: the list and the open page are separate screens on a phone) |
+| R5 | `frontend/tests/condominium-registry.test.mjs` (`currentSection`, the section ids and URLs) |
+| R6 | `frontend/tests/app-shell.test.mjs::the old list routes that became sections still exist, as redirects` |
+| R7 | `frontend/tests/app-shell.test.mjs` (no literal color in the shell or the registry components; the head script applies the saved mode, accent and font and falls back to the defaults; the sidebar plumbing is gone) |
+| R2 (keyboard, Escape, focus), R4 (list rendering), R5 (scroll behavior), R6 (create/edit/delete) | none automated: they need a browser and the API, checked by hand in each mode and accent and at phone width; a gap written down |
 
 ## Definition of done
 - [x] Every criterion R1… has a passing test in the Test plan, or a written gap

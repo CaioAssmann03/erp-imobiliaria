@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { REGISTRY_SECTIONS } from "@/lib/condominium-registry";
+import { currentSection, REGISTRY_SECTIONS } from "@/lib/condominium-registry";
 import { cn } from "@/lib/utils";
 
 /**
@@ -21,9 +21,8 @@ export function SectionIndex() {
           if (entry.isIntersecting) visible.add(entry.target.id);
           else visible.delete(entry.target.id);
         }
-        // A última seção (na ordem da página) que toca a faixa de leitura é a atual: a seguinte já começou nela.
-        const last = REGISTRY_SECTIONS.findLast((section) => visible.has(section.id));
-        if (last) setCurrent(last.id);
+        const next = currentSection(visible);
+        if (next) setCurrent(next);
       },
       { rootMargin: "-80px 0px -55% 0px" }
     );
