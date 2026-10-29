@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isAxiosError } from "axios";
+import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -65,8 +66,8 @@ export function LoginForm() {
       : "Falha ao entrar";
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-8 space-y-4">
-      <div className="space-y-1.5">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate aria-label="Entrar" className="space-y-5">
+      <div className="space-y-2">
         <FieldLabel htmlFor="username" error={errors.username?.message}>
           Usuário
         </FieldLabel>
@@ -75,13 +76,13 @@ export function LoginForm() {
           type="text"
           autoComplete="username"
           autoFocus
-          className="h-11 rounded-full px-5"
+          className="h-12 rounded-sharp border-ink/20 bg-surface px-4"
           aria-invalid={!!errors.username || credentialError}
           {...register("username")}
         />
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <FieldLabel htmlFor="password" error={errors.password?.message ?? loginErrorLabel}>
           Senha
         </FieldLabel>
@@ -89,15 +90,22 @@ export function LoginForm() {
           id="password"
           type="password"
           autoComplete="current-password"
-          className="h-11 rounded-full px-5"
+          className="h-12 rounded-sharp border-ink/20 bg-surface px-4"
           aria-invalid={!!errors.password || loginMutation.isError}
           {...register("password")}
         />
       </div>
 
-      <div className="pt-2">
-        <Button type="submit" size="lg" disabled={loginMutation.isPending} className="w-full">
+      <div className="pt-3">
+        {/* Botão preto como os da home: o laranja é só destaque nas páginas públicas. */}
+        <Button
+          type="submit"
+          size="lg"
+          disabled={loginMutation.isPending}
+          className="h-12 w-full rounded-sharp bg-ink text-label text-ink-foreground hover:bg-ink/85"
+        >
           {loginMutation.isPending ? "Entrando…" : "Entrar"}
+          {!loginMutation.isPending && <ArrowRight className="size-4" />}
         </Button>
       </div>
     </form>
