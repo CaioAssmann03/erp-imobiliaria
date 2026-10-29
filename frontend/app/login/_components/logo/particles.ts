@@ -2,10 +2,14 @@ import { drawLogo, SCENE } from "./scene";
 
 /** Lado de cada célula da grade, em unidades da cena: quanto maior, menos partículas (e mais "pixel"). */
 export const STEP = 3;
+/** A grade do logo pequeno do celular: 4 vezes menos partículas, cada uma ainda com uns 2 px na tela. */
+export const COMPACT_STEP = 6;
 /** Nível (0..255) a partir do qual um pixel do molde é vidro de janela. */
 const WINDOW_WHITE = 250;
 
 export interface ParticleSet {
+  /** Lado da célula (`STEP` ou `COMPACT_STEP`): também o lado de cada partícula ao desenhar. */
+  step: number;
   count: number;
   /** Posição de repouso (centro da célula), em unidades da cena. */
   hx: Float32Array;
@@ -23,7 +27,7 @@ export interface ParticleSet {
 }
 
 /** Desenha a cena num canvas fora da tela e transforma cada célula coberta em uma partícula. */
-export function buildParticles(): ParticleSet {
+export function buildParticles(step: number = STEP): ParticleSet {
   const canvas = document.createElement("canvas");
   canvas.width = SCENE.width;
   canvas.height = SCENE.height;
@@ -32,8 +36,8 @@ export function buildParticles(): ParticleSet {
   const windows = drawLogo(ctx);
   const pixels = ctx.getImageData(0, 0, SCENE.width, SCENE.height).data;
 
-  const columns = Math.floor(SCENE.width / STEP);
-  const rows = Math.floor(SCENE.height / STEP);
+  const columns = Math.floor(SCENE.width / step);
+  const rows = Math.floor(SCENE.height / step);
   const windowOf = new Int16Array(columns * rows).fill(-1);
   // Células cujo centro cai dentro de cada janela (que é um paralelogramo na tela): testa pela matriz inversa.
   windows.forEach((pane, index) => {
@@ -47,11 +51,11 @@ export function buildParticles(): ParticleSet {
     ].map(([u, v]) => [a * u + c * v + e, b * u + d * v + f]);
     const xs = corners.map((corner) => corner[0]);
     const ys = corners.map((corner) => corner[1]);
-    for (let row = Math.floor(Math.min(...ys) / STEP); row <= Math.floor(Math.max(...ys) / STEP); row++) {
-      for (let column = Math.floor(Math.min(...xs) / STEP); column <= Math.floor(Math.max(...xs) / STEP); column++) {
+    for (let row = Math.floor(Math.min(...ys) / step); row <= Math.floor(Math.max(...ys) / step); row++) {
+      for (let column = Math.floor(Math.min(...xs) / step); column <= Math.floor(Math.max(...xs) / step); column++) {
         if (column < 0 || row < 0 || column >= columns || row >= rows) continue;
-        const x = column * STEP + STEP / 2 - e;
-        const y = row * STEP + STEP / 2 - f;
+        const x = column * step + step / 2 - e;
+        const y = row * step + step / 2 - f;
         const u = (d * x - c * y) / determinant;
         const v = (-b * x + a * y) / determinant;
         if (u >= pane.u && u < pane.u + pane.w && v >= pane.v && v < pane.v + pane.h) {
@@ -67,8 +71,8 @@ export function buildParticles(): ParticleSet {
   const win: number[] = [];
   for (let row = 0; row < rows; row++) {
     for (let column = 0; column < columns; column++) {
-      const x = column * STEP + STEP / 2;
-      const y = row * STEP + STEP / 2;
+      const x = column * step + step / 2;
+      const y = row * step + step / 2;
       const at = (Math.floor(y) * SCENE.width + Math.floor(x)) * 4;
       if (pixels[at + 3] < 128) continue;
       hx.push(x);
@@ -79,6 +83,7 @@ export function buildParticles(): ParticleSet {
     }
   }
   return {
+    step,
     count: hx.length,
     hx: Float32Array.from(hx),
     hy: Float32Array.from(hy),

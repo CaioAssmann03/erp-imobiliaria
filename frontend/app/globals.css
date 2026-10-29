@@ -136,6 +136,14 @@
   }
 }
 
+/* Celular, só com o shell do dashboard montado (`data-app-shell`, que também vale para os diálogos e menus que saem do shell): campos de
+   texto com menos de 16px fazem o Safari do iPhone dar zoom na página ao focar. Só o tamanho da letra muda; a altura dos campos não. */
+@media (max-width: 1023px) {
+  :root:has([data-app-shell]) :is(input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea) {
+    font-size: 1rem;
+  }
+}
+
 /* 4. Utilitários do sistema */
 @utility bg-brand-gradient {
   background-image: linear-gradient(

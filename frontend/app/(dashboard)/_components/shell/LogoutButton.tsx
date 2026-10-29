@@ -46,7 +46,7 @@ export function LogoutButton({ compact = false, rail = false, expanded = false }
       variant="ghost"
       title="Sair"
       aria-label="Sair"
-      className="h-10 w-full justify-start gap-3 rounded-control px-3 hover:bg-surface"
+      className="h-11 w-full justify-start gap-3 rounded-control px-3 hover:bg-surface"
       onClick={handleLogout}
     >
       <LogOut className="size-[1.125rem] shrink-0" />
