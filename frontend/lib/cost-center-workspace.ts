@@ -1,5 +1,5 @@
 /** Segmentos de `/condominiums/<segmento>` que não são o id de um condomínio. */
-const RESERVED_SEGMENTS = ["new", "units", "blocks", "cost-centers"];
+const RESERVED_SEGMENTS = ["new", "units", "blocks", "cost-centers", "persons"];
 
 /** Quantas sub-contas as listas carregam de uma vez; acima disso pedem para refinar a busca. */
 export const COST_CENTER_LIST_PAGE_SIZE = 50;

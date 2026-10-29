@@ -144,7 +144,7 @@ export function SectionIndex({
       </div>
     </nav>
 
-    <nav aria-label={label} className="sticky top-20 hidden w-48 shrink-0 xl:block">
+    <nav aria-label={label} className="sticky top-20 hidden w-48 shrink-0 xl:block 2xl:w-56">
       {sections.length > 0 && (
         <>
           <h2 className="mb-3 text-caption font-medium tracking-wide text-ink-faint uppercase">{title}</h2>

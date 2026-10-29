@@ -19,7 +19,7 @@ export default function DashboardHomePage() {
         description={<RegistrySummary />}
         actions={
           <>
-            <LinkButton variant="secondary" href="/persons/new">
+            <LinkButton variant="secondary" href="/condominiums/persons/new">
               Nova pessoa
             </LinkButton>
             <LinkButton href="/condominiums/new">Novo condomínio</LinkButton>

@@ -1,27 +1,9 @@
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { FormPage } from "@/components/form/FormPage";
-import { PageHeader } from "@/components/PageHeader";
-import { PersonCode } from "../_components/PersonCode";
-import { PersonForm } from "../_components/PersonForm";
+import { personUrl } from "@/lib/person-workspace";
 
-export const metadata: Metadata = { title: "Editar pessoa" };
-
-export default async function EditPersonPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+/** O cadastro de pessoas mudou para dentro de Condomínios: um link antigo abre a nova tela. */
+export default async function EditPersonPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-
-  return (
-    <FormPage>
-      <PageHeader
-        back={{ href: "/persons", label: "Pessoas" }}
-        title="Editar pessoa"
-        description={<PersonCode personId={id} />}
-      />
-      <PersonForm personId={id} />
-    </FormPage>
-  );
+  redirect(personUrl(id));
 }

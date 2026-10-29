@@ -9,7 +9,7 @@ export interface StaticSearchItem {
 export const STATIC_SEARCH_ITEMS: StaticSearchItem[] = [
   { title: "Painel", subtitle: "Página", href: "/dashboard", keywords: "inicio home visao geral" },
   { title: "Condomínios", subtitle: "Página", href: "/condominiums", keywords: "lista cadastro" },
-  { title: "Pessoas", subtitle: "Página", href: "/persons", keywords: "lista cadastro proprietarios locatarios" },
+  { title: "Pessoas", subtitle: "Página", href: "/condominiums/persons", keywords: "lista cadastro proprietarios locatarios" },
   { title: "Blocos", subtitle: "Dentro de cada condomínio", href: "/condominiums", keywords: "torre bloco lista cadastro condominio" },
   { title: "Unidades", subtitle: "Condomínios", href: "/condominiums/units", keywords: "apartamento sala loja lista cadastro condominio fracao ideal" },
   { title: "Sub-contas", subtitle: "Dentro de cada condomínio", href: "/condominiums", keywords: "centro de custo plano de contas fundo reserva obras agua lista cadastro" },
@@ -27,7 +27,7 @@ export const STATIC_SEARCH_ITEMS: StaticSearchItem[] = [
   { title: "Novo plano de cobrança", subtitle: "Cadastro", href: "/billing/plans/new", keywords: "criar adicionar cadastrar itens boleto" },
   { title: "Nova conta a pagar", subtitle: "Cadastro", href: "/finance/accounts-payable/new", keywords: "criar adicionar cadastrar despesa" },
   { title: "Novo condomínio", subtitle: "Cadastro", href: "/condominiums/new", keywords: "criar adicionar cadastrar" },
-  { title: "Nova pessoa", subtitle: "Cadastro", href: "/persons/new", keywords: "criar adicionar cadastrar" },
+  { title: "Nova pessoa", subtitle: "Cadastro", href: "/condominiums/persons/new", keywords: "criar adicionar cadastrar" },
   { title: "Unidades com responsável", subtitle: "Painel · gráfico", href: "/dashboard?focus=responsibles", keywords: "pontos proprietario locatario cobrar vinculo grafico" },
   { title: "Reajustes", subtitle: "Painel · gráfico", href: "/dashboard?focus=adjustments", keywords: "barras atrasados proximos meses igpm incc contrato grafico" },
   { title: "Receita fixa mensal", subtitle: "Painel · gráfico", href: "/dashboard?focus=fixed-revenue", keywords: "taxa administracao dinheiro faturamento grafico" },

@@ -17,7 +17,7 @@ export function BlocksFrame({ children }: { children: React.ReactNode }) {
   if (!state.hasFrame) return <>{children}</>;
 
   return (
-    <div className="lg:flex lg:items-start lg:gap-8">
+    <div className="lg:flex lg:items-start lg:gap-8 2xl:gap-12">
       <BlocksList condominiumId={state.condominiumId ?? block?.condominium ?? null} openBlockId={state.blockId} className="hidden lg:flex" />
       <div className="min-w-0 flex-1">{children}</div>
     </div>

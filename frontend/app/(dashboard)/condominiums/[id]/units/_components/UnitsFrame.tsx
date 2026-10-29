@@ -19,7 +19,7 @@ export function UnitsFrame({ children }: { children: React.ReactNode }) {
   if (!state.hasFrame) return <>{children}</>;
 
   return (
-    <div className="lg:flex lg:items-start lg:gap-8">
+    <div className="lg:flex lg:items-start lg:gap-8 2xl:gap-12">
       <UnitsList
         condominiumId={state.condominiumId}
         openUnitId={state.unitId}

@@ -11,7 +11,7 @@ import { condominiumPageUrl, condominiumUrl } from "@/lib/condominium-registry";
  */
 export function BlockSideMenu({ blockId }: { blockId: string }) {
   const { data: block } = useBlocksRetrieve(blockId);
-  if (!block) return <div aria-hidden className="hidden w-48 shrink-0 xl:block" />;
+  if (!block) return <div aria-hidden className="hidden w-48 shrink-0 xl:block 2xl:w-56" />;
 
   return (
     <SectionIndex

@@ -17,7 +17,7 @@ export function CondominiumsFrame({ children }: { children: React.ReactNode }) {
   if (!hasFrame) return <>{children}</>;
 
   return (
-    <div className="lg:flex lg:items-start lg:gap-8">
+    <div className="lg:flex lg:items-start lg:gap-8 2xl:gap-12">
       <Suspense>
         <CondominiumsList className={showListOnPhone ? "flex" : "hidden lg:flex"} />
       </Suspense>
