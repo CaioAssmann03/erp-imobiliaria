@@ -1,5 +1,5 @@
-import { CondominiumsWorkspace } from "./_components/workspace/CondominiumsWorkspace";
+import { CondominiumsFrame } from "./_components/CondominiumsFrame";
 
 export default function CondominiumsLayout({ children }: { children: React.ReactNode }) {
-  return <CondominiumsWorkspace>{children}</CondominiumsWorkspace>;
+  return <CondominiumsFrame>{children}</CondominiumsFrame>;
 }

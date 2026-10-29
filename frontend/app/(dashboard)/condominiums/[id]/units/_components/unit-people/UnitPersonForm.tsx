@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
-import { SelectField, TextField } from "@/components/form/fields";
+import { TextField } from "@/components/form/fields";
 import { FormField } from "@/components/form/FormField";
 import { FieldRow } from "@/components/form/FormSection";
 import { PersonPicker } from "@/components/PersonPicker";
@@ -24,17 +24,19 @@ import {
 
 interface UnitPersonFormProps {
   unitId: string;
+  /** O papel da seção onde o formulário está (Proprietário ou Inquilino): não se escolhe. */
+  role: "owner" | "tenant";
   onCreated: () => void;
 }
 
-export function UnitPersonForm({ unitId, onCreated }: UnitPersonFormProps) {
+export function UnitPersonForm({ unitId, role: fixedRole, onCreated }: UnitPersonFormProps) {
   const [person, setPerson] = useState<Person | null>(null);
   const [personError, setPersonError] = useState<string>();
   const createMutation = useUnitPeopleCreate();
 
   const methods = useForm<UnitPersonFormInput, unknown, UnitPersonFormOutput>({
     resolver: zodResolver(unitPersonSchema),
-    defaultValues: UNIT_PERSON_DEFAULTS,
+    defaultValues: { ...UNIT_PERSON_DEFAULTS, role: fixedRole },
     mode: "onTouched",
   });
   const { handleSubmit, reset, setError, setValue, control } = methods;
@@ -65,7 +67,7 @@ export function UnitPersonForm({ unitId, onCreated }: UnitPersonFormProps) {
       {
         onSuccess: () => {
           setPerson(null);
-          reset();
+          reset({ ...UNIT_PERSON_DEFAULTS, role: fixedRole });
           toast.success("Vínculo adicionado.");
           onCreated();
         },
@@ -104,16 +106,8 @@ export function UnitPersonForm({ unitId, onCreated }: UnitPersonFormProps) {
         </FormField>
 
         <FieldRow
-          template={role === "owner" ? "1.2fr 1fr 1fr 1fr" : "1.2fr 1fr 1fr"}
+          template={role === "owner" ? "1fr 1fr 1fr" : "1fr 1fr"}
         >
-          <SelectField
-            name="role"
-            label="Papel"
-            options={[
-              { value: "owner", label: "Proprietário" },
-              { value: "tenant", label: "Locatário" },
-            ]}
-          />
           {role === "owner" && (
             <TextField
               name="ownership_percentage"

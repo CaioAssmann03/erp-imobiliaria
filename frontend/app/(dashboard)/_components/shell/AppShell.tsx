@@ -3,38 +3,34 @@ import Link from "next/link";
 import { Brand } from "@/components/Brand";
 import { GlobalSearch } from "./GlobalSearch";
 import { MobileMenu } from "./MobileMenu";
-import { Sidebar } from "./Sidebar";
+import { Rail } from "./Rail";
 
 /**
- * Server Component sem dados nem cookies (o mesmo HTML para todos): monta o esqueleto. O tema e a lateral aberta ou
- * recolhida vêm de atributos do <html> (ver `APPEARANCE_INIT_SCRIPT`).
+ * Server Component sem dados nem cookies (o mesmo HTML para todos): monta o esqueleto. O tema vem de atributos do <html>
+ * (ver `APPEARANCE_INIT_SCRIPT`).
  *
- * Desktop (lg+): lateral (marca + navegação) sobre o fundo e, à direita, a moldura
- * arredondada com a busca centralizada e as páginas.
- * Celular: tela inteira, sem moldura. Barra fixa no topo (menu lateral, marca, busca); a navegação, as configurações e o sair ficam no
- * menu lateral.
+ * Desktop (lg+): a rail de ícones à esquerda (cada módulo abre seu cartão de menu) e, ao lado, a área de conteúdo com a busca no topo.
+ * Celular: tela inteira. Barra fixa no topo (menu lateral, marca, busca); a navegação, as configurações e o sair ficam no menu lateral.
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-shell lg:bg-transparent lg:p-4">
-      <div className="flex min-h-screen flex-col lg:min-h-[calc(100vh-2rem)] lg:flex-row lg:gap-4">
-        <Sidebar />
+    <div className="min-h-screen bg-canvas lg:flex">
+      <Rail />
 
-        <div className="min-w-0 flex-1 bg-shell lg:rounded-shell lg:p-5">
-          <header className="sticky top-0 z-30 flex h-14 items-center gap-2 bg-shell/90 px-4 backdrop-blur-md lg:static lg:mb-6 lg:h-auto lg:justify-center lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
-            <MobileMenu />
-            <Link href="/dashboard" className="lg:hidden">
-              <Brand />
-            </Link>
-            <div className="ml-auto flex items-center gap-0.5 lg:ml-0 lg:w-full lg:max-w-xl">
-              <div className="lg:w-full">
-                <GlobalSearch />
-              </div>
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col bg-shell">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-2 bg-shell/90 px-4 backdrop-blur-md lg:h-16 lg:justify-center lg:px-8">
+          <MobileMenu />
+          <Link href="/dashboard" className="lg:hidden">
+            <Brand />
+          </Link>
+          <div className="ml-auto flex items-center gap-0.5 lg:ml-0 lg:w-full lg:max-w-xl">
+            <div className="lg:w-full">
+              <GlobalSearch />
             </div>
-          </header>
+          </div>
+        </header>
 
-          <main className="px-4 pt-2 pb-8 lg:p-0">{children}</main>
-        </div>
+        <main className="min-w-0 flex-1 px-4 pt-2 pb-8 lg:px-8">{children}</main>
       </div>
     </div>
   );

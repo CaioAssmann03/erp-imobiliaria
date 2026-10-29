@@ -28,6 +28,8 @@ test("an empty term is not searchable", () => {
 test("every section of the site is reachable from the static pages", () => {
   const titles = (term) => searchStatic(term).map((item) => item.title);
 
+  assert.ok(titles("torre").includes("Blocos"));
+  assert.ok(titles("centro de custo").includes("Sub-contas"));
   assert.ok(titles("apartamento").includes("Unidades"));
   assert.ok(titles("boleto").includes("Documentos de cobrança"));
   assert.ok(titles("emissao").includes("Execuções da emissão"));

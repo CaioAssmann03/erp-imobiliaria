@@ -1,26 +1,9 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
+import { redirect } from "next/navigation";
 
-import { BlocksTable } from "../../_components/BlocksTable";
-import { SectionActions } from "../../_components/workspace/SectionActions";
-import { ListFallback } from "@/components/data-list";
-import { LinkButton } from "@/components/LinkButton";
+import { condominiumUrl } from "@/lib/condominium-registry";
 
-export const metadata: Metadata = { title: "Blocos" };
-
+/** Os blocos de um condomínio são uma seção da página dele. */
 export default async function CondominiumBlocksPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-
-  return (
-    <>
-      <SectionActions>
-        <LinkButton href={`/condominiums/${id}/blocks/new`} size="sm">
-          Novo bloco
-        </LinkButton>
-      </SectionActions>
-      <Suspense fallback={<ListFallback />}>
-        <BlocksTable condominiumId={id} />
-      </Suspense>
-    </>
-  );
+  redirect(condominiumUrl(id, "blocos-e-unidades"));
 }

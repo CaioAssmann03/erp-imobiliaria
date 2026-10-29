@@ -11,8 +11,8 @@ import {
   useCondominiumsDestroy,
 } from "@/lib/api/generated";
 
-/** Client Component: exclui o condomínio (com confirmação) e volta para a lista. Fica no rodapé do formulário. */
-export function DeleteCondominiumButton({ condominiumId, name }: { condominiumId: string; name: string }) {
+/** Client Component: exclui o condomínio aberto (confirmação) e volta à tela vazia do cadastro. */
+export function CondominiumDeleteButton({ condominiumId, name }: { condominiumId: string; name: string }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const destroyMutation = useCondominiumsDestroy();
@@ -36,7 +36,6 @@ export function DeleteCondominiumButton({ condominiumId, name }: { condominiumId
       title="Excluir condomínio?"
       description={`O condomínio "${name}" será excluído. Esta ação não pode ser desfeita.`}
       onConfirm={handleDelete}
-      label="Excluir condomínio"
     />
   );
 }

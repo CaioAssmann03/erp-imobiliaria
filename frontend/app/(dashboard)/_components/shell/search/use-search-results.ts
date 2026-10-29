@@ -5,6 +5,7 @@ import { useMemo } from "react";
 
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useSearchRetrieve } from "@/lib/api/generated";
+import { condominiumUrl } from "@/lib/condominium-registry";
 import type { Search } from "@/lib/api/generated/models";
 import { brl, formatDate, formatMonth } from "@/lib/format";
 import { documentStatusLabel } from "@/lib/billing-documents";
@@ -50,7 +51,7 @@ function apiResults(data: Search): SearchResultItem[] {
       group: "Blocos",
       title: block.name,
       subtitle: block.condominium_name,
-      href: `/condominiums/${block.condominium}/blocks/${block.id}`,
+      href: condominiumUrl(block.condominium, "blocos-e-unidades"),
     })),
     ...data.cost_centers.map((costCenter) => ({
       key: `cc${costCenter.id}`,

@@ -8,22 +8,22 @@ import { Button } from "@/components/ui/button";
 import { DEFAULT_APPEARANCE, type Appearance } from "@/lib/appearance";
 
 import { AccentSection } from "./settings/AccentSection";
-import { applyAppearance, readAppearance } from "@/lib/apply-appearance";
+import { applyAppearance, readAppearance } from "./settings/apply-appearance";
 import { FontSection } from "./settings/FontSection";
 import { ModeSection } from "./settings/ModeSection";
 import { RegistersSection } from "./settings/RegistersSection";
 
 const TRIGGER_COMPACT =
   "flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink";
-const TRIGGER_SIDEBAR =
-  "flex h-9 w-full items-center gap-3 rounded-control px-3 text-body font-medium whitespace-nowrap text-ink-soft transition-colors hover:bg-surface hover:text-ink lg:sidebar-closed:justify-center lg:sidebar-closed:px-0";
+const TRIGGER_RAIL =
+  "flex size-11 items-center justify-center rounded-control text-ink-soft transition-colors hover:bg-surface hover:text-ink";
 
 export function SettingsDialog({
   compact = false,
   open,
   onOpenChange,
 }: {
-  /** Botão só com o ícone (barra do topo no celular). */
+  /** Botão redondo da barra do topo no celular (sem isto, é o botão da rail). */
   compact?: boolean;
   /** Controlado por quem usa (sem estes dois, o próprio botão abre e fecha). Controlado, não desenha o botão. */
   open?: boolean;
@@ -52,16 +52,9 @@ export function SettingsDialog({
         <Dialog.Trigger
           title="Configurações"
           aria-label="Configurações"
-          className={compact ? TRIGGER_COMPACT : TRIGGER_SIDEBAR}
+          className={compact ? TRIGGER_COMPACT : TRIGGER_RAIL}
         >
-          {compact ? (
-            <Settings className="size-5" />
-          ) : (
-            <>
-              <Settings className="size-[1.125rem] shrink-0" />
-              <span className="lg:sidebar-closed:hidden">Configurações</span>
-            </>
-          )}
+          <Settings className="size-5" />
         </Dialog.Trigger>
       )}
 

@@ -8,31 +8,37 @@ import { ListState, RowActions, RowLink, SearchField, Toolbar } from "@/componen
 import { FilterMenu } from "@/components/FilterMenu";
 import { LinkButton } from "@/components/LinkButton";
 import { Pagination } from "@/components/Pagination";
+import { StatusBadge } from "@/components/StatusBadge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useListParams } from "@/hooks/use-list-params";
 import {
   getCostCentersListQueryKey,
+  useCondominiumsList,
   useCostCentersDestroy,
   useCostCentersList,
 } from "@/lib/api/generated";
 import { formatCode } from "@/lib/billing-entry-payload";
 import { applyServerErrors } from "@/lib/form-errors";
 
-/** Client Component: sub-contas de um condomínio (seção dele) com busca, filtro de status e exclusão. */
-export function CostCentersTable({ condominiumId }: { condominiumId: string }) {
+/** Client Component: lista de sub-contas com busca, filtros e exclusão. Sem `condominiumId` o condomínio vira filtro (e coluna); com ele, a lista é só do condomínio (a seção da página do condomínio). */
+export function CostCentersTable({ condominiumId }: { condominiumId?: string }) {
   const queryClient = useQueryClient();
   const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
     useListParams({
       filterKeys: ["status"],
     });
+  const isOverview = !condominiumId;
   const { data, isLoading, isPlaceholderData } = useCostCentersList(
     {
       ...params,
-      condominium: condominiumId,
+      ...(condominiumId ? { condominium: condominiumId } : {}),
       ...(filters.status ? { active: filters.status === "active" } : {}),
     },
     { query: { placeholderData: keepPreviousData } }
   );
+  const { data: condominiumsData } = useCondominiumsList({ limit: 100 }, { query: { enabled: isOverview } });
+  const condominiums = condominiumsData?.results ?? [];
+  const condominiumName = (id: string) => condominiums.find((item) => item.id === id)?.name ?? "—";
   const destroyMutation = useCostCentersDestroy();
 
   const handleDelete = (id: string) => {
@@ -92,12 +98,14 @@ export function CostCentersTable({ condominiumId }: { condominiumId: string }) {
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="hidden w-20 md:table-cell">Cód.</TableHead>
                   <TableHead>Sub-conta</TableHead>
+                  {isOverview && <TableHead className="hidden md:table-cell">Condomínio</TableHead>}
+                  <TableHead className="hidden md:table-cell">Status</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {results.map((costCenter) => {
-                  const href = `/condominiums/${condominiumId}/cost-centers/${costCenter.id}`;
+                  const href = `/condominiums/cost-centers/${costCenter.id}`;
                   return (
                     <TableRow key={costCenter.id}>
                       <TableCell className="hidden tabular-nums text-ink-soft md:table-cell">
@@ -106,13 +114,20 @@ export function CostCentersTable({ condominiumId }: { condominiumId: string }) {
                       <TableCell>
                         <RowLink
                           href={href}
-                          sub={[formatCode(costCenter.code), costCenter.active ? null : "Inativa"]
+                          sub={[formatCode(costCenter.code), isOverview ? condominiumName(costCenter.condominium) : null, costCenter.active ? null : "Inativa"]
                             .filter(Boolean)
                             .join(" · ")}
                         >
                           {costCenter.name}
-                          {!costCenter.active && <span className="hidden text-ink-soft md:inline"> · Inativa</span>}
                         </RowLink>
+                      </TableCell>
+                      {isOverview && (
+                        <TableCell className="hidden max-w-[16rem] truncate text-ink-soft md:table-cell">
+                          {condominiumName(costCenter.condominium)}
+                        </TableCell>
+                      )}
+                      <TableCell className="hidden md:table-cell">
+                        <StatusBadge active={costCenter.active} />
                       </TableCell>
                       <TableCell>
                         <RowActions>

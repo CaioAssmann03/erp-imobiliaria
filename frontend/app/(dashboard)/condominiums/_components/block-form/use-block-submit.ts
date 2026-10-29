@@ -12,15 +12,15 @@ import {
   useBlocksPartialUpdate,
 } from "@/lib/api/generated";
 import type { Block } from "@/lib/api/generated/models";
+import { condominiumUrl } from "@/lib/condominium-registry";
 import { applyServerErrors } from "@/lib/form-errors";
 import { blockToPayload, type BlockFormInput, type BlockFormOutput } from "@/lib/schemas/block";
-
-export const BLOCKS_URL = "/condominiums/blocks";
 
 export function useBlockSubmit(
   blockId: string | undefined,
   setError: UseFormSetError<BlockFormInput>,
-  returnUrl: string = BLOCKS_URL
+  /** Sem ele, volta à seção de blocos do condomínio do bloco salvo. */
+  returnUrl?: string
 ) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -28,11 +28,12 @@ export function useBlockSubmit(
   const updateMutation = useBlocksPartialUpdate();
   const isEdit = blockId !== undefined;
 
-  const done = (message: string, id: string) => {
+  const done = (message: string, saved: Block) => {
+    const id = saved.id;
     queryClient.invalidateQueries({ queryKey: getBlocksListQueryKey() });
     queryClient.invalidateQueries({ queryKey: getBlocksRetrieveQueryKey(id) });
     toast.success(message);
-    router.push(returnUrl);
+    router.push(returnUrl ?? condominiumUrl(saved.condominium, "blocos-e-unidades"));
   };
   const onError = (error: unknown) => toast.error(applyServerErrors(error, setError));
 
@@ -41,12 +42,12 @@ export function useBlockSubmit(
     if (isEdit) {
       updateMutation.mutate(
         { id: blockId, data: payload as Partial<Block> },
-        { onSuccess: () => done("Bloco salvo.", blockId), onError }
+        { onSuccess: (saved) => done("Bloco salvo.", saved), onError }
       );
     } else {
       createMutation.mutate(
         { data: payload as unknown as Block },
-        { onSuccess: (created) => done("Bloco cadastrado.", created.id), onError }
+        { onSuccess: (created) => done("Bloco cadastrado.", created), onError }
       );
     }
   };

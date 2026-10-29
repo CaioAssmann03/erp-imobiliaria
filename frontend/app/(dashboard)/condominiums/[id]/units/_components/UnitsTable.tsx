@@ -117,6 +117,7 @@ export function UnitsTable({ condominiumId }: { condominiumId?: string }) {
                   <TableHead className="hidden md:table-cell">Bloco</TableHead>
                   <TableHead className="hidden md:table-cell">Tipo</TableHead>
                   <TableHead className="hidden md:table-cell">Proprietário(s) / Locatário(s)</TableHead>
+                  <TableHead className="hidden md:table-cell">Status</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>

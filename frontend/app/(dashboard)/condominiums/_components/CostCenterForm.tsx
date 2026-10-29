@@ -12,6 +12,7 @@ import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useCondominiumsList, useCostCentersRetrieve } from "@/lib/api/generated";
+import { condominiumUrl } from "@/lib/condominium-registry";
 import { throwIfNotFound } from "@/lib/query/not-found";
 import {
   COST_CENTER_DEFAULTS,
@@ -21,18 +22,16 @@ import {
   type CostCenterFormOutput,
 } from "@/lib/schemas/cost-center";
 
-import { COST_CENTERS_URL, useCostCenterSubmit } from "./cost-center-form/use-cost-center-submit";
+import { useCostCenterSubmit } from "./cost-center-form/use-cost-center-submit";
 
-/** Cadastro e edição de sub-conta. O condomínio só é escolhido no cadastro. */
+/** Cadastro e edição de sub-conta. O condomínio só é escolhido no cadastro, e não quando o cadastro parte de um condomínio. */
 export function CostCenterForm({
   costCenterId,
   condominiumId,
-  returnUrl = COST_CENTERS_URL,
 }: {
   costCenterId?: string;
   /** Cadastro a partir de um condomínio: já vem escolhido e o campo some. */
   condominiumId?: string;
-  returnUrl?: string;
 }) {
   const router = useRouter();
   const isEdit = costCenterId !== undefined;
@@ -45,11 +44,12 @@ export function CostCenterForm({
 
   const methods = useForm<CostCenterFormInput, unknown, CostCenterFormOutput>({
     resolver: zodResolver(costCenterSchema),
-    defaultValues: { ...COST_CENTER_DEFAULTS, condominium: condominiumId ?? COST_CENTER_DEFAULTS.condominium },
+    defaultValues: { ...COST_CENTER_DEFAULTS, condominium: condominiumId ?? "" },
     mode: "onTouched",
   });
   const { handleSubmit, reset, setError } = methods;
-  const { submit, isSubmitting } = useCostCenterSubmit(costCenterId, setError, returnUrl);
+  const { submit, isSubmitting } = useCostCenterSubmit(costCenterId, setError);
+  const returnUrl = costCenter ? condominiumUrl(costCenter.condominium, "sub-contas") : condominiumId ? condominiumUrl(condominiumId, "sub-contas") : "/condominiums";
 
   useEffect(() => {
     if (costCenter) reset(costCenterToForm(costCenter));

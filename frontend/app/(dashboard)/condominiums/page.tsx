@@ -1,15 +1,18 @@
+import { Building2 } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Condomínios" };
 
-/** `/condominiums`: no desktop o meio pede para escolher um condomínio; no celular só a lista aparece. */
 export default function CondominiumsPage() {
   return (
-    <div className="flex min-h-64 items-center justify-center rounded-card bg-surface px-6 py-20 text-center">
-      <div>
-        <p className="text-heading">Escolha um condomínio</p>
-        <p className="mt-1 text-body text-ink-soft">Selecione um da lista ao lado ou cadastre um novo.</p>
-      </div>
+    <div className="flex min-h-[24rem] flex-col items-center justify-center gap-3 rounded-card bg-surface p-10 text-center">
+      <span className="flex size-12 items-center justify-center rounded-panel bg-surface-muted text-brand">
+        <Building2 className="size-6" />
+      </span>
+      <h1 className="text-heading">Escolha um condomínio</h1>
+      <p className="max-w-sm text-body text-ink-soft">
+        Selecione um condomínio na lista para ver e editar seus dados, blocos, unidades e sub-contas, ou cadastre um novo.
+      </p>
     </div>
   );
 }

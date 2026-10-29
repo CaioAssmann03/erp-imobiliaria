@@ -1,7 +1,18 @@
-import { CostCenterRedirect } from "../../_components/CostCenterRedirect";
+import type { Metadata } from "next";
 
-/** Endereço antigo de uma sub-conta (resultado da busca global): abre a edição dentro do condomínio dela. */
-export default async function CostCenterRedirectPage({ params }: { params: Promise<{ id: string }> }) {
+import { CostCenterForm } from "../../_components/CostCenterForm";
+import { FormPage } from "@/components/form/FormPage";
+import { PageHeader } from "@/components/PageHeader";
+
+export const metadata: Metadata = { title: "Editar sub-conta" };
+
+export default async function EditCostCenterPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <CostCenterRedirect costCenterId={id} />;
+
+  return (
+    <FormPage>
+      <PageHeader back={{ href: "/condominiums", label: "Condomínios" }} title="Editar sub-conta" />
+      <CostCenterForm costCenterId={id} />
+    </FormPage>
+  );
 }

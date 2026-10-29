@@ -12,7 +12,7 @@ interface UnitPeopleListProps {
 
 export function UnitPeopleList({ links, onRemove }: UnitPeopleListProps) {
   if (links.length === 0) {
-    return <p className="text-body text-ink-soft">Nenhum vínculo cadastrado ainda.</p>;
+    return <p className="text-body text-ink-soft">Nenhuma pessoa vinculada ainda.</p>;
   }
 
   return (

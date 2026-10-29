@@ -2,9 +2,6 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Lateral recolhida: `data-sidebar="closed"` no <html> (script do <head>); vale só para o que está dentro do <aside>. */
-@custom-variant sidebar-closed (html[data-sidebar="closed"] aside &);
-
 /* ==========================================================================
    Design system — ERP Imobiliária
    Fonte única de verdade para cores, tipografia, raios e sombras.

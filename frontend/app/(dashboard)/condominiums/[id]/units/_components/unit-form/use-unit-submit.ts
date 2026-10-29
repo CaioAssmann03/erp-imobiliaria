@@ -15,20 +15,19 @@ import {
 import type { Unit } from "@/lib/api/generated/models";
 import { applyServerErrors } from "@/lib/form-errors";
 import { invalidateApportionment } from "@/lib/query/apportionment";
+import { unitUrl } from "@/lib/unit-workspace";
 import { unitToPayload, type UnitFormInput, type UnitFormOutput } from "@/lib/schemas/unit";
 
 export function useUnitSubmit(
   condominiumId: string,
   unitId: string | undefined,
-  setError: UseFormSetError<UnitFormInput>,
-  returnUrl?: string
+  setError: UseFormSetError<UnitFormInput>
 ) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const createMutation = useUnitsCreate();
   const updateMutation = useUnitsPartialUpdate();
   const isEdit = unitId !== undefined;
-  const unitsUrl = `/condominiums/${condominiumId}/units`;
 
   const invalidate = (id: string) =>
     Promise.all([
@@ -50,7 +49,6 @@ export function useUnitSubmit(
           onSuccess: () => {
             invalidate(unitId);
             toast.success("Unidade salva.");
-            router.push(returnUrl ?? unitsUrl);
           },
           onError,
         }
@@ -62,7 +60,7 @@ export function useUnitSubmit(
           onSuccess: (created) => {
             invalidate(created.id);
             toast.success("Unidade cadastrada. Agora você pode vincular proprietários e locatários.");
-            router.push(`${unitsUrl}/${created.id}`);
+            router.push(unitUrl(condominiumId, created.id));
           },
           onError,
         }
