@@ -6,7 +6,6 @@ from unittest import mock
 import pytest
 from auditlog.models import LogEntry
 from django.urls import reverse
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -90,12 +89,15 @@ def test_runs_are_audited(api_client: APIClient, condominium: Condominium, issua
 def test_the_daily_task_enqueues_only_the_condominiums_of_the_day(
     condominium: Condominium, other_condominium: Condominium
 ) -> None:
-    today = timezone.localdate()
-    other_day = 1 if today.day != 1 else 2
+    # A fixed day: the issuance day only goes from 1 to 28, so the real today (29th to 31st) would not fit.
+    today = date(2026, 10, 15)
     _ = CondominiumBillingRules.objects.create(condominium=condominium, issuance_day=today.day)
-    _ = CondominiumBillingRules.objects.create(condominium=other_condominium, issuance_day=other_day)
+    _ = CondominiumBillingRules.objects.create(condominium=other_condominium, issuance_day=1)
 
-    with mock.patch.object(tasks.issue_condominium_billing_task, "delay") as delay:
+    with (
+        mock.patch.object(tasks.timezone, "localdate", return_value=today),
+        mock.patch.object(tasks.issue_condominium_billing_task, "delay") as delay,
+    ):
         enqueued = tasks.issue_due_billing()
 
     assert enqueued == 1
@@ -103,10 +105,14 @@ def test_the_daily_task_enqueues_only_the_condominiums_of_the_day(
 
 
 def test_the_daily_task_skips_inactive_condominiums(condominium: Condominium) -> None:
-    _ = CondominiumBillingRules.objects.create(condominium=condominium, issuance_day=timezone.localdate().day)
+    today = date(2026, 10, 15)
+    _ = CondominiumBillingRules.objects.create(condominium=condominium, issuance_day=today.day)
     _ = Condominium.objects.filter(pk=condominium.pk).update(active=False)
 
-    with mock.patch.object(tasks.issue_condominium_billing_task, "delay") as delay:
+    with (
+        mock.patch.object(tasks.timezone, "localdate", return_value=today),
+        mock.patch.object(tasks.issue_condominium_billing_task, "delay") as delay,
+    ):
         assert tasks.issue_due_billing() == 0
 
     delay.assert_not_called()
