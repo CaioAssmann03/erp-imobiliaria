@@ -1,20 +1,8 @@
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { LinkButton } from "@/components/LinkButton";
-import { PageHeader } from "@/components/PageHeader";
-import { PersonsTable } from "./_components/PersonsTable";
+import { personsUrl } from "@/lib/person-workspace";
 
-export const metadata: Metadata = { title: "Pessoas" };
-
+/** O cadastro de pessoas mudou para dentro de Condomínios: um link antigo abre a nova tela. */
 export default function PersonsPage() {
-  return (
-    <div>
-      <PageHeader
-        title="Pessoas"
-        description="Proprietários, locatários e demais contatos."
-        actions={<LinkButton href="/persons/new">Nova pessoa</LinkButton>}
-      />
-      <PersonsTable />
-    </div>
-  );
+  redirect(personsUrl());
 }

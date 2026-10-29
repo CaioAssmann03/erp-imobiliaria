@@ -1,5 +1,5 @@
 /** Segmentos de `/condominiums/<segmento>` que não são o id de um condomínio. */
-const RESERVED_SEGMENTS = ["new", "units", "blocks", "cost-centers"];
+const RESERVED_SEGMENTS = ["new", "units", "blocks", "cost-centers", "persons"];
 
 export interface BlocksFrameState {
   /** A coluna da lista de blocos só envolve o cadastro e a edição de um bloco (a tela de blocos do condomínio tem a lista no centro). */

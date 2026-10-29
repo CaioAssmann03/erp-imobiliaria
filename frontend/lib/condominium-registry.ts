@@ -21,7 +21,7 @@ export function condominiumPageUrl(condominiumId: string, page: CondominiumPageK
 }
 
 /** Primeiro segmento depois de `/condominiums` que não é o id de um condomínio. */
-const RESERVED_SEGMENTS = ["new", "units", "blocks", "cost-centers"];
+const RESERVED_SEGMENTS = ["new", "units", "blocks", "cost-centers", "persons"];
 
 /** URL da página de um condomínio, opcionalmente já na seção. */
 export function condominiumUrl(condominiumId: string, section?: RegistrySectionId) {

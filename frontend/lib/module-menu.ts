@@ -28,7 +28,7 @@ export interface MenuGroup {
   items: readonly MenuItem[];
 }
 
-export type ModuleKey = "home" | "condominiums" | "finance" | "billing" | "persons";
+export type ModuleKey = "home" | "condominiums" | "finance" | "billing";
 
 export interface AppModule {
   key: ModuleKey;
@@ -54,7 +54,7 @@ export const APP_MODULES: readonly AppModule[] = [
         items: [
           { label: "Condomínios", description: "Cadastro e ficha completa", icon: "building", href: "/condominiums" },
           { label: "Unidades", description: "Apartamentos, salas e garagens", icon: "door", href: "/condominiums/units" },
-          { label: "Pessoas", description: "Proprietários, inquilinos e síndicos", icon: "users", href: "/persons" },
+          { label: "Pessoas", description: "Proprietários, inquilinos e síndicos", icon: "users", href: "/condominiums/persons" },
           { label: "Eventos", description: "Itens que entram no boleto", icon: "layers", href: "/billing/events" },
           { label: "Áreas", description: "Áreas comuns e reservas", icon: "home" },
         ],
@@ -106,7 +106,6 @@ export const APP_MODULES: readonly AppModule[] = [
       },
     ],
   },
-  { key: "persons", label: "Pessoas", icon: "users", prefix: "/persons", href: "/persons", groups: [] },
 ];
 
 /** Módulo da rota aberta (ou `null` na tela de login e em rotas desconhecidas). */

@@ -1,15 +1,8 @@
-import type { Metadata } from "next";
-import { FormPage } from "@/components/form/FormPage";
-import { PageHeader } from "@/components/PageHeader";
-import { PersonForm } from "../_components/PersonForm";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Nova pessoa" };
+import { newPersonUrl } from "@/lib/person-workspace";
 
+/** O cadastro de pessoas mudou para dentro de Condomínios: um link antigo abre a nova tela. */
 export default function NewPersonPage() {
-  return (
-    <FormPage>
-      <PageHeader back={{ href: "/persons", label: "Pessoas" }} title="Nova pessoa" />
-      <PersonForm />
-    </FormPage>
-  );
+  redirect(newPersonUrl());
 }
