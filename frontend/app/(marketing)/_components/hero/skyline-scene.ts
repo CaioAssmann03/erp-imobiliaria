@@ -46,12 +46,18 @@ function addWindows(block: Rect, ground: number, windows: Rect[]) {
   }
 }
 
-export function buildSkyline(width: number, height: number): SkylineScene {
-  return { ...buildLayer(width, height, 804, 1), back: buildLayer(width, height, 311, 1.15).bodies };
+/** "valley": baixos no centro e altos nas laterais (hero); "hill": o contrário, altos no meio e baixos nas pontas (fecho da página). */
+export type SkylineShape = "valley" | "hill";
+
+const SEEDS = { valley: [804, 311], hill: [517, 902] } as const;
+
+export function buildSkyline(width: number, height: number, shape: SkylineShape = "valley"): SkylineScene {
+  const [frontSeed, backSeed] = SEEDS[shape];
+  return { ...buildLayer(width, height, frontSeed, 1, shape), back: buildLayer(width, height, backSeed, 1.15, shape).bodies };
 }
 
 /** Uma camada de prédios; `scale` aumenta as alturas (a camada de fundo é mais alta). */
-function buildLayer(width: number, height: number, seed: number, scale: number) {
+function buildLayer(width: number, height: number, seed: number, scale: number, shape: SkylineShape) {
   const next = random(seed);
   const bodies: SkylineScene["bodies"] = [];
   const windows: Rect[] = [];
@@ -62,11 +68,12 @@ function buildLayer(width: number, height: number, seed: number, scale: number) 
     const w = Math.max(44, width * (0.035 + next() * 0.05));
     const center = (x + w / 2) / width;
     const distance = Math.min(Math.abs(center - 0.5) / 0.5, 1); // 0 no centro, 1 nas bordas
-    const peak = Math.min(height * scale * (0.06 + 0.86 * Math.pow(distance, 1.4)), height);
+    const reach = shape === "valley" ? Math.pow(distance, 1.8) : Math.pow(1 - distance, 1.3);
+    const peak = Math.min(height * scale * (0.085 + 0.66 * reach), height);
     const h = peak * (0.72 + next() * 0.28);
     const tone = next() < 0.3 ? 2 : next() < 0.5 ? 1 : 0;
 
-    if (distance > 0.18 || next() < 0.6) {
+    if (shape === "hill" || distance > 0.18 || next() < 0.9) {
       const body = { x, y: height - h, w, h };
       bodies.push({ ...body, tone });
       if (h > 50) addWindows(body, height, windows);
@@ -84,7 +91,7 @@ function buildLayer(width: number, height: number, seed: number, scale: number) 
         bodies.push({ x: roof.x + roof.w * 0.3, y: roof.y - 34, w: 2, h: 34, tone });
       }
     }
-    x += w + (next() < 0.3 ? 0 : 3 + next() * 8);
+    x += w + 4 + next() * 7;
   }
   return { bodies, windows };
 }

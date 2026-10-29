@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
-import { ContactCta } from "./_components/ContactCta";
+import { GlobeSection } from "./_components/GlobeSection";
 import { Hero } from "./_components/hero/Hero";
-import { ModuleIndex } from "./_components/ModuleIndex";
-import { ProductTour } from "./_components/product-tour/ProductTour";
-import { Section } from "./_components/Section";
-import { Statement } from "./_components/Statement";
+import { ScanlineSkyline } from "./_components/hero/ScanlineSkyline";
+import { Questions } from "./_components/Questions";
+import { ScreenStack } from "./_components/ScreenStack";
+import { Summary } from "./_components/Summary";
 
 export const metadata: Metadata = {
   title: "Software de gestão para administradoras de condomínios",
@@ -16,12 +16,15 @@ export default function LandingPage() {
   return (
     <>
       <Hero />
-      <Statement />
-      <ProductTour />
-      <Section eyebrow="O que o sistema faz" title="Um sistema para toda a rotina da administradora">
-        <ModuleIndex />
-      </Section>
-      <ContactCta />
+      {/* Fundo liso: esta parte sobe por cima do hero fixo e o cobre. */}
+      <div className="relative z-10 bg-canvas">
+        <Summary />
+        <GlobeSection />
+        <Questions />
+        <ScreenStack />
+        {/* Fecha o ciclo: os prédios voltam, em outra silhueta, assentados no topo do rodapé (-mb-12 anula o mt-12 dele). */}
+        <ScanlineSkyline variant="footer" className="-mb-12 mt-12 h-44 w-full md:h-72" />
+      </div>
     </>
   );
 }
