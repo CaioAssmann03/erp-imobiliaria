@@ -1,3 +1,8 @@
+---
+summary: Weekly overview (2026-10-22 to 2026-10-29), in Portuguese, built from the git history: what Caio and Eduardo delivered, quality, branch state and what is left.
+read-when: you need the numbers and the split of the work between the two developers in that week
+skip-if: you need the report in the sprint template → view-report/status_sprint_4.md; what is done or comes next → roadmap/README.md
+---
 # Status report — semana de 22 a 29/10/2026
 
 ERP da EVE Administradora de Imóveis. Relatório feito a partir do histórico do git (`origin/dev` e `origin/main`), dos testes rodados hoje e das specs.
