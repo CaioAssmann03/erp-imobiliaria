@@ -1,6 +1,6 @@
 "use client";
 
-import { LinkButton } from "@/components/LinkButton";
+import { BackLink } from "@/components/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUnitsRetrieve } from "@/lib/api/generated";
 import { unitTypeLabel } from "@/lib/schemas/unit";
@@ -15,20 +15,19 @@ import { unitListLabel } from "@/lib/unit-workspace";
 export function UnitHeader({ condominiumId, unitId }: { condominiumId: string; unitId: string }) {
   const { data: unit } = useUnitsRetrieve(unitId);
 
-  if (!unit) return <Skeleton className="mb-6 h-9 w-72 rounded-control" />;
+  if (!unit)
+    return (
+      <div className="mb-6">
+        <BackLink href={condominiumUrl(condominiumId)} label="Condomínio" />
+        <Skeleton className="h-9 w-72 rounded-control" />
+      </div>
+    );
 
   const active = unit.active ?? true;
 
   return (
     <div className="mb-6">
-      <LinkButton
-        href={condominiumUrl(condominiumId)}
-        variant="ghost"
-        size="sm"
-        className="-ml-2.5 mb-2 px-2.5 text-ink-soft hover:text-ink lg:hidden"
-      >
-        Condomínio
-      </LinkButton>
+      <BackLink href={condominiumUrl(condominiumId)} label="Condomínio" />
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <h1 className="text-title">{unitListLabel(unitTypeLabel(unit.type), unit.name)}</h1>
         {unit.is_manager_unit && <span className="text-body text-ink-soft">Síndico</span>}
