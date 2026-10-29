@@ -9,8 +9,7 @@ import { LogoutButton } from "./LogoutButton";
 import { NavLinks } from "./NavLinks";
 import { SettingsDialog } from "./SettingsDialog";
 import { SIDEBAR_COOKIE } from "@/lib/auth";
-
-const SIDEBAR_EVENT = "sidebar-change";
+import { SIDEBAR_EVENT, setSidebarOpen } from "./sidebar-state";
 
 const subscribe = (onChange: () => void) => {
   window.addEventListener(SIDEBAR_EVENT, onChange);
@@ -29,9 +28,8 @@ export function Sidebar() {
 
   const toggle = () => {
     const next = !open;
-    document.documentElement.dataset.sidebar = next ? "open" : "closed";
     document.cookie = `${SIDEBAR_COOKIE}=${next ? "1" : "0"}; path=/; max-age=31536000; samesite=lax`;
-    window.dispatchEvent(new Event(SIDEBAR_EVENT));
+    setSidebarOpen(next);
   };
 
   return (
