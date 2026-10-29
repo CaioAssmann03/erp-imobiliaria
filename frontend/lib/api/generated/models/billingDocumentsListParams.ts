@@ -5,12 +5,18 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { BillingDocumentsListKind } from './billingDocumentsListKind';
 import type { BillingDocumentsListStatus } from './billingDocumentsListStatus';
 
 export type BillingDocumentsListParams = {
 competence_month?: string;
 condominium?: string;
 is_overdue?: boolean;
+/**
+ * * `monthly` - Monthly
+ * * `extra` - Extra
+ */
+kind?: BillingDocumentsListKind;
 /**
  * Número de resultados a serem retornados por página.
  */

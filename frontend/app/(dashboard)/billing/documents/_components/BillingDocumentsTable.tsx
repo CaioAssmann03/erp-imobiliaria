@@ -8,7 +8,7 @@ import { Pagination } from "@/components/Pagination";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useListParams } from "@/hooks/use-list-params";
 import { useBillingDocumentsList, useCondominiumsList } from "@/lib/api/generated";
-import type { BillingDocumentsListStatus } from "@/lib/api/generated/models";
+import type { BillingDocumentsListKind, BillingDocumentsListStatus } from "@/lib/api/generated/models";
 
 import { BillingDocumentRow } from "./BillingDocumentRow";
 import { BillingDocumentsFilters } from "./BillingDocumentsFilters";
@@ -20,7 +20,7 @@ export function BillingDocumentsTable() {
   const initialMonth = searchParams.get("reference_month") ?? undefined;
   const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
     useListParams({
-      filterKeys: ["condominium", "status", "month", "overdue"],
+      filterKeys: ["condominium", "status", "month", "overdue", "kind"],
       initialFilters: { condominium: initialCondominium ?? "", month: initialMonth ?? "" },
     });
   const { data, isLoading, isPlaceholderData } = useBillingDocumentsList(
@@ -30,6 +30,7 @@ export function BillingDocumentsTable() {
       ...(filters.status ? { status: filters.status as BillingDocumentsListStatus } : {}),
       ...(filters.month ? { reference_month: filters.month } : {}),
       ...(filters.overdue ? { is_overdue: true } : {}),
+      ...(filters.kind ? { kind: filters.kind as BillingDocumentsListKind } : {}),
     },
     { query: { placeholderData: keepPreviousData } }
   );

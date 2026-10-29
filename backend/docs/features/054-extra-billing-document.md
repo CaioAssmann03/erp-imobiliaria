@@ -1,11 +1,11 @@
 ---
 summary: Spec 054 — the extra boleto: a standalone boleto outside the monthly issuance, for one or more units of a condominium, with its own due date and lines.
 read-when: you change how an extra (avulso) boleto is issued, its API, its screen, or how it differs from the monthly document
-skip-if: the monthly issuance and the launches → apps/billing.md; the gateway registration → apps/billing.md
+skip-if: the monthly issuance and the launches → apps/billing.md; discounts (negative values) → features/055-discounts-negative-values.md; the gateway registration → apps/billing.md
 ---
 # 054 — Extra billing document (boleto extra)
 
-**Status:** in-progress · **Level:** full · **Roadmap:** none · **Apps:** billing, frontend · **Frontend impact:** client regeneration, new screens
+**Status:** in-progress (built; waiting for the "agent, to be confirmed" decisions) · **Level:** full · **Roadmap:** none · **Apps:** billing, frontend · **Frontend impact:** client regeneration, new screens
 
 ## Open questions
 None.
@@ -19,17 +19,18 @@ None.
 | 2026-10-29 | The staff **adds the registration fee as a line** (event 0005 TARIFA BANCO, individual, the fee's value), as on the monthly boleto; the screen has a button for it. Nothing is added silently | agent, to be confirmed |
 | 2026-10-29 | The competence month is chosen (it defaults to the month of the due date); `reference_month` equals it. The late-payment and discount terms are copied from the condominium's rules like the monthly document | agent, to be confirmed |
 | 2026-10-29 | The payer is the unit's current payer (`Unit.billing_payer`). A selected unit with no payer, with no tax id while the gateway is active, or inactive is **skipped and told** in the answer; the others are issued. Each unit is issued in its own transaction | agent, to be confirmed |
+| 2026-10-29 | The manager-unit exemption of the billing rules does **not** apply to an extra (the staff chose the unit); a billing-blocked unit is still skipped. The selected units are re-checked at issuance; the line shares are computed over the billable ones | agent, to be confirmed |
 | 2026-10-29 | After the commit, each extra gets its PDF draft and (with an active gateway account) its registration, through the same tasks as the monthly one | agent, to be confirmed |
 
 ## R — Requirements
-- [ ] R1 — `POST /api/billing-documents/extra/` takes `condominium`, `due_date` (not in the past), `competence_month` (first day), `units` (at least one, of the condominium) and `lines` (at least one) and answers `issued` (documents) and `skipped` (`{unit, unit_name, code}`)
-- [ ] R2 — Each issued document has `kind = extra`, the items computed by the lines' allocation over the units that were issued, the amount equal to the sum of its items, and the terms of the condominium's rules; it can coexist with the unit's monthly document of the same month
-- [ ] R3 — A line is valid like a launch: an event of the administradora has no sub-conta; any other line needs one (of the condominium, active) and an entry template; `fraction` needs a criterion of the condominium and every selected unit a fraction in it
-- [ ] R4 — A unit with no current payer, without tax id (active gateway) or inactive is skipped with its code and does not block the others; if no unit can be issued the answer is a 400
-- [ ] R5 — Every issued document gets its PDF draft and, with an active account, its registration after the commit
-- [ ] R6 — `billing-documents` carry `kind`, accept `?kind=`, and the documents screens show a tag "Extra"
-- [ ] R7 — The screen **Cobrança → Boleto extra**: condominium, competence month, due date, the units (all or chosen), the lines (event, description, allocation, criterion, amount, sub-conta) and the **tarifa de registro** button; after issuing, it lists the documents and the skipped units
-- [ ] R8 — Another company's condominium or unit is refused; nothing is created when the data is invalid
+- [x] R1 — `POST /api/billing-documents/extra/` takes `condominium`, `due_date` (not in the past), `competence_month` (first day), `units` (at least one, of the condominium) and `lines` (at least one) and answers `issued` (documents) and `skipped` (`{unit, unit_name, code}`): 201 when at least one unit was issued, 200 when none was
+- [x] R2 — Each issued document has `kind = extra`, the items computed by the lines' allocation over the units that were issued, the amount equal to the sum of its items, and the terms of the condominium's rules; it can coexist with the unit's monthly document of the same month
+- [x] R3 — A line is valid like a launch: an event of the administradora has no sub-conta; any other line needs one (of the condominium, active) and an entry template; `fraction` needs a criterion of the condominium; a unit with no fraction in it pays nothing for that line (as in the monthly issuance)
+- [x] R4 — A unit that is inactive or billing-blocked, with no current payer, or without tax id (active gateway) is skipped with its code and does not block the others; the shares are split among the units that can be issued, so a skipped unit's part is not lost; a unit left with no value is skipped as `nothing_to_bill`
+- [x] R5 — Every issued document gets its PDF draft and, with an active account, its registration after the commit
+- [x] R6 — `billing-documents` carry `kind`, accept `?kind=`, and the documents screens show a tag "Extra"
+- [x] R7 — The screen **Cobrança → Boleto extra**: condominium, competence month, due date, the units (all or chosen), the lines (event, description, allocation, criterion, amount, sub-conta) and the **tarifa de registro** button; after issuing, it lists the documents and the skipped units
+- [x] R8 — Another company's condominium or unit is refused; nothing is created when the data is invalid
 
 ## E — Entities
 | Entity | Change | Fields / rules |
@@ -48,7 +49,7 @@ None.
 | POST | `/api/billing-documents/extra/` | `condominium`, `due_date`, `competence_month`, `units[]`, `lines[]` | 201 `{issued: [BillingDocument], skipped: [{unit, unit_name, code}]}` |
 | GET | `/api/billing-documents/?kind=extra` | | filter |
 
-Files: `billing/models/billing_document.py` (+ migration `0017_billing_document_kind`), `billing/services/issue_extra_billing_document.py`, `billing/serializers/extra_billing_document_serializers.py`, `billing/views/billing_document_views.py` (the `extra` action), `billing/filters.py`, `billing/errors/…`; frontend `app/(dashboard)/billing/extra/**`, `lib/schemas/extra-billing-document.ts`, `lib/module-menu.ts`, `lib/error-messages.ts`, the documents list/page tag; docs.
+Files: `billing/models/billing_document.py` (+ migration `0017_billing_document_kind`), `billing/services/issue_extra_billing_document.py`, `billing/serializers/extra_billing_document_serializers.py`, `billing/views/billing_document_views.py` (the `extra` action), `billing/filters.py`, `billing/errors/billing_document.py`, `billing/models/rules/billing_document.py` (the due-date rule), `billing/services/schedule_billing_document_tasks.py` (shared with the monthly issuance); frontend `app/(dashboard)/billing/extra/**`, `lib/schemas/extra-billing-document.ts`, `lib/module-menu.ts`, `lib/error-messages.ts`, the documents list/page tag; docs.
 
 ## O — Operations
 1. Model field + migration; constraint change; filter and serializer field.
@@ -70,12 +71,12 @@ Rules in models; one service per use case; no `ValidationError` built in the ser
 |---|---|
 | R1–R5, R8 | `billing/tests/test_extra_billing_document.py` |
 | R6 | `billing/tests/test_extra_billing_document.py` (kind and filter) |
-| R7 | `frontend/tests/extra-billing-document.test.mjs` (the payload builder); the screen by hand in the browser: a gap written down |
+| R7 | `frontend/tests/extra-billing.test.mjs` (the payload builder); the screen checked by hand in the browser (Playwright run: form, fee line, result with skipped unit, documents list tag) — no automated screen test |
 
 ## Definition of done
-- [ ] Every criterion R1… has a passing test in the Test plan, or a written gap
-- [ ] `pytest apps -q` green; `manage.py check` and `makemigrations --check --dry-run` clean
-- [ ] `python backend/docs/tools/check_docs.py` passes
-- [ ] Frontend client regenerated and callers fixed (`pnpm generate:api`), or `N/A — no API change`
-- [ ] `docs/apps/<app>.md` updated; `docs/known-gaps.md` row closed (if any)
-- [ ] Roadmap part and phase table updated — N/A (Roadmap: none); index in `features/README.md` updated
+- [x] Every criterion R1… has a passing test in the Test plan, or a written gap
+- [x] `pytest apps -q` green; `manage.py check` and `makemigrations --check --dry-run` clean
+- [x] `python backend/docs/tools/check_docs.py` passes
+- [x] Frontend client regenerated and callers fixed (`pnpm generate:api`), or `N/A — no API change`
+- [x] `docs/apps/<app>.md` updated; `docs/known-gaps.md` row closed (if any)
+- [x] Roadmap part and phase table updated — N/A (Roadmap: none); index in `features/README.md` updated

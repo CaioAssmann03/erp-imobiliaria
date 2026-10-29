@@ -104,6 +104,7 @@ export const APP_MODULES: readonly AppModule[] = [
         title: "Cobrança",
         items: [
           { label: "Inclusão de valores", description: "Lançar valores no boleto do mês", icon: "plus", href: "/billing/entries" },
+          { label: "Boleto extra", description: "Cobrança avulsa, fora da emissão do mês", icon: "receipt", href: "/billing/extra" },
           { label: "Planos de cobrança", description: "Itens fixos de cada condomínio", icon: "list", href: "/billing/plans" },
           { label: "Documentos", description: "Boletos emitidos", icon: "file", href: "/billing/documents" },
           { label: "Execuções", description: "Emissões do mês e problemas", icon: "play", href: "/billing/runs" },

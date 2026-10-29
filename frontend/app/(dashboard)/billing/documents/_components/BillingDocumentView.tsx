@@ -33,6 +33,7 @@ export function BillingDocumentView({ document }: { document: BillingDocument })
             </Link>
           </DocumentItem>
           <DocumentItem label="Pagador">{document.payer_name}</DocumentItem>
+          <DocumentItem label="Tipo">{document.kind === "extra" ? "Boleto extra" : "Mensal"}</DocumentItem>
           <DocumentItem label="Referência">{formatMonth(document.reference_month)}</DocumentItem>
           <DocumentItem label="Competência">{formatMonth(document.competence_month)}</DocumentItem>
           <DocumentItem label="Vencimento">{formatDate(document.due_date)}</DocumentItem>

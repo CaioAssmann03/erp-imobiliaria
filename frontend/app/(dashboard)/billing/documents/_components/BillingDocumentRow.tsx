@@ -11,7 +11,9 @@ import { BillingDocumentStatusBadge } from "./BillingDocumentStatusBadge";
 /** Uma linha da lista de documentos: abre o documento (a página dele tem os itens e as ações). */
 export function BillingDocumentRow({ document }: { document: BillingDocument }) {
   const href = `/billing/documents/${document.id}`;
+  const isExtra = document.kind === "extra";
   const mobileSub = [
+    ...(isExtra ? ["Extra"] : []),
     document.condominium_name,
     `${formatMonth(document.reference_month)} · ${brl(document.amount)}`,
     documentStatusLabel(document.status, document.is_overdue),
@@ -22,6 +24,7 @@ export function BillingDocumentRow({ document }: { document: BillingDocument }) 
       <TableCell>
         <RowLink href={href} sub={mobileSub}>
           {document.unit_name}
+          {isExtra && <span className="ml-2 rounded-control bg-surface-muted px-1.5 py-0.5 text-caption font-normal text-ink-soft">Extra</span>}
         </RowLink>
       </TableCell>
       <TableCell className="hidden max-w-[14rem] truncate text-ink-soft md:table-cell">{document.condominium_name}</TableCell>

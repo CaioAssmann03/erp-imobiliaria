@@ -9,6 +9,7 @@ export interface DocumentFilterValues {
   status: string;
   month: string;
   overdue: string;
+  kind: string;
 }
 
 interface BillingDocumentsFiltersProps {
@@ -63,6 +64,16 @@ export function BillingDocumentsFilters({
             value: filters.month,
             onChange: (value) => onFilterChange("month", value),
             options: recentMonths(todayIso(), 12).map((month) => ({ value: month, label: formatMonth(month) })),
+          },
+          {
+            key: "kind",
+            label: "Tipo",
+            value: filters.kind,
+            onChange: (value) => onFilterChange("kind", value),
+            options: [
+              { value: "monthly", label: "Mensais" },
+              { value: "extra", label: "Extras" },
+            ],
           },
           {
             key: "overdue",

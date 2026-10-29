@@ -38,6 +38,9 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "bank_account.condominium.other_company": "O condomínio pertence a outra empresa.",
   "bank_code.invalid_format": "O código do banco deve ter exatamente 3 dígitos.",
   "billing_document.amount.differs_from_items_total": "O valor do documento deve ser igual à soma dos itens.",
+  "billing_document.condominium.without_billing_rules": "O condomínio não tem regras de cobrança: cadastre-as antes de emitir um boleto.",
+  "billing_document.due_date.extra_in_the_past": "O vencimento de um boleto extra não pode ser no passado.",
+  "billing_document.units.other_condominium": "Uma unidade escolhida pertence a outro condomínio.",
   "billing_document.data.immutable":
     "Unidade, pagador, meses, vencimento, valor e condições de um documento de cobrança não podem ser alterados.",
   "billing_document.items.required": "O documento de cobrança precisa de ao menos um item.",

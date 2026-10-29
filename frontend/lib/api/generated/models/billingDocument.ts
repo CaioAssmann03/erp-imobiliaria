@@ -7,6 +7,7 @@
  */
 import type { BillingDocumentDelivery } from './billingDocumentDelivery';
 import type { BillingDocumentItem } from './billingDocumentItem';
+import type { BillingDocumentKindEnum } from './billingDocumentKindEnum';
 import type { BillingDocumentPayment } from './billingDocumentPayment';
 import type { BillingDocumentRegistration } from './billingDocumentRegistration';
 import type { BillingDocumentStatusEnum } from './billingDocumentStatusEnum';
@@ -29,6 +30,7 @@ export interface BillingDocument {
   /** @pattern ^-?\d{0,10}(?:\.\d{0,2})?$ */
   readonly amount: string;
   readonly status: BillingDocumentStatusEnum;
+  readonly kind: BillingDocumentKindEnum;
   readonly is_overdue: boolean;
   /** @pattern ^-?\d{0,3}(?:\.\d{0,2})?$ */
   readonly discount_percentage: string;

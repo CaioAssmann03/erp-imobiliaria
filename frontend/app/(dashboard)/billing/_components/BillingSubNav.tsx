@@ -7,6 +7,7 @@ import { SectionTabs } from "@/components/SectionTabs";
 const TABS = [
   { href: "/billing/entries", label: "Inclusão de valores" },
   { href: "/billing/plans", label: "Planos de cobrança" },
+  { href: "/billing/extra", label: "Boleto extra" },
   { href: "/billing/documents", label: "Documentos" },
   { href: "/billing/runs", label: "Execuções" },
   { href: "/billing/events", label: "Eventos" },

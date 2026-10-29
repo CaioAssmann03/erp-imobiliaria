@@ -33,6 +33,8 @@ import type {
   BillingDocumentsListParams,
   DelinquencyReport,
   ErrorResponse,
+  ExtraBillingDocument,
+  ExtraBillingResult,
   PaginatedBillingDocumentList
 } from '../models';
 
@@ -694,3 +696,69 @@ export function useBillingDocumentsDelinquencyPdf<TData = Awaited<ReturnType<typ
 
 
 
+/**
+ * Issue an extra boleto, outside the monthly issuance, to each selected unit (spec 054).
+ *
+ * 201 when at least one unit was issued; the units that could not be are listed in `skipped`.
+ */
+export const billingDocumentsExtra = (
+    extraBillingDocument: ExtraBillingDocument,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<ExtraBillingResult>(
+      {url: `/api/billing-documents/extra/`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: extraBillingDocument, signal
+    },
+      );
+    }
+
+
+
+
+export const getBillingDocumentsExtraMutationKey = () => ['billingDocumentsExtra'] as const;
+
+export const getBillingDocumentsExtraMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof billingDocumentsExtra>>, TError,BillingDocumentsExtraMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof billingDocumentsExtra>>, TError,BillingDocumentsExtraMutationVariables, TContext> => {
+
+const mutationKey = getBillingDocumentsExtraMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof billingDocumentsExtra>>, BillingDocumentsExtraMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  billingDocumentsExtra(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BillingDocumentsExtraMutationResult = NonNullable<Awaited<ReturnType<typeof billingDocumentsExtra>>>
+    export type BillingDocumentsExtraMutationBody = ExtraBillingDocument
+    export type BillingDocumentsExtraMutationError = ErrorResponse
+    export type BillingDocumentsExtraMutationVariables = {data: ExtraBillingDocument}
+
+    export const useBillingDocumentsExtra = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof billingDocumentsExtra>>, TError,BillingDocumentsExtraMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof billingDocumentsExtra>>,
+        TError,
+        BillingDocumentsExtraMutationVariables,
+        TContext
+      > => {
+      return useMutation(getBillingDocumentsExtraMutationOptions(options), queryClient);
+    }

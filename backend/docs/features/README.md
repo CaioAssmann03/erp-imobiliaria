@@ -64,5 +64,6 @@ One row per spec; update it in the same change that creates or closes the spec.
 | [052](052-reports-delinquency-and-accountability.md) | Reports: Inadimplência and Prestação de contas | full | in-progress | none |
 | [053](053-cost-center-catalog.md) | Cost center catalog (sub-contas of the administradora) | full | in-progress | none |
 | [054](054-extra-billing-document.md) | Extra billing document (boleto extra) | full | in-progress | none |
+| [055](055-discounts-negative-values.md) | Discounts: negative values in the launches | full | ready | none |
 
 The finished specs (001–029 and 049–051) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.
