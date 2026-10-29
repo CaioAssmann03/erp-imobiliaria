@@ -17,7 +17,7 @@ class BillingDocumentFilter(django_filters.FilterSet):
 
     class Meta:
         model = BillingDocument
-        fields = ("status", "unit", "payer", "reference_month", "competence_month")
+        fields = ("status", "kind", "unit", "payer", "reference_month", "competence_month")
 
     def filter_is_overdue(
         self, queryset: QuerySet[BillingDocument], name: str, value: bool

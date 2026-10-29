@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
 @final
 class BillingDocument(BaseModel):
-    """The monthly boleto of a unit as a business record (the PDF's *DocumentoCobranca*).
+    """The boleto of a unit (the monthly one, or an extra) as a business record (the PDF's *DocumentoCobranca*).
 
     The bank or gateway fields (our number, digitable line, barcode) are not here: they change on every
     reissue. The late-payment and discount terms are copied from the condominium's rules at issuance,
@@ -41,6 +41,10 @@ class BillingDocument(BaseModel):
         REGISTERED = ("registered", "Registered")
         PAID = ("paid", "Paid")
         CANCELLED = ("cancelled", "Cancelled")
+
+    class Kind(models.TextChoices):
+        MONTHLY = ("monthly", "Monthly")
+        EXTRA = ("extra", "Extra")
 
     # Overdue is derived from the due date (`overdue_on`), not stored.
     AWAITING_PAYMENT_STATUSES: ClassVar[tuple[str, ...]] = (
@@ -73,6 +77,8 @@ class BillingDocument(BaseModel):
     status = models.CharField(
         max_length=12, choices=Status.choices, default=Status.ISSUED
     )
+    # The monthly issuance makes one per unit and month; an extra is a standalone boleto outside it (spec 054).
+    kind = models.CharField(max_length=8, choices=Kind.choices, default=Kind.MONTHLY)
 
     discount_percentage = models.DecimalField(
         max_digits=5, decimal_places=2, default=0, validators=[validate_percentage]
@@ -103,7 +109,7 @@ class BillingDocument(BaseModel):
         constraints = (
             models.UniqueConstraint(
                 fields=("unit", "reference_month"),
-                condition=~Q(status="cancelled"),
+                condition=~Q(status="cancelled") & Q(kind="monthly"),
                 name="billing_document_unique_reference_month_per_unit",
                 violation_error_message=BillingDocumentError.REFERENCE_MONTH_DUPLICATE_FOR_UNIT.message,
                 violation_error_code=BillingDocumentError.REFERENCE_MONTH_DUPLICATE_FOR_UNIT.value,

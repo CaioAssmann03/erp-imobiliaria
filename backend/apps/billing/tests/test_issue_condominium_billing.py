@@ -244,7 +244,7 @@ def test_payer_without_document_and_missing_account_are_reported(  # type: ignor
     _activate_gateway(condominium)
     sent: list[tuple[str, list[str]]] = []
     monkeypatch.setattr(
-        "apps.billing.services.issue_condominium_billing.celery_app.send_task",
+        "apps.billing.services.schedule_billing_document_tasks.celery_app.send_task",
         lambda name, args: sent.append((name, args)),
     )
     no_cpf_unit, cpf_unit = make_unit("101"), make_unit("102")

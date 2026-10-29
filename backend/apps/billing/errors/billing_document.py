@@ -26,3 +26,15 @@ class BillingDocumentError(RuleError):
         "billing_document.amount.differs_from_items_total",
         "The amount of the billing document must equal the sum of its items.",
     )
+    EXTRA_DUE_DATE_IN_THE_PAST = (
+        "billing_document.due_date.extra_in_the_past",
+        "An extra billing document cannot be due in the past.",
+    )
+    EXTRA_UNIT_OTHER_CONDOMINIUM = (
+        "billing_document.units.other_condominium",
+        "A selected unit belongs to another condominium.",
+    )
+    EXTRA_CONDOMINIUM_WITHOUT_BILLING_RULES = (
+        "billing_document.condominium.without_billing_rules",
+        "The condominium has no billing rules: set them before issuing a boleto.",
+    )

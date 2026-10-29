@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from django.db.models import Sum
+from django.utils import timezone
 
 from apps.billing.errors import BillingDocumentError
 from apps.core.models.rules import ModelRules, rule
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
 ISSUED_FIELDS = (
     "unit_id",
     "payer_id",
+    "kind",
     "reference_month",
     "competence_month",
     "due_date",
@@ -36,6 +38,15 @@ class BillingDocumentRules(ModelRules["BillingDocument"]):
         if document.unit_id is None or document.payer_id is None:
             return False
         return document.payer.company_id != document.unit.condominium.company_id
+
+    @rule("due_date", BillingDocumentError.EXTRA_DUE_DATE_IN_THE_PAST)
+    def extra_is_due_in_the_past(self) -> bool:
+        document = self.instance
+        return (
+            document._state.adding
+            and document.kind == document.Kind.EXTRA
+            and document.due_date < timezone.localdate()
+        )
 
     @rule("amount", BillingDocumentError.DATA_IMMUTABLE)
     def issued_data_changed(self) -> bool:

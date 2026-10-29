@@ -22,8 +22,8 @@ from apps.billing.services.create_billing_document import (
     NewBillingDocumentItem,
     create_billing_document,
 )
+from apps.billing.services.schedule_billing_document_tasks import schedule_billing_document_tasks
 from apps.condominiums.models import Condominium, Unit
-from config.celery import app as celery_app
 
 ProblemCode = BillingRun.ProblemCode
 
@@ -70,7 +70,9 @@ def _issue_units(run: BillingRun) -> None:
     amounts_by_item = [item.amounts_by_unit(units) for item in items]
     amounts_by_entry = [entry.amounts_for_selected_units() for entry in entries]
     already_issued_unit_ids = set(
-        BillingDocument.objects.filter(unit__condominium=condominium, reference_month=reference_month)
+        BillingDocument.objects.filter(
+            unit__condominium=condominium, reference_month=reference_month, kind=BillingDocument.Kind.MONTHLY
+        )
         .exclude(status=BillingDocument.Status.CANCELLED)
         .values_list("unit_id", flat=True)
     )
@@ -167,15 +169,7 @@ def _issue_unit(run: BillingRun, new_document: NewBillingDocument, registers_at_
         run.already_issued_count += 1
     else:
         run.issued_count += 1
-        document_id = str(document.pk)
-        # By name: tasks.py imports this module. The PDF is generated once the unit's transaction has committed.
-        transaction.on_commit(
-            lambda: celery_app.send_task("apps.billing.tasks.generate_billing_document_pdf_task", args=[document_id])
-        )
-        if registers_at_gateway:
-            transaction.on_commit(
-                lambda: celery_app.send_task("apps.billing.tasks.register_billing_document_task", args=[document_id])
-            )
+        schedule_billing_document_tasks(document, registers_at_gateway)
 
 
 def _record_problem(run: BillingRun, unit_id: uuid.UUID | None, code: BillingRun.ProblemCode) -> None:

@@ -27,6 +27,7 @@ class NewBillingDocument:
     competence_month: date
     due_date: date
     items: tuple[NewBillingDocumentItem, ...]
+    kind: BillingDocument.Kind = BillingDocument.Kind.MONTHLY
 
 
 @transaction.atomic
@@ -45,6 +46,7 @@ def create_billing_document(new_document: NewBillingDocument) -> BillingDocument
         payer=new_document.payer,
         reference_month=new_document.reference_month,
         competence_month=new_document.competence_month,
+        kind=new_document.kind,
         due_date=new_document.due_date,
         amount=sum((item.amount for item in new_document.items), Decimal(0)),
         discount_percentage=billing_rules.early_payment_discount_percentage,

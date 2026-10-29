@@ -100,6 +100,7 @@ class BillingDocumentSerializer(serializers.ModelSerializer[BillingDocument]):
             "due_date",
             "amount",
             "status",
+            "kind",
             "is_overdue",
             "discount_percentage",
             "discount_days",

@@ -36,3 +36,9 @@ from .billing_entry_serializers import reference_month_of as reference_month_of
 from .delinquency_report_serializers import (
     DelinquencyReportSerializer as DelinquencyReportSerializer,
 )
+from .extra_billing_document_serializers import (
+    ExtraBillingDocumentSerializer as ExtraBillingDocumentSerializer,
+)
+from .extra_billing_document_serializers import (
+    ExtraBillingResultSerializer as ExtraBillingResultSerializer,
+)

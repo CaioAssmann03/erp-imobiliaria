@@ -26,9 +26,12 @@ from ..serializers import (
     BillingDocumentReissueSerializer,
     BillingDocumentSerializer,
     DelinquencyReportSerializer,
+    ExtraBillingDocumentSerializer,
+    ExtraBillingResultSerializer,
 )
 from ..services.cancel_billing_document import cancel_billing_document
 from ..services.build_delinquency_report import DelinquencyReport, build_delinquency_report
+from ..services.issue_extra_billing_document import issue_extra_billing_document
 from ..services.generate_billing_document_pdf import generate_billing_document_pdf
 from ..services.render_delinquency_pdf import render_delinquency_pdf
 from ..services.reissue_billing_document import reissue_billing_document
@@ -77,6 +80,28 @@ class BillingDocumentViewSet(CompanyScopedViewSetMixin, viewsets.ReadOnlyModelVi
         document = self.get_object()
         cancel_billing_document(document)
         return Response(self.get_serializer(document).data)
+
+    @extend_schema(
+        request=ExtraBillingDocumentSerializer,
+        responses={201: ExtraBillingResultSerializer, 200: ExtraBillingResultSerializer},
+        operation_id="billing_documents_extra",
+    )
+    @action(detail=False, methods=["post"])
+    def extra(self, request: Request) -> Response:
+        """Issue an extra boleto, outside the monthly issuance, to each selected unit (spec 054).
+
+        201 when at least one unit was issued; the units that could not be are listed in `skipped`.
+        """
+        serializer = ExtraBillingDocumentSerializer(data=request.data, context=self.get_serializer_context())
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        issuance = issue_extra_billing_document(
+            data["condominium"], data["units"], data["lines"], data["due_date"], data["competence_month"]
+        )
+        body = ExtraBillingResultSerializer(
+            {"issued": issuance.issued, "skipped": issuance.skipped}, context=self.get_serializer_context()
+        ).data
+        return Response(body, status=status.HTTP_201_CREATED if issuance.issued else status.HTTP_200_OK)
 
     @extend_schema(request=BillingDocumentReissueSerializer, responses=BillingDocumentSerializer, operation_id="billing_documents_reissue")
     @action(detail=True, methods=["post"])

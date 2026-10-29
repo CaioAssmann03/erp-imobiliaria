@@ -80,7 +80,7 @@ def test_the_issuance_enqueues_a_pdf_per_issued_document_after_it_commits(  # ty
 
     sent: list[tuple[str, list[Any]]] = []
     monkeypatch.setattr(
-        "apps.billing.services.issue_condominium_billing.celery_app.send_task",
+        "apps.billing.services.schedule_billing_document_tasks.celery_app.send_task",
         lambda name, args: sent.append((name, args)),
     )
     link(make_unit("101"), "Maria")
@@ -106,7 +106,7 @@ def test_an_issuance_that_finds_the_unit_issued_enqueues_nothing(  # type: ignor
     _ = issue_condominium_billing(condominium, date(2026, 10, 1))
     sent: list[str] = []
     monkeypatch.setattr(
-        "apps.billing.services.issue_condominium_billing.celery_app.send_task", lambda name, args: sent.append(name)
+        "apps.billing.services.schedule_billing_document_tasks.celery_app.send_task", lambda name, args: sent.append(name)
     )
 
     with django_capture_on_commit_callbacks(execute=True):
