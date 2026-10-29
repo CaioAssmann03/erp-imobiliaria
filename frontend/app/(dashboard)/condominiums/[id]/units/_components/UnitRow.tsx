@@ -3,7 +3,6 @@
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { RowActions, RowLink } from "@/components/data-list";
 import { LinkButton } from "@/components/LinkButton";
-import { StatusBadge } from "@/components/StatusBadge";
 import { TableCell, TableRow } from "@/components/ui/table";
 import type { Unit } from "@/lib/api/generated/models";
 import { unitTypeLabel } from "@/lib/schemas/unit";
@@ -41,7 +40,10 @@ export function UnitRow({ unit, condominiumId, blockName, condominiumName = null
         </TableCell>
       )}
       <TableCell className="hidden md:table-cell text-ink-soft">{blockName ?? "—"}</TableCell>
-      <TableCell className="hidden md:table-cell text-ink-soft">{unitTypeLabel(unit.type)}</TableCell>
+      <TableCell className="hidden md:table-cell text-ink-soft">
+        {unitTypeLabel(unit.type)}
+        {!unit.active && " · Inativa"}
+      </TableCell>
       <TableCell className="hidden md:table-cell max-w-[22rem] truncate text-ink-soft">
         {links.length === 0
           ? "—"
@@ -51,9 +53,6 @@ export function UnitRow({ unit, condominiumId, blockName, condominiumName = null
                   `${link.person_detail.name} (${link.role === "owner" ? "Prop." : "Loc."}, ID ${link.person_detail.code})`
               )
               .join(", ")}
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        <StatusBadge active={unit.active} />
       </TableCell>
       <TableCell>
         <RowActions>

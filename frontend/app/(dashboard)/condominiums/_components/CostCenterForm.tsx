@@ -24,7 +24,16 @@ import {
 import { COST_CENTERS_URL, useCostCenterSubmit } from "./cost-center-form/use-cost-center-submit";
 
 /** Cadastro e edição de sub-conta. O condomínio só é escolhido no cadastro. */
-export function CostCenterForm({ costCenterId }: { costCenterId?: string }) {
+export function CostCenterForm({
+  costCenterId,
+  condominiumId,
+  returnUrl = COST_CENTERS_URL,
+}: {
+  costCenterId?: string;
+  /** Cadastro a partir de um condomínio: já vem escolhido e o campo some. */
+  condominiumId?: string;
+  returnUrl?: string;
+}) {
   const router = useRouter();
   const isEdit = costCenterId !== undefined;
 
@@ -36,11 +45,11 @@ export function CostCenterForm({ costCenterId }: { costCenterId?: string }) {
 
   const methods = useForm<CostCenterFormInput, unknown, CostCenterFormOutput>({
     resolver: zodResolver(costCenterSchema),
-    defaultValues: COST_CENTER_DEFAULTS,
+    defaultValues: { ...COST_CENTER_DEFAULTS, condominium: condominiumId ?? COST_CENTER_DEFAULTS.condominium },
     mode: "onTouched",
   });
   const { handleSubmit, reset, setError } = methods;
-  const { submit, isSubmitting } = useCostCenterSubmit(costCenterId, setError);
+  const { submit, isSubmitting } = useCostCenterSubmit(costCenterId, setError, returnUrl);
 
   useEffect(() => {
     if (costCenter) reset(costCenterToForm(costCenter));
@@ -56,7 +65,7 @@ export function CostCenterForm({ costCenterId }: { costCenterId?: string }) {
         className="space-y-4"
       >
         <FormSection title="Identificação">
-          {!isEdit && (
+          {!isEdit && !condominiumId && (
             <SelectField
               name="condominium"
               label="Condomínio"
@@ -80,7 +89,7 @@ export function CostCenterForm({ costCenterId }: { costCenterId?: string }) {
           </FieldRow>
         </FormSection>
         <FormActions isSubmitting={isSubmitting}>
-          <Button type="button" variant="secondary" onClick={() => router.push(COST_CENTERS_URL)}>
+          <Button type="button" variant="secondary" onClick={() => router.push(returnUrl)}>
             Cancelar
           </Button>
         </FormActions>

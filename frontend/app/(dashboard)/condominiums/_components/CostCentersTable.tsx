@@ -1,7 +1,6 @@
 "use client";
 
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
@@ -9,38 +8,31 @@ import { ListState, RowActions, RowLink, SearchField, Toolbar } from "@/componen
 import { FilterMenu } from "@/components/FilterMenu";
 import { LinkButton } from "@/components/LinkButton";
 import { Pagination } from "@/components/Pagination";
-import { StatusBadge } from "@/components/StatusBadge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useListParams } from "@/hooks/use-list-params";
 import {
   getCostCentersListQueryKey,
-  useCondominiumsList,
   useCostCentersDestroy,
   useCostCentersList,
 } from "@/lib/api/generated";
 import { formatCode } from "@/lib/billing-entry-payload";
 import { applyServerErrors } from "@/lib/form-errors";
 
-/** Client Component: lista de sub-contas com busca, filtros e exclusão. O condomínio filtrado vem da URL (`?condominium=`). */
-export function CostCentersTable() {
-  const initialCondominium = useSearchParams().get("condominium") ?? undefined;
+/** Client Component: sub-contas de um condomínio (seção dele) com busca, filtro de status e exclusão. */
+export function CostCentersTable({ condominiumId }: { condominiumId: string }) {
   const queryClient = useQueryClient();
   const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
     useListParams({
-      filterKeys: ["status", "condominium"],
-      initialFilters: { condominium: initialCondominium ?? "" },
+      filterKeys: ["status"],
     });
   const { data, isLoading, isPlaceholderData } = useCostCentersList(
     {
       ...params,
-      ...(filters.condominium ? { condominium: filters.condominium } : {}),
+      condominium: condominiumId,
       ...(filters.status ? { active: filters.status === "active" } : {}),
     },
     { query: { placeholderData: keepPreviousData } }
   );
-  const { data: condominiumsData } = useCondominiumsList({ limit: 100 });
-  const condominiums = condominiumsData?.results ?? [];
-  const condominiumName = (id: string) => condominiums.find((item) => item.id === id)?.name ?? "—";
   const destroyMutation = useCostCentersDestroy();
 
   const handleDelete = (id: string) => {
@@ -74,14 +66,6 @@ export function CostCentersTable() {
           onClear={clearFilters}
           groups={[
             {
-              key: "condominium",
-              label: "Condomínio",
-              searchable: true,
-              value: filters.condominium,
-              onChange: (value) => setFilter("condominium", value),
-              options: condominiums.map((item) => ({ value: item.id, label: item.name })),
-            },
-            {
               key: "status",
               label: "Status",
               value: filters.status,
@@ -108,14 +92,12 @@ export function CostCentersTable() {
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="hidden w-20 md:table-cell">Cód.</TableHead>
                   <TableHead>Sub-conta</TableHead>
-                  <TableHead className="hidden md:table-cell">Condomínio</TableHead>
-                  <TableHead className="hidden md:table-cell">Status</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {results.map((costCenter) => {
-                  const href = `/condominiums/cost-centers/${costCenter.id}`;
+                  const href = `/condominiums/${condominiumId}/cost-centers/${costCenter.id}`;
                   return (
                     <TableRow key={costCenter.id}>
                       <TableCell className="hidden tabular-nums text-ink-soft md:table-cell">
@@ -124,18 +106,13 @@ export function CostCentersTable() {
                       <TableCell>
                         <RowLink
                           href={href}
-                          sub={[formatCode(costCenter.code), condominiumName(costCenter.condominium), costCenter.active ? null : "Inativa"]
+                          sub={[formatCode(costCenter.code), costCenter.active ? null : "Inativa"]
                             .filter(Boolean)
                             .join(" · ")}
                         >
                           {costCenter.name}
+                          {!costCenter.active && <span className="hidden text-ink-soft md:inline"> · Inativa</span>}
                         </RowLink>
-                      </TableCell>
-                      <TableCell className="hidden max-w-[16rem] truncate text-ink-soft md:table-cell">
-                        {condominiumName(costCenter.condominium)}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <StatusBadge active={costCenter.active} />
                       </TableCell>
                       <TableCell>
                         <RowActions>

@@ -136,7 +136,7 @@ export function BlocksTable({ condominiumId }: { condominiumId?: string }) {
               </TableHeader>
               <TableBody>
                 {results.map((block) => {
-                  const href = `/condominiums/blocks/${block.id}`;
+                  const href = `/condominiums/${block.condominium}/blocks/${block.id}`;
                   return (
                     <TableRow key={block.id}>
                       <TableCell>
@@ -162,7 +162,7 @@ export function BlocksTable({ condominiumId }: { condominiumId?: string }) {
                             variant="ghost"
                             size="sm"
                             className="text-ink-soft"
-                            href={`/condominiums/units?condominium=${block.condominium}&block=${block.id}`}
+                            href={`/condominiums/${block.condominium}/units?block=${block.id}`}
                           >
                             Ver unidades
                           </LinkButton>

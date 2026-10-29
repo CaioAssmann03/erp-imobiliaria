@@ -1,14 +1,26 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import { Suspense } from "react";
 
-/** A lista de unidades de um condomínio é a lista geral com o filtro de condomínio aplicado. */
-export default async function CondominiumUnitsPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ block?: string }>;
-}) {
-  const [{ id }, { block }] = await Promise.all([params, searchParams]);
-  const query = new URLSearchParams({ condominium: id, ...(block ? { block } : {}) });
-  redirect(`/condominiums/units?${query}`);
+import { SectionActions } from "../../_components/workspace/SectionActions";
+import { UnitsTable } from "./_components/UnitsTable";
+import { ListFallback } from "@/components/data-list";
+import { LinkButton } from "@/components/LinkButton";
+
+export const metadata: Metadata = { title: "Unidades" };
+
+export default async function CondominiumUnitsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
+  return (
+    <>
+      <SectionActions>
+        <LinkButton href={`/condominiums/${id}/units/new`} size="sm">
+          Nova unidade
+        </LinkButton>
+      </SectionActions>
+      <Suspense fallback={<ListFallback />}>
+        <UnitsTable condominiumId={id} />
+      </Suspense>
+    </>
+  );
 }

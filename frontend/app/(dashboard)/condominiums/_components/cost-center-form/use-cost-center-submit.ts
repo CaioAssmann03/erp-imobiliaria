@@ -23,7 +23,8 @@ export const COST_CENTERS_URL = "/condominiums/cost-centers";
 
 export function useCostCenterSubmit(
   costCenterId: string | undefined,
-  setError: UseFormSetError<CostCenterFormInput>
+  setError: UseFormSetError<CostCenterFormInput>,
+  returnUrl: string = COST_CENTERS_URL
 ) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -35,7 +36,7 @@ export function useCostCenterSubmit(
     queryClient.invalidateQueries({ queryKey: getCostCentersListQueryKey() });
     queryClient.invalidateQueries({ queryKey: getCostCentersRetrieveQueryKey(id) });
     toast.success(message);
-    router.push(COST_CENTERS_URL);
+    router.push(returnUrl);
   };
   const onError = (error: unknown) => toast.error(applyServerErrors(error, setError));
 
