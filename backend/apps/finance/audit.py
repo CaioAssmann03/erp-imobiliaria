@@ -5,6 +5,7 @@ from .models import (
     BankAccount,
     CompanyEntry,
     CostCenter,
+    CostCenterCatalogItem,
     EntryBatch,
     EntryTemplate,
     PaymentReceipt,
@@ -15,6 +16,7 @@ from .models import (
 def register() -> None:
     """The registries; bank data is logged as changed, never with its value (like personal data)."""
     register_audited(CostCenter)
+    register_audited(CostCenterCatalogItem)
     register_audited(EntryTemplate)
     register_audited(BankAccount, masked_fields=("branch", "account_number", "pix_key"))
     register_audited(Supplier, masked_fields=("bank_code", "branch", "account_number", "pix_key"))

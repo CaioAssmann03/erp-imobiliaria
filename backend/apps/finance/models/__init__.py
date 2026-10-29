@@ -3,6 +3,7 @@ from .bank_account import AccountKind as AccountKind
 from .bank_account import BankAccount as BankAccount
 from .company_entry import CompanyEntry as CompanyEntry
 from .cost_center import CostCenter as CostCenter
+from .cost_center_catalog_item import CostCenterCatalogItem as CostCenterCatalogItem
 from .current_account import CurrentAccount as CurrentAccount
 from .current_account_entry import CurrentAccountEntry as CurrentAccountEntry
 from .entry_batch import EntryBatch as EntryBatch

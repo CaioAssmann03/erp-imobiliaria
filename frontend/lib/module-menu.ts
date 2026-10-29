@@ -86,6 +86,12 @@ export const APP_MODULES: readonly AppModule[] = [
           { label: "Conta da imobiliária", description: "Tarifas recebidas pela administradora", icon: "landmark", href: "/finance/company-account" },
         ],
       },
+      {
+        title: "Cadastros",
+        items: [
+          { label: "Catálogo de sub-contas", description: "Código e nome de cada sub-conta, uma vez só", icon: "folder", href: "/finance/cost-center-catalog" },
+        ],
+      },
     ],
   },
   {

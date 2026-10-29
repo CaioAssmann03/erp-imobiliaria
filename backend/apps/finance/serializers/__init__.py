@@ -48,3 +48,6 @@ from .accountability_report_serializers import (
 from .accountability_report_serializers import (
     AccountabilityReportSerializer as AccountabilityReportSerializer,
 )
+from .cost_center_catalog_item_serializers import (
+    CostCenterCatalogItemSerializer as CostCenterCatalogItemSerializer,
+)

@@ -3,15 +3,21 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
-import { CheckboxField, SelectField, TextField } from "@/components/form/fields";
+import { CheckboxField, SelectField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
-import { useCondominiumsList, useCostCentersRetrieve } from "@/lib/api/generated";
+import {
+  useCondominiumsList,
+  useCostCenterCatalogList,
+  useCostCentersList,
+  useCostCentersRetrieve,
+} from "@/lib/api/generated";
+import { formatCode } from "@/lib/billing-entry-payload";
 import { condominiumUrl } from "@/lib/condominium-registry";
 import { throwIfNotFound } from "@/lib/query/not-found";
 import {
@@ -24,7 +30,7 @@ import {
 
 import { useCostCenterSubmit } from "./cost-center-form/use-cost-center-submit";
 
-/** Cadastro e edição de sub-conta. O condomínio só é escolhido no cadastro, e não quando o cadastro parte de um condomínio. */
+/** Cadastro e edição de sub-conta de um condomínio: no cadastro escolhe-se uma do catálogo da administradora; na edição só muda se está ativa. */
 export function CostCenterForm({
   costCenterId,
   condominiumId,
@@ -47,7 +53,19 @@ export function CostCenterForm({
     defaultValues: { ...COST_CENTER_DEFAULTS, condominium: condominiumId ?? "" },
     mode: "onTouched",
   });
-  const { handleSubmit, reset, setError } = methods;
+  const { handleSubmit, reset, setError, control } = methods;
+  // O catálogo (só as ativas) menos as que o condomínio escolhido já usa.
+  const watchedCondominium = useWatch({ control, name: "condominium" });
+  const chosenCondominium = condominiumId ?? watchedCondominium;
+  const { data: catalog } = useCostCenterCatalogList({ active: true, limit: 100 }, { query: { enabled: !isEdit } });
+  const { data: used } = useCostCentersList(
+    { condominium: chosenCondominium || undefined, limit: 100 },
+    { query: { enabled: !isEdit && Boolean(chosenCondominium) } }
+  );
+  const usedItems = new Set((used?.results ?? []).map((center) => center.catalog_item));
+  const catalogOptions = (catalog?.results ?? [])
+    .filter((item) => !usedItems.has(item.id))
+    .map((item) => ({ value: item.id, label: `${formatCode(item.code ?? 0)} · ${item.name}` }));
   const { submit, isSubmitting } = useCostCenterSubmit(costCenterId, setError);
   const returnUrl = costCenter ? condominiumUrl(costCenter.condominium, "sub-contas") : condominiumId ? condominiumUrl(condominiumId, "sub-contas") : "/condominiums";
 
@@ -64,7 +82,14 @@ export function CostCenterForm({
         onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))}
         className="space-y-4"
       >
-        <FormSection title="Identificação">
+        <FormSection
+          title="Sub-conta"
+          description={
+            isEdit
+              ? "O código e o nome vêm do catálogo da administradora; para mudá-los, edite a sub-conta lá."
+              : "Escolha, entre as sub-contas do catálogo da administradora, a que este condomínio vai usar."
+          }
+        >
           {!isEdit && !condominiumId && (
             <SelectField
               name="condominium"
@@ -74,16 +99,26 @@ export function CostCenterForm({
               options={(condominiums?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
             />
           )}
-          <TextField
-            name="code"
-            label="Código"
-            inputMode="numeric"
-            maxLength={4}
-            placeholder="Automático"
-            hint="Número pelo qual a equipe conhece a sub-conta (0000 é a Conta Normal). Em branco, o sistema dá o próximo livre."
-            autoComplete="off"
-          />
-          <TextField name="name" label="Sub-conta" required maxLength={120} placeholder="Ex.: Fundo de reserva" autoComplete="off" />
+          {isEdit ? (
+            <p className="rounded-control bg-surface-muted px-4 py-2 text-body">
+              <span className="tabular-nums text-ink-soft">{costCenter ? formatCode(costCenter.code) : ""}</span>
+              {" · "}
+              {costCenter?.name}
+            </p>
+          ) : (
+            <SelectField
+              name="catalog_item"
+              label="Sub-conta do catálogo"
+              required
+              placeholder="Selecione"
+              options={catalogOptions}
+              hint={
+                catalogOptions.length === 0
+                  ? "Não há sub-contas livres no catálogo para este condomínio. Cadastre-as em Financeiro → Catálogo de sub-contas."
+                  : undefined
+              }
+            />
+          )}
           <FieldRow>
             <CheckboxField name="active" label="Cadastro ativo" />
           </FieldRow>

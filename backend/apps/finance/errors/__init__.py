@@ -2,6 +2,7 @@ from .account_payable import AccountPayableError as AccountPayableError
 from .bank_account import BankAccountError as BankAccountError
 from .company_entry import CompanyEntryError as CompanyEntryError
 from .cost_center import CostCenterError as CostCenterError
+from .cost_center_catalog_item import CostCenterCatalogItemError as CostCenterCatalogItemError
 from .current_account import CurrentAccountError as CurrentAccountError
 from .current_account_entry import CurrentAccountEntryError as CurrentAccountEntryError
 from .entry_batch import EntryBatchError as EntryBatchError

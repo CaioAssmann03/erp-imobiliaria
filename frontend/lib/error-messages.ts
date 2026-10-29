@@ -138,6 +138,13 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "company_entry.update_not_allowed": "Um lançamento da imobiliária não pode ser alterado.",
   "billing_event.code.duplicate_in_company": "Já existe um evento com este código.",
   "billing_event.deletion.has_entries": "Este evento tem lançamentos; desative-o em vez de excluir.",
+  "cost_center.catalog_item.duplicate_in_condominium": "Este condomínio já usa esta sub-conta do catálogo.",
+  "cost_center.catalog_item.immutable": "A sub-conta do catálogo de uma sub-conta do condomínio não pode ser trocada.",
+  "cost_center.catalog_item.inactive": "Esta sub-conta do catálogo está inativa: não dá para escolhê-la para um novo uso.",
+  "cost_center.catalog_item.other_company": "A sub-conta do catálogo pertence a outra administradora.",
+  "cost_center_catalog_item.code.duplicate_in_company": "O catálogo já tem uma sub-conta com este código.",
+  "cost_center_catalog_item.deletion.in_use": "Condomínios usam esta sub-conta; desative-a em vez de excluir.",
+  "cost_center_catalog_item.name.duplicate_in_company": "O catálogo já tem uma sub-conta com este nome.",
   "cost_center.code.duplicate_in_condominium": "Este condomínio já tem uma sub-conta com este código.",
   "cost_center.condominium.immutable": "O condomínio de um centro de custo não pode ser alterado.",
   "cost_center.deletion.has_entry_templates":

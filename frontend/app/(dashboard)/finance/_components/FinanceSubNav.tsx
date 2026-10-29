@@ -9,6 +9,7 @@ const TABS = [
   { href: "/finance/statement", label: "Extrato" },
   { href: "/finance/entries/new", label: "Lançamento manual" },
   { href: "/finance/company-account", label: "Conta da imobiliária" },
+  { href: "/finance/cost-center-catalog", label: "Catálogo de sub-contas" },
 ];
 
 /** Client Component: precisa do pathname para marcar a aba ativa. */

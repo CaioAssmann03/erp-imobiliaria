@@ -1,6 +1,9 @@
 from .account_payable_views import AccountPayableViewSet as AccountPayableViewSet
 from .bank_account_views import BankAccountViewSet as BankAccountViewSet
 from .company_entry_views import CompanyEntryViewSet as CompanyEntryViewSet
+from .cost_center_catalog_item_views import (
+    CostCenterCatalogItemViewSet as CostCenterCatalogItemViewSet,
+)
 from .cost_center_views import CostCenterViewSet as CostCenterViewSet
 from .current_account_entry_views import (
     CurrentAccountEntryViewSet as CurrentAccountEntryViewSet,

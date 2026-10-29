@@ -25,12 +25,12 @@ DEBIT = CurrentAccountEntry.Kind.DEBIT
 
 @pytest.fixture
 def reserve(condominium: Condominium) -> CostCenter:
-    return CostCenter.objects.create(condominium=condominium, name="Fundo de reserva")
+    return CostCenter.objects.create(condominium=condominium, name="Obras")
 
 
 @pytest.fixture
 def reserve_template(reserve: CostCenter) -> EntryTemplate:
-    return EntryTemplate.objects.create(cost_center=reserve, name="REC Reserva")
+    return EntryTemplate.objects.create(cost_center=reserve, name="REC Obras")
 
 
 @pytest.fixture
@@ -73,8 +73,8 @@ def test_each_sub_conta_closes_on_its_own(api_client: APIClient, condominium: Co
     data = body(api_client.get(reverse(REPORT), query(condominium)))
 
     lines = {line["cost_center_name"]: line for line in data["by_cost_center"]}
-    main = lines["Taxa Ordinária"] if "Taxa Ordinária" in lines else next(line for name, line in lines.items() if name != "Fundo de reserva")
-    reserve = lines["Fundo de reserva"]
+    main = lines["Taxa Ordinária"] if "Taxa Ordinária" in lines else next(line for name, line in lines.items() if name != "Obras")
+    reserve = lines["Obras"]
     assert [Decimal(main[key]) for key in ("opening_balance", "total_credits", "total_debits", "closing_balance")] == [
         Decimal("700.00"), Decimal("200.00"), Decimal("50.00"), Decimal("850.00")
     ]

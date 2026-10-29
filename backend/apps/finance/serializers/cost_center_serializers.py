@@ -11,8 +11,9 @@ class CostCenterSerializer(ModelRulesMixin, serializers.ModelSerializer[CostCent
     @final
     class Meta:
         model = CostCenter
-        fields = ("id", "condominium", "code", "name", "active", "created_at", "updated_at")
-        read_only_fields = ("id", "created_at", "updated_at")
-        extra_kwargs = {"code": {"required": False}}
-        # DRF would require `code` for its own unique-together check; the model constraints run in `ModelRulesMixin`.
+        fields = ("id", "condominium", "catalog_item", "code", "name", "active", "created_at", "updated_at")
+        # `code` and `name` are the catalog item's (spec 053): the API only picks the item.
+        read_only_fields = ("id", "code", "name", "created_at", "updated_at")
+        extra_kwargs = {"catalog_item": {"required": True}}
+        # DRF would require the pair for its own unique-together check; the model constraints run in `ModelRulesMixin`.
         validators = ()

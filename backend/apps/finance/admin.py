@@ -11,6 +11,7 @@ from .models import (
     BankAccount,
     CompanyEntry,
     CostCenter,
+    CostCenterCatalogItem,
     CurrentAccount,
     CurrentAccountEntry,
     EntryBatch,
@@ -32,8 +33,17 @@ class EntryTemplateInline(CompanyScopedAdminMixin, TabularInline):
 class CostCenterAdmin(CompanyScopedAdminMixin, ModelAdmin):
     list_display = ("name", "condominium", "active")
     search_fields = ("name", "condominium__name")
+    readonly_fields = ("code", "name")
     list_filter = ("active", "condominium")
     inlines = (EntryTemplateInline,)
+
+
+@final
+@admin.register(CostCenterCatalogItem)
+class CostCenterCatalogItemAdmin(CompanyScopedAdminMixin, ModelAdmin):
+    list_display = ("code", "name", "company", "active")
+    search_fields = ("name",)
+    list_filter = ("active",)
 
 
 @final

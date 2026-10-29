@@ -4,6 +4,7 @@ from .views import (
     AccountPayableViewSet,
     BankAccountViewSet,
     CompanyEntryViewSet,
+    CostCenterCatalogItemViewSet,
     CostCenterViewSet,
     CurrentAccountEntryViewSet,
     CurrentAccountViewSet,
@@ -14,6 +15,7 @@ from .views import (
 )
 
 router = DefaultRouter()
+router.register("cost-center-catalog", CostCenterCatalogItemViewSet, basename="cost-center-catalog-item")
 router.register("cost-centers", CostCenterViewSet, basename="cost-center")
 router.register("entry-templates", EntryTemplateViewSet, basename="entry-template")
 router.register("suppliers", SupplierViewSet, basename="supplier")

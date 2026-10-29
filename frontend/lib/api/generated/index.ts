@@ -12,6 +12,7 @@ export * from './company-entries/company-entries';
 export * from './condominium-apportionment-criteria/condominium-apportionment-criteria';
 export * from './condominium-billing-rules/condominium-billing-rules';
 export * from './condominiums/condominiums';
+export * from './cost-center-catalog/cost-center-catalog';
 export * from './cost-centers/cost-centers';
 export * from './current-account-entries/current-account-entries';
 export * from './current-accounts/current-accounts';

@@ -11,7 +11,7 @@ from apps.condominiums.models import Condominium
 from apps.core.models import Company
 from apps.core.tests.scoping_data import build_company_data
 
-from ..models import CostCenter, EntryTemplate
+from ..models import CostCenter, CostCenterCatalogItem, EntryTemplate
 from .base import body, error_codes, errors, results
 
 pytestmark = pytest.mark.django_db
@@ -24,18 +24,23 @@ DETAIL = "cost-center-detail"
 
 
 def test_crud(api_client: APIClient, condominium: Condominium) -> None:
+    item = CostCenterCatalogItem.objects.create(company=condominium.company, name="Fundo de Obras")
     created = api_client.post(
-        reverse(LIST), {"condominium": str(condominium.pk), "name": "Fundo de Obras"}, format="json"
+        reverse(LIST), {"condominium": str(condominium.pk), "catalog_item": str(item.pk)}, format="json"
     )
     assert created.status_code == status.HTTP_201_CREATED, created.data
     cost_center_id = body(created)["id"]
     assert body(created)["active"] is True
+    assert body(created)["name"] == "Fundo de Obras"
+    assert body(created)["code"] == item.code
 
     detail = reverse(DETAIL, args=[cost_center_id])
     assert api_client.get(detail).status_code == status.HTTP_200_OK
-    renamed = api_client.patch(detail, {"name": "Fundo de Obras 2"}, format="json")
-    assert renamed.status_code == status.HTTP_200_OK
-    assert body(renamed)["name"] == "Fundo de Obras 2"
+    # The name belongs to the catalog item: a sub-conta only changes whether it is active (spec 053).
+    patched = api_client.patch(detail, {"name": "Outro nome", "active": False}, format="json")
+    assert patched.status_code == status.HTTP_200_OK
+    assert body(patched)["name"] == "Fundo de Obras"
+    assert body(patched)["active"] is False
     assert api_client.delete(detail).status_code == status.HTTP_204_NO_CONTENT
     assert not CostCenter.objects.filter(pk=cost_center_id).exists()
 
@@ -94,7 +99,9 @@ def test_other_company_is_404_and_foreign_condominium_is_does_not_exist(
     detail = api_client.get(reverse(DETAIL, args=[their_cost_center.pk]))
     listed = results(api_client.get(reverse(LIST)))
     created = api_client.post(
-        reverse(LIST), {"condominium": str(theirs.condominium.pk), "name": "X"}, format="json"
+        reverse(LIST),
+        {"condominium": str(theirs.condominium.pk), "catalog_item": str(their_cost_center.catalog_item_id)},
+        format="json",
     )
 
     assert detail.status_code == status.HTTP_404_NOT_FOUND
@@ -110,11 +117,13 @@ def test_duplicate_name_is_a_400_with_its_code(
     api_client: APIClient, condominium: Condominium, cost_center: CostCenter
 ) -> None:
     response = api_client.post(
-        reverse(LIST), {"condominium": str(condominium.pk), "name": cost_center.name}, format="json"
+        reverse(LIST),
+        {"condominium": str(condominium.pk), "catalog_item": str(cost_center.catalog_item_id)},
+        format="json",
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert errors(response)[0]["code"] == "cost_center.name.duplicate_in_condominium"
+    assert {item["code"] for item in errors(response)} >= {"cost_center.catalog_item.duplicate_in_condominium"}
 
 
 def test_same_name_is_allowed_in_another_condominium(
@@ -122,7 +131,7 @@ def test_same_name_is_allowed_in_another_condominium(
 ) -> None:
     response = api_client.post(
         reverse(LIST),
-        {"condominium": str(other_condominium.pk), "name": cost_center.name},
+        {"condominium": str(other_condominium.pk), "catalog_item": str(cost_center.catalog_item_id)},
         format="json",
     )
 
@@ -234,11 +243,15 @@ def test_a_code_is_unique_per_condominium(condominium: Condominium) -> None:
     assert "already has a cost center with this code" in str(raised.value)
 
 
-def test_the_api_shows_and_accepts_the_code(api_client: APIClient, condominium: Condominium) -> None:
+def test_the_api_shows_the_code_of_the_catalog_item(api_client: APIClient, condominium: Condominium) -> None:
+    obras = CostCenterCatalogItem.objects.create(company=condominium.company, code=2, name="Fundo de Obras")
+    garagem = CostCenterCatalogItem.objects.create(company=condominium.company, name="Garagem")
     created = api_client.post(
-        reverse(LIST), {"condominium": str(condominium.pk), "code": 2, "name": "Fundo de Obras"}, format="json"
+        reverse(LIST), {"condominium": str(condominium.pk), "catalog_item": str(obras.pk)}, format="json"
     )
-    auto = api_client.post(reverse(LIST), {"condominium": str(condominium.pk), "name": "Garagem"}, format="json")
+    other = api_client.post(
+        reverse(LIST), {"condominium": str(condominium.pk), "catalog_item": str(garagem.pk)}, format="json"
+    )
 
     assert body(created)["code"] == 2
-    assert body(auto)["code"] == 3
+    assert body(other)["code"] == garagem.code == 3
