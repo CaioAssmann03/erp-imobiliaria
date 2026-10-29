@@ -95,7 +95,7 @@ def test_the_daily_task_enqueues_only_the_condominiums_of_the_day(
     _ = CondominiumBillingRules.objects.create(condominium=other_condominium, issuance_day=1)
 
     with (
-        mock.patch.object(tasks.timezone, "localdate", return_value=today),
+        mock.patch("apps.billing.tasks.timezone.localdate", return_value=today),
         mock.patch.object(tasks.issue_condominium_billing_task, "delay") as delay,
     ):
         enqueued = tasks.issue_due_billing()
@@ -110,7 +110,7 @@ def test_the_daily_task_skips_inactive_condominiums(condominium: Condominium) ->
     _ = Condominium.objects.filter(pk=condominium.pk).update(active=False)
 
     with (
-        mock.patch.object(tasks.timezone, "localdate", return_value=today),
+        mock.patch("apps.billing.tasks.timezone.localdate", return_value=today),
         mock.patch.object(tasks.issue_condominium_billing_task, "delay") as delay,
     ):
         assert tasks.issue_due_billing() == 0
