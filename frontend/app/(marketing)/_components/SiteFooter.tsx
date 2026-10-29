@@ -16,7 +16,7 @@ export function SiteFooter() {
           </Link>
         ))}
       </nav>
-      <p className="text-label text-ink-faint">© {new Date().getFullYear()} EVE Administradora de Imóveis</p>
+      <p className="text-label text-ink-faint">© {new Date().getFullYear()} ERP Imobiliária</p>
     </footer>
   );
 }

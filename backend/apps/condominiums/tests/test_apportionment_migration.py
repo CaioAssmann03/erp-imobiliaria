@@ -50,7 +50,7 @@ def old_condominium_with_units(apps: StateApps) -> tuple[Any, Any, Any]:
     company_model: Any = apps.get_model("core", "Company")
     company, _ = company_model.objects.get_or_create(
         cnpj=SEEDED_COMPANY_CNPJ,
-        defaults={"legal_name": "EVE ADM DE IMOVEIS COND E VENDAS LTDA"},
+        defaults={"legal_name": "ADMINISTRADORA EXEMPLO LTDA"},
     )
     condominium_model: Any = apps.get_model("condominiums", "Condominium")
     unit_model: Any = apps.get_model("condominiums", "Unit")

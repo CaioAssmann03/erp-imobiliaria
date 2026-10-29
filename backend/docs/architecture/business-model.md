@@ -5,7 +5,7 @@ skip-if: a table of fields → architecture/data.md; the stack and env vars → 
 ---
 # Business model of the administradora
 
-Told by the user (the owner of EVE Administradora de Imóveis) on 2026-10-26, in Portuguese; kept here in English so every session reasons from the same facts.
+Told by the user (the owner of the administradora) on 2026-10-26, in Portuguese; kept here in English so every session reasons from the same facts.
 
 ## Money
 - The administradora has **one** payment-gateway account (Asaas), in its own name. Every boleto is issued on it and **all the real money lands there**. A condominium needs **no** gateway account and **no CNPJ** (many do not have one).

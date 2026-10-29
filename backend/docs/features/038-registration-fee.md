@@ -28,7 +28,7 @@ None.
 | 2026-10-27 | **How a line prints:** every line opens with the event code in four digits, a dash and the event name (`0005-TARIFA BANCO`), then the description; a **plan item may name an event** too | "as you prefer" (agent) |
 
 ## Example sent by the user (2026-10-27)
-A Santander boleto issued in the administradora's own name (beneficiary EVE ADM DE IMOVEIS COND E VENDAS), competence SET/2026, due 10/10/2026, unit "Apto 103", "SÉRIE: 195 REGISTRO: 6518". Lines: `0005-TARIFA BANCO 3,90`, `2772-PINTURA FACHADA 30,00`, `0052-CONDOMINIO 170,00`; `TOTAL ATÉ 10/10/2026 203,90`; `MULTA APÓS 10/10/2026 4,04`; `TOTAL C/MULTA APÓS 10/10/2026 207,94`; `PAGAMENTO NA ADM. SEM TAXA BANCO ATÉ 10/10/2026 200,00`; "APÓS VENCIMENTO ACRESCER CORREÇÃO MONETÁRIA, JUROS DE 1% A.M E MULTA DE 2%".
+A Santander boleto issued in the administradora's own name (the beneficiary is the administradora), competence SET/2026, due 10/10/2026, unit "Apto 103", "SÉRIE: 195 REGISTRO: 6518". Lines: `0005-TARIFA BANCO 3,90`, `2772-PINTURA FACHADA 30,00`, `0052-CONDOMINIO 170,00`; `TOTAL ATÉ 10/10/2026 203,90`; `MULTA APÓS 10/10/2026 4,04`; `TOTAL C/MULTA APÓS 10/10/2026 207,94`; `PAGAMENTO NA ADM. SEM TAXA BANCO ATÉ 10/10/2026 200,00`; "APÓS VENCIMENTO ACRESCER CORREÇÃO MONETÁRIA, JUROS DE 1% A.M E MULTA DE 2%".
 
 ## R — Requirements
 A boleto total is the sum of its lines. A line can credit a condominium's sub-conta or the administradora itself (the fee). When the boleto is paid, each line is credited where it belongs, in one transaction.

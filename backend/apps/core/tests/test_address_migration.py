@@ -45,7 +45,7 @@ def old_addresses(apps: StateApps) -> tuple[Any, Any, Any]:
     """A condominium with an address, and an address nobody points at."""
     company_model: Any = apps.get_model("core", "Company")
     company, _ = company_model.objects.get_or_create(
-        cnpj=SEEDED_COMPANY_CNPJ, defaults={"legal_name": "EVE ADM DE IMOVEIS COND E VENDAS LTDA"}
+        cnpj=SEEDED_COMPANY_CNPJ, defaults={"legal_name": "ADMINISTRADORA EXEMPLO LTDA"}
     )
     address_model: Any = apps.get_model("condominiums", "Address")
     used = address_model.objects.create(street="Rua A", number="10", city="Curitiba", state="PR")
