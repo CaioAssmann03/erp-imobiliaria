@@ -18,11 +18,7 @@ test("the active module follows the URL", () => {
 test("an item without a screen has no link, and every linked item is absolute", () => {
   const items = APP_MODULES.flatMap((appModule) => appModule.groups.flatMap((group) => group.items));
   const soon = items.filter((item) => !item.href).map((item) => item.label);
-  assert.deepEqual(soon, [
-    "Áreas",
-    "Ficha da unidade",
-    "Taxa de administração",
-  ]);
+  assert.deepEqual(soon, ["Áreas"]);
   for (const item of items) if (item.href) assert.ok(item.href.startsWith("/"));
 });
 

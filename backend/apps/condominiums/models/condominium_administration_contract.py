@@ -1,5 +1,6 @@
 import uuid
 from datetime import date
+from decimal import ROUND_HALF_UP, Decimal
 from typing import TYPE_CHECKING, final, override
 
 from django.db import models
@@ -92,6 +93,31 @@ class CondominiumAdministrationContract(UUIDModel):
     def clean(self) -> None:
         """Also guarded by the check constraints above."""
         CondominiumAdministrationContractRules(self).validate()
+
+    def is_due_in(self, month: date) -> bool:
+        """Whether the contract already runs in `month` (its first day): a month before the start date's month is not due."""
+        return self.start_date is None or month >= self.start_date.replace(day=1)
+
+    def fee_before_limits(self, base_amount: Decimal) -> Decimal:
+        """The fee without the floor and the ceiling: the fixed amount, or the percentage of the month's base (half-up to the cent)."""
+        if self.fee_type == self.FeeType.FIXED:
+            return self.fee_amount or Decimal(0)
+        percentage = self.fee_percentage or Decimal(0)
+        return (base_amount * percentage / 100).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    def fee_for(self, base_amount: Decimal) -> Decimal:
+        """What the administradora charges for a month whose base (revenue or expense) is `base_amount`.
+
+        A fixed fee is the amount; a variable one is kept between the floor and the ceiling when they exist.
+        """
+        fee = self.fee_before_limits(base_amount)
+        if self.fee_type == self.FeeType.FIXED:
+            return fee
+        if self.fee_floor is not None:
+            fee = max(fee, self.fee_floor)
+        if self.fee_ceiling is not None:
+            fee = min(fee, self.fee_ceiling)
+        return fee
 
     def next_adjustment_date(self) -> date | None:
         if self.adjustment_base_date is None:

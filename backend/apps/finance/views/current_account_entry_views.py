@@ -1,6 +1,8 @@
 from typing import cast, final
 
 from django.http import HttpResponse
+from django.utils import timezone
+from django.utils.text import slugify
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.types import OpenApiTypes
@@ -12,17 +14,25 @@ from rest_framework.response import Response
 
 from apps.accounts.models import User
 from apps.core.infrastructure.api.filters import QuerySearchFilter
-from apps.condominiums.models import Condominium
+from apps.condominiums.models import Condominium, Unit
 from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin, scope_to_company
 
 from ..filters import CurrentAccountEntryFilter
 from ..models import CurrentAccountEntry
 from ..serializers import (
     AccountabilityQuerySerializer,
+    AdministrationFeeQuerySerializer,
+    AdministrationFeeReportSerializer,
+    UnitSheetQuerySerializer,
+    UnitSheetSerializer,
     AccountabilityReportSerializer,
     CurrentAccountEntrySerializer,
     ReverseEntrySerializer,
 )
+from ..services.build_administration_fee_report import AdministrationFeeReport, build_administration_fee_report
+from ..services.build_unit_sheet import UnitSheet, build_unit_sheet
+from ..services.render_unit_sheet_pdf import render_unit_sheet_pdf
+from ..services.render_administration_fee_pdf import render_administration_fee_pdf
 from ..services.build_accountability_report import AccountabilityReport, build_accountability_report
 from ..services.render_accountability_pdf import render_accountability_pdf
 from ..services.reverse_entry import reverse_entry
@@ -97,5 +107,76 @@ class CurrentAccountEntryViewSet(
         response = HttpResponse(content, content_type="application/pdf")
         response["Content-Disposition"] = (
             f'attachment; filename="prestacao-de-contas-{report.condominium_code:04d}-{report.month:%Y-%m}.pdf"'
+        )
+        return response
+
+    def _administration_fee_report(self, request: Request) -> AdministrationFeeReport:
+        """The month's administration fee of the active condominiums of the user's company (another company's is a 404)."""
+        query = AdministrationFeeQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        condominiums = scope_to_company(Condominium.objects.filter(active=True), request.user)
+        if "condominium" in query.validated_data:
+            chosen = get_object_or_404(condominiums, pk=query.validated_data["condominium"])
+            condominiums = condominiums.filter(pk=chosen.pk)
+        return build_administration_fee_report(query.validated_data["month"], condominiums, self.get_queryset())
+
+    @extend_schema(
+        parameters=[AdministrationFeeQuerySerializer],
+        responses=AdministrationFeeReportSerializer,
+        operation_id="current_account_entries_administration_fee",
+    )
+    @action(detail=False, methods=["get"], url_path="administration-fee")
+    def administration_fee(self, request: Request) -> Response:
+        """Report: what the administradora charges each condominium in a month, from its contract and its statement."""
+        return Response(AdministrationFeeReportSerializer(self._administration_fee_report(request)).data)
+
+    @extend_schema(
+        parameters=[AdministrationFeeQuerySerializer],
+        responses={(200, "application/pdf"): OpenApiTypes.BINARY},
+        operation_id="current_account_entries_administration_fee_pdf",
+    )
+    @action(detail=False, methods=["get"], url_path="administration-fee/pdf")
+    def administration_fee_pdf(self, request: Request) -> HttpResponse:
+        """The same report as a PDF download."""
+        report = self._administration_fee_report(request)
+        company = getattr(request.user, "company", None)
+        content = render_administration_fee_pdf(report, company.legal_name if company else "")
+        response = HttpResponse(content, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="taxa-de-administracao-{report.month:%Y-%m}.pdf"'
+        return response
+
+    def _unit_sheet(self, request: Request) -> UnitSheet:
+        """The unit's sheet for the period asked (default: the last 12 months); another company's unit is a 404."""
+        query = UnitSheetQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        unit = get_object_or_404(
+            scope_to_company(Unit.objects.select_related("condominium", "block"), request.user), pk=query.validated_data["unit"]
+        )
+        return build_unit_sheet(unit, query.validated_data["from_month"], query.validated_data["to_month"], timezone.localdate())
+
+    @extend_schema(
+        parameters=[UnitSheetQuerySerializer],
+        responses=UnitSheetSerializer,
+        operation_id="current_account_entries_unit_sheet",
+    )
+    @action(detail=False, methods=["get"], url_path="unit-sheet")
+    def unit_sheet(self, request: Request) -> Response:
+        """Report: one page about a unit — its data and people, its boletos and the entries of its account."""
+        return Response(UnitSheetSerializer(self._unit_sheet(request)).data)
+
+    @extend_schema(
+        parameters=[UnitSheetQuerySerializer],
+        responses={(200, "application/pdf"): OpenApiTypes.BINARY},
+        operation_id="current_account_entries_unit_sheet_pdf",
+    )
+    @action(detail=False, methods=["get"], url_path="unit-sheet/pdf")
+    def unit_sheet_pdf(self, request: Request) -> HttpResponse:
+        """The same sheet as a PDF download."""
+        sheet = self._unit_sheet(request)
+        company = getattr(request.user, "company", None)
+        content = render_unit_sheet_pdf(sheet, company.legal_name if company else "")
+        response = HttpResponse(content, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            f'attachment; filename="ficha-{sheet.condominium_code:04d}-{slugify(sheet.unit_name) or "unidade"}.pdf"'
         )
         return response

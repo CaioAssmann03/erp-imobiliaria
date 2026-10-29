@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Taxa de administração</title>
+<style>
+  @page { size: A4 landscape; margin: 14mm 12mm; @bottom-right { content: "Página " counter(page) " de " counter(pages); font-size: 8pt; color: #555; } }
+  body { font-family: "Liberation Sans", Arial, Helvetica, sans-serif; font-size: 9pt; color: #1a1a1a; }
+  header { border-bottom: 2px solid #1a1a1a; padding-bottom: 6pt; margin-bottom: 10pt; }
+  h1 { font-size: 15pt; margin: 0 0 2pt 0; }
+  .muted { color: #555; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 8pt; }
+  th { text-align: left; background: #eee; border: 1px solid #999; padding: 3pt 5pt; }
+  td { border: 1px solid #ccc; padding: 3pt 5pt; }
+  .amount { text-align: right; white-space: nowrap; }
+  .total td { font-weight: bold; border-top: 2px solid #1a1a1a; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Taxa de administração</h1>
+  <div class="muted">{{ company_name }} · {{ month }}</div>
+</header>
+
+<table>
+  <tr><th>Condomínio</th><th>Regra do contrato</th><th class="amount">Base do mês</th><th class="amount">Taxa devida</th><th>ISS na taxa</th><th>Observação</th></tr>
+  {% for row in rows %}
+  <tr>
+    <td>{{ row.condominium }}</td><td>{{ row.rule }}</td><td class="amount">{{ row.base }}</td>
+    <td class="amount">{{ row.fee_due }}</td><td>{{ row.iss }}</td><td>{{ row.note }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="6">Nenhum condomínio ativo.</td></tr>
+  {% endfor %}
+  <tr class="total"><td colspan="3">Total ({{ count }} condomínio{{ count|pluralize }})</td><td class="amount">{{ total_fee }}</td><td colspan="2"></td></tr>
+</table>
+<p class="muted">A base é o extrato do mês (créditos para a taxa sobre a receita, débitos para a taxa sobre a despesa), pela data do lançamento. O ISS é só indicado: não é calculado aqui.</p>
+</body>
+</html>

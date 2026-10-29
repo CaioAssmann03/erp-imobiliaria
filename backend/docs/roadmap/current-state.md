@@ -23,8 +23,10 @@ Specs 049 and 050 are condensed in [`features/history.md`](../features/history.m
 | 030 | `dropped` (sub-account per condominium) | — |
 | 037 single gateway account | `in-progress`, implemented | sandbox validation with the CPF account (key, webhook, a charge, a confirmed payment, postings in three sub-contas); Asaas confirmation that the use is allowed; the user's OK on 2 decisions marked *agent, to be confirmed* |
 | 038 registration fee | `in-progress`, implemented (backend + frontend) | the user's use on real data; the PDF discount sentence checked by eye; the payment at the administradora's counter (*caixa*) and the reversal of a company entry on a refund are left for later |
-| 052 reports | `in-progress`, implemented (Inadimplência and Prestação de contas, screen + PDF) | the user's OK on the decisions marked *agent, to be confirmed*; Ficha da unidade and Taxa de administração reports are still to do |
+| 052 reports | `in-progress`, implemented (Inadimplência and Prestação de contas, screen + PDF) | the user's OK on the decisions marked *agent, to be confirmed* |
 | 053 sub-conta catalog | `in-progress`, implemented (one catalog for the administradora, each condominium uses the ones it wants) | the user's OK on the decisions marked *agent, to be confirmed*; the data migration run on a copy of the real data |
+| 056 administration fee report | `in-progress`, implemented (screen + PDF; read only, the fee is not posted) | the user's OK on the decisions marked *agent, to be confirmed* (ISS not calculated; not-started and no-contract rows); use on real data |
+| 057 unit sheet report | `in-progress`, implemented (screen + PDF, button on the unit page) | the user's OK on the decisions marked *agent, to be confirmed*; use on real data |
 | 055 discounts | `in-progress`, implemented (negative values in the launches and the extra boleto, total never below the fee, debit posting) | the user's OK on the decisions marked *agent, to be confirmed*; use on real data |
 | 054 extra boleto | `in-progress`, implemented (backend + frontend) | the user's OK on the decisions marked *agent, to be confirmed*; use on real data |
 | 039 billing entries | `in-progress`, implemented (backend + frontend) | the user's OK on 3 decisions marked *agent, to be confirmed*; use on real data |

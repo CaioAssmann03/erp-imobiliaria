@@ -1,11 +1,14 @@
 "use client";
 
+import Link from "next/link";
+
 import { BackLink } from "@/components/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUnitsRetrieve } from "@/lib/api/generated";
 import { unitTypeLabel } from "@/lib/schemas/unit";
 import { cn } from "@/lib/utils";
 import { condominiumUrl } from "@/lib/condominium-registry";
+import { unitSheetUrl } from "@/lib/reports";
 import { unitListLabel } from "@/lib/unit-workspace";
 
 /**
@@ -32,6 +35,9 @@ export function UnitHeader({ condominiumId, unitId }: { condominiumId: string; u
         <h1 className="text-title">{unitListLabel(unitTypeLabel(unit.type), unit.name)}</h1>
         {unit.is_manager_unit && <span className="text-body text-ink-soft">Síndico</span>}
         <span className={cn("text-body font-medium", active ? "text-success" : "text-warning")}>{active ? "Ativa" : "Inativa"}</span>
+        <Link href={unitSheetUrl(condominiumId, unitId)} className="text-body text-brand hover:underline">
+          Ficha da unidade
+        </Link>
       </div>
     </div>
   );

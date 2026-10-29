@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Ficha da unidade</title>
+<style>
+  @page { size: A4; margin: 14mm 12mm; @bottom-right { content: "Página " counter(page) " de " counter(pages); font-size: 8pt; color: #555; } }
+  body { font-family: "Liberation Sans", Arial, Helvetica, sans-serif; font-size: 9pt; color: #1a1a1a; }
+  header { border-bottom: 2px solid #1a1a1a; padding-bottom: 6pt; margin-bottom: 10pt; }
+  h1 { font-size: 15pt; margin: 0 0 2pt 0; }
+  h2 { font-size: 11pt; margin: 12pt 0 4pt 0; }
+  .muted { color: #555; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 8pt; }
+  th { text-align: left; background: #eee; border: 1px solid #999; padding: 3pt 5pt; }
+  td { border: 1px solid #ccc; padding: 3pt 5pt; }
+  .amount { text-align: right; white-space: nowrap; }
+  .total td { font-weight: bold; border-top: 2px solid #1a1a1a; }
+  .warning { color: #b00000; font-weight: bold; margin: 6pt 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Ficha da unidade {{ unit_label }}</h1>
+  <div class="muted">{{ company_name }} · {{ condominium }} · {{ period }}</div>
+</header>
+
+<h2>Dados da unidade</h2>
+<table>
+  <tr><th>Tipo</th><th>Situação</th><th>Matrícula</th><th class="amount">Moradores</th><th class="amount">Gás</th><th class="amount">Água</th><th class="amount">Energia</th></tr>
+  <tr><td>{{ unit_type }}</td><td>{{ situation }}</td><td>{{ registration_number }}</td><td class="amount">{{ resident_count }}</td>
+    <td class="amount">{{ gas_value }}</td><td class="amount">{{ water_value }}</td><td class="amount">{{ electricity_value }}</td></tr>
+</table>
+{% if fractions %}
+<table>
+  <tr><th>Critério de rateio</th><th class="amount">Fração</th></tr>
+  {% for item in fractions %}<tr><td>{{ item.name }}</td><td class="amount">{{ item.value }}</td></tr>{% endfor %}
+</table>
+{% endif %}
+
+<h2>Pessoas</h2>
+<table>
+  <tr><th>Vínculo</th><th>Nome</th><th class="amount">Participação</th><th>Desde</th><th>Até</th></tr>
+  {% for person in people %}
+  <tr><td>{{ person.role }}</td><td>{{ person.name }}</td><td class="amount">{{ person.percentage }}</td><td>{{ person.since }}</td><td>{{ person.until }}</td></tr>
+  {% empty %}
+  <tr><td colspan="5">Nenhum proprietário nem inquilino atual.</td></tr>
+  {% endfor %}
+</table>
+
+<h2>Boletos</h2>
+<table>
+  <tr><th class="amount">Emitido</th><th class="amount">Pago</th><th class="amount">Em aberto</th><th class="amount">Vencido</th></tr>
+  <tr><td class="amount">{{ total_issued }}</td><td class="amount">{{ total_paid }}</td><td class="amount">{{ total_open }}</td><td class="amount">{{ total_overdue }}</td></tr>
+</table>
+{% if boletos_truncated %}<p class="warning">A lista mostra só os primeiros boletos; os totais consideram todos.</p>{% endif %}
+<table>
+  <tr><th>Referência</th><th>Tipo</th><th>Vencimento</th><th class="amount">Valor</th><th>Situação</th><th class="amount">Dias de atraso</th><th>Pago em</th></tr>
+  {% for item in boletos %}
+  <tr><td>{{ item.reference }}</td><td>{{ item.kind }}</td><td>{{ item.due_date }}</td><td class="amount">{{ item.amount }}</td>
+    <td>{{ item.status }}</td><td class="amount">{{ item.days_overdue }}</td><td>{{ item.paid_on }}</td></tr>
+  {% empty %}
+  <tr><td colspan="7">Nenhum boleto neste período.</td></tr>
+  {% endfor %}
+</table>
+
+<h2>Lançamentos do extrato</h2>
+{% if entries_truncated %}<p class="warning">A lista mostra só os primeiros lançamentos; os totais consideram todos.</p>{% endif %}
+<table>
+  <tr><th>Data</th><th>Histórico</th><th>Sub-conta</th><th class="amount">Crédito</th><th class="amount">Débito</th></tr>
+  {% for entry in entries %}
+  <tr><td>{{ entry.entry_date }}</td><td>{{ entry.description }}</td><td>{{ entry.cost_center }}</td><td class="amount">{{ entry.credit }}</td><td class="amount">{{ entry.debit }}</td></tr>
+  {% empty %}
+  <tr><td colspan="5">Nenhum lançamento neste período.</td></tr>
+  {% endfor %}
+  <tr class="total"><td colspan="3">Total</td><td class="amount">{{ total_credits }}</td><td class="amount">{{ total_debits }}</td></tr>
+</table>
+</body>
+</html>

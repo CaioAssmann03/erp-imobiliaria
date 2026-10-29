@@ -62,9 +62,9 @@ export const APP_MODULES: readonly AppModule[] = [
       {
         title: "Relatórios",
         items: [
-          { label: "Ficha da unidade", description: "Tudo de uma unidade em uma página", icon: "file" },
+          { label: "Ficha da unidade", description: "Tudo de uma unidade em uma página", icon: "file", href: "/reports/unit-sheet" },
           { label: "Relatórios", description: "Todos os relatórios do sistema", icon: "folder", href: "/reports" },
-          { label: "Taxa de administração", description: "Cobrança por condomínio", icon: "percent" },
+          { label: "Taxa de administração", description: "Cobrança por condomínio", icon: "percent", href: "/reports/administration-fee" },
           { label: "Inadimplência", description: "Boletos vencidos e não pagos", icon: "receipt", href: "/reports/delinquency" },
           { label: "Prestação de contas", description: "Receitas e despesas do mês", icon: "wallet", href: "/reports/accountability" },
         ],

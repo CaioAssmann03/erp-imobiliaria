@@ -19,8 +19,18 @@ const REPORTS = [
     description: "O mês de um condomínio na conta corrente: saldo anterior, créditos, débitos e saldo final.",
     icon: Wallet,
   },
-  { title: "Ficha da unidade", description: "Tudo de uma unidade em uma página.", icon: FileText },
-  { title: "Taxa de administração", description: "A cobrança da administradora por condomínio.", icon: Percent },
+  {
+    href: "/reports/unit-sheet",
+    title: "Ficha da unidade",
+    description: "Tudo de uma unidade em uma página: dados, pessoas, boletos e lançamentos do extrato.",
+    icon: FileText,
+  },
+  {
+    href: "/reports/administration-fee",
+    title: "Taxa de administração",
+    description: "O que a administradora tem a cobrar de cada condomínio no mês, pelo contrato e pelo extrato.",
+    icon: Percent,
+  },
 ] as const;
 
 export default function ReportsPage() {
@@ -30,33 +40,18 @@ export default function ReportsPage() {
       <ul className="grid gap-4 md:grid-cols-2">
         {REPORTS.map((report) => (
           <li key={report.title}>
-            {"href" in report ? (
-              <Link
-                href={report.href}
-                className="flex h-full items-start gap-4 rounded-card bg-card p-5 shadow-card transition-colors hover:bg-surface-muted"
-              >
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-panel bg-surface-muted text-brand">
-                  <report.icon className="size-5" />
-                </span>
-                <span>
-                  <span className="block text-heading">{report.title}</span>
-                  <span className="mt-1 block text-body text-ink-soft">{report.description}</span>
-                </span>
-              </Link>
-            ) : (
-              <div aria-disabled="true" className="flex h-full items-start gap-4 rounded-card bg-card p-5 opacity-60 shadow-card">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-panel bg-surface-muted text-ink-faint">
-                  <report.icon className="size-5" />
-                </span>
-                <span>
-                  <span className="flex items-center gap-2 text-heading">
-                    {report.title}
-                    <span className="rounded-full bg-surface-muted px-2 py-0.5 text-caption font-normal text-ink-soft">Em breve</span>
-                  </span>
-                  <span className="mt-1 block text-body text-ink-soft">{report.description}</span>
-                </span>
-              </div>
-            )}
+            <Link
+              href={report.href}
+              className="flex h-full items-start gap-4 rounded-card bg-card p-5 shadow-card transition-colors hover:bg-surface-muted"
+            >
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-panel bg-surface-muted text-brand">
+                <report.icon className="size-5" />
+              </span>
+              <span>
+                <span className="block text-heading">{report.title}</span>
+                <span className="mt-1 block text-body text-ink-soft">{report.description}</span>
+              </span>
+            </Link>
           </li>
         ))}
       </ul>
