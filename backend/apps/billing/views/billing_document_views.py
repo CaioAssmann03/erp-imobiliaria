@@ -28,7 +28,7 @@ from ..serializers import (
     DelinquencyReportSerializer,
 )
 from ..services.cancel_billing_document import cancel_billing_document
-from ..services.delinquency_report import DelinquencyReport, build_delinquency_report
+from ..services.build_delinquency_report import DelinquencyReport, build_delinquency_report
 from ..services.generate_billing_document_pdf import generate_billing_document_pdf
 from ..services.render_delinquency_pdf import render_delinquency_pdf
 from ..services.reissue_billing_document import reissue_billing_document

@@ -1,6 +1,6 @@
 from django.template.loader import render_to_string
 
-from apps.billing.services.delinquency_report import DelinquencyReport
+from apps.billing.services.build_delinquency_report import DelinquencyReport
 from apps.core.infrastructure.formatting import format_date, format_money, format_month
 from apps.core.infrastructure.pdf import render_pdf
 

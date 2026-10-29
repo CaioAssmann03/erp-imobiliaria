@@ -34,7 +34,7 @@ N/A — no model, no migration. New read-only serializers and services.
 
 ## A — Approach
 - **Where it lives.** The data's owner serves it: the overdue report is an `@action` of `BillingDocumentViewSet` (`delinquency`, `delinquency/pdf`), the accountability report one of `CurrentAccountEntryViewSet`. Both are company-scoped by the viewsets' own queryset.
-- **Services build the report, the view only calls them** (`billing/services/delinquency_report.py`, `finance/services/accountability_report.py`: dataclasses of totals and rows) and **render** it (`render_delinquency_pdf`, `render_accountability_pdf`, WeasyPrint with the same refuse-every-URL fetcher as the boleto, templates in `infrastructure/rendering/templates/`). The business arithmetic (days late, balance per sub-conta) is in the service, not the serializer.
+- **Services build the report, the view only calls them** (`billing/services/build_delinquency_report.py`, `finance/services/build_accountability_report.py`: dataclasses of totals and rows) and **render** it (`render_delinquency_pdf`, `render_accountability_pdf`, WeasyPrint with the same refuse-every-URL fetcher as the boleto, templates in `infrastructure/rendering/templates/`). The business arithmetic (days late, balance per sub-conta) is in the service, not the serializer.
 - **PDF in the response, not in the bucket:** a report is a view of data at a moment; storing it would only keep stale copies.
 - Rejected: one `reports` app (it would import billing and finance and duplicate their scoping); pagination of a report (a report is whole, with a row cap).
 

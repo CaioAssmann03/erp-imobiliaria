@@ -20,7 +20,7 @@ from ..services.create_billing_document import (
     NewBillingDocumentItem,
     create_billing_document,
 )
-from ..services.delinquency_report import ROW_LIMIT, build_delinquency_report
+from ..services.build_delinquency_report import ROW_LIMIT, build_delinquency_report
 
 pytestmark = pytest.mark.django_db
 
@@ -133,7 +133,7 @@ def test_without_overdue_documents_the_report_is_empty(api_client: APIClient, do
 
 def test_rows_are_capped_but_totals_cover_everything(document: BillingDocument, monkeypatch: pytest.MonkeyPatch) -> None:
     _ = _due(document, 5)
-    monkeypatch.setattr("apps.billing.services.delinquency_report.ROW_LIMIT", 0)
+    monkeypatch.setattr("apps.billing.services.build_delinquency_report.ROW_LIMIT", 0)
 
     report = build_delinquency_report(BillingDocument.objects.all(), timezone.localdate())
 

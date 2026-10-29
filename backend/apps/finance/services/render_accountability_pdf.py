@@ -3,7 +3,7 @@ from django.template.loader import render_to_string
 from apps.core.infrastructure.formatting import format_date, format_money, format_month
 from apps.core.infrastructure.pdf import render_pdf
 from apps.finance.models import CurrentAccountEntry
-from apps.finance.services.accountability_report import AccountabilityReport
+from apps.finance.services.build_accountability_report import AccountabilityReport
 
 TEMPLATE = "finance/accountability_report.html"
 

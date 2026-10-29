@@ -11,7 +11,7 @@ from rest_framework.test import APIClient
 from apps.condominiums.models import Condominium
 
 from ..models import CostCenter, CurrentAccountEntry, EntryTemplate
-from ..services.accountability_report import build_accountability_report
+from ..services.build_accountability_report import build_accountability_report
 from ..services.post_entry import post_entry
 from .base import body, error_codes
 
@@ -130,7 +130,7 @@ def test_a_condominium_of_another_company_is_not_found(other_api_client: APIClie
 
 
 def test_the_service_row_cap_keeps_the_totals(condominium: Condominium, ledger: None, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("apps.finance.services.accountability_report.ROW_LIMIT", 1)
+    monkeypatch.setattr("apps.finance.services.build_accountability_report.ROW_LIMIT", 1)
 
     report = build_accountability_report(
         condominium, date(2026, 10, 1), CurrentAccountEntry.objects.filter(current_account__condominium=condominium)

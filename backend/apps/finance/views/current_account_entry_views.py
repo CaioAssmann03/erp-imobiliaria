@@ -23,7 +23,7 @@ from ..serializers import (
     CurrentAccountEntrySerializer,
     ReverseEntrySerializer,
 )
-from ..services.accountability_report import AccountabilityReport, build_accountability_report
+from ..services.build_accountability_report import AccountabilityReport, build_accountability_report
 from ..services.render_accountability_pdf import render_accountability_pdf
 from ..services.reverse_entry import reverse_entry
 
