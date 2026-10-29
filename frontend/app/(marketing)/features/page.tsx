@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 
-import { ContactCta } from "../_components/ContactCta";
 import { FeatureGrid } from "../_components/FeatureGrid";
 import { PageIntro } from "../_components/PageIntro";
 import { Section } from "../_components/Section";
@@ -21,7 +20,6 @@ export default function FeaturesPage() {
       <Section eyebrow="Módulos" title="O que você encontra dentro">
         <FeatureGrid />
       </Section>
-      <ContactCta />
     </>
   );
 }

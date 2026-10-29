@@ -11,7 +11,7 @@ export const PAD = 40;
 export const PARALLAX_FRONT = 14;
 export const PARALLAX_BACK = -8;
 /** Espessura da linha e o vão entre linhas (px de CSS): o efeito de "persiana". Inteiros, alinhados à grade de janelas. */
-export const LINE = 2;
+export const LINE = 3;
 export const PITCH = 4;
 
 export interface SkylineColors {
@@ -46,7 +46,7 @@ export function renderLayers(scene: SkylineScene, width: number, height: number,
   const wide = width + PAD * 2;
 
   const back = layer(wide, height, ratio);
-  back.context.globalAlpha = 0.35;
+  back.context.globalAlpha = 0.5;
   back.context.fillStyle = colors.tones[0];
   for (const body of scene.back) back.context.fillRect(body.x + PAD, body.y, body.w, body.h);
 
