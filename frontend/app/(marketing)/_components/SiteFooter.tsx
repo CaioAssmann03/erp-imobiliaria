@@ -84,7 +84,7 @@ export function SiteFooter() {
           <p className="text-label text-ink-foreground/50">
             © {new Date().getFullYear()} EVE Administradora de Imóveis
           </p>
-          <p className="text-label text-ink-foreground/50">ERP Imobiliária</p>
+          <p className="text-label text-ink-foreground/50">METRI</p>
         </div>
       </div>
     </footer>

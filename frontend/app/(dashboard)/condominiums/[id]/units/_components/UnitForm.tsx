@@ -32,6 +32,7 @@ import { FractionsSection } from "./unit-form/FractionsSection";
 import { IdentificationSection } from "./unit-form/IdentificationSection";
 import { MetersSection } from "./unit-form/MetersSection";
 import { useUnitSubmit } from "./unit-form/use-unit-submit";
+import { UnitDeleteButton } from "./UnitDeleteButton";
 import { UnitPeopleSection } from "./unit-people/UnitPeopleSection";
 
 interface UnitFormProps {
@@ -98,7 +99,11 @@ export function UnitForm({ condominiumId, unitId }: UnitFormProps) {
           <BillingSection />
           <MetersSection />
         </div>
-        <FormActions isSubmitting={isSubmitting} formId={FORM_ID}>
+        <FormActions
+          isSubmitting={isSubmitting}
+          formId={FORM_ID}
+          danger={unit && <UnitDeleteButton condominiumId={condominiumId} unitId={unit.id} name={unit.name} />}
+        >
           <Button type="button" variant="secondary" onClick={() => router.push(unitsUrl(condominiumId))}>
             Cancelar
           </Button>

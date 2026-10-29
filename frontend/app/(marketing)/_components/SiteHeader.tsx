@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { MetriLogo } from "@/components/MetriLogo";
 import { ModeToggle } from "@/components/ModeToggle";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +13,7 @@ import { NAV_LINKS } from "./content";
 import { MarketingButton } from "./MarketingButton";
 
 /**
- * Cabeçalho das páginas públicas: o nome à esquerda, a navegação em rótulos (caixa-alta) no meio e, à direita, o acesso
+ * Cabeçalho das páginas públicas: o logo METRI (casa e nome) à esquerda, a navegação em rótulos (caixa-alta) no meio e, à direita, o acesso
  * ao sistema; ganha fundo depois que a página rola.
  */
 export function SiteHeader() {
@@ -30,8 +31,8 @@ export function SiteHeader() {
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6">
         <div className="flex flex-1 items-center">
-          <Link href="/" aria-label="Página inicial" className="text-body font-medium">
-            ERP Imobiliária
+          <Link href="/" aria-label="Página inicial">
+            <MetriLogo className="h-8 w-auto" />
           </Link>
         </div>
         <nav aria-label="Principal" className="hidden items-center gap-8 md:flex">

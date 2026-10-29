@@ -7,7 +7,7 @@ import { MarketingButton } from "../MarketingButton";
 import { ScanlineSkyline } from "./ScanlineSkyline";
 import { SkyFlyers } from "./SkyFlyers";
 
-const TITLE = "Condomínio em ordem.";
+const TITLE = "Condomínio em dia.";
 const DESCRIPTION =
   "Emita a cobrança do mês em lote, receba as baixas em tempo real e feche o extrato sem digitar nada, para todos os condomínios da administradora, no mesmo painel.";
 

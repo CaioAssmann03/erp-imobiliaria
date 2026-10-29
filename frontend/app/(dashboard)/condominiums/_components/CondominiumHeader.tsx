@@ -2,26 +2,27 @@
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCondominiumsRetrieve } from "@/lib/api/generated";
-import { StatusBadge } from "@/components/StatusBadge";
+import { cn } from "@/lib/utils";
 
-import { CondominiumDeleteButton } from "./CondominiumDeleteButton";
-
-/** Client Component: o nome, o código e a situação do condomínio aberto, com Excluir; usa a mesma consulta do formulário (uma só chamada). */
+/**
+ * Client Component: o código (cinza, como na lista ao lado), o nome e a situação do condomínio aberto, a situação em texto simples e colorido (verde ativo, âmbar inativo), sem selo.
+ * Usa a mesma consulta do formulário (uma só chamada); o Excluir fica na barra de ações dele.
+ */
 export function CondominiumHeader({ condominiumId }: { condominiumId: string }) {
   const { data: condominium } = useCondominiumsRetrieve(condominiumId);
 
   if (!condominium) return <Skeleton className="mb-6 h-9 w-72 rounded-control" />;
 
+  const active = condominium.active ?? true;
+
   return (
-    <div className="mb-6 flex flex-wrap items-center gap-3">
-      <h1 className="text-title">{condominium.name}</h1>
-      <span className="rounded-md bg-surface-muted px-2 py-0.5 text-caption font-medium tabular-nums text-ink-soft">
-        {String(condominium.code).padStart(4, "0")}
-      </span>
-      <StatusBadge active={condominium.active ?? true} />
-      <div className="ml-auto">
-        <CondominiumDeleteButton condominiumId={condominium.id} name={condominium.name} />
-      </div>
+    <div className="mb-6 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+      <h1 className="text-title">
+        <span className="tabular-nums text-ink-faint">{String(condominium.code).padStart(4, "0")}</span>
+        <span className="text-ink-faint"> · </span>
+        {condominium.name}
+      </h1>
+      <span className={cn("text-body font-medium", active ? "text-success" : "text-warning")}>{active ? "Ativo" : "Inativo"}</span>
     </div>
   );
 }

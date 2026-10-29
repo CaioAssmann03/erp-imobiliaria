@@ -36,7 +36,7 @@ export function CheckboxField({
           </span>
         )}
       </label>
-      <p className="mt-1 min-h-4 text-caption leading-4">{hint && <span className="sr-only">{hint}</span>}</p>
+      {hint && <p className="sr-only">{hint}</p>}
     </div>
   );
 }

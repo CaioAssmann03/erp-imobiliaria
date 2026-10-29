@@ -1,4 +1,4 @@
-# ERP Imobiliária — repository index
+# METRI — repository index
 
 Monorepo for a condominium administration ERP.
 

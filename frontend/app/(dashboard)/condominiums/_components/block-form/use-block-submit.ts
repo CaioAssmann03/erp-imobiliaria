@@ -12,7 +12,7 @@ import {
   useBlocksPartialUpdate,
 } from "@/lib/api/generated";
 import type { Block } from "@/lib/api/generated/models";
-import { condominiumUrl } from "@/lib/condominium-registry";
+import { condominiumPageUrl } from "@/lib/condominium-registry";
 import { applyServerErrors } from "@/lib/form-errors";
 import { blockToPayload, type BlockFormInput, type BlockFormOutput } from "@/lib/schemas/block";
 
@@ -33,7 +33,7 @@ export function useBlockSubmit(
     queryClient.invalidateQueries({ queryKey: getBlocksListQueryKey() });
     queryClient.invalidateQueries({ queryKey: getBlocksRetrieveQueryKey(id) });
     toast.success(message);
-    router.push(returnUrl ?? condominiumUrl(saved.condominium, "blocos-e-unidades"));
+    router.push(returnUrl ?? condominiumPageUrl(saved.condominium, "blocks"));
   };
   const onError = (error: unknown) => toast.error(applyServerErrors(error, setError));
 

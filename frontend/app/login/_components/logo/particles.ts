@@ -1,4 +1,4 @@
-import { drawSkyscraper, SCENE } from "./scene";
+import { drawLogo, SCENE } from "./scene";
 
 /** Lado de cada célula da grade, em unidades da cena: quanto maior, menos partículas (e mais "pixel"). */
 export const STEP = 3;
@@ -29,7 +29,7 @@ export function buildParticles(): ParticleSet {
   canvas.height = SCENE.height;
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   if (!ctx) throw new Error("Canvas 2D indisponível");
-  const windows = drawSkyscraper(ctx);
+  const windows = drawLogo(ctx);
   const pixels = ctx.getImageData(0, 0, SCENE.width, SCENE.height).data;
 
   const columns = Math.floor(SCENE.width / STEP);
@@ -74,7 +74,7 @@ export function buildParticles(): ParticleSet {
       hx.push(x);
       hy.push(y);
       base.push(pixels[at] / 255);
-      // As janelas nascem brancas (nenhuma parede passa de 0,92): se a célula já não é branca, um prédio da frente a cobriu.
+      // As janelas nascem brancas (nada mais no molde passa de 0,88): se a célula já não é branca, uma lateral a cobriu.
       win.push(pixels[at] >= WINDOW_WHITE ? windowOf[row * columns + column] : -1);
     }
   }

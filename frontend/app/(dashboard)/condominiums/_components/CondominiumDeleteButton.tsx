@@ -36,6 +36,7 @@ export function CondominiumDeleteButton({ condominiumId, name }: { condominiumId
       title="Excluir condomínio?"
       description={`O condomínio "${name}" será excluído. Esta ação não pode ser desfeita.`}
       onConfirm={handleDelete}
+      appearance="solid"
     />
   );
 }

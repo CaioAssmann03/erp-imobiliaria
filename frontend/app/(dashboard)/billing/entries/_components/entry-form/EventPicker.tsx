@@ -52,7 +52,6 @@ export function EventPicker() {
             if (inputEvent.target.value.trim() === "") setValue("event", "", { shouldDirty: true });
           }}
         />
-        <p className="mt-1.5 min-h-4" />
       </div>
       <SelectField
         name="event"

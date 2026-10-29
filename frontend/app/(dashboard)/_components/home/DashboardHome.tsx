@@ -28,7 +28,8 @@ export function DashboardHome() {
       )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        {WIDGET_IDS.map((id) => {
+        {/* O resumo dos cadastros vive no cabeçalho da página (`RegistrySummary`); aqui só abre em destaque (`?focus=condominiums`). */}
+        {WIDGET_IDS.filter((id) => id !== "condominiums").map((id) => {
           const widget = widgets[id];
           return (
             <WidgetCard key={id} id={id} className={`gap-4 ${widget.className}`}>
