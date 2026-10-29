@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 
-import { ContactCta } from "../_components/ContactCta";
 import { PageIntro } from "../_components/PageIntro";
 import { Steps } from "../_components/Steps";
 
@@ -20,7 +19,6 @@ export default function HowItWorksPage() {
       <div className="px-6 py-16">
         <Steps />
       </div>
-      <ContactCta />
     </>
   );
 }
