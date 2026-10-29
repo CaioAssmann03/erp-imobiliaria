@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { DEFAULT_APPEARANCE, type Appearance } from "@/lib/appearance";
 
 import { AccentSection } from "./settings/AccentSection";
-import { applyAppearance, readAppearance } from "./settings/apply-appearance";
+import { applyAppearance, readAppearance } from "@/lib/apply-appearance";
 import { FontSection } from "./settings/FontSection";
 import { ModeSection } from "./settings/ModeSection";
 import { RegistersSection } from "./settings/RegistersSection";

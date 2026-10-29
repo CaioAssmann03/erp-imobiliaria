@@ -35,5 +35,6 @@ CSS swaps variables only. The server does not read them (the HTML is the same fo
 | Font | Inter, DM Sans, Source Serif, system | Inter |
 
 Defined in `lib/appearance.ts` (`DEFAULT_APPEARANCE`, `ACCENTS`...); validated by `parseAppearance` and, in the script, by the same lists; applied by
-`shell/settings/apply-appearance.ts` (cookie 1 year, `SameSite=Lax`). Reddish accents also override `--color-danger`.
+`lib/apply-appearance.ts` (cookie 1 year, `SameSite=Lax`). Reddish accents also override `--color-danger`.
+The public pages (landing, login) share the mode: they follow the same `data-mode` and variables (`theme-public` fixes only accent, font and error red), and `components/ModeToggle.tsx` writes the same cookie; `lib/mode.ts` (`useResolvedMode`, `subscribeMode`) tells canvases when the mode changes.
 Never hardcode a theme color; never use `localStorage` for appearance.

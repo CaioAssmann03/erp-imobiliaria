@@ -7,9 +7,12 @@ skip-if: the logged-in ERP → norms/design-system.md; folders and routes → st
 
 The public pages (`app/(marketing)`) share the ERP tokens (`app/globals.css`) but have their own voice: an editorial
 the same font as the ERP (Inter, the default; no serif or mono), larger titles, uppercase labels, square buttons and orange as an accent. They use the orange
-accent: the layout wrapper has the `theme-public` class (end of `app/globals.css`), which redefines the light/orange
-tokens for the public subtree, so the user's saved ERP accent and font (`data-accent`, `data-font` on `<html>`) never
-leak in and nothing switches after hydration.
+accent: the layout wrapper has the `theme-public` class (end of `app/globals.css`), which fixes only the orange accent, the Inter font and
+the error red for the public subtree, so the user's saved ERP accent and font (`data-accent`, `data-font` on `<html>`) never
+leak in and nothing switches after hydration. **The mode is shared with the ERP:** surfaces and ink follow `data-mode` on `<html>`
+(light, dark or system, the same cookie `ui_mode` and the same variables as the ERP; there is no second dark theme). The header's `ModeToggle`
+(`components/ModeToggle.tsx`) switches it and the ERP opens in the same mode. Canvases that read colors from tokens at mount re-read them on a mode change
+(`subscribeMode` in `lib/mode.ts`).
 
 ## Type
 
@@ -25,10 +28,10 @@ leak in and nothing switches after hydration.
 
 ## Color
 
-- Background `bg-canvas` (light grey); text `text-ink`, secondary `text-ink-soft`, faint `text-ink-faint`.
+- Background `bg-canvas`; text `text-ink`, secondary `text-ink-soft`, faint `text-ink-faint`.
 - **Orange (`brand`) is an accent only:** eyebrows (`text-label text-brand`), list numbers, the skyline illustration,
   progress lines. Never a button fill, never a full title.
-- Dark band: `bg-ink text-ink-foreground` (the footer, which also carries the `#contato` anchor), with secondary text at `text-ink-foreground/65`.
+- Inverted band: `bg-ink text-ink-foreground` (the footer, which also carries the `#contato` anchor), with secondary text at `text-ink-foreground/65`.
 - The skyline's tones and the login skyscraper's come from the same ramp, `brandRamp` in `lib/brand-ramp.ts`: change it there, not in each canvas.
 - Read colors from tokens, including in `<canvas>` (`getComputedStyle(...).getPropertyValue("--color-brand")`).
 

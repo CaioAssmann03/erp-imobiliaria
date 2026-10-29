@@ -4,6 +4,7 @@ import { AnimatePresence } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
 import { brandRamp } from "@/lib/brand-ramp";
+import { subscribeMode } from "@/lib/mode";
 
 import { LINE, PITCH } from "../hero/skyline-layers";
 import { MASK, MASK_BASE64 } from "./brazil-mask";
@@ -177,10 +178,15 @@ export function GlobeStage({ children }: { children: React.ReactNode }) {
     const ramp = brandRamp(canvas);
     const tones = [ramp(0.76), ramp(0.65), ramp(0.54), ramp(0.42), ramp(0.3), ramp(0.16)];
     const slabColor = ramp(0.1);
-    // Cores dos pontos: os tokens de tinta e de superfície do tema, lidos uma vez.
-    const current = getComputedStyle(canvas);
-    const ink = current.getPropertyValue("--color-ink").trim();
-    const surface = current.getPropertyValue("--color-surface").trim();
+    // Cores dos pontos: os tokens de tinta e de superfície do tema; lidos de novo quando o modo muda.
+    let ink = "";
+    let surface = "";
+    const readColors = () => {
+      const current = getComputedStyle(canvas);
+      ink = current.getPropertyValue("--color-ink").trim();
+      surface = current.getPropertyValue("--color-surface").trim();
+    };
+    readColors();
 
     const mask = decodeMask();
     const tilt = CENTER_LAT * RAD;
@@ -485,8 +491,13 @@ export function GlobeStage({ children }: { children: React.ReactNode }) {
       visibility.observe(stage);
     };
     const idle = window.requestIdleCallback?.(start, { timeout: 400 }) ?? window.setTimeout(start, 150);
+    const unsubscribeMode = subscribeMode(() => {
+      readColors();
+      draw(performance.now());
+    });
 
     return () => {
+      unsubscribeMode();
       window.cancelIdleCallback?.(idle);
       window.clearTimeout(idle);
       resizeObserver.disconnect();

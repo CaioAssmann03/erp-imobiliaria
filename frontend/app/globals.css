@@ -335,21 +335,12 @@ html[data-font="system"] {
 }
 
 /* ==========================================================================
-   Páginas públicas: sempre claras, destaque laranja e Inter, seja qual for a
-   preferência salva no <html> (data-mode, data-accent, data-font). As variáveis
-   são redefinidas na própria área pública, então valem desde o primeiro quadro,
-   sem trocar o tema depois que o JavaScript carrega.
+   Páginas públicas: o mesmo modo (claro, escuro ou sistema) do ERP, o mesmo cookie e as mesmas
+   variáveis de superfície e tinta (data-mode no <html>); só o destaque laranja e a Inter são fixos, seja qual
+   for a preferência salva (data-accent, data-font). As variáveis são redefinidas na própria área pública, então
+   valem desde o primeiro quadro, sem trocar o tema depois que o JavaScript carrega.
    ========================================================================== */
 .theme-public {
-  --color-canvas: #e9e9e8;
-  --color-shell: #f6f6f5;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f2f2f0;
-  --color-surface-sunken: #ebebe9;
-  --color-ink: #1c1b19;
-  --color-ink-soft: #6e6d68;
-  --color-ink-faint: #a5a49e;
-  --color-ink-foreground: #ffffff;
   --color-brand: #f05a28;
   --color-brand-strong: #d9481a;
   --color-brand-light: #ff7a45;
@@ -358,19 +349,17 @@ html[data-font="system"] {
   /* Janelas dos prédios desenhados: apagada escura e acesa clara. */
   --color-window-off: #1c1b19;
   --color-window-on: #ffffff;
-  --color-success: #1d9a54;
+  /* O vermelho de erro não segue o destaque salvo (rosa e vermelho o deixam alaranjado): aqui o destaque é sempre laranja. */
   --color-danger: #d4243a;
-  --color-warning: #c98a06;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --border: color-mix(in oklab, var(--color-ink) 8%, transparent);
-  --glass-top: color-mix(in oklab, var(--color-surface) 82%, transparent);
-  --glass-bottom: color-mix(in oklab, var(--color-surface) 58%, transparent);
-  --glass-highlight: rgb(255 255 255 / 0.95);
-  --glass-edge: rgb(255 255 255 / 0.6);
-  --shadow-card: 0 1px 2px rgb(28 27 25 / 0.04);
-  --shadow-float: 0 8px 24px rgb(28 27 25 / 0.08);
-  color-scheme: light;
   font-family: var(--font-sans);
   color: var(--color-ink);
 }
-
+html[data-mode="dark"] .theme-public {
+  --color-danger: #ff5d6e;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-mode="system"] .theme-public {
+    --color-danger: #ff5d6e;
+  }
+}

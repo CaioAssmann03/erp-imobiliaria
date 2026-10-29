@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { ModeToggle } from "@/components/ModeToggle";
 import { cn } from "@/lib/utils";
 
 import { NAV_LINKS } from "./content";
@@ -45,6 +46,7 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="flex flex-1 items-center justify-end gap-2">
+          <ModeToggle />
           {!onLogin && (
             <MarketingButton href="/login" variant="outline">
               Entrar
