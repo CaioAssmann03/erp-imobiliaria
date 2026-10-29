@@ -1,7 +1,26 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import { Suspense } from "react";
 
-/** A lista de blocos de um condomínio é a lista geral com o filtro de condomínio aplicado. */
+import { BlocksTable } from "../../_components/BlocksTable";
+import { SectionActions } from "../../_components/workspace/SectionActions";
+import { ListFallback } from "@/components/data-list";
+import { LinkButton } from "@/components/LinkButton";
+
+export const metadata: Metadata = { title: "Blocos" };
+
 export default async function CondominiumBlocksPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  redirect(`/condominiums/blocks?condominium=${id}`);
+
+  return (
+    <>
+      <SectionActions>
+        <LinkButton href={`/condominiums/${id}/blocks/new`} size="sm">
+          Novo bloco
+        </LinkButton>
+      </SectionActions>
+      <Suspense fallback={<ListFallback />}>
+        <BlocksTable condominiumId={id} />
+      </Suspense>
+    </>
+  );
 }

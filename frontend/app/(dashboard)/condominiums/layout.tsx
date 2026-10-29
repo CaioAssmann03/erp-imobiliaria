@@ -1,10 +1,5 @@
-import { CondominiumsSubNav } from "./_components/CondominiumsSubNav";
+import { CondominiumsWorkspace } from "./_components/workspace/CondominiumsWorkspace";
 
-export default function CondominiumsListsLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div>
-      <CondominiumsSubNav />
-      {children}
-    </div>
-  );
+export default function CondominiumsLayout({ children }: { children: React.ReactNode }) {
+  return <CondominiumsWorkspace>{children}</CondominiumsWorkspace>;
 }

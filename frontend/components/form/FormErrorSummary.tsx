@@ -1,6 +1,7 @@
 "use client";
 
 import { describeField } from "@/lib/form-labels";
+import { revealSectionOf } from "./reveal-section";
 import {
   useFormContext,
   type FieldErrors,
@@ -70,7 +71,11 @@ export function FormErrorSummary() {
               <li key={name}>
                 <button
                   type="button"
-                  onClick={() => setFocus(name)}
+                  onClick={() => {
+                    // Campo num painel fechado: abre o painel e só então foca.
+                    if (revealSectionOf(name)) setTimeout(() => setFocus(name), 50);
+                    else setFocus(name);
+                  }}
                   className="grid w-full grid-cols-1 gap-x-4 rounded-control px-2 py-1.5 text-left text-caption outline-none transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted sm:grid-cols-[minmax(7rem,11rem)_minmax(0,1fr)]"
                 >
                   <span className="font-medium text-ink">{describeField(name, label)}</span>

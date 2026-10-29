@@ -10,7 +10,6 @@ import { DEFAULT_APPEARANCE, type Appearance } from "@/lib/appearance";
 import { AccentSection } from "./settings/AccentSection";
 import { applyAppearance, readAppearance } from "./settings/apply-appearance";
 import { FontSection } from "./settings/FontSection";
-import { ModeSection } from "./settings/ModeSection";
 import { RegistersSection } from "./settings/RegistersSection";
 
 const TRIGGER_COMPACT =
@@ -79,7 +78,6 @@ export function SettingsDialog({
 
             <div className="space-y-7">
               <RegistersSection />
-              <ModeSection appearance={appearance} onChange={update} />
               <AccentSection appearance={appearance} onChange={update} />
               <FontSection appearance={appearance} onChange={update} />
             </div>

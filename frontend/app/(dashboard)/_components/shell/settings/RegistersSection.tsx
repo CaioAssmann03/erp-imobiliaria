@@ -6,7 +6,6 @@ import { SettingsSection } from "./SettingsSection";
 
 const REGISTERS = [
   { href: "/billing/events", label: "Eventos", hint: "Códigos que preenchem a descrição dos lançamentos" },
-  { href: "/condominiums/cost-centers", label: "Sub-contas", hint: "Conta normal, fundo de reserva, obras..." },
 ];
 
 /** Atalhos para os cadastros de apoio da cobrança (fecham o diálogo ao abrir a página). */

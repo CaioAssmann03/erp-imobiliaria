@@ -1,22 +1,11 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
+import { redirect } from "next/navigation";
 
-import { BlocksTable } from "../_components/BlocksTable";
-import { ListFallback } from "@/components/data-list";
-import { LinkButton } from "@/components/LinkButton";
-import { PageHeader } from "@/components/PageHeader";
-
-export const metadata: Metadata = { title: "Blocos" };
-
-export default function BlocksPage() {
-  return (
-    <div>
-      <PageHeader title="Blocos" description="Blocos de todos os condomínios administrados."
-        actions={<LinkButton href="/condominiums/blocks/new">Novo bloco</LinkButton>}
-      />
-      <Suspense fallback={<ListFallback />}>
-        <BlocksTable />
-      </Suspense>
-    </div>
-  );
+/** Os blocos são uma seção de cada condomínio; `?condominium=` abre a seção dele. */
+export default async function BlocksRedirectPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ condominium?: string }>;
+}) {
+  const { condominium } = await searchParams;
+  redirect(condominium ? `/condominiums/${condominium}/blocks` : "/condominiums");
 }

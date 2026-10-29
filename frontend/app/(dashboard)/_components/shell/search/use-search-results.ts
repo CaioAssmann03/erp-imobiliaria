@@ -50,7 +50,7 @@ function apiResults(data: Search): SearchResultItem[] {
       group: "Blocos",
       title: block.name,
       subtitle: block.condominium_name,
-      href: `/condominiums/blocks/${block.id}`,
+      href: `/condominiums/${block.condominium}/blocks/${block.id}`,
     })),
     ...data.cost_centers.map((costCenter) => ({
       key: `cc${costCenter.id}`,
