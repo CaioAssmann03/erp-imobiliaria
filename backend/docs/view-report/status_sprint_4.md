@@ -1,9 +1,4 @@
----
-summary: Status report of calendar sprint 4 (2026-10-23 to 2026-10-29, partial), in Portuguese: goal, result, planned items, quality, retrospective and next sprint.
-read-when: you need what the team reported for calendar sprint 4 (it counts calendar sprints, not the roadmap phases)
-skip-if: you need what is done or comes next in the project → roadmap/README.md; the previous sprint → view-report/status_sprint_2.md
----
-# Status Report da Sprint 4 — ERP Imobiliária
+# Status Report da Sprint 3 — ERP Imobiliária
 
 ## 1. Identificação
 
@@ -42,7 +37,7 @@ O fluxo de cobrança ficou completo no código e a interface foi refeita. Entreg
 
 ### Principal dificuldade ou impedimento
 
-O que foi feito ainda não foi usado com dados reais: o Asaas não foi testado em sandbox (adiado), o backup ainda não rodou na VPS e várias decisões das specs 052 a 055 aguardam confirmação. Além disso, `dev` e `main` receberam mudanças paralelas de interface (shell, cadastro de condomínios, tema); foi preciso reconciliar as duas linhas, e o tema claro/escuro precisa ser alinhado entre o Caio e o Eduardo.
+O que foi feito ainda não foi usado com dados reais: o Asaas não foi testado em sandbox (adiado).
 
 ## 3. Itens planejados e situação final
 
