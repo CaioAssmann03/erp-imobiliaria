@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Inter, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
+import { LoginTransition } from "@/components/LoginTransition";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { APPEARANCE_INIT_SCRIPT, DEFAULT_APPEARANCE } from "@/lib/appearance";
@@ -20,7 +21,7 @@ const sourceSerif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: { default: "ERP Imobiliária", template: "%s · ERP Imobiliária" },
+  title: { default: "METRI", template: "%s · METRI" },
   description: "Administração de condomínios, locações, vendas e financeiro.",
 };
 
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <Providers>
           <TooltipProvider>{children}</TooltipProvider>
+          <LoginTransition />
           <Toaster position="top-right" />
         </Providers>
       </body>

@@ -2,7 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isAxiosError } from "axios";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -10,6 +12,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuthLoginCreate } from "@/lib/api/generated";
+import { startLoginTransition } from "@/lib/login-transition";
 import { safeNextPath } from "@/lib/safe-redirect";
 
 import { FieldLabel } from "./FieldLabel";
@@ -25,6 +28,7 @@ type FormValues = z.infer<typeof schema>;
 export function LoginForm() {
   const router = useRouter();
   const loginMutation = useAuthLoginCreate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -39,6 +43,7 @@ export function LoginForm() {
       {
         onSuccess: () => {
           // Os tokens já foram para cookies HttpOnly (o handler do Next); o corpo não traz token.
+          startLoginTransition();
           const next = new URLSearchParams(window.location.search).get("next");
           router.push(safeNextPath(next));
           router.refresh();
@@ -65,7 +70,7 @@ export function LoginForm() {
       : "Falha ao entrar";
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-8 space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate aria-label="Entrar" className="space-y-4">
       <div className="space-y-1.5">
         <FieldLabel htmlFor="username" error={errors.username?.message}>
           Usuário
@@ -75,7 +80,7 @@ export function LoginForm() {
           type="text"
           autoComplete="username"
           autoFocus
-          className="h-11 rounded-full px-5"
+          className="h-11 rounded-sharp border-ink/20 bg-surface px-3.5"
           aria-invalid={!!errors.username || credentialError}
           {...register("username")}
         />
@@ -85,19 +90,37 @@ export function LoginForm() {
         <FieldLabel htmlFor="password" error={errors.password?.message ?? loginErrorLabel}>
           Senha
         </FieldLabel>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          className="h-11 rounded-full px-5"
-          aria-invalid={!!errors.password || loginMutation.isError}
-          {...register("password")}
-        />
+        <div className="relative">
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
+            className="h-11 rounded-sharp border-ink/20 bg-surface pr-11 pl-3.5"
+            aria-invalid={!!errors.password || loginMutation.isError}
+            {...register("password")}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((visible) => !visible)}
+            aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+            aria-pressed={showPassword}
+            className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-soft outline-none transition-colors hover:text-ink focus-visible:text-ink"
+          >
+            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          </button>
+        </div>
       </div>
 
       <div className="pt-2">
-        <Button type="submit" size="lg" disabled={loginMutation.isPending} className="w-full">
+        {/* Botão preto como os da home: o laranja é só destaque nas páginas públicas. */}
+        <Button
+          type="submit"
+          size="lg"
+          disabled={loginMutation.isPending}
+          className="h-11 w-full rounded-sharp bg-ink text-label text-ink-foreground hover:bg-ink/85"
+        >
           {loginMutation.isPending ? "Entrando…" : "Entrar"}
+          {!loginMutation.isPending && <ArrowRight className="size-4" />}
         </Button>
       </div>
     </form>

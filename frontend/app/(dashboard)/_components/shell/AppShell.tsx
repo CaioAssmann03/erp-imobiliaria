@@ -11,10 +11,11 @@ import { Rail } from "./Rail";
  *
  * Desktop (lg+): a rail de ícones à esquerda (cada módulo abre seu cartão de menu) e, ao lado, a área de conteúdo com a busca no topo.
  * Celular: tela inteira. Barra fixa no topo (menu lateral, marca, busca); a navegação, as configurações e o sair ficam no menu lateral.
+ * `data-app-shell` marca o shell para os estilos só do dashboard (ver `globals.css`).
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-canvas lg:flex">
+    <div data-app-shell className="min-h-screen bg-canvas lg:flex">
       <Rail />
 
       <div className="flex min-h-screen min-w-0 flex-1 flex-col bg-shell">
@@ -30,7 +31,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="min-w-0 flex-1 px-4 pt-2 pb-8 lg:px-8">{children}</main>
+        <main className="min-w-0 flex-1 px-4 pt-2 pb-8 lg:px-8 lg:pt-6">{children}</main>
       </div>
     </div>
   );

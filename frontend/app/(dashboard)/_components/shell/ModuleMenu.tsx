@@ -10,22 +10,32 @@ import { type AppModule, isItemActive } from "@/lib/module-menu";
 import { ITEM_ICONS, MODULE_ICONS } from "./menu-icons";
 
 const RAIL_BUTTON =
-  "flex size-11 items-center justify-center rounded-control transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  "flex h-11 items-center rounded-control transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-/** Botão da rail de um módulo, no mesmo estilo do link direto (Painel, Pessoas). */
-export function railButtonClass(isActive: boolean, isOpen = false) {
+/**
+ * Botão da rail, no mesmo estilo para o módulo com menu, o link direto (Painel, Pessoas), as configurações e o sair. Recolhida é só o ícone,
+ * quadrado e centrado; expandida ocupa a largura e o ícone fica no mesmo lugar, com o nome ao lado.
+ */
+export function railButtonClass(isActive: boolean, isOpen = false, expanded = false) {
   return cn(
     RAIL_BUTTON,
+    expanded ? "w-full gap-3 px-3" : "w-11 justify-center",
     isActive ? "bg-ink text-ink-foreground" : "text-ink-soft hover:bg-surface hover:text-ink",
-    isOpen && "ring-2 ring-brand/60"
+    // Menu do módulo aberto: um fundo um tom acima do hover (nada de anel em volta).
+    isOpen && !isActive && "bg-surface-muted text-ink"
   );
+}
+
+/** O nome do botão da rail expandida (recolhida o nome fica no `title`). */
+export function RailLabel({ children }: { children: React.ReactNode }) {
+  return <span className="truncate text-body font-medium">{children}</span>;
 }
 
 /**
  * Client Component: o cartão do módulo, ancorado ao ícone da rail. Os grupos (Cadastros, Relatórios…) ficam lado a lado; um item sem
  * tela (`href` ausente) aparece desativado com "Em breve". Fecha ao escolher um item, com Esc ou clicando fora.
  */
-export function ModuleMenu({ appModule, isActive }: { appModule: AppModule; isActive: boolean }) {
+export function ModuleMenu({ appModule, isActive, expanded = false }: { appModule: AppModule; isActive: boolean; expanded?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const Icon = MODULE_ICONS[appModule.icon];
@@ -35,9 +45,10 @@ export function ModuleMenu({ appModule, isActive }: { appModule: AppModule; isAc
       <Popover.Trigger
         title={appModule.label}
         aria-label={appModule.label}
-        className={railButtonClass(isActive, open)}
+        className={railButtonClass(isActive, open, expanded)}
       >
-        <Icon className="size-5" />
+        <Icon className="size-5 shrink-0" />
+        {expanded && <RailLabel>{appModule.label}</RailLabel>}
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="right" align="start" sideOffset={14} className="z-50 outline-none">
@@ -86,7 +97,7 @@ export function ModuleMenu({ appModule, isActive }: { appModule: AppModule; isAc
                               onClick={() => setOpen(false)}
                               aria-current={isItemActive(item, group.items, pathname) ? "page" : undefined}
                               className={cn(
-                                "flex items-center gap-3 rounded-panel px-2.5 py-2 transition-colors hover:bg-surface-muted aria-[current=page]:bg-surface-muted aria-[current=page]:shadow-[inset_3px_0_0_var(--color-brand)]"
+                                "flex items-center gap-3 rounded-panel px-2.5 py-2 transition-colors hover:bg-surface-muted aria-[current=page]:bg-surface-muted"
                               )}
                             >
                               {content}

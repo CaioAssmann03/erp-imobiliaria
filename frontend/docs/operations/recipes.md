@@ -26,7 +26,7 @@ Entry in `ACCENTS` (`lib/appearance.ts`) + `html[data-accent="x"]` block in `app
 `--color-brand`, `-strong`, `-light`; if reddish, also override `--color-danger` (and dark/system variants).
 
 ## Add a navigation item
-`lib/module-menu.ts` (read by `Rail`/`ModuleMenu` and `MobileMenu`; label and description in Portuguese, href in English; an item with no `href` is shown disabled as "Em breve").
+`lib/module-menu.ts` (read by `Rail`/`ModuleMenu` and `MobileMenu`, which shows only items with an `href`; label and description in Portuguese, href in English; an item with no `href` is shown disabled as "Em breve").
 
 ## Add a shared component
 Only when two or more routes use it: `components/`; otherwise `_components/` of the route.

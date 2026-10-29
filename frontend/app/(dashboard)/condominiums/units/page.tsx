@@ -1,4 +1,3 @@
-import { DoorOpen } from "lucide-react";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -29,7 +28,7 @@ export default async function UnitsPage({ searchParams }: { searchParams: Promis
 
   return (
     <Suspense fallback={null}>
-      <UnitsEmptyState icon={<DoorOpen className="size-6" />} />
+      <UnitsEmptyState />
     </Suspense>
   );
 }

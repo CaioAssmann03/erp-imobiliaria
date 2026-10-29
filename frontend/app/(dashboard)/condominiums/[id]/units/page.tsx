@@ -1,15 +1,24 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import { Suspense } from "react";
 
-import { unitsUrl } from "@/lib/unit-workspace";
+import { CondominiumHeader } from "../../_components/CondominiumHeader";
+import { CondominiumSideMenu } from "../../_components/CondominiumSideMenu";
+import { ListFallback } from "@/components/data-list";
+import { FormPage } from "@/components/form/FormPage";
+import { UnitsRegistryList } from "./_components/UnitsRegistryList";
 
-/** As unidades de um condomínio são o cadastro de unidades com o condomínio já escolhido (`?block=` também filtra a lista). */
-export default async function CondominiumUnitsPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ block?: string }>;
-}) {
-  const [{ id }, { block }] = await Promise.all([params, searchParams]);
-  redirect(`${unitsUrl(id)}${block ? `&block=${block}` : ""}`);
+export const metadata: Metadata = { title: "Unidades" };
+
+/** As unidades de um condomínio, numa tela própria, na lista no padrão da de condomínios (`?block=` filtra); abrir uma leva ao cadastro de unidades. */
+export default async function CondominiumUnitsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
+  return (
+    <FormPage aside={<CondominiumSideMenu condominiumId={id} current="units" />}>
+      <CondominiumHeader condominiumId={id} />
+      <Suspense fallback={<ListFallback />}>
+        <UnitsRegistryList condominiumId={id} />
+      </Suspense>
+    </FormPage>
+  );
 }

@@ -1,31 +1,61 @@
-# ERP Imobiliária
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-metri-white.svg">
+    <img src="docs/assets/logo-metri.svg" alt="METRI" width="260">
+  </picture>
+</p>
 
-Sistema de ERP para administradora de condomínios, locações, vendas e financeiro.
+<p align="center"><strong>ERP para administradoras de condomínios.</strong><br>Cadastros, cobrança e financeiro em um só sistema.</p>
 
-Documentação completa:
-- [Arquitetura e Modelagem de Dados](https://claude.ai/code/artifact/b8a13ffb-f93f-4765-b54c-fe3d5e1496a8)
-- [Stack Técnica](https://claude.ai/code/artifact/bf998f82-25a4-426f-8ab5-dcdd4b71e7d0)
-- [Sprints](https://claude.ai/code/artifact/a3ec7ec2-eebb-402f-a6ac-aecde0b77ccb)
-- [Quadro Trello](https://trello.com/b/DSNUcHd1/erp-imobili%C3%A1ria)
+---
 
-## Stack
+## O que é
 
-- **Backend:** Django + Django REST Framework + PostgreSQL
-- **Frontend:** Next.js + TypeScript + Tailwind + TanStack Query
-- **Jobs:** Celery + Redis
-- **Deploy:** VPS com Docker Compose e HTTPS pelo Caddy (ver *Deploy na VPS*)
+O METRI **(Modelo Eficiente de Tempo e Recursos Imobiliários)** é a ferramenta interna de uma administradora de condomínios: a equipe cadastra condomínios, unidades e pessoas, emite os boletos do mês e acompanha o caixa de cada condomínio. Hoje só usuários administradores entram; o portal para proprietários e inquilinos está planejado.
+
+**Já funciona**
+
+- **Cadastros:** condomínios (dados, endereço, taxa, regras de cobrança, rateio), blocos, unidades com proprietário e inquilino, sub-contas e pessoas (CPF e CNPJ).
+- **Cobrança:** planos, lançamentos avulsos (*Inclusão de valores*), emissão mensal de boletos em lote com PDF rascunho e a taxa de cadastro da administradora.
+- **Financeiro:** contas a pagar com baixa, extrato por condomínio e por sub-conta, lançamento manual com estorno e a conta da própria administradora.
+- **Painel:** resumo, pendências, vencimentos e busca global.
+
+**Em andamento:** integração bancária com o Asaas (boleto registrado e baixa automática). **Planejado:** portal do cliente, locações e vendas.
+
+## Tecnologia
+
+| | |
+|---|---|
+| Backend | Django + Django REST Framework + PostgreSQL |
+| Frontend | Next.js (App Router) + TypeScript + Tailwind + TanStack Query |
+| Jobs | Celery + Redis |
+| Produção | VPS com Docker Compose e HTTPS pelo Caddy |
+
+O frontend usa um client gerado a partir do schema OpenAPI do backend: a API é o contrato.
 
 ## Rodando localmente
 
-Pré-requisitos: Docker Desktop (com `docker compose`) e Git.
+Precisa de Docker Desktop e Git.
 
 ```bash
 git clone https://github.com/CaioAssmann03/erp-imobiliaria.git
 cd erp-imobiliaria
-cp .env.example .env
+cp .env.example .env          # preencha as duas chaves (abaixo)
+docker compose up -d --build
+docker compose exec backend python manage.py migrate
+docker compose exec backend python manage.py createsuperuser
+docker compose exec backend python manage.py seed_demo    # dados FICTÍCIOS (--clear remove)
 ```
 
-Duas chaves são obrigatórias e vêm com `change-me` no `.env`; gere as duas sem instalar nada (só Docker) e cole no `.env`:
+- Frontend: http://localhost:3000 · API: http://localhost:8000/api/docs/ · Admin: http://localhost:8000/admin/
+- No Windows, `scripts/local-up.ps1` faz tudo de uma vez (chaves, containers, migrate, usuário e exemplos).
+- Porta 5432 ocupada? Defina `POSTGRES_HOST_PORT=5434` no `.env`.
+- Use só dados de exemplo no notebook: **nunca** dados reais de clientes.
+
+<details>
+<summary>Gerando as duas chaves obrigatórias do <code>.env</code></summary>
+
+`JWT_SIGNING_KEY` e `GATEWAY_CREDENTIALS_KEY` vêm com `change-me`. Gere as duas só com Docker:
 
 ```bash
 # JWT_SIGNING_KEY (uma linha, com \n literal)
@@ -35,49 +65,22 @@ docker run --rm python:3.12-slim sh -c "pip install -q cryptography >/dev/null 2
 docker run --rm python:3.12-slim sh -c "pip install -q cryptography >/dev/null 2>&1 && python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""
 ```
 
-No Windows, o script `scripts/local-up.ps1` faz tudo isso de uma vez (chaves, containers, migrate, usuário e dados de exemplo): `powershell -ExecutionPolicy Bypass -File .\scripts\local-up.ps1`.
+</details>
 
-Depois:
-
-```bash
-docker compose up -d --build
-docker compose exec backend python manage.py migrate
-docker compose exec backend python manage.py createsuperuser   # usuário e senha para entrar
-docker compose exec backend python manage.py seed_demo         # dados FICTÍCIOS de exemplo (--clear remove)
-```
-
-- Frontend: http://localhost:3000 (entre com o usuário criado acima)
-- API: http://localhost:8000/api/docs/ · Admin: http://localhost:8000/admin/
-- Arquivos (PDF do boleto, comprovantes): o `docker compose` já sobe um armazenamento S3 local (serviço `s3`, porta 9090) com o bucket `erp-dev`; assim "Baixar PDF" funciona no notebook. Sem ele o PDF responde 503.
-- Porta 5432 ocupada? Ponha `POSTGRES_HOST_PORT=5434` no `.env` e rode `docker compose up -d` de novo.
-- Parar: `docker compose down` (os dados ficam); apagar tudo: `docker compose down -v`.
-- Só dados de exemplo no seu notebook: **nunca** coloque dados reais de clientes nele.
-
-## Deploy na VPS
-
-Produção roda numa VPS com Docker Compose: Postgres, Redis, backend (gunicorn), Celery e frontend. O
-HTTPS vem do Caddy que já existe na VPS (um bloco no `Caddyfile` aponta o domínio para o frontend), e o
-nome provisório é `erp.177-7-63-175.sslip.io`. Os comprovantes de pagamento ficam num bucket Cloudflare R2
-(variáveis `AWS_*`; sem elas só a parte de comprovantes fica indisponível). O passo a passo, as variáveis e o
-que fazer quando algo falha estão em [`backend/docs/architecture/operations.md`](backend/docs/architecture/operations.md)
-(seção *Production on the VPS*). O compose de produção e o `deploy.sh` ficam só na VPS: não são mais versionados neste repositório.
-
-## Client da API no frontend
-
-O frontend não chama a API manualmente: os hooks React Query em `frontend/lib/api/generated/` são gerados a partir do schema OpenAPI do backend pelo [orval](https://orval.dev). Sempre que um endpoint for criado/alterado no backend, regenere o client com o backend rodando:
-
-```bash
-cd frontend
-pnpm generate:api
-```
-
-## Estrutura
+## Estrutura e documentação
 
 ```
-backend/    # Django + DRF
-frontend/   # Next.js
+backend/    Django + DRF   → backend/AGENTS.md (índice de docs, specs e roadmap)
+frontend/   Next.js        → frontend/AGENTS.md (índice de docs)
 ```
 
-## Fluxo de branches
+- **Onde o projeto está:** [`backend/docs/roadmap/current-state.md`](backend/docs/roadmap/current-state.md)
+- **Como a administradora funciona:** [`backend/docs/architecture/business-model.md`](backend/docs/architecture/business-model.md)
+- **Deploy e operação na VPS:** [`backend/docs/architecture/operations.md`](backend/docs/architecture/operations.md)
+- **Quadro de tarefas:** [Trello](https://trello.com/b/DSNUcHd1/erp-imobili%C3%A1ria)
 
-Uma branch por task (`feature/<nome-da-task>`), Pull Request pra `main`, CI roda os testes automaticamente. Veja o documento de Stack Técnica para o fluxo completo de revisão.
+Depois de alterar a API, regenere o client do frontend (com o backend rodando): `cd frontend && pnpm generate:api`.
+
+## Fluxo de trabalho
+
+Uma branch por tarefa, Pull Request para `main` e CI rodando os testes do backend e do frontend.

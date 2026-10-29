@@ -12,7 +12,7 @@ import { FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useBlocksRetrieve, useCondominiumsList } from "@/lib/api/generated";
-import { condominiumUrl } from "@/lib/condominium-registry";
+import { condominiumPageUrl } from "@/lib/condominium-registry";
 import { throwIfNotFound } from "@/lib/query/not-found";
 import {
   BLOCK_DEFAULTS,
@@ -22,6 +22,7 @@ import {
   type BlockFormOutput,
 } from "@/lib/schemas/block";
 
+import { BlockDeleteButton } from "./BlockDeleteButton";
 import { useBlockSubmit } from "./block-form/use-block-submit";
 
 /** Cadastro e edição de bloco. O condomínio só é escolhido no cadastro. */
@@ -76,8 +77,11 @@ export function BlockForm({
           )}
           <TextField name="name" label="Bloco" required maxLength={60} placeholder="Ex.: Bloco A" autoComplete="off" />
         </FormSection>
-        <FormActions isSubmitting={isSubmitting}>
-          <Button type="button" variant="secondary" onClick={() => router.push(returnUrl ?? (block ? condominiumUrl(block.condominium, "blocos-e-unidades") : "/condominiums"))}>
+        <FormActions
+          isSubmitting={isSubmitting}
+          danger={block && <BlockDeleteButton condominiumId={block.condominium} blockId={block.id} name={block.name} />}
+        >
+          <Button type="button" variant="secondary" onClick={() => router.push(returnUrl ?? (block ? condominiumPageUrl(block.condominium, "blocks") : "/condominiums"))}>
             Cancelar
           </Button>
         </FormActions>

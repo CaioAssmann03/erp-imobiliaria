@@ -1,11 +1,7 @@
-/** A marca: o "E" e, fora do modo `compact` (a rail), o nome. */
+import { HouseLogo } from "@/components/HouseLogo";
+import { MetriLogo } from "@/components/MetriLogo";
+
+/** A marca: o logo METRI (casa e nome) e, no modo `compact` (a rail), só a casa. */
 export function Brand({ compact = false }: { compact?: boolean }) {
-  return (
-    <span className="flex items-center gap-2.5">
-      <span className="flex size-9 items-center justify-center rounded-control bg-brand-gradient text-body font-semibold text-brand-foreground">
-        E
-      </span>
-      {!compact && <span className="text-body font-medium">ERP Imobiliária</span>}
-    </span>
-  );
+  return compact ? <HouseLogo className="size-7 shrink-0 text-brand" /> : <MetriLogo className="h-7 w-auto" />;
 }

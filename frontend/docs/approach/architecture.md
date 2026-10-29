@@ -43,9 +43,10 @@ Edit pages: the page awaits `params` and passes the `id`; the form loads the rec
 ## Rendering and routing
 
 - `page.tsx`/`layout.tsx` are server components, but a page does not fetch: `params` is a Promise (`await`), and `searchParams` is read on the client with `useSearchParams` (no page reads it on the server, so list routes stay static).
+- The rail expands (icons with names) and collapses (icons only, the default) when the logo is clicked; the choice is kept in `localStorage` (`use-rail-expanded.ts`), never in a cookie or an `<html>` attribute, so the server HTML stays the same for everyone.
 - The root layout and `AppShell` read no cookie: the theme is applied to `<html>` by an inline script before the first paint (norms/design-system.md), so the HTML is the same for every user and can be prerendered. `[id]` routes stay dynamic only because Next renders unknown params on demand.
 - `proxy.ts` (before every request): no token → `/login?next=`; token expiring (< 30 s) → refresh and forward new
   cookies to the server render and the browser; refresh failure → `/login`.
-- Every page exports `metadata` (Portuguese title; root template `"%s · ERP Imobiliária"`).
+- Every page exports `metadata` (Portuguese title; root template `"%s · METRI"`).
 - `Suspense` around a client component that reads `useSearchParams`; `loading.tsx` while a page change renders; recoverable failures: `error.tsx`; missing record: `throwIfNotFound` (`lib/query/not-found.ts`) from the client.
 - This Next.js version has breaking changes: check `node_modules/next/dist/docs/` for anything not covered here.

@@ -6,7 +6,7 @@ from apps.billing.errors import GatewayAccountError
 from apps.billing.infrastructure.gateway.asaas_client import AsaasClient, GatewayError
 from apps.billing.models import GatewayAccount
 
-WEBHOOK_NAME = "ERP Imobiliária"
+WEBHOOK_NAME = "METRI"
 WEBHOOK_EVENTS = (
     "PAYMENT_CREATED",
     "PAYMENT_UPDATED",

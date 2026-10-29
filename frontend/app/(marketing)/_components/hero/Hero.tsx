@@ -1,51 +1,68 @@
 "use client";
 
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
-import { useRef } from "react";
 
 import { CONTACT_HREF } from "../content";
 import { MarketingButton } from "../MarketingButton";
-import { Reveal } from "../Reveal";
 import { ScanlineSkyline } from "./ScanlineSkyline";
+import { SkyFlyers } from "./SkyFlyers";
+
+const TITLE = "Condomínio em dia.";
+const DESCRIPTION =
+  "Emita a cobrança do mês em lote, receba as baixas em tempo real e feche o extrato sem digitar nada, para todos os condomínios da administradora, no mesmo painel.";
 
 /**
- * Hero: título em serifa centralizado e o skyline laranja em linhas. Ao rolar, o título anda mais devagar que a
- * página e some; depois que os prédios saem de vista, a base deles escorre em pixels pela faixa abaixo do hero, até o
- * texto da seção seguinte.
+ * Hero: uma frase só como título, grande, em negrito e numa linha (a mesma fonte do site), subindo de dentro de uma
+ * máscara; embaixo, uma descrição curta e o botão de agendar. O nome do negócio fica no cabeçalho. Fica no centro do hero, sobre o skyline
+ * laranja em linhas (o canvas é transparente e fica por cima, então qualquer prédio que o alcance passa na frente). O
+ * hero fica fixo no topo enquanto a seção seguinte (com fundo liso) sobe por cima e o cobre, como uma cortina; o texto
+ * some aos poucos nesse trecho. A frase precisa caber numa linha em qualquer largura (até uns 21 caracteres).
  */
 export function Hero() {
-  const ref = useRef<HTMLElement>(null);
   const still = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  // Título: só transform e opacity, o compositor anima sem refazer layout.
-  const titleY = useTransform(scrollYProgress, [0, 1], ["0svh", "38svh"]);
-  const titleOpacity = useTransform(scrollYProgress, [0, 0.45], [1, 0]);
+  const { scrollY } = useScroll();
+  const opacity = useTransform(scrollY, [0, 350], [1, 0]);
 
   return (
-    <section ref={ref} className="relative flex min-h-svh flex-col items-center overflow-x-clip px-6 pt-36 md:pt-44">
-      <motion.div
-        style={still ? undefined : { y: titleY, opacity: titleOpacity }}
-        className="relative z-10 will-change-transform"
-      >
-        <Reveal className="flex max-w-2xl flex-col items-center text-center">
-          <h1 className="font-display text-hero">Administre condomínios com visibilidade total.</h1>
-          <p className="mt-5 max-w-md text-body text-ink-soft">
-            Um sistema moderno para administradoras: cadastros, cobrança, conciliação e financeiro de todos os
-            condomínios, do cadastro ao extrato fechado.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <MarketingButton href={CONTACT_HREF}>Agendar demonstração</MarketingButton>
-            <MarketingButton href="/how-it-works" variant="outline">
-              Ver como funciona
-            </MarketingButton>
-          </div>
-        </Reveal>
+    <section className="sticky top-0 h-svh overflow-x-clip">
+      <motion.div style={still ? undefined : { opacity }} className="absolute inset-0 flex flex-col items-center justify-center px-4">
+        <h1 className="text-center font-display leading-[0.95] tracking-[-0.045em] whitespace-nowrap">
+          <span className="block overflow-hidden px-[0.04em] pt-[0.1em] pb-[0.08em]">
+            <motion.span
+              className="block text-[clamp(1.75rem,8.6vw,6.25rem)] font-bold"
+              initial={still ? false : { y: "110%" }}
+              animate={{ y: 0 }}
+              transition={{ duration: 1.1, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {TITLE}
+            </motion.span>
+          </span>
+        </h1>
+        <motion.p
+          initial={still ? false : { y: 14, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.9, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-5 max-w-md text-balance text-center text-body text-ink-soft"
+        >
+          {DESCRIPTION}
+        </motion.p>
+        <motion.div
+          initial={still ? false : { y: 14, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.9, delay: 0.85, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-8"
+        >
+          <MarketingButton href={CONTACT_HREF}>Agendar demonstração</MarketingButton>
+        </motion.div>
       </motion.div>
 
-      <ScanlineSkyline
-        className="absolute inset-x-0 bottom-0 h-[58svh] w-full"
-        dripClassName="absolute inset-x-0 top-full h-[45svh] w-full"
-      />
+      {/* De vez em quando passa um avião ou um bando de pássaros no céu, acima do título. */}
+      <motion.div style={still ? undefined : { opacity }} aria-hidden className="pointer-events-none absolute inset-x-0 top-16 h-[28svh]">
+        <SkyFlyers className="size-full" />
+      </motion.div>
+
+      {/* Por cima do nome: o canvas é transparente, então só os prédios o encobrem. */}
+      <ScanlineSkyline className="absolute inset-x-0 bottom-0 z-10 h-[40svh] w-full md:h-[58svh]" />
     </section>
   );
 }

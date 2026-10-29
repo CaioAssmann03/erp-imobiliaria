@@ -1,25 +1,47 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
-import { AsciiBuilding } from "./_components/AsciiBuilding";
+import { CONTACT_HREF } from "@/app/(marketing)/_components/content";
+
 import { LoginForm } from "./_components/LoginForm";
-import { ShellFrame } from "./_components/ShellFrame";
+import { ParticleLogo } from "./_components/ParticleLogo";
 
 export const metadata: Metadata = { title: "Entrar" };
 
-/** Server Component: só o conteúdo estático; a interação fica no `LoginForm`. */
+/**
+ * Server Component: só o conteúdo estático; a interação fica no `LoginForm`. O cabeçalho vem do `layout.tsx`. A tela é
+ * dividida ao meio, abaixo do cabeçalho: à esquerda o formulário, numa coluna estreita e centrada na altura (título, uma
+ * linha de apoio, os dois campos e o botão, com o convite para criar conta separado por um fio); à direita (só no
+ * desktop) um painel emoldurado, mais claro, com o logo de partículas. No celular fica o formulário, com o mesmo logo, pequeno e mais simples, acima do título.
+ */
 export default function LoginPage() {
   return (
-    <ShellFrame className="flex flex-col items-center justify-center">
-      <main className="w-full max-w-xs">
-        <AsciiBuilding className="mx-auto mb-8 w-fit" />
+    <main className="relative z-10 grid min-h-screen lg:grid-cols-2 lg:p-3 lg:pt-16">
+      <section className="flex items-center justify-center px-6 pt-16 pb-10 lg:pt-0 lg:pb-0">
+        <div className="w-full max-w-[22rem]">
+          {/* No celular não há o painel ao lado: o logo, pequeno e mais simples, vai acima do título. */}
+          <div className="mb-6 flex justify-center overflow-x-clip lg:hidden">
+            <ParticleLogo compact />
+          </div>
+          <h1 className="font-display text-title">Entrar</h1>
+          <p className="mt-1.5 text-body text-ink-soft">Use o usuário e a senha da sua administradora.</p>
 
-        <header className="text-center">
-          <h1 className="text-title">ERP Imobiliária</h1>
-          <p className="mt-1.5 text-body text-ink-soft">Entre para continuar.</p>
-        </header>
+          <div className="mt-7">
+            <LoginForm />
+          </div>
 
-        <LoginForm />
-      </main>
-    </ShellFrame>
+          <p className="mt-6 border-t border-ink/10 pt-5 text-body text-ink-soft">
+            Ainda não tem conta?{" "}
+            <Link href={CONTACT_HREF} className="font-medium text-ink underline underline-offset-4">
+              Criar conta
+            </Link>
+          </p>
+        </div>
+      </section>
+
+      <aside className="hidden items-center justify-center overflow-hidden border border-ink/10 bg-shell lg:flex">
+        <ParticleLogo />
+      </aside>
+    </main>
   );
 }

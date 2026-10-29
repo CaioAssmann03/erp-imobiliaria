@@ -12,7 +12,7 @@ import {
   useCostCentersPartialUpdate,
 } from "@/lib/api/generated";
 import type { CostCenter } from "@/lib/api/generated/models";
-import { condominiumUrl } from "@/lib/condominium-registry";
+import { condominiumPageUrl } from "@/lib/condominium-registry";
 import { applyServerErrors } from "@/lib/form-errors";
 import {
   costCenterToPayload,
@@ -23,7 +23,7 @@ import {
 export function useCostCenterSubmit(
   costCenterId: string | undefined,
   setError: UseFormSetError<CostCenterFormInput>,
-  /** Sem ele, volta à seção de sub-contas do condomínio da sub-conta salva. */
+  /** Sem ele, volta à lista de sub-contas do condomínio da sub-conta salva. */
   returnUrl?: string
 ) {
   const router = useRouter();
@@ -37,7 +37,7 @@ export function useCostCenterSubmit(
     queryClient.invalidateQueries({ queryKey: getCostCentersListQueryKey() });
     queryClient.invalidateQueries({ queryKey: getCostCentersRetrieveQueryKey(id) });
     toast.success(message);
-    router.push(returnUrl ?? condominiumUrl(saved.condominium, "sub-contas"));
+    router.push(returnUrl ?? condominiumPageUrl(saved.condominium, "cost-centers"));
   };
   const onError = (error: unknown) => toast.error(applyServerErrors(error, setError));
 

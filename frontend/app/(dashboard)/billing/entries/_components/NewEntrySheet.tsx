@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { FormErrorSummary } from "@/components/form/FormErrorSummary";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
@@ -60,6 +61,10 @@ export function NewEntrySheet({ open, onOpenChange, condominium, month }: NewEnt
               <div className="lg:sticky lg:top-0 lg:self-start">
                 <EntryPreview />
               </div>
+            </div>
+            {/* Fora da rolagem, logo acima da barra de ações: os campos com erro ficam à vista mesmo longe deles. */}
+            <div className="max-h-40 overflow-y-auto px-4">
+              <FormErrorSummary />
             </div>
             <div className="flex items-center justify-end gap-2 border-t border-line px-4 py-3">
               <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>

@@ -3,7 +3,7 @@
 @import "shadcn/tailwind.css";
 
 /* ==========================================================================
-   Design system — ERP Imobiliária
+   Design system — METRI
    Fonte única de verdade para cores, tipografia, raios e sombras.
    Documentação: frontend/docs/norms/design-system.md
    ========================================================================== */
@@ -136,6 +136,14 @@
   }
 }
 
+/* Celular, só com o shell do dashboard montado (`data-app-shell`, que também vale para os diálogos e menus que saem do shell): campos de
+   texto com menos de 16px fazem o Safari do iPhone dar zoom na página ao focar. Só o tamanho da letra muda; a altura dos campos não. */
+@media (max-width: 1023px) {
+  :root:has([data-app-shell]) :is(input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea) {
+    font-size: 1rem;
+  }
+}
+
 /* 4. Utilitários do sistema */
 @utility bg-brand-gradient {
   background-image: linear-gradient(
@@ -169,29 +177,30 @@
     0 4px 12px rgb(0 0 0 / 0.06);
 }
 
-/* 5. Páginas públicas (app/(marketing)): título em serifa, rótulos em mono caixa-alta, cantos retos.
-   Documentação: frontend/docs/norms/marketing.md */
+/* 5. Páginas públicas (app/(marketing)) e login: a mesma fonte do ERP (Inter, a padrão), títulos maiores, rótulos
+   em caixa-alta, cantos retos. Documentação: frontend/docs/norms/marketing.md */
 @theme inline {
-  --font-display: var(--font-display-serif, var(--font-source-serif)), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 @theme {
   --text-hero: clamp(2.5rem, 5vw, 4.25rem);
   --text-hero--line-height: 1.05;
   --text-hero--letter-spacing: -0.02em;
-  --text-hero--font-weight: 400;
+  --text-hero--font-weight: 500;
 
   --text-section: clamp(2rem, 3.4vw, 2.75rem);
   --text-section--line-height: 1.1;
   --text-section--letter-spacing: -0.02em;
-  --text-section--font-weight: 400;
+  --text-section--font-weight: 500;
 
   --radius-sharp: 2px;
 }
 
-/* Rótulo: navegação, botões, sobretítulos e números. A fonte vem do layout público (--font-label-mono). */
+/* Rótulo: navegação, botões, sobretítulos e números (Inter, caixa-alta). */
 @utility text-label {
-  font-family: var(--font-label-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 500;
   font-size: 0.6875rem;
   line-height: 1.4;
   letter-spacing: 0.08em;
@@ -331,39 +340,31 @@ html[data-font="system"] {
 }
 
 /* ==========================================================================
-   Páginas públicas: sempre claras, destaque laranja e Inter, seja qual for a
-   preferência salva no <html> (data-mode, data-accent, data-font). As variáveis
-   são redefinidas na própria área pública, então valem desde o primeiro quadro,
-   sem trocar o tema depois que o JavaScript carrega.
+   Páginas públicas: o mesmo modo (claro, escuro ou sistema) do ERP, o mesmo cookie e as mesmas
+   variáveis de superfície e tinta (data-mode no <html>); só o destaque laranja e a Inter são fixos, seja qual
+   for a preferência salva (data-accent, data-font). As variáveis são redefinidas na própria área pública, então
+   valem desde o primeiro quadro, sem trocar o tema depois que o JavaScript carrega.
    ========================================================================== */
 .theme-public {
-  --color-canvas: #e9e9e8;
-  --color-shell: #f6f6f5;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f2f2f0;
-  --color-surface-sunken: #ebebe9;
-  --color-ink: #1c1b19;
-  --color-ink-soft: #6e6d68;
-  --color-ink-faint: #a5a49e;
-  --color-ink-foreground: #ffffff;
   --color-brand: #f05a28;
   --color-brand-strong: #d9481a;
   --color-brand-light: #ff7a45;
   --color-brand-foreground: #ffffff;
   --color-brand-soft: color-mix(in oklab, var(--color-brand) 12%, var(--color-surface));
-  --color-success: #1d9a54;
+  /* Janelas dos prédios desenhados: apagada escura e acesa clara. */
+  --color-window-off: #1c1b19;
+  --color-window-on: #ffffff;
+  /* O vermelho de erro não segue o destaque salvo (rosa e vermelho o deixam alaranjado): aqui o destaque é sempre laranja. */
   --color-danger: #d4243a;
-  --color-warning: #c98a06;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --border: color-mix(in oklab, var(--color-ink) 8%, transparent);
-  --glass-top: color-mix(in oklab, var(--color-surface) 82%, transparent);
-  --glass-bottom: color-mix(in oklab, var(--color-surface) 58%, transparent);
-  --glass-highlight: rgb(255 255 255 / 0.95);
-  --glass-edge: rgb(255 255 255 / 0.6);
-  --shadow-card: 0 1px 2px rgb(28 27 25 / 0.04);
-  --shadow-float: 0 8px 24px rgb(28 27 25 / 0.08);
-  color-scheme: light;
   font-family: var(--font-sans);
   color: var(--color-ink);
 }
-
+html[data-mode="dark"] .theme-public {
+  --color-danger: #ff5d6e;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-mode="system"] .theme-public {
+    --color-danger: #ff5d6e;
+  }
+}

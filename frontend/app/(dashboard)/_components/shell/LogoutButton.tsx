@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 
+import { railButtonClass, RailLabel } from "./ModuleMenu";
+
 /** Client Component: o servidor revoga o refresh token e apaga os cookies; aqui limpa o cache do usuário. */
-export function LogoutButton({ compact = false, rail = false }: { compact?: boolean; rail?: boolean }) {
+export function LogoutButton({ compact = false, rail = false, expanded = false }: { compact?: boolean; rail?: boolean; expanded?: boolean }) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -29,11 +31,12 @@ export function LogoutButton({ compact = false, rail = false }: { compact?: bool
         onClick={handleLogout}
         className={
           rail
-            ? "flex size-11 items-center justify-center rounded-control text-ink-soft transition-colors hover:bg-surface hover:text-ink"
+            ? railButtonClass(false, false, expanded)
             : "flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink"
         }
       >
-        <LogOut className="size-5" />
+        <LogOut className="size-5 shrink-0" />
+        {rail && expanded && <RailLabel>Sair</RailLabel>}
       </button>
     );
   }
@@ -43,7 +46,7 @@ export function LogoutButton({ compact = false, rail = false }: { compact?: bool
       variant="ghost"
       title="Sair"
       aria-label="Sair"
-      className="h-10 w-full justify-start gap-3 rounded-control px-3 hover:bg-surface"
+      className="h-11 w-full justify-start gap-3 rounded-control px-3 hover:bg-surface"
       onClick={handleLogout}
     >
       <LogOut className="size-[1.125rem] shrink-0" />

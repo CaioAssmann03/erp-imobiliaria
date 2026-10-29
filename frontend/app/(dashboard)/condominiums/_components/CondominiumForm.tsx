@@ -21,12 +21,12 @@ import {
 
 import { AddressSection } from "./condominium-form/AddressSection";
 import { AdjustmentSection } from "./condominium-form/AdjustmentSection";
-import { ApportionmentCard } from "./condominium-form/ApportionmentCard";
 import { ApportionmentCriteriaCard } from "./condominium-form/ApportionmentCriteriaCard";
 import { BillingSection } from "./condominium-form/BillingSection";
 import { FeeSection } from "./condominium-form/FeeSection";
 import { IdentificationSection } from "./condominium-form/IdentificationSection";
 import { useCondominiumSubmit } from "./condominium-form/use-condominium-submit";
+import { CondominiumDeleteButton } from "./CondominiumDeleteButton";
 
 export function CondominiumForm({
   condominiumId,
@@ -80,9 +80,11 @@ export function CondominiumForm({
           <BillingSection condominiumId={condominiumId} />
           <AdjustmentSection />
           {isEdit && <ApportionmentCriteriaCard condominiumId={condominiumId} />}
-          {isEdit && <ApportionmentCard condominiumId={condominiumId} />}
         </div>
-        <FormActions isSubmitting={isSubmitting}>
+        <FormActions
+          isSubmitting={isSubmitting}
+          danger={condominium && <CondominiumDeleteButton condominiumId={condominium.id} name={condominium.name} />}
+        >
           <Button type="button" variant="secondary" onClick={() => router.push("/condominiums")}>
             Cancelar
           </Button>

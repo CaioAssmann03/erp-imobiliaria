@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { ListFallback } from "@/components/data-list";
+import { LinkButton } from "@/components/LinkButton";
 import { PageHeader } from "@/components/PageHeader";
 
 import { DashboardHome } from "../_components/home/DashboardHome";
 import { Greeting } from "../_components/home/Greeting";
+import { RegistrySummary } from "../_components/home/RegistrySummary";
 
 export const metadata: Metadata = { title: "Painel" };
 
@@ -14,7 +16,15 @@ export default function DashboardHomePage() {
     <div>
       <PageHeader
         title={<Greeting />}
-        description="O que pede atenção na administração de condomínios, locações, vendas e financeiro."
+        description={<RegistrySummary />}
+        actions={
+          <>
+            <LinkButton variant="secondary" href="/persons/new">
+              Nova pessoa
+            </LinkButton>
+            <LinkButton href="/condominiums/new">Novo condomínio</LinkButton>
+          </>
+        }
       />
       <Suspense fallback={<ListFallback />}>
         <DashboardHome />

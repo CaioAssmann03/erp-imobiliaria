@@ -16,12 +16,13 @@ interface FormFieldProps {
 }
 
 /**
- * Rótulo (com o ícone de ajuda, se houver dica) + controle + a linha do erro. A linha do erro é sempre reservada:
- * um erro que aparece não empurra os campos abaixo. A dica fica na mesma linha, só para leitor de tela.
+ * Rótulo (com o ícone de ajuda, se houver dica) + controle + a linha do erro. A linha do erro não ocupa espaço: aparece sobreposta no vão entre
+ * este campo e o de baixo (`FormSection` e `FieldRow` deixam 20 px), numa linha só (o texto inteiro está no `title` e no resumo de erros da barra de
+ * ações), então um erro que aparece não empurra os campos abaixo e os campos ficam juntos. A dica fica na mesma linha, só para leitor de tela.
  */
 export function FormField({ id, label, required, hint, error, className, children }: FormFieldProps) {
   return (
-    <div className={cn("flex flex-col", className)}>
+    <div className={cn("relative flex flex-col", className)}>
       <div className="mb-1.5 flex items-center gap-1.5">
         <label htmlFor={id} className="text-caption font-medium text-ink-soft">
           {label}
@@ -37,12 +38,13 @@ export function FormField({ id, label, required, hint, error, className, childre
       <p
         id={`${id}-message`}
         role={error ? "alert" : undefined}
-        className="mt-1.5 flex min-h-4 items-start gap-1.5 text-caption leading-4 text-danger"
+        title={error}
+        className="absolute inset-x-0 top-full mt-0.5 flex items-center gap-1.5 text-caption leading-4 text-danger"
       >
         {error ? (
           <>
-            <CircleAlert aria-hidden className="mt-px size-3 shrink-0" />
-            {error}
+            <CircleAlert aria-hidden className="size-3 shrink-0" />
+            <span className="min-w-0 truncate">{error}</span>
           </>
         ) : (
           hint && <span className="sr-only">{hint}</span>
