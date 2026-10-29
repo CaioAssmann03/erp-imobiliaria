@@ -2,32 +2,55 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { Brand } from "@/components/Brand";
 import { activeModule, APP_MODULES } from "@/lib/module-menu";
+import { cn } from "@/lib/utils";
 import { LogoutButton } from "./LogoutButton";
 import { MODULE_ICONS } from "./menu-icons";
-import { ModuleMenu, railButtonClass } from "./ModuleMenu";
+import { ModuleMenu, railButtonClass, RailLabel } from "./ModuleMenu";
 import { SettingsDialog } from "./SettingsDialog";
+import { useRailExpanded } from "./use-rail-expanded";
 
 /**
- * Client Component: a faixa de ícones da lateral (só em telas grandes; no celular a navegação é o `MobileMenu`). Um módulo com grupos abre o
- * cartão `ModuleMenu`; sem grupos (Painel, Pessoas) é um link direto. Embaixo ficam as configurações e o sair. Precisa do pathname para marcar o módulo ativo.
+ * Client Component: a lateral (só em telas grandes; no celular a navegação é o `MobileMenu`). Recolhida é uma faixa de ícones; expandida, os
+ * ícones com o nome ao lado. Clicar no logo alterna os dois, e a escolha fica lembrada neste navegador. Um módulo com grupos abre o cartão
+ * `ModuleMenu`; sem grupos (Painel, Pessoas) é um link direto. Embaixo ficam as configurações e o sair. Precisa do pathname para marcar o módulo ativo.
  */
 export function Rail() {
   const current = activeModule(usePathname());
+  const [expanded, toggle] = useRailExpanded();
+  // A largura só anima depois de um clique: quem abre a página já com a rail expandida não a vê "abrir" a cada carga.
+  const [animated, setAnimated] = useState(false);
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-[4.5rem] shrink-0 flex-col items-center gap-1.5 bg-canvas py-4 lg:flex">
-      <Link href="/dashboard" aria-label="ERP Imobiliária" title="ERP Imobiliária" className="mb-4">
-        <Brand compact />
-      </Link>
+    <aside
+      className={cn(
+        "sticky top-0 hidden h-screen shrink-0 flex-col gap-1.5 overflow-hidden bg-canvas px-3.5 py-4 lg:flex",
+        expanded ? "w-60" : "w-[4.5rem]",
+        animated && "transition-[width] duration-200 ease-out",
+      )}
+    >
+      <button
+        type="button"
+        onClick={() => {
+          setAnimated(true);
+          toggle();
+        }}
+        aria-label={expanded ? "Recolher menu" : "Expandir menu"}
+        aria-expanded={expanded}
+        title={expanded ? "Recolher menu" : "Expandir menu"}
+        className="mb-4 flex h-11 items-center rounded-control px-2 outline-none transition-opacity hover:opacity-75 focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <Brand compact={!expanded} />
+      </button>
 
-      <nav aria-label="Módulos" className="flex flex-col items-center gap-1.5">
+      <nav aria-label="Módulos" className="flex flex-col gap-1.5">
         {APP_MODULES.map((appModule) => {
           const isActive = current === appModule.key;
           if (appModule.groups.length > 0) {
-            return <ModuleMenu key={appModule.key} appModule={appModule} isActive={isActive} />;
+            return <ModuleMenu key={appModule.key} appModule={appModule} isActive={isActive} expanded={expanded} />;
           }
           const Icon = MODULE_ICONS[appModule.icon];
           return (
@@ -37,17 +60,18 @@ export function Rail() {
               title={appModule.label}
               aria-label={appModule.label}
               aria-current={isActive ? "page" : undefined}
-              className={railButtonClass(isActive)}
+              className={railButtonClass(isActive, false, expanded)}
             >
-              <Icon className="size-5" />
+              <Icon className="size-5 shrink-0" />
+              {expanded && <RailLabel>{appModule.label}</RailLabel>}
             </Link>
           );
         })}
       </nav>
 
-      <div className="mt-auto flex flex-col items-center gap-1.5">
-        <SettingsDialog />
-        <LogoutButton rail />
+      <div className="mt-auto flex flex-col gap-1.5">
+        <SettingsDialog expanded={expanded} />
+        <LogoutButton rail expanded={expanded} />
       </div>
     </aside>
   );

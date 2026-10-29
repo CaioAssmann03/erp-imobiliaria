@@ -3,12 +3,11 @@
 import { useSearchParams } from "next/navigation";
 
 /** Client Component: o centro da tela de unidades sem unidade aberta; o texto depende de já haver condomínio escolhido. */
-export function UnitsEmptyState({ icon }: { icon: React.ReactNode }) {
+export function UnitsEmptyState() {
   const hasCondominium = Boolean(useSearchParams().get("condominium"));
 
   return (
     <div className="flex min-h-[24rem] flex-col items-center justify-center gap-3 rounded-card bg-surface p-10 text-center">
-      <span className="flex size-12 items-center justify-center rounded-panel bg-surface-muted text-brand">{icon}</span>
       <h1 className="text-heading">{hasCondominium ? "Escolha uma unidade" : "Escolha um condomínio"}</h1>
       <p className="max-w-sm text-body text-ink-soft">
         {hasCondominium

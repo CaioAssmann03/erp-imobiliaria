@@ -7,24 +7,25 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_APPEARANCE, type Appearance } from "@/lib/appearance";
 
+import { railButtonClass, RailLabel } from "./ModuleMenu";
 import { AccentSection } from "./settings/AccentSection";
 import { applyAppearance, readAppearance } from "./settings/apply-appearance";
 import { FontSection } from "./settings/FontSection";
 import { ModeSection } from "./settings/ModeSection";
-import { RegistersSection } from "./settings/RegistersSection";
 
 const TRIGGER_COMPACT =
   "flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink";
-const TRIGGER_RAIL =
-  "flex size-11 items-center justify-center rounded-control text-ink-soft transition-colors hover:bg-surface hover:text-ink";
 
 export function SettingsDialog({
   compact = false,
+  expanded = false,
   open,
   onOpenChange,
 }: {
   /** Botão redondo da barra do topo no celular (sem isto, é o botão da rail). */
   compact?: boolean;
+  /** Na rail expandida, o botão mostra o nome ao lado do ícone. */
+  expanded?: boolean;
   /** Controlado por quem usa (sem estes dois, o próprio botão abre e fecha). Controlado, não desenha o botão. */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -52,9 +53,10 @@ export function SettingsDialog({
         <Dialog.Trigger
           title="Configurações"
           aria-label="Configurações"
-          className={compact ? TRIGGER_COMPACT : TRIGGER_RAIL}
+          className={compact ? TRIGGER_COMPACT : railButtonClass(false, false, expanded)}
         >
-          <Settings className="size-5" />
+          <Settings className="size-5 shrink-0" />
+          {!compact && expanded && <RailLabel>Configurações</RailLabel>}
         </Dialog.Trigger>
       )}
 
@@ -66,12 +68,11 @@ export function SettingsDialog({
             <header className="mb-6 sm:mb-7">
               <Dialog.Title className="text-title">Configurações</Dialog.Title>
               <Dialog.Description className="mt-1 text-body text-ink-soft">
-                Cadastros de apoio e aparência do sistema (a aparência fica salva neste navegador).
+                Aparência do sistema, salva neste navegador.
               </Dialog.Description>
             </header>
 
             <div className="space-y-7">
-              <RegistersSection />
               <ModeSection appearance={appearance} onChange={update} />
               <AccentSection appearance={appearance} onChange={update} />
               <FontSection appearance={appearance} onChange={update} />

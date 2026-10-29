@@ -12,7 +12,7 @@ import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useCondominiumsList, useCostCentersRetrieve } from "@/lib/api/generated";
-import { condominiumUrl } from "@/lib/condominium-registry";
+import { condominiumPageUrl } from "@/lib/condominium-registry";
 import { throwIfNotFound } from "@/lib/query/not-found";
 import {
   COST_CENTER_DEFAULTS,
@@ -22,6 +22,7 @@ import {
   type CostCenterFormOutput,
 } from "@/lib/schemas/cost-center";
 
+import { CostCenterDeleteButton } from "./CostCenterDeleteButton";
 import { useCostCenterSubmit } from "./cost-center-form/use-cost-center-submit";
 
 /** Cadastro e edição de sub-conta. O condomínio só é escolhido no cadastro, e não quando o cadastro parte de um condomínio. */
@@ -49,7 +50,7 @@ export function CostCenterForm({
   });
   const { handleSubmit, reset, setError } = methods;
   const { submit, isSubmitting } = useCostCenterSubmit(costCenterId, setError);
-  const returnUrl = costCenter ? condominiumUrl(costCenter.condominium, "sub-contas") : condominiumId ? condominiumUrl(condominiumId, "sub-contas") : "/condominiums";
+  const returnUrl = costCenter ? condominiumPageUrl(costCenter.condominium, "cost-centers") : condominiumId ? condominiumPageUrl(condominiumId, "cost-centers") : "/condominiums";
 
   useEffect(() => {
     if (costCenter) reset(costCenterToForm(costCenter));
@@ -88,7 +89,10 @@ export function CostCenterForm({
             <CheckboxField name="active" label="Cadastro ativo" />
           </FieldRow>
         </FormSection>
-        <FormActions isSubmitting={isSubmitting}>
+        <FormActions
+          isSubmitting={isSubmitting}
+          danger={costCenter && <CostCenterDeleteButton condominiumId={costCenter.condominium} costCenterId={costCenter.id} name={costCenter.name} />}
+        >
           <Button type="button" variant="secondary" onClick={() => router.push(returnUrl)}>
             Cancelar
           </Button>

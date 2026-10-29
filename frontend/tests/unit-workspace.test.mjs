@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { currentSection } from "../lib/condominium-registry.ts";
+import { sectionPosition } from "../lib/condominium-registry.ts";
 import {
   newUnitUrl,
   UNIT_SECTIONS,
@@ -45,7 +45,7 @@ test("the pendency table has no frame", () => {
 });
 
 test("other routes are not the unit workspace", () => {
-  for (const path of ["/condominiums", "/condominiums/c1", "/condominiums/blocks", "/condominiums/c1/blocks/new", "/persons", "/condominiums/c1/units/u9/extra"]) {
+  for (const path of ["/condominiums", "/condominiums/c1", "/condominiums/blocks", "/condominiums/c1/blocks/new", "/condominiums/c1/units", "/persons", "/condominiums/c1/units/u9/extra"]) {
     assert.equal(unitsFrameState(path).hasFrame, false, path);
   }
   assert.equal(unitsFrameState(null).hasFrame, false);
@@ -63,8 +63,9 @@ test("the list shows the type and the name of the unit", () => {
   assert.equal(unitListLabel("", "A3"), "A3");
 });
 
-test("the unit page has the four sections and the index follows the reading band", () => {
+test("the unit page has the four sections and the index marker follows the reading line", () => {
   assert.deepEqual(UNIT_SECTIONS.map((section) => section.id), ["dados-gerais", "proprietario", "inquilino", "cobranca"]);
-  assert.equal(currentSection(new Set(["proprietario", "inquilino"]), UNIT_SECTIONS), "inquilino");
-  assert.equal(currentSection(new Set(), UNIT_SECTIONS), null);
+  // the owner section started above the line and the tenant one is on it: the marker is on the tenant item
+  assert.equal(sectionPosition([-600, -250, 300, 700], 300), 2);
+  assert.equal(sectionPosition([500, 900, 1200, 1500], 300), 0);
 });

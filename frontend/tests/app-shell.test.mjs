@@ -59,10 +59,18 @@ test("no module menu label is repeated inside one module", () => {
   }
 });
 
-test("the old list routes that became sections still exist, as redirects", () => {
-  for (const route of ["condominiums/blocks", "condominiums/cost-centers", "condominiums/[id]/blocks", "condominiums/[id]/units", "condominiums/units/new"]) {
+test("the old list routes still exist, as redirects", () => {
+  for (const route of ["condominiums/blocks", "condominiums/cost-centers", "condominiums/units/new"]) {
     const page = readFileSync(join(DASHBOARD, ...route.split("/"), "page.tsx"), "utf8");
     assert.match(page, /redirect\(/, route);
+  }
+});
+
+test("the blocks, the units and the cost centers of a condominium are screens of their own, with the side menu", () => {
+  for (const route of ["condominiums/[id]/blocks", "condominiums/[id]/units", "condominiums/[id]/cost-centers"]) {
+    const page = readFileSync(join(DASHBOARD, ...route.split("/"), "page.tsx"), "utf8");
+    assert.doesNotMatch(page, /redirect\(/, route);
+    assert.match(page, /CondominiumSideMenu/, route);
   }
 });
 
@@ -71,7 +79,7 @@ test("the shell and the registry use design tokens, never a hard-coded color", (
     // The settings previews (ModePreview) paint the themes they offer, so they are the one place with literal colors.
     ...sourceFiles(join(DASHBOARD, "_components", "shell")).filter((file) => !file.includes(`${"settings"}/`)),
     ...sourceFiles(join(DASHBOARD, "condominiums", "_components")).filter((file) =>
-      /(CondominiumsList|CondominiumsFrame|CondominiumHeader|RegistrySection|SectionIndex|CondominiumDeleteButton)\.tsx$/.test(file)
+      /(CondominiumsList|CondominiumsFrame|CondominiumHeader|CondominiumSideMenu|RegistrySection|SectionIndex|CondominiumDeleteButton)\.tsx$/.test(file)
     ),
   ];
   assert.ok(files.length > 10);
@@ -93,7 +101,9 @@ test("the head script applies the saved mode, accent and font, and falls back to
   assert.equal(tampered.font, DEFAULT_APPEARANCE.font);
 });
 
-test("the collapsible sidebar is gone: no attribute, cookie or variant is left", () => {
+// The rail expands and collapses (click on the logo), but the choice lives only in the browser (`localStorage`): the server renders the
+// same HTML for everyone, so there is no <html> attribute, no cookie and no CSS variant for it.
+test("the rail state is not on <html>: no attribute, cookie or variant", () => {
   assert.equal(Object.hasOwn(runInitScript(""), "sidebar"), false);
   const css = readFileSync(join(ROOT, "app", "globals.css"), "utf8");
   assert.doesNotMatch(css, /sidebar-closed/);

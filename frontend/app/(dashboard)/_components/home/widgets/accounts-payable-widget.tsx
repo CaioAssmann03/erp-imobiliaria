@@ -10,15 +10,29 @@ import type { WidgetBuilder } from "./types";
 
 const SHORT_LIST = 4;
 
-function Tile({ label, value, alert = false }: { label: string; value: PayableTotal | undefined; alert?: boolean }) {
-  const hasAlert = alert && (value?.count ?? 0) > 0;
+const accountsLabel = (count: number) => `${count} conta${count === 1 ? "" : "s"}`;
+
+/** O que pede atenção: o valor atrasado, grande, e em vermelho só quando há atraso. */
+function Overdue({ value }: { value: PayableTotal | undefined }) {
+  const late = (value?.count ?? 0) > 0;
   return (
-    <div className="rounded-panel bg-surface-muted p-4">
-      <Caption>{label}</Caption>
-      <div className={cn("mt-1 text-heading tabular-nums", hasAlert && "text-danger")}>
-        {value ? brl(value.total) : "–"}
-      </div>
-      <Caption>{value ? `${value.count} conta${value.count === 1 ? "" : "s"}` : ""}</Caption>
+    <div>
+      <Caption>Atrasadas</Caption>
+      <div className={cn("mt-1 text-title tabular-nums", late && "text-danger")}>{value ? brl(value.total) : "–"}</div>
+      <Caption>
+        {!value ? "" : late ? `${accountsLabel(value.count)} vencida${value.count === 1 ? "" : "s"}` : "Nenhuma conta atrasada"}
+      </Caption>
+    </div>
+  );
+}
+
+/** Uma janela de vencimento como linha de razão: nome, quantidade e valor alinhado à direita. */
+function WindowRow({ label, value }: { label: string; value: PayableTotal | undefined }) {
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_auto_7.5rem] items-baseline gap-x-4 border-b border-border py-2.5 first:pt-0 last:border-b-0 last:pb-0">
+      <dt className="text-ink-soft">{label}</dt>
+      <dd className="text-caption text-ink-faint tabular-nums">{value ? accountsLabel(value.count) : ""}</dd>
+      <dd className="text-right tabular-nums">{value ? brl(value.total) : "–"}</dd>
     </div>
   );
 }
@@ -68,13 +82,15 @@ export const buildAccountsPayableWidget: WidgetBuilder = (dash) => {
     renderFocus: () => <AccountsPayableFocus payables={payables} />,
     render: (large) => (
       <>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Tile label="Atrasadas" value={payables?.overdue} alert />
-          <Tile label="Vencem hoje" value={payables?.due_today} />
-          <Tile label="Próximos 7 dias" value={payables?.due_next_7_days} />
-          <Tile label="Neste mês" value={payables?.due_this_month} />
+        <div className="grid items-start gap-x-12 gap-y-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
+          <Overdue value={payables?.overdue} />
+          <dl>
+            <WindowRow label="Vencem hoje" value={payables?.due_today} />
+            <WindowRow label="Próximos 7 dias" value={payables?.due_next_7_days} />
+            <WindowRow label="Neste mês" value={payables?.due_this_month} />
+          </dl>
         </div>
-        <div className="mt-4">
+        <div className="mt-6 border-t border-border pt-4">
           <Caption>Mais antigas em aberto</Caption>
           <Upcoming payables={payables} large={large} />
         </div>

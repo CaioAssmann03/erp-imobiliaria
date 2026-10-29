@@ -20,7 +20,7 @@ authenticated with a Django user (admins only for now).
 | Finance · Accounts payable | `/finance/accounts-payable` | list with filters, register/edit, settle ("baixa", which posts the debit in the condominium's statement) and cancel |
 | Finance · Statement | `/finance/statement` | current account of a condominium: balance and balance by cost center, entries (newest first) with filters (period, reference month, kind), reversal |
 | Billing · Entries | `/billing/entries` | **Inclusão de valores**: the values launched for a condominium's boletos besides the plan, by month: grid by unit, new launch panel with live preview, delete or end a launch (spec 039) |
-| Billing · Events | `/billing/events` | the events (code + name) that fill a launch's description; also linked from Configurações → Cadastros |
+| Billing · Events | `/billing/events` | the events (code + name) that fill a launch's description; in the module menu (Condomínios → Cadastros → Eventos) |
 | Billing · Plans | `/billing/plans` | list (search, condominium and status filters), create and edit a billing plan with its items (kind-dependent fields, ordered with move buttons), delete; the issuance fields live in the condominium form (`issuance_day`, `exempts_manager_unit`) and the unit form (`billing_recipient`) |
 | Billing · Documents | `/billing/documents` | the issued boletos per unit and month: list (search, condominium, status, reference month, overdue), the document page with items, draft PDF download and cancel |
 | Billing · Runs | `/billing/runs` | the monthly issuance runs: counts per run, **Emitir mês** (issue a condominium's month now), and each run's problems with a Portuguese sentence and a link to fix them |

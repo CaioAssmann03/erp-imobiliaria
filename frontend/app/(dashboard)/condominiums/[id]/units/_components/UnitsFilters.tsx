@@ -4,7 +4,7 @@ import { FilterMenu } from "@/components/FilterMenu";
 import type { Block } from "@/lib/api/generated/models";
 import { UNIT_TYPES } from "@/lib/schemas/unit";
 
-const PENDING_OPTIONS = [
+export const PENDING_OPTIONS = [
   { value: "without_responsible", label: "Sem responsável" },
   { value: "lease_ending", label: "Locação terminando" },
   { value: "billing_blocked", label: "Lançamento bloqueado" },

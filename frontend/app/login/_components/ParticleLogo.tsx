@@ -4,17 +4,17 @@ import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { buildParticles } from "./skyscraper/particles";
-import { SCENE } from "./skyscraper/scene";
-import { createSimulation } from "./skyscraper/simulation";
+import { buildParticles } from "./logo/particles";
+import { SCENE } from "./logo/scene";
+import { createSimulation } from "./logo/simulation";
 
 /**
- * Client Component: o prédio do login, feito de partículas quadradas em tons de laranja (os tokens de destaque do tema).
- * Se monta ao abrir, algumas janelas acendem e apagam, o mouse acende as janelas de perto (como na home) e empurra de leve
- * as partículas. Para quem prefere menos movimento fica o desenho parado. Tem o tamanho dele mesmo: a página o põe ao lado
- * do formulário, inteiro à vista.
+ * Client Component: o logo da casa do login, em 3D e feito de partículas quadradas em tons de laranja (os tokens de destaque
+ * do tema). Se monta ao abrir, algumas faixas acendem e apagam, o mouse acende as faixas de perto (como as janelas da home) e
+ * empurra de leve as partículas. Para quem prefere menos movimento fica o desenho parado. Tem o tamanho dele mesmo: a página
+ * o põe num painel ao lado do formulário, inteiro à vista.
  */
-export function ParticleSkyscraper({ className }: { className?: string }) {
+export function ParticleLogo({ className }: { className?: string }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -31,7 +31,7 @@ export function ParticleSkyscraper({ className }: { className?: string }) {
 
     const resize = new ResizeObserver(measure);
     resize.observe(wrap);
-    // O mouse é lido na janela: o <main> da página (z-10, largura total) cobre o prédio, então os eventos nunca chegam a ele.
+    // O mouse é lido na janela: o <main> da página (z-10, largura total) cobre o logo, então os eventos nunca chegam a ele.
     const onMove = (event: PointerEvent) => {
       const box = wrap.getBoundingClientRect();
       simulation.setPointer(event.clientX - box.left, event.clientY - box.top);
@@ -57,9 +57,9 @@ export function ParticleSkyscraper({ className }: { className?: string }) {
     <div
       ref={wrapRef}
       role="img"
-      aria-label="Ilustração de um prédio feita de pequenas partículas laranja"
+      aria-label="Logo da casa em 3D feito de pequenas partículas laranja"
       className={cn("relative", className)}
-      style={{ height: "min(44vh, 90vw)", aspectRatio: `${SCENE.width} / ${SCENE.height}` }}
+      style={{ height: "min(56vh, 36vw)", aspectRatio: `${SCENE.width} / ${SCENE.height}` }}
     >
       <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none absolute" />
     </div>

@@ -165,7 +165,7 @@ REST_FRAMEWORK = {
 AUDITLOG_DISABLE_REMOTE_ADDR = True
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "ERP Imobiliária API",
+    "TITLE": "METRI API",
     "DESCRIPTION": "API do sistema de administração de condomínios, locações, vendas e financeiro.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
@@ -316,6 +316,6 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 UNFOLD = {
-    "SITE_TITLE": "ERP Imobiliária",
-    "SITE_HEADER": "ERP Imobiliária",
+    "SITE_TITLE": "METRI",
+    "SITE_HEADER": "METRI",
 }

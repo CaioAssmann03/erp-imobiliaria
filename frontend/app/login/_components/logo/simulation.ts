@@ -5,7 +5,7 @@ import { STEP, type ParticleSet } from "./particles";
 import { SCENE } from "./scene";
 
 // Unidades da cena e quadros de 60 fps.
-const PAD = 64; // folga do canvas além do prédio (px de tela), para as partículas que voam para fora
+const PAD = 64; // folga do canvas além do logo (px de tela), para as partículas que voam para fora
 const RADIUS = 48; // raio do empurrão do mouse (suave: o principal é a luz)
 const PUSH = 1.8; // empurrão máximo por quadro
 const LIGHT_RADIUS = 130; // raio da luz do mouse sobre as janelas
@@ -16,12 +16,12 @@ const LIT_RATIO = 0.2; // janelas acesas sozinhas (poucas: o círculo do mouse p
 const STILL_LIT_RATIO = 0.4; // sem animação (só o desenho parado)
 const TOGGLES_PER_SECOND = 10;
 const WINDOW_EASE = 0.98; // fração do caminho até o alvo percorrida por segundo
-const BUILD_MS = 900; // quanto o prédio leva para começar a subir, do chão ao topo (cada partícula sai na sua vez)
+const BUILD_MS = 900; // quanto o logo leva para começar a subir, do chão ao topo (cada partícula sai na sua vez)
 const RISE_MS = 1100; // quanto cada partícula leva para subir da base até o seu lugar
 
 /**
- * O arranha-céu como nuvem de partículas quadradas num canvas: ao abrir, as partículas sobem de baixo da cena (as do chão primeiro), algumas janelas acendem
- * e apagam sozinhas, o mouse acende as janelas de perto (como na home) e empurra de leve as partículas, que voltam. Só redesenha quando algo muda (parado, não gasta nada).
+ * O logo como nuvem de partículas quadradas num canvas: ao abrir, as partículas sobem de baixo da cena (as do chão primeiro), algumas janelas acendem
+ * e apagam sozinhas, o mouse acende as faixas de perto (como as janelas da home) e empurra de leve as partículas, que voltam. Só redesenha quando algo muda (parado, não gasta nada).
  */
 export function createSimulation(canvas: HTMLCanvasElement, set: ParticleSet, animate: boolean) {
   const ctx = canvas.getContext("2d");
@@ -85,7 +85,7 @@ export function createSimulation(canvas: HTMLCanvasElement, set: ParticleSet, an
     needsDraw = true;
   };
 
-  /** `width` e `height` são o tamanho do prédio na tela (px de CSS), sem a folga. */
+  /** `width` e `height` são o tamanho do logo na tela (px de CSS), sem a folga. */
   const resize = (width: number, height: number) => {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     cssWidth = width + PAD * 2;
@@ -201,7 +201,7 @@ export function createSimulation(canvas: HTMLCanvasElement, set: ParticleSet, an
   return {
     resize,
     readColor,
-    /** Posição do mouse em px de tela relativa ao prédio, ou `null` quando sai. */
+    /** Posição do mouse em px de tela relativa ao logo, ou `null` quando sai. */
     setPointer(x: number | null, y = 0) {
       pointer = x === null ? null : { x: x / scale, y: y / scale };
     },

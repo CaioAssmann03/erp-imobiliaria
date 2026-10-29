@@ -22,7 +22,7 @@ export const NAV_LINKS = [
  * abertura e os demais em duas colunas. Só afirma o que o sistema faz (ver `FEATURES` e `STEPS`), sem números inventados.
  */
 export const SUMMARY = {
-  lead: "A ERP Imobiliária é um sistema de gestão desenvolvido para administradoras de condomínios. Reúne, em uma única plataforma, o cadastro de condomínios, blocos, unidades e pessoas, a cobrança mensal, a conciliação bancária e o financeiro de cada condomínio administrado.",
+  lead: "O METRI é um sistema de gestão desenvolvido para administradoras de condomínios. Reúne, em uma única plataforma, o cadastro de condomínios, blocos, unidades e pessoas, a cobrança mensal, a conciliação bancária e o financeiro de cada condomínio administrado.",
   paragraphs: [
     "O cadastro é mantido uma única vez e serve de base para todas as demais rotinas. A partir dele, a administradora define os planos de cobrança de cada condomínio, emite os documentos do mês em lote para todas as unidades e registra os boletos correspondentes, sem a necessidade de planilhas intermediárias.",
     "Os pagamentos são recebidos do banco por meio de baixa automática e conciliados com o extrato, de modo que o boleto emitido, o valor baixado e o lançamento do mês refiram-se sempre ao mesmo registro. As despesas são lançadas por centro de custo, com contas a pagar, baixa e histórico completo.",

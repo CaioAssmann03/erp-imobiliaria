@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { FormPage } from "@/components/form/FormPage";
 import { SectionIndex } from "@/components/SectionIndex";
 import { UNIT_SECTIONS } from "@/lib/unit-workspace";
 import { UnitForm } from "../_components/UnitForm";
@@ -12,12 +13,9 @@ export default async function UnitPage({ params }: { params: Promise<{ id: strin
   const { id, unitId } = await params;
 
   return (
-    <div className="flex items-start gap-8">
-      <div className="min-w-0 flex-1 pb-24">
-        <UnitHeader condominiumId={id} unitId={unitId} />
-        <UnitForm condominiumId={id} unitId={unitId} />
-      </div>
-      <SectionIndex sections={UNIT_SECTIONS} label="Seções da unidade" title="Nesta unidade" />
-    </div>
+    <FormPage aside={<SectionIndex sections={UNIT_SECTIONS} label="Seções da unidade" title="Nesta unidade" />}>
+      <UnitHeader condominiumId={id} unitId={unitId} />
+      <UnitForm condominiumId={id} unitId={unitId} />
+    </FormPage>
   );
 }

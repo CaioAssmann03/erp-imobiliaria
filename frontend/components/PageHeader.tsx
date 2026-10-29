@@ -1,30 +1,19 @@
-import { ArrowLeft } from "lucide-react";
-
-import { LinkButton } from "@/components/LinkButton";
+import { BackLink } from "@/components/BackLink";
 
 interface PageHeaderProps {
   title: React.ReactNode;
   description?: React.ReactNode;
   back?: { href: string; label: string };
+  /** Um "voltar" que só se sabe depois de carregar (client), no lugar de `back`. */
+  backSlot?: React.ReactNode;
   actions?: React.ReactNode;
 }
 
-export function PageHeader({ title, description, back, actions }: PageHeaderProps) {
+export function PageHeader({ title, description, back, backSlot, actions }: PageHeaderProps) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        {back && (
-          <LinkButton
-            href={back.href}
-            variant="ghost"
-            size="sm"
-            aria-label={`Voltar para ${back.label}`}
-            className="group -ml-2.5 mb-2 gap-1.5 px-2.5 text-ink-soft hover:text-ink"
-          >
-            <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-0.5" />
-            {back.label}
-          </LinkButton>
-        )}
+        {back ? <BackLink href={back.href} label={back.label} /> : backSlot}
         <h1 className="text-title">{title}</h1>
         {description && <p className="mt-1.5 text-body text-ink-soft">{description}</p>}
       </div>

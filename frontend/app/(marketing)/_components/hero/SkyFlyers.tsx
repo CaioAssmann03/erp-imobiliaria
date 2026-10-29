@@ -42,7 +42,8 @@ const BIRD_CYCLE = [0, 1, 2, 1];
 const FLAP_MS = 130;
 
 /** Intervalo entre uma passagem e a próxima (ms). */
-const FIRST_DELAY = [2200, 3600] as const;
+/** Tempo (ms) que a pessoa precisa já ter passado no hero, com a aba visível e o hero à vista, para o primeiro voo. */
+const FIRST_DWELL = [12000, 18000] as const;
 const GAP = [6000, 13000] as const;
 const MAX_RATIO = 1.5;
 const TRAIL = 240;
@@ -64,8 +65,8 @@ interface Flyer {
 const between = ([min, max]: readonly [number, number]) => min + Math.random() * (max - min);
 
 /**
- * Client Component: de vez em quando passa pelo céu do hero um avião (com um rastro que some) ou um bando de pássaros
- * em V, no mesmo desenho de linhas laranja do skyline. Só desenha enquanto há alguém no ar, e nada quando a aba está
+ * Client Component: depois de a pessoa ficar um tempo no hero, e de vez em quando daí em diante, passa pelo céu um avião
+ * (com um rastro que some) ou um bando de pássaros em V, no mesmo desenho de linhas laranja do skyline. Só desenha enquanto há alguém no ar, e nada quando a aba está
  * escondida ou o hero já foi coberto pela seção seguinte. Não aparece para quem prefere menos movimento.
  */
 export function SkyFlyers({ className }: { className?: string }) {
@@ -83,6 +84,7 @@ export function SkyFlyers({ className }: { className?: string }) {
     let flyers: Flyer[] = [];
     let animation = 0;
     let timer = 0;
+    let watch = 0;
     let last = 0;
 
     const resize = () => {
@@ -201,10 +203,20 @@ export function SkyFlyers({ className }: { className?: string }) {
     resize();
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(canvas);
-    schedule(between(FIRST_DELAY));
+    // O primeiro voo só sai depois de a pessoa ficar um tempo no hero (aba escondida ou hero coberto não contam).
+    let dwell = 0;
+    const needed = between(FIRST_DWELL);
+    watch = window.setInterval(() => {
+      if (document.hidden || window.scrollY > window.innerHeight * 0.5) return;
+      dwell += 500;
+      if (dwell < needed) return;
+      window.clearInterval(watch);
+      spawn();
+    }, 500);
 
     return () => {
       window.clearTimeout(timer);
+      window.clearInterval(watch);
       cancelAnimationFrame(animation);
       resizeObserver.disconnect();
     };

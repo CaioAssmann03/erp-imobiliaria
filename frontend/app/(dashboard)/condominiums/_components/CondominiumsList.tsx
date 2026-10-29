@@ -10,19 +10,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useCondominiumsList } from "@/lib/api/generated";
 import type { CondominiumsListPending } from "@/lib/api/generated/models";
-import { selectedCondominiumId } from "@/lib/condominium-registry";
+import { condominiumPageUrl, selectedCondominiumId, selectedCondominiumPage } from "@/lib/condominium-registry";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 50;
 
 /**
  * Client Component: a coluna da esquerda do cadastro, a lista de condomínios com busca por nome ou código. Marca o condomínio aberto.
+ * Ao trocar de condomínio fica na tela própria em que se está (blocos, unidades ou sub-contas), agora a do condomínio escolhido; da página de dados vai à página de dados.
  * O filtro `?pending=` (do dashboard → Pendências) vem da URL e aparece como uma faixa que se limpa com um clique.
  */
 export function CondominiumsList({ className }: { className?: string }) {
   const pathname = usePathname();
   const pending = useSearchParams().get("pending") ?? undefined;
   const selectedId = selectedCondominiumId(pathname);
+  const openPage = selectedCondominiumPage(pathname);
   const [search, setSearch] = useState("");
   const term = useDebouncedValue(search.trim());
 
@@ -48,10 +50,11 @@ export function CondominiumsList({ className }: { className?: string }) {
         <h2 className="text-heading">Condomínios</h2>
         <Link
           href="/condominiums/new"
-          className="inline-flex h-8 items-center gap-1.5 rounded-full bg-ink px-3.5 text-body font-medium text-ink-foreground transition-opacity hover:opacity-90"
+          aria-label="Novo condomínio"
+          title="Novo condomínio"
+          className="flex size-8 items-center justify-center rounded-control text-ink-soft outline-none transition-colors hover:bg-surface hover:text-ink focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <Plus className="size-4" />
-          Novo
+          <Plus className="size-5" />
         </Link>
       </div>
 
@@ -98,11 +101,13 @@ export function CondominiumsList({ className }: { className?: string }) {
               return (
                 <li key={condominium.id}>
                   <Link
-                    href={`/condominiums/${condominium.id}`}
+                    href={openPage ? condominiumPageUrl(condominium.id, openPage) : `/condominiums/${condominium.id}`}
                     aria-current={isSelected ? "page" : undefined}
                     className={cn(
-                      "block rounded-panel px-3 py-2 transition-colors hover:bg-surface",
-                      isSelected && "bg-surface shadow-card shadow-[inset_3px_0_0_var(--color-brand)]"
+                      "block rounded-panel px-3 py-2 transition-[background-color,opacity] hover:bg-surface",
+                      isSelected && "bg-surface shadow-card shadow-[inset_3px_0_0_var(--color-brand)]",
+                      // Com um condomínio aberto, os outros ficam mais apagados (voltam ao passar o mouse ou focar).
+                      selectedId && !isSelected && "opacity-60 hover:opacity-100 focus-visible:opacity-100"
                     )}
                   >
                     <span className="block truncate text-body font-medium">
