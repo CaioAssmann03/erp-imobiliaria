@@ -11,11 +11,11 @@ Read first: [`architecture/business-model.md`](../architecture/business-model.md
 | Branch | What it holds | State |
 |---|---|---|
 | `main` | phases 1–4, phase 5 coded, **and the PR #31 merge** (the persons/core/billing refactor, specs 037–040 implemented: one Asaas account per company, the registration fee, *Inclusão de valores*, the backup tool in `backup/`), the landing page and the dashboard at `/dashboard` | up to date |
-| `dev` | `main` + **spec 049** (new app shell and condominium registry, layout 2) and **spec 050** (unit workspace: pick a condominium, its units, the unit page); the branch the user tests locally | PR not opened on purpose: the user tests first |
+| `dev` | `main` + **specs 049 and 050** (the app shell and condominium registry, the unit workspace), done and in `main` since 2026-10-29; the branch the user tests locally | in sync with `main` |
 | older `feat/*`, `refactor/*`, `chore/*`, `fix/*` | already in `main` (or superseded) | can be deleted |
 
 ## `dev` (the branch the user tests locally)
-**Spec 049** (new app shell and condominium registry, layout 2) is built on `dev`, commits authored as the user (no Claude trailers): the narrow rail with the module menu card, the condominium page as one scrolling page with a section index, Blocos and Sub-contas moved inside it. It reads the existing appearance tokens, so mode, accent and font from *Configurações* keep working. Not in it yet (no backend data): síndico, dados bancários, documents, history and the KPI cards of the prototype. Waiting on the user: use on the real screens and the 2 decisions marked *agent, to be confirmed* in the spec.
+Specs 049 and 050 are condensed in [`features/history.md`](../features/history.md): the rail with the module menu, the condominium page as one scrolling page, and the unit workspace. Not built (no backend data): síndico, dados bancários, documents, history and the KPI cards of the prototype; the prints' extra unit sections.
 
 ## Specs
 | Spec | State | Waiting on |
