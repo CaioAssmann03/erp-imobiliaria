@@ -59,7 +59,8 @@ export function entryToPayload(values: EntryValues): Record<string, unknown> {
 /** Já dá para pedir a pré-visualização dos valores à API (o resto das regras é do backend). */
 export function canPreview(values: EntryValues): boolean {
   if (!values.condominium || (!values.credits_company && !values.cost_center) || !values.start_month || values.units.length === 0) return false;
-  if (!(Number(values.amount) > 0)) return false;
+  // Um desconto (valor negativo) também tem pré-visualização; só zero e vazio não têm.
+  if (!Number.isFinite(Number(values.amount)) || Number(values.amount) === 0) return false;
   if (needsApportionmentCriterion(values.allocation) && values.apportionment_criterion === "") return false;
   if (needsInstallments(values.recurrence) && !(Number(values.installments_total) >= 2)) return false;
   return true;

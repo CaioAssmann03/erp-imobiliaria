@@ -129,7 +129,7 @@ export function intField(label: string, min: number, max: number) {
 /** Decimal digitado em pt-BR ("1.234,56" / "12,5") → string da API com `decimals` casas. */
 export function decimalField(
   label: string,
-  { min = 0, max, decimals = 2 }: { min?: number; max: number; decimals?: number }
+  { min = 0, max, decimals = 2, signed = false }: { min?: number; max: number; decimals?: number; signed?: boolean }
 ) {
   return z.string().transform((raw, ctx) => {
     if (!raw.trim()) return undefined;
@@ -137,6 +137,17 @@ export function decimalField(
     if (Number.isNaN(number)) {
       ctx.addIssue({ code: "custom", message: `${label} inválido` });
       return z.NEVER;
+    }
+    // Valor com sinal (desconto, spec 055): qualquer um de -max a max, menos zero.
+    if (signed) {
+      if (number === 0 || Math.abs(number) > max) {
+        ctx.addIssue({
+          code: "custom",
+          message: number === 0 ? `${label} não pode ser zero` : `${label} deve ser no máximo ${max.toLocaleString("pt-BR")}, com ou sem sinal`,
+        });
+        return z.NEVER;
+      }
+      return number.toFixed(decimals);
     }
     if (number < min || number > max) {
       ctx.addIssue({

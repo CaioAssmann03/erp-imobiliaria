@@ -19,6 +19,12 @@ def validate_positive_amount(amount: Decimal) -> None:
         raise FinanceValidatorError.AMOUNT_NOT_POSITIVE.to_validation_error()
 
 
+def validate_non_zero_amount(amount: Decimal) -> None:
+    """A value that may be negative (a discount, spec 055) but never zero."""
+    if amount == 0:
+        raise FinanceValidatorError.AMOUNT_ZERO.to_validation_error()
+
+
 def validate_positive_cash_number(cash_number: int) -> None:
     if cash_number <= 0:
         raise FinanceValidatorError.CASH_NUMBER_NOT_POSITIVE.to_validation_error()

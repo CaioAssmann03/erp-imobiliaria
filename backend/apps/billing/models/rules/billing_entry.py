@@ -91,6 +91,11 @@ class BillingEntryRules(ModelRules["BillingEntry"]):
             and self._event_changed()
         )
 
+    @rule("amount", BillingEntryError.AMOUNT_NEGATIVE_FOR_COMPANY_EVENT)
+    def company_event_is_a_discount(self) -> bool:
+        entry = self.instance
+        return entry.credits_company and entry.amount is not None and entry.amount < 0
+
     @rule("cost_center", BillingEntryError.COST_CENTER_REQUIRED)
     def cost_center_is_missing(self) -> bool:
         entry = self.instance

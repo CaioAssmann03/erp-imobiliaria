@@ -9,7 +9,7 @@ from apps.billing.models.rules import BillingEntryUnitRules
 from apps.condominiums.models import Unit
 from apps.core.models.base import BaseModel
 from apps.finance.errors import FinanceValidatorError
-from apps.finance.validators import validate_positive_amount
+from apps.finance.validators import validate_non_zero_amount
 
 
 @final
@@ -27,7 +27,7 @@ class BillingEntryUnit(BaseModel):
         decimal_places=2,
         null=True,
         blank=True,
-        validators=[validate_positive_amount],
+        validators=[validate_non_zero_amount],
     )
 
     company_lookup = "entry__condominium__company"
@@ -44,10 +44,10 @@ class BillingEntryUnit(BaseModel):
                 violation_error_code=BillingEntryError.UNIT_DUPLICATE_IN_ENTRY.value,
             ),
             models.CheckConstraint(
-                name="billing_entry_unit_amount_positive",
-                condition=Q(amount__isnull=True) | Q(amount__gt=0),
-                violation_error_message=FinanceValidatorError.AMOUNT_NOT_POSITIVE.message,
-                violation_error_code=FinanceValidatorError.AMOUNT_NOT_POSITIVE.value,
+                name="billing_entry_unit_amount_non_zero",
+                condition=Q(amount__isnull=True) | ~Q(amount=0),
+                violation_error_message=FinanceValidatorError.AMOUNT_ZERO.message,
+                violation_error_code=FinanceValidatorError.AMOUNT_ZERO.value,
             ),
         )
 

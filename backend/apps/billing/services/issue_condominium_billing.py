@@ -21,6 +21,7 @@ from apps.billing.services.create_billing_document import (
     NewBillingDocument,
     NewBillingDocumentItem,
     create_billing_document,
+    discounts_exceed_total,
 )
 from apps.billing.services.schedule_billing_document_tasks import schedule_billing_document_tasks
 from apps.condominiums.models import Condominium, Unit
@@ -86,7 +87,7 @@ def _issue_units(run: BillingRun) -> None:
         lines = [
             NewBillingDocumentItem(item.line_description(), item.cost_center, item.entry_template, amounts[unit.pk])
             for item, amounts in zip(items, amounts_by_item, strict=True)
-            if amounts[unit.pk] > Decimal(0)
+            if amounts[unit.pk] != Decimal(0)
         ]
         lines += [
             NewBillingDocumentItem(
@@ -98,9 +99,9 @@ def _issue_units(run: BillingRun) -> None:
             )
             for entry, amounts in zip(entries, amounts_by_entry, strict=True)
             if (entry.entry_template is not None or entry.credits_company)
-            and amounts.get(unit.pk, Decimal(0)) > Decimal(0)
+            and amounts.get(unit.pk, Decimal(0)) != Decimal(0)
         ]
-        skip_code = _skip_code(unit, billing_rules, has_lines=bool(lines))
+        skip_code = _skip_code(unit, billing_rules, lines)
         payer = unit.billing_payer(today) if skip_code is None else None
         if skip_code is None and payer is None:
             skip_code = ProblemCode.NO_CURRENT_PAYER
@@ -147,13 +148,15 @@ def _entries_in_force(condominium: Condominium, reference_month: date) -> list[B
     )
 
 
-def _skip_code(unit: Unit, billing_rules: CondominiumBillingRules, has_lines: bool) -> BillingRun.ProblemCode | None:
+def _skip_code(unit: Unit, billing_rules: CondominiumBillingRules, lines: list[NewBillingDocumentItem]) -> BillingRun.ProblemCode | None:
     if unit.is_billing_blocked:
         return ProblemCode.UNIT_BILLING_BLOCKED
     if billing_rules.exempts(unit):
         return ProblemCode.MANAGER_UNIT_EXEMPT
-    if not has_lines:
+    if not lines:
         return ProblemCode.NOTHING_TO_BILL
+    if discounts_exceed_total(tuple(lines)):
+        return ProblemCode.DISCOUNT_EXCEEDS_TOTAL
     return None
 
 

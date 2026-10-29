@@ -28,6 +28,13 @@ class BillingEntryUnitRules(ModelRules["BillingEntryUnit"]):
             return False
         return entry.allocation != entry.Allocation.INDIVIDUAL
 
+    @rule("amount", BillingEntryError.UNIT_AMOUNT_SIGN_DIFFERS)
+    def amount_has_another_sign_than_the_entry(self) -> bool:
+        link, entry = self.instance, self._entry()
+        if link.amount is None or entry is None or entry.amount is None:
+            return False
+        return (link.amount < 0) != (entry.amount < 0)
+
     @rule("unit", BillingEntryError.UNIT_WITHOUT_FRACTION)
     def unit_has_no_fraction_in_the_entry_criterion(self) -> bool:
         link, entry = self.instance, self._entry()

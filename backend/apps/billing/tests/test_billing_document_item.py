@@ -88,6 +88,6 @@ def test_position_is_unique_per_document(document: BillingDocument, cost_center:
         build_item(document, cost_center, entry_template, position=1).save()
 
 
-def test_amount_must_be_positive_in_the_database(document: BillingDocument) -> None:
+def test_amount_cannot_be_zero_in_the_database(document: BillingDocument) -> None:
     with pytest.raises(IntegrityError), transaction.atomic():
-        _ = BillingDocumentItem.objects.filter(document=document, position=1).update(amount=Decimal(-1))
+        _ = BillingDocumentItem.objects.filter(document=document, position=1).update(amount=Decimal(0))

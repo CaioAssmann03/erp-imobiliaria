@@ -5,7 +5,7 @@ skip-if: the launches themselves → features/039-billing-entries.md; the regist
 ---
 # 055 — Discounts: negative values in the launches
 
-**Status:** ready · **Level:** full · **Roadmap:** none · **Apps:** billing, finance, frontend · **Frontend impact:** client regeneration, money mask, labels
+**Status:** in-progress (built; waiting for the "agent, to be confirmed" decisions) · **Level:** full · **Roadmap:** none · **Apps:** billing, finance, frontend · **Frontend impact:** client regeneration, money mask, labels
 
 ## Open questions
 None.
@@ -23,14 +23,14 @@ None.
 | 2026-10-29 | Plans keep positive values only: a recurring discount is a launch that repeats (`always`), not a plan item | agent, to be confirmed |
 
 ## R — Requirements
-- [ ] R1 — A launch (`BillingEntry`) accepts a negative `amount` and a zero one is refused; a launch of an event that credits the administradora cannot be negative
-- [ ] R2 — `BillingEntryUnit.amount` accepts a negative value only on a negative launch and a positive one only on a positive launch; zero is refused
-- [ ] R3 — The allocation (individual, collective, fraction) works with negative totals: the shares are rounded half away from zero and add up to the total
-- [ ] R4 — A `BillingDocumentItem` accepts a negative `amount` (never on a line that credits the administradora); the document `amount` is still the sum of its items and stays above zero and **not below the fee** (`BillingDocumentRules`)
-- [ ] R5 — The monthly issuance and the extra boleto carry the negative lines (the zero-value filter becomes `!= 0`); a unit whose total would fall below the fee is skipped with the new problem code `discount_exceeds_total` (a run problem, a skipped unit) and nothing is created for it
-- [ ] R6 — Paying a boleto posts a negative item as a **debit** of its absolute value in its sub-conta, the same way the credits post; the ledger stays consistent with the amount paid
-- [ ] R7 — The boleto PDF and the screens show a negative line with a minus sign; the gateway receives the document total (already net of the discounts) and the discount rules of spec 038 unchanged
-- [ ] R8 — The launches screen and the extra boleto accept a leading minus in the value field, say what a negative value means, and the preview, grid and totals show the sign
+- [x] R1 — A launch (`BillingEntry`) accepts a negative `amount` and a zero one is refused; a launch of an event that credits the administradora cannot be negative
+- [x] R2 — `BillingEntryUnit.amount` accepts a negative value only on a negative launch and a positive one only on a positive launch; zero is refused
+- [x] R3 — The allocation (individual, collective, fraction) works with negative totals: the shares are rounded half away from zero and add up to the total
+- [x] R4 — A `BillingDocumentItem` accepts a negative `amount` (never on a line that credits the administradora); the document `amount` is still the sum of its items and stays above zero and **not below the fee** (`BillingDocumentRules`)
+- [x] R5 — The monthly issuance and the extra boleto carry the negative lines (the zero-value filter becomes `!= 0`); a unit whose total would fall below the fee is skipped with the new problem code `discount_exceeds_total` (a run problem, a skipped unit) and nothing is created for it
+- [x] R6 — Paying a boleto posts a negative item as a **debit** of its absolute value in its sub-conta, the same way the credits post; the ledger stays consistent with the amount paid
+- [x] R7 — The boleto PDF and the screens show a negative line with a minus sign; the gateway receives the document total (already net of the discounts) and the discount rules of spec 038 unchanged
+- [x] R8 — The launches screen and the extra boleto accept a leading minus in the value field, say what a negative value means, and the preview, grid and totals show the sign
 
 ## E — Entities
 | Entity | Change | Fields / rules |
@@ -49,7 +49,7 @@ None.
 - Rejected: a separate "discount" entity or flag (a sign is simpler and is what the staff wrote on paper); letting the total reach zero (the boleto would have nothing to register).
 
 ## S — Structure
-No new endpoint. The existing `billing-entries`, `billing-entries/preview/`, `billing-documents/extra/` and the issuance accept negative values; `BillingRun.problems` and the extra boleto's `skipped` may carry `discount_exceeds_total`. Files: the models and rules above, `billing/services/issue_condominium_billing.py`, `issue_extra_billing_document.py`, `finance/models/current_account_entry.py`, the boleto template, migrations (billing `0018`, constraints only), frontend `lib/masks.ts`, `lib/schemas/billing-entry.ts`, `lib/schemas/extra-billing.ts`, `lib/billing-run-problems.ts`, `lib/error-messages.ts`, the grid and the preview; docs.
+No new endpoint. The existing `billing-entries`, `billing-entries/preview/`, `billing-documents/extra/` and the issuance accept negative values; `BillingRun.problems` and the extra boleto's `skipped` may carry `discount_exceeds_total`. Files: the models and rules above, `billing/services/issue_condominium_billing.py`, `issue_extra_billing_document.py`, `finance/models/current_account_entry.py`, the boleto template, migrations (billing `0018`, constraints and validators only), frontend `lib/masks.ts`, `lib/schemas/billing-entry.ts`, `lib/schemas/extra-billing.ts`, `lib/billing-run-problems.ts`, `lib/error-messages.ts`, the grid and the preview; docs.
 
 ## O — Operations
 1. Backend rules, constraints and migration.
@@ -76,12 +76,12 @@ Rules in models; one service per use case; error codes in `errors/`, translated 
 | R4, R5 | `billing/tests/test_billing_discount.py` (document rule, issuance skip, extra skip) |
 | R6 | `billing/tests/test_billing_discount.py` (payment posts a debit) |
 | R7 | `billing/tests/test_billing_discount.py` (PDF text) |
-| R8 | `frontend/tests/billing-entry.test.mjs` (mask and grid with sign); the screen by hand in the browser |
+| R8 | `frontend/tests/billing-entry.test.mjs` (mask, preview and grid with sign); the launch sheet checked by hand in the browser (a `-50,00` launch previews `-R$ 50,00` per unit) — no automated screen test |
 
 ## Definition of done
-- [ ] Every criterion R1… has a passing test in the Test plan, or a written gap
-- [ ] `pytest apps -q` green; `manage.py check` and `makemigrations --check --dry-run` clean
-- [ ] `python backend/docs/tools/check_docs.py` passes
-- [ ] Frontend client regenerated and callers fixed (`pnpm generate:api`), or `N/A — no API change`
-- [ ] `docs/apps/<app>.md` updated; `docs/known-gaps.md` row closed (if any)
-- [ ] Roadmap part and phase table updated — N/A (Roadmap: none); index in `features/README.md` updated
+- [x] Every criterion R1… has a passing test in the Test plan, or a written gap
+- [x] `pytest apps -q` green; `manage.py check` and `makemigrations --check --dry-run` clean
+- [x] `python backend/docs/tools/check_docs.py` passes
+- [x] Frontend client regenerated and callers fixed (`pnpm generate:api`), or `N/A — no API change`
+- [x] `docs/apps/<app>.md` updated; `docs/known-gaps.md` row closed (if any)
+- [x] Roadmap part and phase table updated — N/A (Roadmap: none); index in `features/README.md` updated

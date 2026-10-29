@@ -70,3 +70,11 @@ class BillingEntryError(RuleError):
         "billing_entry.unit.duplicate_in_entry",
         "This unit is already in the entry.",
     )
+    AMOUNT_NEGATIVE_FOR_COMPANY_EVENT = (
+        "billing_entry.amount.negative_for_company_event",
+        "A value of the administradora (the registration fee) cannot be a discount.",
+    )
+    UNIT_AMOUNT_SIGN_DIFFERS = (
+        "billing_entry.unit.amount_sign_differs",
+        "The unit's own value must have the same sign as the entry: a discount cannot charge a unit, nor a charge discount it.",
+    )

@@ -30,6 +30,15 @@ class NewBillingDocument:
     kind: BillingDocument.Kind = BillingDocument.Kind.MONTHLY
 
 
+def discounts_exceed_total(items: tuple[NewBillingDocumentItem, ...]) -> bool:
+    """Whether the discounts (negative lines, spec 055) leave the boleto below the registration fee, or with nothing to pay.
+
+    The administradora's own line (no cost center) is the fee: the lines of the condominium must not sum below zero.
+    """
+    condominium_total = sum((item.amount for item in items if item.cost_center is not None), Decimal(0))
+    return condominium_total < 0 or sum((item.amount for item in items), Decimal(0)) <= 0
+
+
 @transaction.atomic
 def create_billing_document(new_document: NewBillingDocument) -> BillingDocument:
     """Issue a unit's document with its items, all or none.

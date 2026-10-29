@@ -22,7 +22,7 @@ from apps.core.infrastructure.validators import validate_first_day_of_month
 from apps.core.models.base import BaseModel
 from apps.finance.errors import FinanceValidatorError
 from apps.finance.models import CostCenter, EntryTemplate
-from apps.finance.validators import validate_positive_amount
+from apps.finance.validators import validate_non_zero_amount
 
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
@@ -103,8 +103,9 @@ class BillingEntry(BaseModel):
         related_name="billing_entries",
     )
     # Individual: what each unit pays. Collective and fraction: the total split among the selected units.
+    # Negative is a discount (spec 055): never zero, never for an event that credits the administradora.
     amount = models.DecimalField(
-        max_digits=12, decimal_places=2, validators=[validate_positive_amount]
+        max_digits=12, decimal_places=2, validators=[validate_non_zero_amount]
     )
 
     company_lookup = "condominium__company"
@@ -115,10 +116,10 @@ class BillingEntry(BaseModel):
         ordering = ("-start_month", "created_at")
         constraints = (
             models.CheckConstraint(
-                name="billing_entry_amount_positive",
-                condition=Q(amount__gt=0),
-                violation_error_message=FinanceValidatorError.AMOUNT_NOT_POSITIVE.message,
-                violation_error_code=FinanceValidatorError.AMOUNT_NOT_POSITIVE.value,
+                name="billing_entry_amount_non_zero",
+                condition=~Q(amount=0),
+                violation_error_message=FinanceValidatorError.AMOUNT_ZERO.message,
+                violation_error_code=FinanceValidatorError.AMOUNT_ZERO.value,
             ),
             models.CheckConstraint(
                 name="billing_entry_criterion_matches_allocation",

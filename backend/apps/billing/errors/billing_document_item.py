@@ -30,3 +30,7 @@ class BillingDocumentItemError(RuleError):
         "billing_document_item.data.immutable",
         "An item of a billing document cannot be changed.",
     )
+    COMPANY_AMOUNT_NOT_POSITIVE = (
+        "billing_document_item.credits_company.amount_not_positive",
+        "A line that credits the administradora cannot be a discount.",
+    )

@@ -39,9 +39,9 @@ export const billingEntrySchema = z
       .refine((value) => monthToApi(value) !== undefined, "Mês inválido. Use mês/ano, ex.: 10/2026")
       .transform((value) => monthToApi(value) as string),
     cost_center: z.string(),
-    amount: decimalField("Valor", { min: 0.01, max: MAX_MONEY }),
+    amount: decimalField("Valor", { max: MAX_MONEY, signed: true }),
     units: z
-      .array(z.object({ unit: z.string(), amount: decimalField("Valor da unidade", { min: 0.01, max: MAX_MONEY }) }))
+      .array(z.object({ unit: z.string(), amount: decimalField("Valor da unidade", { max: MAX_MONEY, signed: true }) }))
       .min(1, "Selecione ao menos uma unidade"),
   })
   .refine((entry) => entry.credits_company || entry.cost_center !== "", {
@@ -50,6 +50,11 @@ export const billingEntrySchema = z
     when: () => true,
   })
   .refine((entry) => entry.amount !== undefined, { path: ["amount"], message: "Informe o valor", when: () => true })
+  .refine((entry) => !entry.credits_company || Number(entry.amount) > 0, {
+    path: ["amount"],
+    message: "A tarifa da imobiliária não pode ser desconto",
+    when: () => true,
+  })
   .refine((entry) => !needsApportionmentCriterion(entry.allocation) || entry.apportionment_criterion !== "", {
     path: ["apportionment_criterion"],
     message: "Escolha o critério de rateio",

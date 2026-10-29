@@ -9,7 +9,7 @@ import { FieldRow } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
 import { useBillingEventsList, useCondominiumApportionmentCriteriaList, useCostCentersList } from "@/lib/api/generated";
 import { defaultCostCenterId, formatCode } from "@/lib/billing-entry-payload";
-import { maskMoney } from "@/lib/masks";
+import { maskSignedMoney } from "@/lib/masks";
 import { ALLOCATION_HINT, ALLOCATIONS } from "@/lib/schemas/billing-entry";
 import type { ExtraBillingFormInput } from "@/lib/schemas/extra-billing";
 
@@ -102,7 +102,8 @@ export function ExtraLineFields({ index, condominium, onRemove }: ExtraLineField
               required
               inputMode="decimal"
               placeholder="0,00"
-              mask={maskMoney}
+              mask={maskSignedMoney}
+              hint="Use o sinal de menos (-) na frente para um desconto."
               autoComplete="off"
             />
           </FieldRow>

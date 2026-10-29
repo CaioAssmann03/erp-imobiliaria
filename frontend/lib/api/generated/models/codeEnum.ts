@@ -17,6 +17,7 @@
  * * `document_invalid` - Document invalid
  * * `payer_without_document` - Payer without document
  * * `gateway_account_missing` - Gateway account missing
+ * * `discount_exceeds_total` - Discount exceeds total
  */
 export type CodeEnum = typeof CodeEnum[keyof typeof CodeEnum];
 
@@ -32,4 +33,5 @@ export const CodeEnum = {
   document_invalid: 'document_invalid',
   payer_without_document: 'payer_without_document',
   gateway_account_missing: 'gateway_account_missing',
+  discount_exceeds_total: 'discount_exceeds_total',
 } as const;

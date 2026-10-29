@@ -202,8 +202,9 @@ class CurrentAccountEntry(BaseModel):
             unit=document.unit,
             entry_date=paid_on,
             competence_month=document.competence_month,
-            kind=cls.Kind.CREDIT,
-            amount=item.amount,
+            # A discount (a negative item, spec 055) is a debit: the unit paid less, so the sub-conta receives less.
+            kind=cls.Kind.CREDIT if item.amount > 0 else cls.Kind.DEBIT,
+            amount=abs(item.amount),
             description=f"{document.unit} - {item.description}"[:255],
             origin=cls.Origin.AUTOMATIC_BILLING,
             billing_document_item=item,

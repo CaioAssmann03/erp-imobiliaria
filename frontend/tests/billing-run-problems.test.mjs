@@ -12,6 +12,7 @@ const CODES = [
   "manager_unit_exempt",
   "no_current_payer",
   "nothing_to_bill",
+  "discount_exceeds_total",
   "document_invalid",
 ];
 

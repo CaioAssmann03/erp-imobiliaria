@@ -37,6 +37,7 @@ class BillingRun(BaseModel):
         DOCUMENT_INVALID = ("document_invalid", "Document invalid")
         PAYER_WITHOUT_DOCUMENT = ("payer_without_document", "Payer without document")
         GATEWAY_ACCOUNT_MISSING = ("gateway_account_missing", "Gateway account missing")
+        DISCOUNT_EXCEEDS_TOTAL = ("discount_exceeds_total", "Discount exceeds total")
 
     condominium = models.ForeignKey(Condominium, on_delete=models.PROTECT, related_name="billing_runs")
     reference_month = models.DateField(validators=[validate_first_day_of_month])

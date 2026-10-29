@@ -54,6 +54,13 @@ export function maskMoney(value: string, maxDigits = 10) {
   });
 }
 
+/** Dinheiro que aceita desconto: o "-" digitado na frente vira o sinal ("-123,45"); sozinho, fica à espera dos dígitos. */
+export function maskSignedMoney(value: string, maxDigits = 10) {
+  const negative = value.trim().startsWith("-");
+  const masked = maskMoney(value, maxDigits);
+  return negative ? `-${masked}` : masked;
+}
+
 /** Decimal com vírgula e casas limitadas (percentuais, frações). Aceita "." como vírgula. */
 export function maskDecimal(value: string, decimals: number, maxIntegerDigits = 3) {
   const cleaned = value.replace(/\./g, ",").replace(/[^\d,]/g, "");

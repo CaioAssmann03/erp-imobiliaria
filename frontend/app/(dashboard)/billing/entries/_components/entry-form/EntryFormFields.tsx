@@ -8,7 +8,7 @@ import { FieldRow } from "@/components/form/FormSection";
 import { useCondominiumApportionmentCriteriaList, useCondominiumsList, useCostCentersList } from "@/lib/api/generated";
 import { defaultCostCenterId, formatCode, needsApportionmentCriterion, needsInstallments } from "@/lib/billing-entry-payload";
 import { maskMonthYear } from "@/lib/billing-plan-payload";
-import { maskMoney } from "@/lib/masks";
+import { maskSignedMoney } from "@/lib/masks";
 import {
   ALLOCATION_HINT,
   ALLOCATIONS,
@@ -115,7 +115,8 @@ export function EntryFormFields() {
           required
           inputMode="decimal"
           placeholder="0,00"
-          mask={maskMoney}
+          mask={maskSignedMoney}
+          hint="Use o sinal de menos (-) na frente para um desconto."
           autoComplete="off"
         />
       </FieldRow>

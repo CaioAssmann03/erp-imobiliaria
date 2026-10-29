@@ -38,3 +38,7 @@ class BillingDocumentError(RuleError):
         "billing_document.condominium.without_billing_rules",
         "The condominium has no billing rules: set them before issuing a boleto.",
     )
+    AMOUNT_BELOW_FEE = (
+        "billing_document.amount.below_fee",
+        "The discounts leave the boleto below the registration fee: its total cannot be lower than the fee.",
+    )

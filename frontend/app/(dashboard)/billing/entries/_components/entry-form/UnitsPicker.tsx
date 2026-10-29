@@ -4,7 +4,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { useUnitsList } from "@/lib/api/generated";
-import { maskMoney } from "@/lib/masks";
+import { maskSignedMoney } from "@/lib/masks";
 import { inputClass } from "@/lib/ui";
 
 interface SelectedUnit {
@@ -70,7 +70,7 @@ export function UnitsPicker({ condominium }: { condominium: string }) {
                     placeholder="Valor do lançamento"
                     className={`${inputClass} h-8 w-40`}
                     value={current.amount}
-                    onChange={(event) => setAmount(unit.id, maskMoney(event.target.value))}
+                    onChange={(event) => setAmount(unit.id, maskSignedMoney(event.target.value))}
                   />
                 )}
               </li>

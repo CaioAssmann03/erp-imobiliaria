@@ -343,3 +343,26 @@ def test_another_companys_condominium_is_refused(  # type: ignore[no-untyped-def
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert not BillingDocument.objects.exists()
+
+
+# ----- spec 055: discounts -----
+
+
+def test_a_negative_line_discounts_the_extra_and_a_discount_over_the_total_skips_the_unit(  # type: ignore[no-untyped-def]
+    api_client: APIClient, condominium, billing_rules, units, cost_center, entry_template, fee_event
+) -> None:
+    fee = {"event": str(fee_event.pk), "allocation": "individual", "amount": "3.90"}
+    charge = line(cost_center, allocation="individual", amount="100.00")
+    discount = line(cost_center, description="Desconto", allocation="individual", amount="-40.00")
+
+    response = post(api_client, payload(condominium, units[:1], [charge, discount, fee]))
+
+    assert response.status_code == status.HTTP_201_CREATED, response.data
+    assert BillingDocument.objects.get().amount == Decimal("63.90")
+
+    too_much = line(cost_center, description="Desconto", allocation="individual", amount="-500.00")
+    refused = post(api_client, payload(condominium, units[1:2], [charge, too_much, fee]))
+
+    assert refused.status_code == status.HTTP_200_OK
+    assert [item["code"] for item in body(refused)["skipped"]] == [Problem.DISCOUNT_EXCEEDS_TOTAL]
+    assert BillingDocument.objects.count() == 1

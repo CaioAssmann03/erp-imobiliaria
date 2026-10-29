@@ -19,7 +19,7 @@ const lineSchema = z
     allocation: enumField(ALLOCATIONS.map((item) => item.value) as [string, ...string[]]),
     apportionment_criterion: z.string(),
     cost_center: z.string(),
-    amount: decimalField("Valor", { min: 0.01, max: MAX_MONEY }),
+    amount: decimalField("Valor", { max: MAX_MONEY, signed: true }),
   })
   .refine((line) => line.credits_company || line.cost_center !== "", {
     path: ["cost_center"],
@@ -27,6 +27,11 @@ const lineSchema = z
     when: () => true,
   })
   .refine((line) => line.amount !== undefined, { path: ["amount"], message: "Informe o valor", when: () => true })
+  .refine((line) => !line.credits_company || Number(line.amount) > 0, {
+    path: ["amount"],
+    message: "A tarifa da imobiliária não pode ser desconto",
+    when: () => true,
+  })
   .refine((line) => line.allocation !== "fraction" || line.apportionment_criterion !== "", {
     path: ["apportionment_criterion"],
     message: "Escolha o critério de rateio",

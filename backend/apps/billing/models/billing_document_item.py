@@ -9,7 +9,7 @@ from apps.billing.models.rules import BillingDocumentItemRules
 from apps.core.models.base import BaseModel
 from apps.finance.errors import FinanceValidatorError
 from apps.finance.models import CostCenter, EntryTemplate
-from apps.finance.validators import validate_positive_amount
+from apps.finance.validators import validate_non_zero_amount
 
 
 @final
@@ -40,8 +40,9 @@ class BillingDocumentItem(BaseModel):
         related_name="billing_document_items",
     )
     credits_company = models.BooleanField(default=False)
+    # Negative is a discount (spec 055); never zero, and the administradora's own line is never a discount.
     amount = models.DecimalField(
-        max_digits=12, decimal_places=2, validators=[validate_positive_amount]
+        max_digits=12, decimal_places=2, validators=[validate_non_zero_amount]
     )
     # The launch (spec 039) the line comes from; empty for a plan item. It freezes the launch once a document exists.
     billing_entry = models.ForeignKey(
@@ -81,10 +82,16 @@ class BillingDocumentItem(BaseModel):
                 violation_error_code=BillingDocumentItemError.CREDITS_COMPANY_MISMATCH.value,
             ),
             models.CheckConstraint(
-                name="billing_document_item_amount_positive",
-                condition=Q(amount__gt=0),
-                violation_error_message=FinanceValidatorError.AMOUNT_NOT_POSITIVE.message,
-                violation_error_code=FinanceValidatorError.AMOUNT_NOT_POSITIVE.value,
+                name="billing_document_item_amount_non_zero",
+                condition=~Q(amount=0),
+                violation_error_message=FinanceValidatorError.AMOUNT_ZERO.message,
+                violation_error_code=FinanceValidatorError.AMOUNT_ZERO.value,
+            ),
+            models.CheckConstraint(
+                name="billing_document_item_company_amount_positive",
+                condition=Q(credits_company=False) | Q(amount__gt=0),
+                violation_error_message=BillingDocumentItemError.COMPANY_AMOUNT_NOT_POSITIVE.message,
+                violation_error_code=BillingDocumentItemError.COMPANY_AMOUNT_NOT_POSITIVE.value,
             ),
         )
 

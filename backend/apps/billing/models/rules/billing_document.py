@@ -71,6 +71,11 @@ class BillingDocumentRules(ModelRules["BillingDocument"]):
         document = self.instance
         return not document._state.adding and not document.items.exists()
 
+    @rule("amount", BillingDocumentError.AMOUNT_BELOW_FEE)
+    def amount_is_below_the_fee(self) -> bool:
+        document = self.instance
+        return not document._state.adding and document.amount < document.fee_amount()
+
     @rule("amount", BillingDocumentError.AMOUNT_DIFFERS_FROM_ITEMS_TOTAL)
     def amount_differs_from_items_total(self) -> bool:
         document = self.instance

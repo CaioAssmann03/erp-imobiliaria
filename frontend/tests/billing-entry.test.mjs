@@ -9,6 +9,7 @@ import {
   entryToPayload,
   formatCode,
 } from "../lib/billing-entry-payload.ts";
+import { maskSignedMoney } from "../lib/masks.ts";
 
 const values = (overrides = {}) => ({
   condominium: "c-1",
@@ -48,6 +49,7 @@ test("the preview waits for what it needs", () => {
   assert.equal(canPreview(values()), true);
   assert.equal(canPreview(values({ units: [] })), false);
   assert.equal(canPreview(values({ amount: "0.00" })), false);
+  assert.equal(canPreview(values({ amount: "-50.00" })), true);
   assert.equal(canPreview(values({ cost_center: "" })), false);
   assert.equal(canPreview(values({ allocation: "fraction" })), false);
   assert.equal(canPreview(values({ allocation: "fraction", apportionment_criterion: "criterion-3" })), true);
@@ -91,4 +93,23 @@ test("the column title carries the event code and the installment", () => {
 
   assert.deepEqual(entryColumnTitle({ month }), { title: "0250-Limpeza do condomínio - 10/2026 (2/3)", installment: "2/3" });
   assert.deepEqual(entryColumnTitle({ event_name: null, description: "Gás", month: null }), { title: "Gás", installment: "" });
+});
+
+test("the signed money mask keeps the minus sign in front and the cash-style digits", () => {
+  assert.equal(maskSignedMoney("-"), "-");
+  assert.equal(maskSignedMoney("-5"), "-0,05");
+  assert.equal(maskSignedMoney("-12345"), "-123,45");
+  assert.equal(maskSignedMoney("12345"), "123,45");
+  assert.equal(maskSignedMoney(""), "");
+});
+
+test("the grid sums a discount as a negative value", () => {
+  const grid = buildGrid([
+    { id: "a", month: { unit_amounts: [{ unit: "u1", unit_name: "101", amount: "450.00" }] } },
+    { id: "b", month: { unit_amounts: [{ unit: "u1", unit_name: "101", amount: "-50.00" }] } },
+  ]);
+
+  assert.equal(grid.rows[0].total, "400.00");
+  assert.equal(grid.entryTotals.b, "-50.00");
+  assert.equal(grid.grandTotal, "400.00");
 });

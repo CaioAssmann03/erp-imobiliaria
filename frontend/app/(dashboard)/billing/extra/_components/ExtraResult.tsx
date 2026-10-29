@@ -53,7 +53,7 @@ export function ExtraResult({ result, condominiumId, onEdit, onNew }: ExtraResul
           <ul className="mt-3 divide-y divide-line">
             {result.skipped.map((item) => {
               const nothingToBill = item.code === "nothing_to_bill";
-              const fix = nothingToBill ? null : problemFix(item.code, { condominiumId, unitId: item.unit });
+              const fix = nothingToBill || item.code === "discount_exceeds_total" ? null : problemFix(item.code, { condominiumId, unitId: item.unit });
               return (
                 <li key={item.unit} className="flex flex-wrap items-center justify-between gap-2 py-2 text-body">
                   <span>

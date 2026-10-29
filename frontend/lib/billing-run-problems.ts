@@ -9,7 +9,7 @@ export interface ProblemTarget {
   unitId: string | null;
 }
 
-type FixKind = "condominium" | "plans" | "units" | "unit" | null;
+type FixKind = "condominium" | "plans" | "entries" | "units" | "unit" | null;
 
 const PROBLEMS: Record<string, { text: string; fix: FixKind }> = {
   no_billing_rules: { text: "O condomínio não tem regras de cobrança.", fix: "condominium" },
@@ -27,6 +27,10 @@ const PROBLEMS: Record<string, { text: string; fix: FixKind }> = {
     text: "A imobiliária não tem conta ativa no gateway: os boletos ficam emitidos, mas não registrados.",
     fix: "condominium",
   },
+  discount_exceeds_total: {
+    text: "Os descontos deixam o boleto abaixo da tarifa de registro: o total não pode ser menor que ela.",
+    fix: "entries",
+  },
   document_invalid: {
     text: "O documento foi recusado: confira se as sub-contas e os modelos dos itens estão ativos.",
     fix: "plans",
@@ -36,6 +40,7 @@ const PROBLEMS: Record<string, { text: string; fix: FixKind }> = {
 const FIX_LABELS: Record<Exclude<FixKind, null>, string> = {
   condominium: "Abrir o condomínio",
   plans: "Ver os planos",
+  entries: "Ver os lançamentos",
   units: "Ver as unidades",
   unit: "Abrir a unidade",
 };
@@ -51,6 +56,7 @@ export function problemFix(code: string, target: ProblemTarget): { href: string;
   const hrefs: Record<Exclude<FixKind, null>, string | null> = {
     condominium: `/condominiums/${condominiumId}`,
     plans: `/billing/plans?condominium=${condominiumId}`,
+    entries: `/billing/entries?condominium=${condominiumId}`,
     units: `/condominiums/units?condominium=${condominiumId}`,
     unit: unitId ? `/condominiums/${condominiumId}/units/${unitId}` : null,
   };

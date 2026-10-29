@@ -13,6 +13,7 @@ from apps.billing.services.create_billing_document import (
     NewBillingDocument,
     NewBillingDocumentItem,
     create_billing_document,
+    discounts_exceed_total,
 )
 from apps.billing.services.schedule_billing_document_tasks import schedule_billing_document_tasks
 from apps.condominiums.models import Condominium, Unit
@@ -64,10 +65,13 @@ def issue_extra_billing_document(
         items = tuple(
             NewBillingDocumentItem(line.line_description(competence_month), line.cost_center, line.entry_template, amounts[unit.pk])
             for line, amounts in zip(lines, amounts_by_line, strict=True)
-            if amounts[unit.pk] > Decimal(0)
+            if amounts[unit.pk] != Decimal(0)
         )
         if not items:
             issuance.skipped.append(SkippedUnit(unit, ProblemCode.NOTHING_TO_BILL))
+            continue
+        if discounts_exceed_total(items):
+            issuance.skipped.append(SkippedUnit(unit, ProblemCode.DISCOUNT_EXCEEDS_TOTAL))
             continue
         new_document = NewBillingDocument(
             unit=unit,
