@@ -5,32 +5,12 @@ from decimal import Decimal
 from typing import Any
 
 from apps.billing.models import BillingDocument, CondominiumBillingRules
+from apps.core.infrastructure.formatting import format_date, format_money, format_month
 from apps.core.models import Address
 from apps.persons.models import Person
 
 CPF_LENGTH = 11
 CNPJ_LENGTH = 14
-
-MONTH_NAMES = (
-    "janeiro",
-    "fevereiro",
-    "março",
-    "abril",
-    "maio",
-    "junho",
-    "julho",
-    "agosto",
-    "setembro",
-    "outubro",
-    "novembro",
-    "dezembro",
-)
-
-
-def format_money(amount: Decimal) -> str:
-    whole, _, cents = f"{amount:,.2f}".partition(".")
-    return f"R$ {whole.replace(',', '.')},{cents}"
-
 
 def format_percentage(value: Decimal) -> str:
     return f"{value:.2f}".replace(".", ",").removesuffix(",00") + "%"
@@ -38,14 +18,6 @@ def format_percentage(value: Decimal) -> str:
 
 def format_days(days: int) -> str:
     return f"{days} dia" if days == 1 else f"{days} dias"
-
-
-def format_date(value: date) -> str:
-    return f"{value:%d/%m/%Y}"
-
-
-def format_month(value: date) -> str:
-    return f"{MONTH_NAMES[value.month - 1]}/{value.year}"
 
 
 def format_cpf_cnpj(digits: str) -> str:

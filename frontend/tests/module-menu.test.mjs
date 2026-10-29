@@ -20,10 +20,7 @@ test("an item without a screen has no link, and every linked item is absolute", 
   assert.deepEqual(soon, [
     "Áreas",
     "Ficha da unidade",
-    "Relatórios",
     "Taxa de administração",
-    "Inadimplência",
-    "Prestação de contas",
   ]);
   for (const item of items) if (item.href) assert.ok(item.href.startsWith("/"));
 });

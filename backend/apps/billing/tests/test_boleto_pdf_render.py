@@ -10,18 +10,17 @@ from apps.billing.models import CondominiumBillingRules
 from apps.billing.infrastructure.rendering import boleto_template
 
 from ..models import BillingDocument
-from ..services.render_billing_document_pdf import (
-    TEMPLATE,
-    _refuse_every_url,
-    render_billing_document_pdf,
-)
+from apps.core.infrastructure import formatting
+from apps.core.infrastructure.pdf import _refuse_every_url
+
+from ..services.render_billing_document_pdf import TEMPLATE, render_billing_document_pdf
 
 pytestmark = pytest.mark.django_db
 
 
 def test_money_is_written_the_brazilian_way() -> None:
-    assert boleto_template.format_money(Decimal("1234567.5")) == "R$ 1.234.567,50"
-    assert boleto_template.format_money(Decimal("0.05")) == "R$ 0,05"
+    assert formatting.format_money(Decimal("1234567.5")) == "R$ 1.234.567,50"
+    assert formatting.format_money(Decimal("0.05")) == "R$ 0,05"
 
 
 def test_percentages_drop_empty_cents() -> None:
@@ -32,8 +31,8 @@ def test_percentages_drop_empty_cents() -> None:
 def test_documents_and_months_are_formatted() -> None:
     assert boleto_template.format_cpf_cnpj("12345678909") == "123.456.789-09"
     assert boleto_template.format_cpf_cnpj("11222333000181") == "11.222.333/0001-81"
-    assert boleto_template.format_month(date(2026, 3, 1)) == "março/2026"
-    assert boleto_template.format_date(date(2026, 10, 5)) == "05/10/2026"
+    assert formatting.format_month(date(2026, 3, 1)) == "março/2026"
+    assert formatting.format_date(date(2026, 10, 5)) == "05/10/2026"
 
 
 def printed(document: BillingDocument) -> str:

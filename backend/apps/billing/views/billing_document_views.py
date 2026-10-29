@@ -1,8 +1,11 @@
 from typing import final
 
 from django.db.models import Prefetch
+from django.http import HttpResponse
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import APIException, NotFound
@@ -22,9 +25,12 @@ from ..serializers import (
     BillingDocumentPdfDownloadSerializer,
     BillingDocumentReissueSerializer,
     BillingDocumentSerializer,
+    DelinquencyReportSerializer,
 )
 from ..services.cancel_billing_document import cancel_billing_document
+from ..services.delinquency_report import DelinquencyReport, build_delinquency_report
 from ..services.generate_billing_document_pdf import generate_billing_document_pdf
+from ..services.render_delinquency_pdf import render_delinquency_pdf
 from ..services.reissue_billing_document import reissue_billing_document
 
 
@@ -34,6 +40,12 @@ class GatewayNotAvailable(APIException):
     status_code = status.HTTP_503_SERVICE_UNAVAILABLE
     default_detail = GatewayAccountError.GATEWAY_UNAVAILABLE.message
     default_code = GatewayAccountError.GATEWAY_UNAVAILABLE.value
+
+
+DELINQUENCY_FILTERS = [
+    OpenApiParameter("condominium", OpenApiTypes.UUID, description="Only this condominium's boletos"),
+    OpenApiParameter("reference_month", OpenApiTypes.DATE, description="Only the boletos of this reference month (first day)"),
+]
 
 
 @final
@@ -105,3 +117,28 @@ class BillingDocumentViewSet(CompanyScopedViewSetMixin, viewsets.ReadOnlyModelVi
         download_url = storage.presigned_download_url(pdf.file_key, file_name, DOWNLOAD_URL_TTL_SECONDS)
         body = {"download_url": download_url, "expires_in": DOWNLOAD_URL_TTL_SECONDS, "generated_at": pdf.generated_at}
         return Response(BillingDocumentPdfDownloadSerializer(body).data, status=status_code)
+
+    def _delinquency_report(self) -> DelinquencyReport:
+        """The overdue report over what the user may see and the filters ask (`?condominium=`, `?reference_month=`)."""
+        return build_delinquency_report(self.filter_queryset(self.get_queryset()), timezone.localdate())
+
+    @extend_schema(parameters=DELINQUENCY_FILTERS, responses=DelinquencyReportSerializer, operation_id="billing_documents_delinquency")
+    @action(detail=False, methods=["get"])
+    def delinquency(self, request: Request) -> Response:
+        """Report: the boletos awaiting payment past their due date, with the days late and the totals."""
+        return Response(DelinquencyReportSerializer(self._delinquency_report()).data)
+
+    @extend_schema(
+        parameters=DELINQUENCY_FILTERS,
+        responses={(200, "application/pdf"): OpenApiTypes.BINARY},
+        operation_id="billing_documents_delinquency_pdf",
+    )
+    @action(detail=False, methods=["get"], url_path="delinquency/pdf")
+    def delinquency_pdf(self, request: Request) -> HttpResponse:
+        """The same report as a PDF download."""
+        report = self._delinquency_report()
+        company = getattr(request.user, "company", None)
+        content = render_delinquency_pdf(report, company.legal_name if company else "")
+        response = HttpResponse(content, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="inadimplencia-{report.as_of:%Y-%m-%d}.pdf"'
+        return response

@@ -28,7 +28,10 @@ import type {
   BillingDocument,
   BillingDocumentPdfDownload,
   BillingDocumentReissue,
+  BillingDocumentsDelinquencyParams,
+  BillingDocumentsDelinquencyPdfParams,
   BillingDocumentsListParams,
+  DelinquencyReport,
   ErrorResponse,
   PaginatedBillingDocumentList
 } from '../models';
@@ -510,3 +513,184 @@ const {mutation: mutationOptions} = options ?
       > => {
       return useMutation(getBillingDocumentsReissueMutationOptions(options), queryClient);
     }
+    /**
+ * Report: the boletos awaiting payment past their due date, with the days late and the totals.
+ */
+export const billingDocumentsDelinquency = (
+    params?: BillingDocumentsDelinquencyParams,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<DelinquencyReport>(
+      {url: `/api/billing-documents/delinquency/`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getBillingDocumentsDelinquencyQueryKey = (params?: BillingDocumentsDelinquencyParams,) => {
+    return [
+    `/api/billing-documents/delinquency/`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getBillingDocumentsDelinquencyQueryOptions = <TData = Awaited<ReturnType<typeof billingDocumentsDelinquency>>, TError = ErrorResponse>(params?: BillingDocumentsDelinquencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingDocumentsDelinquency>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getBillingDocumentsDelinquencyQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof billingDocumentsDelinquency>>> = ({ signal }) => billingDocumentsDelinquency(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof billingDocumentsDelinquency>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type BillingDocumentsDelinquencyQueryResult = NonNullable<Awaited<ReturnType<typeof billingDocumentsDelinquency>>>
+export type BillingDocumentsDelinquencyQueryError = ErrorResponse
+
+
+export function useBillingDocumentsDelinquency<TData = Awaited<ReturnType<typeof billingDocumentsDelinquency>>, TError = ErrorResponse>(
+ params: undefined |  BillingDocumentsDelinquencyParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingDocumentsDelinquency>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof billingDocumentsDelinquency>>,
+          TError,
+          Awaited<ReturnType<typeof billingDocumentsDelinquency>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBillingDocumentsDelinquency<TData = Awaited<ReturnType<typeof billingDocumentsDelinquency>>, TError = ErrorResponse>(
+ params?: BillingDocumentsDelinquencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingDocumentsDelinquency>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof billingDocumentsDelinquency>>,
+          TError,
+          Awaited<ReturnType<typeof billingDocumentsDelinquency>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBillingDocumentsDelinquency<TData = Awaited<ReturnType<typeof billingDocumentsDelinquency>>, TError = ErrorResponse>(
+ params?: BillingDocumentsDelinquencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingDocumentsDelinquency>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useBillingDocumentsDelinquency<TData = Awaited<ReturnType<typeof billingDocumentsDelinquency>>, TError = ErrorResponse>(
+ params?: BillingDocumentsDelinquencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingDocumentsDelinquency>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getBillingDocumentsDelinquencyQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * The same report as a PDF download.
+ */
+export const billingDocumentsDelinquencyPdf = (
+    params?: BillingDocumentsDelinquencyPdfParams,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<Blob>(
+      {url: `/api/billing-documents/delinquency/pdf/`, method: 'GET',
+        params,
+        responseType: 'blob', signal
+    },
+      );
+    }
+
+
+
+
+export const getBillingDocumentsDelinquencyPdfQueryKey = (params?: BillingDocumentsDelinquencyPdfParams,) => {
+    return [
+    `/api/billing-documents/delinquency/pdf/`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getBillingDocumentsDelinquencyPdfQueryOptions = <TData = Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>, TError = ErrorResponse>(params?: BillingDocumentsDelinquencyPdfParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getBillingDocumentsDelinquencyPdfQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>> = ({ signal }) => billingDocumentsDelinquencyPdf(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type BillingDocumentsDelinquencyPdfQueryResult = NonNullable<Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>>
+export type BillingDocumentsDelinquencyPdfQueryError = ErrorResponse
+
+
+export function useBillingDocumentsDelinquencyPdf<TData = Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>, TError = ErrorResponse>(
+ params: undefined |  BillingDocumentsDelinquencyPdfParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>,
+          TError,
+          Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBillingDocumentsDelinquencyPdf<TData = Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>, TError = ErrorResponse>(
+ params?: BillingDocumentsDelinquencyPdfParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>,
+          TError,
+          Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBillingDocumentsDelinquencyPdf<TData = Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>, TError = ErrorResponse>(
+ params?: BillingDocumentsDelinquencyPdfParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useBillingDocumentsDelinquencyPdf<TData = Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>, TError = ErrorResponse>(
+ params?: BillingDocumentsDelinquencyPdfParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingDocumentsDelinquencyPdf>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getBillingDocumentsDelinquencyPdfQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+

@@ -51,6 +51,7 @@ docs/         REASONS documentation
 | `/billing/runs`, `/[id]` | `app/(dashboard)/billing/runs/...` (issuance runs: list, the **Emitir mês** dialog, and the run page with counts and the problems explained by `lib/billing-run-problems.ts`) |
 | `/billing/events`, `/new`, `/[id]` | `app/(dashboard)/billing/events/...` (events CRUD: code, name, active and **Receita da imobiliária** (the fee event: a launch with it has no sub-conta, the form shows "Conta da imobiliária"); reached from the **Cadastros** section of the Configurações dialog and from the Cobrança tabs) |
 | `/finance/entries/new` | `app/(dashboard)/finance/entries/new/page.tsx` (batch + lines with `useFieldArray`) |
+| `/reports`, `/reports/delinquency`, `/reports/accountability` | `app/(dashboard)/reports/...` (spec 052: the list of reports, then **Inadimplência** (the overdue boletos with a condominium and a reference-month filter, totals, a table by condominium and a table of boletos) and **Prestação de contas** (a condominium and a month: opening balance, credits, debits and closing balance, per sub-conta, and the entries); both have **Baixar PDF** (`ReportDownloadButton`, the file comes through the `/api` proxy as a blob and `lib/download.ts` saves it; names in `lib/reports.ts`); the other two reports of the menu are "Em breve") |
 | `/finance/company-account` | `app/(dashboard)/finance/company-account/...` (**Conta da imobiliária**, spec 038: the administradora's own ledger, the registration fees of the paid boletos: balance and list; `FinanceSubNav` tab) |
 
 ## Where new code goes

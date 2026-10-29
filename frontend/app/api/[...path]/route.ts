@@ -11,7 +11,7 @@ import { isTokenExpiring } from "@/lib/jwt";
  * O navegador só fala com este servidor (`/api/...`, mesma origem). Aqui o token vive em cookie
  * HttpOnly: o handler o lê, chama o Django com `Authorization: Bearer` e devolve status e JSON
  * sem alterar. Login e logout também passam por aqui (o navegador nunca vê um token).
- * Só JSON; arquivos grandes não passam por aqui (limite da plataforma): usarão URL assinada.
+ * Quase só JSON: os PDFs dos relatórios (pequenos) passam como estão; arquivos grandes não passam por aqui (limite da plataforma): usam URL assinada.
  */
 
 type Context = { params: Promise<{ path: string[] }> };

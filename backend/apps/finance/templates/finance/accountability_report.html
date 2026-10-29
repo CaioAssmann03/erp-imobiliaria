@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Prestação de contas</title>
+<style>
+  @page { size: A4; margin: 14mm 12mm; @bottom-right { content: "Página " counter(page) " de " counter(pages); font-size: 8pt; color: #555; } }
+  body { font-family: "Liberation Sans", Arial, Helvetica, sans-serif; font-size: 9pt; color: #1a1a1a; }
+  header { border-bottom: 2px solid #1a1a1a; padding-bottom: 6pt; margin-bottom: 10pt; }
+  h1 { font-size: 15pt; margin: 0 0 2pt 0; }
+  h2 { font-size: 11pt; margin: 12pt 0 4pt 0; }
+  .muted { color: #555; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 8pt; }
+  th { text-align: left; background: #eee; border: 1px solid #999; padding: 3pt 5pt; }
+  td { border: 1px solid #ccc; padding: 3pt 5pt; }
+  .amount { text-align: right; white-space: nowrap; }
+  .total td { font-weight: bold; border-top: 2px solid #1a1a1a; }
+  .warning { color: #b00000; font-weight: bold; margin: 6pt 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Prestação de contas</h1>
+  <div class="muted">{{ company_name }} · {{ condominium }} · {{ month }}</div>
+</header>
+
+<h2>Resumo do mês</h2>
+<table>
+  <tr><th>Saldo anterior</th><th class="amount">Créditos</th><th class="amount">Débitos</th><th class="amount">Saldo final</th></tr>
+  <tr><td>{{ opening_balance }}</td><td class="amount">{{ total_credits }}</td><td class="amount">{{ total_debits }}</td><td class="amount">{{ closing_balance }}</td></tr>
+</table>
+
+<h2>Por sub-conta</h2>
+<table>
+  <tr><th>Sub-conta</th><th class="amount">Saldo anterior</th><th class="amount">Créditos</th><th class="amount">Débitos</th><th class="amount">Saldo final</th></tr>
+  {% for line in by_cost_center %}
+  <tr><td>{{ line.label }}</td><td class="amount">{{ line.opening_balance }}</td><td class="amount">{{ line.total_credits }}</td><td class="amount">{{ line.total_debits }}</td><td class="amount">{{ line.closing_balance }}</td></tr>
+  {% empty %}
+  <tr><td colspan="5">Nenhum movimento.</td></tr>
+  {% endfor %}
+  <tr class="total"><td>Total</td><td class="amount">{{ opening_balance }}</td><td class="amount">{{ total_credits }}</td><td class="amount">{{ total_debits }}</td><td class="amount">{{ closing_balance }}</td></tr>
+</table>
+
+<h2>Lançamentos do mês</h2>
+{% if truncated %}<p class="warning">A lista mostra só os primeiros lançamentos; os totais acima consideram todos.</p>{% endif %}
+<table>
+  <tr><th>Data</th><th>Histórico</th><th>Sub-conta</th><th>Unidade</th><th class="amount">Crédito</th><th class="amount">Débito</th></tr>
+  {% for entry in entries %}
+  <tr>
+    <td>{{ entry.entry_date }}</td><td>{{ entry.description }}<br><span class="muted">{{ entry.template }}</span></td>
+    <td>{{ entry.cost_center }}</td><td>{{ entry.unit }}</td><td class="amount">{{ entry.credit }}</td><td class="amount">{{ entry.debit }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="6">Nenhum lançamento neste mês.</td></tr>
+  {% endfor %}
+</table>
+</body>
+</html>

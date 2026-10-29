@@ -25,6 +25,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AccountabilityReport,
+  CurrentAccountEntriesAccountabilityParams,
+  CurrentAccountEntriesAccountabilityPdfParams,
   CurrentAccountEntriesListParams,
   CurrentAccountEntry,
   ErrorResponse,
@@ -387,3 +390,184 @@ const {mutation: mutationOptions} = options ?
       > => {
       return useMutation(getCurrentAccountEntriesReverseMutationOptions(options), queryClient);
     }
+    /**
+ * Report: a condominium's month in the ledger, opening and closing balance, per sub-conta, with the entries.
+ */
+export const currentAccountEntriesAccountability = (
+    params: CurrentAccountEntriesAccountabilityParams,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<AccountabilityReport>(
+      {url: `/api/current-account-entries/accountability/`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getCurrentAccountEntriesAccountabilityQueryKey = (params?: CurrentAccountEntriesAccountabilityParams,) => {
+    return [
+    `/api/current-account-entries/accountability/`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getCurrentAccountEntriesAccountabilityQueryOptions = <TData = Awaited<ReturnType<typeof currentAccountEntriesAccountability>>, TError = ErrorResponse>(params: CurrentAccountEntriesAccountabilityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof currentAccountEntriesAccountability>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCurrentAccountEntriesAccountabilityQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof currentAccountEntriesAccountability>>> = ({ signal }) => currentAccountEntriesAccountability(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof currentAccountEntriesAccountability>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CurrentAccountEntriesAccountabilityQueryResult = NonNullable<Awaited<ReturnType<typeof currentAccountEntriesAccountability>>>
+export type CurrentAccountEntriesAccountabilityQueryError = ErrorResponse
+
+
+export function useCurrentAccountEntriesAccountability<TData = Awaited<ReturnType<typeof currentAccountEntriesAccountability>>, TError = ErrorResponse>(
+ params: CurrentAccountEntriesAccountabilityParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof currentAccountEntriesAccountability>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof currentAccountEntriesAccountability>>,
+          TError,
+          Awaited<ReturnType<typeof currentAccountEntriesAccountability>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCurrentAccountEntriesAccountability<TData = Awaited<ReturnType<typeof currentAccountEntriesAccountability>>, TError = ErrorResponse>(
+ params: CurrentAccountEntriesAccountabilityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof currentAccountEntriesAccountability>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof currentAccountEntriesAccountability>>,
+          TError,
+          Awaited<ReturnType<typeof currentAccountEntriesAccountability>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCurrentAccountEntriesAccountability<TData = Awaited<ReturnType<typeof currentAccountEntriesAccountability>>, TError = ErrorResponse>(
+ params: CurrentAccountEntriesAccountabilityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof currentAccountEntriesAccountability>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useCurrentAccountEntriesAccountability<TData = Awaited<ReturnType<typeof currentAccountEntriesAccountability>>, TError = ErrorResponse>(
+ params: CurrentAccountEntriesAccountabilityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof currentAccountEntriesAccountability>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCurrentAccountEntriesAccountabilityQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * The same report as a PDF download.
+ */
+export const currentAccountEntriesAccountabilityPdf = (
+    params: CurrentAccountEntriesAccountabilityPdfParams,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<Blob>(
+      {url: `/api/current-account-entries/accountability/pdf/`, method: 'GET',
+        params,
+        responseType: 'blob', signal
+    },
+      );
+    }
+
+
+
+
+export const getCurrentAccountEntriesAccountabilityPdfQueryKey = (params?: CurrentAccountEntriesAccountabilityPdfParams,) => {
+    return [
+    `/api/current-account-entries/accountability/pdf/`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getCurrentAccountEntriesAccountabilityPdfQueryOptions = <TData = Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>, TError = ErrorResponse>(params: CurrentAccountEntriesAccountabilityPdfParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCurrentAccountEntriesAccountabilityPdfQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>> = ({ signal }) => currentAccountEntriesAccountabilityPdf(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CurrentAccountEntriesAccountabilityPdfQueryResult = NonNullable<Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>>
+export type CurrentAccountEntriesAccountabilityPdfQueryError = ErrorResponse
+
+
+export function useCurrentAccountEntriesAccountabilityPdf<TData = Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>, TError = ErrorResponse>(
+ params: CurrentAccountEntriesAccountabilityPdfParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>,
+          TError,
+          Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCurrentAccountEntriesAccountabilityPdf<TData = Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>, TError = ErrorResponse>(
+ params: CurrentAccountEntriesAccountabilityPdfParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>,
+          TError,
+          Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCurrentAccountEntriesAccountabilityPdf<TData = Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>, TError = ErrorResponse>(
+ params: CurrentAccountEntriesAccountabilityPdfParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useCurrentAccountEntriesAccountabilityPdf<TData = Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>, TError = ErrorResponse>(
+ params: CurrentAccountEntriesAccountabilityPdfParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof currentAccountEntriesAccountabilityPdf>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCurrentAccountEntriesAccountabilityPdfQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+

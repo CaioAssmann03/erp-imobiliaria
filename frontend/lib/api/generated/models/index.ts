@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './accountabilityCostCenter';
+export * from './accountabilityEntry';
+export * from './accountabilityReport';
 export * from './accountKindEnum';
 export * from './accountPayable';
 export * from './accountPayableSearch';
@@ -30,6 +33,8 @@ export * from './billingDocumentPayment';
 export * from './billingDocumentPdfDownload';
 export * from './billingDocumentRegistration';
 export * from './billingDocumentReissue';
+export * from './billingDocumentsDelinquencyParams';
+export * from './billingDocumentsDelinquencyPdfParams';
 export * from './billingDocumentSearch';
 export * from './billingDocumentsListParams';
 export * from './billingDocumentsListStatus';
@@ -89,6 +94,8 @@ export * from './costCentersListParams';
 export * from './createPaymentReceipt';
 export * from './currentAccount';
 export * from './currentAccountBalances';
+export * from './currentAccountEntriesAccountabilityParams';
+export * from './currentAccountEntriesAccountabilityPdfParams';
 export * from './currentAccountEntriesListKind';
 export * from './currentAccountEntriesListOrigin';
 export * from './currentAccountEntriesListParams';
@@ -96,6 +103,9 @@ export * from './currentAccountEntry';
 export * from './currentAccountEntryOriginEnum';
 export * from './currentAccountsListParams';
 export * from './dashboard';
+export * from './delinquencyCondominiumTotal';
+export * from './delinquencyReport';
+export * from './delinquencyRow';
 export * from './dueMonthEnum';
 export * from './entryBatch';
 export * from './entryBatchesListOrigin';

@@ -24,6 +24,7 @@ authenticated with a Django user (admins only for now).
 | Billing · Plans | `/billing/plans` | list (search, condominium and status filters), create and edit a billing plan with its items (kind-dependent fields, ordered with move buttons), delete; the issuance fields live in the condominium form (`issuance_day`, `exempts_manager_unit`) and the unit form (`billing_recipient`) |
 | Billing · Documents | `/billing/documents` | the issued boletos per unit and month: list (search, condominium, status, reference month, overdue), the document page with items, draft PDF download and cancel |
 | Billing · Runs | `/billing/runs` | the monthly issuance runs: counts per run, **Emitir mês** (issue a condominium's month now), and each run's problems with a Portuguese sentence and a link to fix them |
+| Reports | `/reports` | **Inadimplência** (overdue boletos by condominium, with totals and PDF) and **Prestação de contas** (a condominium's month in the current account, by sub-conta, with PDF); Ficha da unidade and Taxa de administração are "Em breve" (spec 052) |
 | Finance · Manual entry | `/finance/entries/new` | one batch with several entries, possibly of several condominiums, posted all or none |
 | Finance · Company account | `/finance/company-account` | **Conta da imobiliária**: the administradora's own ledger (the registration fees of the paid boletos): balance and list (spec 038) |
 
