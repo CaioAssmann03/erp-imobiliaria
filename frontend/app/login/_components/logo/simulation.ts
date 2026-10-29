@@ -1,7 +1,7 @@
 import { random } from "@/app/(marketing)/_components/hero/skyline-scene";
 import { brandRamp } from "@/lib/brand-ramp";
 
-import { STEP, type ParticleSet } from "./particles";
+import type { ParticleSet } from "./particles";
 import { SCENE } from "./scene";
 
 // Unidades da cena e quadros de 60 fps.
@@ -26,7 +26,7 @@ const RISE_MS = 1100; // quanto cada partícula leva para subir da base até o s
 export function createSimulation(canvas: HTMLCanvasElement, set: ParticleSet, animate: boolean) {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas 2D indisponível");
-  const { count, hx, hy, base, win, tones, offs, winX, winY } = set;
+  const { count, hx, hy, base, win, tones, offs, winX, winY, step: cell } = set;
 
   const ox = new Float32Array(count);
   const oy = new Float32Array(count);
@@ -103,7 +103,7 @@ export function createSimulation(canvas: HTMLCanvasElement, set: ParticleSet, an
 
   const draw = () => {
     ctx.clearRect(0, 0, cssWidth, cssHeight);
-    const size = STEP * scale * 0.92;
+    const size = cell * scale * 0.92;
     for (let b = 0; b < BUCKETS; b++) {
       ctx.fillStyle = palette[b];
       for (let k = starts[b]; k < starts[b + 1]; k++) {

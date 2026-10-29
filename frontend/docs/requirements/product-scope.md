@@ -35,7 +35,7 @@ Out of scope for now: suppliers, bank accounts and entry templates screens (regi
 |---|---|
 | Language | code in English, UI text in Portuguese (pt-BR); docs in English |
 | Themes | dark default; light/system; selectable accent color and font, applied to the whole shell (rail, module menu, registry) through the tokens |
-| Responsive | usable on mobile width; secondary columns hidden below `md` |
+| Responsive | usable on mobile width; secondary columns hidden below `md`. On a phone: the side menu (`MobileMenu`) has modules collapsed in rows of 44 px and only the screens that exist; the right-hand `SectionIndex` becomes a sticky row of buttons under the header (below `xl`) so the sections and the Blocos/Unidades/Sub-contas screens stay reachable; fields use 16 px text under `lg` (iOS zoom, `data-app-shell` in `globals.css`) |
 | Performance | instant shell with skeletons, static shells, data fetched on the client; server-side pagination/search/filters |
 | Security | tokens only in cookies, no PII in logs/URLs, backend authorizes everything |
 | Accessibility | keyboard operable, labeled fields, visible focus, contrast in both modes |
