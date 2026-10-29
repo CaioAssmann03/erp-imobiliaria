@@ -172,29 +172,30 @@
     0 4px 12px rgb(0 0 0 / 0.06);
 }
 
-/* 5. Páginas públicas (app/(marketing)): título em serifa, rótulos em mono caixa-alta, cantos retos.
-   Documentação: frontend/docs/norms/marketing.md */
+/* 5. Páginas públicas (app/(marketing)) e login: a mesma fonte do ERP (Inter, a padrão), títulos maiores, rótulos
+   em caixa-alta, cantos retos. Documentação: frontend/docs/norms/marketing.md */
 @theme inline {
-  --font-display: var(--font-display-serif, var(--font-source-serif)), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 @theme {
   --text-hero: clamp(2.5rem, 5vw, 4.25rem);
   --text-hero--line-height: 1.05;
   --text-hero--letter-spacing: -0.02em;
-  --text-hero--font-weight: 400;
+  --text-hero--font-weight: 500;
 
   --text-section: clamp(2rem, 3.4vw, 2.75rem);
   --text-section--line-height: 1.1;
   --text-section--letter-spacing: -0.02em;
-  --text-section--font-weight: 400;
+  --text-section--font-weight: 500;
 
   --radius-sharp: 2px;
 }
 
-/* Rótulo: navegação, botões, sobretítulos e números. A fonte vem do layout público (--font-label-mono). */
+/* Rótulo: navegação, botões, sobretítulos e números (Inter, caixa-alta). */
 @utility text-label {
-  font-family: var(--font-label-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 500;
   font-size: 0.6875rem;
   line-height: 1.4;
   letter-spacing: 0.08em;
@@ -203,8 +204,8 @@
 
 /* ==========================================================================
    Temas (Configurações): o app define, no <html>, os atributos
-   data-mode (light | dark | system), data-accent e data-font.
-   Cada tema só sobrescreve variáveis; os componentes não mudam.
+   data-accent e data-font. O tema é um só, claro (as variáveis do :root / @theme).
+   Cada preferência só sobrescreve variáveis; os componentes não mudam.
    ========================================================================== */
 
 :root {
@@ -212,54 +213,6 @@
   --glass-bottom: color-mix(in oklab, var(--color-surface) 58%, transparent);
   --glass-highlight: rgb(255 255 255 / 0.95);
   --glass-edge: rgb(255 255 255 / 0.6);
-}
-
-/* Modo escuro (explícito) e modo "sistema" quando o SO está escuro. */
-html[data-mode="dark"] {
-  --color-canvas: #101010;
-  --color-shell: #181817;
-  --color-surface: #21211f;
-  --color-surface-muted: #2a2a27;
-  --color-surface-sunken: #353531;
-  --color-ink: #f2f2ef;
-  --color-ink-soft: #a4a39d;
-  --color-ink-faint: #706f6a;
-  --color-ink-foreground: #1c1b19;
-  --color-success: #3ecf7a;
-  --color-danger: #ff5d6e;
-  --color-warning: #e9b440;
-  --glass-top: rgb(60 60 56 / 0.72);
-  --glass-bottom: rgb(36 36 33 / 0.62);
-  --glass-highlight: rgb(255 255 255 / 0.12);
-  --glass-edge: rgb(255 255 255 / 0.08);
-  /* No escuro a sombra some: o contorno de 1px é o que separa painéis flutuantes. */
-  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.04);
-  --shadow-float: 0 12px 32px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.09);
-  color-scheme: dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  html[data-mode="system"] {
-    --color-canvas: #101010;
-    --color-shell: #181817;
-    --color-surface: #21211f;
-    --color-surface-muted: #2a2a27;
-    --color-surface-sunken: #353531;
-    --color-ink: #f2f2ef;
-    --color-ink-soft: #a4a39d;
-    --color-ink-faint: #706f6a;
-    --color-ink-foreground: #1c1b19;
-    --color-success: #3ecf7a;
-    --color-danger: #ff5d6e;
-    --color-warning: #e9b440;
-    --glass-top: rgb(60 60 56 / 0.72);
-    --glass-bottom: rgb(36 36 33 / 0.62);
-    --glass-highlight: rgb(255 255 255 / 0.12);
-    --glass-edge: rgb(255 255 255 / 0.08);
-    --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.04);
-    --shadow-float: 0 12px 32px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.09);
-    color-scheme: dark;
-  }
 }
 
 /* Cor de destaque (o laranja é o padrão, definido em @theme). Os fundos e cinzas não mudam
@@ -298,30 +251,6 @@ html[data-accent="graphite"] {
   --color-brand-strong: #1c1b19;
   --color-brand-light: #6b6a66;
 }
-html[data-mode="dark"][data-accent="rose"],
-html[data-mode="dark"][data-accent="red"] {
-  --color-danger: #ff7a3d;
-}
-/* Grafite no escuro precisa ser claro para ter contraste. */
-html[data-mode="dark"][data-accent="graphite"] {
-  --color-brand: #c9c8c2;
-  --color-brand-strong: #e4e3de;
-  --color-brand-light: #a9a8a2;
-  --color-brand-foreground: #1c1b19;
-}
-@media (prefers-color-scheme: dark) {
-  html[data-mode="system"][data-accent="rose"],
-  html[data-mode="system"][data-accent="red"] {
-    --color-danger: #ff7a3d;
-  }
-  html[data-mode="system"][data-accent="graphite"] {
-    --color-brand: #c9c8c2;
-    --color-brand-strong: #e4e3de;
-    --color-brand-light: #a9a8a2;
-    --color-brand-foreground: #1c1b19;
-  }
-}
-
 /* Fonte (Inter é a padrão; as variáveis --font-* vêm do next/font em layout.tsx). */
 html[data-font="dm-sans"] {
   --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
@@ -334,8 +263,8 @@ html[data-font="system"] {
 }
 
 /* ==========================================================================
-   Páginas públicas: sempre claras, destaque laranja e Inter, seja qual for a
-   preferência salva no <html> (data-mode, data-accent, data-font). As variáveis
+   Páginas públicas: destaque laranja e Inter, seja qual for a
+   preferência salva no <html> (data-accent, data-font). As variáveis
    são redefinidas na própria área pública, então valem desde o primeiro quadro,
    sem trocar o tema depois que o JavaScript carrega.
    ========================================================================== */
@@ -354,6 +283,9 @@ html[data-font="system"] {
   --color-brand-light: #ff7a45;
   --color-brand-foreground: #ffffff;
   --color-brand-soft: color-mix(in oklab, var(--color-brand) 12%, var(--color-surface));
+  /* Janelas dos prédios desenhados: apagada escura e acesa clara. */
+  --color-window-off: #1c1b19;
+  --color-window-on: #ffffff;
   --color-success: #1d9a54;
   --color-danger: #d4243a;
   --color-warning: #c98a06;
@@ -369,4 +301,3 @@ html[data-font="system"] {
   font-family: var(--font-sans);
   color: var(--color-ink);
 }
-

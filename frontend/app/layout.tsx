@@ -29,7 +29,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     // Os atributos de tema são trocados pelo script do <head> antes do primeiro paint: o React não deve reclamar da diferença.
     <html
       lang="pt-BR"
-      data-mode={DEFAULT_APPEARANCE.mode}
       data-accent={DEFAULT_APPEARANCE.accent}
       data-font={DEFAULT_APPEARANCE.font}
       suppressHydrationWarning
