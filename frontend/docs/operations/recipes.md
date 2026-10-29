@@ -23,7 +23,7 @@ New `widgets/xxx-widget.tsx` (`buildXxxWidget`) → entry in `WIDGET_IDS` (`widg
 
 ## Add an accent color
 Entry in `ACCENTS` (`lib/appearance.ts`) + `html[data-accent="x"]` block in `app/globals.css` with
-`--color-brand`, `-strong`, `-light`; if reddish, also override `--color-danger`.
+`--color-brand`, `-strong`, `-light`; if reddish, also override `--color-danger` (and dark/system variants).
 
 ## Add a navigation item
 `nav-items.ts` (used by `NavLinks` and `MobileMenu`) in `app/(dashboard)/_components/shell/` (label in Portuguese, href in English).
