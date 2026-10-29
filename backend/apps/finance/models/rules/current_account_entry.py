@@ -64,9 +64,9 @@ class CurrentAccountEntryRules(ModelRules["CurrentAccountEntry"]):
         return competence_month is not None and competence_month.day != 1
 
     @rule("justification", CurrentAccountEntryError.JUSTIFICATION_BLANK)
-    def manual_entry_lacks_justification(self) -> bool:
+    def reversal_lacks_justification(self) -> bool:
         entry = self.instance
-        return entry.origin == entry.Origin.MANUAL and not (entry.justification or "").strip()
+        return entry.reversal_of_id is not None and not (entry.justification or "").strip()
 
     @rule("account_payable", CurrentAccountEntryError.ACCOUNT_PAYABLE_MATCHES_ORIGIN)
     def account_payable_does_not_match_origin(self) -> bool:

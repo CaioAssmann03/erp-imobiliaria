@@ -45,7 +45,7 @@ the UI shows Portuguese labels.
 - CPF/CNPJ/CEP travel as digits only; masks are display-only.
 - A block must belong to the unit's condominium.
 - A condominium expense needs a cost center; paying it needs an entry template of that cost center and posts a debit in the condominium's statement. A company expense has neither and posts nothing. A paid or cancelled account is read-only.
-- A manual entry needs a justification; a cash or extra cash batch needs its cash number and a bank batch has none; the competence is the first day of a month. An entry is reversed, never edited.
+- A manual entry needs no justification and no unit (the form does not ask for them; spec 051), but a reversal needs its reason; a cash or extra cash batch needs its cash number and a bank batch has none; the competence is the first day of a month. An entry is reversed, never edited.
 
 ## Dashboard summary (`dashboard`)
 

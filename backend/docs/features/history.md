@@ -1,5 +1,5 @@
 ---
-summary: The finished feature specs (001–029) condensed: what each did, the decisions that still explain the code, and its numbered requirements.
+summary: The finished feature specs (001–029 and 051) condensed: what each did, the decisions that still explain the code, and its numbered requirements.
 read-when: you wonder why something was built a certain way, or a test cites "spec NNN, Rn" and you need what Rn means
 skip-if: you are specifying a new feature → features/README.md; you need what an app does today → apps/<app>.md
 ---
@@ -316,3 +316,11 @@ The mark "this person can be used in this module" is a fact about the person, so
 - Decisions (user, 2026-10-26): the marker is a sub-entity of the person in `persons`, one table keyed by module (a person may still be in several modules, so no `type` column); the model is `PersonModuleMembership`; a stored key that is no longer registered stays and is ignored; no database check on the key; `apps/rentals` keeps the app and its key without a model.
 - R1 the table, unique per `(person, module)` · R2 the API unchanged · R3 `persons` imports no module app and only registered keys are written · R4 the `UnitPerson` rule · R5 the copy and the reverse · R6 a module needs only its key · R7 the filter does not query per person
 Checked: `pytest apps -q` 1091 passed, `mypy apps config` clean; frontend `tsc`, `eslint` and `pnpm test` clean. Gap: the previous release's deploy window is not tested (the old `modules` column still stays, as in spec 046).
+
+## 051 — Manual entries without justification and unit · none
+A manual ledger entry no longer needs a justification or a unit: the form drops both fields, and only a reversal keeps its required reason.
+- Backend: the rule `reversal_lacks_justification` and the constraint `current_account_entry_reversal_has_justification` (migration `finance.0016`) replace the ones that required a justification of every manual entry; they apply to an entry with `reversal_of`, with the same coded error `current_account_entry.justification.blank`. The existing rows satisfy the new constraint because every reversal already had a reason. The API still accepts `justification` and `unit` when they are sent, and the entries already saved keep theirs.
+- Frontend: `EntryLineFields` and `lib/schemas/entry-batch.ts` lose the two fields, so an entry made in the form is for the whole condominium. The reversal dialog keeps its reason.
+- Decisions (2026-10-22): dropping both fields (user); the reversal keeping its reason, the API staying compatible and the error code staying (agent, to review in the PR).
+- R1 a manual entry is saved without a justification (model, database, API) · R2 a reversal without a reason is still refused (rule and constraint) · R3 the form has no Justificativa and no Unidade · R4 the entries already saved keep theirs
+Checked: `pytest apps/finance apps/billing` 469 passed; the 8 failures are the PDF rendering tests, which need WeasyPrint's system libraries that this Windows machine lacks (a stub stood in), unrelated to the change; `mypy apps config` and `makemigrations --check` clean; `tsc`, `eslint --max-warnings=0`, `pnpm test` (54) and `pnpm build` clean; the migration was applied to a database that has entries; the form was opened in a browser and the two fields are gone. Not checked: posting an entry through the form in a browser (its selects were not driven).
