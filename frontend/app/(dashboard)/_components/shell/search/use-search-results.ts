@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useSearchRetrieve } from "@/lib/api/generated";
 import { condominiumPageUrl } from "@/lib/condominium-registry";
+import { personUrl } from "@/lib/person-workspace";
 import type { Search } from "@/lib/api/generated/models";
 import { brl, formatDate, formatMonth } from "@/lib/format";
 import { documentStatusLabel } from "@/lib/billing-documents";
@@ -27,7 +28,7 @@ function apiResults(data: Search): SearchResultItem[] {
       group: "Pessoas",
       title: person.name,
       subtitle: withId(person.code, person.document),
-      href: `/persons/${person.id}`,
+      href: personUrl(person.id),
     })),
     ...data.condominiums.map((condominium) => ({
       key: `c${condominium.id}`,

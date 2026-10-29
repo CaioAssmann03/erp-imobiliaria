@@ -42,14 +42,14 @@ export function CondominiumsFocus({ dash }: { dash: Dashboard | undefined }) {
       <div className="grid gap-8 md:grid-cols-3">
         <SummaryBlock title="Condomínios" summary={dash?.condominiums} href="/condominiums" />
         <SummaryBlock title="Unidades" summary={dash?.units} href="/condominiums/units" />
-        <SummaryBlock title="Pessoas" summary={dash?.persons} href="/persons" />
+        <SummaryBlock title="Pessoas" summary={dash?.persons} href="/condominiums/persons" />
       </div>
       <div className="flex flex-wrap gap-2">
         <LinkButton href="/condominiums/new">Novo condomínio</LinkButton>
         <LinkButton variant="secondary" href="/condominiums/units/new">
           Nova unidade
         </LinkButton>
-        <LinkButton variant="secondary" href="/persons/new">
+        <LinkButton variant="secondary" href="/condominiums/persons/new">
           Nova pessoa
         </LinkButton>
       </div>

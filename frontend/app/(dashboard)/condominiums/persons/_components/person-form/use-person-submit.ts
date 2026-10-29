@@ -15,6 +15,7 @@ import {
 import type { Person } from "@/lib/api/generated/models";
 import { applyServerErrors } from "@/lib/form-errors";
 import { CONDOMINIUMS_MODULE } from "@/lib/person-module";
+import { personUrl } from "@/lib/person-workspace";
 import { personToPayload, type PersonFormInput, type PersonFormOutput } from "@/lib/schemas/person";
 
 export function usePersonSubmit(personId: string | undefined, setError: UseFormSetError<PersonFormInput>) {
@@ -43,7 +44,6 @@ export function usePersonSubmit(personId: string | undefined, setError: UseFormS
           onSuccess: () => {
             invalidate(personId);
             toast.success("Pessoa salva.");
-            router.push("/persons");
           },
           onError,
         }
@@ -55,7 +55,7 @@ export function usePersonSubmit(personId: string | undefined, setError: UseFormS
           onSuccess: (created) => {
             invalidate(created.id);
             toast.success("Pessoa cadastrada.");
-            router.push("/persons");
+            router.push(personUrl(created.id));
           },
           onError,
         }

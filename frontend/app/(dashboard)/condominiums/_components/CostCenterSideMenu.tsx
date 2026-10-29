@@ -11,7 +11,7 @@ import { costCenterUrl } from "@/lib/cost-center-workspace";
  */
 export function CostCenterSideMenu({ costCenterId }: { costCenterId: string }) {
   const { data: costCenter } = useCostCentersRetrieve(costCenterId);
-  if (!costCenter) return <div aria-hidden className="hidden w-48 shrink-0 xl:block" />;
+  if (!costCenter) return <div aria-hidden className="hidden w-48 shrink-0 xl:block 2xl:w-56" />;
 
   return (
     <SectionIndex

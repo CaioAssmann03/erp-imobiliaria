@@ -9,7 +9,8 @@ test("the active module follows the URL", () => {
   assert.equal(activeModule("/condominiums/abc"), "condominiums");
   assert.equal(activeModule("/finance/statement"), "finance");
   assert.equal(activeModule("/billing/entries"), "billing");
-  assert.equal(activeModule("/persons/new"), "persons");
+  assert.equal(activeModule("/condominiums/persons/new"), "condominiums");
+  assert.equal(activeModule("/persons"), null);
   assert.equal(activeModule("/login"), null);
   assert.equal(activeModule(null), null);
 });

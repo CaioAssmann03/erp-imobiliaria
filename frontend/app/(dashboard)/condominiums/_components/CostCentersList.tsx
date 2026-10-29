@@ -82,7 +82,7 @@ export function CostCentersList({
     <aside
       aria-label="Sub-contas"
       className={cn(
-        "w-full shrink-0 flex-col gap-3 lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:w-80",
+        "w-full shrink-0 flex-col gap-3 lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:w-80 2xl:w-96",
         className
       )}
     >

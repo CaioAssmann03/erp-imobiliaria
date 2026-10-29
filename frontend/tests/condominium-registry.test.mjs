@@ -31,6 +31,8 @@ test("the other condominium screens have no list column", () => {
   assert.equal(isRegistryPath("/condominiums/0a1b/blocks/new"), false);
   assert.equal(isRegistryPath("/condominiums/0a1b/cost-centers/new"), false);
   assert.equal(isRegistryPath("/persons"), false);
+  assert.equal(isRegistryPath("/condominiums/persons"), false);
+  assert.equal(isRegistryPath("/condominiums/persons/9"), false);
   assert.equal(isRegistryPath(null), false);
 });
 

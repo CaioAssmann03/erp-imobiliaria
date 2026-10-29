@@ -11,7 +11,7 @@ const FALLBACK = "O que pede atenção na administração de condomínios, loca�
 const GROUPS = [
   { key: "condominiums", href: "/condominiums", noun: ["condomínio", "condomínios"], adjective: ["ativo", "ativos"] },
   { key: "units", href: "/condominiums/units", noun: ["unidade", "unidades"], adjective: ["ativa", "ativas"] },
-  { key: "persons", href: "/persons", noun: ["pessoa", "pessoas"], adjective: ["ativa", "ativas"] },
+  { key: "persons", href: "/condominiums/persons", noun: ["pessoa", "pessoas"], adjective: ["ativa", "ativas"] },
 ] as const;
 
 const pick = (pair: readonly [string, string], amount: number) => (amount === 1 ? pair[0] : pair[1]);
