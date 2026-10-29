@@ -11,7 +11,7 @@
 
 ## O que é
 
-O METRI é a ferramenta interna de uma administradora de condomínios: a equipe cadastra condomínios, unidades e pessoas, emite os boletos do mês e acompanha o caixa de cada condomínio. Hoje só usuários administradores entram; o portal para proprietários e inquilinos está planejado.
+O METRI **(Modelo Eficiente de Tempo e Recursos Imobiliários)** é a ferramenta interna de uma administradora de condomínios: a equipe cadastra condomínios, unidades e pessoas, emite os boletos do mês e acompanha o caixa de cada condomínio. Hoje só usuários administradores entram; o portal para proprietários e inquilinos está planejado.
 
 **Já funciona**
 
