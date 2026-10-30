@@ -530,6 +530,68 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getPersonsDestroyMutationOptions(options), queryClient);
     }
     /**
+ * The LGPD erasure of a deleted person after the retention period; irreversible (superuser only).
+ */
+export const personsAnonymizeCreate = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<Person>(
+      {url: `/api/persons/${id}/anonymize/`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+
+export const getPersonsAnonymizeCreateMutationKey = () => ['personsAnonymizeCreate'] as const;
+
+export const getPersonsAnonymizeCreateMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof personsAnonymizeCreate>>, TError,PersonsAnonymizeCreateMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof personsAnonymizeCreate>>, TError,PersonsAnonymizeCreateMutationVariables, TContext> => {
+
+const mutationKey = getPersonsAnonymizeCreateMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof personsAnonymizeCreate>>, PersonsAnonymizeCreateMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  personsAnonymizeCreate(id,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PersonsAnonymizeCreateMutationResult = NonNullable<Awaited<ReturnType<typeof personsAnonymizeCreate>>>
+
+    export type PersonsAnonymizeCreateMutationError = ErrorResponse
+    export type PersonsAnonymizeCreateMutationVariables = {id: string}
+
+    export const usePersonsAnonymizeCreate = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof personsAnonymizeCreate>>, TError,PersonsAnonymizeCreateMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof personsAnonymizeCreate>>,
+        TError,
+        PersonsAnonymizeCreateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPersonsAnonymizeCreateMutationOptions(options), queryClient);
+    }
+    /**
  * PUT releases the person to the module, DELETE takes them out; both are idempotent.
  */
 export const personsModulesUpdate = (
@@ -654,4 +716,66 @@ const {mutation: mutationOptions} = options ?
         TContext
       > => {
       return useMutation(getPersonsModulesDestroyMutationOptions(options), queryClient);
+    }
+    /**
+ * Bring a deleted person back (superuser only).
+ */
+export const personsRestoreCreate = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<Person>(
+      {url: `/api/persons/${id}/restore/`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+
+export const getPersonsRestoreCreateMutationKey = () => ['personsRestoreCreate'] as const;
+
+export const getPersonsRestoreCreateMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof personsRestoreCreate>>, TError,PersonsRestoreCreateMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof personsRestoreCreate>>, TError,PersonsRestoreCreateMutationVariables, TContext> => {
+
+const mutationKey = getPersonsRestoreCreateMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof personsRestoreCreate>>, PersonsRestoreCreateMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  personsRestoreCreate(id,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PersonsRestoreCreateMutationResult = NonNullable<Awaited<ReturnType<typeof personsRestoreCreate>>>
+
+    export type PersonsRestoreCreateMutationError = ErrorResponse
+    export type PersonsRestoreCreateMutationVariables = {id: string}
+
+    export const usePersonsRestoreCreate = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof personsRestoreCreate>>, TError,PersonsRestoreCreateMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof personsRestoreCreate>>,
+        TError,
+        PersonsRestoreCreateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPersonsRestoreCreateMutationOptions(options), queryClient);
     }

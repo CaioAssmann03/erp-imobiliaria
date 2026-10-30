@@ -3,6 +3,7 @@ import type { FieldValues, Path, UseFormSetError } from "react-hook-form";
 
 import type { ErrorItem, ErrorResponse } from "@/lib/api/generated/models";
 
+import { recordErrorDetails, type ErrorDetails } from "./error-details";
 import { errorMessage } from "./error-messages";
 
 /** Os erros do backend: `{errors: [{field, code, message}]}` (spec 006). */
@@ -10,6 +11,25 @@ function readErrors(data: unknown): ErrorItem[] | null {
   if (!data || typeof data !== "object") return null;
   const errors = (data as Partial<ErrorResponse>).errors;
   return Array.isArray(errors) ? errors : null;
+}
+
+/** O que a resposta de erro diz, para o aviso mostrar ao clicar (`lib/error-details.ts`). */
+function detailsOf(error: unknown): ErrorDetails | null {
+  if (!isAxiosError(error)) return null;
+  const method = error.config?.method?.toUpperCase();
+  const path = error.config?.url?.split("?")[0];
+  return {
+    status: error.response?.status ?? null,
+    request: method && path ? `${method} ${path}` : null,
+    items: (readErrors(error.response?.data) ?? []).map(({ field, code, message }) => ({ field, code, message })),
+  };
+}
+
+/** Registra os detalhes de `error` para a `message` que o chamador vai exibir e devolve a própria mensagem. */
+function withDetails(error: unknown, message: string): string {
+  const details = detailsOf(error);
+  if (details) recordErrorDetails(message, details);
+  return message;
 }
 
 /**
@@ -30,6 +50,14 @@ export function applyServerErrors<T extends FieldValues>(
   error: unknown,
   setError: UseFormSetError<T>,
   toFieldName: (path: string) => string = formFieldName
+): string {
+  return withDetails(error, serverErrorMessage(error, setError, toFieldName));
+}
+
+function serverErrorMessage<T extends FieldValues>(
+  error: unknown,
+  setError: UseFormSetError<T>,
+  toFieldName: (path: string) => string
 ): string {
   if (!isAxiosError(error) || !error.response) {
     return "Sem conexão com o servidor. Tente novamente.";
@@ -73,6 +101,10 @@ export function applyServerErrors<T extends FieldValues>(
  * o primeiro erro da API traduzido pelo código; sem corpo no formato da API, uma mensagem pelo status.
  */
 export function apiErrorMessage(error: unknown, fallback: string): string {
+  return withDetails(error, plainErrorMessage(error, fallback));
+}
+
+function plainErrorMessage(error: unknown, fallback: string): string {
   if (!isAxiosError(error) || !error.response) return "Sem conexão com o servidor. Tente novamente.";
   const { status, data } = error.response;
   const first = readErrors(data)?.[0];

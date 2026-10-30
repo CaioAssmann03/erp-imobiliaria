@@ -33,8 +33,11 @@ export const formActionsClass =
   "sticky bottom-4 z-10 flex items-center gap-3 rounded-card bg-card p-3 shadow-float";
 
 /**
- * O fundo de um modal (busca, configurações, visão ampliada do painel, confirmações): escurece só um pouco a página, sem desfocar. O menu lateral
+ * O fundo de um modal (busca, configurações, visão ampliada do painel, confirmações): escurece só um pouco a página. O menu lateral
  * fica acima dele (`z-[60]` na rail) e por isso não escurece; quem usa põe o `z-` (40 ou 50).
  */
 export const modalBackdropClass =
   "fixed inset-0 bg-black/30 transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0";
+
+/** O fundo dos modais no meio da tela (confirmações, busca, configurações, visão ampliada): o mesmo, com a página desfocada atrás para dar foco ao modal. Os menus e painéis laterais (`Sheet`, menu de módulos) ficam com o `modalBackdropClass`, sem desfoque. */
+export const centeredModalBackdropClass = `${modalBackdropClass} backdrop-blur-sm`;

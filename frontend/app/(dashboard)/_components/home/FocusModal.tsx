@@ -3,7 +3,7 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { useRouter } from "next/navigation";
 
-import { modalBackdropClass } from "@/lib/ui";
+import { centeredModalBackdropClass } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 
 /**
@@ -31,7 +31,7 @@ export function FocusModal({
     >
       <Dialog.Portal>
         {/* Só a visão ampliada do painel escurece um pouco mais que os outros modais (45% em vez de 30%). */}
-        <Dialog.Backdrop className={cn("z-40", modalBackdropClass, "bg-black/45")} />
+        <Dialog.Backdrop className={cn("z-40", centeredModalBackdropClass, "bg-black/45")} />
         <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 max-h-[90vh] w-[min(64rem,94vw)] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-card bg-surface p-6 shadow-float outline-none transition duration-200 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
           <button
             type="button"
