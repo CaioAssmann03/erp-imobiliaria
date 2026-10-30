@@ -4,6 +4,7 @@ import { FormSection } from "@/components/form/FormSection";
 import type { AccountPayable } from "@/lib/api/generated/models";
 import { brl, formatDate } from "@/lib/format";
 import { paymentMethodLabel } from "@/lib/schemas/account-payable";
+import { statementUrl } from "@/lib/statement-workspace";
 
 import { PayableStatusBadge } from "./PayableStatusBadge";
 
@@ -19,10 +20,7 @@ function Item({ label, children }: { label: string; children: React.ReactNode })
 /** Conta paga ou cancelada: só leitura (o servidor não aceita mais alterações). */
 export function AccountPayableSummary({ account }: { account: AccountPayable }) {
   return (
-    <FormSection
-      title={account.description}
-      description="Esta conta está fechada e não pode mais ser alterada."
-    >
+    <FormSection title="Resumo" description="Esta conta está fechada e não pode mais ser alterada.">
       <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
         <Item label="Situação">
           <PayableStatusBadge status={account.status} />
@@ -43,7 +41,7 @@ export function AccountPayableSummary({ account }: { account: AccountPayable }) 
       {account.status === "paid" && account.condominium && (
         <p className="text-body text-ink-soft">
           O débito deste pagamento está no{" "}
-          <Link href={`/finance/statement?condominium=${account.condominium}`} className="text-ink underline">
+          <Link href={statementUrl(account.condominium)} className="text-ink underline">
             extrato do condomínio
           </Link>
           .

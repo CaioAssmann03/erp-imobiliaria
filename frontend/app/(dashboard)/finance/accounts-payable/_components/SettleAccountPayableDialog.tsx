@@ -41,7 +41,7 @@ import {
  * Baixa de uma conta a pagar em aberto. Uma despesa de condomínio gera o débito no extrato do
  * condomínio; por isso ela precisa de um modelo de lançamento (o servidor recusa sem ele).
  */
-export function SettleAccountPayableDialog({ account }: { account: AccountPayable }) {
+export function SettleAccountPayableDialog({ account, solid = false }: { account: AccountPayable; /** O botão da barra de ações do formulário (sólido, "Dar baixa"); sem isto é o discreto de uma linha. */ solid?: boolean }) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const settleMutation = useAccountsPayableSettle();
@@ -86,8 +86,8 @@ export function SettleAccountPayableDialog({ account }: { account: AccountPayabl
 
   return (
     <>
-      <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(true)}>
-        Baixar
+      <Button type="button" variant={solid ? "secondary" : "ghost"} size={solid ? "default" : "sm"} onClick={() => setOpen(true)}>
+        {solid ? "Dar baixa" : "Baixar"}
       </Button>
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
@@ -106,7 +106,16 @@ export function SettleAccountPayableDialog({ account }: { account: AccountPayabl
             </p>
           ) : (
             <FormProvider {...methods}>
-              <form noValidate onSubmit={handleSubmit(submit)} className="space-y-3" id={`settle-${account.id}`}>
+              <form
+                noValidate
+                // O diálogo fica na barra do formulário da conta (na árvore do React, não no DOM): sem isto o envio da baixa subiria e salvaria a conta junto.
+                onSubmit={(event) => {
+                  event.stopPropagation();
+                  void handleSubmit(submit)(event);
+                }}
+                className="space-y-3"
+                id={`settle-${account.id}`}
+              >
                 <TextField name="payment_date" label="Data do pagamento" type="date" required />
                 <TextField
                   name="amount_paid"

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
+import { accountsPayableUrl } from "@/lib/account-payable-workspace";
 import { useAccountsPayableRetrieve } from "@/lib/api/generated";
 import { throwIfNotFound } from "@/lib/query/not-found";
 import {
@@ -20,10 +21,12 @@ import {
 } from "@/lib/schemas/account-payable";
 
 import { AccountPayableSummary } from "./AccountPayableSummary";
+import { CancelAccountPayableButton } from "./CancelAccountPayableButton";
 import { PaymentReceiptsSection } from "./PaymentReceiptsSection";
+import { SettleAccountPayableDialog } from "./SettleAccountPayableDialog";
 import { AmountsSection } from "./account-payable-form/AmountsSection";
 import { HolderSection } from "./account-payable-form/HolderSection";
-import { ACCOUNTS_PAYABLE_URL, useAccountPayableSubmit } from "./account-payable-form/use-account-payable-submit";
+import { useAccountPayableSubmit } from "./account-payable-form/use-account-payable-submit";
 
 /** Cadastro e edição de conta a pagar. Uma conta paga ou cancelada só pode ser consultada. */
 export function AccountPayableForm({ accountId }: { accountId?: string }) {
@@ -49,8 +52,14 @@ export function AccountPayableForm({ accountId }: { accountId?: string }) {
   if (account && account.status !== "open") {
     return (
       <div className="flex flex-col gap-4">
-        <AccountPayableSummary account={account} />
-        {account.status === "paid" && <PaymentReceiptsSection accountId={account.id} />}
+        <div id="resumo" className="scroll-mt-20">
+          <AccountPayableSummary account={account} />
+        </div>
+        {account.status === "paid" && (
+          <div id="comprovantes" className="scroll-mt-20">
+            <PaymentReceiptsSection accountId={account.id} />
+          </div>
+        )}
       </div>
     );
   }
@@ -62,11 +71,19 @@ export function AccountPayableForm({ accountId }: { accountId?: string }) {
         onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))}
         className="space-y-4"
       >
-        <HolderSection />
-        <AmountsSection />
-        <FormActions isSubmitting={isSubmitting}>
-          <Button type="button" variant="secondary" onClick={() => router.push(ACCOUNTS_PAYABLE_URL)}>
-            Cancelar
+        <div id="despesa" className="scroll-mt-20">
+          <HolderSection />
+        </div>
+        <div id="conta" className="scroll-mt-20">
+          <AmountsSection />
+        </div>
+        <FormActions
+          isSubmitting={isSubmitting}
+          danger={account && <CancelAccountPayableButton accountId={account.id} description={account.description} />}
+        >
+          {account && <SettleAccountPayableDialog account={account} solid />}
+          <Button type="button" variant="secondary" onClick={() => router.push(accountsPayableUrl())}>
+            Fechar
           </Button>
         </FormActions>
       </form>

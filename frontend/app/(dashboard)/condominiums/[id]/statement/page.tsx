@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 
-/** O extrato de um condomínio é o extrato geral com o condomínio já escolhido. */
+import { statementUrl } from "@/lib/statement-workspace";
+
+/** O extrato de um condomínio abre em /finance/statement/[id]. */
 export default async function CondominiumStatementPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  redirect(`/finance/statement?condominium=${id}`);
+  redirect(statementUrl(id));
 }

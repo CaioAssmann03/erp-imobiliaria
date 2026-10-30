@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 
-import { AccountPayableForm } from "../../_components/AccountPayableForm";
-import { FormPage } from "@/components/form/FormPage";
-import { PageHeader } from "@/components/PageHeader";
+import { AccountPayableForm } from "../_components/AccountPayableForm";
+import { AccountPayableHeader } from "../_components/AccountPayableHeader";
 
 export const metadata: Metadata = { title: "Conta a pagar" };
 
@@ -10,9 +9,9 @@ export default async function EditAccountPayablePage({ params }: { params: Promi
   const { id } = await params;
 
   return (
-    <FormPage>
-      <PageHeader back={{ href: "/finance/accounts-payable", label: "Contas a pagar" }} title="Conta a pagar" />
+    <>
+      <AccountPayableHeader accountId={id} />
       <AccountPayableForm accountId={id} />
-    </FormPage>
+    </>
   );
 }

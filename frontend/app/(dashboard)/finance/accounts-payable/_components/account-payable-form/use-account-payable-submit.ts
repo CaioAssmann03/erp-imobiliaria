@@ -13,14 +13,13 @@ import {
   useAccountsPayablePartialUpdate,
 } from "@/lib/api/generated";
 import type { AccountPayable } from "@/lib/api/generated/models";
+import { accountPayableUrl } from "@/lib/account-payable-workspace";
 import { applyServerErrors } from "@/lib/form-errors";
 import {
   accountPayableToPayload,
   type AccountPayableFormInput,
   type AccountPayableFormOutput,
 } from "@/lib/schemas/account-payable";
-
-export const ACCOUNTS_PAYABLE_URL = "/finance/accounts-payable";
 
 export function useAccountPayableSubmit(
   accountId: string | undefined,
@@ -32,12 +31,13 @@ export function useAccountPayableSubmit(
   const updateMutation = useAccountsPayablePartialUpdate();
   const isEdit = accountId !== undefined;
 
-  const done = (message: string, id: string) => {
+  // Salvar uma edição deixa na página; cadastrar abre a conta nova (a lista ao lado já a mostra).
+  const done = (message: string, id: string, opensAccount: boolean) => {
     queryClient.invalidateQueries({ queryKey: getAccountsPayableListQueryKey() });
     queryClient.invalidateQueries({ queryKey: getAccountsPayableRetrieveQueryKey(id) });
     queryClient.invalidateQueries({ queryKey: getDashboardRetrieveQueryKey() });
     toast.success(message);
-    router.push(ACCOUNTS_PAYABLE_URL);
+    if (opensAccount) router.push(accountPayableUrl(id));
   };
   const onError = (error: unknown) => toast.error(applyServerErrors(error, setError));
 
@@ -46,12 +46,12 @@ export function useAccountPayableSubmit(
     if (isEdit) {
       updateMutation.mutate(
         { id: accountId, data: payload as Partial<AccountPayable> },
-        { onSuccess: () => done("Conta salva.", accountId), onError }
+        { onSuccess: () => done("Conta salva.", accountId, false), onError }
       );
     } else {
       createMutation.mutate(
         { data: payload as unknown as AccountPayable },
-        { onSuccess: (created) => done("Conta cadastrada.", created.id), onError }
+        { onSuccess: (created) => done("Conta cadastrada.", created.id, true), onError }
       );
     }
   };
