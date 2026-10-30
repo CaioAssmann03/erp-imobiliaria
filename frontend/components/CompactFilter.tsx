@@ -13,7 +13,7 @@ const activeGroups = (groups: readonly CompactFilterGroup[]) => groups.filter((g
 
 /**
  * Filtros discretos para as listas laterais e de cadastro: só um ícone, que se põe **dentro** do campo de busca (no lugar do botão "Filtros"),
- * com o número de filtros ativos num selo e o ícone em destaque quando há algum; o que está ativo se lê ao passar o mouse (não há linha de resumo). Abre um popover pequeno, alinhado à borda direita do botão, com um seletor por filtro.
+ * com o número de filtros ativos numa bolinha no canto (o ícone em si não muda de cor); o que está ativo se lê ao passar o mouse (não há linha de resumo). Abre um popover pequeno, alinhado à borda direita do botão, com um seletor por filtro.
  * Com `columns={2}` os seletores ficam lado a lado (o popover é mais largo e menos alto; um grupo `wide` ocupa a linha). Um grupo `required` (o condomínio de uma lista de blocos) é só uma
  * escolha de escopo. Para filtros com muitas opções ou mais espaço, use `FilterMenu`.
  */
@@ -31,10 +31,7 @@ export function CompactFilter({ groups, onClear, columns = 1 }: { groups: readon
         aria-label={activeCount > 0 ? `Filtros (${activeCount} ativos): ${summary}` : "Filtros"}
         title={activeCount > 0 ? summary : "Filtros"}
         className={cn(
-          "relative flex size-7 shrink-0 items-center justify-center rounded-control outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand/50",
-          activeCount > 0
-            ? "bg-brand-soft text-brand-strong hover:bg-brand/20"
-            : "text-ink-soft hover:bg-ink/5 hover:text-ink data-[popup-open]:bg-ink/5 data-[popup-open]:text-ink"
+          "relative flex size-7 shrink-0 items-center justify-center rounded-control text-ink-soft outline-none transition-colors hover:bg-ink/5 hover:text-ink focus-visible:ring-2 focus-visible:ring-brand/50 data-[popup-open]:bg-ink/5 data-[popup-open]:text-ink"
         )}
       >
         <SlidersHorizontal className="size-4" />

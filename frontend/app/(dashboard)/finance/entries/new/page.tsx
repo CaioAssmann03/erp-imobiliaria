@@ -1,19 +1,23 @@
 import type { Metadata } from "next";
 
-import { NewEntriesForm } from "../../_components/NewEntriesForm";
-import { PageHeader } from "@/components/PageHeader";
+import { BackLink } from "@/components/BackLink";
+import { entriesUrl } from "@/lib/entry-batch-workspace";
 
-export const metadata: Metadata = { title: "Lançamento manual" };
+import { NewEntriesForm } from "../_components/NewEntriesForm";
+
+export const metadata: Metadata = { title: "Novo lote" };
 
 export default function NewEntriesPage() {
   return (
-    <div className="mx-auto w-full max-w-5xl">
-      <PageHeader
-        back={{ href: "/finance/statement", label: "Extrato" }}
-        title="Lançamento manual"
-        description="Tarifas, ajustes e outros movimentos fora de contas a pagar."
-      />
+    <>
+      <div className="mb-6">
+        <div className="lg:hidden">
+          <BackLink href={entriesUrl()} label="Lançamento manual" />
+        </div>
+        <h1 className="text-title">Novo lote</h1>
+        <p className="mt-1 text-body text-ink-soft">Tarifas, ajustes e outros movimentos fora de contas a pagar.</p>
+      </div>
       <NewEntriesForm />
-    </div>
+    </>
   );
 }

@@ -7,6 +7,9 @@ export function reportMonths(todayIso: string, count: number): string[] {
   });
 }
 
+/** O primeiro dia de um mês como ISO: (2026, 3) → "2026-03-01" (o mês vai de 1 a 12). */
+export const monthIso = (year: number, month: number) => `${year}-${String(month).padStart(2, "0")}-01`;
+
 /** O mês que a prestação de contas abre: o anterior ao de hoje (a que se refere o síndico no começo do mês). */
 export function defaultAccountabilityMonth(todayIso: string): string {
   return reportMonths(todayIso, 2)[1];

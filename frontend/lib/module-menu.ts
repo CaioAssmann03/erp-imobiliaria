@@ -36,6 +36,8 @@ export interface AppModule {
   icon: "dashboard" | "building" | "wallet" | "receipt" | "users";
   /** Prefixo da URL que torna o módulo o ativo. */
   prefix: string;
+  /** Outros prefixos que também o tornam o ativo (telas que moram no menu dele mas têm outro endereço, como Relatórios em Condomínios). */
+  alsoPrefixes?: readonly string[];
   /** Link direto (sem menu) quando o módulo não tem grupos. */
   href?: string;
   groups: readonly MenuGroup[];
@@ -48,6 +50,7 @@ export const APP_MODULES: readonly AppModule[] = [
     label: "Condomínios",
     icon: "building",
     prefix: "/condominiums",
+    alsoPrefixes: ["/reports"],
     groups: [
       {
         title: "Cadastros",
@@ -82,7 +85,7 @@ export const APP_MODULES: readonly AppModule[] = [
         items: [
           { label: "Contas a pagar", description: "Despesas a pagar e baixadas", icon: "list", href: "/finance/accounts-payable" },
           { label: "Extrato", description: "Movimento de cada condomínio", icon: "file", href: "/finance/statement" },
-          { label: "Lançamento manual", description: "Créditos e débitos avulsos", icon: "plus", href: "/finance/entries/new" },
+          { label: "Lançamento manual", description: "Créditos e débitos avulsos", icon: "plus", href: "/finance/entries" },
           { label: "Conta da imobiliária", description: "Tarifas recebidas pela administradora", icon: "landmark", href: "/finance/company-account" },
         ],
       },
@@ -117,7 +120,9 @@ export const APP_MODULES: readonly AppModule[] = [
 /** Módulo da rota aberta (ou `null` na tela de login e em rotas desconhecidas). */
 export function activeModule(pathname: string | null): ModuleKey | null {
   if (!pathname) return null;
-  const found = APP_MODULES.find((appModule) => pathname.startsWith(appModule.prefix));
+  const found = APP_MODULES.find((appModule) =>
+    [appModule.prefix, ...(appModule.alsoPrefixes ?? [])].some((prefix) => pathname.startsWith(prefix))
+  );
   return found?.key ?? null;
 }
 

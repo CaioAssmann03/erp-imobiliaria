@@ -40,5 +40,5 @@ class CondominiumQuerySet(CountsByTypeQuerySet["Condominium"]):
             self.filter(any_of(matching))
             .annotate(rank=relevance_rank(starts_with, exact))
             .select_related("address")
-            .order_by("rank", "name")
+            .order_by("rank", "code")
         )

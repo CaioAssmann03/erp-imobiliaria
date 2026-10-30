@@ -43,6 +43,9 @@ from .payment_receipt_serializers import (
 )
 from .supplier_serializers import SupplierSerializer as SupplierSerializer
 from .accountability_report_serializers import (
+    AccountabilityPageQuerySerializer as AccountabilityPageQuerySerializer,
+)
+from .accountability_report_serializers import (
     AccountabilityQuerySerializer as AccountabilityQuerySerializer,
 )
 from .accountability_report_serializers import (

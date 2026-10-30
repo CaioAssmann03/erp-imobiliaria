@@ -47,7 +47,7 @@ class CondominiumApportionmentCriterion(BaseModel):
     class Meta:
         verbose_name = "Apportionment criterion"
         verbose_name_plural = "Apportionment criteria"
-        ordering = ("condominium__name", "position")
+        ordering = ("condominium__code", "position")
         constraints = (
             models.UniqueConstraint(
                 fields=("condominium", "name"),

@@ -15,6 +15,7 @@ import { currentLinks } from "./current-links";
 export function UnitListItem({
   unit,
   blockName,
+  condominiumName = null,
   isOpen = false,
   dimmed = false,
   onCard = false,
@@ -22,17 +23,21 @@ export function UnitListItem({
 }: {
   unit: Unit;
   blockName: string | null;
+  /** Só quando a lista mistura condomínios (a pendência do painel): o nome do condomínio vai na segunda linha. */
+  condominiumName?: string | null;
   isOpen?: boolean;
   dimmed?: boolean;
   onCard?: boolean;
   /** De onde se chegou: o bloco que recorta a lista (segue com ela) e a tela de origem, a que o "voltar" da unidade leva (a sub-tela de unidades de um bloco). */
-  context?: { block?: string | null; from?: string | null };
+  context?: { block?: string | null; from?: string | null; pending?: string | null; condominium?: string | null };
 }) {
   const query = new URLSearchParams();
   if (context?.block) query.set("block", context.block);
   if (context?.from) query.set("from", context.from);
+  if (context?.pending) query.set("pending", context.pending);
+  if (context?.condominium) query.set("condominium", context.condominium);
   const owner = currentLinks(unit).find((link) => link.role === "owner")?.person_detail.name;
-  const sub = [blockName, owner, unit.is_manager_unit ? "Síndico" : null, unit.active ? null : "Inativa"]
+  const sub = [condominiumName, blockName, owner, unit.is_manager_unit ? "Síndico" : null, unit.active ? null : "Inativa"]
     .filter(Boolean)
     .join(" · ");
 

@@ -11,6 +11,9 @@ test("the active module follows the URL", () => {
   assert.equal(activeModule("/billing/entries"), "billing");
   assert.equal(activeModule("/condominiums/persons/new"), "condominiums");
   assert.equal(activeModule("/persons"), null);
+  // Reports live in the Condomínios menu, so that module stays selected on them.
+  assert.equal(activeModule("/reports"), "condominiums");
+  assert.equal(activeModule("/reports/delinquency"), "condominiums");
   assert.equal(activeModule("/login"), null);
   assert.equal(activeModule(null), null);
 });

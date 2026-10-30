@@ -31,3 +31,10 @@ export const checkboxLabelClass = "flex items-center gap-2 text-body text-ink";
 
 export const formActionsClass =
   "sticky bottom-4 z-10 flex items-center gap-3 rounded-card bg-card p-3 shadow-float";
+
+/**
+ * O fundo de um modal (busca, configurações, visão ampliada do painel, confirmações): escurece só um pouco a página, sem desfocar. O menu lateral
+ * fica acima dele (`z-[60]` na rail) e por isso não escurece; quem usa põe o `z-` (40 ou 50).
+ */
+export const modalBackdropClass =
+  "fixed inset-0 bg-black/30 transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0";

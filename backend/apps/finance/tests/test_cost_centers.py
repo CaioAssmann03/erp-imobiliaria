@@ -71,11 +71,11 @@ def test_list_is_paginated_and_ordered(
     response = api_client.get(reverse(LIST))
 
     assert set(body(response)) == {"count", "next", "previous", "results"}
-    # condominium name first ("Edifício Lua" < "Residencial Sol"), then the cost center code (the order they were created in)
+    # the condominium's code first (the fixture `condominium` was created before `other_condominium`), then the cost center code (the order they were created in)
     assert [(str(item["condominium"]), item["name"]) for item in results(response)] == [
-        (str(other_condominium.pk), "A"),
         (str(condominium.pk), "B"),
         (str(condominium.pk), "A"),
+        (str(other_condominium.pk), "A"),
     ]
 
 
@@ -84,7 +84,7 @@ def test_requires_authentication() -> None:
 
 
 def test_ordering_is_declared() -> None:
-    assert CostCenter._meta.ordering == ("condominium__name", "code")
+    assert CostCenter._meta.ordering == ("condominium__code", "code")
 
 
 # ----- R3: company scoping -----
@@ -255,3 +255,19 @@ def test_the_api_shows_the_code_of_the_catalog_item(api_client: APIClient, condo
 
     assert body(created)["code"] == 2
     assert body(other)["code"] == garagem.code == 3
+
+
+def test_the_condominiums_that_use_a_catalog_item_are_listed_by_name(
+    api_client: APIClient, condominium: Condominium, other_condominium: Condominium
+) -> None:
+    """Spec 060: `?catalog_item=` lists the sub-contas made from one item, each with its condominium's name."""
+    item = CostCenterCatalogItem.objects.create(company=condominium.company, name="Fundo de Obras")
+    other_item = CostCenterCatalogItem.objects.create(company=condominium.company, name="Elevadores")
+    _ = CostCenter.objects.create(condominium=condominium, catalog_item=item)
+    _ = CostCenter.objects.create(condominium=other_condominium, catalog_item=item, active=False)
+    _ = CostCenter.objects.create(condominium=condominium, catalog_item=other_item)
+
+    listed = results(api_client.get(reverse(LIST), {"catalog_item": str(item.pk)}))
+
+    assert {row["condominium_name"] for row in listed} == {condominium.name, other_condominium.name}
+    assert len(listed) == 2  # the inactive one is listed too: it is still an association

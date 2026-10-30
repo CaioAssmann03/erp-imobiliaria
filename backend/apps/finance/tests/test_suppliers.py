@@ -84,7 +84,7 @@ def test_list_is_paginated_and_ordered(api_client: APIClient, company: Company) 
     response = api_client.get(reverse(LIST))
 
     assert set(body(response)) == {"count", "next", "previous", "results"}
-    assert [item["person_detail"]["name"] for item in results(response)] == ["Ana", "Mário", "Zeca"]
+    assert [item["person_detail"]["name"] for item in results(response)] == ["Zeca", "Ana", "Mário"]  # by the person's code: the order they were created in
 
 
 def test_requires_authentication() -> None:

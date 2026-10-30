@@ -90,7 +90,7 @@ class Unit(BaseModel):
     class Meta:
         verbose_name = "Unit"
         verbose_name_plural = "Units"
-        ordering = ("condominium__name", "block__name", "name")
+        ordering = ("condominium__code", "block__name", "name")
         constraints = (
             models.UniqueConstraint(
                 fields=("condominium", "block", "name"),

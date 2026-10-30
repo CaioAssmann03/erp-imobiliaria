@@ -16,7 +16,7 @@ export const STATIC_SEARCH_ITEMS: StaticSearchItem[] = [
   { title: "Nova unidade", subtitle: "Escolha o condomínio e use Nova", href: "/condominiums/units", keywords: "criar adicionar cadastrar apartamento" },
   { title: "Contas a pagar", subtitle: "Financeiro", href: "/finance/accounts-payable", keywords: "despesas baixa pagamento fornecedor vencimento cancelar" },
   { title: "Extrato", subtitle: "Financeiro", href: "/finance/statement", keywords: "conta corrente saldo lancamentos estorno condominio" },
-  { title: "Lançamento manual", subtitle: "Financeiro", href: "/finance/entries/new", keywords: "lote tarifa ajuste credito debito conta corrente criar adicionar" },
+  { title: "Lançamento manual", subtitle: "Financeiro", href: "/finance/entries", keywords: "lote tarifa ajuste credito debito conta corrente criar adicionar" },
   { title: "Planos de cobrança", subtitle: "Cobrança", href: "/billing/plans", keywords: "plano itens taxa condominial rateio fracao ideal boleto emissao vigencia" },
   { title: "Inclusão de valores", subtitle: "Cobrança", href: "/billing/entries", keywords: "lancamento valores boleto chamada extra agua tarifa rateio parcelado recorrencia sub-conta fundo obras reserva" },
   { title: "Eventos", subtitle: "Cadastro", href: "/condominiums/events", keywords: "evento codigo descricao lancamento limpeza" },
@@ -33,6 +33,9 @@ export const STATIC_SEARCH_ITEMS: StaticSearchItem[] = [
   { title: "Receita fixa mensal", subtitle: "Painel · gráfico", href: "/dashboard?focus=fixed-revenue", keywords: "taxa administracao dinheiro faturamento grafico" },
   { title: "Pendências", subtitle: "Painel", href: "/dashboard?focus=pending", keywords: "sem responsavel rateio fracao ideal reajuste locacao centros de custo plano de contas bloqueio atencao" },
   { title: "Resumo dos cadastros", subtitle: "Painel", href: "/dashboard?focus=condominiums", keywords: "total ativos condominios unidades pessoas" },
+  { title: "Inadimplência (painel)", subtitle: "Painel", href: "/dashboard?focus=delinquency", keywords: "boletos vencidos nao pagos devendo atrasados condominios receber" },
+  { title: "Emissão do mês", subtitle: "Painel", href: "/dashboard?focus=billing-month", keywords: "boletos emitidos recebidos em aberto execucoes problema cobranca" },
+  { title: "Emitido × recebido", subtitle: "Painel · gráfico", href: "/dashboard?focus=billing-chart", keywords: "boletos meses recebimento faturamento grafico barras" },
   { title: "Contas a pagar", subtitle: "Painel", href: "/dashboard?focus=accounts-payable", keywords: "despesas vencimento atrasadas vencem hoje fornecedor pagar" },
 ];
 

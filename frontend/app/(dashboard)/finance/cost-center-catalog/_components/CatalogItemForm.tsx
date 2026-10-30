@@ -12,6 +12,7 @@ import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useCostCenterCatalogRetrieve } from "@/lib/api/generated";
+import { catalogUrl } from "@/lib/cost-center-catalog-workspace";
 import { throwIfNotFound } from "@/lib/query/not-found";
 import {
   COST_CENTER_CATALOG_ITEM_DEFAULTS,
@@ -21,7 +22,9 @@ import {
   type CostCenterCatalogItemFormOutput,
 } from "@/lib/schemas/cost-center-catalog-item";
 
-import { COST_CENTER_CATALOG_URL, useCatalogItemSubmit } from "./catalog-form/use-catalog-item-submit";
+import { CatalogCondominiums } from "./CatalogCondominiums";
+import { CatalogDeleteButton } from "./CatalogDeleteButton";
+import { useCatalogItemSubmit } from "./catalog-form/use-catalog-item-submit";
 
 /** Cadastro e edição de uma sub-conta do catálogo (código e nome valem para todos os condomínios que a usam). */
 export function CatalogItemForm({ itemId }: { itemId?: string }) {
@@ -47,6 +50,7 @@ export function CatalogItemForm({ itemId }: { itemId?: string }) {
   return (
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))} className="space-y-4">
+        <div id="identificacao" className="scroll-mt-20">
         <FormSection
           title="Identificação"
           description={
@@ -69,8 +73,14 @@ export function CatalogItemForm({ itemId }: { itemId?: string }) {
             <CheckboxField name="active" label="Cadastro ativo" hint="Uma sub-conta inativa não pode ser escolhida para novos condomínios; os que já a usam continuam." />
           </FieldRow>
         </FormSection>
-        <FormActions isSubmitting={isSubmitting}>
-          <Button type="button" variant="secondary" onClick={() => router.push(COST_CENTER_CATALOG_URL)}>
+        </div>
+        {item && (
+          <div id="condominios" className="scroll-mt-20">
+            <CatalogCondominiums key={item.id} itemId={item.id} />
+          </div>
+        )}
+        <FormActions isSubmitting={isSubmitting} danger={item && <CatalogDeleteButton itemId={item.id} name={item.name} />}>
+          <Button type="button" variant="secondary" onClick={() => router.push(catalogUrl())}>
             Cancelar
           </Button>
         </FormActions>

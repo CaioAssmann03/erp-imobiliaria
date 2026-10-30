@@ -65,5 +65,11 @@ One row per spec; update it in the same change that creates or closes the spec.
 | [053](053-cost-center-catalog.md) | Cost center catalog (sub-contas of the administradora) | full | in-progress | none |
 | [054](054-extra-billing-document.md) | Extra billing document (boleto extra) | full | in-progress | none |
 | [055](055-discounts-negative-values.md) | Discounts: negative values in the launches | full | in-progress | none |
+| [056](056-billing-month-summary.md) | Billing month summary (dashboard) | lite | done | none |
+| [057](057-delinquency-pagination.md) | Delinquency report pagination | lite | done | none |
+| [058](058-accountability-pagination.md) | Accountability report pagination | lite | done | none |
+| [059](059-entry-batch-condominium-filter.md) | Entry batch filter by condominium | lite | done | none |
+| [060](060-catalog-item-condominiums.md) | Condominiums of a catalog item | lite | done | none |
+| [061](061-code-ordering.md) | Code ordering | lite | done | none |
 
 The finished specs (001–029 and 049–051) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.

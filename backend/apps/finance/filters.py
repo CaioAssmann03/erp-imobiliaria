@@ -3,7 +3,7 @@ from typing import final
 import django_filters
 from django.db.models import QuerySet
 
-from .models import AccountPayable, CurrentAccountEntry, EntryTemplate
+from .models import AccountPayable, CurrentAccountEntry, EntryBatch, EntryTemplate
 
 
 @final
@@ -46,3 +46,14 @@ class CurrentAccountEntryFilter(django_filters.FilterSet):
     class Meta:
         model = CurrentAccountEntry
         fields = ("current_account", "batch", "cost_center", "entry_template", "unit", "kind", "origin", "competence_month")
+
+
+@final
+class EntryBatchFilter(django_filters.FilterSet):
+    """`?origin=`, `?batch_date=` and `?condominium=<id>`: the batches that have at least one entry of that condominium (a batch may cover several)."""
+
+    condominium = django_filters.UUIDFilter(field_name="entries__current_account__condominium", distinct=True)
+
+    class Meta:
+        model = EntryBatch
+        fields = ("origin", "batch_date")

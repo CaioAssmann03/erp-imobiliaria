@@ -39,9 +39,11 @@ test("a new unit opens inside the frame, with no unit selected", () => {
   assert.equal(state.condominiumId, "c1");
 });
 
-test("the pendency table has no frame", () => {
-  assert.equal(unitsFrameState("/condominiums/units", { pending: "without_responsible" }).hasFrame, false);
-  assert.equal(unitsFrameState("/condominiums/units", { pending: "" }).hasFrame, true);
+test("a pendency shortcut (?pending=) keeps the frame, with no condominium chosen", () => {
+  const state = unitsFrameState("/condominiums/units");
+  assert.equal(state.hasFrame, true);
+  assert.equal(state.condominiumId, null);
+  assert.equal(state.showListOnPhone, true);
 });
 
 test("other routes are not the unit workspace", () => {
