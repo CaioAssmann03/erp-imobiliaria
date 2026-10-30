@@ -1,9 +1,9 @@
 from typing import TYPE_CHECKING
 
-from django.db import models
 from django.db.models import Count, Q, Value
 from django.db.models.functions import Coalesce
 
+from apps.core.models import SoftDeleteQuerySet
 from apps.core.infrastructure.search.ranking import any_of, exact_code, relevance_rank
 
 if TYPE_CHECKING:
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from apps.persons.models.person import Person  # noqa: F401
 
 
-class PersonQuerySet(models.QuerySet["Person"]):
+class PersonQuerySet(SoftDeleteQuerySet["Person"]):
     def in_module(self, module: str) -> "PersonQuerySet":
         """The people released to `module`: one join on the unique `(person, module)` membership, no duplicates."""
         return self.filter(module_memberships__module=module)

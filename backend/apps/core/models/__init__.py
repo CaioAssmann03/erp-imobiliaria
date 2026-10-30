@@ -4,3 +4,6 @@ from .base import UUIDModel as UUIDModel
 from .company import Company as Company
 from .sequential_code import SequentialCodeMixin as SequentialCodeMixin
 from .sequential_code import sequential_code_field as sequential_code_field
+from .soft_delete import SoftDeleteManager as SoftDeleteManager
+from .soft_delete import SoftDeleteMixin as SoftDeleteMixin
+from .soft_delete import SoftDeleteQuerySet as SoftDeleteQuerySet

@@ -4,9 +4,10 @@ from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.db import models
 from django.db.models.functions import Upper
 
-from apps.core.models import Company, SequentialCodeMixin, sequential_code_field
+from apps.core.models import Company, SequentialCodeMixin, SoftDeleteManager, SoftDeleteMixin, sequential_code_field
 from apps.core.models.base import BaseModel
 from apps.persons.models.querysets import PersonQuerySet
+from apps.persons.models.rules import PersonAnonymizeRules, PersonArchiveRules
 
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
@@ -22,8 +23,9 @@ def default_modules() -> list[str]:
 
 
 @final
-class Person(SequentialCodeMixin, BaseModel):
-    objects = PersonQuerySet.as_manager()
+class Person(SoftDeleteMixin, SequentialCodeMixin, BaseModel):
+    objects = SoftDeleteManager.from_queryset(PersonQuerySet)()
+    all_objects = PersonQuerySet.as_manager()
 
     if TYPE_CHECKING:
         people_individual: "PeopleIndividual"
@@ -42,6 +44,7 @@ class Person(SequentialCodeMixin, BaseModel):
 
     email = models.EmailField(blank=True)
     active = models.BooleanField(default=True)
+    anonymized_at = models.DateTimeField(null=True, blank=True, editable=False)
 
     class Meta:
         verbose_name = "Person"
@@ -55,6 +58,13 @@ class Person(SequentialCodeMixin, BaseModel):
                 OpClass(Upper("email"), name="gin_trgm_ops"), name="person_email_trgm"
             ),
         )
+
+    @override
+    def validate_archivable(self) -> None:
+        PersonArchiveRules(self).validate()
+
+    def validate_anonymizable(self) -> None:
+        PersonAnonymizeRules(self).validate()
 
     @property
     def tax_id(self) -> str | None:

@@ -6,3 +6,7 @@ class BlockError(RuleError):
         "block.name.duplicate_in_condominium",
         "This condominium already has a block with this name.",
     )
+    ARCHIVE_HAS_UNITS = (
+        "block.archive.has_units",
+        "This block still has units; delete them first.",
+    )

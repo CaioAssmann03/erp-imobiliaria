@@ -10,7 +10,8 @@ from apps.condominiums.errors import UnitError
 from apps.condominiums.models.block import Block
 from apps.condominiums.models.condominium import Condominium
 from apps.condominiums.models.querysets import UnitQuerySet
-from apps.condominiums.models.rules import UnitRules
+from apps.condominiums.models.rules import UnitArchiveRules, UnitRules
+from apps.core.models import SoftDeleteManager, SoftDeleteMixin
 from apps.core.models.base import BaseModel
 
 if TYPE_CHECKING:
@@ -29,8 +30,9 @@ def validate_non_negative(amount: Decimal) -> None:
 
 
 @final
-class Unit(BaseModel):
-    objects = UnitQuerySet.as_manager()
+class Unit(SoftDeleteMixin, BaseModel):
+    objects = SoftDeleteManager.from_queryset(UnitQuerySet)()
+    all_objects = UnitQuerySet.as_manager()
 
     class BillingRecipient(models.TextChoices):
         OWNER = "owner", "Owner"
@@ -94,13 +96,14 @@ class Unit(BaseModel):
         constraints = (
             models.UniqueConstraint(
                 fields=("condominium", "block", "name"),
+                condition=Q(deleted_at__isnull=True),
                 name="unit_unique_per_block",
                 violation_error_message=UnitError.NAME_DUPLICATE_IN_BLOCK.message,
                 violation_error_code=UnitError.NAME_DUPLICATE_IN_BLOCK.value,
             ),
             models.UniqueConstraint(
                 fields=("condominium", "name"),
-                condition=Q(block__isnull=True),
+                condition=Q(block__isnull=True) & Q(deleted_at__isnull=True),
                 name="unit_unique_per_condominium",
                 violation_error_message=UnitError.NAME_DUPLICATE_IN_CONDOMINIUM.message,
                 violation_error_code=UnitError.NAME_DUPLICATE_IN_CONDOMINIUM.value,
@@ -118,6 +121,10 @@ class Unit(BaseModel):
     @override
     def clean(self) -> None:
         UnitRules(self).validate()
+
+    @override
+    def validate_archivable(self) -> None:
+        UnitArchiveRules(self).validate()
 
     def billing_payer(self, reference_date: date) -> "Person | None":
         """Who pays the unit's boleto: the current tenant when the unit sends it to the tenant and has one,

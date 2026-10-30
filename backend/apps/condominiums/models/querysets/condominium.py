@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from django.db.models import Q
 
 from apps.core.infrastructure.search.ranking import any_of, exact_code, relevance_rank
+from apps.core.models import SoftDeleteQuerySet
 from apps.core.models.querysets import CountsByTypeQuerySet
 
 if TYPE_CHECKING:
@@ -10,7 +11,7 @@ if TYPE_CHECKING:
     from apps.core.infrastructure.search.term import ClassifiedTerm
 
 
-class CondominiumQuerySet(CountsByTypeQuerySet["Condominium"]):
+class CondominiumQuerySet(CountsByTypeQuerySet["Condominium"], SoftDeleteQuerySet["Condominium"]):
     def without_cost_centers(self) -> "CondominiumQuerySet":
         """Active condominiums with no cost center (sub-conta): they block the finance."""
         return self.filter(active=True, cost_centers__isnull=True)

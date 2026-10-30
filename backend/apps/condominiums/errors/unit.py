@@ -26,3 +26,11 @@ class UnitError(RuleError):
         "unit.utility_values.negative",
         "Utility values cannot be negative.",
     )
+    ARCHIVE_HAS_CURRENT_PEOPLE = (
+        "unit.archive.has_current_people",
+        "This unit still has a current owner or tenant; end their links first.",
+    )
+    ARCHIVE_HAS_OPEN_BILLING_DOCUMENTS = (
+        "unit.archive.has_open_billing_documents",
+        "This unit has boletos awaiting payment; wait for them or cancel them first.",
+    )

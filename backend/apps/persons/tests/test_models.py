@@ -21,7 +21,7 @@ def test_str_of_documents() -> None:
 def test_delete_person_cascades_to_individual() -> None:
     person = make_individual()
 
-    _ = person.delete()
+    _ = person.hard_delete()
 
     assert not PeopleIndividual.objects.exists()
 
@@ -29,7 +29,7 @@ def test_delete_person_cascades_to_individual() -> None:
 def test_delete_person_cascades_to_legal() -> None:
     person = make_legal()
 
-    _ = person.delete()
+    _ = person.hard_delete()
 
     assert not PeopleLegal.objects.exists()
 

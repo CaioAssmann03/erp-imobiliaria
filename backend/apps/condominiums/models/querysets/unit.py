@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from django.db.models import Exists, OuterRef, Q
 
 from apps.core.infrastructure.search.ranking import relevance_rank
+from apps.core.models import SoftDeleteQuerySet
 from apps.core.models.querysets import CountsByTypeQuerySet
 
 if TYPE_CHECKING:
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
     from apps.core.infrastructure.search.term import ClassifiedTerm
 
 
-class UnitQuerySet(CountsByTypeQuerySet["Unit"]):
+class UnitQuerySet(CountsByTypeQuerySet["Unit"], SoftDeleteQuerySet["Unit"]):
     def active(self) -> "UnitQuerySet":
         return self.filter(active=True)
 

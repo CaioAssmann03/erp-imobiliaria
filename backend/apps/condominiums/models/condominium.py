@@ -6,7 +6,7 @@ from django.db import models
 from apps.condominiums.errors import CondominiumError
 from apps.condominiums.models.querysets import CondominiumQuerySet
 from apps.core.infrastructure.validators import validate_cnpj
-from apps.core.models import Address, Company, SequentialCodeMixin, sequential_code_field
+from apps.core.models import Address, Company, SequentialCodeMixin, SoftDeleteManager, SoftDeleteMixin, sequential_code_field
 from apps.core.models.base import BaseModel
 from apps.persons.models import Person
 
@@ -18,8 +18,9 @@ if TYPE_CHECKING:
 
 
 @final
-class Condominium(SequentialCodeMixin, BaseModel):
-    objects = CondominiumQuerySet.as_manager()
+class Condominium(SoftDeleteMixin, SequentialCodeMixin, BaseModel):
+    objects = SoftDeleteManager.from_queryset(CondominiumQuerySet)()
+    all_objects = CondominiumQuerySet.as_manager()
 
     class CondominiumType(models.TextChoices):
         RESIDENTIAL = ("residential", "Residential")
@@ -79,7 +80,15 @@ class Condominium(SequentialCodeMixin, BaseModel):
             )
 
     @override
+    def validate_archivable(self) -> None:
+        from .rules.condominium_archive import CondominiumArchiveRules  # the rules package imports this module
+
+        CondominiumArchiveRules(self).validate()
+
+    @override
     def clean(self) -> None:
+        if self._state.adding and Condominium.all_objects.filter(cnpj=self.cnpj, deleted_at__isnull=False).exists():
+            raise ValidationError({"cnpj": CondominiumError.CNPJ_ARCHIVED.to_validation_error()})
         advisor = self.advisor if self.advisor_id is not None else None
         if (
             advisor is not None

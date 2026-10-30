@@ -158,10 +158,10 @@ def test_a_membership_is_unique_per_person_and_module() -> None:
         _ = PersonModuleMembership.objects.create(person=person, module="condominiums")
 
 
-def test_deleting_a_person_deletes_the_memberships() -> None:
+def test_removing_a_person_for_good_deletes_the_memberships() -> None:
     person = make_person("Maria", "condominiums", "rentals")
 
-    _ = person.delete()
+    _ = person.hard_delete()
 
     assert PersonModuleMembership.objects.count() == 0
 
