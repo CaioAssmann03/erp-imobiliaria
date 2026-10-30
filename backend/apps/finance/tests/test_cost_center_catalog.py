@@ -209,3 +209,17 @@ def test_the_list_comes_by_code_even_though_it_counts_the_condominiums(api_clien
     listed = results(api_client.get(reverse(LIST)))
 
     assert [row["code"] for row in listed] == [0, 2, 5, 9]
+
+
+def test_unused_by_condominium_leaves_out_the_items_the_condominium_already_has(
+    api_client: APIClient, company: Company, condominium: Condominium
+) -> None:
+    used = item(company, "Fundo de Reserva")
+    _ = item(company, "Fundo de Obras")
+    _ = CostCenter.objects.create(condominium=condominium, name=used.name, catalog_item=used)
+
+    free = results(api_client.get(reverse(LIST), {"unused_by_condominium": str(condominium.pk)}))
+    everything = results(api_client.get(reverse(LIST)))
+
+    assert [row["name"] for row in free] == ["Fundo de Obras"]
+    assert len(everything) == 2

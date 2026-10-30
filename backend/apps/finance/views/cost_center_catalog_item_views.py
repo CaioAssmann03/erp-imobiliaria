@@ -7,6 +7,7 @@ from rest_framework import viewsets
 from apps.core.infrastructure.api.filters import QuerySearchFilter
 from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin
 
+from ..filters import CostCenterCatalogItemFilter
 from ..models import CostCenterCatalogItem
 from ..serializers import CostCenterCatalogItemSerializer
 
@@ -20,4 +21,4 @@ class CostCenterCatalogItemViewSet(CompanyScopedViewSetMixin, viewsets.ModelView
     serializer_class = CostCenterCatalogItemSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)
     search_fields = ("name",)
-    filterset_fields = ("active",)
+    filterset_class = CostCenterCatalogItemFilter

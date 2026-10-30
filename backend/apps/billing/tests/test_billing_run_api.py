@@ -152,3 +152,16 @@ def test_a_whole_condominium_problem_has_no_unit_name(api_client: APIClient, con
     created = api_client.post(reverse(LIST), {"condominium": str(condominium.pk), "reference_month": "2026-10-01"}, format="json")
 
     assert body(created)["problems"] == [{"unit": None, "unit_name": None, "code": "no_plan_in_force"}]
+
+
+def test_coverage_says_which_active_condominiums_have_no_boleto_in_the_month(
+    api_client: APIClient, condominium: Condominium, other_condominium: Condominium
+) -> None:
+    _ = BillingRun.objects.create(condominium=condominium, reference_month=date(2026, 10, 1), issued_count=3)
+    _ = BillingRun.objects.create(condominium=other_condominium, reference_month=date(2026, 10, 1), failed_count=1)
+
+    october = body(api_client.get(reverse("billing-run-coverage"), {"reference_month": "2026-10-01"}))
+    november = body(api_client.get(reverse("billing-run-coverage"), {"reference_month": "2026-11-01"}))
+
+    assert (october["expected"], october["issued"], [row["name"] for row in october["missing"]]) == (2, 1, [other_condominium.name])
+    assert (november["expected"], november["issued"], len(november["missing"])) == (2, 0, 2)
