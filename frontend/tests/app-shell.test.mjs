@@ -12,8 +12,10 @@ const DASHBOARD = join(ROOT, "app", "(dashboard)");
 /** Run the inline <head> script against a fake document, like the browser does before the first paint. */
 function runInitScript(cookie) {
   const dataset = {};
-  const fakeDocument = { cookie, documentElement: { dataset } };
+  const style = { props: {}, setProperty(name, value) { this.props[name] = value; } };
+  const fakeDocument = { cookie, documentElement: { dataset, style } };
   new Function("document", APPEARANCE_INIT_SCRIPT)(fakeDocument);
+  dataset.__style = style.props;
   return dataset;
 }
 
@@ -66,17 +68,35 @@ test("the old list routes still exist, as redirects", () => {
   }
 });
 
-test("the blocks, the units and the cost centers of a condominium are screens of their own, with the side menu", () => {
-  for (const route of ["condominiums/[id]/blocks", "condominiums/[id]/units", "condominiums/[id]/cost-centers"]) {
+test("the blocks, the units, the cost centers and the people of a condominium are screens of their own", () => {
+  for (const route of ["condominiums/[id]/blocks", "condominiums/[id]/units", "condominiums/[id]/cost-centers", "condominiums/[id]/persons"]) {
     const page = readFileSync(join(DASHBOARD, ...route.split("/"), "page.tsx"), "utf8");
     assert.doesNotMatch(page, /redirect\(/, route);
-    assert.match(page, /CondominiumSideMenu/, route);
+  }
+});
+
+test("the right-hand menu is drawn by the layout frames, never by the pages, so it stays mounted between screens", () => {
+  const frames = {
+    "condominiums/_components/CondominiumsFrame.tsx": /CondominiumSideMenu/,
+    "condominiums/_components/BlocksFrame.tsx": /BlockSideMenu/,
+    "condominiums/_components/CostCentersFrame.tsx": /CostCenterSideMenu/,
+    "condominiums/persons/_components/PersonsFrame.tsx": /SectionIndex/,
+    "condominiums/[id]/units/_components/UnitsFrame.tsx": /UnitSideMenu/,
+    "condominiums/events/_components/BillingEventsFrame.tsx": /SectionIndex/,
+  };
+  for (const [file, menu] of Object.entries(frames)) {
+    assert.match(readFileSync(join(DASHBOARD, ...file.split("/")), "utf8"), menu, file);
+  }
+  const pages = sourceFiles(join(DASHBOARD, "condominiums")).filter((file) => /[\\/]page\.tsx$/.test(file));
+  assert.ok(pages.length > 10);
+  for (const page of pages) {
+    assert.doesNotMatch(readFileSync(page, "utf8"), /\baside=/, relative(ROOT, page));
   }
 });
 
 test("the shell and the registry use design tokens, never a hard-coded color", () => {
   const files = [
-    // The settings previews (ModePreview) paint the themes they offer, so they are the one place with literal colors.
+    // The settings folder is exempt (it may paint literal colors, e.g. the accent dots).
     ...sourceFiles(join(DASHBOARD, "_components", "shell")).filter((file) => !file.includes(`${"settings"}/`)),
     ...sourceFiles(join(DASHBOARD, "condominiums", "_components")).filter((file) =>
       /(CondominiumsList|CondominiumsFrame|CondominiumHeader|CondominiumSideMenu|RegistrySection|SectionIndex|CondominiumDeleteButton)\.tsx$/.test(file)
@@ -91,14 +111,38 @@ test("the shell and the registry use design tokens, never a hard-coded color", (
 });
 
 test("the head script applies the saved mode, accent and font, and falls back to the defaults", () => {
-  const saved = runInitScript("ui_mode=light; ui_accent=blue; ui_font=dm-sans");
+  const saved = runInitScript("ui_mode=light; ui_accent=custom; ui_accent_custom=%232f6bff; ui_font=dm-sans");
   assert.equal(saved.mode, "light");
-  assert.equal(saved.accent, "blue");
+  assert.equal(saved.accent, "custom");
 
   const tampered = runInitScript("ui_mode=neon; ui_accent=<script>");
   assert.equal(tampered.mode, DEFAULT_APPEARANCE.mode);
   assert.equal(tampered.accent, DEFAULT_APPEARANCE.accent);
   assert.equal(tampered.font, DEFAULT_APPEARANCE.font);
+});
+
+test("the head script applies a custom accent only when the color is a valid #rrggbb", () => {
+  const custom = runInitScript("ui_accent=custom; ui_accent_custom=%2300aa55");
+  assert.equal(custom.accent, "custom");
+  assert.equal(custom.accentCustom, "#00aa55");
+  assert.equal(custom.__style["--accent-custom"], "#00aa55");
+  assert.equal(custom.__style["--accent-foreground"], "#ffffff");
+  assert.equal(runInitScript("ui_accent=custom; ui_accent_custom=%23ffe066").__style["--accent-foreground"], "#1c1b19");
+
+  const invalid = runInitScript("ui_accent=custom; ui_accent_custom=red");
+  assert.equal(invalid.accent, DEFAULT_APPEARANCE.accent);
+  assert.equal(invalid.accentCustom, "");
+  assert.deepEqual(invalid.__style, {});
+});
+
+test("the head script also applies the text size and the reduced motion, and ignores invalid values", () => {
+  const saved = runInitScript("ui_text=large; ui_motion=reduced");
+  assert.equal(saved.text, "large");
+  assert.equal(saved.motion, "reduced");
+
+  const tampered = runInitScript("ui_text=huge; ui_motion=<b>");
+  assert.equal(tampered.text, DEFAULT_APPEARANCE.text);
+  assert.equal(tampered.motion, DEFAULT_APPEARANCE.motion);
 });
 
 // The rail expands and collapses (click on the logo), but the choice lives only in the browser (`localStorage`): the server renders the

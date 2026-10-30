@@ -12,6 +12,8 @@ export const unitsUrl = (condominiumId?: string) =>
   condominiumId ? `/condominiums/units?condominium=${condominiumId}` : "/condominiums/units";
 export const unitUrl = (condominiumId: string, unitId: string) =>
   `/condominiums/${condominiumId}/units/${unitId}`;
+/** A sub-tela de uma unidade com as pessoas dela (proprietário e inquilino vigentes). */
+export const unitPeopleUrl = (condominiumId: string, unitId: string) => `${unitUrl(condominiumId, unitId)}/persons`;
 export const newUnitUrl = (condominiumId: string) => `/condominiums/${condominiumId}/units/new`;
 
 /** "Apartamento 101": o tipo e o nome, como a coluna da lista mostra a unidade. */
@@ -24,6 +26,8 @@ export interface UnitsFrameState {
   hasFrame: boolean;
   condominiumId: string | null;
   unitId: string | null;
+  /** A sub-tela da unidade aberta no meio (hoje só `persons`: as pessoas dela); `null` na página da unidade. */
+  subScreen: "persons" | null;
   isNew: boolean;
   showListOnPhone: boolean;
   showPageOnPhone: boolean;
@@ -42,6 +46,7 @@ export function unitsFrameState(
     hasFrame: false,
     condominiumId: null,
     unitId: null,
+    subScreen: null,
     isNew: false,
     showListOnPhone: false,
     showPageOnPhone: true,
@@ -54,11 +59,12 @@ export function unitsFrameState(
     if (search.pending) return none;
     return { ...none, hasFrame: true, condominiumId: search.condominium || null, showListOnPhone: true, showPageOnPhone: false };
   }
-  if (second && second !== "units" && third === "units" && extra === undefined) {
+  if (second && second !== "units" && third === "units" && (extra === undefined || (extra === "persons" && fourth !== "new"))) {
+    if (pathname.split("/").length > 6) return none;
     const isNew = fourth === "new";
     const unitId = !isNew && fourth ? fourth : null;
     if (!isNew && !unitId) return none;
-    return { ...none, hasFrame: true, condominiumId: second, unitId, isNew };
+    return { ...none, hasFrame: true, condominiumId: second, unitId, isNew, subScreen: extra === "persons" ? "persons" : null };
   }
   return none;
 }

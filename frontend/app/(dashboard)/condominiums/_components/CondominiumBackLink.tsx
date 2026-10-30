@@ -1,7 +1,10 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+
 import { BackLink } from "@/components/BackLink";
 import { useBlocksRetrieve, useCostCentersRetrieve } from "@/lib/api/generated";
+import { backTargetOf } from "@/lib/back-target";
 import { condominiumUrl } from "@/lib/condominium-registry";
 
 /**
@@ -13,6 +16,10 @@ export function CondominiumBackLink({ blockId, costCenterId }: { blockId?: strin
   const { data: costCenter } = useCostCentersRetrieve(costCenterId ?? "", { query: { enabled: Boolean(costCenterId) } });
   const condominiumId = block?.condominium ?? costCenter?.condominium;
 
+  // A tela de onde se chegou (`?from=`: a lista de blocos, as unidades...); sem ela, o condomínio.
+  const from = backTargetOf(useSearchParams().get("from"));
+
+  if (from) return <BackLink href={from.href} label={from.label} />;
   if (!condominiumId) return <span aria-hidden className="mb-2 block h-7" />;
   return <BackLink href={condominiumUrl(condominiumId)} label="Condomínio" />;
 }

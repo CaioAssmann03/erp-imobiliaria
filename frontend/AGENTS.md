@@ -25,6 +25,7 @@ organized by the SPDD REASONS canvas.
 ## Always true
 
 - Code in English; everything the user reads in Portuguese (pt-BR). Docs and this file in English.
+- Registry screens (condominiums, units, blocks, sub-contas, persons, events) use the 3-column layout: a frame in the `layout.tsx` draws the list and the right menu, a page renders only its content (`docs/structure/three-column-layout.md`).
 - ERP pages render on the client: a `page.tsx` makes no API call (not even the home); `"use client"` for what calls the API or interacts.
 - Style only with design tokens. Never edit `lib/api/generated/` (regenerate with `pnpm generate:api`).
 - Before finishing: `pnpm exec tsc --noEmit` · `pnpm exec eslint .` · `pnpm build`.

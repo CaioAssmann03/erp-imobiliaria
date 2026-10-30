@@ -2,12 +2,12 @@
 
 import { SectionIndex } from "@/components/SectionIndex";
 import { useCostCentersRetrieve } from "@/lib/api/generated";
-import { condominiumPageUrl, condominiumUrl } from "@/lib/condominium-registry";
 import { costCenterUrl } from "@/lib/cost-center-workspace";
 
 /**
- * O menu da direita da edição de uma sub-conta: os dados dela e o caminho de volta às sub-contas e ao condomínio. O condomínio vem da
- * própria sub-conta (a mesma consulta do formulário); enquanto carrega, só reserva o espaço.
+ * O menu da direita da edição de uma sub-conta: só os dados dela. Não há "Cadastros" aqui: nada é cadastrado dentro de uma sub-conta (contas
+ * a pagar e lançamentos só a referenciam e ficam no Financeiro); o caminho de volta é a seta acima do título. Enquanto a sub-conta carrega,
+ * só reserva o espaço.
  */
 export function CostCenterSideMenu({ costCenterId }: { costCenterId: string }) {
   const { data: costCenter } = useCostCentersRetrieve(costCenterId);
@@ -21,8 +21,6 @@ export function CostCenterSideMenu({ costCenterId }: { costCenterId: string }) {
         title: "Nesta sub-conta",
         items: [
           { href: costCenterUrl(costCenter.id), label: "Dados da sub-conta", current: true },
-          { href: condominiumPageUrl(costCenter.condominium, "cost-centers"), label: "Sub-contas do condomínio" },
-          { href: condominiumUrl(costCenter.condominium), label: "Dados do condomínio" },
         ],
       }}
     />

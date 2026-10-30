@@ -12,6 +12,7 @@ import {
   useBillingEventsPartialUpdate,
 } from "@/lib/api/generated";
 import type { BillingEvent } from "@/lib/api/generated/models";
+import { eventUrl } from "@/lib/billing-event-workspace";
 import { applyServerErrors } from "@/lib/form-errors";
 import {
   billingEventToPayload,
@@ -19,19 +20,18 @@ import {
   type BillingEventFormOutput,
 } from "@/lib/schemas/billing-event";
 
-export const BILLING_EVENTS_URL = "/billing/events";
-
 export function useBillingEventSubmit(billingEventId: string | undefined, setError: UseFormSetError<BillingEventFormInput>) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const createMutation = useBillingEventsCreate();
   const updateMutation = useBillingEventsPartialUpdate();
 
-  const done = (message: string, id: string) => {
+  // Salvar uma edição deixa na página; cadastrar abre o evento novo (a lista ao lado já o mostra).
+  const done = (message: string, id: string, opensEvent: boolean) => {
     queryClient.invalidateQueries({ queryKey: getBillingEventsListQueryKey() });
     queryClient.invalidateQueries({ queryKey: getBillingEventsRetrieveQueryKey(id) });
     toast.success(message);
-    router.push(BILLING_EVENTS_URL);
+    if (opensEvent) router.push(eventUrl(id));
   };
   const onError = (error: unknown) => toast.error(applyServerErrors(error, setError));
 
@@ -40,12 +40,12 @@ export function useBillingEventSubmit(billingEventId: string | undefined, setErr
     if (billingEventId !== undefined) {
       updateMutation.mutate(
         { id: billingEventId, data: payload as Partial<BillingEvent> },
-        { onSuccess: () => done("Evento salvo.", billingEventId), onError }
+        { onSuccess: () => done("Evento salvo.", billingEventId, false), onError }
       );
     } else {
       createMutation.mutate(
         { data: payload as unknown as BillingEvent },
-        { onSuccess: (created) => done("Evento cadastrado.", created.id), onError }
+        { onSuccess: (created) => done("Evento cadastrado.", created.id, true), onError }
       );
     }
   };

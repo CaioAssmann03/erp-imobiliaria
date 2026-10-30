@@ -3,12 +3,16 @@
 import { keepPreviousData } from "@tanstack/react-query";
 import { Plus, Search } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import { CompactFilter, FilterSummary, type CompactFilterGroup } from "@/components/CompactFilter";
+import { CompactFilter, type CompactFilterGroup } from "@/components/CompactFilter";
 import { ShowMore } from "@/components/data-list";
+import { ScopeSearchCard, ScopeSearchRow } from "@/components/ScopeSearchCard";
+import { ScopeSelect } from "@/components/ScopeSelect";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { backTargetOf } from "@/lib/back-target";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useCondominiumsList, useCostCentersList } from "@/lib/api/generated";
 import { newCostCenterUrl } from "@/lib/cost-center-workspace";
@@ -18,7 +22,7 @@ import { CostCenterListItem } from "./CostCenterListItem";
 
 /**
  * Client Component: a coluna da esquerda do cadastro e da edição de uma sub-conta, as do condomínio dela no mesmo padrão da lista de
- * condomínios, com a aberta marcada. O ícone de filtro dentro da busca (`CompactFilter`) escolhe o condomínio (troca a lista e o **+**
+ * condomínios, com a aberta marcada. O condomínio é um seletor acima da busca, como na coluna de unidades (troca a lista e o **+**
  * sem sair da tela) e a situação; o condomínio da lista se lê numa linha abaixo. Sem `condominiumId` (a edição ainda carregando a
  * sub-conta) mostra só o esqueleto.
  */
@@ -31,6 +35,8 @@ export function CostCentersList({
   openCostCenterId: string | null;
   className?: string;
 }) {
+  // A origem com que a sub-conta foi aberta segue ao trocar de sub-conta pela lista: o "voltar" continua levando a ela.
+  const from = backTargetOf(useSearchParams().get("from"))?.href ?? null;
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [chosen, setChosen] = useState<string | null>(null);
@@ -50,25 +56,8 @@ export function CostCentersList({
   );
   const results = data?.results ?? [];
   const loading = !activeCondominium || isLoading;
-  const current = condominiums?.results.find((condominium) => condominium.id === activeCondominium);
-  const condominiumLabel = current ? `${String(current.code).padStart(4, "0")} · ${current.name}` : null;
 
   const groups: CompactFilterGroup[] = [
-    {
-      key: "condominium",
-      label: "Condomínio",
-      required: true,
-      value: activeCondominium ?? "",
-      onChange: (value) => {
-        setChosen(value || null);
-        setSearch("");
-        setStatus("");
-      },
-      options: (condominiums?.results ?? []).map((condominium) => ({
-        value: condominium.id,
-        label: `${String(condominium.code).padStart(4, "0")} · ${condominium.name}`,
-      })),
-    },
     {
       key: "status",
       label: "Situação",
@@ -85,7 +74,7 @@ export function CostCentersList({
     <aside
       aria-label="Sub-contas"
       className={cn(
-        "w-full shrink-0 flex-col gap-3 lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:w-80 2xl:w-96",
+        "w-full shrink-0 flex-col gap-3 lg:sticky lg:top-[4.25rem] lg:h-[calc(100vh-5.25rem)] lg:w-80 2xl:w-96",
         className
       )}
     >
@@ -107,20 +96,40 @@ export function CostCentersList({
         )}
       </div>
 
-      <div className="flex h-10 items-center gap-2 rounded-control bg-surface pr-1.5 pl-3 text-ink-soft shadow-card focus-within:ring-2 focus-within:ring-brand/50">
-        <Search className="size-4 shrink-0" />
-        <input
-          type="search"
-          aria-label="Buscar sub-conta"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Código ou nome"
-          className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint"
-        />
-        <CompactFilter groups={groups} onClear={() => setStatus("")} />
-      </div>
-      {condominiumLabel && <p className="truncate px-1 text-caption text-ink-soft">{condominiumLabel}</p>}
-      <FilterSummary groups={groups} onClear={() => setStatus("")} />
+      <ScopeSearchCard
+        scopes={
+          <ScopeSelect
+            variant="segment"
+            className="flex-1"
+            label="Condomínio"
+            value={activeCondominium ?? ""}
+            placeholder="Selecione o condomínio"
+            onChange={(value) => {
+              setChosen(value || null);
+              setSearch("");
+              setStatus("");
+            }}
+            options={(condominiums?.results ?? []).map((condominium) => ({
+              value: condominium.id,
+              label: `${String(condominium.code).padStart(4, "0")} · ${condominium.name}`,
+              title: condominium.name,
+            }))}
+          />
+        }
+      >
+        <ScopeSearchRow>
+          <Search className="size-4 shrink-0" />
+          <input
+            type="search"
+            aria-label="Buscar sub-conta"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Código ou nome"
+            className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint"
+          />
+          <CompactFilter groups={groups} onClear={() => setStatus("")} />
+        </ScopeSearchRow>
+      </ScopeSearchCard>
 
       <nav
         aria-label="Lista de sub-contas"
@@ -144,6 +153,7 @@ export function CostCentersList({
                 costCenter={costCenter}
                 isOpen={costCenter.id === openCostCenterId}
                 dimmed={results.some((item) => item.id === openCostCenterId)}
+                from={from}
               />
             ))}
           </ul>

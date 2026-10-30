@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { CondominiumHeader } from "../../_components/CondominiumHeader";
-import { CondominiumSideMenu } from "../../_components/CondominiumSideMenu";
 import { ListFallback } from "@/components/data-list";
-import { FormPage } from "@/components/form/FormPage";
 import { UnitsRegistryList } from "./_components/UnitsRegistryList";
 
 export const metadata: Metadata = { title: "Unidades" };
@@ -14,11 +12,11 @@ export default async function CondominiumUnitsPage({ params }: { params: Promise
   const { id } = await params;
 
   return (
-    <FormPage aside={<CondominiumSideMenu condominiumId={id} current="units" />}>
+    <>
       <CondominiumHeader condominiumId={id} />
       <Suspense fallback={<ListFallback />}>
         <UnitsRegistryList condominiumId={id} />
       </Suspense>
-    </FormPage>
+    </>
   );
 }

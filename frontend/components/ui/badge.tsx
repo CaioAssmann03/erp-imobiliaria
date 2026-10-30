@@ -9,11 +9,14 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default: "bg-ink text-ink-foreground",
-        secondary: "bg-surface-muted text-ink-soft",
-        brand: "bg-brand-soft text-brand-strong",
-        success: "bg-success-soft text-success",
-        danger: "bg-danger-soft text-danger",
-        warning: "bg-warning-soft text-warning",
+        secondary: "bg-surface-sunken text-ink ring-1 ring-inset ring-ink/15",
+        brand: "bg-[color-mix(in_oklab,var(--color-brand)_20%,var(--color-surface))] text-brand-strong ring-1 ring-inset ring-brand/40",
+        success:
+          "bg-[color-mix(in_oklab,var(--color-success)_20%,var(--color-surface))] text-[color-mix(in_oklab,var(--color-success)_80%,var(--color-ink))] ring-1 ring-inset ring-success/40",
+        danger:
+          "bg-[color-mix(in_oklab,var(--color-danger)_18%,var(--color-surface))] text-[color-mix(in_oklab,var(--color-danger)_85%,var(--color-ink))] ring-1 ring-inset ring-danger/40",
+        warning:
+          "bg-[color-mix(in_oklab,var(--color-warning)_24%,var(--color-surface))] text-[color-mix(in_oklab,var(--color-warning)_60%,var(--color-ink))] ring-1 ring-inset ring-warning/50",
       },
     },
     defaultVariants: {

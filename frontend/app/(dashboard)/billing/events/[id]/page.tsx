@@ -1,18 +1,9 @@
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { BillingEventForm } from "../_components/BillingEventForm";
-import { FormPage } from "@/components/form/FormPage";
-import { PageHeader } from "@/components/PageHeader";
+import { eventUrl } from "@/lib/billing-event-workspace";
 
-export const metadata: Metadata = { title: "Editar evento" };
-
+/** O cadastro de eventos mudou para dentro de Condomínios: um link antigo abre a nova tela. */
 export default async function EditBillingEventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-
-  return (
-    <FormPage>
-      <PageHeader back={{ href: "/billing/events", label: "Eventos" }} title="Editar evento" />
-      <BillingEventForm billingEventId={id} />
-    </FormPage>
-  );
+  redirect(eventUrl(id));
 }

@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrentUrl } from "@/hooks/use-current-url";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useBlocksList } from "@/lib/api/generated";
 import { newBlockUrl } from "@/lib/block-workspace";
@@ -18,6 +19,7 @@ import { BlockListItem } from "./BlockListItem";
  * Abrir um bloco leva à edição dele.
  */
 export function BlocksRegistryList({ condominiumId }: { condominiumId: string }) {
+  const here = useCurrentUrl();
   const [search, setSearch] = useState("");
   const { data, isLoading } = useBlocksList({ condominium: condominiumId, limit: 100 });
 
@@ -68,7 +70,7 @@ export function BlocksRegistryList({ condominiumId }: { condominiumId: string })
           ) : (
             <ul className="space-y-0.5">
               {results.map((block) => (
-                <BlockListItem key={block.id} block={block} onCard withUnitsLink />
+                <BlockListItem key={block.id} block={block} onCard withUnitsLink from={here} />
               ))}
             </ul>
           )}

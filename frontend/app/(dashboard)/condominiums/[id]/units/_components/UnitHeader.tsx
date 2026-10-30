@@ -1,10 +1,13 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+
 import { BackLink } from "@/components/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUnitsRetrieve } from "@/lib/api/generated";
 import { unitTypeLabel } from "@/lib/schemas/unit";
 import { cn } from "@/lib/utils";
+import { backTargetOf } from "@/lib/back-target";
 import { condominiumUrl } from "@/lib/condominium-registry";
 import { unitListLabel } from "@/lib/unit-workspace";
 
@@ -14,11 +17,13 @@ import { unitListLabel } from "@/lib/unit-workspace";
  */
 export function UnitHeader({ condominiumId, unitId }: { condominiumId: string; unitId: string }) {
   const { data: unit } = useUnitsRetrieve(unitId);
+  // A tela de onde se chegou (`?from=`, por exemplo as unidades de um bloco); sem ela, o condomínio.
+  const target = backTargetOf(useSearchParams().get("from")) ?? { href: condominiumUrl(condominiumId), label: "Condomínio" };
 
   if (!unit)
     return (
       <div className="mb-6">
-        <BackLink href={condominiumUrl(condominiumId)} label="Condomínio" />
+        <BackLink href={target.href} label={target.label} />
         <Skeleton className="h-9 w-72 rounded-control" />
       </div>
     );
@@ -27,7 +32,7 @@ export function UnitHeader({ condominiumId, unitId }: { condominiumId: string; u
 
   return (
     <div className="mb-6">
-      <BackLink href={condominiumUrl(condominiumId)} label="Condomínio" />
+      <BackLink href={target.href} label={target.label} />
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <h1 className="text-title">{unitListLabel(unitTypeLabel(unit.type), unit.name)}</h1>
         {unit.is_manager_unit && <span className="text-body text-ink-soft">Síndico</span>}

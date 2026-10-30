@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 
 import { CostCenterForm } from "../../../_components/CostCenterForm";
-import { CondominiumSideMenu } from "../../../_components/CondominiumSideMenu";
-import { FormPage } from "@/components/form/FormPage";
 import { PageHeader } from "@/components/PageHeader";
 import { condominiumUrl } from "@/lib/condominium-registry";
 
@@ -12,9 +10,9 @@ export default async function NewCondominiumCostCenterPage({ params }: { params:
   const { id } = await params;
 
   return (
-    <FormPage aside={<CondominiumSideMenu condominiumId={id} current="cost-centers" />}>
+    <>
       <PageHeader back={{ href: condominiumUrl(id), label: "Condomínio" }} title="Nova sub-conta" />
       <CostCenterForm condominiumId={id} />
-    </FormPage>
+    </>
   );
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { StatusText } from "@/components/StatusText";
 import type { CostCenter } from "@/lib/api/generated/models";
 import { formatCode } from "@/lib/billing-entry-payload";
+import { withFrom } from "@/lib/back-target";
 import { costCenterUrl } from "@/lib/cost-center-workspace";
 import { cn } from "@/lib/utils";
 
@@ -17,12 +18,15 @@ export function CostCenterListItem({
   dimmed = false,
   onCard = false,
   withStatus = false,
+  from,
 }: {
   costCenter: CostCenter;
   isOpen?: boolean;
   dimmed?: boolean;
   onCard?: boolean;
   withStatus?: boolean;
+  /** A tela de onde se chegou (o "voltar" da sub-conta leva a ela). */
+  from?: string | null;
 }) {
   const active = costCenter.active ?? true;
 
@@ -36,7 +40,7 @@ export function CostCenterListItem({
       )}
     >
       <Link
-        href={costCenterUrl(costCenter.id)}
+        href={withFrom(costCenterUrl(costCenter.id), from)}
         aria-current={isOpen ? "page" : undefined}
         className="block min-w-0 flex-1 rounded-panel px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >

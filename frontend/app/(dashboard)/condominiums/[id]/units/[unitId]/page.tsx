@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
-import { FormPage } from "@/components/form/FormPage";
 import { UnitForm } from "../_components/UnitForm";
 import { UnitHeader } from "../_components/UnitHeader";
-import { UnitSideMenu } from "../_components/UnitSideMenu";
 
 export const metadata: Metadata = { title: "Unidade" };
 
@@ -12,9 +11,11 @@ export default async function UnitPage({ params }: { params: Promise<{ id: strin
   const { id, unitId } = await params;
 
   return (
-    <FormPage aside={<UnitSideMenu unitId={unitId} />}>
-      <UnitHeader condominiumId={id} unitId={unitId} />
+    <>
+      <Suspense fallback={null}>
+        <UnitHeader condominiumId={id} unitId={unitId} />
+      </Suspense>
       <UnitForm condominiumId={id} unitId={unitId} />
-    </FormPage>
+    </>
   );
 }

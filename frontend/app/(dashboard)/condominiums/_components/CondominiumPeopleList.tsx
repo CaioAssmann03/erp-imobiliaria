@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 
 import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrentUrl } from "@/hooks/use-current-url";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useUnitPeopleList, useUnitsList } from "@/lib/api/generated";
 import type { Person } from "@/lib/api/generated/models";
@@ -28,6 +29,7 @@ interface CondominiumPerson {
  * unidades; abrir uma leva à ficha dela. A lista sai dos vínculos do condomínio (`?condominium=`), agrupados por pessoa aqui.
  */
 export function CondominiumPeopleList({ condominiumId }: { condominiumId: string }) {
+  const here = useCurrentUrl();
   const [search, setSearch] = useState("");
   const { data: links, isLoading } = useUnitPeopleList({ condominium: condominiumId, limit: LINKS_LIMIT });
   const { data: units } = useUnitsList({ condominium: condominiumId, limit: LINKS_LIMIT });
@@ -98,7 +100,7 @@ export function CondominiumPeopleList({ condominiumId }: { condominiumId: string
               {results.map(({ person, roles }) => (
                 <li key={person.id}>
                   <Link
-                    href={personUrl(person.id)}
+                    href={personUrl(person.id, { condominium: condominiumId, from: here })}
                     className="block rounded-panel px-3 py-2 outline-none transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <span className="block truncate text-body font-medium">

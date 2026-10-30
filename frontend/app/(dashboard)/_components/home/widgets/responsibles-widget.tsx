@@ -1,4 +1,4 @@
-import { DotMatrix } from "../DotMatrix";
+import { ResponsiblesDonut } from "../ResponsiblesDonut";
 import { Caption } from "./Caption";
 import { ResponsiblesFocus } from "./focus/ResponsiblesFocus";
 import type { WidgetBuilder } from "./types";
@@ -13,15 +13,10 @@ export const buildResponsiblesWidget: WidgetBuilder = (dash) => {
     className: "lg:col-span-4",
     showHeader: true,
     renderFocus: () => <ResponsiblesFocus stats={stats} />,
-    render: (large) => (
+    render: () => (
       <>
-        <DotMatrix
-          filled={stats?.with_responsible ?? 0}
-          total={stats?.active_units ?? 0}
-          columns={large ? 40 : 24}
-          rows={large ? 10 : 6}
-        />
-        <div className="mt-4">
+        <ResponsiblesDonut covered={stats?.with_responsible ?? 0} total={stats?.active_units ?? 0} />
+        <div className="mt-3 text-center">
           <Caption>
             {withoutResponsible === undefined
               ? "–"
@@ -29,10 +24,6 @@ export const buildResponsiblesWidget: WidgetBuilder = (dash) => {
                 ? "Todas as unidades têm responsável"
                 : `${withoutResponsible} sem ninguém para cobrar`}
           </Caption>
-          <div className="text-title tabular-nums">
-            {stats?.with_responsible ?? "–"}
-            <span className="text-heading font-normal text-ink-faint"> de {stats?.active_units ?? "–"}</span>
-          </div>
         </div>
       </>
     ),

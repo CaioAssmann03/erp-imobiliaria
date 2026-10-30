@@ -33,6 +33,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       data-mode={DEFAULT_APPEARANCE.mode}
       data-accent={DEFAULT_APPEARANCE.accent}
       data-font={DEFAULT_APPEARANCE.font}
+      data-text={DEFAULT_APPEARANCE.text}
+      data-motion={DEFAULT_APPEARANCE.motion}
       suppressHydrationWarning
       className={`${inter.variable} ${dmSans.variable} ${sourceSerif.variable} h-full`}
     >

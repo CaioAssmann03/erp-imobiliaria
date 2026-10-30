@@ -6,8 +6,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import { CompactFilter, FilterSummary } from "@/components/CompactFilter";
+import { CompactFilter } from "@/components/CompactFilter";
 import { ShowMore } from "@/components/data-list";
+import { ScopeSearchCard, ScopeSearchRow, ScopeDivider } from "@/components/ScopeSearchCard";
+import { ScopeSelect } from "@/components/ScopeSelect";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
@@ -17,12 +19,14 @@ import { newUnitUrl, unitsUrl } from "@/lib/unit-workspace";
 import { cn } from "@/lib/utils";
 
 import { UnitListItem } from "./UnitListItem";
+import { backTargetOf } from "@/lib/back-target";
+import { uuidParam } from "@/lib/uuid-param";
 import { NO_UNIT_FILTERS, unitFilterGroups, type UnitFilters } from "./unit-filter-groups";
 
 /**
- * Client Component: a coluna da esquerda do cadastro de unidades. No alto, o condomínio (código e nome); embaixo, as unidades
- * dele, com busca no servidor, **+** de nova unidade e filtros discretos (`CompactFilter`: bloco, tipo, situação). Sem condomínio
- * escolhido, só pede para escolher. `?block=` na URL (de "Ver unidades" num bloco) já abre filtrada.
+ * Client Component: a coluna da esquerda do cadastro de unidades. No alto, uma pílula com o condomínio e o bloco lado a lado; embaixo, as
+ * unidades dele, com busca no servidor, **+** de nova unidade e filtros discretos (`CompactFilter`: tipo, situação). Sem condomínio
+ * escolhido, a pílula pede para escolher. `?block=` na URL (de "Ver unidades" num bloco) já abre filtrada.
  */
 export function UnitsList({
   condominiumId,
@@ -34,9 +38,19 @@ export function UnitsList({
   className?: string;
 }) {
   const router = useRouter();
-  const initialBlock = useSearchParams().get("block") ?? "";
+  const urlParams = useSearchParams();
+  // O bloco de onde se chegou (`?block=`, das unidades de um bloco) já recorta a lista e ela o mantém ao abrir outra unidade; a tela de origem
+  // (`?from=`) segue junto, para o "voltar" da unidade continuar levando a ela. Se o endereço traz outro bloco, a lista o acompanha; se um link
+  // não traz bloco nenhum (a sub-tela de pessoas, por exemplo), ela **mantém** o que tinha: só o seletor ou outro condomínio o limpam.
+  const urlBlock = uuidParam(urlParams.get("block")) ?? "";
+  const from = backTargetOf(urlParams.get("from"))?.href ?? null;
   const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState<UnitFilters>({ ...NO_UNIT_FILTERS, block: initialBlock });
+  const [filters, setFilters] = useState<UnitFilters>({ ...NO_UNIT_FILTERS, block: urlBlock });
+  const [seenUrlBlock, setSeenUrlBlock] = useState(urlBlock);
+  if (urlBlock !== seenUrlBlock) {
+    setSeenUrlBlock(urlBlock);
+    if (urlBlock) setFilters((current) => ({ ...current, block: urlBlock }));
+  }
   const term = useDebouncedValue(search.trim());
 
   const { data: condominiums } = useCondominiumsList({ limit: 100 });
@@ -61,11 +75,12 @@ export function UnitsList({
   );
   const results = data?.results ?? [];
   const hasFilters = Object.values(filters).some(Boolean) || Boolean(term);
-  const filterGroups = unitFilterGroups(blocks, filters, (key, value) => setFilters((current) => ({ ...current, [key]: value })));
-  const clearFilters = () => setFilters(NO_UNIT_FILTERS);
+  const filterGroups = unitFilterGroups(filters, (key, value) => setFilters((current) => ({ ...current, [key]: value })));
+  // "Limpar" é dos filtros da unidade (tipo e situação); o bloco é o recorte da lista e fica na pílula acima da busca.
+  const clearFilters = () => setFilters((current) => ({ ...NO_UNIT_FILTERS, block: current.block }));
 
   const chooseCondominium = (id: string) => {
-    clearFilters();
+    setFilters(NO_UNIT_FILTERS);
     setSearch("");
     router.push(unitsUrl(id || undefined));
   };
@@ -74,7 +89,7 @@ export function UnitsList({
     <aside
       aria-label="Unidades"
       className={cn(
-        "w-full shrink-0 flex-col gap-3 lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:w-80 2xl:w-96",
+        "w-full shrink-0 flex-col gap-3 lg:sticky lg:top-[4.25rem] lg:h-[calc(100vh-5.25rem)] lg:w-80 2xl:w-96",
         className
       )}
     >
@@ -96,25 +111,41 @@ export function UnitsList({
         )}
       </div>
 
-      <label className="block">
-        <span className="sr-only">Condomínio</span>
-        <select
-          value={condominiumId ?? ""}
-          onChange={(event) => chooseCondominium(event.target.value)}
-          className="h-10 w-full rounded-control bg-surface px-3 text-body shadow-card outline-none focus:ring-2 focus:ring-brand/50"
-        >
-          <option value="">Selecione o condomínio</option>
-          {(condominiums?.results ?? []).map((condominium) => (
-            <option key={condominium.id} value={condominium.id}>
-              {String(condominium.code).padStart(4, "0")} · {condominium.name}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      {condominiumId && (
-        <>
-          <div className="flex h-10 items-center gap-2 rounded-control bg-surface pr-1.5 pl-3 text-ink-soft shadow-card focus-within:ring-2 focus-within:ring-brand/50">
+      <ScopeSearchCard
+        scopes={
+          <>
+            <ScopeSelect
+              variant="segment"
+              className="flex-1"
+              label="Condomínio"
+              value={condominiumId ?? ""}
+              placeholder="Selecione o condomínio"
+              onChange={chooseCondominium}
+              options={(condominiums?.results ?? []).map((condominium) => ({
+                value: condominium.id,
+                label: `${String(condominium.code).padStart(4, "0")} · ${condominium.name}`,
+                title: condominium.name,
+              }))}
+            />
+            {condominiumId && blocks.length > 0 && (
+              <>
+                <ScopeDivider />
+                <ScopeSelect
+                  variant="segment"
+                  className="max-w-[45%] shrink-0"
+                  label="Bloco"
+                  value={filters.block}
+                  allLabel="Todos os blocos"
+                  onChange={(value) => setFilters((current) => ({ ...current, block: value }))}
+                  options={blocks.map((block) => ({ value: block.id, label: block.name }))}
+                />
+              </>
+            )}
+          </>
+        }
+      >
+        {condominiumId && (
+          <ScopeSearchRow>
             <Search className="size-4 shrink-0" />
             <input
               type="search"
@@ -125,10 +156,9 @@ export function UnitsList({
               className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint"
             />
             <CompactFilter groups={filterGroups} onClear={clearFilters} />
-          </div>
-          <FilterSummary groups={filterGroups} onClear={clearFilters} />
-        </>
-      )}
+          </ScopeSearchRow>
+        )}
+      </ScopeSearchCard>
 
       <nav
         aria-label="Lista de unidades"
@@ -155,6 +185,7 @@ export function UnitsList({
                 blockName={blockName(unit.block)}
                 isOpen={unit.id === openUnitId}
                 dimmed={Boolean(openUnitId)}
+                context={{ block: filters.block, from }}
               />
             ))}
           </ul>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 import { readingLine, sectionPosition } from "@/lib/condominium-registry";
 import { cn } from "@/lib/utils";
@@ -12,9 +12,14 @@ import { cn } from "@/lib/utils";
  * `sectionPosition`). Clicar leva até a seção. Em telas largas é a coluna da direita; abaixo de `xl` (celular, tablet) vira uma fileira de
  * botões que rola de lado e fica presa sob o cabeçalho, com as mesmas seções e opções, e a atual sempre à vista.
  *
- * Pode ter, num bloco separado embaixo (ou sozinho, sem `sections`), `links`: opções que abrem outra tela no centro (o que não é da página em si),
+ * Pode ter, em blocos separados embaixo (ou sozinhos, sem `sections`), `links`: um grupo ou vários, cada um com o seu título, de opções que abrem outra tela no centro (o que não é da página em si),
  * sem marcador que desliza; a da tela aberta fica em destaque.
  */
+interface LinkGroup {
+  title: string;
+  items: readonly { href: string; label: string; current?: boolean }[];
+}
+
 export function SectionIndex({
   sections,
   label = "Seções",
@@ -25,14 +30,15 @@ export function SectionIndex({
   /** Nome acessível do `nav`. */
   label?: string;
   title?: string;
-  links?: { title: string; items: readonly { href: string; label: string; current?: boolean }[] };
+  links?: LinkGroup | readonly LinkGroup[];
 }) {
   const [current, setCurrent] = useState(0);
   const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
   const markerRef = useRef<HTMLSpanElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef<(HTMLElement | null)[]>([]);
-  const currentLink = links?.items.findIndex((item) => item.current) ?? -1;
+  const linkGroups: readonly LinkGroup[] = links === undefined ? [] : "title" in links ? [links] : links;
+  const currentLink = linkGroups.flatMap((group) => group.items).findIndex((item) => item.current);
   // O botão da fileira que está em destaque: a seção à vista, ou, numa tela só de opções, a da tela aberta.
   const activeChip = sections.length > 0 ? current : currentLink >= 0 ? currentLink : -1;
 
@@ -127,24 +133,31 @@ export function SectionIndex({
             {section.label}
           </button>
         ))}
-        {sections.length > 0 && links && <span aria-hidden className="h-5 w-px shrink-0 bg-border" />}
-        {links?.items.map((item, index) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            ref={(element) => {
-              chipRefs.current[sections.length + index] = element;
-            }}
-            aria-current={item.current ? "page" : undefined}
-            className={chipClass(Boolean(item.current))}
-          >
-            {item.label}
-          </Link>
-        ))}
+        {linkGroups.map((group, groupIndex) => {
+          const offset = sections.length + linkGroups.slice(0, groupIndex).reduce((total, previous) => total + previous.items.length, 0);
+          return (
+            <Fragment key={group.title}>
+              {(sections.length > 0 || groupIndex > 0) && <span aria-hidden className="h-5 w-px shrink-0 bg-border" />}
+              {group.items.map((item, index) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  ref={(element) => {
+                    chipRefs.current[offset + index] = element;
+                  }}
+                  aria-current={item.current ? "page" : undefined}
+                  className={chipClass(Boolean(item.current))}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </Fragment>
+          );
+        })}
       </div>
     </nav>
 
-    <nav aria-label={label} className="sticky top-20 hidden w-48 shrink-0 xl:block 2xl:w-56">
+    <nav aria-label={label} className="sticky top-[4.25rem] hidden w-48 shrink-0 xl:block 2xl:w-56">
       {sections.length > 0 && (
         <>
           <h2 className="mb-3 text-caption font-medium tracking-wide text-ink-faint uppercase">{title}</h2>
@@ -180,11 +193,11 @@ export function SectionIndex({
         </>
       )}
 
-      {links && (
-        <div className={cn(sections.length > 0 && "mt-8")}>
-          <h2 className="mb-3 text-caption font-medium tracking-wide text-ink-faint uppercase">{links.title}</h2>
+      {linkGroups.map((group, groupIndex) => (
+        <div key={group.title} className={cn((sections.length > 0 || groupIndex > 0) && "mt-8")}>
+          <h2 className="mb-3 text-caption font-medium tracking-wide text-ink-faint uppercase">{group.title}</h2>
           <ul>
-            {links.items.map((item) => (
+            {group.items.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
@@ -200,7 +213,7 @@ export function SectionIndex({
             ))}
           </ul>
         </div>
-      )}
+      ))}
     </nav>
     </>
   );

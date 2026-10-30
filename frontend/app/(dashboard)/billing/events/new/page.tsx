@@ -1,16 +1,8 @@
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { BillingEventForm } from "../_components/BillingEventForm";
-import { FormPage } from "@/components/form/FormPage";
-import { PageHeader } from "@/components/PageHeader";
+import { newEventUrl } from "@/lib/billing-event-workspace";
 
-export const metadata: Metadata = { title: "Novo evento" };
-
+/** O cadastro de eventos mudou para dentro de Condomínios: um link antigo abre a nova tela. */
 export default function NewBillingEventPage() {
-  return (
-    <FormPage>
-      <PageHeader back={{ href: "/billing/events", label: "Eventos" }} title="Novo evento" />
-      <BillingEventForm />
-    </FormPage>
-  );
+  redirect(newEventUrl());
 }

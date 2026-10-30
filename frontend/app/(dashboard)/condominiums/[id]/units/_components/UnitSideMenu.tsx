@@ -1,31 +1,48 @@
 "use client";
 
-import { SectionIndex } from "@/components/SectionIndex";
-import { useUnitsRetrieve } from "@/lib/api/generated";
-import { personUrl, UNIT_ROLE_LABELS } from "@/lib/person-workspace";
-import { UNIT_SECTIONS } from "@/lib/unit-workspace";
+import { useSearchParams } from "next/navigation";
 
-import { currentLinks } from "./current-links";
+import { SectionIndex } from "@/components/SectionIndex";
+import { useCurrentUrl } from "@/hooks/use-current-url";
+import { useUnitsRetrieve } from "@/lib/api/generated";
+import { pageKeepingOrigin, withFrom, withParams } from "@/lib/back-target";
+import { uuidParam } from "@/lib/uuid-param";
+import { UNIT_SECTIONS, unitPeopleUrl, unitUrl } from "@/lib/unit-workspace";
 
 /**
- * O menu da direita da unidade aberta: as seções da página e, embaixo, **Pessoas**: o proprietário e o inquilino vigentes dela, cada um um link
- * para a ficha da pessoa. Lê a unidade pela mesma consulta do formulário (uma só chamada); sem vínculos, só as seções.
+ * O menu da direita da unidade aberta, que a moldura (`UnitsFrame`) desenha. Na página da unidade: as seções (com o marcador que acompanha a
+ * rolagem) e, embaixo, **Cadastros → Pessoas**, que abre a sub-tela das pessoas dela no meio. Nessa sub-tela: os mesmos dois títulos, com as
+ * seções levando de volta à página da unidade e **Pessoas** em destaque, como o menu do condomínio. Os links levam a pilha do "voltar": a página
+ * abre as pessoas com ela como origem, e a sub-tela volta à página do jeito que ela estava. Lê a unidade pela mesma consulta do formulário.
  */
-export function UnitSideMenu({ unitId }: { unitId: string }) {
+export function UnitSideMenu({ unitId, current }: { unitId: string; current?: "persons" | null }) {
   const { data: unit } = useUnitsRetrieve(unitId);
-  const people = unit
-    ? currentLinks(unit).map((link) => ({
-        href: personUrl(link.person),
-        label: `${link.person_detail.name} · ${UNIT_ROLE_LABELS[link.role === "owner" ? "owner" : "tenant"]}`,
-      }))
-    : [];
+  const here = useCurrentUrl();
+  const params = useSearchParams();
+  const fromParam = params.get("from");
+  // O bloco que recorta a lista de unidades segue nos links do menu: trocar de tela da unidade não pode apagá-lo.
+  const block = uuidParam(params.get("block"));
+
+  if (current && unit) {
+    const page = unitUrl(unit.condominium, unit.id);
+    return (
+      <SectionIndex
+        sections={[]}
+        label="Menu da unidade"
+        links={[
+          { title: "Nesta unidade", items: UNIT_SECTIONS.map((section) => ({ href: `${withParams(pageKeepingOrigin(page, fromParam), { block })}#${section.id}`, label: section.label })) },
+          { title: "Cadastros", items: [{ href: here, label: "Pessoas", current: true }] },
+        ]}
+      />
+    );
+  }
 
   return (
     <SectionIndex
       sections={UNIT_SECTIONS}
       label="Seções da unidade"
       title="Nesta unidade"
-      links={people.length > 0 ? { title: "Pessoas", items: people } : undefined}
+      links={unit ? { title: "Cadastros", items: [{ href: withParams(withFrom(unitPeopleUrl(unit.condominium, unit.id), here), { block }), label: "Pessoas" }] } : undefined}
     />
   );
 }

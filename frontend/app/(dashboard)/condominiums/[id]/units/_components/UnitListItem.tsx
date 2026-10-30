@@ -18,13 +18,19 @@ export function UnitListItem({
   isOpen = false,
   dimmed = false,
   onCard = false,
+  context,
 }: {
   unit: Unit;
   blockName: string | null;
   isOpen?: boolean;
   dimmed?: boolean;
   onCard?: boolean;
+  /** De onde se chegou: o bloco que recorta a lista (segue com ela) e a tela de origem, a que o "voltar" da unidade leva (a sub-tela de unidades de um bloco). */
+  context?: { block?: string | null; from?: string | null };
 }) {
+  const query = new URLSearchParams();
+  if (context?.block) query.set("block", context.block);
+  if (context?.from) query.set("from", context.from);
   const owner = currentLinks(unit).find((link) => link.role === "owner")?.person_detail.name;
   const sub = [blockName, owner, unit.is_manager_unit ? "Síndico" : null, unit.active ? null : "Inativa"]
     .filter(Boolean)
@@ -33,7 +39,7 @@ export function UnitListItem({
   return (
     <li>
       <Link
-        href={unitUrl(unit.condominium, unit.id)}
+        href={`${unitUrl(unit.condominium, unit.id)}${query.size > 0 ? `?${query}` : ""}`}
         aria-current={isOpen ? "page" : undefined}
         className={cn(
           "block rounded-panel px-3 py-2 transition-[background-color,opacity]",

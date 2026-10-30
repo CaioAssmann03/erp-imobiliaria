@@ -16,7 +16,7 @@ export const buildAdjustmentsWidget: WidgetBuilder = (dash) => ({
         tooltipLabel: longMonthLabel(item.month),
         value: item.total,
       }))}
-      className={large ? "h-72 w-full" : "h-40 w-full"}
+      className={large ? "h-72 w-full" : "h-44 w-full"}
       highlightFirst
     />
   ),
