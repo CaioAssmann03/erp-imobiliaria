@@ -30,7 +30,7 @@ def test_no_model_is_ordered_by_the_name_of_a_condominium_or_a_person() -> None:
     offenders = [
         f"{model.__name__}: {key}"
         for model in apps.get_models()
-        for key in model._meta.ordering
+        for key in model._meta.ordering or []
         if re.search(r"(condominium|person)__name$", str(key).lstrip("-"))
     ]
 

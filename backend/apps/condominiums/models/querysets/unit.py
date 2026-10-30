@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from apps.core.infrastructure.search.term import ClassifiedTerm
 
 
-class UnitQuerySet(CountsByTypeQuerySet["Unit"], SoftDeleteQuerySet["Unit"]):
+class UnitQuerySet(CountsByTypeQuerySet["Unit"], SoftDeleteQuerySet["Unit"]):  # type: ignore[override]
     def active(self) -> "UnitQuerySet":
         return self.filter(active=True)
 

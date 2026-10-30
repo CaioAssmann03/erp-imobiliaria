@@ -2,15 +2,17 @@
 
 from datetime import date
 from decimal import Decimal
+from typing import cast
 
 import pytest
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.test import APIClient
 
 from apps.condominiums.models import Condominium
-from apps.finance.tests.base import body
+from apps.finance.tests.base import JsonObject, body
 
 from ..models import BillingDocument
 from ..services.build_billing_month_summary import build_billing_month_summary
@@ -20,6 +22,11 @@ from .test_delinquency_report import _document_of
 pytestmark = pytest.mark.django_db
 
 SUMMARY = "billing-document-summary"
+
+
+def _lines(response: Response) -> list[JsonObject]:
+    """The summary is a list, one line per month (`body` is typed for an object)."""
+    return cast(list[JsonObject], body(response))
 
 
 def _month(months_ago: int) -> date:
@@ -46,7 +53,7 @@ def test_sums_issued_paid_and_open_per_month_and_skips_cancelled(  # type: ignor
     _ = _document_in(new_document, make_unit, "204", 0, status=BillingDocument.Status.CANCELLED)
     older = _document_in(new_document, make_unit, "205", 2, status=BillingDocument.Status.PAID)
 
-    lines = body(api_client.get(reverse(SUMMARY)))
+    lines = _lines(api_client.get(reverse(SUMMARY)))
 
     assert len(lines) == 6
     assert [line["reference_month"] for line in lines] == [_month(5 - index).isoformat() for index in range(6)]
@@ -59,7 +66,7 @@ def test_sums_issued_paid_and_open_per_month_and_skips_cancelled(  # type: ignor
 
 
 def test_fills_empty_months_and_validates_the_months_parameter(api_client: APIClient, billing_rules) -> None:  # type: ignore[no-untyped-def]
-    three = body(api_client.get(reverse(SUMMARY), {"months": 3}))
+    three = _lines(api_client.get(reverse(SUMMARY), {"months": 3}))
 
     assert [line["reference_month"] for line in three] == [_month(2).isoformat(), _month(1).isoformat(), _month(0).isoformat()]
     assert all(line["issued_count"] == 0 and Decimal(line["issued_total"]) == 0 for line in three)
@@ -67,16 +74,16 @@ def test_fills_empty_months_and_validates_the_months_parameter(api_client: APICl
         assert api_client.get(reverse(SUMMARY), {"months": invalid}).status_code == status.HTTP_400_BAD_REQUEST
 
 
-def test_filters_by_condominium_and_ignores_other_companies(  # type: ignore[no-untyped-def]
+def test_filters_by_condominium_and_ignores_other_companies(
     api_client: APIClient, other_api_client: APIClient, document: BillingDocument, other_condominium: Condominium
 ) -> None:
     month = _month(0)
     _ = BillingDocument.objects.filter(pk=document.pk).update(reference_month=month, competence_month=month)
     other = _document_of(other_condominium, document.payer, 5, month)
 
-    everything = body(api_client.get(reverse(SUMMARY)))[-1]
-    only_other = body(api_client.get(reverse(SUMMARY), {"condominium": str(other_condominium.pk)}))[-1]
-    foreign = body(other_api_client.get(reverse(SUMMARY)))[-1]
+    everything = _lines(api_client.get(reverse(SUMMARY)))[-1]
+    only_other = _lines(api_client.get(reverse(SUMMARY), {"condominium": str(other_condominium.pk)}))[-1]
+    foreign = _lines(other_api_client.get(reverse(SUMMARY)))[-1]
 
     assert everything["open_count"] == 2
     assert (only_other["open_count"], Decimal(only_other["open_total"])) == (1, other.amount)

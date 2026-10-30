@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
-from typing import final
+from typing import Any, final
 
 from django.db.models import Count, Q, QuerySet, Sum
 
@@ -56,7 +56,7 @@ def build_billing_month_summary(documents: QuerySet[BillingDocument], months: in
             open_total=Sum("amount", filter=awaiting),
         )
     }
-    empty = {"paid_count": 0, "paid_total": None, "open_count": 0, "open_total": None}
+    empty: dict[str, Any] = {"paid_count": 0, "paid_total": None, "open_count": 0, "open_total": None}
     summaries = []
     for month in first_months:
         line = lines.get(month, empty)

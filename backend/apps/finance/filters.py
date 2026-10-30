@@ -1,3 +1,4 @@
+import uuid
 from typing import final
 
 import django_filters
@@ -81,7 +82,7 @@ class CostCenterCatalogItemFilter(django_filters.FilterSet):
         fields = ("active",)
 
     def filter_unused_by_condominium(
-        self, queryset: QuerySet[CostCenterCatalogItem], name: str, value: object
+        self, queryset: QuerySet[CostCenterCatalogItem], name: str, value: uuid.UUID
     ) -> QuerySet[CostCenterCatalogItem]:
         used = CostCenter.objects.filter(condominium_id=value).values("catalog_item_id")
         return queryset.exclude(pk__in=used)

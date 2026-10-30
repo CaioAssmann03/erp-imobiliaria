@@ -1,5 +1,7 @@
 """Spec 062, R10: the Admin lists deleted records (filter `deleted`), restores them and turns a refused deletion into a message."""
 
+from typing import Any
+
 import pytest
 from django.contrib import admin
 from django.contrib.messages.storage.fallback import FallbackStorage
@@ -17,12 +19,12 @@ pytestmark = pytest.mark.django_db
 def request_of_a_superuser(company: Company):  # type: ignore[no-untyped-def]
     request = RequestFactory().get("/admin/persons/person/")
     request.user = User.objects.create_superuser("root", password="x", company=company)
-    request.session = {}
+    request.session = {}  # type: ignore[assignment]
     request._messages = FallbackStorage(request)  # type: ignore[attr-defined]
     return request
 
 
-def person_admin():  # type: ignore[no-untyped-def]
+def person_admin() -> Any:
     return admin.site._registry[Person]
 
 

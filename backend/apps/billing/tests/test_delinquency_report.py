@@ -96,7 +96,7 @@ def test_registered_documents_count_and_totals_are_per_condominium(  # type: ign
     code_of = {document.unit.condominium.name: document.unit.condominium.code, other_condominium.name: other_condominium.code}
     ordered = [(code_of[row["condominium_name"]], row["days_overdue"]) for row in data["rows"]]
     assert ordered == sorted(ordered, key=lambda pair: (pair[0], -pair[1]))
-    assert [line["condominium_name"] for line in data["by_condominium"]] == sorted(code_of, key=code_of.get)
+    assert [line["condominium_name"] for line in data["by_condominium"]] == sorted(code_of, key=lambda name: code_of[name])
 
 
 def test_filters_by_condominium_and_reference_month(

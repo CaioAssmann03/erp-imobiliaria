@@ -58,7 +58,6 @@ class SoftDeleteAdminMixin:
     archived_label: ClassVar[str] = ""
     archived_actions: ClassVar[tuple[ArchivedAction, ...]] = ()
 
-    @override
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
         queryset: QuerySet[Any] = self.model.all_objects.get_queryset()  # type: ignore[attr-defined]
         ordering = self.get_ordering(request)  # type: ignore[attr-defined]

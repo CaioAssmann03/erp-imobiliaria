@@ -55,7 +55,7 @@ class BillingEvent(BaseModel):
         )
         # The highest code always has a free successor, so there is a first one.
         assert last_of_the_first_run is not None
-        return last_of_the_first_run + 1
+        return int(last_of_the_first_run) + 1
 
     @override
     def save(self, *args: Any, **kwargs: Any) -> None:
