@@ -2,9 +2,9 @@
 
 import { Search } from "lucide-react";
 
-import { CompactFilter, type CompactFilterGroup } from "@/components/CompactFilter";
-import { MonthSelect } from "@/components/MonthSelect";
-import { todayIso } from "@/lib/format";
+import { CompactFilter, type CompactFilterGroup } from "@/components/filters/CompactFilter";
+import { MonthSelect } from "@/components/dates/MonthSelect";
+import { todayIso } from "@/lib/format/format";
 import { ENTRY_KINDS } from "@/lib/schemas/entry-batch";
 
 /** O período é um intervalo pronto (calculado pela tela), como os demais filtros do menu. */

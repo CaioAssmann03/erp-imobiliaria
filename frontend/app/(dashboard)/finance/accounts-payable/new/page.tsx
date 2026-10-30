@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { BackLink } from "@/components/BackLink";
-import { accountsPayableUrl } from "@/lib/account-payable-workspace";
+import { BackLink } from "@/components/layout/BackLink";
+import { accountsPayableUrl } from "@/lib/finance/account-payable-workspace";
 
 import { AccountPayableForm } from "../_components/AccountPayableForm";
 

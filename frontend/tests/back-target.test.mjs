@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { backTargetOf, pageKeepingOrigin, withFrom, withParams } from "../lib/back-target.ts";
+import { backTargetOf, pageKeepingOrigin, withFrom, withParams } from "../lib/navigation/back-target.ts";
 
 const C = "1b7ab73b-092f-4514-8532-573173c2bd73";
 const U = "1a99554a-29a7-49fa-94f0-d231ff41b7dd";

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { REPORTS, reportsFrameState } from "../lib/report-catalog.ts";
+import { REPORTS, reportsFrameState } from "../lib/reports/report-catalog.ts";
 
 test("the hub is the list on a phone and has no open report", () => {
   const state = reportsFrameState("/reports");

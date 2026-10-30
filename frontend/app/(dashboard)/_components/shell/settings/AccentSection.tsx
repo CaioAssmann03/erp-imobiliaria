@@ -3,7 +3,7 @@
 import { Check, Plus } from "lucide-react";
 import { useState } from "react";
 
-import { ACCENTS, CUSTOM_ACCENT, DEFAULT_APPEARANCE, isHexColor, type Appearance } from "@/lib/appearance";
+import { ACCENTS, CUSTOM_ACCENT, DEFAULT_APPEARANCE, isHexColor, type Appearance } from "@/lib/theme/appearance";
 import { cn } from "@/lib/utils";
 
 import { SettingsRow } from "./SettingsSection";

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { LIST_PAGE_SIZE } from "@/lib/list-size";
+import { LIST_PAGE_SIZE } from "@/lib/api/list-size";
 
 /**
  * O limite de uma lista que mostra uns poucos registros e cresce com "Mostrar mais". Volta ao tamanho inicial quando a `key`

@@ -10,7 +10,7 @@ import {
   needsAmount,
   planErrorPath,
   planToPayload,
-} from "../lib/billing-plan-payload.ts";
+} from "../lib/billing/billing-plan-payload.ts";
 
 const item = (overrides = {}) => ({
   event: "",
@@ -130,7 +130,7 @@ test("a nested API error path keeps its item index, a flat one keeps its last na
 });
 
 test("the validity is described from its months", async () => {
-  const { describeValidity } = await import("../lib/billing-plan-payload.ts");
+  const { describeValidity } = await import("../lib/billing/billing-plan-payload.ts");
 
   assert.equal(describeValidity(null, null), "Sem prazo");
   assert.equal(describeValidity("2026-03-01", null), "a partir de mar/2026");
@@ -139,7 +139,7 @@ test("the validity is described from its months", async () => {
 });
 
 test("the error summary names a field that is not on screen, and the row of a list", async () => {
-  const { describeField } = await import("../lib/form-labels.ts");
+  const { describeField } = await import("../lib/errors/form-labels.ts");
 
   assert.equal(describeField("condominium", null), "Condomínio");
   assert.equal(describeField("name", "Nome do plano"), "Nome do plano");

@@ -1,4 +1,4 @@
-import type { Appearance } from "@/lib/appearance";
+import type { Appearance } from "@/lib/theme/appearance";
 
 import { SettingsGroup } from "./SettingsSection";
 import { SettingsSwitch } from "./SettingsSwitch";

@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 
-import { reportsFrameState } from "@/lib/report-catalog";
+import { reportsFrameState } from "@/lib/reports/report-catalog";
 import { cn } from "@/lib/utils";
 
 import { ReportsList } from "./ReportsList";

@@ -5,13 +5,13 @@ import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { CompactFilter, type CompactFilterGroup } from "@/components/CompactFilter";
+import { CompactFilter, type CompactFilterGroup } from "@/components/filters/CompactFilter";
 import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useCostCenterCatalogList } from "@/lib/api/generated";
-import { newCatalogItemUrl } from "@/lib/cost-center-catalog-workspace";
+import { newCatalogItemUrl } from "@/lib/finance/cost-center-catalog-workspace";
 import { cn } from "@/lib/utils";
 
 import { CatalogListItem } from "./CatalogListItem";

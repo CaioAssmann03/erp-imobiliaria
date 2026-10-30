@@ -1,10 +1,10 @@
 "use client";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatMonth } from "@/lib/format";
+import { formatMonth } from "@/lib/format/format";
 
-import { BillingSummaryChart } from "../../BillingSummaryChart";
-import { useBillingSummary } from "../../use-billing-summary";
+import { BillingSummaryChart } from "@/app/(dashboard)/_components/home/charts/BillingSummaryChart";
+import { useBillingSummary } from "@/app/(dashboard)/_components/home/shared/use-billing-summary";
 import { brl } from "../format";
 import { FocusSection, percent } from "./parts";
 

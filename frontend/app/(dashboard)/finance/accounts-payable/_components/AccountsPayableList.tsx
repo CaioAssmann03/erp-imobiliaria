@@ -5,17 +5,17 @@ import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { CompactFilter, type CompactFilterGroup } from "@/components/CompactFilter";
+import { CompactFilter, type CompactFilterGroup } from "@/components/filters/CompactFilter";
 import { ShowMore } from "@/components/data-list";
-import { ScopeSearchCard, ScopeSearchRow } from "@/components/ScopeSearchCard";
-import { ScopeSelect } from "@/components/ScopeSelect";
+import { ScopeSearchCard, ScopeSearchRow } from "@/components/filters/ScopeSearchCard";
+import { ScopeSelect } from "@/components/filters/ScopeSelect";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
-import { DUE_OPTIONS, newAccountPayableUrl } from "@/lib/account-payable-workspace";
+import { DUE_OPTIONS, newAccountPayableUrl } from "@/lib/finance/account-payable-workspace";
 import { useAccountsPayableList, useCondominiumsList } from "@/lib/api/generated";
 import type { AccountsPayableListParams, AccountsPayableListStatus } from "@/lib/api/generated/models";
-import { addDays, monthBounds, todayIso } from "@/lib/format";
+import { addDays, monthBounds, todayIso } from "@/lib/format/format";
 import { PAYABLE_STATUSES } from "@/lib/schemas/account-payable";
 import { cn } from "@/lib/utils";
 

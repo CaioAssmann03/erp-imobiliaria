@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
-import { FeatureGrid } from "../_components/FeatureGrid";
-import { PageIntro } from "../_components/PageIntro";
-import { Section } from "../_components/Section";
+import { FeatureGrid } from "@/app/(marketing)/_components/sections/FeatureGrid";
+import { PageIntro } from "@/app/(marketing)/_components/sections/PageIntro";
+import { Section } from "@/app/(marketing)/_components/layout/Section";
 
 export const metadata: Metadata = {
   title: "Recursos",

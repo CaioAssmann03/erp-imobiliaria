@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { needsApportionmentCriterion, needsInstallments, type EntryValues } from "@/lib/billing-entry-payload";
-import { currentMonthTyped, monthToApi } from "@/lib/billing-plan-payload";
+import { needsApportionmentCriterion, needsInstallments, type EntryValues } from "@/lib/billing/billing-entry-payload";
+import { currentMonthTyped, monthToApi } from "@/lib/billing/billing-plan-payload";
 
 import { decimalField, enumField } from "./fields";
 

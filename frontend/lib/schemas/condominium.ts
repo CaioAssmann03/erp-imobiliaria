@@ -7,8 +7,8 @@ import {
   maskCnpj,
   moneyFromApi,
   onlyDigits,
-} from "@/lib/masks";
-import { isValidCnpj } from "@/lib/validators";
+} from "@/lib/format/masks";
+import { isValidCnpj } from "@/lib/format/validators";
 
 import {
   cepField,

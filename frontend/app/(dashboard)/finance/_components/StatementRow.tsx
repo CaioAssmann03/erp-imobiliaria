@@ -2,7 +2,7 @@
 
 import { RowActions } from "@/components/data-list";
 import type { CurrentAccountEntry } from "@/lib/api/generated/models";
-import { brl, formatDate, formatMonth } from "@/lib/format";
+import { brl, formatDate, formatMonth } from "@/lib/format/format";
 import { BATCH_ORIGINS } from "@/lib/schemas/entry-batch";
 import { cn } from "@/lib/utils";
 

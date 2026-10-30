@@ -1,4 +1,4 @@
-import { TEXT_SIZES, type Appearance } from "@/lib/appearance";
+import { TEXT_SIZES, type Appearance } from "@/lib/theme/appearance";
 
 import { SegmentedControl } from "./SegmentedControl";
 import { SettingsRow } from "./SettingsSection";

@@ -15,6 +15,8 @@ from .billing_plan_serializers import (
 )
 from .billing_plan_serializers import BillingPlanSerializer as BillingPlanSerializer
 from .billing_run_serializers import BillingRunSerializer as BillingRunSerializer
+from .issuance_coverage_serializers import IssuanceCoverageQuerySerializer as IssuanceCoverageQuerySerializer
+from .issuance_coverage_serializers import IssuanceCoverageSerializer as IssuanceCoverageSerializer
 from .condominium_billing_rules_serializers import (
     CondominiumBillingRulesSerializer as CondominiumBillingRulesSerializer,
 )

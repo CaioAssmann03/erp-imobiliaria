@@ -9,8 +9,8 @@ import {
   getDashboardRetrieveQueryKey,
   useAccountsPayableCancel,
 } from "@/lib/api/generated";
-import { applyServerErrors } from "@/lib/form-errors";
-import { toast } from "@/lib/toast";
+import { applyServerErrors } from "@/lib/errors/form-errors";
+import { toast } from "@/lib/errors/toast";
 
 /** Client Component: cancela a conta aberta (confirmação). Ela continua na página, agora cancelada e só para consulta. */
 export function CancelAccountPayableButton({ accountId, description }: { accountId: string; description: string }) {

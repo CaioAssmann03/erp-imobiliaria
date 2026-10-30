@@ -5,10 +5,10 @@ import { useSearchParams } from "next/navigation";
 import { useDashboardRetrieve } from "@/lib/api/generated";
 import { cn } from "@/lib/utils";
 
-import { FocusModal } from "./FocusModal";
-import { SeeAllLink } from "./SeeAllLink";
-import { UpcomingAdjustments } from "./UpcomingAdjustments";
-import { WidgetCard } from "./WidgetCard";
+import { FocusModal } from "./card/FocusModal";
+import { SeeAllLink } from "./shared/SeeAllLink";
+import { UpcomingAdjustments } from "./bodies/UpcomingAdjustments";
+import { WidgetCard } from "./card/WidgetCard";
 import { buildWidgets, WIDGET_IDS, type WidgetId } from "./widgets";
 
 /** Client Component: os cards do painel e o destaque (`?focus=`). Falha ou carga mostram "–" em vez de derrubar o painel. */

@@ -1,4 +1,4 @@
-import { ScopeSearchCard } from "@/components/ScopeSearchCard";
+import { ScopeSearchCard } from "@/components/filters/ScopeSearchCard";
 
 import { ReportDownloadButton } from "./ReportDownloadButton";
 

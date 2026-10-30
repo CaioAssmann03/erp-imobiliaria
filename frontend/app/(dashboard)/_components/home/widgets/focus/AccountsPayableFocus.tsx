@@ -1,8 +1,13 @@
 "use client";
 
+import { keepPreviousData } from "@tanstack/react-query";
+import { useState } from "react";
+
 import { LinkButton } from "@/components/LinkButton";
 import { useAccountsPayableList } from "@/lib/api/generated";
 import type { AccountsPayable } from "@/lib/api/generated/models";
+import { todayIso } from "@/lib/format/format";
+import { windowRange, type PayableWindow } from "@/lib/finance/payable-windows";
 
 import { brl } from "../format";
 import { OpenAccountsList } from "./OpenAccountsList";
@@ -11,12 +16,14 @@ import { FocusSection, FocusStat } from "./parts";
 const countLabel = (count: number) => `${count} ${count === 1 ? "conta" : "contas"}`;
 const LIST_LIMIT = 100;
 
-/** Client Component: os totais por janela e as contas em aberto; o filtro por vencimento é o `OpenAccountsList`. */
+/** Client Component: os totais por janela e as contas em aberto; a janela de vencimento escolhida vai à API (`windowRange`) e a lista é o `OpenAccountsList`. */
 export function AccountsPayableFocus({ payables }: { payables: AccountsPayable | undefined }) {
-  const { data: open, isLoading } = useAccountsPayableList({ status: "open", limit: LIST_LIMIT });
-  const accounts = [...(open?.results ?? [])]
-    .sort((a, b) => a.due_date.localeCompare(b.due_date))
-    .map((account) => ({
+  const [window, setWindow] = useState<PayableWindow>("all");
+  const { data: open, isLoading } = useAccountsPayableList(
+    { status: "open", limit: LIST_LIMIT, ...windowRange(window, todayIso()) },
+    { query: { placeholderData: keepPreviousData } }
+  );
+  const accounts = (open?.results ?? []).map((account) => ({
       id: account.id,
       description: account.description,
       supplierName: account.supplier_name,
@@ -41,7 +48,7 @@ export function AccountsPayableFocus({ payables }: { payables: AccountsPayable |
 
       <FocusSection title="Contas em aberto" action={{ href: "/finance/accounts-payable", label: "Ver todas" }}>
         {open ? (
-          <OpenAccountsList accounts={accounts} total={open.count} />
+          <OpenAccountsList accounts={accounts} total={open.count} window={window} onWindowChange={setWindow} />
         ) : (
           <p className="py-6 text-ink-soft">{isLoading ? "Carregando as contas…" : "Não foi possível carregar as contas."}</p>
         )}

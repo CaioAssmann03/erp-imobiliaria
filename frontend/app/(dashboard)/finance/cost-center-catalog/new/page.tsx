@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { BackLink } from "@/components/BackLink";
-import { catalogUrl } from "@/lib/cost-center-catalog-workspace";
+import { BackLink } from "@/components/layout/BackLink";
+import { catalogUrl } from "@/lib/finance/cost-center-catalog-workspace";
 
 import { CatalogItemForm } from "../_components/CatalogItemForm";
 

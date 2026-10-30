@@ -4,7 +4,7 @@ import "./globals.css";
 import { LoginTransition } from "@/components/LoginTransition";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { APPEARANCE_INIT_SCRIPT, DEFAULT_APPEARANCE } from "@/lib/appearance";
+import { APPEARANCE_INIT_SCRIPT, DEFAULT_APPEARANCE } from "@/lib/theme/appearance";
 import { Providers } from "./providers";
 
 const inter = Inter({

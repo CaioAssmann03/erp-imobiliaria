@@ -3,8 +3,8 @@
 import { usePathname } from "next/navigation";
 
 import { FormPage } from "@/components/form/FormPage";
-import { SectionIndex } from "@/components/SectionIndex";
-import { COMPANY_ENTRY_SECTIONS, companyAccountFrameState } from "@/lib/company-account-workspace";
+import { SectionIndex } from "@/components/layout/SectionIndex";
+import { COMPANY_ENTRY_SECTIONS, companyAccountFrameState } from "@/lib/finance/company-account-workspace";
 import { cn } from "@/lib/utils";
 
 import { CompanyEntriesList } from "./CompanyEntriesList";

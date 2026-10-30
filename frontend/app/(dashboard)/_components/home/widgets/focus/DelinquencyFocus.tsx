@@ -5,9 +5,9 @@ import Link from "next/link";
 import { LinkButton } from "@/components/LinkButton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useBillingDocumentsDelinquency } from "@/lib/api/generated";
-import { formatDate } from "@/lib/format";
+import { formatDate } from "@/lib/format/format";
 
-import { SimpleBarChart } from "../../SimpleBarChart";
+import { SimpleBarChart } from "@/app/(dashboard)/_components/home/charts/SimpleBarChart";
 import { brl } from "../format";
 import { FocusSection, FocusStat } from "./parts";
 

@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 import type { BillingPlan, BillingPlanItem } from "@/lib/api/generated/models";
-import { monthFromApi, monthToApi, needsAmount, needsApportionmentCriterion, needsUnitValueField } from "@/lib/billing-plan-payload";
-import { moneyFromApi } from "@/lib/masks";
+import { monthFromApi, monthToApi, needsAmount, needsApportionmentCriterion, needsUnitValueField } from "@/lib/billing/billing-plan-payload";
+import { moneyFromApi } from "@/lib/format/masks";
 
 import { decimalField, enumField, optionalText, requiredText } from "./fields";
 
@@ -118,4 +118,4 @@ export const billingPlanToForm = (plan: BillingPlan): BillingPlanFormInput => ({
   items: plan.items.map(itemToForm),
 });
 
-export { planToPayload as billingPlanToPayload } from "@/lib/billing-plan-payload";
+export { planToPayload as billingPlanToPayload } from "@/lib/billing/billing-plan-payload";

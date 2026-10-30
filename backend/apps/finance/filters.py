@@ -3,7 +3,7 @@ from typing import final
 import django_filters
 from django.db.models import QuerySet
 
-from .models import AccountPayable, CurrentAccountEntry, EntryBatch, EntryTemplate
+from .models import AccountPayable, CompanyEntry, CostCenter, CostCenterCatalogItem, CurrentAccountEntry, EntryBatch, EntryTemplate
 
 
 @final
@@ -57,3 +57,31 @@ class EntryBatchFilter(django_filters.FilterSet):
     class Meta:
         model = EntryBatch
         fields = ("origin", "batch_date")
+
+
+@final
+class CompanyEntryFilter(django_filters.FilterSet):
+    """An entry-date range and `?condominium=<id>`: the entries of the documents of that condominium."""
+
+    condominium = django_filters.UUIDFilter(field_name="billing_document_item__document__unit__condominium")
+
+    class Meta:
+        model = CompanyEntry
+        fields = {"entry_date": ["gte", "lte"]}
+
+
+@final
+class CostCenterCatalogItemFilter(django_filters.FilterSet):
+    """`?active=` and `?unused_by_condominium=<id>`: the items that condominium has no sub-conta of yet."""
+
+    unused_by_condominium = django_filters.UUIDFilter(method="filter_unused_by_condominium")
+
+    class Meta:
+        model = CostCenterCatalogItem
+        fields = ("active",)
+
+    def filter_unused_by_condominium(
+        self, queryset: QuerySet[CostCenterCatalogItem], name: str, value: object
+    ) -> QuerySet[CostCenterCatalogItem]:
+        used = CostCenter.objects.filter(condominium_id=value).values("catalog_item_id")
+        return queryset.exclude(pk__in=used)

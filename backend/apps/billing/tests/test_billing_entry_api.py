@@ -282,3 +282,32 @@ def test_entries_of_another_company_are_invisible(
     foreign_client.force_authenticate(user=User.objects.create_user(username="other", password="x", company=other_company))
 
     assert results(foreign_client.get(reverse(ENTRIES))) == []
+
+
+@pytest.mark.usefixtures("entry_template")
+def test_query_searches_event_description_and_cost_center(api_client: APIClient, condominium: Condominium, cost_center: CostCenter) -> None:
+    units = make_units(condominium)
+    event = BillingEvent.objects.create(company=condominium.company, code=250, name="Limpeza do condomínio")
+    for overrides in ({"event": str(event.pk), "description": "10/2026"}, {"description": "Reparo do portão"}):
+        created = api_client.post(reverse(ENTRIES), entry_payload(condominium, cost_center, units, **overrides), format="json")
+        assert created.status_code == status.HTTP_201_CREATED, created.data
+
+    def found(term: str) -> list[str]:
+        listed = results(api_client.get(reverse(ENTRIES), {"condominium": str(condominium.pk), "query": term}))
+        return sorted(row["description"] for row in listed)
+
+    assert found("limpeza") == ["10/2026"]
+    assert found("portão") == ["Reparo do portão"]
+    assert found(cost_center.name) == ["10/2026", "Reparo do portão"]
+    assert found("zzz") == []
+
+
+def test_events_filter_by_credits_company(api_client: APIClient, company: Company) -> None:
+    _ = BillingEvent.objects.create(company=company, code=1, name="Taxa do condomínio")
+    _ = BillingEvent.objects.create(company=company, code=5, name="TARIFA BANCO", credits_company=True)
+
+    def names(value: str) -> list[str]:
+        return [row["name"] for row in results(api_client.get(reverse(EVENTS), {"credits_company": value}))]
+
+    assert names("true") == ["TARIFA BANCO"]
+    assert names("false") == ["Taxa do condomínio"]

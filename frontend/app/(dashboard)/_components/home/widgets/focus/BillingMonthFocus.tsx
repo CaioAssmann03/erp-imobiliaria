@@ -3,11 +3,11 @@
 import Link from "next/link";
 
 import { LinkButton } from "@/components/LinkButton";
-import { formatMonth } from "@/lib/format";
+import { formatMonth } from "@/lib/format/format";
 
 import { BillingMonthBodyRuns } from "./BillingMonthRuns";
-import { useBillingSummary } from "../../use-billing-summary";
-import { firstDayOfThisMonth, useIssuanceCoverage } from "../../BillingMonthBody";
+import { useBillingSummary } from "@/app/(dashboard)/_components/home/shared/use-billing-summary";
+import { firstDayOfThisMonth, useIssuanceCoverage } from "@/app/(dashboard)/_components/home/bodies/BillingMonthBody";
 import { brl } from "../format";
 import { FocusSection, FocusStat, ShareBar, percent } from "./parts";
 

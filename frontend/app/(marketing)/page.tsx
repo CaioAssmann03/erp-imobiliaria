@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
-import { GlobeSection } from "./_components/GlobeSection";
+import { GlobeSection } from "./_components/sections/GlobeSection";
 import { Hero } from "./_components/hero/Hero";
 import { ScanlineSkyline } from "./_components/hero/ScanlineSkyline";
-import { Questions } from "./_components/Questions";
-import { ScreenStack } from "./_components/ScreenStack";
-import { Summary } from "./_components/Summary";
+import { Questions } from "./_components/sections/Questions";
+import { ScreenStack } from "./_components/sections/ScreenStack";
+import { Summary } from "./_components/sections/Summary";
 
 export const metadata: Metadata = {
   title: "Software de gestão para administradoras de condomínios",

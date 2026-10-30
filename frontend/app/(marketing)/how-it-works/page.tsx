@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { PageIntro } from "../_components/PageIntro";
-import { Steps } from "../_components/Steps";
+import { PageIntro } from "@/app/(marketing)/_components/sections/PageIntro";
+import { Steps } from "@/app/(marketing)/_components/sections/Steps";
 
 export const metadata: Metadata = {
   title: "Como funciona",

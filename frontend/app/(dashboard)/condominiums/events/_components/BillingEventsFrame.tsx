@@ -3,8 +3,8 @@
 import { usePathname } from "next/navigation";
 
 import { FormPage } from "@/components/form/FormPage";
-import { SectionIndex } from "@/components/SectionIndex";
-import { EVENT_SECTIONS, eventsFrameState } from "@/lib/billing-event-workspace";
+import { SectionIndex } from "@/components/layout/SectionIndex";
+import { EVENT_SECTIONS, eventsFrameState } from "@/lib/billing/billing-event-workspace";
 import { cn } from "@/lib/utils";
 import { BillingEventsList } from "./BillingEventsList";
 

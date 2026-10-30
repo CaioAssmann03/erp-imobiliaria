@@ -1,45 +1,46 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
-import { DateField, MonthField, SearchSelectField } from "@/components/form/fields";
+import { DateField, MonthField } from "@/components/form/fields";
+import { FormActions } from "@/components/form/FormActions";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
-import { useCondominiumsList } from "@/lib/api/generated";
+import { extraBillingUrl, type ExtraBillingScope } from "@/lib/billing/extra-billing-workspace";
 import {
   extraBillingDefaults,
   extraBillingSchema,
   type ExtraBillingFormInput,
   type ExtraBillingFormOutput,
 } from "@/lib/schemas/extra-billing";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 import { UnitsPicker } from "../../entries/_components/entry-form/UnitsPicker";
 import { ExtraLines } from "./ExtraLines";
 import { ExtraResult } from "./ExtraResult";
+import { useExtraScope } from "./use-extra-scope";
 import { useExtraSubmit } from "./use-extra-submit";
 
-/** A tela do boleto extra: condomínio, mês e vencimento, as unidades e as linhas; depois de emitir, mostra o que saiu. */
-export function ExtraBillingForm() {
+function Form({ scope }: { scope: ExtraBillingScope }) {
+  const router = useRouter();
   const methods = useForm<ExtraBillingFormInput, unknown, ExtraBillingFormOutput>({
     resolver: zodResolver(extraBillingSchema),
-    defaultValues: extraBillingDefaults(),
+    defaultValues: extraBillingDefaults(scope.condominium),
     mode: "onTouched",
   });
-  const { handleSubmit, reset, setError, setValue, getValues } = methods;
+  const { handleSubmit, reset, setError } = methods;
   const { submit, isSubmitting, result, clearResult } = useExtraSubmit(setError);
-  const { data: condominiums } = useCondominiumsList({ limit: 100 });
 
   if (result) {
     return (
       <ExtraResult
         result={result}
-        condominiumId={getValues("condominium")}
+        condominiumId={scope.condominium}
         onEdit={clearResult}
         onNew={() => {
-          reset(extraBillingDefaults());
+          reset(extraBillingDefaults(scope.condominium));
           clearResult();
         }}
       />
@@ -48,53 +49,49 @@ export function ExtraBillingForm() {
 
   return (
     <FormProvider {...methods}>
-      <form
-        noValidate
-        onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))}
-        className="mx-auto flex w-full max-w-4xl flex-col gap-4"
-      >
-        <FormSection title="Boleto" description="O vencimento é só deste boleto; a multa e os juros seguem as regras do condomínio.">
-          <SearchSelectField
-            name="condominium"
-            label="Condomínio"
-            required
-            placeholder="Selecione"
-            onValueChange={() => {
-              setValue("units", [], { shouldDirty: true });
-              setValue("lines", extraBillingDefaults().lines);
-            }}
-            options={(condominiums?.results ?? []).map((item) => ({ value: item.id, label: `${item.code} - ${item.name}` }))}
-          />
-          <FieldRow>
-            <MonthField
-              name="competence_month"
-              label="Competência"
-              required
-              hint="O mês a que a cobrança se refere."
-            />
-            <DateField name="due_date" label="Vencimento" required />
-          </FieldRow>
-        </FormSection>
-        <FormSection title="Unidades" description="Quem recebe o boleto. Cada unidade recebe o seu, com a sua parte do rateio.">
-          <ExtraUnits />
-        </FormSection>
-        <ExtraLines />
-        <div className="flex items-center justify-end gap-2">
-          <Button type="button" variant="secondary" onClick={() => reset(extraBillingDefaults())}>
-            Limpar
-          </Button>
-          <Button type="submit" disabled={isSubmitting} className="min-w-32">
-            {isSubmitting && <Loader2 className="size-4 animate-spin" />}
-            {isSubmitting ? "Emitindo…" : "Emitir boleto extra"}
-          </Button>
+      <form noValidate onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))} className="space-y-4">
+        <div id="boleto" className="scroll-mt-20">
+          <FormSection title="Boleto">
+            <FieldRow>
+              <MonthField name="competence_month" label="Competência" required hint="O mês a que a cobrança se refere." />
+              <DateField name="due_date" label="Vencimento" required hint="Só deste boleto; a multa e os juros seguem as regras do condomínio." />
+            </FieldRow>
+          </FormSection>
         </div>
+        <div id="unidades" className="scroll-mt-20">
+          <FormSection title="Unidades">
+            <ExtraUnits />
+          </FormSection>
+        </div>
+        <div id="valores" className="scroll-mt-20">
+          <ExtraLines />
+        </div>
+        <FormActions isSubmitting={isSubmitting} submitLabel="Emitir boleto extra" submittingLabel="Emitindo…">
+          <Button type="button" variant="secondary" onClick={() => router.push(extraBillingUrl(scope))}>
+            Cancelar
+          </Button>
+        </FormActions>
       </form>
     </FormProvider>
   );
 }
 
-/** O seletor de unidades da Inclusão de valores, com o condomínio escolhido acima. */
+/** O seletor de unidades da Inclusão de valores, com o condomínio da lista. */
 function ExtraUnits() {
   const condominium = useWatch({ name: "condominium" }) as string;
   return <UnitsPicker condominium={condominium} />;
+}
+
+/** Client Component: o boleto extra novo, no condomínio da lista: mês e vencimento, as unidades e as linhas; depois de emitir, mostra o que saiu. */
+export function ExtraBillingForm() {
+  const scope = useExtraScope();
+
+  if (scope.condominium === "")
+    return (
+      <div className="rounded-card bg-surface p-8 text-center">
+        <p className="text-body text-ink-soft">Escolha o condomínio na lista para emitir um boleto extra para ele.</p>
+      </div>
+    );
+
+  return <Form scope={scope} />;
 }

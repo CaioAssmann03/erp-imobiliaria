@@ -1,7 +1,7 @@
 "use client";
 
 import { useCurrentAccountsBalances } from "@/lib/api/generated";
-import { brl } from "@/lib/format";
+import { brl } from "@/lib/format/format";
 import { cn } from "@/lib/utils";
 
 /**

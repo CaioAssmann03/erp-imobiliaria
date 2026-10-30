@@ -12,14 +12,14 @@ import {
   useAccountsPayablePartialUpdate,
 } from "@/lib/api/generated";
 import type { AccountPayable } from "@/lib/api/generated/models";
-import { accountPayableUrl } from "@/lib/account-payable-workspace";
-import { applyServerErrors } from "@/lib/form-errors";
+import { accountPayableUrl } from "@/lib/finance/account-payable-workspace";
+import { applyServerErrors } from "@/lib/errors/form-errors";
 import {
   accountPayableToPayload,
   type AccountPayableFormInput,
   type AccountPayableFormOutput,
 } from "@/lib/schemas/account-payable";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 export function useAccountPayableSubmit(
   accountId: string | undefined,

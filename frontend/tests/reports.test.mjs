@@ -8,7 +8,7 @@ import {
   delinquencyPdfName,
   monthIso,
   reportMonths,
-} from "../lib/reports.ts";
+} from "../lib/reports/reports.ts";
 
 test("a month is written as its first day", () => {
   assert.equal(monthIso(2026, 3), "2026-03-01");

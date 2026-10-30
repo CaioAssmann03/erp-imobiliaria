@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useCondominiumsList, useUnitsList } from "@/lib/api/generated";
 import type { Dashboard } from "@/lib/api/generated/models";
 
-import { DotMatrix } from "../../DotMatrix";
+import { DotMatrix } from "@/app/(dashboard)/_components/home/charts/DotMatrix";
 import { FocusSection, FocusStat, percent } from "./parts";
 
 const SHOWN = 10;

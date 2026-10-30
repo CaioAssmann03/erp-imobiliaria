@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { EVENT_SECTIONS, eventsFrameState, eventsUrl, eventUrl, newEventUrl } from "../lib/billing-event-workspace.ts";
+import { EVENT_SECTIONS, eventsFrameState, eventsUrl, eventUrl, newEventUrl } from "../lib/billing/billing-event-workspace.ts";
 
 test("the empty screen has the frame and, on a phone, only the list", () => {
   const state = eventsFrameState("/condominiums/events");

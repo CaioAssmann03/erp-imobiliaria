@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { MonthField, SearchSelectField } from "@/components/form/fields";
@@ -24,11 +24,12 @@ import {
   useCondominiumsList,
 } from "@/lib/api/generated";
 import type { BillingRun } from "@/lib/api/generated/models";
-import { applyServerErrors } from "@/lib/form-errors";
-import { issuedNothing } from "@/lib/billing-documents";
-import { currentMonthTyped } from "@/lib/billing-plan-payload";
+import { applyServerErrors } from "@/lib/errors/form-errors";
+import { issuedNothing } from "@/lib/billing/billing-documents";
+import { currentMonthTyped, monthFromApi } from "@/lib/billing/billing-plan-payload";
+import { billingRunUrl, type BillingRunsScope } from "@/lib/billing/billing-run-workspace";
 import { issueMonthSchema, type IssueMonthFormInput, type IssueMonthFormOutput } from "@/lib/schemas/billing-run";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 /** O aviso depois de emitir: sucesso só se emitiu algo; sem emissão nenhuma é um alerta que manda ver os problemas. */
 function notifyResult(run: BillingRun) {
@@ -38,9 +39,11 @@ function notifyResult(run: BillingRun) {
   else toast.success(run.issued_count === 1 ? "1 documento emitido." : `${run.issued_count} documentos emitidos.`);
 }
 
-/** Emite agora o mês de um condomínio (a chamada é síncrona) e abre a execução. Unidades já emitidas não duplicam. */
-export function IssueMonthDialog() {
-  const [open, setOpen] = useState(false);
+/**
+ * Emite agora o mês de um condomínio (a chamada é síncrona) e abre a execução ao lado da lista. Unidades já emitidas não duplicam. Quem abre é o **+** da lista, que passa
+ * o escopo dela: o condomínio e o mês já vêm preenchidos (sem mês na lista, o mês atual).
+ */
+export function IssueMonthDialog({ open, onOpenChange, scope }: { open: boolean; onOpenChange: (open: boolean) => void; scope: BillingRunsScope }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const createMutation = useBillingRunsCreate();
@@ -48,10 +51,15 @@ export function IssueMonthDialog() {
 
   const methods = useForm<IssueMonthFormInput, unknown, IssueMonthFormOutput>({
     resolver: zodResolver(issueMonthSchema),
-    defaultValues: { condominium: "", reference_month: currentMonthTyped() },
+    defaultValues: { condominium: scope.condominium, reference_month: scope.month ? monthFromApi(scope.month) : currentMonthTyped() },
     mode: "onTouched",
   });
-  const { handleSubmit, setError } = methods;
+  const { handleSubmit, setError, reset } = methods;
+
+  // A cada abertura o formulário volta a partir do que a lista mostra agora.
+  useEffect(() => {
+    if (open) reset({ condominium: scope.condominium, reference_month: scope.month ? monthFromApi(scope.month) : currentMonthTyped() });
+  }, [open, scope.condominium, scope.month, reset]);
 
   const submit = (values: IssueMonthFormOutput) =>
     createMutation.mutate(
@@ -61,8 +69,9 @@ export function IssueMonthDialog() {
           queryClient.invalidateQueries({ queryKey: getBillingRunsListQueryKey() });
           queryClient.invalidateQueries({ queryKey: getBillingDocumentsListQueryKey() });
           notifyResult(run);
-          setOpen(false);
-          router.push(`/billing/runs/${run.id}`);
+          onOpenChange(false);
+          // A execução nova abre na lista do condomínio dela; o mês da lista só fica se for o dela (senão a execução não apareceria).
+          router.push(billingRunUrl(run.id, { condominium: run.condominium, month: scope.month === run.reference_month ? scope.month : "" }));
         },
         onError: (error) => toast.error(applyServerErrors(error, setError)),
       }
@@ -70,10 +79,7 @@ export function IssueMonthDialog() {
 
   return (
     <>
-      <Button type="button" onClick={() => setOpen(true)}>
-        Emitir mês
-      </Button>
-      <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialog open={open} onOpenChange={onOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Emitir o mês de um condomínio</AlertDialogTitle>

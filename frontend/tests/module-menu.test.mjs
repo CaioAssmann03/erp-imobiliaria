@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { activeModule, APP_MODULES, isItemActive } from "../lib/module-menu.ts";
+import { activeModule, APP_MODULES, isItemActive } from "../lib/navigation/module-menu.ts";
 
 test("the active module follows the URL", () => {
   assert.equal(activeModule("/dashboard"), "home");

@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 import type { CostCenterCatalogItem } from "@/lib/api/generated/models";
-import { formatCode } from "@/lib/billing-entry-payload";
-import { catalogItemUrl } from "@/lib/cost-center-catalog-workspace";
+import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { catalogItemUrl } from "@/lib/finance/cost-center-catalog-workspace";
 import { cn } from "@/lib/utils";
 
 /**

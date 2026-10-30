@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { monthToApi } from "@/lib/billing-plan-payload";
+import { monthToApi } from "@/lib/billing/billing-plan-payload";
 
 /** Emitir o mês de um condomínio: o mês é digitado como "03/2026" e vai como o primeiro dia dele. */
 export const issueMonthSchema = z.object({

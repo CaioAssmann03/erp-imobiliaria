@@ -1,8 +1,8 @@
 "use client";
 
-import { SectionIndex } from "@/components/SectionIndex";
+import { SectionIndex } from "@/components/layout/SectionIndex";
 import { useAccountsPayableRetrieve } from "@/lib/api/generated";
-import { payableSections } from "@/lib/account-payable-workspace";
+import { payableSections } from "@/lib/finance/account-payable-workspace";
 
 /**
  * Client Component: o índice da direita da conta aberta. Uma conta em aberto (e a nova) é um formulário, com as seções Despesa e Conta; uma

@@ -15,6 +15,7 @@ skip-if: serializer/view code patterns → conventions/practices.md; permissions
 - **Pagination** (`StandardPagination`): `?page=`, `?limit=` (default 20, max 100); body `{count, next, previous, results}`. Querysets must be **ordered** (`Meta.ordering`).
 - **Search**: `?query=` over the view's `search_fields`; space-separated terms must all match. A view with `search_code_field = "code"` also matches a term of only digits against the record's ID (the "ID" users type) and lists that record first.
 - **Filters**: `filterset_fields` for exact matches; a `FilterSet` in `filters.py` for derived ones (`persons` `?type=` and `?module=`, `?pending=`).
+- **The client never filters**: every list a screen shows must be filterable, searchable and paginated by these parameters (spec 064). When a screen needs a criterion the endpoint lacks (`?condominium=`, `?is_current=`, `?query=`, `?credits_company=`), add it here with a test; a screen that fetched "everything" and filtered it in the browser is a missing filter, not a feature.
 - Avoid N+1: `select_related` / `prefetch_related` for everything the serializer reads.
 
 ## Writes

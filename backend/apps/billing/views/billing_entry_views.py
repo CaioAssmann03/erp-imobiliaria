@@ -9,6 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.core.infrastructure.api.filters import QuerySearchFilter
 from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin
 
 from ..filters import BillingEntryFilter
@@ -33,7 +34,8 @@ class BillingEntryViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Billi
         Prefetch("entry_units", queryset=BillingEntryUnit.objects.select_related("unit"))
     )
     serializer_class = BillingEntrySerializer
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, QuerySearchFilter)
+    search_fields = ("event__name", "description", "cost_center__name")
     filterset_class = BillingEntryFilter
 
     def get_serializer_context(self) -> dict[str, Any]:

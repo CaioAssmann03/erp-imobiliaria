@@ -11,7 +11,7 @@ skip-if: token/cookie details → safeguards/auth-and-tokens.md
 - **XSS/injection:** render data as JSX text; **never** `dangerouslySetInnerHTML` with API/user content; no `eval`/`new Function`/
   `document.write`; `encodeURIComponent` for hand-built query parts (the generated client encodes params); validate `href`/`src`
   (`https:` or relative; never `javascript:`).
-- **Redirects/links:** `?next=` through `safeNextPath()` (`lib/safe-redirect.ts`); `target="_blank"` needs `rel="noopener noreferrer"`.
+- **Redirects/links:** `?next=` through `safeNextPath()` (`lib/auth/safe-redirect.ts`); `target="_blank"` needs `rel="noopener noreferrer"`.
 - **PII (CPF, CNPJ, email, phone — LGPD):** never in `console.log`, toasts, error texts, analytics or URLs; show only what the screen
   needs; not in browser storage (query cache for the session; `queryClient.clear()` on logout).
 - **Validation:** Zod for UX **and** always handle the server 400 (`applyServerErrors`); normalize in `xxxToPayload`; mirror backend `max_length`.

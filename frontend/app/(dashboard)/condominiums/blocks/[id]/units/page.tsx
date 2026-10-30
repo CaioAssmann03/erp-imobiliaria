@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { BlockHeader } from "../../../_components/BlockHeader";
-import { BlockUnitsList } from "../../../_components/BlockUnitsList";
+import { BlockHeader } from "@/app/(dashboard)/condominiums/_components/blocks/BlockHeader";
+import { BlockUnitsList } from "@/app/(dashboard)/condominiums/_components/blocks/BlockUnitsList";
 
 export const metadata: Metadata = { title: "Unidades do bloco" };
 

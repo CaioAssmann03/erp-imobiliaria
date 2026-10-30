@@ -1,22 +1,9 @@
 "use client";
 
-import { LinkButton } from "@/components/LinkButton";
-import { Button } from "@/components/ui/button";
+import { ErrorScreen } from "@/components/errors/ErrorScreen";
+import { errorScreenCodeOf } from "@/lib/errors/error-screens";
 
-/** Um erro inesperado ao montar a página: mensagem em português e as saídas, sem expor o detalhe técnico. */
-export default function DashboardError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
-  return (
-    <div className="mx-auto max-w-md space-y-4 py-16 text-center" role="alert">
-      <h1 className="text-title">Algo deu errado</h1>
-      <p className="text-body text-ink-soft">Não foi possível carregar esta página. Tente de novo; se continuar, volte ao painel.</p>
-      <div className="flex justify-center gap-2">
-        <Button type="button" onClick={reset}>
-          Tentar de novo
-        </Button>
-        <LinkButton variant="secondary" href="/dashboard">
-          Ir ao painel
-        </LinkButton>
-      </div>
-    </div>
-  );
+/** Falha ao montar ou carregar a página: a tela do código (403, 5xx, rede...) ou a 500, sem expor o detalhe técnico. */
+export default function DashboardError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  return <ErrorScreen code={errorScreenCodeOf(error)} onRetry={reset} reference={error.digest} />;
 }

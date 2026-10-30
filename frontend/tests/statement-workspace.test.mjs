@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { STATEMENT_SECTIONS, statementFrameState, statementUrl } from "../lib/statement-workspace.ts";
+import { STATEMENT_SECTIONS, statementFrameState, statementUrl } from "../lib/finance/statement-workspace.ts";
 
 test("the empty screen has the frame and, on a phone, only the list", () => {
   const state = statementFrameState("/finance/statement");

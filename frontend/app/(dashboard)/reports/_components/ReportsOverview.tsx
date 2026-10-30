@@ -3,8 +3,8 @@
 import Link from "next/link";
 
 import { billingDocumentsDelinquencyPdf, useBillingDocumentsDelinquency } from "@/lib/api/generated";
-import { brl, formatMonth, todayIso } from "@/lib/format";
-import { delinquencyPdfName } from "@/lib/reports";
+import { brl, formatMonth, todayIso } from "@/lib/format/format";
+import { delinquencyPdfName } from "@/lib/reports/reports";
 import { cn } from "@/lib/utils";
 
 import { ReportDownloadButton } from "./ReportDownloadButton";

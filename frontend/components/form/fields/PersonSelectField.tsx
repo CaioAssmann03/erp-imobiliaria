@@ -3,7 +3,7 @@
 import { useId } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
-import { PersonSearchSelect } from "@/components/PersonSearchSelect";
+import { PersonSearchSelect } from "@/components/persons/PersonSearchSelect";
 import type { Person } from "@/lib/api/generated/models";
 
 import { FormField } from "../FormField";

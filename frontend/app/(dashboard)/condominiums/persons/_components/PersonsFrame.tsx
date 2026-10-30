@@ -4,8 +4,8 @@ import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 
 import { FormPage } from "@/components/form/FormPage";
-import { SectionIndex } from "@/components/SectionIndex";
-import { PERSON_SECTIONS, personsFrameState } from "@/lib/person-workspace";
+import { SectionIndex } from "@/components/layout/SectionIndex";
+import { PERSON_SECTIONS, personsFrameState } from "@/lib/persons/person-workspace";
 import { cn } from "@/lib/utils";
 import { PersonsList } from "./PersonsList";
 

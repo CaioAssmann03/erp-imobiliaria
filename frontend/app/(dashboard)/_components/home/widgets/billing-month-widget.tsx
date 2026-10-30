@@ -1,4 +1,4 @@
-import { BillingMonthBody } from "../BillingMonthBody";
+import { BillingMonthBody } from "@/app/(dashboard)/_components/home/bodies/BillingMonthBody";
 import { BillingMonthFocus } from "./focus/BillingMonthFocus";
 import type { WidgetBuilder } from "./types";
 

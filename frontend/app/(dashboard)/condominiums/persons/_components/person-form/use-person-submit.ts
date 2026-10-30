@@ -12,11 +12,11 @@ import {
   usePersonsPartialUpdate,
 } from "@/lib/api/generated";
 import type { Person } from "@/lib/api/generated/models";
-import { applyServerErrors } from "@/lib/form-errors";
-import { CONDOMINIUMS_MODULE } from "@/lib/person-module";
-import { personUrl } from "@/lib/person-workspace";
+import { applyServerErrors } from "@/lib/errors/form-errors";
+import { CONDOMINIUMS_MODULE } from "@/lib/persons/person-module";
+import { personUrl } from "@/lib/persons/person-workspace";
 import { personToPayload, type PersonFormInput, type PersonFormOutput } from "@/lib/schemas/person";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 export function usePersonSubmit(personId: string | undefined, setError: UseFormSetError<PersonFormInput>) {
   const router = useRouter();

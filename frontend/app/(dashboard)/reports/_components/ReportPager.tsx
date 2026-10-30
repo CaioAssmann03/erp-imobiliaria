@@ -1,4 +1,4 @@
-import { PageControls } from "@/components/PageControls";
+import { PageControls } from "@/components/data-list/PageControls";
 
 /** Quantos itens por página o relatório oferece; o primeiro é o padrão do servidor. */
 export const REPORT_PAGE_SIZES = [10, 25, 50, 100];

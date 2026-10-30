@@ -27,6 +27,10 @@ limit?: number;
  */
 page?: number;
 /**
+ * Termo de busca (nome, documento, ID…).
+ */
+query?: string;
+/**
  * * `once` - Once
  * * `installments` - Installments
  * * `always` - Always

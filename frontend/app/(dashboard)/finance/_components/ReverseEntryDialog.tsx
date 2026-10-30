@@ -22,14 +22,14 @@ import {
   useCurrentAccountEntriesReverse,
 } from "@/lib/api/generated";
 import type { CurrentAccountEntry } from "@/lib/api/generated/models";
-import { applyServerErrors } from "@/lib/form-errors";
-import { brl, todayIso } from "@/lib/format";
+import { applyServerErrors } from "@/lib/errors/form-errors";
+import { brl, todayIso } from "@/lib/format/format";
 import {
   reverseEntrySchema,
   type ReverseEntryFormInput,
   type ReverseEntryFormOutput,
 } from "@/lib/schemas/entry-batch";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 /** Estorno: um lançamento nunca é alterado nem apagado, o estorno cria o lançamento oposto. */
 export function ReverseEntryDialog({ entry }: { entry: CurrentAccountEntry }) {

@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-import { Brand } from "@/components/Brand";
-import { GlobalSearch } from "./GlobalSearch";
-import { MobileMenu } from "./MobileMenu";
-import { Rail } from "./Rail";
+import { Brand } from "@/components/brand/Brand";
+import { GlobalSearch } from "./search/GlobalSearch";
+import { MobileMenu } from "./menu/MobileMenu";
+import { Rail } from "./rail/Rail";
 
 /**
  * Server Component sem dados nem cookies (o mesmo HTML para todos): monta o esqueleto. O tema vem de atributos do <html>

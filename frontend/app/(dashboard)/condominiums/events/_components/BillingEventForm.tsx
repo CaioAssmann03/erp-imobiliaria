@@ -11,8 +11,8 @@ import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useBillingEventsRetrieve } from "@/lib/api/generated";
-import { eventsUrl } from "@/lib/billing-event-workspace";
-import { throwIfNotFound } from "@/lib/query/not-found";
+import { eventsUrl } from "@/lib/billing/billing-event-workspace";
+import { throwIfPageError } from "@/lib/query/page-error";
 import {
   BILLING_EVENT_DEFAULTS,
   billingEventSchema,
@@ -20,7 +20,7 @@ import {
   type BillingEventFormInput,
   type BillingEventFormOutput,
 } from "@/lib/schemas/billing-event";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 import { BillingEventDeleteButton } from "./BillingEventDeleteButton";
 import { useBillingEventSubmit } from "./billing-event-form/use-billing-event-submit";
@@ -32,7 +32,7 @@ export function BillingEventForm({ billingEventId }: { billingEventId?: string }
   const { data: event, isLoading, error: loadError } = useBillingEventsRetrieve(billingEventId ?? "", {
     query: { enabled: isEdit },
   });
-  throwIfNotFound(loadError);
+  throwIfPageError(loadError);
 
   const methods = useForm<BillingEventFormInput, unknown, BillingEventFormOutput>({
     resolver: zodResolver(billingEventSchema),

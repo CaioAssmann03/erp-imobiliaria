@@ -7,18 +7,19 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ShowMore } from "@/components/data-list";
-import { MonthSelect } from "@/components/MonthSelect";
-import { ScopeDivider, ScopeSearchCard, ScopeSearchRow } from "@/components/ScopeSearchCard";
-import { ScopeSelect } from "@/components/ScopeSelect";
+import { MonthSelect } from "@/components/dates/MonthSelect";
+import { ScopeDivider, ScopeSearchCard, ScopeSearchRow } from "@/components/filters/ScopeSearchCard";
+import { ScopeSelect } from "@/components/filters/ScopeSelect";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useBillingEntriesList, useCondominiumsList } from "@/lib/api/generated";
-import { buildGrid, entryColumnTitle, formatCode } from "@/lib/billing-entry-payload";
-import { MAX_ENTRIES_PER_MONTH, billingEntriesUrl, newBillingEntryUrl } from "@/lib/billing-entry-workspace";
-import { todayIso } from "@/lib/format";
+import { buildGrid, formatCode } from "@/lib/billing/billing-entry-payload";
+import { MAX_ENTRIES_PER_MONTH, billingEntriesUrl, newBillingEntryUrl } from "@/lib/billing/billing-entry-workspace";
+import { todayIso } from "@/lib/format/format";
 import { cn } from "@/lib/utils";
 
-import { BillingEntryListItem, entryDestinationLabel } from "./BillingEntryListItem";
+import { BillingEntryListItem } from "./BillingEntryListItem";
 import { useEntriesScope } from "./use-entries-scope";
 
 /**
@@ -30,16 +31,16 @@ export function BillingEntriesList({ openEntryId, className }: { openEntryId: st
   const router = useRouter();
   const scope = useEntriesScope();
   const [search, setSearch] = useState("");
-  const term = search.trim().toLowerCase();
+  const term = useDebouncedValue(search.trim());
 
   const { limit, showMore } = useGrowingLimit(`${scope.condominium}|${scope.month}|${term}`);
   const { data: condominiums } = useCondominiumsList({ limit: 100 });
   const { data, isLoading, isPlaceholderData } = useBillingEntriesList(
-    { condominium: scope.condominium, reference_month: scope.month, limit: MAX_ENTRIES_PER_MONTH },
+    { condominium: scope.condominium, reference_month: scope.month, limit: MAX_ENTRIES_PER_MONTH, ...(term ? { query: term } : {}) },
     { query: { enabled: scope.condominium !== "", placeholderData: keepPreviousData } }
   );
-  const entries = (data?.results ?? []).filter((entry) => !term || `${entryColumnTitle(entry).title} ${entryDestinationLabel(entry)}`.toLowerCase().includes(term));
-  const { entryTotals } = buildGrid((data?.results ?? []).map((entry) => ({ id: entry.id, month: entry.month })));
+  const entries = data?.results ?? [];
+  const { entryTotals } = buildGrid(entries.map((entry) => ({ id: entry.id, month: entry.month })));
 
   const hasScope = scope.condominium !== "";
   const plusClass = "flex size-8 items-center justify-center rounded-control text-ink-soft outline-none transition-colors";

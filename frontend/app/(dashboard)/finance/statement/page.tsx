@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { statementUrl } from "@/lib/statement-workspace";
-import { uuidParam } from "@/lib/uuid-param";
+import { statementUrl } from "@/lib/finance/statement-workspace";
+import { uuidParam } from "@/lib/api/uuid-param";
 
 export const metadata: Metadata = { title: "Extrato" };
 

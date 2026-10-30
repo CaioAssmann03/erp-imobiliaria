@@ -75,31 +75,54 @@ export const QUESTIONS = {
 };
 
 /**
- * Duas telas reais do sistema (`ScreenStack`), uma por vez: ao lado, a frase de abertura e os três pontos da tela da vez.
- * Os prints (`public/marketing/painel.png` e `unidades.png`, 1440×900 a 2x) usam só dados fictícios (`seed_demo`); se forem
- * refeitos, manter o tema claro e o mesmo tamanho. Só afirma o que a tela mostra: conferir o texto contra o print.
+ * As telas reais mostradas em `ScreenStack` (prints 1440×900 a 2x em `public/marketing`, tema claro, só dados fictícios de
+ * `seed_demo`; se refeitos, manter o tema e o tamanho). Cada ponto aproxima a imagem de uma região do print: `x` e `y` são o centro,
+ * em % da imagem, e `zoom` o aumento. O texto descreve só o que o print mostra.
  */
 export const SCREENS = [
   {
     key: "painel",
-    alt: "Painel do sistema: resumo da carteira, contas a pagar e pendências",
+    alt: "Painel do sistema: emissão do mês, inadimplência, contas a pagar e pendências",
     title: "Painel",
-    lead: "A primeira tela do dia mostra o que pede atenção na administração: quantos condomínios, unidades e pessoas há na carteira, o que vence e o que está pendente, sem abrir relatório nenhum.",
+    lead: "O que pede atenção hoje: o que foi cobrado, o que está atrasado e o que ainda falta cadastrar.",
     points: [
-      { term: "Contas a pagar", text: "Atrasadas, de hoje, dos próximos 7 dias e do mês, de todos os condomínios, com as mais antigas em aberto logo abaixo." },
-      { term: "Pendências", text: "Unidades sem responsável, rateio que não fecha 100%, reajustes atrasados, locações terminando e condomínios sem centro de custo." },
-      { term: "Receita fixa", text: "A soma mensal das taxas fixas de administração, com a parte de cada condomínio." },
+      { term: "Emissão do mês", text: "O valor emitido, quanto já foi recebido e o que segue em aberto. Quando uma emissão dá problema, a linha vermelha avisa.", focus: { x: 22, y: 30, zoom: 2.8 } },
+      { term: "Inadimplência", text: "Os boletos vencidos e não pagos, com os condomínios que mais devem logo abaixo.", focus: { x: 52.5, y: 30, zoom: 2.8 } },
+      { term: "Contas a pagar", text: "As contas vencidas, as de hoje, as dos próximos 7 dias e as do mês.", focus: { x: 83, y: 30, zoom: 2.8 } },
+      { term: "Pendências", text: "Unidades sem responsável, rateio que não fecha 100% e lançamentos bloqueados, cada um com a sua quantidade.", focus: { x: 83, y: 66, zoom: 2.1 } },
     ],
   },
   {
     key: "unidades",
-    alt: "Lista de unidades de todos os condomínios, com bloco, tipo e proprietários ou locatários",
+    alt: "Unidade aberta: lista de unidades do condomínio, dados da unidade e frações ideais",
     title: "Unidades",
-    lead: "Todas as unidades dos condomínios administrados numa lista só, cada uma ligada às pessoas que respondem por ela. É a base de onde parte a cobrança.",
+    lead: "Cada unidade com as pessoas que respondem por ela. É dela que parte a cobrança.",
     points: [
-      { term: "Quem responde", text: "Proprietários e locatários de cada unidade, com o ID do cadastro de pessoas, para achar a pessoa certa na hora." },
-      { term: "Como é a unidade", text: "Condomínio, bloco e tipo (loja, conjunto, sala), com as inativas identificadas na própria linha." },
-      { term: "Filtros", text: "Para achar qualquer unidade entre as de todos os condomínios, e a lista paginada quando a carteira cresce." },
+      { term: "A lista", text: "As unidades do condomínio escolhido, com bloco e responsável. As inativas aparecem marcadas na própria linha.", focus: { x: 18, y: 42, zoom: 1.9 } },
+      { term: "Dados da unidade", text: "Número, bloco, tipo, matrícula e quantidade de moradores, e a marca de unidade do síndico.", focus: { x: 57, y: 30, zoom: 1.9 } },
+      { term: "Frações ideais", text: "A parte da unidade no rateio de cada critério. Um critério novo se cria ali mesmo.", focus: { x: 57, y: 62, zoom: 1.9 } },
+    ],
+  },
+  {
+    key: "extrato",
+    alt: "Extrato de um condomínio: saldo, saldo por sub-conta e lançamentos",
+    title: "Extrato",
+    lead: "A conta corrente de cada condomínio, do saldo ao último lançamento.",
+    points: [
+      { term: "Saldo de cada condomínio", text: "A lista mostra o saldo ao lado do nome, em vermelho quando é negativo.", focus: { x: 18, y: 42, zoom: 1.9 } },
+      { term: "Saldo por sub-conta", text: "O mesmo saldo repartido por sub-conta. A soma delas é o saldo total.", focus: { x: 47, y: 36, zoom: 1.9 } },
+      { term: "Lançamentos", text: "Do mais novo ao mais antigo, com a sub-conta e o número de cada um, busca pela descrição e filtro por mês.", focus: { x: 56, y: 76, zoom: 1.9 } },
+    ],
+  },
+  {
+    key: "inadimplencia",
+    alt: "Relatório de inadimplência: total vencido, condomínios que mais devem e lista de boletos",
+    title: "Inadimplência",
+    lead: "Todos os boletos vencidos e não pagos, por condomínio. O valor é o do boleto, sem multa nem juros.",
+    points: [
+      { term: "Total vencido", text: "A soma de tudo o que está em atraso, em destaque, com o relatório em PDF a um clique.", focus: { x: 52, y: 34, zoom: 2 } },
+      { term: "Quem mais deve", text: "Os condomínios com mais boletos vencidos, em porcentagem do total.", focus: { x: 80, y: 34, zoom: 2.5 } },
+      { term: "Boleto a boleto", text: "Unidade, pagador, referência, vencimento com os dias de atraso e valor, dez por página.", focus: { x: 66, y: 74, zoom: 1.6 } },
     ],
   },
 ] as const;

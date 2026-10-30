@@ -3,7 +3,7 @@
 import { useId } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { inputClass } from "@/lib/ui";
+import { inputClass } from "@/lib/theme/ui";
 
 import { FormField } from "../FormField";
 import type { BaseProps } from "./types";

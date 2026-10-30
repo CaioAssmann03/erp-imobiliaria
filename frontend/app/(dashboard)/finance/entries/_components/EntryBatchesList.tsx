@@ -5,17 +5,17 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { CompactFilter, type CompactFilterGroup } from "@/components/CompactFilter";
-import { DateSelect } from "@/components/DateSelect";
+import { CompactFilter, type CompactFilterGroup } from "@/components/filters/CompactFilter";
+import { DateSelect } from "@/components/dates/DateSelect";
 import { ShowMore } from "@/components/data-list";
-import { ScopeSearchCard, ScopeSearchRow } from "@/components/ScopeSearchCard";
-import { ScopeSelect } from "@/components/ScopeSelect";
+import { ScopeSearchCard, ScopeSearchRow } from "@/components/filters/ScopeSearchCard";
+import { ScopeSelect } from "@/components/filters/ScopeSelect";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useCondominiumsList, useEntryBatchesList } from "@/lib/api/generated";
 import type { EntryBatchesListOrigin } from "@/lib/api/generated/models";
-import { newEntryBatchUrl } from "@/lib/entry-batch-workspace";
-import { todayIso } from "@/lib/format";
+import { newEntryBatchUrl } from "@/lib/finance/entry-batch-workspace";
+import { todayIso } from "@/lib/format/format";
 import { BATCH_ORIGINS } from "@/lib/schemas/entry-batch";
 import { cn } from "@/lib/utils";
 

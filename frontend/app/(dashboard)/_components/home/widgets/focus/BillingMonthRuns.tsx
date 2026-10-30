@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { useRunsWithProblem } from "../../BillingMonthBody";
+import { useRunsWithProblem } from "@/app/(dashboard)/_components/home/bodies/BillingMonthBody";
 import { FocusSection } from "./parts";
 
 /** As execuções da emissão do mês que terminaram com problema, cada uma com o link para ver o que falhou. */

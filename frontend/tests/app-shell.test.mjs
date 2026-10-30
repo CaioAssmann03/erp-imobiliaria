@@ -3,8 +3,8 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { test } from "node:test";
 
-import { APPEARANCE_INIT_SCRIPT, DEFAULT_APPEARANCE } from "../lib/appearance.ts";
-import { APP_MODULES } from "../lib/module-menu.ts";
+import { APPEARANCE_INIT_SCRIPT, DEFAULT_APPEARANCE } from "../lib/theme/appearance.ts";
+import { APP_MODULES } from "../lib/navigation/module-menu.ts";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const DASHBOARD = join(ROOT, "app", "(dashboard)");
@@ -69,7 +69,7 @@ test("the old list routes still exist, as redirects", () => {
 });
 
 test("the blocks, the units, the cost centers and the people of a condominium are screens of their own", () => {
-  for (const route of ["condominiums/[id]/blocks", "condominiums/[id]/units", "condominiums/[id]/cost-centers", "condominiums/[id]/persons"]) {
+  for (const route of ["condominiums/(condominium)/[id]/blocks", "condominiums/(condominium)/[id]/units", "condominiums/(condominium)/[id]/cost-centers", "condominiums/(condominium)/[id]/persons"]) {
     const page = readFileSync(join(DASHBOARD, ...route.split("/"), "page.tsx"), "utf8");
     assert.doesNotMatch(page, /redirect\(/, route);
   }
@@ -93,11 +93,11 @@ test("the billing launches (Inclusão de valores) are in the 3 columns, with the
 
 test("the right-hand menu is drawn by the layout frames, never by the pages, so it stays mounted between screens", () => {
   const frames = {
-    "condominiums/_components/CondominiumsFrame.tsx": /CondominiumSideMenu/,
-    "condominiums/_components/BlocksFrame.tsx": /BlockSideMenu/,
-    "condominiums/_components/CostCentersFrame.tsx": /CostCenterSideMenu/,
+    "condominiums/_components/condominium/CondominiumsFrame.tsx": /CondominiumSideMenu/,
+    "condominiums/_components/blocks/BlocksFrame.tsx": /BlockSideMenu/,
+    "condominiums/_components/cost-centers/CostCentersFrame.tsx": /CostCenterSideMenu/,
     "condominiums/persons/_components/PersonsFrame.tsx": /SectionIndex/,
-    "condominiums/[id]/units/_components/UnitsFrame.tsx": /UnitSideMenu/,
+    "condominiums/(condominium)/[id]/units/_components/UnitsFrame.tsx": /UnitSideMenu/,
     "condominiums/events/_components/BillingEventsFrame.tsx": /SectionIndex/,
     "finance/accounts-payable/_components/AccountsPayableFrame.tsx": /AccountPayableSideMenu/,
     "finance/statement/_components/StatementFrame.tsx": /StatementSideMenu/,
@@ -105,6 +105,10 @@ test("the right-hand menu is drawn by the layout frames, never by the pages, so 
     "finance/company-account/_components/CompanyAccountFrame.tsx": /SectionIndex/,
     "finance/cost-center-catalog/_components/CatalogFrame.tsx": /SectionIndex/,
     "billing/entries/_components/BillingEntriesFrame.tsx": /SectionIndex/,
+    "billing/extra/_components/ExtraBillingFrame.tsx": /SectionIndex/,
+    "billing/plans/_components/BillingPlansFrame.tsx": /SectionIndex/,
+    "billing/documents/_components/list/BillingDocumentsFrame.tsx": /SectionIndex/,
+    "billing/runs/_components/BillingRunsFrame.tsx": /SectionIndex/,
   };
   for (const [file, menu] of Object.entries(frames)) {
     assert.match(readFileSync(join(DASHBOARD, ...file.split("/")), "utf8"), menu, file);
@@ -117,6 +121,10 @@ test("the right-hand menu is drawn by the layout frames, never by the pages, so 
     ...sourceFiles(join(DASHBOARD, "finance", "company-account")),
     ...sourceFiles(join(DASHBOARD, "finance", "cost-center-catalog")),
     ...sourceFiles(join(DASHBOARD, "billing", "entries")),
+    ...sourceFiles(join(DASHBOARD, "billing", "extra")),
+    ...sourceFiles(join(DASHBOARD, "billing", "plans")),
+    ...sourceFiles(join(DASHBOARD, "billing", "documents")),
+    ...sourceFiles(join(DASHBOARD, "billing", "runs")),
   ].filter((file) => /[\\/]page\.tsx$/.test(file));
   assert.ok(pages.length > 10);
   for (const page of pages) {
@@ -129,7 +137,7 @@ test("the shell and the registry use design tokens, never a hard-coded color", (
     // The settings folder is exempt (it may paint literal colors, e.g. the accent dots).
     ...sourceFiles(join(DASHBOARD, "_components", "shell")).filter((file) => !file.includes(`${"settings"}/`)),
     ...sourceFiles(join(DASHBOARD, "condominiums", "_components")).filter((file) =>
-      /(CondominiumsList|CondominiumsFrame|CondominiumHeader|CondominiumSideMenu|RegistrySection|SectionIndex|CondominiumDeleteButton)\.tsx$/.test(file)
+      /(CondominiumsList|CondominiumsFrame|CondominiumHeader|CondominiumSideMenu|SectionIndex|CondominiumDeleteButton)\.tsx$/.test(file)
     ),
   ];
   assert.ok(files.length > 10);
@@ -181,4 +189,36 @@ test("the rail state is not on <html>: no attribute, cookie or variant", () => {
   assert.equal(Object.hasOwn(runInitScript(""), "sidebar"), false);
   const css = readFileSync(join(ROOT, "app", "globals.css"), "utf8");
   assert.doesNotMatch(css, /sidebar-closed/);
+});
+
+test("the extra boleto is in the 3 columns, with the frame as the layout", () => {
+  const layout = readFileSync(join(DASHBOARD, "billing", "extra", "layout.tsx"), "utf8");
+  assert.match(layout, /ExtraBillingFrame/);
+  for (const route of ["page.tsx", join("new", "page.tsx"), join("[id]", "page.tsx")]) {
+    assert.equal(existsSync(join(DASHBOARD, "billing", "extra", route)), true, route);
+  }
+});
+
+test("the billing plans are in the 3 columns, with the frame as the layout", () => {
+  const layout = readFileSync(join(DASHBOARD, "billing", "plans", "layout.tsx"), "utf8");
+  assert.match(layout, /BillingPlansFrame/);
+  for (const route of ["page.tsx", join("new", "page.tsx"), join("[id]", "page.tsx")]) {
+    assert.equal(existsSync(join(DASHBOARD, "billing", "plans", route)), true, route);
+  }
+});
+
+test("the billing documents are in the 3 columns, with the frame as the layout", () => {
+  const layout = readFileSync(join(DASHBOARD, "billing", "documents", "layout.tsx"), "utf8");
+  assert.match(layout, /BillingDocumentsFrame/);
+  for (const route of ["page.tsx", join("[id]", "page.tsx")]) {
+    assert.equal(existsSync(join(DASHBOARD, "billing", "documents", route)), true, route);
+  }
+});
+
+test("the billing runs are in the 3 columns, with the frame as the layout", () => {
+  const layout = readFileSync(join(DASHBOARD, "billing", "runs", "layout.tsx"), "utf8");
+  assert.match(layout, /BillingRunsFrame/);
+  for (const route of ["page.tsx", join("[id]", "page.tsx")]) {
+    assert.equal(existsSync(join(DASHBOARD, "billing", "runs", route)), true, route);
+  }
 });

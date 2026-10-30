@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { addDays, monthBounds, todayIso } from "@/lib/format";
+import { todayIso } from "@/lib/format/format";
+import { PAYABLE_WINDOWS, type PayableWindow } from "@/lib/finance/payable-windows";
 import { cn } from "@/lib/utils";
 
-import { Late } from "../../Late";
-import { formatDate, relativeDays } from "../../relative-days";
+import { Late } from "@/app/(dashboard)/_components/home/shared/Late";
+import { formatDate, relativeDays } from "@/app/(dashboard)/_components/home/shared/relative-days";
 import { brl } from "../format";
 
 export interface OpenAccount {
@@ -20,43 +20,32 @@ export interface OpenAccount {
   amount: string;
 }
 
-type Window = "all" | "overdue" | "today" | "week" | "month";
-
-const WINDOWS: { id: Window; label: string }[] = [
-  { id: "all", label: "Todas" },
-  { id: "overdue", label: "Atrasadas" },
-  { id: "today", label: "Vencem hoje" },
-  { id: "week", label: "Próximos 7 dias" },
-  { id: "month", label: "Neste mês" },
-];
-
-function inWindow(window: Window, dueDate: string): boolean {
-  const today = todayIso();
-  if (window === "overdue") return dueDate < today;
-  if (window === "today") return dueDate === today;
-  if (window === "week") return dueDate >= today && dueDate <= addDays(today, 7);
-  if (window === "month") return dueDate >= today && dueDate <= monthBounds(today).to;
-  return true;
-}
-
 /**
- * A única parte interativa da visão de contas a pagar: os filtros por vencimento e a lista que muda com eles.
- * As contas chegam prontas do servidor; aqui só se filtra.
+ * A visão de contas a pagar: os botões de janela de vencimento e a lista. As contas já chegam filtradas pela API para a janela escolhida
+ * (`due_date_after`/`due_date_before`); aqui só se mostra e se avisa qual janela o usuário pediu.
  */
-export function OpenAccountsList({ accounts, total }: { accounts: OpenAccount[]; total: number }) {
-  const [window, setWindow] = useState<Window>("all");
-  const visible = accounts.filter((account) => inWindow(window, account.dueDate));
-  const visibleTotal = visible.reduce((sum, account) => sum + Number(account.amount), 0);
+export function OpenAccountsList({
+  accounts,
+  total,
+  window,
+  onWindowChange,
+}: {
+  accounts: OpenAccount[];
+  total: number;
+  window: PayableWindow;
+  onWindowChange: (window: PayableWindow) => void;
+}) {
+  const visibleTotal = accounts.reduce((sum, account) => sum + Number(account.amount), 0);
 
   return (
     <>
       <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por vencimento">
-        {WINDOWS.map((item) => (
+        {PAYABLE_WINDOWS.map((item) => (
           <button
             key={item.id}
             type="button"
             aria-pressed={window === item.id}
-            onClick={() => setWindow(item.id)}
+            onClick={() => onWindowChange(item.id)}
             className={cn(
               "rounded-full px-3 py-1 text-body transition-colors",
               window === item.id ? "bg-ink text-ink-foreground" : "bg-surface-muted text-ink-soft hover:text-ink"
@@ -67,7 +56,7 @@ export function OpenAccountsList({ accounts, total }: { accounts: OpenAccount[];
         ))}
       </div>
 
-      {visible.length === 0 ? (
+      {accounts.length === 0 ? (
         <p className="py-6 text-ink-soft">Nenhuma conta neste filtro.</p>
       ) : (
         <>
@@ -81,7 +70,7 @@ export function OpenAccountsList({ accounts, total }: { accounts: OpenAccount[];
               </TableRow>
             </TableHeader>
             <TableBody>
-              {visible.map((account) => {
+              {accounts.map((account) => {
                 const overdue = account.dueDate < todayIso();
                 return (
                   <TableRow key={account.id}>
@@ -105,7 +94,7 @@ export function OpenAccountsList({ accounts, total }: { accounts: OpenAccount[];
             </TableBody>
           </Table>
           <p className="text-caption text-ink-soft">
-            {visible.length} {visible.length === 1 ? "conta" : "contas"} · {brl(visibleTotal)}
+            {accounts.length} {accounts.length === 1 ? "conta" : "contas"} · {brl(visibleTotal)}
             {total > accounts.length ? ` (mostrando as ${accounts.length} primeiras de ${total})` : ""}
           </p>
         </>

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { isoDate, monthLayout, shiftMonth } from "../lib/calendar.ts";
+import { isoDate, monthLayout, shiftMonth } from "../lib/format/calendar.ts";
 
 test("a month starts on its weekday (Sunday = 0) and has its number of days", () => {
   assert.deepEqual(monthLayout(2026, 10), { offset: 4, days: 31 }); // 1 Oct 2026 is a Thursday

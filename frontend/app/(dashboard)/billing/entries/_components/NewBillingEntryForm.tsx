@@ -6,15 +6,15 @@ import { FormProvider, useForm } from "react-hook-form";
 
 import { FormActions } from "@/components/form/FormActions";
 import { Button } from "@/components/ui/button";
-import { monthFromApi } from "@/lib/billing-plan-payload";
-import { billingEntriesUrl, billingEntryUrl, type BillingEntriesScope } from "@/lib/billing-entry-workspace";
+import { monthFromApi } from "@/lib/billing/billing-plan-payload";
+import { billingEntriesUrl, billingEntryUrl, type BillingEntriesScope } from "@/lib/billing/billing-entry-workspace";
 import {
   billingEntryDefaults,
   billingEntrySchema,
   type BillingEntryFormInput,
   type BillingEntryFormOutput,
 } from "@/lib/schemas/billing-entry";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 import { EntryAmountSection, EntryIdentitySection, EntryUnitsSection } from "./entry-form/EntryFormFields";
 import { EntryPreview } from "./entry-form/EntryPreview";

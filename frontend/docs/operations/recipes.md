@@ -19,19 +19,19 @@ The regeneration wipes and rewrites the folder: a running `next dev` keeps a bro
 
 ## Add a dashboard widget
 New `widgets/xxx-widget.tsx` (`buildXxxWidget`) → entry in `WIDGET_IDS` (`widgets/types.ts`) and `buildWidgets`
-(`widgets/index.ts`) → entry in `lib/search-index.ts`. The data comes from `/api/dashboard/` (backend change if new).
+(`widgets/index.ts`) → entry in `lib/navigation/search-index.ts`. The data comes from `/api/dashboard/` (backend change if new).
 
 ## Add an accent color
-Entry in `ACCENTS` (`lib/appearance.ts`) + `html[data-accent="x"]` block in `app/globals.css` with
+Entry in `ACCENTS` (`lib/theme/appearance.ts`) + `html[data-accent="x"]` block in `app/globals.css` with
 `--color-brand`, `-strong`, `-light`; if reddish, also override `--color-danger` (and dark/system variants).
 
 ## Add a navigation item
-`lib/module-menu.ts` (read by `Rail`/`ModuleMenu` and `MobileMenu`, which shows only items with an `href`; label and description in Portuguese, href in English; an item with no `href` is shown disabled as "Em breve").
+`lib/navigation/module-menu.ts` (read by `Rail`/`ModuleMenu` and `MobileMenu`, which shows only items with an `href`; label and description in Portuguese, href in English; an item with no `href` is shown disabled as "Em breve").
 
 ## Add a shared component
 Only when two or more routes use it: `components/`; otherwise `_components/` of the route.
 Follow norms/components.md (server by default, ~100 lines).
 
 ## Change the auth flow
-Read safeguards/auth-and-tokens.md first. Touch only `lib/cookies.ts`, `lib/api-client.ts`, `proxy.ts`, the login
+Read safeguards/auth-and-tokens.md first. Touch only `lib/auth/auth-cookies.ts`, `lib/api/api-client.ts`, `proxy.ts`, the login
 form and the logout button; update that doc in the same change.

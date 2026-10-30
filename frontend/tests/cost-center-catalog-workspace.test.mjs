@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { CATALOG_SECTIONS, catalogFrameState, catalogSections, catalogItemUrl, catalogUrl, newCatalogItemUrl } from "../lib/cost-center-catalog-workspace.ts";
+import { CATALOG_SECTIONS, catalogFrameState, catalogSections, catalogItemUrl, catalogUrl, newCatalogItemUrl } from "../lib/finance/cost-center-catalog-workspace.ts";
 
 test("the empty screen has the frame and, on a phone, only the list", () => {
   const state = catalogFrameState("/finance/cost-center-catalog");

@@ -14,7 +14,7 @@ import {
   sectionPosition,
   selectedCondominiumId,
   selectedCondominiumPage,
-} from "../lib/condominium-registry.ts";
+} from "../lib/condominiums/condominium-registry.ts";
 
 test("the registry frame wraps the empty screen, the new form, one condominium and its lists of blocks and cost centers", () => {
   assert.equal(isRegistryPath("/condominiums"), true);

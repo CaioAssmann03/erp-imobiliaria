@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { sectionPosition } from "../lib/condominium-registry.ts";
+import { sectionPosition } from "../lib/condominiums/condominium-registry.ts";
 import {
   newUnitUrl,
   UNIT_SECTIONS,
@@ -9,7 +9,7 @@ import {
   unitsFrameState,
   unitsUrl,
   unitUrl,
-} from "../lib/unit-workspace.ts";
+} from "../lib/condominiums/unit-workspace.ts";
 
 test("the unit screen without a condominium asks for one, on its own screen on a phone", () => {
   const state = unitsFrameState("/condominiums/units", {});

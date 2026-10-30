@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { ACCESS_COOKIE, REFRESH_COOKIE } from "./lib/auth";
-import { clearAuthCookies, setAuthCookies } from "./lib/auth-cookies";
-import { refreshTokens } from "./lib/backend";
-import { isTokenExpiring } from "./lib/jwt";
+import { ACCESS_COOKIE, REFRESH_COOKIE } from "./lib/auth/auth";
+import { clearAuthCookies, setAuthCookies } from "./lib/auth/auth-cookies";
+import { refreshTokens } from "./lib/api/backend";
+import { isTokenExpiring } from "./lib/auth/jwt";
 
 const PUBLIC_PATHS = ["/login"];
 // Páginas de apresentação do produto: abertas a todos, sem redirecionar quem já está logado.

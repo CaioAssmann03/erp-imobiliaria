@@ -1,10 +1,10 @@
 "use client";
 
-import { BackLink } from "@/components/BackLink";
+import { BackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEntryBatchesRetrieve } from "@/lib/api/generated";
-import { entriesUrl } from "@/lib/entry-batch-workspace";
-import { formatDate } from "@/lib/format";
+import { entriesUrl } from "@/lib/finance/entry-batch-workspace";
+import { formatDate } from "@/lib/format/format";
 
 import { batchOriginLabel } from "./EntryBatchListItem";
 

@@ -3,11 +3,11 @@
 import { keepPreviousData } from "@tanstack/react-query";
 
 import { ListState } from "@/components/data-list";
-import { Pagination } from "@/components/Pagination";
+import { Pagination } from "@/components/data-list/Pagination";
 import { useListParams } from "@/hooks/use-list-params";
 import { useCurrentAccountEntriesList, useCurrentAccountsList } from "@/lib/api/generated";
 import type { CurrentAccountEntriesListKind, CurrentAccountEntriesListParams } from "@/lib/api/generated/models";
-import { addDays, brl, monthBounds, todayIso } from "@/lib/format";
+import { addDays, brl, monthBounds, todayIso } from "@/lib/format/format";
 import { cn } from "@/lib/utils";
 
 import { StatementRow } from "../../_components/StatementRow";

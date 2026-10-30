@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { ListFallback } from "@/components/data-list";
-import { PageHeader } from "@/components/PageHeader";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 import { DashboardHome } from "../_components/home/DashboardHome";
 import { Greeting } from "../_components/home/Greeting";
-import { RegistrySummary } from "../_components/home/RegistrySummary";
+import { RegistrySummary } from "@/app/(dashboard)/_components/home/bodies/RegistrySummary";
 
 export const metadata: Metadata = { title: "Painel" };
 

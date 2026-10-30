@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { getCostCenterCatalogListQueryKey, useCostCenterCatalogDestroy } from "@/lib/api/generated";
-import { catalogUrl } from "@/lib/cost-center-catalog-workspace";
-import { applyServerErrors } from "@/lib/form-errors";
-import { toast } from "@/lib/toast";
+import { catalogUrl } from "@/lib/finance/cost-center-catalog-workspace";
+import { applyServerErrors } from "@/lib/errors/form-errors";
+import { toast } from "@/lib/errors/toast";
 
 /** Client Component: exclui a sub-conta aberta (confirmação) e volta à tela do catálogo, sem nenhuma aberta. Uma que condomínios usam não sai: o backend recusa e a mensagem vem no aviso (desative em vez de excluir). */
 export function CatalogDeleteButton({ itemId, name }: { itemId: string; name: string }) {

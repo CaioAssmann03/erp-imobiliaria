@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-import { CondominiumBackLink } from "../../_components/CondominiumBackLink";
-import { CostCenterForm } from "../../_components/CostCenterForm";
-import { CostCenterHeader } from "../../_components/CostCenterHeader";
-import { PageHeader } from "@/components/PageHeader";
+import { CondominiumBackLink } from "@/app/(dashboard)/condominiums/_components/condominium/CondominiumBackLink";
+import { CostCenterForm } from "@/app/(dashboard)/condominiums/_components/cost-centers/CostCenterForm";
+import { CostCenterHeader } from "@/app/(dashboard)/condominiums/_components/cost-centers/CostCenterHeader";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export const metadata: Metadata = { title: "Editar sub-conta" };
 

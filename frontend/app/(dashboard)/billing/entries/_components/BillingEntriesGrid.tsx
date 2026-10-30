@@ -2,9 +2,9 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { BillingEntry } from "@/lib/api/generated/models";
-import { buildGrid } from "@/lib/billing-entry-payload";
-import type { BillingEntriesScope } from "@/lib/billing-entry-workspace";
-import { brl } from "@/lib/format";
+import { buildGrid } from "@/lib/billing/billing-entry-payload";
+import type { BillingEntriesScope } from "@/lib/billing/billing-entry-workspace";
+import { brl } from "@/lib/format/format";
 
 import { EntryColumnHeader } from "./EntryColumnHeader";
 

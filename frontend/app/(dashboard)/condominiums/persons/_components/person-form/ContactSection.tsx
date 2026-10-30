@@ -2,7 +2,7 @@
 
 import { TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
-import { maskPhone } from "@/lib/masks";
+import { maskPhone } from "@/lib/format/masks";
 
 export function ContactSection() {
   return (

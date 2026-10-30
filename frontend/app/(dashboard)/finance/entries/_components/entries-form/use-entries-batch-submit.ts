@@ -15,15 +15,15 @@ import {
   useEntryBatchesPostEntries,
 } from "@/lib/api/generated";
 import type { BatchEntryLine, CurrentAccount, EntryBatch } from "@/lib/api/generated/models";
-import { applyServerErrors, formFieldName } from "@/lib/form-errors";
-import { entryBatchUrl } from "@/lib/entry-batch-workspace";
+import { applyServerErrors, formFieldName } from "@/lib/errors/form-errors";
+import { entryBatchUrl } from "@/lib/finance/entry-batch-workspace";
 import {
   entryBatchToPayload,
   entryLineToPayload,
   type EntriesBatchFormInput,
   type EntriesBatchFormOutput,
 } from "@/lib/schemas/entry-batch";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 /** `entries.2.amount` (API) → `lines.2.amount` (formulário); a conta corrente da linha é o condomínio escolhido. */
 function toFormPath(path: string): string {

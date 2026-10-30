@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-import { HOUSE_LOGO_PATH } from "@/components/HouseLogo";
+import { HOUSE_LOGO_PATH } from "@/components/brand/HouseLogo";
 
 export const contentType = "image/png";
 

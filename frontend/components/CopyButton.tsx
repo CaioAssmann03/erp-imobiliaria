@@ -4,7 +4,7 @@ import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 /** Copia um texto para a área de transferência (linha digitável, código Pix) e avisa que copiou. */
 export function CopyButton({ value, label }: { value: string; label: string }) {

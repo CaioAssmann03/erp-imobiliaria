@@ -1,7 +1,7 @@
 "use client";
 
-import { BackLink } from "@/components/BackLink";
-import { billingEntriesUrl } from "@/lib/billing-entry-workspace";
+import { BackLink } from "@/components/layout/BackLink";
+import { billingEntriesUrl } from "@/lib/billing/billing-entry-workspace";
 
 import { useEntriesScope } from "./use-entries-scope";
 

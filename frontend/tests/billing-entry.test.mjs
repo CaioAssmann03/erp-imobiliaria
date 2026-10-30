@@ -8,8 +8,8 @@ import {
   entryColumnTitle,
   entryToPayload,
   formatCode,
-} from "../lib/billing-entry-payload.ts";
-import { maskSignedMoney } from "../lib/masks.ts";
+} from "../lib/billing/billing-entry-payload.ts";
+import { maskSignedMoney } from "../lib/format/masks.ts";
 
 const values = (overrides = {}) => ({
   condominium: "c-1",

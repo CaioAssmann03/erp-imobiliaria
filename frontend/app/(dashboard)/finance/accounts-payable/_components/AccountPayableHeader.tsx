@@ -1,11 +1,11 @@
 "use client";
 
-import { BackLink } from "@/components/BackLink";
+import { BackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
-import { accountsPayableUrl } from "@/lib/account-payable-workspace";
+import { accountsPayableUrl } from "@/lib/finance/account-payable-workspace";
 import { useAccountsPayableRetrieve } from "@/lib/api/generated";
 import { payableStatusLabel } from "@/lib/schemas/account-payable";
-import { todayIso } from "@/lib/format";
+import { todayIso } from "@/lib/format/format";
 import { cn } from "@/lib/utils";
 
 /**

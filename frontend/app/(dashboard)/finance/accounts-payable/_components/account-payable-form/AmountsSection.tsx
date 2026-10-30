@@ -2,7 +2,7 @@
 
 import { DateField, TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
-import { maskMoney } from "@/lib/masks";
+import { maskMoney } from "@/lib/format/masks";
 
 /** Descrição, valor e datas da conta. */
 export function AmountsSection() {

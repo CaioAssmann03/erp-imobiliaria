@@ -1,11 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { errorResponse } from "@/lib/api-error";
-import { backendApiPath } from "@/lib/api-path";
-import { clearAuthCookies, setAuthCookies, type Tokens } from "@/lib/auth-cookies";
-import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/lib/auth";
-import { API_URL, backendHeaders, refreshTokens } from "@/lib/backend";
-import { isTokenExpiring } from "@/lib/jwt";
+import { errorResponse } from "@/lib/api/api-error";
+import { backendApiPath } from "@/lib/api/api-path";
+import { clearAuthCookies, setAuthCookies, type Tokens } from "@/lib/auth/auth-cookies";
+import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/lib/auth/auth";
+import { API_URL, backendHeaders, refreshTokens } from "@/lib/api/backend";
+import { isTokenExpiring } from "@/lib/auth/jwt";
 
 /**
  * O navegador só fala com este servidor (`/api/...`, mesma origem). Aqui o token vive em cookie

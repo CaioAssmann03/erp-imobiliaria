@@ -12,6 +12,8 @@ from apps.core.models import Company
 from apps.finance.models import CompanyEntry
 from apps.finance.tests.base import body, results
 
+from apps.condominiums.models import Condominium
+
 from ..models import BillingDocument, BillingDocumentItem
 
 pytestmark = pytest.mark.django_db
@@ -53,3 +55,16 @@ def test_another_company_sees_nothing(api_client: APIClient, other_company: Comp
 
     assert results(foreign.get(reverse("company-entry-list"))) == []
     assert foreign.get(reverse("company-entry-balance")).data["balance"] == 0
+
+
+def test_filter_by_condominium(api_client: APIClient, fee_item: BillingDocumentItem, other_condominium: Condominium) -> None:
+    condominium = fee_item.document.unit.condominium
+    _ = CompanyEntry.objects.create(
+        company=condominium.company, billing_document_item=fee_item, entry_date=date(2026, 10, 20), amount=Decimal("3.90"), description="x"
+    )
+
+    of_the_document = results(api_client.get(reverse("company-entry-list"), {"condominium": str(condominium.pk)}))
+    of_another = results(api_client.get(reverse("company-entry-list"), {"condominium": str(other_condominium.pk)}))
+
+    assert len(of_the_document) == 1
+    assert of_another == []

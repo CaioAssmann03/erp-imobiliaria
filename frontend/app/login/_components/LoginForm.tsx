@@ -11,9 +11,9 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuthLoginCreate } from "@/lib/api/generated";
-import { startLoginTransition } from "@/lib/login-transition";
-import { safeNextPath } from "@/lib/safe-redirect";
-import { toast } from "@/lib/toast";
+import { startLoginTransition } from "@/lib/auth/login-transition";
+import { safeNextPath } from "@/lib/auth/safe-redirect";
+import { toast } from "@/lib/errors/toast";
 
 import { FieldLabel } from "./FieldLabel";
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { BLOCK_SECTIONS, blocksFrameState, blockUnitsUrl, blockUrl, newBlockUrl } from "../lib/block-workspace.ts";
+import { BLOCK_SECTIONS, blocksFrameState, blockUnitsUrl, blockUrl, newBlockUrl } from "../lib/condominiums/block-workspace.ts";
 
 test("a new block is inside the frame, with the condominium from the URL", () => {
   const state = blocksFrameState("/condominiums/c1/blocks/new");

@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 import type { Person } from "@/lib/api/generated/models";
-import { maskCpf, maskCnpj, maskPhone, onlyDigits } from "@/lib/masks";
-import { isValidCnpj, isValidCpf } from "@/lib/validators";
+import { maskCpf, maskCnpj, maskPhone, onlyDigits } from "@/lib/format/masks";
+import { isValidCnpj, isValidCpf } from "@/lib/format/validators";
 
 import {
   dateField,

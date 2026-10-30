@@ -34,6 +34,7 @@ skip-if: other situation → path of the right file; ...
 
 - **The OpenAPI schema is the contract.** After any API change (field, enum, endpoint, filter), the frontend client must be regenerated
   (`cd frontend && pnpm generate:api`, backend running) and its callers fixed.
+- **The API filters, searches and paginates; the frontend never does.** A screen never `.filter`s a list's `results`: a missing criterion is added to the backend (with a test), the client regenerated, and the param sent (backend spec 064, `frontend/docs/norms/data-and-cache.md`).
 - Names are English on both sides and identical to the API field names; only user-facing text is Portuguese (frontend).
 - Never commit secrets or personal data; `.env` stays local (`.env.example` has placeholders).
 - Docs and `AGENTS.md` files are English; update the doc you changed in the same change.

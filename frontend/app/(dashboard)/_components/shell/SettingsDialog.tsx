@@ -5,14 +5,14 @@ import { Settings, X } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { DEFAULT_APPEARANCE, type Appearance } from "@/lib/appearance";
+import { DEFAULT_APPEARANCE, type Appearance } from "@/lib/theme/appearance";
 import { cn } from "@/lib/utils";
-import { centeredModalBackdropClass } from "@/lib/ui";
+import { centeredModalBackdropClass } from "@/lib/theme/ui";
 
-import { railButtonClass, RailLabel } from "./ModuleMenu";
+import { railButtonClass, RailLabel } from "./menu/ModuleMenu";
 import { AccentSection } from "./settings/AccentSection";
 import { AccessibilitySection } from "./settings/AccessibilitySection";
-import { applyAppearance, readAppearance } from "./settings/apply-appearance";
+import { applyAppearance, readAppearance } from "@/lib/theme/apply-appearance";
 import { FontSection } from "./settings/FontSection";
 import { SettingsGroup } from "./settings/SettingsSection";
 import { ModeSection } from "./settings/ModeSection";

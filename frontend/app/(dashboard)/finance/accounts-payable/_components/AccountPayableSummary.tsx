@@ -2,9 +2,9 @@ import Link from "next/link";
 
 import { FormSection } from "@/components/form/FormSection";
 import type { AccountPayable } from "@/lib/api/generated/models";
-import { brl, formatDate } from "@/lib/format";
+import { brl, formatDate } from "@/lib/format/format";
 import { paymentMethodLabel } from "@/lib/schemas/account-payable";
-import { statementUrl } from "@/lib/statement-workspace";
+import { statementUrl } from "@/lib/finance/statement-workspace";
 
 import { PayableStatusBadge } from "./PayableStatusBadge";
 
