@@ -1,7 +1,13 @@
 import type { FilterGroup } from "@/components/FilterMenu";
 import { UNIT_TYPES } from "@/lib/schemas/unit";
 
-import { PENDING_OPTIONS } from "./UnitsFilters";
+
+/** As pendências de unidade que o painel aponta (`?pending=`). */
+export const PENDING_OPTIONS = [
+  { value: "without_responsible", label: "Sem responsável" },
+  { value: "lease_ending", label: "Locação terminando" },
+  { value: "billing_blocked", label: "Lançamento bloqueado" },
+];
 
 export interface UnitFilters {
   block: string;

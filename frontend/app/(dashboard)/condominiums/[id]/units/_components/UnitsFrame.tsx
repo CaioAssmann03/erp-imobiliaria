@@ -12,13 +12,13 @@ import { UnitsList } from "./UnitsList";
 
 /**
  * Client Component: a moldura do cadastro de unidades (condomínio e lista de unidades à esquerda, a unidade aberta ao lado).
- * Só envolve as telas do cadastro (`unitsFrameState`); a tabela de pendências (`?pending=`) ocupa a largura toda.
+ * Só envolve as telas do cadastro (`unitsFrameState`); com `?pending=` (as Pendências do painel) a lista abre filtrada, de todos os condomínios.
  * No celular, a lista e a unidade aberta são telas separadas.
  */
 export function UnitsFrame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const search = useSearchParams();
-  const state = unitsFrameState(pathname, { condominium: search.get("condominium"), pending: search.get("pending") });
+  const state = unitsFrameState(pathname, { condominium: search.get("condominium") });
   if (!state.hasFrame) return <>{children}</>;
 
   // O menu da direita é desta moldura (layout): o da unidade aberta (seções e pessoas) ou o das seções no cadastro novo; a tela vazia não tem.

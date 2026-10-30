@@ -14,22 +14,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useBlocksList, useCondominiumsList, useUnitsList } from "@/lib/api/generated";
-import type { UnitsListType } from "@/lib/api/generated/models";
+import type { UnitsListPending, UnitsListType } from "@/lib/api/generated/models";
 import { newUnitUrl, unitsUrl } from "@/lib/unit-workspace";
 import { cn } from "@/lib/utils";
 
 import { UnitListItem } from "./UnitListItem";
 import { backTargetOf } from "@/lib/back-target";
 import { uuidParam } from "@/lib/uuid-param";
-import { NO_UNIT_FILTERS, unitFilterGroups, type UnitFilters } from "./unit-filter-groups";
+import { NO_UNIT_FILTERS, PENDING_OPTIONS, unitFilterGroups, type UnitFilters } from "./unit-filter-groups";
 
 /**
  * Client Component: a coluna da esquerda do cadastro de unidades. No alto, uma pílula com o condomínio e o bloco lado a lado; embaixo, as
  * unidades dele, com busca no servidor, **+** de nova unidade e filtros discretos (`CompactFilter`: tipo, situação). Sem condomínio
- * escolhido, a pílula pede para escolher. `?block=` na URL (de "Ver unidades" num bloco) já abre filtrada.
+ * escolhido, a pílula pede para escolher. `?block=` na URL (de "Ver unidades" num bloco) já abre filtrada, e `?pending=` (as Pendências do painel) abre a lista de todos os condomínios filtrada pela pendência.
  */
 export function UnitsList({
-  condominiumId,
+  condominiumId: routeCondominiumId,
   openUnitId,
   className,
 }: {
@@ -43,14 +43,26 @@ export function UnitsList({
   // (`?from=`) segue junto, para o "voltar" da unidade continuar levando a ela. Se o endereço traz outro bloco, a lista o acompanha; se um link
   // não traz bloco nenhum (a sub-tela de pessoas, por exemplo), ela **mantém** o que tinha: só o seletor ou outro condomínio o limpam.
   const urlBlock = uuidParam(urlParams.get("block")) ?? "";
+  // A pendência do painel (`?pending=`) abre a lista filtrada, de todos os condomínios, e segue nos links das unidades abertas por ela.
+  const urlPendingParam = urlParams.get("pending") ?? "";
+  const urlPending = PENDING_OPTIONS.some((option) => option.value === urlPendingParam) ? urlPendingParam : "";
   const from = backTargetOf(urlParams.get("from"))?.href ?? null;
   const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState<UnitFilters>({ ...NO_UNIT_FILTERS, block: urlBlock });
+  const [filters, setFilters] = useState<UnitFilters>({ ...NO_UNIT_FILTERS, block: urlBlock, pending: urlPending });
   const [seenUrlBlock, setSeenUrlBlock] = useState(urlBlock);
   if (urlBlock !== seenUrlBlock) {
     setSeenUrlBlock(urlBlock);
     if (urlBlock) setFilters((current) => ({ ...current, block: urlBlock }));
   }
+  const [seenUrlPending, setSeenUrlPending] = useState(urlPending);
+  if (urlPending !== seenUrlPending) {
+    setSeenUrlPending(urlPending);
+    if (urlPending) setFilters((current) => ({ ...current, pending: urlPending }));
+  }
+  // Com uma pendência a lista não segue o condomínio da rota: mostra as unidades de todos, ou do que foi escolhido no cartão (`?condominium=`,
+  // que os links das unidades levam junto), para não encolher ao abrir uma unidade. Sem pendência vale o condomínio da rota.
+  const condominiumId = filters.pending ? uuidParam(urlParams.get("condominium")) : routeCondominiumId;
+  const listing = Boolean(condominiumId || filters.pending);
   const term = useDebouncedValue(search.trim());
 
   const { data: condominiums } = useCondominiumsList({ limit: 100 });
@@ -59,9 +71,10 @@ export function UnitsList({
     { query: { enabled: Boolean(condominiumId) } }
   );
   const blocks = blocksData?.results ?? [];
+  const condominiumNameOf = (id: string) => condominiums?.results.find((condominium) => condominium.id === id)?.name ?? null;
   const blockName = (id: string | null | undefined) => blocks.find((block) => block.id === id)?.name ?? null;
 
-  const { limit, showMore } = useGrowingLimit(`${term}|${condominiumId}|${filters.block}|${filters.type}|${filters.status}`);
+  const { limit, showMore } = useGrowingLimit(`${term}|${condominiumId}|${filters.block}|${filters.type}|${filters.status}|${filters.pending}`);
   const { data, isLoading, isPlaceholderData } = useUnitsList(
     {
       condominium: condominiumId ?? undefined,
@@ -70,8 +83,9 @@ export function UnitsList({
       ...(filters.block ? { block: filters.block } : {}),
       ...(filters.type ? { type: filters.type as UnitsListType } : {}),
       ...(filters.status ? { active: filters.status === "active" } : {}),
+      ...(filters.pending ? { pending: filters.pending as UnitsListPending } : {}),
     },
-    { query: { enabled: Boolean(condominiumId), placeholderData: keepPreviousData } }
+    { query: { enabled: listing, placeholderData: keepPreviousData } }
   );
   const results = data?.results ?? [];
   const hasFilters = Object.values(filters).some(Boolean) || Boolean(term);
@@ -80,9 +94,10 @@ export function UnitsList({
   const clearFilters = () => setFilters((current) => ({ ...NO_UNIT_FILTERS, block: current.block }));
 
   const chooseCondominium = (id: string) => {
-    setFilters(NO_UNIT_FILTERS);
+    setFilters({ ...NO_UNIT_FILTERS, pending: filters.pending });
     setSearch("");
-    router.push(unitsUrl(id || undefined));
+    const url = unitsUrl(id || undefined);
+    router.push(filters.pending ? `${url}${url.includes("?") ? "&" : "?"}pending=${filters.pending}` : url);
   };
 
   return (
@@ -120,6 +135,7 @@ export function UnitsList({
               label="Condomínio"
               value={condominiumId ?? ""}
               placeholder="Selecione o condomínio"
+              allLabel={filters.pending ? "Todos os condomínios" : undefined}
               onChange={chooseCondominium}
               options={(condominiums?.results ?? []).map((condominium) => ({
                 value: condominium.id,
@@ -144,7 +160,7 @@ export function UnitsList({
           </>
         }
       >
-        {condominiumId && (
+        {listing && (
           <ScopeSearchRow>
             <Search className="size-4 shrink-0" />
             <input
@@ -164,7 +180,7 @@ export function UnitsList({
         aria-label="Lista de unidades"
         className={cn("min-h-0 flex-1 overflow-y-auto pr-1 transition-opacity", isPlaceholderData && "opacity-60")}
       >
-        {!condominiumId ? (
+        {!listing ? (
           <p className="px-2 py-6 text-center text-body text-ink-soft">Escolha um condomínio para ver as unidades dele.</p>
         ) : isLoading ? (
           <div className="space-y-2">
@@ -183,9 +199,10 @@ export function UnitsList({
                 key={unit.id}
                 unit={unit}
                 blockName={blockName(unit.block)}
+                condominiumName={condominiumId ? null : condominiumNameOf(unit.condominium)}
                 isOpen={unit.id === openUnitId}
                 dimmed={Boolean(openUnitId)}
-                context={{ block: filters.block, from }}
+                context={{ block: filters.block, from, pending: filters.pending, condominium: filters.pending ? condominiumId : null }}
               />
             ))}
           </ul>

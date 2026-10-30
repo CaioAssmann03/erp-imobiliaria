@@ -12,14 +12,26 @@ const SHORT_LIST = 4;
 
 const accountsLabel = (count: number) => `${count} conta${count === 1 ? "" : "s"}`;
 
-/** Uma janela de vencimento: o valor, grande, e a quantidade de contas; o atrasado fica em vermelho só quando há atraso. */
-function Figure({ label, value, late = false }: { label: string; value: PayableTotal | undefined; late?: boolean }) {
-  const alert = late && (value?.count ?? 0) > 0;
+/** O que pede atenção: o valor atrasado, grande, e em vermelho só quando há atraso. */
+function Overdue({ value }: { value: PayableTotal | undefined }) {
+  const late = (value?.count ?? 0) > 0;
   return (
-    <div className="min-w-0 px-5 first:pl-0 last:pr-0 max-sm:px-0 max-sm:py-3">
-      <Caption>{label}</Caption>
-      <div className={cn("mt-0.5 truncate text-heading tabular-nums sm:text-title", alert && "text-danger")}>{value ? brl(value.total) : "–"}</div>
-      <div className="text-caption text-ink-faint">{value ? accountsLabel(value.count) : ""}</div>
+    <div>
+      <div className={cn("text-title tabular-nums", late && "text-danger")}>{value ? brl(value.total) : "–"}</div>
+      <Caption>
+        {!value ? "" : late ? `${accountsLabel(value.count)} vencida${value.count === 1 ? "" : "s"}` : "Nenhuma conta atrasada"}
+      </Caption>
+    </div>
+  );
+}
+
+/** Uma janela de vencimento como linha de razão: nome, quantidade e valor alinhado à direita. */
+function WindowRow({ label, value }: { label: string; value: PayableTotal | undefined }) {
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_auto_7rem] items-baseline gap-x-3 py-2">
+      <dt className="text-ink-soft">{label}</dt>
+      <dd className="text-caption text-ink-faint tabular-nums">{value ? accountsLabel(value.count) : ""}</dd>
+      <dd className="text-right tabular-nums">{value ? brl(value.total) : "–"}</dd>
     </div>
   );
 }
@@ -64,18 +76,18 @@ export const buildAccountsPayableWidget: WidgetBuilder = (dash) => {
   return {
     title: "Contas a pagar",
     description: "Em aberto, por vencimento (inclui despesas da empresa)",
-    className: "lg:col-span-8",
+    className: "lg:col-span-4",
     seeAll: { href: "/finance/accounts-payable" },
     showHeader: true,
     renderFocus: () => <AccountsPayableFocus payables={payables} />,
     render: (large) => (
       <>
-        <div className="grid grid-cols-2 gap-y-2 sm:grid-cols-4 sm:divide-x sm:divide-border">
-          <Figure label="Atrasadas" value={payables?.overdue} late />
-          <Figure label="Vencem hoje" value={payables?.due_today} />
-          <Figure label="Próximos 7 dias" value={payables?.due_next_7_days} />
-          <Figure label="Neste mês" value={payables?.due_this_month} />
-        </div>
+        <Overdue value={payables?.overdue} />
+        <dl className="mt-4 divide-y divide-border">
+          <WindowRow label="Vencem hoje" value={payables?.due_today} />
+          <WindowRow label="Próximos 7 dias" value={payables?.due_next_7_days} />
+          <WindowRow label="Neste mês" value={payables?.due_this_month} />
+        </dl>
         {large && (
           <div className="mt-6 border-t border-border pt-4">
             <Caption>Mais antigas em aberto</Caption>

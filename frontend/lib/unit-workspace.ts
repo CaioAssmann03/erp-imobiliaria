@@ -22,7 +22,7 @@ export function unitListLabel(typeLabel: string, name: string) {
 }
 
 export interface UnitsFrameState {
-  /** A coluna da lista só envolve as telas do cadastro (não a tabela de pendências nem outras rotas). */
+  /** A coluna da lista só envolve as telas do cadastro (não outras rotas). */
   hasFrame: boolean;
   condominiumId: string | null;
   unitId: string | null;
@@ -35,12 +35,12 @@ export interface UnitsFrameState {
 
 /**
  * Onde o usuário está no cadastro de unidades, a partir da URL: `/condominiums/units` (`?condominium=` escolhe o condomínio;
- * `?pending=` é a tabela de pendências, sem moldura), `/condominiums/[id]/units/new` e `/condominiums/[id]/units/[unitId]`.
+ * `?pending=` é o atalho das Pendências do painel: a lista da esquerda abre filtrada, de todos os condomínios), `/condominiums/[id]/units/new` e `/condominiums/[id]/units/[unitId]`.
  * No celular, a lista e a unidade aberta são telas separadas.
  */
 export function unitsFrameState(
   pathname: string | null,
-  search: { condominium?: string | null; pending?: string | null } = {}
+  search: { condominium?: string | null } = {}
 ): UnitsFrameState {
   const none: UnitsFrameState = {
     hasFrame: false,
@@ -56,7 +56,6 @@ export function unitsFrameState(
   if (root !== "condominiums") return none;
 
   if (second === "units" && (third === undefined || third === "")) {
-    if (search.pending) return none;
     return { ...none, hasFrame: true, condominiumId: search.condominium || null, showListOnPhone: true, showPageOnPhone: false };
   }
   if (second && second !== "units" && third === "units" && (extra === undefined || (extra === "persons" && fourth !== "new"))) {

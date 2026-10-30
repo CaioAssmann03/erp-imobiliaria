@@ -4,8 +4,11 @@ import type { Dashboard } from "@/lib/api/generated/models";
 export const WIDGET_IDS = [
   "condominiums",
   "accounts-payable",
-  "fixed-revenue",
+  "delinquency",
+  "billing-month",
   "pending",
+  "billing-chart",
+  "fixed-revenue",
   "adjustments",
   "responsibles",
 ] as const;

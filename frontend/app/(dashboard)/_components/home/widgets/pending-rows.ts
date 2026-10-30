@@ -14,6 +14,8 @@ export interface PendingRow {
   label: string;
   detail: string;
   href: string;
+  /** Fora do card do painel (continua na visão ampliada): o assunto já tem lista própria no painel. */
+  hiddenOnPanel?: boolean;
 }
 
 /** Ordem = criticidade para a cobrança: sem pagador e rateio errado quebram o boleto. */
@@ -39,6 +41,7 @@ export function pendingRows(pending: Dashboard["pending"] | undefined): PendingR
       label: "Reajustes atrasados",
       detail: "A data do próximo reajuste já passou",
       href: "/condominiums?pending=overdue_adjustment",
+      hiddenOnPanel: true,
     },
     {
       severity: "info",
@@ -46,6 +49,7 @@ export function pendingRows(pending: Dashboard["pending"] | undefined): PendingR
       label: "Reajustes em 30 dias",
       detail: "Condomínios com reajuste previsto no próximo mês",
       href: "/condominiums?pending=upcoming_adjustment",
+      hiddenOnPanel: true,
     },
     {
       severity: "attention",
@@ -53,6 +57,7 @@ export function pendingRows(pending: Dashboard["pending"] | undefined): PendingR
       label: "Locações terminando",
       detail: "Vínculos de locatário que terminam em até 60 dias (ou já encerraram)",
       href: "/condominiums/units?pending=lease_ending",
+      hiddenOnPanel: true,
     },
     {
       severity: "critical",
