@@ -3,6 +3,7 @@ export const statementUrl = (condominiumId?: string) => (condominiumId ? `/finan
 /** Seções do extrato de um condomínio, na ordem em que aparecem; o índice da direita usa estes ids. */
 export const STATEMENT_SECTIONS = [
   { id: "saldo", label: "Saldo" },
+  { id: "subcontas", label: "Sub-contas" },
   { id: "lancamentos", label: "Lançamentos" },
 ] as const;
 

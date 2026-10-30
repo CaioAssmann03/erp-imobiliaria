@@ -2,7 +2,7 @@
 
 import { useFormContext } from "react-hook-form";
 
-import { SelectField, TextField } from "@/components/form/fields";
+import { SearchSelectField, TextField } from "@/components/form/fields";
 import { FormSection } from "@/components/form/FormSection";
 import { useCondominiumsList } from "@/lib/api/generated";
 
@@ -24,7 +24,7 @@ export function IdentificationSection({ isEdit }: { isEdit: boolean }) {
 
   return (
     <FormSection title="Identificação">
-      <SelectField
+      <SearchSelectField
         name="condominium"
         label="Condomínio"
         required

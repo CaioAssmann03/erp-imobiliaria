@@ -80,7 +80,7 @@ The backend publishes port 8000 on the VPS **loopback only** (`127.0.0.1:8000`, 
 ```bash
 ssh -N -L 8000:127.0.0.1:8000 root@177.7.63.175   # keep it open while you use the Admin
 ```
-Then open `http://localhost:8000/<ADMIN_URL>` (the path is in the host `.env`). It needs `localhost` in `ALLOWED_HOSTS`. The session and CSRF cookies are `Secure` in production: Chrome and Firefox accept them on `http://localhost`, Safari does not (use another browser). Close the tunnel with Ctrl+C.
+Then open `http://localhost:8000/<ADMIN_URL>` (the path is in the host `.env`; read it with `ssh root@177.7.63.175 "grep ADMIN_URL /root/erp-imobiliaria/.env"`). If the local Docker backend already uses port 8000, open the tunnel on another local port (`-L 8001:127.0.0.1:8000`) and use `http://localhost:8001/<ADMIN_URL>`. The **Arquivados** page (restore of deleted records, spec 063) is at `<ADMIN_URL>archived/` and in the sidebar. It needs `localhost` in `ALLOWED_HOSTS`. The session and CSRF cookies are `Secure` in production: Chrome and Firefox accept them on `http://localhost`, Safari does not (use another browser). Close the tunnel with Ctrl+C.
 
 ## Gateway account (Asaas)
 The company has **one** Asaas account that issues every boleto and receives the money (spec 037). Set it up once per environment:

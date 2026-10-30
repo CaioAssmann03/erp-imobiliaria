@@ -1,7 +1,6 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import {
@@ -11,6 +10,7 @@ import {
 } from "@/lib/api/generated";
 import type { BillingDocument } from "@/lib/api/generated/models";
 import { apiErrorMessage } from "@/lib/form-errors";
+import { toast } from "@/lib/toast";
 
 /** Cancela um documento emitido ou registrado; o mês da unidade fica livre para uma nova emissão. */
 export function CancelBillingDocumentButton({ document }: { document: BillingDocument }) {

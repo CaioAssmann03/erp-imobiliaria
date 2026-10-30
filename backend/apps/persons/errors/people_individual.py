@@ -8,7 +8,7 @@ class PeopleIndividualError(RuleError):
     )
     CPF_DUPLICATE_IN_COMPANY = (
         "people_individual.cpf.duplicate_in_company",
-        "A person with this CPF already exists in this company.",
+        "A person with this CPF already exists in this company (it may have been deleted: ask an administrator to restore it).",
     )
     RG_DUPLICATE_IN_COMPANY = (
         "people_individual.rg.duplicate_in_company",

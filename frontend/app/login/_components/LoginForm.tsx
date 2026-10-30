@@ -6,7 +6,6 @@ import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { useAuthLoginCreate } from "@/lib/api/generated";
 import { startLoginTransition } from "@/lib/login-transition";
 import { safeNextPath } from "@/lib/safe-redirect";
+import { toast } from "@/lib/toast";
 
 import { FieldLabel } from "./FieldLabel";
 

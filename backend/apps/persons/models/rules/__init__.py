@@ -1,0 +1,2 @@
+from .person_anonymize import PersonAnonymizeRules as PersonAnonymizeRules
+from .person_archive import PersonArchiveRules as PersonArchiveRules

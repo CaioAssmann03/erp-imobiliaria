@@ -35,6 +35,7 @@ export function ScopeSelect({
   allLabel,
   onCard = false,
   variant = "field",
+  onSearch,
   className,
 }: {
   label: string;
@@ -45,6 +46,8 @@ export function ScopeSelect({
   allLabel?: string;
   onCard?: boolean;
   variant?: "field" | "segment";
+  /** Para listas grandes demais para trazer inteiras (pessoas): chamado a cada digitação (e com "" ao fechar); as `options` passam a ser o resultado da busca feita fora e não se filtram aqui. */
+  onSearch?: (query: string) => void;
   /** Classes do botão (na variante `segment`, a largura que ele ocupa na pílula). */
   className?: string;
 }) {
@@ -53,7 +56,7 @@ export function ScopeSelect({
   const [active, setActive] = useState(0);
 
   const term = normalize(query.trim());
-  const matches = term ? options.filter((option) => normalize(option.label).includes(term)) : options;
+  const matches = term && !onSearch ? options.filter((option) => normalize(option.label).includes(term)) : options;
   const shown = matches.slice(0, SCOPE_SELECT_MAX_RESULTS);
   // A opção que limpa o escopo vem antes das outras e só some quando se digita.
   const rows: ScopeOption[] = allLabel && !term ? [{ value: "", label: allLabel }, ...shown] : shown;
@@ -66,6 +69,7 @@ export function ScopeSelect({
   const close = () => {
     setOpen(false);
     setQuery("");
+    onSearch?.("");
   };
   const choose = (next: string) => {
     onChange(next);
@@ -130,6 +134,7 @@ export function ScopeSelect({
                 value={query}
                 onChange={(event) => {
                   setQuery(event.target.value);
+                  onSearch?.(event.target.value);
                   setActive(0);
                 }}
                 onKeyDown={handleKeyDown}

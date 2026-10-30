@@ -1,12 +1,15 @@
 "use client";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
-import type { UnitPerson } from "@/lib/api/generated/models";
+import type { Person } from "@/lib/api/generated/models";
 
-import { linkSummary } from "./unit-link-summary";
+import { linkSummary, type LinkSummarySource } from "./unit-link-summary";
+
+/** Um vínculo na lista: o salvo (`UnitPerson`) ou o que ainda vai ser salvo com a unidade nova (`PendingLink`, ver `pendingLinkRow`). */
+export type LinkRow = LinkSummarySource & { id: string; person_detail: Pick<Person, "name" | "code"> };
 
 interface UnitPeopleListProps {
-  links: readonly UnitPerson[];
+  links: readonly LinkRow[];
   onRemove: (linkId: string) => void;
 }
 

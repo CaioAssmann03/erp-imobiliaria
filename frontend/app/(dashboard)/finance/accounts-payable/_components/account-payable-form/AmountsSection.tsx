@@ -1,6 +1,6 @@
 "use client";
 
-import { TextField } from "@/components/form/fields";
+import { DateField, TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { maskMoney } from "@/lib/masks";
 
@@ -14,8 +14,8 @@ export function AmountsSection() {
         <TextField name="amount" label="Valor" required inputMode="numeric" mask={(value) => maskMoney(value, 12)} placeholder="0,00" />
       </FieldRow>
       <FieldRow>
-        <TextField name="issue_date" label="Emissão" type="date" />
-        <TextField name="due_date" label="Vencimento" type="date" required />
+        <DateField name="issue_date" label="Emissão" />
+        <DateField name="due_date" label="Vencimento" required />
       </FieldRow>
     </FormSection>
   );

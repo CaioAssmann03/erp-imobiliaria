@@ -136,9 +136,9 @@ def test_a_condominium_can_be_deleted_while_the_old_rows_remain() -> None:
     _ = old_rules_model.objects.create(condominium=condominium)
     _ = migrate(latest())
 
-    Condominium.objects.get(pk=condominium.pk).delete()
+    _ = Condominium.objects.get(pk=condominium.pk).hard_delete()
 
-    assert not Condominium.objects.exists()
+    assert not Condominium.all_objects.exists()
 
 
 def test_going_back_copies_the_current_rows_into_the_old_tables() -> None:

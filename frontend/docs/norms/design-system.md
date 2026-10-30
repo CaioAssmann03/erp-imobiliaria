@@ -21,7 +21,7 @@ Source of truth: `app/globals.css` (Tailwind v4 `@theme`). shadcn tokens map to 
 - **No divider lines**: separate with space and surfaces, not `border`.
 - Density: buttons `h-8` (sm `h-7`), inputs `h-9`, table rows `py-2`, card padding 20 px, shell max `90rem`, forms up to 3 columns.
 - Glass (`glass-pill`, `glass`) only where something overlaps (header search, Spotlight, floating menus).
-- Modals (search, settings, the dashboard focus view, confirmations, sheets, and the module menu card that opens from the rail) share one backdrop, `modalBackdropClass` in `lib/ui.ts`: black at 30%, no blur, so the page is only a little darker. The left rail sits above it (`z-[60]`) and is **not** dimmed; give a new modal the same class with its own `z-` (40 or 50).
+- Modals (search, settings, the dashboard focus view, confirmations, sheets, and the module menu card that opens from the rail) share one backdrop, `modalBackdropClass` in `lib/ui.ts`: black at 30%, so the page is only a little darker. The modals in the middle of the screen (confirmations, search, settings, the focus view) use `centeredModalBackdropClass` instead: the same, plus `backdrop-blur-sm` to focus the modal. Sheets and the module menu keep the plain one, with no blur. The left rail sits above it (`z-[60]`) and is **not** dimmed; give a new modal the same class with its own `z-` (40 or 50).
 - Components: `Button` (variants default/brand/secondary/ghost/destructive/link; sizes default/sm/lg/icon), `Card`, `Badge`, `Input`, `Table`,
   plus shared `PageHeader`, `LinkButton`, `StatusBadge`, `ConfirmDeleteButton`, `FilterMenu`, `Pagination`, `data-list/`, `form/`.
 

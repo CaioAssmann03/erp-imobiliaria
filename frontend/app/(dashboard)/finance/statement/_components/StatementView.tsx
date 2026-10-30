@@ -35,8 +35,8 @@ function periodParams(period: string, today: string): Pick<CurrentAccountEntries
 }
 
 /**
- * Client Component: o extrato de um condomínio, do mais recente ao mais antigo, num cartão só: o saldo atual em tipo grande (vermelho se negativo)
- * com o saldo de cada sub-conta, e os lançamentos com a busca e o filtro no padrão das listas de Unidades. As seções `saldo` e `lancamentos` são as do índice da direita.
+ * Client Component: o extrato de um condomínio, do mais recente ao mais antigo, num cartão só: o saldo atual em tipo grande (vermelho se negativo),
+ * o saldo por sub-conta em uma seção própria e os lançamentos com a busca e o filtro no padrão das listas de Unidades. As seções `saldo`, `subcontas` e `lancamentos` são as do índice da direita.
  */
 export function StatementView({ condominiumId }: { condominiumId: string }) {
   const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
@@ -61,14 +61,11 @@ export function StatementView({ condominiumId }: { condominiumId: string }) {
     <div className="rounded-card bg-surface p-5 sm:p-6">
       <section id="saldo" aria-label="Saldo da conta corrente" className="scroll-mt-20">
         <p className={cn("text-display tabular-nums", balance < 0 && "text-danger")}>{loadingAccount ? "–" : brl(balance)}</p>
-        {account && (
-          <div className="mt-5">
-            <StatementBalances accountId={account.id} />
-          </div>
-        )}
       </section>
 
-      <section id="lancamentos" aria-label="Lançamentos" className="mt-8 scroll-mt-20">
+      <StatementBalances accountId={account?.id} />
+
+      <section id="lancamentos" aria-label="Lançamentos" className="mt-8 scroll-mt-20 border-t border-line pt-6">
         <div className="mb-3">
           <StatementFilters search={search} onSearchChange={setSearch} filters={filters} onFilterChange={setFilter} onClear={clearFilters} />
         </div>

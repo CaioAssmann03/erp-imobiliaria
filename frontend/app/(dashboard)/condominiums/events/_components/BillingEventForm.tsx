@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { CheckboxField, TextField } from "@/components/form/fields";
 import { FormActions } from "@/components/form/FormActions";
@@ -21,6 +20,7 @@ import {
   type BillingEventFormInput,
   type BillingEventFormOutput,
 } from "@/lib/schemas/billing-event";
+import { toast } from "@/lib/toast";
 
 import { BillingEventDeleteButton } from "./BillingEventDeleteButton";
 import { useBillingEventSubmit } from "./billing-event-form/use-billing-event-submit";

@@ -4,9 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
 
-import { SelectField, TextField } from "@/components/form/fields";
+import { SearchSelectField, TextField } from "@/components/form/fields";
 import { FormActions } from "@/components/form/FormActions";
 import { FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
@@ -21,6 +20,7 @@ import {
   type BlockFormInput,
   type BlockFormOutput,
 } from "@/lib/schemas/block";
+import { toast } from "@/lib/toast";
 
 import { BlockDeleteButton } from "./BlockDeleteButton";
 import { useBlockSubmit } from "./block-form/use-block-submit";
@@ -68,7 +68,7 @@ export function BlockForm({
         <div id="dados-gerais" className="scroll-mt-20">
         <FormSection title="Identificação">
           {!isEdit && !condominiumId && (
-            <SelectField
+            <SearchSelectField
               name="condominium"
               label="Condomínio"
               required

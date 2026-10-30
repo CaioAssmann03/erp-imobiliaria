@@ -2,11 +2,11 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { getDashboardRetrieveQueryKey, getUnitsListQueryKey, useUnitsDestroy } from "@/lib/api/generated";
 import { invalidateApportionment } from "@/lib/query/apportionment";
+import { toast } from "@/lib/toast";
 import { unitsUrl } from "@/lib/unit-workspace";
 
 /** Client Component: exclui a unidade aberta (confirmação) e volta à lista de unidades do condomínio. */

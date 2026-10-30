@@ -2,11 +2,11 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { getDashboardRetrieveQueryKey, getPersonsListQueryKey, usePersonsDestroy } from "@/lib/api/generated";
 import { personsUrl } from "@/lib/person-workspace";
+import { toast } from "@/lib/toast";
 
 /** Client Component: exclui a pessoa aberta (confirmação) e volta à tela de pessoas, sem ninguém aberta. */
 export function PersonDeleteButton({ personId, name }: { personId: string; name: string }) {

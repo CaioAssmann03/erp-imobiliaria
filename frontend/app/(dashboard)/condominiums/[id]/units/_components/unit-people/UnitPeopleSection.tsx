@@ -1,26 +1,29 @@
 "use client";
 
-import { toast } from "sonner";
-
 import { FormSection } from "@/components/form/FormSection";
 import { useUnitPeopleDestroy } from "@/lib/api/generated";
 import type { UnitPerson } from "@/lib/api/generated/models";
+import { toast } from "@/lib/toast";
 
+import { type PendingLink, pendingLinkRow } from "./pending-link";
 import { UnitPeopleList } from "./UnitPeopleList";
 import { UnitPersonForm } from "./UnitPersonForm";
 
 const TITLES = { owner: "Proprietário", tenant: "Inquilino" } as const;
 
 interface UnitPeopleSectionProps {
-  /** Sem unidade (cadastro novo) a seção só avisa que é preciso salvar antes. */
+  /** Sem unidade (cadastro novo) os vínculos escolhidos ficam em `pending` e são gravados com a unidade, depois dela. */
   unitId?: string;
   role: "owner" | "tenant";
   links: readonly UnitPerson[];
   onChanged: () => void;
+  pending?: readonly PendingLink[];
+  onAddPending?: (link: PendingLink) => void;
+  onRemovePending?: (key: string) => void;
 }
 
-/** Os vínculos de um papel (proprietário ou inquilino): os vigentes primeiro, depois os encerrados, e o formulário para vincular. */
-export function UnitPeopleSection({ unitId, role, links, onChanged }: UnitPeopleSectionProps) {
+/** Os vínculos de um papel (proprietário ou inquilino): os vigentes primeiro, depois os encerrados, e o formulário para vincular. Na unidade nova os vínculos escolhidos ficam numa lista local e são gravados com a unidade. */
+export function UnitPeopleSection({ unitId, role, links, onChanged, pending = [], onAddPending, onRemovePending }: UnitPeopleSectionProps) {
   const destroyMutation = useUnitPeopleDestroy();
   const today = new Date().toISOString().slice(0, 10);
   const ofRole = links
@@ -55,7 +58,10 @@ export function UnitPeopleSection({ unitId, role, links, onChanged }: UnitPeople
           <UnitPersonForm unitId={unitId} role={role} onCreated={onChanged} />
         </>
       ) : (
-        <p className="text-body text-ink-soft">Salve a unidade para vincular pessoas.</p>
+        <>
+          <UnitPeopleList links={pending.filter((link) => link.role === role).map(pendingLinkRow)} onRemove={(key) => onRemovePending?.(key)} />
+          <UnitPersonForm role={role} onAdd={onAddPending} />
+        </>
       )}
     </FormSection>
   );

@@ -3,7 +3,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type { UseFormSetError } from "react-hook-form";
-import { toast } from "sonner";
 
 import {
   getBillingPlansListQueryKey,
@@ -19,6 +18,7 @@ import {
   type BillingPlanFormInput,
   type BillingPlanFormOutput,
 } from "@/lib/schemas/billing-plan";
+import { toast } from "@/lib/toast";
 
 export const BILLING_PLANS_URL = "/billing/plans";
 

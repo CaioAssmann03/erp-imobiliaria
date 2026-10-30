@@ -4,7 +4,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import type { UseFormSetError } from "react-hook-form";
-import { toast } from "sonner";
 
 import {
   currentAccountsList,
@@ -24,6 +23,7 @@ import {
   type EntriesBatchFormInput,
   type EntriesBatchFormOutput,
 } from "@/lib/schemas/entry-batch";
+import { toast } from "@/lib/toast";
 
 /** `entries.2.amount` (API) → `lines.2.amount` (formulário); a conta corrente da linha é o condomínio escolhido. */
 function toFormPath(path: string): string {

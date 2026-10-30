@@ -4,8 +4,11 @@ export const ROLE_LABELS = { owner: "Proprietário", tenant: "Locatário" } as c
 
 const formatDate = (iso: string) => iso.split("-").reverse().join("/");
 
+/** O que o resumo de um vínculo lê: serve ao vínculo salvo e ao que ainda vai ser salvo com a unidade nova. */
+export type LinkSummarySource = Pick<UnitPerson, "role" | "ownership_percentage" | "end_date" | "start_date">;
+
 /** "Proprietário · 50% · desde 01/01/2024" */
-export function linkSummary(link: UnitPerson) {
+export function linkSummary(link: LinkSummarySource) {
   const parts: string[] = [ROLE_LABELS[link.role ?? "tenant"]];
   if (link.ownership_percentage) {
     parts.push(`${Number(link.ownership_percentage).toLocaleString("pt-BR")}%`);

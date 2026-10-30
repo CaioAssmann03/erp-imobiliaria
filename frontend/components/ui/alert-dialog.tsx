@@ -3,7 +3,7 @@
 import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "@base-ui/react/alert-dialog"
 import { cn } from "@/lib/utils"
-import { modalBackdropClass } from "@/lib/ui"
+import { centeredModalBackdropClass } from "@/lib/ui"
 
 import { Button } from "@/components/ui/button"
 
@@ -32,7 +32,7 @@ function AlertDialogOverlay({
       data-slot="alert-dialog-overlay"
       className={cn(
         "isolate z-50 duration-100 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
-        modalBackdropClass,
+        centeredModalBackdropClass,
         className
       )}
       {...props}

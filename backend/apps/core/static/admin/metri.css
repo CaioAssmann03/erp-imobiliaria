@@ -1,0 +1,16 @@
+/* Admin theme (spec 063): the shapes of the site (frontend/app/globals.css) on top of Unfold.
+   The colors come from `UNFOLD["COLORS"]` (config/settings.py), so both modes follow the site. */
+:root {
+  --border-radius: 0.75rem; /* the site's --radius-control; Unfold's `rounded-default` */
+}
+
+/* Cards and tables breathe like the site's cards. */
+.shadow-xs {
+  box-shadow: 0 1px 2px rgb(28 27 25 / 0.04);
+}
+
+/* Sidebar group titles: small and quiet, like the site's menus. */
+#nav-sidebar h2,
+nav h2 {
+  letter-spacing: -0.01em;
+}

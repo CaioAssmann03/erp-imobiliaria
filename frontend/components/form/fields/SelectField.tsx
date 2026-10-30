@@ -4,6 +4,7 @@ import { useId } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
 import { inputClass } from "@/lib/ui";
+import { cn } from "@/lib/utils";
 
 import { FormField } from "../FormField";
 import type { BaseProps } from "./types";
@@ -41,7 +42,7 @@ export function SelectField({
     <FormField id={id} label={label} required={required} hint={hint} error={error} className={className}>
       <select
         id={id}
-        className={inputClass}
+        className={cn(inputClass, placeholder !== undefined && !value && "text-ink-faint")}
         aria-invalid={error ? true : undefined}
         aria-describedby={error || hint ? `${id}-message` : undefined}
         aria-required={required}
@@ -53,9 +54,13 @@ export function SelectField({
           onValueChange?.(event.target.value);
         }}
       >
+        {/* O texto do campo vazio ("Selecione") só aparece no campo, não como uma opção da lista; num campo opcional que já tem valor, "Nenhum" o esvazia. */}
         {placeholder !== undefined && (
-          <option value="">{placeholder}</option>
+          <option value="" disabled hidden>
+            {placeholder}
+          </option>
         )}
+        {placeholder !== undefined && !required && value ? <option value="">Nenhum</option> : null}
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

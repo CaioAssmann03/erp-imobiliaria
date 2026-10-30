@@ -2,7 +2,6 @@
 
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { toast } from "sonner";
 
 import { ListState } from "@/components/data-list";
 import { Pagination } from "@/components/Pagination";
@@ -15,6 +14,7 @@ import {
   useCondominiumsList,
 } from "@/lib/api/generated";
 import { apiErrorMessage } from "@/lib/form-errors";
+import { toast } from "@/lib/toast";
 
 import { BillingPlanRow } from "./BillingPlanRow";
 import { BillingPlansFilters } from "./BillingPlansFilters";

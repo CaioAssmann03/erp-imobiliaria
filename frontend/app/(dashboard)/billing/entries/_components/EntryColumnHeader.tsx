@@ -1,83 +1,21 @@
-"use client";
+import Link from "next/link";
 
-import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-
-import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
-import {
-  getBillingEntriesListQueryKey,
-  useBillingEntriesDestroy,
-  useBillingEntriesEnd,
-} from "@/lib/api/generated";
 import type { BillingEntry } from "@/lib/api/generated/models";
-import { entryColumnTitle, formatCode } from "@/lib/billing-entry-payload";
-import { brl, formatMonth } from "@/lib/format";
-import { applyServerErrors } from "@/lib/form-errors";
+import { entryColumnTitle } from "@/lib/billing-entry-payload";
+import { billingEntryUrl, type BillingEntriesScope } from "@/lib/billing-entry-workspace";
+import { brl } from "@/lib/format";
 
-interface EntryColumnHeaderProps {
-  entry: BillingEntry;
-  total: string;
-  /** Primeiro dia do mês que a grade mostra ("2026-10-01"). */
-  referenceMonth: string;
-}
+import { entryDestinationLabel } from "./BillingEntryListItem";
 
-/** O cabeçalho de uma coluna: o lançamento, o total, a sub-conta e as ações (excluir, ou encerrar o que se repete). */
-export function EntryColumnHeader({ entry, total, referenceMonth }: EntryColumnHeaderProps) {
-  const queryClient = useQueryClient();
-  const destroyMutation = useBillingEntriesDestroy();
-  const endMutation = useBillingEntriesEnd();
-  const { title, installment } = entryColumnTitle(entry);
-  const refresh = () => queryClient.invalidateQueries({ queryKey: getBillingEntriesListQueryKey() });
-  const onError = (error: unknown) => toast.error(applyServerErrors(error, () => undefined));
-
+/** O cabeçalho de uma coluna da grade: o nome do boleto (abre o lançamento), a sub-conta e o total. Excluir e encerrar ficam no lançamento aberto. */
+export function EntryColumnHeader({ entry, total, scope }: { entry: BillingEntry; total: string; scope: BillingEntriesScope }) {
   return (
     <div className="min-w-36 space-y-0.5 text-left font-normal">
-      <p className="font-medium text-ink">{title}</p>
-      <p className="text-caption text-ink-soft">
-        {entry.event_credits_company ? "Conta da imobiliária" : `(${formatCode(entry.cost_center_code)}) ${entry.cost_center_name}`}
-        {installment && ` · ${installment}`}
-        {entry.recurrence === "always" && " · sempre"}
-      </p>
+      <Link href={billingEntryUrl(entry.id, scope)} className="font-medium text-ink underline-offset-2 outline-none hover:underline focus-visible:underline">
+        {entryColumnTitle(entry).title}
+      </Link>
+      <p className="text-caption text-ink-soft">{entryDestinationLabel(entry)}</p>
       <p className="text-caption tabular-nums text-ink-soft">Total {brl(total)}</p>
-      <div className="flex gap-1">
-        {entry.recurrence === "always" && (
-          <ConfirmDeleteButton
-            label="Encerrar"
-            title="Encerrar lançamento?"
-            description={`O lançamento "${title}" deixa de entrar nos boletos depois de ${formatMonth(referenceMonth)}. Os boletos já emitidos não mudam.`}
-            onConfirm={() =>
-              endMutation.mutate(
-                { id: entry.id, data: { end_month: referenceMonth } },
-                {
-                  onSuccess: () => {
-                    refresh();
-                    toast.success("Lançamento encerrado.");
-                  },
-                  onError,
-                }
-              )
-            }
-          />
-        )}
-        {!entry.is_used && (
-          <ConfirmDeleteButton
-            title="Excluir lançamento?"
-            description={`O lançamento "${title}" será excluído de todos os meses. Esta ação não pode ser desfeita.`}
-            onConfirm={() =>
-              destroyMutation.mutate(
-                { id: entry.id },
-                {
-                  onSuccess: () => {
-                    refresh();
-                    toast.success("Lançamento excluído.");
-                  },
-                  onError,
-                }
-              )
-            }
-          />
-        )}
-      </div>
     </div>
   );
 }

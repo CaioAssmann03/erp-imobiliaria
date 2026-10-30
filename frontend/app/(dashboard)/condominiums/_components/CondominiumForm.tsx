@@ -2,9 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
@@ -18,6 +17,7 @@ import {
   type CondominiumFormInput,
   type CondominiumFormOutput,
 } from "@/lib/schemas/condominium";
+import { toast } from "@/lib/toast";
 
 import { AddressSection } from "./condominium-form/AddressSection";
 import { AdjustmentSection } from "./condominium-form/AdjustmentSection";
@@ -25,6 +25,7 @@ import { ApportionmentCriteriaCard } from "./condominium-form/ApportionmentCrite
 import { BillingSection } from "./condominium-form/BillingSection";
 import { FeeSection } from "./condominium-form/FeeSection";
 import { IdentificationSection } from "./condominium-form/IdentificationSection";
+import type { PendingInterestRate } from "./condominium-form/pending-interest-rate";
 import { useCondominiumSubmit } from "./condominium-form/use-condominium-submit";
 import { CondominiumDeleteButton } from "./CondominiumDeleteButton";
 
@@ -56,7 +57,9 @@ export function CondominiumForm({
     mode: "onTouched",
   });
   const { handleSubmit, reset, setError } = methods;
-  const { submit, isSubmitting } = useCondominiumSubmit(condominiumId, billingRules?.id, setError);
+  // No condomínio novo, as taxas de juros escolhidas aguardam aqui: são gravadas depois do condomínio.
+  const [pendingRates, setPendingRates] = useState<PendingInterestRate[]>([]);
+  const { submit, isSubmitting } = useCondominiumSubmit(condominiumId, billingRules?.id, setError, pendingRates);
 
   useEffect(() => {
     if (condominium && !isLoadingBillingRules) reset(condominiumToForm(condominium, billingRules));
@@ -77,7 +80,12 @@ export function CondominiumForm({
         </div>
         <div id="taxa-e-cobranca" className="scroll-mt-20 space-y-4">
           <FeeSection />
-          <BillingSection condominiumId={condominiumId} />
+          <BillingSection
+            condominiumId={condominiumId}
+            pending={pendingRates}
+            onAddPending={(rate) => setPendingRates((current) => [...current, rate])}
+            onRemovePending={(key) => setPendingRates((current) => current.filter((rate) => rate.key !== key))}
+          />
           <AdjustmentSection />
           {isEdit && <ApportionmentCriteriaCard condominiumId={condominiumId} />}
         </div>

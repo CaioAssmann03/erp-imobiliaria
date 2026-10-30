@@ -1,6 +1,6 @@
 "use client";
 
-import { TextField } from "@/components/form/fields";
+import { DateField, TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { maskInteger } from "@/lib/masks";
 
@@ -8,8 +8,8 @@ export function AdjustmentSection() {
   return (
     <FormSection title="Reajuste">
       <FieldRow>
-        <TextField name="start_date" label="Início da administração" type="date" />
-        <TextField name="adjustment_base_date" label="Base do reajuste" type="date" />
+        <DateField name="start_date" label="Início da administração" />
+        <DateField name="adjustment_base_date" label="Base do reajuste" />
       </FieldRow>
       <FieldRow>
         <TextField

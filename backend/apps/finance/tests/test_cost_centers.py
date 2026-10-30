@@ -183,15 +183,24 @@ def test_delete_rule_holds_for_code_that_calls_delete(cost_center: CostCenter) -
     with pytest.raises(ValidationError) as error:
         _ = cost_center.delete()
 
-    assert error.value.code == "cost_center.deletion.has_entry_templates"
+    assert error.value.error_dict["__all__"][0].code == "cost_center.deletion.has_entry_templates"
     assert CostCenter.objects.filter(pk=cost_center.pk).exists()
 
 
-def test_the_database_still_protects_a_bulk_delete(cost_center: CostCenter) -> None:
+def test_a_bulk_delete_does_not_bypass_the_archive_rules(cost_center: CostCenter) -> None:
+    _ = EntryTemplate.objects.create(cost_center=cost_center, name="Fundo")
+
+    with pytest.raises(ValidationError):
+        _ = CostCenter.objects.filter(pk=cost_center.pk).delete()
+
+    assert CostCenter.objects.filter(pk=cost_center.pk).exists()
+
+
+def test_the_database_still_protects_a_hard_delete(cost_center: CostCenter) -> None:
     _ = EntryTemplate.objects.create(cost_center=cost_center, name="Fundo")
 
     with pytest.raises(ProtectedError):
-        _ = CostCenter.objects.filter(pk=cost_center.pk).delete()
+        _ = CostCenter.objects.filter(pk=cost_center.pk).hard_delete()
 
 
 # ----- R6: immutable condominium -----

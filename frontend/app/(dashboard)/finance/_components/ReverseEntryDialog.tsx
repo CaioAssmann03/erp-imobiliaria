@@ -4,9 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
 
-import { TextField } from "@/components/form/fields";
+import { DateField, TextField } from "@/components/form/fields";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -30,6 +29,7 @@ import {
   type ReverseEntryFormInput,
   type ReverseEntryFormOutput,
 } from "@/lib/schemas/entry-batch";
+import { toast } from "@/lib/toast";
 
 /** Estorno: um lançamento nunca é alterado nem apagado, o estorno cria o lançamento oposto. */
 export function ReverseEntryDialog({ entry }: { entry: CurrentAccountEntry }) {
@@ -75,7 +75,7 @@ export function ReverseEntryDialog({ entry }: { entry: CurrentAccountEntry }) {
           </AlertDialogHeader>
           <FormProvider {...methods}>
             <form noValidate onSubmit={handleSubmit(submit)} className="space-y-3" id={`reverse-${entry.id}`}>
-              <TextField name="reversal_date" label="Data do estorno" type="date" required />
+              <DateField name="reversal_date" label="Data do estorno" required />
               <TextField name="reason" label="Motivo" required maxLength={2000} autoComplete="off" />
             </form>
           </FormProvider>

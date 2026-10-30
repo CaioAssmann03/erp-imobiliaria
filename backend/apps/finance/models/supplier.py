@@ -3,17 +3,23 @@ from typing import final, override
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from apps.core.models import SoftDeleteManager, SoftDeleteMixin
 from apps.core.models.base import BaseModel
 from apps.finance.errors import SupplierError
 from apps.finance.validators import validate_bank_code
+from apps.finance.models.querysets import SupplierQuerySet
+from apps.finance.models.rules.supplier_archive import SupplierArchiveRules
 from apps.persons.models import Person
 
 from .bank_account import AccountKind
 
 
 @final
-class Supplier(BaseModel):
+class Supplier(SoftDeleteMixin, BaseModel):
     """Who the company pays (the PDF's *Fornecedor*): a `Person` plus how to pay them."""
+
+    objects = SoftDeleteManager.from_queryset(SupplierQuerySet)()
+    all_objects = SupplierQuerySet.as_manager()
 
     person = models.OneToOneField(
         Person, on_delete=models.PROTECT, related_name="supplier"
@@ -40,8 +46,14 @@ class Supplier(BaseModel):
         ordering = ("person__code",)
 
     @override
+    def validate_archivable(self) -> None:
+        SupplierArchiveRules(self).validate()
+
+    @override
     def clean(self) -> None:
-        """Bank code, branch and account number are filled together or not at all."""
+        """Bank code, branch and account number are filled together or not at all; a person whose supplier was deleted gets it restored."""
+        if self._state.adding and Supplier.all_objects.filter(person_id=self.person_id, deleted_at__isnull=False).exists():
+            raise ValidationError({"person": SupplierError.PERSON_HAS_ARCHIVED_SUPPLIER.to_validation_error()})
         bank_data = {
             "bank_code": self.bank_code,
             "branch": self.branch,

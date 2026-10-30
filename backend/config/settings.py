@@ -7,6 +7,8 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from django.core.exceptions import ImproperlyConfigured
+from django.templatetags.static import static
+from django.urls import reverse_lazy
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -71,7 +73,10 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "apps" / "billing" / "infrastructure" / "rendering" / "templates"],
+        "DIRS": [
+            BASE_DIR / "config" / "templates",
+            BASE_DIR / "apps" / "billing" / "infrastructure" / "rendering" / "templates",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -315,7 +320,141 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
+def _sidebar_group(
+    title: str, description: str, items: list[tuple[str, str, str]], collapsible: bool = True
+) -> dict[str, object]:
+    """One group of the Admin sidebar and of its home page; an item is (title, icon, `app_label_model_name` of its list, or the name of a URL).
+
+    A collapsible group opens by itself when the page being shown belongs to it.
+    """
+    return {
+        "title": title,
+        "description": description,
+        "collapsible": collapsible,
+        "items": [
+            {"title": item_title, "icon": icon, "link": reverse_lazy(target if target == "admin_archived" else f"admin:{target}_changelist")}
+            for item_title, icon, target in items
+        ],
+    }
+
+
+# Every model registered in the Admin has an item here (a guard test fails when one is missing).
 UNFOLD = {
     "SITE_TITLE": "METRI",
     "SITE_HEADER": "METRI",
+    "DASHBOARD_CALLBACK": "apps.core.infrastructure.admin_home.dashboard_callback",
+    "STYLES": [lambda request: static("admin/metri.css")],
+    # The colors of the site (frontend/app/globals.css): the orange as the main color and the warm neutrals as the base,
+    # so the light and dark modes of the Admin match the ones of the app.
+    "COLORS": {
+        "primary": {
+            "50": "#fff4ef",
+            "100": "#ffe7dc",
+            "200": "#ffcdb8",
+            "300": "#ffab86",
+            "400": "#ff7a45",
+            "500": "#f56a35",
+            "600": "#f05a28",
+            "700": "#d9481a",
+            "800": "#b13b15",
+            "900": "#8a2f12",
+            "950": "#4d1807",
+        },
+        "base": {
+            "50": "#f6f6f5",
+            "100": "#f2f2f0",
+            "200": "#e4e4e1",
+            "300": "#d2d2ce",
+            "400": "#a5a49e",
+            "500": "#8a8983",
+            "600": "#6e6d68",
+            "700": "#4a4945",
+            "800": "#2a2a27",
+            "900": "#21211f",
+            "950": "#181817",
+        },
+        "font": {
+            "subtle-light": "var(--color-base-500)",
+            "subtle-dark": "var(--color-base-400)",
+            "default-light": "var(--color-base-600)",
+            "default-dark": "var(--color-base-300)",
+            "important-light": "#1c1b19",
+            "important-dark": "#f2f2ef",
+        },
+    },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation": [
+            _sidebar_group(
+                "Cadastros",
+                "Condomínios, unidades, pessoas e fornecedores.",
+                [
+                    ("Condomínios", "apartment", "condominiums_condominium"),
+                    ("Blocos", "domain", "condominiums_block"),
+                    ("Unidades", "meeting_room", "condominiums_unit"),
+                    ("Pessoas", "group", "persons_person"),
+                    ("Fornecedores", "local_shipping", "finance_supplier"),
+                    ("Endereços", "location_on", "core_address"),
+                    ("Arquivados", "inventory_2", "admin_archived"),
+                ],
+                collapsible=False,
+            ),
+            _sidebar_group(
+                "Financeiro",
+                "Contas a pagar, sub-contas, extrato e comprovantes.",
+                [
+                    ("Contas a pagar", "receipt_long", "finance_accountpayable"),
+                    ("Sub-contas", "account_tree", "finance_costcenter"),
+                    ("Catálogo de sub-contas", "list_alt", "finance_costcentercatalogitem"),
+                    ("Modelos de lançamento", "description", "finance_entrytemplate"),
+                    ("Contas bancárias", "account_balance", "finance_bankaccount"),
+                    ("Contas correntes", "savings", "finance_currentaccount"),
+                    ("Lotes de lançamentos", "inventory", "finance_entrybatch"),
+                    ("Extrato (lançamentos)", "swap_vert", "finance_currentaccountentry"),
+                    ("Conta da imobiliária", "business_center", "finance_companyentry"),
+                    ("Comprovantes", "attach_file", "finance_paymentreceipt"),
+                ],
+            ),
+            _sidebar_group(
+                "Cobrança",
+                "Planos, inclusão de valores, emissão e boletos.",
+                [
+                    ("Planos de cobrança", "event_repeat", "billing_billingplan"),
+                    ("Eventos", "bolt", "billing_billingevent"),
+                    ("Regras de cobrança", "rule", "billing_condominiumbillingrules"),
+                    ("Taxas de juros", "percent", "billing_lateinterestrate"),
+                    ("Inclusão de valores", "add_card", "billing_billingentry"),
+                    ("Emissões do mês", "play_circle", "billing_billingrun"),
+                    ("Boletos", "request_quote", "billing_billingdocument"),
+                ],
+            ),
+            _sidebar_group(
+                "Gateway e boletos (técnico)",
+                "Registros, entregas, pagamentos e eventos do gateway; só para conferência.",
+                [
+                    ("Registros no gateway", "how_to_reg", "billing_billingdocumentregistration"),
+                    ("Entregas por e-mail", "mail", "billing_billingdocumentdelivery"),
+                    ("Pagamentos de boletos", "paid", "billing_billingdocumentpayment"),
+                    ("PDFs dos boletos", "picture_as_pdf", "billing_billingdocumentpdf"),
+                    ("Conta do gateway", "key", "billing_gatewayaccount"),
+                    ("Clientes do gateway", "badge", "billing_gatewaycustomer"),
+                    ("Eventos do gateway", "webhook", "billing_gatewayevent"),
+                    ("Conciliações", "sync", "billing_gatewayreconciliationrun"),
+                ],
+            ),
+            _sidebar_group(
+                "Sistema",
+                "Usuários, empresas, log de auditoria e tokens.",
+                [
+                    ("Usuários", "person", "accounts_user"),
+                    ("Grupos", "shield_person", "auth_group"),
+                    ("Empresas", "corporate_fare", "core_company"),
+                    ("Log de auditoria", "history", "auditlog_logentry"),
+                    ("Tokens pendentes", "key_vertical", "token_blacklist_outstandingtoken"),
+                    ("Tokens na lista negra", "block", "token_blacklist_blacklistedtoken"),
+                ],
+            ),
+        ],
+    },
 }

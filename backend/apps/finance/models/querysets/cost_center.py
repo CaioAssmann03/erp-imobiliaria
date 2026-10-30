@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
-from django.db import models
 
+from apps.core.models import SoftDeleteQuerySet
 from apps.core.infrastructure.search.ranking import relevance_rank
 from apps.core.infrastructure.search.text_match import name_matches
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from apps.finance.models.cost_center import CostCenter  # noqa: F401
 
 
-class CostCenterQuerySet(models.QuerySet["CostCenter"]):
+class CostCenterQuerySet(SoftDeleteQuerySet["CostCenter"]):
     def search(self, query: "ClassifiedTerm") -> "CostCenterQuerySet":
         """Cost centers whose name matches the global search term, the best match first.
 

@@ -3,7 +3,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type { UseFormSetError } from "react-hook-form";
-import { toast } from "sonner";
 
 import {
   getAccountsPayableListQueryKey,
@@ -20,6 +19,7 @@ import {
   type AccountPayableFormInput,
   type AccountPayableFormOutput,
 } from "@/lib/schemas/account-payable";
+import { toast } from "@/lib/toast";
 
 export function useAccountPayableSubmit(
   accountId: string | undefined,

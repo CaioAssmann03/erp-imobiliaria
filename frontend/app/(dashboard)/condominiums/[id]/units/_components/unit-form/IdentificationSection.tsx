@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckboxField, SelectField, TextField } from "@/components/form/fields";
+import { CheckboxField, SearchSelectField, SelectField, TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { useBlocksList } from "@/lib/api/generated";
 import { maskInteger } from "@/lib/masks";
@@ -20,7 +20,7 @@ export function IdentificationSection({ condominiumId }: { condominiumId: string
           placeholder="Ex.: 101"
           autoComplete="off"
         />
-        <SelectField
+        <SearchSelectField
           name="block"
           label="Bloco"
           placeholder="Sem bloco"

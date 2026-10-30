@@ -3,12 +3,15 @@ from typing import TYPE_CHECKING, Any, final, override
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 
 from apps.condominiums.models import Condominium
+from apps.core.models import SoftDeleteManager, SoftDeleteMixin
 from apps.core.models.base import BaseModel
 from apps.finance.errors import CostCenterError
 from apps.finance.models.cost_center_catalog_item import CostCenterCatalogItem
 from apps.finance.models.querysets import CostCenterQuerySet
+from apps.finance.models.rules.cost_center_archive import CostCenterArchiveRules
 
 if TYPE_CHECKING:
     from django.db.models.fields.related_descriptors import RelatedManager
@@ -17,8 +20,9 @@ if TYPE_CHECKING:
 
 
 @final
-class CostCenter(BaseModel):
-    objects = CostCenterQuerySet.as_manager()
+class CostCenter(SoftDeleteMixin, BaseModel):
+    objects = SoftDeleteManager.from_queryset(CostCenterQuerySet)()
+    all_objects = CostCenterQuerySet.as_manager()
 
     """Chart-of-accounts entry of a condominium (the PDF's *SubConta*)."""
 
@@ -51,18 +55,21 @@ class CostCenter(BaseModel):
         constraints = (
             models.UniqueConstraint(
                 fields=("condominium", "code"),
+                condition=Q(deleted_at__isnull=True),
                 name="cost_center_unique_code_per_condominium",
                 violation_error_message=CostCenterError.CODE_DUPLICATE_IN_CONDOMINIUM.message,
                 violation_error_code=CostCenterError.CODE_DUPLICATE_IN_CONDOMINIUM.value,
             ),
             models.UniqueConstraint(
                 fields=("condominium", "name"),
+                condition=Q(deleted_at__isnull=True),
                 name="cost_center_unique_name_per_condominium",
                 violation_error_message=CostCenterError.NAME_DUPLICATE_IN_CONDOMINIUM.message,
                 violation_error_code=CostCenterError.NAME_DUPLICATE_IN_CONDOMINIUM.value,
             ),
             models.UniqueConstraint(
                 fields=("condominium", "catalog_item"),
+                condition=Q(deleted_at__isnull=True),
                 name="cost_center_unique_catalog_item_per_condominium",
                 violation_error_message=CostCenterError.CATALOG_ITEM_DUPLICATE_IN_CONDOMINIUM.message,
                 violation_error_code=CostCenterError.CATALOG_ITEM_DUPLICATE_IN_CONDOMINIUM.value,
@@ -132,10 +139,8 @@ class CostCenter(BaseModel):
         return templates[0] if len(templates) == 1 else None
 
     @override
-    def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
-        if self.entry_templates.exists():
-            raise CostCenterError.DELETION_HAS_ENTRY_TEMPLATES.to_validation_error()
-        return super().delete(*args, **kwargs)
+    def validate_archivable(self) -> None:
+        CostCenterArchiveRules(self).validate()
 
     @override
     def __str__(self) -> str:

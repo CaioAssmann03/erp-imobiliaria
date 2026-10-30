@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
@@ -18,6 +17,7 @@ import {
   type BillingPlanFormInput,
   type BillingPlanFormOutput,
 } from "@/lib/schemas/billing-plan";
+import { toast } from "@/lib/toast";
 
 import { IdentificationSection } from "./billing-plan-form/IdentificationSection";
 import { ItemsSection } from "./billing-plan-form/ItemsSection";

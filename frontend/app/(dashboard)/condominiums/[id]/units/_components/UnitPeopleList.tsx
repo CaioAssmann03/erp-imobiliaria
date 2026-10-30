@@ -45,7 +45,7 @@ export function UnitPeopleList({ condominiumId, unitId }: { condominiumId: strin
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Nome ou ID"
+            placeholder="Nome"
             className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint"
           />
         </label>

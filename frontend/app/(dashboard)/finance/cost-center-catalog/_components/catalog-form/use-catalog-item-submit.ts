@@ -3,7 +3,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type { UseFormSetError } from "react-hook-form";
-import { toast } from "sonner";
 
 import {
   getCostCenterCatalogListQueryKey,
@@ -20,6 +19,7 @@ import {
   type CostCenterCatalogItemFormInput,
   type CostCenterCatalogItemFormOutput,
 } from "@/lib/schemas/cost-center-catalog-item";
+import { toast } from "@/lib/toast";
 
 export function useCatalogItemSubmit(itemId: string | undefined, setError: UseFormSetError<CostCenterCatalogItemFormInput>) {
   const router = useRouter();

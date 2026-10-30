@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_APPEARANCE, type Appearance } from "@/lib/appearance";
 import { cn } from "@/lib/utils";
-import { modalBackdropClass } from "@/lib/ui";
+import { centeredModalBackdropClass } from "@/lib/ui";
 
 import { railButtonClass, RailLabel } from "./ModuleMenu";
 import { AccentSection } from "./settings/AccentSection";
@@ -84,7 +84,7 @@ export function SettingsDialog({
       )}
 
       <Dialog.Portal>
-        <Dialog.Backdrop className={cn("z-40", modalBackdropClass)} />
+        <Dialog.Backdrop className={cn("z-40", centeredModalBackdropClass)} />
         <Dialog.Popup className="fixed inset-x-0 bottom-0 z-50 flex max-h-[88dvh] flex-col overflow-hidden rounded-t-card bg-surface shadow-float outline-none transition duration-200 data-[ending-style]:translate-y-full data-[starting-style]:translate-y-full sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:h-[min(34rem,90vh)] sm:max-h-none sm:w-[min(46rem,94vw)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:flex-row sm:rounded-card sm:data-[ending-style]:translate-y-[-50%] sm:data-[ending-style]:scale-95 sm:data-[ending-style]:opacity-0 sm:data-[starting-style]:translate-y-[-50%] sm:data-[starting-style]:scale-95 sm:data-[starting-style]:opacity-0">
           <div aria-hidden className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-ink-faint/40 sm:hidden" />
 

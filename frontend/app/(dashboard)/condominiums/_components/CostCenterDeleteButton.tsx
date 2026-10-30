@@ -2,12 +2,12 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { getCostCentersListQueryKey, useCostCentersDestroy } from "@/lib/api/generated";
 import { condominiumPageUrl } from "@/lib/condominium-registry";
 import { applyServerErrors } from "@/lib/form-errors";
+import { toast } from "@/lib/toast";
 
 /** Client Component: exclui a sub-conta aberta (confirmação) e volta à tela de sub-contas do condomínio. Com modelos de lançamento vinculados o backend recusa (desative em vez de excluir). */
 export function CostCenterDeleteButton({ condominiumId, costCenterId, name }: { condominiumId: string; costCenterId: string; name: string }) {

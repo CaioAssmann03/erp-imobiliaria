@@ -3,10 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
-import { TextField } from "@/components/form/fields";
+import { DateField, TextField } from "@/components/form/fields";
 import { FieldRow } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,33 +24,42 @@ import {
   type LateInterestRateFormInput,
   type LateInterestRateFormOutput,
 } from "@/lib/schemas/late-interest-rate";
+import { toast } from "@/lib/toast";
+
+import { newPendingRateKey, type PendingInterestRate } from "./pending-interest-rate";
 
 const percent = (value: string) => maskDecimal(value, 2, 3);
 const percentLabel = (value: string) =>
   `${Number(value).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
 
-/**
- * As taxas de juros do condomínio: cada uma vale a partir da sua data de início. Como as unidades de
- * uma pessoa, são gravadas na hora (não dependem do botão Salvar do formulário), então só existem
- * depois que o condomínio foi cadastrado.
- */
-export function InterestRatesCard({ condominiumId }: { condominiumId?: string }) {
-  if (condominiumId === undefined) {
-    return (
-      <p className="rounded-panel bg-surface-muted px-4 py-2.5 text-body text-ink-soft">
-        Salve o condomínio para cadastrar as taxas de juros.
-      </p>
-    );
-  }
-  return <InterestRates condominiumId={condominiumId} />;
+interface InterestRatesProps {
+  /** Sem condomínio (cadastro novo) as taxas escolhidas ficam em `pending` e são gravadas com o condomínio, depois dele. */
+  condominiumId?: string;
+  pending?: readonly PendingInterestRate[];
+  onAddPending?: (rate: PendingInterestRate) => void;
+  onRemovePending?: (key: string) => void;
 }
 
-function InterestRates({ condominiumId }: { condominiumId: string }) {
+/**
+ * As taxas de juros do condomínio: cada uma vale a partir da sua data de início. Como as unidades de uma pessoa, num condomínio que já existe são gravadas
+ * na hora (não dependem do botão Salvar do formulário). No condomínio novo o formulário só junta as taxas, e o Salvar as grava depois do condomínio.
+ */
+export function InterestRatesCard(props: InterestRatesProps) {
+  return <InterestRates {...props} />;
+}
+
+function InterestRates({ condominiumId, pending = [], onAddPending, onRemovePending }: InterestRatesProps) {
   const queryClient = useQueryClient();
-  const { data } = useLateInterestRatesList({ condominium: condominiumId, limit: 100 });
+  const { data } = useLateInterestRatesList(
+    { condominium: condominiumId ?? "", limit: 100 },
+    { query: { enabled: condominiumId !== undefined } }
+  );
   const createMutation = useLateInterestRatesCreate();
   const destroyMutation = useLateInterestRatesDestroy();
-  const rates = data?.results ?? [];
+  const rates: { id: string; start_date: string; monthly_percentage: string }[] =
+    condominiumId === undefined
+      ? pending.map((rate) => ({ id: rate.key, start_date: rate.start_date, monthly_percentage: rate.monthly_percentage }))
+      : (data?.results ?? []);
 
   const methods = useForm<LateInterestRateFormInput, unknown, LateInterestRateFormOutput>({
     resolver: zodResolver(lateInterestRateSchema),
@@ -63,6 +71,11 @@ function InterestRates({ condominiumId }: { condominiumId: string }) {
   const refresh = () => queryClient.invalidateQueries({ queryKey: getLateInterestRatesListQueryKey() });
 
   const onSubmit = (values: LateInterestRateFormOutput) => {
+    if (condominiumId === undefined) {
+      onAddPending?.({ key: newPendingRateKey(), start_date: values.start_date!, monthly_percentage: values.monthly_percentage! });
+      reset();
+      return;
+    }
     createMutation.mutate(
       {
         data: {
@@ -83,6 +96,10 @@ function InterestRates({ condominiumId }: { condominiumId: string }) {
   };
 
   const handleRemove = (rateId: string) => {
+    if (condominiumId === undefined) {
+      onRemovePending?.(rateId);
+      return;
+    }
     destroyMutation.mutate(
       { id: rateId },
       {
@@ -126,14 +143,15 @@ function InterestRates({ condominiumId }: { condominiumId: string }) {
         <div
           className="space-y-3 rounded-panel border border-border p-4"
           onKeyDown={(event) => {
-            if (event.key !== "Enter") return;
+            // Enter num botão (o do calendário) abre o que ele abre; no resto do bloco adiciona a taxa.
+            if (event.key !== "Enter" || (event.target as HTMLElement).closest("button")) return;
             event.preventDefault();
             void handleSubmit(onSubmit)();
           }}
         >
           <p className="mb-2 text-body font-medium">Adicionar taxa</p>
           <FieldRow>
-            <TextField name="start_date" label="A partir de" type="date" required />
+            <DateField name="start_date" label="A partir de" required />
             <TextField
               name="monthly_percentage"
               label="Juros ao mês (%)"

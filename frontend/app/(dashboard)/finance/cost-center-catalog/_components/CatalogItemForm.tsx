@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { CheckboxField, TextField } from "@/components/form/fields";
 import { FormActions } from "@/components/form/FormActions";
@@ -21,6 +20,7 @@ import {
   type CostCenterCatalogItemFormInput,
   type CostCenterCatalogItemFormOutput,
 } from "@/lib/schemas/cost-center-catalog-item";
+import { toast } from "@/lib/toast";
 
 import { CatalogCondominiums } from "./CatalogCondominiums";
 import { CatalogDeleteButton } from "./CatalogDeleteButton";

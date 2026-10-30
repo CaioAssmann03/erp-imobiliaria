@@ -1,7 +1,6 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import {
@@ -11,6 +10,7 @@ import {
   useAccountsPayableCancel,
 } from "@/lib/api/generated";
 import { applyServerErrors } from "@/lib/form-errors";
+import { toast } from "@/lib/toast";
 
 /** Client Component: cancela a conta aberta (confirmação). Ela continua na página, agora cancelada e só para consulta. */
 export function CancelAccountPayableButton({ accountId, description }: { accountId: string; description: string }) {

@@ -2,10 +2,10 @@
 
 import { Download, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { downloadBlob } from "@/lib/download";
+import { toast } from "@/lib/toast";
 
 /** Client Component: baixa o PDF de um relatório (a função busca o arquivo; o nome vem pronto). */
 export function ReportDownloadButton({

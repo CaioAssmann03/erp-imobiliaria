@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
@@ -19,6 +18,7 @@ import {
   type PersonFormInput,
   type PersonFormOutput,
 } from "@/lib/schemas/person";
+import { toast } from "@/lib/toast";
 
 import { PersonDeleteButton } from "./PersonDeleteButton";
 import { ContactSection } from "./person-form/ContactSection";

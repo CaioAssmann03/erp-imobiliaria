@@ -79,7 +79,7 @@ export function CondominiumPeopleList({ condominiumId }: { condominiumId: string
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Nome, CPF/CNPJ ou ID"
+            placeholder="Nome ou CPF/CNPJ"
             className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint"
           />
         </label>

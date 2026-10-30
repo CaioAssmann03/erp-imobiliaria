@@ -4,7 +4,7 @@ import { Trash2 } from "lucide-react";
 import { useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
-import { SelectField, TextField } from "@/components/form/fields";
+import { SearchSelectField, TextField } from "@/components/form/fields";
 import { FieldRow } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
 import { useBillingEventsList, useCondominiumApportionmentCriteriaList, useCostCentersList } from "@/lib/api/generated";
@@ -48,7 +48,7 @@ export function ExtraLineFields({ index, condominium, onRemove }: ExtraLineField
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1 space-y-3">
           <FieldRow>
-            <SelectField
+            <SearchSelectField
               name={`${prefix}.event`}
               label="Evento (opcional)"
               placeholder="Sem evento"
@@ -69,7 +69,7 @@ export function ExtraLineFields({ index, condominium, onRemove }: ExtraLineField
           </FieldRow>
           <SegmentedField name={`${prefix}.allocation`} label="Rateio" hint={ALLOCATION_HINT} options={ALLOCATIONS} />
           {allocation === "fraction" && (
-            <SelectField
+            <SearchSelectField
               name={`${prefix}.apportionment_criterion`}
               label="Critério de rateio"
               required
@@ -86,7 +86,7 @@ export function ExtraLineFields({ index, condominium, onRemove }: ExtraLineField
                 <p className="mt-1.5 text-caption text-ink-soft">Este valor é da imobiliária: nunca entra na conta de um condomínio.</p>
               </div>
             ) : (
-              <SelectField
+              <SearchSelectField
                 name={`${prefix}.cost_center`}
                 label="Sub-conta"
                 required

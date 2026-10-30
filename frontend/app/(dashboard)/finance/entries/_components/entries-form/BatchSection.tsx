@@ -2,7 +2,7 @@
 
 import { useWatch } from "react-hook-form";
 
-import { SelectField, TextField } from "@/components/form/fields";
+import { DateField, SelectField, TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { BATCH_ORIGINS } from "@/lib/schemas/entry-batch";
 
@@ -13,7 +13,7 @@ export function BatchSection() {
   return (
     <FormSection title="Lote" description="Um lote pode reunir lançamentos de vários condomínios.">
       <FieldRow columns={3}>
-        <TextField name="batch_date" label="Data do lote" type="date" required />
+        <DateField name="batch_date" label="Data do lote" required />
         <SelectField name="origin" label="Origem" required options={BATCH_ORIGINS} />
         {origin !== "bank" && (
           <TextField

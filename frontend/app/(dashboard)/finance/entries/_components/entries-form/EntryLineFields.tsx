@@ -2,7 +2,7 @@
 
 import { useFormContext, useWatch } from "react-hook-form";
 
-import { SelectField, TextField } from "@/components/form/fields";
+import { DateField, MonthField, SearchSelectField, SelectField, TextField } from "@/components/form/fields";
 import { FieldRow } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
 import { useCondominiumsList, useCostCentersList, useEntryTemplatesList } from "@/lib/api/generated";
@@ -54,7 +54,7 @@ export function EntryLineFields({
         )}
       </div>
       <FieldRow columns={3}>
-        <SelectField
+        <SearchSelectField
           name={`${prefix}.condominium`}
           label="Condomínio"
           required
@@ -62,7 +62,7 @@ export function EntryLineFields({
           onValueChange={chooseCondominium}
           options={(condominiums?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
         />
-        <SelectField
+        <SearchSelectField
           name={`${prefix}.entry_template`}
           label="Modelo de lançamento"
           required
@@ -71,7 +71,7 @@ export function EntryLineFields({
           onValueChange={chooseTemplate}
           options={(entryTemplates?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
         />
-        <SelectField
+        <SearchSelectField
           name={`${prefix}.cost_center`}
           label="Sub-conta"
           required
@@ -90,8 +90,8 @@ export function EntryLineFields({
           placeholder="0,00"
           mask={(value) => maskMoney(value, 12)}
         />
-        <TextField name={`${prefix}.entry_date`} label="Data" type="date" required />
-        <TextField name={`${prefix}.competence_month`} label="Competência" type="month" required />
+        <DateField name={`${prefix}.entry_date`} label="Data" required />
+        <MonthField name={`${prefix}.competence_month`} label="Competência" required valueFormat="iso" />
       </FieldRow>
       <TextField name={`${prefix}.description`} label="Descrição" required maxLength={255} autoComplete="off" />
     </div>
