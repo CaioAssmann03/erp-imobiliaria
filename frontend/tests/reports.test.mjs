@@ -6,8 +6,14 @@ import {
   daysLateLabel,
   defaultAccountabilityMonth,
   delinquencyPdfName,
+  monthIso,
   reportMonths,
 } from "../lib/reports.ts";
+
+test("a month is written as its first day", () => {
+  assert.equal(monthIso(2026, 3), "2026-03-01");
+  assert.equal(monthIso(2025, 12), "2025-12-01");
+});
 
 test("the month filter starts at the current month and walks back across the year", () => {
   assert.deepEqual(reportMonths("2026-02-15", 4), ["2026-02-01", "2026-01-01", "2025-12-01", "2025-11-01"]);
