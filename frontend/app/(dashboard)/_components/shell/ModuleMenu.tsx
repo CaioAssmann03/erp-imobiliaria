@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { modalBackdropClass } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 import { type AppModule, isItemActive } from "@/lib/module-menu";
 import { ITEM_ICONS, MODULE_ICONS } from "./menu-icons";
@@ -33,7 +34,7 @@ export function RailLabel({ children }: { children: React.ReactNode }) {
 
 /**
  * Client Component: o cartão do módulo, ancorado ao ícone da rail. Os grupos (Cadastros, Relatórios…) ficam lado a lado; um item sem
- * tela (`href` ausente) aparece desativado com "Em breve". Fecha ao escolher um item, com Esc ou clicando fora.
+ * tela (`href` ausente) aparece desativado com "Em breve". Fecha ao escolher um item, com Esc ou clicando fora; enquanto aberto escurece só um pouco a página (`modalBackdropClass`).
  */
 export function ModuleMenu({ appModule, isActive, expanded = false }: { appModule: AppModule; isActive: boolean; expanded?: boolean }) {
   const pathname = usePathname();
@@ -51,6 +52,8 @@ export function ModuleMenu({ appModule, isActive, expanded = false }: { appModul
         {expanded && <RailLabel>{appModule.label}</RailLabel>}
       </Popover.Trigger>
       <Popover.Portal>
+        {/* O mesmo fundo leve dos modais: escurece só um pouco a página; a rail (z-[60]) fica acima e não escurece, e clicar nele fecha o cartão. */}
+        <Popover.Backdrop className={cn("z-40", modalBackdropClass)} />
         <Popover.Positioner side="right" align="start" sideOffset={14} className="z-50 outline-none">
           <Popover.Popup
             className={cn(
@@ -68,12 +71,18 @@ export function ModuleMenu({ appModule, isActive, expanded = false }: { appModul
                   <ul className="space-y-0.5">
                     {group.items.map((item) => {
                       const ItemIcon = ITEM_ICONS[item.icon];
+                      const isCurrent = isItemActive(item, group.items, pathname);
                       const content = (
                         <>
                           <span
                             className={cn(
-                              "flex size-8 shrink-0 items-center justify-center rounded-panel",
-                              item.href ? "bg-surface-muted text-brand" : "bg-surface-muted text-ink-faint"
+                              // Quadrado de cantos arredondados só de contorno; o ícone tem a cor de destaque (apagada no item "Em breve") e só o contorno da página aberta fica laranja.
+                              "flex size-8 shrink-0 items-center justify-center rounded-control ring-1 ring-inset",
+                              !item.href
+                                ? "text-brand/40 ring-ink/10"
+                                : isCurrent
+                                  ? "text-brand ring-brand/50"
+                                  : "text-brand ring-ink/15"
                             )}
                           >
                             <ItemIcon className="size-4" />
@@ -95,7 +104,7 @@ export function ModuleMenu({ appModule, isActive, expanded = false }: { appModul
                             <Link
                               href={item.href}
                               onClick={() => setOpen(false)}
-                              aria-current={isItemActive(item, group.items, pathname) ? "page" : undefined}
+                              aria-current={isCurrent ? "page" : undefined}
                               className={cn(
                                 "flex items-center gap-3 rounded-panel px-2.5 py-2 transition-colors hover:bg-surface-muted aria-[current=page]:bg-surface-muted"
                               )}

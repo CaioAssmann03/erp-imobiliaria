@@ -7,6 +7,8 @@ import {
   condominiumUrl,
   isRegistryPath,
   REGISTRY_SECTIONS,
+  markerSpan,
+  pageSmallness,
   readingLine,
   registryLayout,
   sectionPosition,
@@ -103,4 +105,19 @@ test("the open screen of a condominium is kept when another one is picked", () =
   assert.equal(selectedCondominiumPage("/condominiums/0a1b"), null);
   assert.equal(selectedCondominiumPage("/condominiums"), null);
   assert.equal(selectedCondominiumPage("/condominiums/persons"), null);
+});
+
+test("a page that does not scroll is small; one that scrolls enough is not; in between it is proportional", () => {
+  assert.equal(pageSmallness(1000, 0), 1);
+  assert.equal(pageSmallness(1000, 600), 0);
+  assert.equal(pageSmallness(1000, 5000), 0);
+  assert.equal(pageSmallness(1000, 300), 0.5);
+  assert.equal(pageSmallness(1000, -20), 1);
+});
+
+test("the marker follows one item on a long page and covers every item on a short one", () => {
+  assert.deepEqual(markerSpan(1.5, 0, 3), { start: 1.5, end: 2.5 });
+  assert.deepEqual(markerSpan(1.5, 1, 3), { start: 0, end: 3 });
+  assert.deepEqual(markerSpan(1, 0.5, 3), { start: 0.5, end: 2.5 });
+  assert.deepEqual(markerSpan(0, 1, 2), { start: 0, end: 2 });
 });

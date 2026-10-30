@@ -89,6 +89,24 @@ export function sectionPosition(tops: readonly number[], line: number): number {
 }
 
 /**
+ * O quanto a página é "pequena" para o índice de seções, de 0 a 1: 1 quando ela não rola (o marcador não tem por onde andar), 0 quando rola o
+ * bastante (60% da altura da tela) para o marcador seguir cada seção; no meio, proporcional, para a transição ser fluida quando o conteúdo cresce.
+ */
+export function pageSmallness(viewportHeight: number, maxScroll: number): number {
+  if (viewportHeight <= 0) return 1;
+  return Math.min(1, Math.max(0, 1 - Math.max(0, maxScroll) / (viewportHeight * 0.6)));
+}
+
+/**
+ * O trecho do índice que o marcador cobre, em "itens" (de `start` até `end`, sem incluir o fim): um item inteiro que segue `position`
+ * (ver `sectionPosition`) quando a página rola, e todos os `count` itens, como se todos estivessem escolhidos, quando é pequena (`small` = 1);
+ * entre os dois, uma mistura, e o trecho cresce e encolhe aos poucos.
+ */
+export function markerSpan(position: number, small: number, count: number): { start: number; end: number } {
+  return { start: position * (1 - small), end: (position + 1) * (1 - small) + count * small };
+}
+
+/**
  * O que a moldura do cadastro mostra: a coluna da lista só nas telas do cadastro; no celular, a lista e a página aberta
  * são telas separadas (a lista na tela vazia, a página quando há um condomínio ou o cadastro novo aberto).
  */

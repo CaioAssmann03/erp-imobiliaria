@@ -28,7 +28,8 @@ export function Rail() {
   return (
     <aside
       className={cn(
-        "sticky top-0 hidden h-screen shrink-0 flex-col gap-1.5 overflow-hidden bg-canvas px-3.5 py-4 lg:flex",
+        // z-[60]: acima do fundo dos modais (z-40 e z-50), que não escurece o menu lateral.
+        "sticky top-0 z-[60] hidden h-screen shrink-0 flex-col gap-1.5 overflow-hidden bg-canvas px-3.5 py-4 lg:flex",
         expanded ? "w-60" : "w-[4.5rem]",
         animated && "transition-[width] duration-200 ease-out",
       )}
