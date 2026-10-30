@@ -16,4 +16,4 @@ class CostCenterViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[CostCen
     serializer_class = CostCenterSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)
     search_fields = ("name",)
-    filterset_fields = ("condominium", "active")
+    filterset_fields = ("condominium", "catalog_item", "active")
