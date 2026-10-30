@@ -17,6 +17,8 @@ import {
   type EntriesBatchFormOutput,
 } from "@/lib/schemas/entry-batch";
 
+import { entriesUrl } from "@/lib/entry-batch-workspace";
+
 import { BatchSection } from "./entries-form/BatchSection";
 import { EntryLineFields } from "./entries-form/EntryLineFields";
 import { useEntriesBatchSubmit } from "./entries-form/use-entries-batch-submit";
@@ -67,10 +69,14 @@ export function NewEntriesForm() {
         onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))}
         className="space-y-4"
       >
-        <BatchSection />
-        <Lines />
+        <div id="lote" className="scroll-mt-20">
+          <BatchSection />
+        </div>
+        <div id="lancamentos" className="scroll-mt-20">
+          <Lines />
+        </div>
         <FormActions isSubmitting={isSubmitting} submitLabel="Registrar lançamentos">
-          <Button type="button" variant="secondary" onClick={() => router.push("/finance/statement")}>
+          <Button type="button" variant="secondary" onClick={() => router.push(entriesUrl())}>
             Cancelar
           </Button>
         </FormActions>

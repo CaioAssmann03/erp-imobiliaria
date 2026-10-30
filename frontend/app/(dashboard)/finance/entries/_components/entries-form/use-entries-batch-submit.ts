@@ -17,6 +17,7 @@ import {
 } from "@/lib/api/generated";
 import type { BatchEntryLine, CurrentAccount, EntryBatch } from "@/lib/api/generated/models";
 import { applyServerErrors, formFieldName } from "@/lib/form-errors";
+import { entryBatchUrl } from "@/lib/entry-batch-workspace";
 import {
   entryBatchToPayload,
   entryLineToPayload,
@@ -73,7 +74,7 @@ export function useEntriesBatchSubmit(setError: UseFormSetError<EntriesBatchForm
       queryClient.invalidateQueries({ queryKey: getCurrentAccountsListQueryKey() });
       queryClient.invalidateQueries({ queryKey: getEntryBatchesListQueryKey() });
       toast.success(entries.length === 1 ? "Lançamento registrado." : `${entries.length} lançamentos registrados.`);
-      router.push(`/finance/statement?condominium=${values.lines[0].condominium}`);
+      router.push(entryBatchUrl(batchId.current));
     } catch (error) {
       toast.error(applyServerErrors(error, setError, toFormPath));
     } finally {
