@@ -4,7 +4,9 @@ import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useBlocksList } from "@/lib/api/generated";
 import { newBlockUrl } from "@/lib/block-workspace";
 
@@ -21,7 +23,9 @@ export function BlocksRegistryList({ condominiumId }: { condominiumId: string })
 
   const term = search.trim().toLowerCase();
   const all = data?.results ?? [];
-  const results = term ? all.filter((block) => block.name.toLowerCase().includes(term)) : all;
+  const matches = term ? all.filter((block) => block.name.toLowerCase().includes(term)) : all;
+  const { limit, showMore } = useGrowingLimit(`${term}|${condominiumId}`);
+  const results = matches.slice(0, limit);
 
   return (
     <section aria-label="Blocos" className="flex flex-col gap-3">
@@ -70,7 +74,7 @@ export function BlocksRegistryList({ condominiumId }: { condominiumId: string })
           )}
         </nav>
 
-        {data && <p className="px-1 text-center text-caption text-ink-soft">{`${data.count} bloco(s)`}</p>}
+        {data && <ShowMore shown={results.length} total={matches.length} noun="bloco(s)" onMore={showMore} />}
       </div>
     </section>
   );

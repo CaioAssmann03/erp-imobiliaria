@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { CompactFilter } from "@/components/CompactFilter";
+import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useBlocksList, useCondominiumsList } from "@/lib/api/generated";
 import { newBlockUrl } from "@/lib/block-workspace";
 import { cn } from "@/lib/utils";
@@ -38,7 +40,9 @@ export function BlocksList({
 
   const term = search.trim().toLowerCase();
   const all = data?.results ?? [];
-  const results = term ? all.filter((block) => block.name.toLowerCase().includes(term)) : all;
+  const matches = term ? all.filter((block) => block.name.toLowerCase().includes(term)) : all;
+  const { limit, showMore } = useGrowingLimit(`${term}|${activeCondominium}`);
+  const results = matches.slice(0, limit);
   const loading = !activeCondominium || isLoading;
   const activeCondominiumData = condominiums?.results.find((condominium) => condominium.id === activeCondominium);
   const condominiumLabel = activeCondominiumData
@@ -117,13 +121,13 @@ export function BlocksList({
         ) : (
           <ul className="space-y-0.5">
             {results.map((block) => (
-              <BlockListItem key={block.id} block={block} isOpen={block.id === openBlockId} dimmed={results.some((item) => item.id === openBlockId)} />
+              <BlockListItem key={block.id} block={block} isOpen={block.id === openBlockId} dimmed={matches.some((item) => item.id === openBlockId)} />
             ))}
           </ul>
         )}
       </nav>
 
-      {data && <p className="px-1 text-center text-caption text-ink-soft">{`${data.count} bloco(s)`}</p>}
+      {data && <ShowMore shown={results.length} total={matches.length} noun="bloco(s)" onMore={showMore} />}
     </aside>
   );
 }

@@ -8,9 +8,6 @@ export const UNIT_SECTIONS = [
 
 export type UnitSectionId = (typeof UNIT_SECTIONS)[number]["id"];
 
-/** Quantas unidades a coluna da lista carrega de uma vez; acima disso o usuário afina a busca. */
-export const UNIT_LIST_PAGE_SIZE = 100;
-
 export const unitsUrl = (condominiumId?: string) =>
   condominiumId ? `/condominiums/units?condominium=${condominiumId}` : "/condominiums/units";
 export const unitUrl = (condominiumId: string, unitId: string) =>

@@ -6,14 +6,14 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
+import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useCondominiumsList } from "@/lib/api/generated";
 import type { CondominiumsListPending } from "@/lib/api/generated/models";
 import { condominiumPageUrl, selectedCondominiumId, selectedCondominiumPage } from "@/lib/condominium-registry";
 import { cn } from "@/lib/utils";
-
-const PAGE_SIZE = 50;
 
 /**
  * Client Component: a coluna da esquerda do cadastro, a lista de condomínios com busca por nome ou código. Marca o condomínio aberto.
@@ -28,9 +28,10 @@ export function CondominiumsList({ className }: { className?: string }) {
   const [search, setSearch] = useState("");
   const term = useDebouncedValue(search.trim());
 
+  const { limit, showMore } = useGrowingLimit(`${term}|${pending ?? ""}`);
   const { data, isLoading, isPlaceholderData } = useCondominiumsList(
     {
-      limit: PAGE_SIZE,
+      limit,
       ...(term ? { query: term } : {}),
       ...(pending ? { pending: pending as CondominiumsListPending } : {}),
     },
@@ -126,13 +127,7 @@ export function CondominiumsList({ className }: { className?: string }) {
         )}
       </nav>
 
-      {data && (
-        <p className="px-1 text-center text-caption text-ink-soft">
-          {data.count > results.length
-            ? `${results.length} de ${data.count}: refine a busca`
-            : `${data.count} condomínio(s)`}
-        </p>
-      )}
+      {data && <ShowMore shown={results.length} total={data.count} noun="condomínio(s)" onMore={showMore} />}
     </aside>
   );
 }
