@@ -18,12 +18,13 @@ from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin, scope_to
 from ..filters import CurrentAccountEntryFilter
 from ..models import CurrentAccountEntry
 from ..serializers import (
+    AccountabilityPageQuerySerializer,
     AccountabilityQuerySerializer,
     AccountabilityReportSerializer,
     CurrentAccountEntrySerializer,
     ReverseEntrySerializer,
 )
-from ..services.build_accountability_report import AccountabilityReport, build_accountability_report
+from ..services.build_accountability_report import AccountabilityPages, AccountabilityReport, build_accountability_report
 from ..services.render_accountability_pdf import render_accountability_pdf
 from ..services.reverse_entry import reverse_entry
 
@@ -63,25 +64,32 @@ class CurrentAccountEntryViewSet(
         )
         return Response(self.get_serializer(reversal).data, status=status.HTTP_201_CREATED)
 
-    def _accountability_report(self, request: Request) -> AccountabilityReport:
-        """The month's accountability of a condominium of the user's company (another company's is a 404)."""
+    def _accountability_report(self, request: Request, pages: AccountabilityPages | None = None) -> AccountabilityReport:
+        """The month's accountability of a condominium of the user's company (another company's is a 404); `pages` for the screen."""
         query = AccountabilityQuerySerializer(data=request.query_params)
         query.is_valid(raise_exception=True)
         condominium = get_object_or_404(
             scope_to_company(Condominium.objects.all(), request.user), pk=query.validated_data["condominium"]
         )
         entries = self.get_queryset().filter(current_account__condominium=condominium)
-        return build_accountability_report(condominium, query.validated_data["month"], entries)
+        return build_accountability_report(condominium, query.validated_data["month"], entries, pages)
 
     @extend_schema(
-        parameters=[AccountabilityQuerySerializer],
+        parameters=[AccountabilityQuerySerializer, AccountabilityPageQuerySerializer],
         responses=AccountabilityReportSerializer,
         operation_id="current_account_entries_accountability",
     )
     @action(detail=False, methods=["get"])
     def accountability(self, request: Request) -> Response:
-        """Report: a condominium's month in the ledger, opening and closing balance, per sub-conta, with the entries."""
-        return Response(AccountabilityReportSerializer(self._accountability_report(request)).data)
+        """Report: a condominium's month in the ledger, opening and closing balance, per sub-conta, with the entries; both lists come 10 per page by default (`?page_size=` up to 100)."""
+        page_query = AccountabilityPageQuerySerializer(data=request.query_params)
+        _ = page_query.is_valid(raise_exception=True)
+        pages = AccountabilityPages(
+            cost_centers=page_query.validated_data["cost_centers_page"],
+            entries=page_query.validated_data["entries_page"],
+            size=page_query.validated_data["page_size"],
+        )
+        return Response(AccountabilityReportSerializer(self._accountability_report(request, pages)).data)
 
     @extend_schema(
         parameters=[AccountabilityQuerySerializer],
