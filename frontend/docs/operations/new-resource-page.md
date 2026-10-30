@@ -13,7 +13,7 @@ Example resource `blocks` → route `/blocks`. Do the steps in order; each step 
    `blockToForm`, `blockToPayload(values, isEdit)`.
 3. **Route files** under `app/(dashboard)/blocks/`:
    - `page.tsx` (server, no API call): `metadata`, `PageHeader` and `BlocksTable` (inside `<Suspense fallback={<ListFallback/>}>` if the table reads the URL).
-   - `new/page.tsx` and `[id]/page.tsx` (server, no API call): `metadata`, `FormPage`, `PageHeader`, form (edit passes the `id`; the form loads the record and calls `throwIfNotFound`).
+   - `new/page.tsx` and `[id]/page.tsx` (server, no API call): `metadata`, `FormPage`, `PageHeader`, form (edit passes the `id`; the form loads the record and calls `throwIfPageError`).
 4. **Components** in `blocks/_components/`: `BlocksTable`, `BlocksFilters`, `BlockRow`, `BlockForm`,
    `block-form/*Section.tsx`, `block-form/use-block-submit.ts` (patterns: structure/component-patterns.md).
 5. **Cache:** the submit/delete hooks invalidate the list, the record and the dashboard (norms/data-and-cache.md).

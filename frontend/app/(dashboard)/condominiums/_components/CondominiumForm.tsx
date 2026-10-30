@@ -9,7 +9,7 @@ import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useCondominiumBillingRulesList, useCondominiumsRetrieve } from "@/lib/api/generated";
-import { throwIfNotFound } from "@/lib/query/not-found";
+import { throwIfPageError } from "@/lib/query/page-error";
 import {
   CONDOMINIUM_DEFAULTS,
   condominiumSchema,
@@ -43,7 +43,7 @@ export function CondominiumForm({
   const { data: condominium, isLoading, error: loadError } = useCondominiumsRetrieve(condominiumId ?? "", {
     query: { enabled: isEdit },
   });
-  throwIfNotFound(loadError);
+  throwIfPageError(loadError);
 
   const { data: billingRulesPage, isLoading: isLoadingBillingRules } = useCondominiumBillingRulesList(
     { condominium: condominiumId, limit: 1 },

@@ -9,7 +9,7 @@ import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useBillingPlansRetrieve } from "@/lib/api/generated";
-import { throwIfNotFound } from "@/lib/query/not-found";
+import { throwIfPageError } from "@/lib/query/page-error";
 import {
   BILLING_PLAN_DEFAULTS,
   billingPlanSchema,
@@ -29,7 +29,7 @@ export function BillingPlanForm({ billingPlanId }: { billingPlanId?: string }) {
   const router = useRouter();
   const isEdit = billingPlanId !== undefined;
   const { data: plan, isLoading, error: loadError } = useBillingPlansRetrieve(billingPlanId ?? "", { query: { enabled: isEdit } });
-  throwIfNotFound(loadError);
+  throwIfPageError(loadError);
 
   const methods = useForm<BillingPlanFormInput, unknown, BillingPlanFormOutput>({
     resolver: zodResolver(billingPlanSchema),

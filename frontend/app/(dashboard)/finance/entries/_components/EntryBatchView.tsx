@@ -4,7 +4,7 @@ import { FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { useCurrentAccountEntriesList, useEntryBatchesRetrieve } from "@/lib/api/generated";
 import { formatDate } from "@/lib/format";
-import { throwIfNotFound } from "@/lib/query/not-found";
+import { throwIfPageError } from "@/lib/query/page-error";
 
 import { StatementRow } from "../../_components/StatementRow";
 import { batchOriginLabel } from "./EntryBatchListItem";
@@ -15,7 +15,7 @@ import { batchOriginLabel } from "./EntryBatchListItem";
  */
 export function EntryBatchView({ batchId }: { batchId: string }) {
   const { data: batch, isLoading, error } = useEntryBatchesRetrieve(batchId);
-  throwIfNotFound(error);
+  throwIfPageError(error);
   const { data: entries, isLoading: loadingEntries } = useCurrentAccountEntriesList({ batch: batchId, limit: 100 });
 
   if (isLoading) return <FormSkeleton sections={2} />;

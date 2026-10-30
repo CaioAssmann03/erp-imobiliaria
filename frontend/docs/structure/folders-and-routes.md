@@ -24,7 +24,7 @@ docs/         REASONS documentation
 
 `_`-prefixed folders are private (not routes).
 
-`app/(dashboard)/` also holds `loading.tsx` (skeleton on a page change), `error.tsx` (an unexpected error, with retry) and `not-found.tsx`.
+`app/(dashboard)/` also holds `loading.tsx` (skeleton on a page change), `error.tsx` (an unexpected error, with retry) and `not-found.tsx`; `error.tsx`, `not-found.tsx`, the root `app/not-found.tsx` and `app/global-error.tsx` (a failure in the root layout) render the shared `components/ErrorScreen.tsx` (the code drawn as orange scanlines that run in top to bottom, content centered, hovering the code darkens the scanlines under the pointer, plain square `ErrorActionButton`s). Copy, hint and actions per code live in `lib/error-screens.ts` (18 codes: 400 401 402 403 404 405 408 409 410 413 415 422 423 429 500 501 502 503 504; any other 400–599 gets a generic screen of its range; 429 and 503 hold *Tentar de novo* behind a countdown, `retryAfter`; 5xx screens show a reference, the Next `digest`). The screens appear only for real errors: a detail page that fails to load its record calls `throwIfPageError` (`lib/query/page-error.ts`) and `error.tsx` picks the screen from the response status (`errorScreenCodeOf`: 403, 410, 429, 5xx, 408 on timeout, 502 with no response, 404 goes to `not-found.tsx`); a 401 still goes to the login (`lib/api-client.ts`) and errors of a save (409, 413, 415, 422, 423...) stay toasts and field errors so the form is not lost. Tested by `tests/error-screens.test.mjs`.
 
 ## Routes
 

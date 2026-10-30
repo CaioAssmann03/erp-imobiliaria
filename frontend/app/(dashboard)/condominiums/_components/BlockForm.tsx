@@ -12,7 +12,7 @@ import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useBlocksRetrieve, useCondominiumsList } from "@/lib/api/generated";
 import { condominiumPageUrl } from "@/lib/condominium-registry";
-import { throwIfNotFound } from "@/lib/query/not-found";
+import { throwIfPageError } from "@/lib/query/page-error";
 import {
   BLOCK_DEFAULTS,
   blockSchema,
@@ -41,7 +41,7 @@ export function BlockForm({
   const isEdit = blockId !== undefined;
 
   const { data: block, isLoading, error: loadError } = useBlocksRetrieve(blockId ?? "", { query: { enabled: isEdit } });
-  throwIfNotFound(loadError);
+  throwIfPageError(loadError);
   const { data: condominiums } = useCondominiumsList({ limit: 100 });
 
   const methods = useForm<BlockFormInput, unknown, BlockFormOutput>({

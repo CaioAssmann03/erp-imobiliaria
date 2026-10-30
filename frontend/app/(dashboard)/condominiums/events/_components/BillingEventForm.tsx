@@ -12,7 +12,7 @@ import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useBillingEventsRetrieve } from "@/lib/api/generated";
 import { eventsUrl } from "@/lib/billing-event-workspace";
-import { throwIfNotFound } from "@/lib/query/not-found";
+import { throwIfPageError } from "@/lib/query/page-error";
 import {
   BILLING_EVENT_DEFAULTS,
   billingEventSchema,
@@ -32,7 +32,7 @@ export function BillingEventForm({ billingEventId }: { billingEventId?: string }
   const { data: event, isLoading, error: loadError } = useBillingEventsRetrieve(billingEventId ?? "", {
     query: { enabled: isEdit },
   });
-  throwIfNotFound(loadError);
+  throwIfPageError(loadError);
 
   const methods = useForm<BillingEventFormInput, unknown, BillingEventFormOutput>({
     resolver: zodResolver(billingEventSchema),

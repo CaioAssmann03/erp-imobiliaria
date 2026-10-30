@@ -18,7 +18,7 @@ import {
 } from "@/lib/api/generated";
 import { formatCode } from "@/lib/billing-entry-payload";
 import { condominiumPageUrl } from "@/lib/condominium-registry";
-import { throwIfNotFound } from "@/lib/query/not-found";
+import { throwIfPageError } from "@/lib/query/page-error";
 import {
   COST_CENTER_DEFAULTS,
   costCenterSchema,
@@ -46,7 +46,7 @@ export function CostCenterForm({
   const { data: costCenter, isLoading, error: loadError } = useCostCentersRetrieve(costCenterId ?? "", {
     query: { enabled: isEdit },
   });
-  throwIfNotFound(loadError);
+  throwIfPageError(loadError);
   const { data: condominiums } = useCondominiumsList({ limit: 100 });
 
   const methods = useForm<CostCenterFormInput, unknown, CostCenterFormOutput>({

@@ -10,7 +10,7 @@ import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { accountsPayableUrl } from "@/lib/account-payable-workspace";
 import { useAccountsPayableRetrieve } from "@/lib/api/generated";
-import { throwIfNotFound } from "@/lib/query/not-found";
+import { throwIfPageError } from "@/lib/query/page-error";
 import {
   ACCOUNT_PAYABLE_DEFAULTS,
   accountPayableSchema,
@@ -34,7 +34,7 @@ export function AccountPayableForm({ accountId }: { accountId?: string }) {
   const isEdit = accountId !== undefined;
 
   const { data: account, isLoading, error: loadError } = useAccountsPayableRetrieve(accountId ?? "", { query: { enabled: isEdit } });
-  throwIfNotFound(loadError);
+  throwIfPageError(loadError);
 
   const methods = useForm<AccountPayableFormInput, unknown, AccountPayableFormOutput>({
     resolver: zodResolver(accountPayableSchema),

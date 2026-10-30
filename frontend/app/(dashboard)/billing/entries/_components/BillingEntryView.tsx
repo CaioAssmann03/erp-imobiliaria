@@ -6,7 +6,7 @@ import { useBillingEntriesList, useBillingEntriesRetrieve } from "@/lib/api/gene
 import { entryColumnTitle, formatCode } from "@/lib/billing-entry-payload";
 import { MAX_ENTRIES_PER_MONTH } from "@/lib/billing-entry-workspace";
 import { brl, formatMonth } from "@/lib/format";
-import { throwIfNotFound } from "@/lib/query/not-found";
+import { throwIfPageError } from "@/lib/query/page-error";
 import { ALLOCATIONS, RECURRENCES } from "@/lib/schemas/billing-entry";
 
 import { EntryActions } from "./EntryActions";
@@ -31,7 +31,7 @@ function Fact({ label, children }: { label: string; children: React.ReactNode })
 export function BillingEntryView({ entryId }: { entryId: string }) {
   const scope = useEntriesScope();
   const { data: entry, isLoading, error } = useBillingEntriesRetrieve(entryId);
-  throwIfNotFound(error);
+  throwIfPageError(error);
   const { data: month } = useBillingEntriesList(
     { condominium: entry?.condominium ?? "", reference_month: scope.month, limit: MAX_ENTRIES_PER_MONTH },
     { query: { enabled: Boolean(entry) } }

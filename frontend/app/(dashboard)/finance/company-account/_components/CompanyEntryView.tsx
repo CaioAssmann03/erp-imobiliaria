@@ -4,7 +4,7 @@ import { FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { useCompanyEntriesRetrieve } from "@/lib/api/generated";
 import { brl, formatDate, formatMonth } from "@/lib/format";
-import { throwIfNotFound } from "@/lib/query/not-found";
+import { throwIfPageError } from "@/lib/query/page-error";
 
 function Item({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -18,7 +18,7 @@ function Item({ label, children }: { label: string; children: React.ReactNode })
 /** Client Component: um lançamento da imobiliária, só para consulta (nasce do pagamento de um boleto e nunca se altera nem se apaga). */
 export function CompanyEntryView({ entryId }: { entryId: string }) {
   const { data: entry, isLoading, error } = useCompanyEntriesRetrieve(entryId);
-  throwIfNotFound(error);
+  throwIfPageError(error);
 
   if (isLoading) return <FormSkeleton sections={1} />;
   if (!entry) return null;

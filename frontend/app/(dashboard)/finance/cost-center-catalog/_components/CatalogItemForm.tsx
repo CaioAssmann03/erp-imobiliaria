@@ -12,7 +12,7 @@ import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useCostCenterCatalogRetrieve } from "@/lib/api/generated";
 import { catalogUrl } from "@/lib/cost-center-catalog-workspace";
-import { throwIfNotFound } from "@/lib/query/not-found";
+import { throwIfPageError } from "@/lib/query/page-error";
 import {
   COST_CENTER_CATALOG_ITEM_DEFAULTS,
   costCenterCatalogItemSchema,
@@ -31,7 +31,7 @@ export function CatalogItemForm({ itemId }: { itemId?: string }) {
   const router = useRouter();
   const isEdit = itemId !== undefined;
   const { data: item, isLoading, error: loadError } = useCostCenterCatalogRetrieve(itemId ?? "", { query: { enabled: isEdit } });
-  throwIfNotFound(loadError);
+  throwIfPageError(loadError);
 
   const methods = useForm<CostCenterCatalogItemFormInput, unknown, CostCenterCatalogItemFormOutput>({
     resolver: zodResolver(costCenterCatalogItemSchema),
