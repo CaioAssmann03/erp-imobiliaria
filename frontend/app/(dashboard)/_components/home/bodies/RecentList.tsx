@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { SeeAllLink } from "./SeeAllLink";
+import { SeeAllLink } from "@/app/(dashboard)/_components/home/shared/SeeAllLink";
 import { Card } from "@/components/ui/card";
 
 export interface RecentItem {

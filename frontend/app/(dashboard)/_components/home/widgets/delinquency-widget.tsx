@@ -1,4 +1,4 @@
-import { DelinquencyBody } from "../DelinquencyBody";
+import { DelinquencyBody } from "@/app/(dashboard)/_components/home/bodies/DelinquencyBody";
 import { DelinquencyFocus } from "./focus/DelinquencyFocus";
 import type { WidgetBuilder } from "./types";
 

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { UnitHeader } from "../../_components/UnitHeader";
-import { UnitPeopleList } from "../../_components/UnitPeopleList";
+import { UnitHeader } from "@/app/(dashboard)/condominiums/(condominium)/[id]/units/_components/UnitHeader";
+import { UnitPeopleList } from "@/app/(dashboard)/condominiums/(condominium)/[id]/units/_components/UnitPeopleList";
 
 export const metadata: Metadata = { title: "Pessoas da unidade" };
 

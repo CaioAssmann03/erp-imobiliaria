@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { UnitForm } from "../_components/UnitForm";
-import { UnitHeader } from "../_components/UnitHeader";
+import { UnitForm } from "@/app/(dashboard)/condominiums/(condominium)/[id]/units/_components/UnitForm";
+import { UnitHeader } from "@/app/(dashboard)/condominiums/(condominium)/[id]/units/_components/UnitHeader";
 
 export const metadata: Metadata = { title: "Unidade" };
 

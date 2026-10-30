@@ -69,7 +69,7 @@ test("the old list routes still exist, as redirects", () => {
 });
 
 test("the blocks, the units, the cost centers and the people of a condominium are screens of their own", () => {
-  for (const route of ["condominiums/[id]/blocks", "condominiums/[id]/units", "condominiums/[id]/cost-centers", "condominiums/[id]/persons"]) {
+  for (const route of ["condominiums/(condominium)/[id]/blocks", "condominiums/(condominium)/[id]/units", "condominiums/(condominium)/[id]/cost-centers", "condominiums/(condominium)/[id]/persons"]) {
     const page = readFileSync(join(DASHBOARD, ...route.split("/"), "page.tsx"), "utf8");
     assert.doesNotMatch(page, /redirect\(/, route);
   }
@@ -97,7 +97,7 @@ test("the right-hand menu is drawn by the layout frames, never by the pages, so 
     "condominiums/_components/blocks/BlocksFrame.tsx": /BlockSideMenu/,
     "condominiums/_components/cost-centers/CostCentersFrame.tsx": /CostCenterSideMenu/,
     "condominiums/persons/_components/PersonsFrame.tsx": /SectionIndex/,
-    "condominiums/[id]/units/_components/UnitsFrame.tsx": /UnitSideMenu/,
+    "condominiums/(condominium)/[id]/units/_components/UnitsFrame.tsx": /UnitSideMenu/,
     "condominiums/events/_components/BillingEventsFrame.tsx": /SectionIndex/,
     "finance/accounts-payable/_components/AccountsPayableFrame.tsx": /AccountPayableSideMenu/,
     "finance/statement/_components/StatementFrame.tsx": /StatementSideMenu/,

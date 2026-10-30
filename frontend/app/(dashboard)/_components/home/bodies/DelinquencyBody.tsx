@@ -6,8 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useBillingDocumentsDelinquency } from "@/lib/api/generated";
 import { cn } from "@/lib/utils";
 
-import { Caption } from "./widgets/Caption";
-import { brl } from "./widgets/format";
+import { Caption } from "@/app/(dashboard)/_components/home/widgets/Caption";
+import { brl } from "@/app/(dashboard)/_components/home/widgets/format";
 
 const SHOWN = 3;
 

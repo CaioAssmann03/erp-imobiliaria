@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { UnitsEmptyState } from "../[id]/units/_components/UnitsEmptyState";
+import { UnitsEmptyState } from "@/app/(dashboard)/condominiums/(condominium)/[id]/units/_components/UnitsEmptyState";
 
 export const metadata: Metadata = { title: "Unidades" };
 

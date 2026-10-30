@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 import type { AccountsPayable, PayableTotal, UpcomingPayable } from "@/lib/api/generated/models";
 
-import { Late } from "../Late";
-import { formatDate, relativeDays } from "../relative-days";
+import { Late } from "@/app/(dashboard)/_components/home/shared/Late";
+import { formatDate, relativeDays } from "@/app/(dashboard)/_components/home/shared/relative-days";
 import { Caption } from "./Caption";
 import { brl } from "./format";
 import { AccountsPayableFocus } from "./focus/AccountsPayableFocus";

@@ -1,4 +1,4 @@
-import { BillingChartBody } from "../BillingChartBody";
+import { BillingChartBody } from "@/app/(dashboard)/_components/home/bodies/BillingChartBody";
 import { BillingChartFocus } from "./focus/BillingChartFocus";
 import type { WidgetBuilder } from "./types";
 

@@ -7,8 +7,8 @@ import { todayIso } from "@/lib/format/format";
 import { PAYABLE_WINDOWS, type PayableWindow } from "@/lib/finance/payable-windows";
 import { cn } from "@/lib/utils";
 
-import { Late } from "../../Late";
-import { formatDate, relativeDays } from "../../relative-days";
+import { Late } from "@/app/(dashboard)/_components/home/shared/Late";
+import { formatDate, relativeDays } from "@/app/(dashboard)/_components/home/shared/relative-days";
 import { brl } from "../format";
 
 export interface OpenAccount {

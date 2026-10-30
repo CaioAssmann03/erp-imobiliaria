@@ -3,9 +3,9 @@ import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Dashboard } from "@/lib/api/generated/models";
 
-import { Late } from "../../Late";
-import { formatDate, relativeDays } from "../../relative-days";
-import { SimpleBarChart } from "../../SimpleBarChart";
+import { Late } from "@/app/(dashboard)/_components/home/shared/Late";
+import { formatDate, relativeDays } from "@/app/(dashboard)/_components/home/shared/relative-days";
+import { SimpleBarChart } from "@/app/(dashboard)/_components/home/charts/SimpleBarChart";
 import { longMonthLabel, shortMonthLabel } from "../format";
 import { FocusSection, FocusStat } from "./parts";
 

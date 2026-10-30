@@ -18,7 +18,7 @@ import { applyServerErrors } from "@/lib/errors/form-errors";
 import { invalidateApportionment } from "@/lib/query/apportionment";
 import { toast } from "@/lib/errors/toast";
 import { unitUrl } from "@/lib/condominiums/unit-workspace";
-import { pendingLinkPayload, type PendingLink } from "../unit-people/pending-link";
+import { pendingLinkPayload, type PendingLink } from "@/app/(dashboard)/condominiums/(condominium)/[id]/units/_components/unit-people/pending-link";
 import { unitToPayload, type UnitFormInput, type UnitFormOutput } from "@/lib/schemas/unit";
 
 export function useUnitSubmit(

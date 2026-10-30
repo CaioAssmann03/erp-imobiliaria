@@ -5,9 +5,9 @@ import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBillingRunsCoverage, useBillingRunsList } from "@/lib/api/generated";
 
-import { Late } from "./Late";
-import { useBillingSummary } from "./use-billing-summary";
-import { brl } from "./widgets/format";
+import { Late } from "@/app/(dashboard)/_components/home/shared/Late";
+import { useBillingSummary } from "@/app/(dashboard)/_components/home/shared/use-billing-summary";
+import { brl } from "@/app/(dashboard)/_components/home/widgets/format";
 
 export const firstDayOfThisMonth = () => {
   const today = new Date();

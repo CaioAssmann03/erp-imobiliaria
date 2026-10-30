@@ -13,7 +13,7 @@ import {
 import { brl } from "@/lib/format/format";
 import type { BillingMonthSummary } from "@/lib/api/generated/models";
 
-import { longMonthLabel, shortMonthLabel } from "./widgets/format";
+import { longMonthLabel, shortMonthLabel } from "@/app/(dashboard)/_components/home/widgets/format";
 
 const config = {
   issued: { label: "Emitido", color: "var(--color-ink-faint)" },

@@ -1,8 +1,8 @@
 import type { UpcomingAdjustment } from "@/lib/api/generated/models";
 
-import { Late } from "./Late";
+import { Late } from "@/app/(dashboard)/_components/home/shared/Late";
 import { RecentList } from "./RecentList";
-import { formatDate, relativeDays } from "./relative-days";
+import { formatDate, relativeDays } from "@/app/(dashboard)/_components/home/shared/relative-days";
 
 export function UpcomingAdjustments({ adjustments }: { adjustments: UpcomingAdjustment[] }) {
   return (
