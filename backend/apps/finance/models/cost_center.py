@@ -47,7 +47,7 @@ class CostCenter(BaseModel):
     class Meta:
         verbose_name = "Cost Center"
         verbose_name_plural = "Cost Centers"
-        ordering = ("condominium__name", "code")
+        ordering = ("condominium__code", "code")
         constraints = (
             models.UniqueConstraint(
                 fields=("condominium", "code"),

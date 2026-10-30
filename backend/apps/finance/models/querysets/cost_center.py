@@ -26,5 +26,5 @@ class CostCenterQuerySet(models.QuerySet["CostCenter"]):
             self.filter(contains)
             .annotate(rank=relevance_rank([starts_with], None))
             .select_related("condominium")
-            .order_by("rank", "name")
+            .order_by("rank", "condominium__code", "code")
         )

@@ -23,7 +23,7 @@ class CurrentAccountViewSet(
 ):
     """The current account of a condominium: created once, its balance moves only through entries."""
 
-    queryset = CurrentAccount.objects.select_related("condominium").order_by("condominium__name")
+    queryset = CurrentAccount.objects.select_related("condominium").order_by("condominium__code")
     serializer_class = CurrentAccountSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ("condominium",)

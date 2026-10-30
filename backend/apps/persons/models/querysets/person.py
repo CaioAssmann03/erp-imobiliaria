@@ -53,5 +53,5 @@ class PersonQuerySet(models.QuerySet["Person"]):
                     "people_individual__cpf", "people_legal__cnpj", Value("")
                 ),
             )
-            .order_by("rank", "name")
+            .order_by("rank", "code")
         )

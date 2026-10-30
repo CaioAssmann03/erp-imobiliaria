@@ -15,7 +15,8 @@ from ..serializers import CostCenterCatalogItemSerializer
 class CostCenterCatalogItemViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[CostCenterCatalogItem]):
     """The administradora's catalog of sub-contas: a code and a name once; the condominiums use them (spec 053)."""
 
-    queryset = CostCenterCatalogItem.objects.annotate(cost_center_count=Count("cost_centers"))
+    # The `Count` groups the rows, and a grouped query ignores `Meta.ordering`: the code order is asked for here (spec 061).
+    queryset = CostCenterCatalogItem.objects.annotate(cost_center_count=Count("cost_centers")).order_by("code")
     serializer_class = CostCenterCatalogItemSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)
     search_fields = ("name",)

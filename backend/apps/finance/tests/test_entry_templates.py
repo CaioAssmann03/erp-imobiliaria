@@ -77,13 +77,13 @@ def test_list_is_paginated_and_ordered(
     response = api_client.get(reverse(LIST))
 
     assert set(body(response)) == {"count", "next", "previous", "results"}
-    assert [item["name"] for item in results(response)] == ["Z", "A", "B"]  # Edifício Lua first
+    assert [item["name"] for item in results(response)] == ["A", "B", "Z"]  # the first condominium (lowest code) first
 
 
 def test_ordering_is_declared() -> None:
     assert EntryTemplate._meta.ordering == (
-        "cost_center__condominium__name",
-        "cost_center__name",
+        "cost_center__condominium__code",
+        "cost_center__code",
         "name",
     )
 

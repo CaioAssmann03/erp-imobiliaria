@@ -37,7 +37,7 @@ class Supplier(BaseModel):
     class Meta:
         verbose_name = "Supplier"
         verbose_name_plural = "Suppliers"
-        ordering = ("person__name",)
+        ordering = ("person__code",)
 
     @override
     def clean(self) -> None:

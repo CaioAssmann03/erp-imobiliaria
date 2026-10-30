@@ -199,3 +199,13 @@ def test_a_given_code_is_kept_when_free_and_replaced_when_taken(condominium: Con
     taken = CostCenter.objects.create(condominium=condominium, code=5, name="Garagem")
 
     assert (free.code, taken.code) == (5, 6)
+
+
+def test_the_list_comes_by_code_even_though_it_counts_the_condominiums(api_client: APIClient, company: Company) -> None:
+    """Spec 061: the count groups the query and a grouped query ignores `Meta.ordering`, so the view asks for the code order."""
+    for code, name in ((5, "Elevadores"), (0, "Conta Normal"), (9, "Piscina"), (2, "Água")):
+        _ = item(company, name, code=code)
+
+    listed = results(api_client.get(reverse(LIST)))
+
+    assert [row["code"] for row in listed] == [0, 2, 5, 9]

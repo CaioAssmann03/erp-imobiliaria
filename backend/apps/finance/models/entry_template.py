@@ -31,7 +31,7 @@ class EntryTemplate(BaseModel):
     class Meta:
         verbose_name = "Entry Template"
         verbose_name_plural = "Entry Templates"
-        ordering = ("cost_center__condominium__name", "cost_center__name", "name")
+        ordering = ("cost_center__condominium__code", "cost_center__code", "name")
         constraints = (
             models.CheckConstraint(
                 name="entry_template_admin_fee_pct_0_100",
