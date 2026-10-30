@@ -17,7 +17,7 @@ import {
   Wallet,
 } from "lucide-react";
 
-import type { AppModule, MenuIcon } from "@/lib/module-menu";
+import type { AppModule, MenuIcon } from "@/lib/navigation/module-menu";
 
 export const ITEM_ICONS: Record<MenuIcon, LucideIcon> = {
   building: Building2,

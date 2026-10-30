@@ -6,7 +6,7 @@ import { DateField, MonthField, SearchSelectField, SelectField, TextField } from
 import { FieldRow } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
 import { useCondominiumsList, useCostCentersList, useEntryTemplatesList } from "@/lib/api/generated";
-import { maskMoney } from "@/lib/masks";
+import { maskMoney } from "@/lib/format/masks";
 import { ENTRY_KINDS } from "@/lib/schemas/entry-batch";
 
 /** Um lançamento do lote: condomínio, modelo e sub-conta (que dependem dele), valor, datas e descrição. */

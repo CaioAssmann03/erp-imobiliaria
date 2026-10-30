@@ -2,7 +2,7 @@
 
 import { TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
-import { maskMoney } from "@/lib/masks";
+import { maskMoney } from "@/lib/format/masks";
 
 const money = (value: string) => maskMoney(value, 8);
 

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { CondominiumHeader } from "../../_components/CondominiumHeader";
-import { CostCentersRegistryList } from "../../_components/CostCentersRegistryList";
+import { CondominiumHeader } from "@/app/(dashboard)/condominiums/_components/condominium/CondominiumHeader";
+import { CostCentersRegistryList } from "@/app/(dashboard)/condominiums/_components/cost-centers/CostCentersRegistryList";
 import { ListFallback } from "@/components/data-list";
 
 export const metadata: Metadata = { title: "Sub-contas" };

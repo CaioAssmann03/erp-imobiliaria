@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { BackLink } from "@/components/BackLink";
-import { eventsUrl } from "@/lib/billing-event-workspace";
+import { BackLink } from "@/components/layout/BackLink";
+import { eventsUrl } from "@/lib/billing/billing-event-workspace";
 import { BillingEventForm } from "../_components/BillingEventForm";
 
 export const metadata: Metadata = { title: "Novo evento" };

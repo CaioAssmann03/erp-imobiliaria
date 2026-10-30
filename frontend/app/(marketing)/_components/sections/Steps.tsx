@@ -3,8 +3,8 @@
 import { motion, useScroll, useSpring } from "motion/react";
 import { useRef } from "react";
 
-import { STEPS } from "./content";
-import { Reveal } from "./Reveal";
+import { STEPS } from "@/app/(marketing)/_components/content";
+import { Reveal } from "@/app/(marketing)/_components/motion/Reveal";
 
 /** Passos numerados numa linha vertical que se preenche de laranja conforme o scroll. */
 export function Steps() {

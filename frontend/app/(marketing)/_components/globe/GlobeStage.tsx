@@ -3,8 +3,8 @@
 import { AnimatePresence } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
-import { brandRamp } from "@/lib/brand-ramp";
-import { subscribeMode } from "@/lib/mode";
+import { brandRamp } from "@/lib/theme/brand-ramp";
+import { subscribeMode } from "@/lib/theme/mode";
 
 import { LINE, PITCH } from "../hero/skyline-layers";
 import { MASK, MASK_BASE64 } from "./brazil-mask";

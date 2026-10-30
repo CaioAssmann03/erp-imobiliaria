@@ -11,7 +11,7 @@ import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useBillingEventsRetrieve } from "@/lib/api/generated";
-import { eventsUrl } from "@/lib/billing-event-workspace";
+import { eventsUrl } from "@/lib/billing/billing-event-workspace";
 import { throwIfPageError } from "@/lib/query/page-error";
 import {
   BILLING_EVENT_DEFAULTS,
@@ -20,7 +20,7 @@ import {
   type BillingEventFormInput,
   type BillingEventFormOutput,
 } from "@/lib/schemas/billing-event";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 import { BillingEventDeleteButton } from "./BillingEventDeleteButton";
 import { useBillingEventSubmit } from "./billing-event-form/use-billing-event-submit";

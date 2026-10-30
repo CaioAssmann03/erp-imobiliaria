@@ -4,9 +4,9 @@ import { keepPreviousData } from "@tanstack/react-query";
 
 import { ListState } from "@/components/data-list";
 import { useBillingEntriesList, useCondominiumsList } from "@/lib/api/generated";
-import { formatCode } from "@/lib/billing-entry-payload";
-import { MAX_ENTRIES_PER_MONTH } from "@/lib/billing-entry-workspace";
-import { formatMonth } from "@/lib/format";
+import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { MAX_ENTRIES_PER_MONTH } from "@/lib/billing/billing-entry-workspace";
+import { formatMonth } from "@/lib/format/format";
 
 import { BillingEntriesGrid } from "./BillingEntriesGrid";
 import { useEntriesScope } from "./use-entries-scope";

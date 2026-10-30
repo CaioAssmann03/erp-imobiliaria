@@ -22,14 +22,14 @@ import {
   useBillingDocumentsReissue,
 } from "@/lib/api/generated";
 import type { BillingDocument } from "@/lib/api/generated/models";
-import { applyServerErrors } from "@/lib/form-errors";
-import { addDays, todayIso } from "@/lib/format";
+import { applyServerErrors } from "@/lib/errors/form-errors";
+import { addDays, todayIso } from "@/lib/format/format";
 import {
   reissueBillingDocumentSchema,
   type ReissueBillingDocumentFormInput,
   type ReissueBillingDocumentFormOutput,
 } from "@/lib/schemas/billing-document";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 /** Reemissão: um novo boleto com o novo vencimento; o antigo é cancelado no gateway e o registro dele fica guardado. */
 export function ReissueBillingDocumentDialog({ document }: { document: BillingDocument }) {

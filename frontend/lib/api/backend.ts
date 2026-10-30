@@ -1,4 +1,4 @@
-import type { Tokens } from "./auth-cookies";
+import type { Tokens } from "@/lib/auth/auth-cookies";
 
 /** Endereço do Django para o servidor do Next (variável só do servidor, nunca vai ao navegador). */
 export const API_URL = process.env.API_INTERNAL_URL || "http://localhost:8000";

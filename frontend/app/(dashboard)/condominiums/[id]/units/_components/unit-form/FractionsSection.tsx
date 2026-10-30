@@ -3,7 +3,7 @@
 import { TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { useCondominiumApportionmentCriteriaList } from "@/lib/api/generated";
-import { maskDecimal } from "@/lib/masks";
+import { maskDecimal } from "@/lib/format/masks";
 
 import { NewCriterionDialog } from "./NewCriterionDialog";
 

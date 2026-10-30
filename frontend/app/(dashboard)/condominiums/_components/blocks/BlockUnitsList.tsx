@@ -12,7 +12,7 @@ import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useUnitsList } from "@/lib/api/generated";
 import { cn } from "@/lib/utils";
 
-import { UnitListItem } from "../[id]/units/_components/UnitListItem";
+import { UnitListItem } from "@/app/(dashboard)/condominiums/[id]/units/_components/UnitListItem";
 
 /**
  * Client Component: as unidades do bloco aberto, numa sub-tela no meio (como as pessoas da unidade), no padrão visual das outras listas do

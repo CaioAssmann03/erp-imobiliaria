@@ -11,14 +11,14 @@ import {
   useCostCentersPartialUpdate,
 } from "@/lib/api/generated";
 import type { CostCenter } from "@/lib/api/generated/models";
-import { condominiumPageUrl } from "@/lib/condominium-registry";
-import { applyServerErrors } from "@/lib/form-errors";
+import { condominiumPageUrl } from "@/lib/condominiums/condominium-registry";
+import { applyServerErrors } from "@/lib/errors/form-errors";
 import {
   costCenterToPayload,
   type CostCenterFormInput,
   type CostCenterFormOutput,
 } from "@/lib/schemas/cost-center";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 export function useCostCenterSubmit(
   costCenterId: string | undefined,

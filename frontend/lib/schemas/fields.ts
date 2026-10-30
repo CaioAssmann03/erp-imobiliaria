@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { maskCep, maskPhone, onlyDigits, parseLocaleNumber } from "@/lib/masks";
-import { isValidIsoDate, UFS } from "@/lib/validators";
+import { maskCep, maskPhone, onlyDigits, parseLocaleNumber } from "@/lib/format/masks";
+import { isValidIsoDate, UFS } from "@/lib/format/validators";
 
 // Mensagens padrão do Zod em português (as específicas abaixo têm texto próprio).
 z.config(z.locales.pt());

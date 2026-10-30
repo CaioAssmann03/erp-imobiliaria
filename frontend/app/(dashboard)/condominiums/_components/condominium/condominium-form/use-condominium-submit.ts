@@ -17,14 +17,14 @@ import {
   useCondominiumsPartialUpdate,
 } from "@/lib/api/generated";
 import type { Condominium, CondominiumBillingRules, LateInterestRate } from "@/lib/api/generated/models";
-import { apiErrorMessage, applyServerErrors } from "@/lib/form-errors";
+import { apiErrorMessage, applyServerErrors } from "@/lib/errors/form-errors";
 import {
   billingRulesToPayload,
   condominiumToPayload,
   type CondominiumFormInput,
   type CondominiumFormOutput,
 } from "@/lib/schemas/condominium";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 import type { PendingInterestRate } from "./pending-interest-rate";
 

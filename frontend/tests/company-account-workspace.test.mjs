@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { COMPANY_ENTRY_SECTIONS, companyAccountFrameState, companyAccountUrl, companyEntryUrl } from "../lib/company-account-workspace.ts";
+import { COMPANY_ENTRY_SECTIONS, companyAccountFrameState, companyAccountUrl, companyEntryUrl } from "../lib/finance/company-account-workspace.ts";
 
 test("the empty screen has the frame and, on a phone, only the list", () => {
   const state = companyAccountFrameState("/finance/company-account");

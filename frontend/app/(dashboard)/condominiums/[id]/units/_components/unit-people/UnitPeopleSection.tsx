@@ -3,7 +3,7 @@
 import { FormSection } from "@/components/form/FormSection";
 import { useUnitPeopleDestroy } from "@/lib/api/generated";
 import type { UnitPerson } from "@/lib/api/generated/models";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 import { type PendingLink, pendingLinkRow } from "./pending-link";
 import { UnitPeopleList } from "./UnitPeopleList";

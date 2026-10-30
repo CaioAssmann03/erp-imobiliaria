@@ -3,7 +3,7 @@
 import { StatusText } from "@/components/StatusText";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCostCentersRetrieve } from "@/lib/api/generated";
-import { formatCode } from "@/lib/billing-entry-payload";
+import { formatCode } from "@/lib/billing/billing-entry-payload";
 
 /**
  * Client Component: o título da edição de uma sub-conta: o código (cinza, como na lista ao lado), o nome e a situação em texto simples

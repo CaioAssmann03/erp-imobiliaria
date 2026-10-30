@@ -9,7 +9,7 @@ import {
   getDashboardRetrieveQueryKey,
   useCondominiumsDestroy,
 } from "@/lib/api/generated";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 /** Client Component: exclui o condomínio aberto (confirmação) e volta à tela vazia do cadastro. */
 export function CondominiumDeleteButton({ condominiumId, name }: { condominiumId: string; name: string }) {

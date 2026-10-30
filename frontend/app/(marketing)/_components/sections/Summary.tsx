@@ -3,7 +3,7 @@
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { useRef } from "react";
 
-import { SUMMARY } from "./content";
+import { SUMMARY } from "@/app/(marketing)/_components/content";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 

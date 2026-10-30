@@ -7,31 +7,25 @@ import { useState } from "react";
 import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUrl } from "@/hooks/use-current-url";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
-import { useUnitsRetrieve } from "@/lib/api/generated";
-import { formatCode } from "@/lib/billing-entry-payload";
-import { formatDate } from "@/lib/format";
-import { personUrl, UNIT_ROLE_LABELS } from "@/lib/person-workspace";
-
-import { currentLinks } from "./current-links";
+import { useUnitPeopleList } from "@/lib/api/generated";
+import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { formatDate } from "@/lib/format/format";
+import { personUrl, UNIT_ROLE_LABELS } from "@/lib/persons/person-workspace";
 
 /**
  * Client Component: as pessoas da unidade aberta (o proprietário e o inquilino vigentes), numa sub-tela no meio, como as pessoas do condomínio, no
  * mesmo padrão visual (cartão branco, busca em pílula, linhas simples, 10 de cada vez). Cada linha diz o papel, a participação do proprietário e
- * desde quando; abrir uma leva à ficha da pessoa, cujo "voltar" retorna a esta tela. Lê a unidade pela mesma consulta do formulário.
+ * desde quando; abrir uma leva à ficha da pessoa, cujo "voltar" retorna a esta tela. A busca, os vínculos vigentes e a paginação são da API (`unit-people` com `?unit=`, `?is_current=` e `?query=`).
  */
 export function UnitPeopleList({ condominiumId, unitId }: { condominiumId: string; unitId: string }) {
   const here = useCurrentUrl();
   const [search, setSearch] = useState("");
-  const { data: unit, isLoading } = useUnitsRetrieve(unitId);
-
-  const links = unit ? [...currentLinks(unit)].sort((a, b) => a.person_detail.code - b.person_detail.code) : [];
-  const term = search.trim().toLowerCase();
-  const matches = term
-    ? links.filter(({ person_detail: person }) => person.name.toLowerCase().includes(term) || formatCode(person.code).includes(term))
-    : links;
+  const term = useDebouncedValue(search.trim());
   const { limit, showMore } = useGrowingLimit(`${term}|${unitId}`);
-  const results = matches.slice(0, limit);
+  const { data, isLoading } = useUnitPeopleList({ unit: unitId, is_current: true, limit, ...(term ? { query: term } : {}) });
+  const results = data?.results ?? [];
 
   return (
     <section aria-label="Pessoas da unidade" className="flex flex-col gap-3">
@@ -92,7 +86,7 @@ export function UnitPeopleList({ condominiumId, unitId }: { condominiumId: strin
           )}
         </nav>
 
-        {!isLoading && links.length > 0 && <ShowMore shown={results.length} total={matches.length} noun="pessoa(s)" onMore={showMore} />}
+        {!isLoading && data && data.count > 0 && <ShowMore shown={results.length} total={data.count} noun="pessoa(s)" onMore={showMore} />}
       </div>
     </section>
   );

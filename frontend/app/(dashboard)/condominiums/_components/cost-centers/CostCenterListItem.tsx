@@ -2,9 +2,9 @@ import Link from "next/link";
 
 import { StatusText } from "@/components/StatusText";
 import type { CostCenter } from "@/lib/api/generated/models";
-import { formatCode } from "@/lib/billing-entry-payload";
-import { withFrom } from "@/lib/back-target";
-import { costCenterUrl } from "@/lib/cost-center-workspace";
+import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { withFrom } from "@/lib/navigation/back-target";
+import { costCenterUrl } from "@/lib/condominiums/cost-center-workspace";
 import { cn } from "@/lib/utils";
 
 /**

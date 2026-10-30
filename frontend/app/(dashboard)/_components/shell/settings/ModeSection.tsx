@@ -1,4 +1,4 @@
-import { MODES, type Appearance } from "@/lib/appearance";
+import { MODES, type Appearance } from "@/lib/theme/appearance";
 
 import { SegmentedControl } from "./SegmentedControl";
 import { SettingsRow } from "./SettingsSection";

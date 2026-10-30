@@ -7,6 +7,7 @@
  */
 
 export type CompanyEntriesListParams = {
+condominium?: string;
 entry_date__gte?: string;
 entry_date__lte?: string;
 /**

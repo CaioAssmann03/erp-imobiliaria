@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { getCostCentersListQueryKey, useCostCentersDestroy } from "@/lib/api/generated";
-import { condominiumPageUrl } from "@/lib/condominium-registry";
-import { applyServerErrors } from "@/lib/form-errors";
-import { toast } from "@/lib/toast";
+import { condominiumPageUrl } from "@/lib/condominiums/condominium-registry";
+import { applyServerErrors } from "@/lib/errors/form-errors";
+import { toast } from "@/lib/errors/toast";
 
 /** Client Component: exclui a sub-conta aberta (confirmação) e volta à tela de sub-contas do condomínio. Com modelos de lançamento vinculados o backend recusa (desative em vez de excluir). */
 export function CostCenterDeleteButton({ condominiumId, costCenterId, name }: { condominiumId: string; costCenterId: string; name: string }) {

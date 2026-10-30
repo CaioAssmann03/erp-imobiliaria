@@ -2,12 +2,12 @@
 
 import { useSearchParams } from "next/navigation";
 
-import { SectionIndex } from "@/components/SectionIndex";
+import { SectionIndex } from "@/components/layout/SectionIndex";
 import { useCurrentUrl } from "@/hooks/use-current-url";
 import { useUnitsRetrieve } from "@/lib/api/generated";
-import { pageKeepingOrigin, withFrom, withParams } from "@/lib/back-target";
-import { uuidParam } from "@/lib/uuid-param";
-import { UNIT_SECTIONS, unitPeopleUrl, unitUrl } from "@/lib/unit-workspace";
+import { pageKeepingOrigin, withFrom, withParams } from "@/lib/navigation/back-target";
+import { uuidParam } from "@/lib/api/uuid-param";
+import { UNIT_SECTIONS, unitPeopleUrl, unitUrl } from "@/lib/condominiums/unit-workspace";
 
 /**
  * O menu da direita da unidade aberta, que a moldura (`UnitsFrame`) desenha. Na página da unidade: as seções (com o marcador que acompanha a

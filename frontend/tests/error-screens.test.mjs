@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import { AxiosError } from "axios";
 
-import { ERROR_SCREENS, errorScreenCodeOf, resolveErrorScreen } from "../lib/error-screens.ts";
+import { ERROR_SCREENS, errorScreenCodeOf, resolveErrorScreen } from "../lib/errors/error-screens.ts";
 
 test("every cataloged code is an HTTP error, unique, and offers a way out", () => {
   const codes = ERROR_SCREENS.map((screen) => screen.code);

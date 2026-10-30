@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 import type { BillingEntry } from "@/lib/api/generated/models";
-import { entryColumnTitle } from "@/lib/billing-entry-payload";
-import { billingEntryUrl, type BillingEntriesScope } from "@/lib/billing-entry-workspace";
-import { brl } from "@/lib/format";
+import { entryColumnTitle } from "@/lib/billing/billing-entry-payload";
+import { billingEntryUrl, type BillingEntriesScope } from "@/lib/billing/billing-entry-workspace";
+import { brl } from "@/lib/format/format";
 
 import { entryDestinationLabel } from "./BillingEntryListItem";
 

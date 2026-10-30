@@ -1,9 +1,9 @@
 "use client";
 
-import { BackLink } from "@/components/BackLink";
+import { BackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCondominiumsRetrieve } from "@/lib/api/generated";
-import { statementUrl } from "@/lib/statement-workspace";
+import { statementUrl } from "@/lib/finance/statement-workspace";
 
 /**
  * Client Component: o código (cinza, como na lista ao lado) e o nome do condomínio do extrato aberto. No celular, onde a lista não fica ao lado,

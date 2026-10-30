@@ -10,7 +10,7 @@ import {
   billingEntryUrl,
   currentMonthIso,
   newBillingEntryUrl,
-} from "../lib/billing-entry-workspace.ts";
+} from "../lib/billing/billing-entry-workspace.ts";
 
 const CONDOMINIUM = "3f0b1c2a-1111-4222-8333-444455556666";
 const params = (query) => new URLSearchParams(query);

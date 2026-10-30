@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Dialog as SheetPrimitive } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
-import { modalBackdropClass } from "@/lib/ui"
+import { modalBackdropClass } from "@/lib/theme/ui"
 
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"

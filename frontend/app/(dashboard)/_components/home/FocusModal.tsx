@@ -3,7 +3,7 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { useRouter } from "next/navigation";
 
-import { centeredModalBackdropClass } from "@/lib/ui";
+import { centeredModalBackdropClass } from "@/lib/theme/ui";
 import { cn } from "@/lib/utils";
 
 /**

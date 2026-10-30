@@ -3,8 +3,8 @@
 import { usePathname } from "next/navigation";
 
 import { FormPage } from "@/components/form/FormPage";
-import { SectionIndex } from "@/components/SectionIndex";
-import { ENTRY_BATCH_SECTIONS, entryBatchFrameState } from "@/lib/entry-batch-workspace";
+import { SectionIndex } from "@/components/layout/SectionIndex";
+import { ENTRY_BATCH_SECTIONS, entryBatchFrameState } from "@/lib/finance/entry-batch-workspace";
 import { cn } from "@/lib/utils";
 
 import { EntryBatchesList } from "./EntryBatchesList";

@@ -5,10 +5,10 @@ import { CalendarDays } from "lucide-react";
 import { useId, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
-import { DateCalendar } from "@/components/DateCalendar";
-import { maskMonthYear, monthToApi } from "@/lib/billing-plan-payload";
-import { todayIso } from "@/lib/format";
-import { inputClass } from "@/lib/ui";
+import { DateCalendar } from "@/components/dates/DateCalendar";
+import { maskMonthYear, monthToApi } from "@/lib/billing/billing-plan-payload";
+import { todayIso } from "@/lib/format/format";
+import { inputClass } from "@/lib/theme/ui";
 import { cn } from "@/lib/utils";
 
 import { FormField } from "../FormField";

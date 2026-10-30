@@ -4,8 +4,8 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 import { FormPage } from "@/components/form/FormPage";
-import { SectionIndex } from "@/components/SectionIndex";
-import { UNIT_SECTIONS, unitsFrameState } from "@/lib/unit-workspace";
+import { SectionIndex } from "@/components/layout/SectionIndex";
+import { UNIT_SECTIONS, unitsFrameState } from "@/lib/condominiums/unit-workspace";
 import { cn } from "@/lib/utils";
 import { UnitSideMenu } from "./UnitSideMenu";
 import { UnitsList } from "./UnitsList";

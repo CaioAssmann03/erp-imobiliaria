@@ -5,15 +5,15 @@ import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { CompactFilter } from "@/components/CompactFilter";
-import type { FilterGroup } from "@/components/FilterMenu";
+import { CompactFilter } from "@/components/filters/CompactFilter";
+import type { FilterGroup } from "@/components/filters/FilterMenu";
 import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUrl } from "@/hooks/use-current-url";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useCostCentersList } from "@/lib/api/generated";
-import { newCostCenterUrl } from "@/lib/cost-center-workspace";
+import { newCostCenterUrl } from "@/lib/condominiums/cost-center-workspace";
 import { cn } from "@/lib/utils";
 
 import { CostCenterListItem } from "./CostCenterListItem";

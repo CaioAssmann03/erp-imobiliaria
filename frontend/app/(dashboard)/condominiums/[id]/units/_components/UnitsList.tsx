@@ -6,21 +6,21 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import { CompactFilter } from "@/components/CompactFilter";
+import { CompactFilter } from "@/components/filters/CompactFilter";
 import { ShowMore } from "@/components/data-list";
-import { ScopeSearchCard, ScopeSearchRow, ScopeDivider } from "@/components/ScopeSearchCard";
-import { ScopeSelect } from "@/components/ScopeSelect";
+import { ScopeSearchCard, ScopeSearchRow, ScopeDivider } from "@/components/filters/ScopeSearchCard";
+import { ScopeSelect } from "@/components/filters/ScopeSelect";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useBlocksList, useCondominiumsList, useUnitsList } from "@/lib/api/generated";
 import type { UnitsListPending, UnitsListType } from "@/lib/api/generated/models";
-import { newUnitUrl, unitsUrl } from "@/lib/unit-workspace";
+import { newUnitUrl, unitsUrl } from "@/lib/condominiums/unit-workspace";
 import { cn } from "@/lib/utils";
 
 import { UnitListItem } from "./UnitListItem";
-import { backTargetOf } from "@/lib/back-target";
-import { uuidParam } from "@/lib/uuid-param";
+import { backTargetOf } from "@/lib/navigation/back-target";
+import { uuidParam } from "@/lib/api/uuid-param";
 import { NO_UNIT_FILTERS, PENDING_OPTIONS, unitFilterGroups, type UnitFilters } from "./unit-filter-groups";
 
 /**

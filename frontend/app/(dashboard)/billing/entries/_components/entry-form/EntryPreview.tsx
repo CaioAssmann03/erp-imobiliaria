@@ -8,8 +8,8 @@ import { FormSection } from "@/components/form/FormSection";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useBillingEntriesPreview } from "@/lib/api/generated";
 import type { BillingEntry } from "@/lib/api/generated/models";
-import { canPreview, entryToPayload } from "@/lib/billing-entry-payload";
-import { brl } from "@/lib/format";
+import { canPreview, entryToPayload } from "@/lib/billing/billing-entry-payload";
+import { brl } from "@/lib/format/format";
 import { billingEntryFormToValues, billingEntrySchema, type BillingEntryFormInput } from "@/lib/schemas/billing-entry";
 
 const PREVIEW_DELAY_MS = 400;

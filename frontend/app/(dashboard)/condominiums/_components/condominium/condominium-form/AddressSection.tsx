@@ -2,7 +2,7 @@
 
 import { TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
-import { maskCep } from "@/lib/masks";
+import { maskCep } from "@/lib/format/masks";
 
 import { AddressMap } from "./AddressMap";
 import { useZipCodeAutofill } from "./use-zip-code-autofill";

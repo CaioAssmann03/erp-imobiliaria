@@ -1,7 +1,7 @@
-import { GLOBE } from "./content";
-import { GlobeStage } from "./globe/GlobeStage";
-import { Reveal } from "./Reveal";
-import { WordsReveal } from "./WordsReveal";
+import { GLOBE } from "@/app/(marketing)/_components/content";
+import { GlobeStage } from "@/app/(marketing)/_components/globe/GlobeStage";
+import { Reveal } from "@/app/(marketing)/_components/motion/Reveal";
+import { WordsReveal } from "@/app/(marketing)/_components/motion/WordsReveal";
 
 /**
  * Seção do mapa do Brasil: à esquerda o título grande em negrito (entra palavra por palavra) e a descrição curta; à

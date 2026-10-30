@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { PAGE_SIZE_OPTIONS } from "@/lib/pagination";
+import { PAGE_SIZE_OPTIONS } from "@/lib/api/pagination";
 
 interface PaginationProps {
   page: number;

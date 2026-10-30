@@ -4,9 +4,9 @@ import { motion, useReducedMotion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { ErrorActionButton } from "@/components/ErrorActionButton";
-import { ScanlineCode } from "@/components/ScanlineCode";
-import { resolveErrorScreen, type ErrorAction } from "@/lib/error-screens";
+import { ErrorActionButton } from "@/components/errors/ErrorActionButton";
+import { ScanlineCode } from "@/components/errors/ScanlineCode";
+import { resolveErrorScreen, type ErrorAction } from "@/lib/errors/error-screens";
 import { cn } from "@/lib/utils";
 
 const EASE = [0.22, 1, 0.36, 1] as const;

@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 import type { EntryBatch } from "@/lib/api/generated/models";
-import { entryBatchUrl } from "@/lib/entry-batch-workspace";
-import { formatDate } from "@/lib/format";
+import { entryBatchUrl } from "@/lib/finance/entry-batch-workspace";
+import { formatDate } from "@/lib/format/format";
 import { BATCH_ORIGINS } from "@/lib/schemas/entry-batch";
 import { cn } from "@/lib/utils";
 

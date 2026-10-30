@@ -6,19 +6,19 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import { CompactFilter, type CompactFilterGroup } from "@/components/CompactFilter";
+import { CompactFilter, type CompactFilterGroup } from "@/components/filters/CompactFilter";
 import { ShowMore } from "@/components/data-list";
-import { ScopeSearchCard, ScopeSearchRow, ScopeDivider } from "@/components/ScopeSearchCard";
-import { ScopeSelect } from "@/components/ScopeSelect";
+import { ScopeSearchCard, ScopeSearchRow, ScopeDivider } from "@/components/filters/ScopeSearchCard";
+import { ScopeSelect } from "@/components/filters/ScopeSelect";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useCondominiumPeopleList, useCondominiumsList, usePersonsList, useUnitsList } from "@/lib/api/generated";
-import { backTargetOf } from "@/lib/back-target";
-import { CONDOMINIUMS_MODULE } from "@/lib/person-module";
+import { backTargetOf } from "@/lib/navigation/back-target";
+import { CONDOMINIUMS_MODULE } from "@/lib/persons/person-module";
 import { unitTypeLabel } from "@/lib/schemas/unit";
-import { unitListLabel } from "@/lib/unit-workspace";
-import { newPersonUrl, originCondominium, type PersonContext } from "@/lib/person-workspace";
+import { unitListLabel } from "@/lib/condominiums/unit-workspace";
+import { newPersonUrl, originCondominium, type PersonContext } from "@/lib/persons/person-workspace";
 import { cn } from "@/lib/utils";
 
 import { PersonListItem } from "./PersonListItem";

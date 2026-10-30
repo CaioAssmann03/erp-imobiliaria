@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { FormSection } from "@/components/form/FormSection";
-import { PageControls } from "@/components/PageControls";
+import { PageControls } from "@/components/data-list/PageControls";
 import { useCostCentersList } from "@/lib/api/generated";
-import { condominiumUrl } from "@/lib/condominium-registry";
+import { condominiumUrl } from "@/lib/condominiums/condominium-registry";
 
 /** Quantos condomínios a seção mostra por página: uma sub-conta pode ser usada por dezenas deles. */
 export const CATALOG_CONDOMINIUMS_PAGE_SIZE = 7;

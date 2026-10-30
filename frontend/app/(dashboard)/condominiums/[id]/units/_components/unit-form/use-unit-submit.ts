@@ -14,10 +14,10 @@ import {
   useUnitsPartialUpdate,
 } from "@/lib/api/generated";
 import type { Unit } from "@/lib/api/generated/models";
-import { applyServerErrors } from "@/lib/form-errors";
+import { applyServerErrors } from "@/lib/errors/form-errors";
 import { invalidateApportionment } from "@/lib/query/apportionment";
-import { toast } from "@/lib/toast";
-import { unitUrl } from "@/lib/unit-workspace";
+import { toast } from "@/lib/errors/toast";
+import { unitUrl } from "@/lib/condominiums/unit-workspace";
 import { pendingLinkPayload, type PendingLink } from "../unit-people/pending-link";
 import { unitToPayload, type UnitFormInput, type UnitFormOutput } from "@/lib/schemas/unit";
 

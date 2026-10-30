@@ -1,9 +1,9 @@
 "use client";
 
-import { BackLink } from "@/components/BackLink";
+import { BackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCompanyEntriesRetrieve } from "@/lib/api/generated";
-import { companyAccountUrl } from "@/lib/company-account-workspace";
+import { companyAccountUrl } from "@/lib/finance/company-account-workspace";
 
 /** Client Component: a descrição do lançamento aberto. No celular, onde a lista não fica ao lado, tem o "voltar" à lista no alto. */
 export function CompanyEntryHeader({ entryId }: { entryId: string }) {

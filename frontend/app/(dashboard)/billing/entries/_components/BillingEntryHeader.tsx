@@ -1,9 +1,9 @@
 "use client";
 
-import { BackLink } from "@/components/BackLink";
+import { BackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBillingEntriesRetrieve } from "@/lib/api/generated";
-import { billingEntriesUrl } from "@/lib/billing-entry-workspace";
+import { billingEntriesUrl } from "@/lib/billing/billing-entry-workspace";
 
 import { entryDestinationLabel } from "./BillingEntryListItem";
 import { useEntriesScope } from "./use-entries-scope";

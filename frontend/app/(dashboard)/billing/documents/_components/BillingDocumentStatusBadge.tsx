@@ -1,4 +1,4 @@
-import { documentStatusLabel } from "@/lib/billing-documents";
+import { documentStatusLabel } from "@/lib/billing/billing-documents";
 import { cn } from "@/lib/utils";
 
 const STYLE: Record<string, string> = {

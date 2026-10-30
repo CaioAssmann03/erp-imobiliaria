@@ -1,17 +1,17 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
-import { Search } from "lucide-react";
 import { useState } from "react";
 
-import { DateSelect } from "@/components/DateSelect";
+import { DateSelect } from "@/components/dates/DateSelect";
 import { ShowMore } from "@/components/data-list";
-import { ScopeDivider, ScopeSearchCard, ScopeSearchRow } from "@/components/ScopeSearchCard";
+import { ScopeDivider, ScopeSearchCard, ScopeSearchRow } from "@/components/filters/ScopeSearchCard";
+import { ScopeSelect } from "@/components/filters/ScopeSelect";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
-import { useCompanyEntriesList } from "@/lib/api/generated";
-import { todayIso } from "@/lib/format";
+import { useCompanyEntriesList, useCondominiumsList } from "@/lib/api/generated";
+import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { todayIso } from "@/lib/format/format";
 import { cn } from "@/lib/utils";
 
 import { CompanyEntryListItem } from "./CompanyEntryListItem";
@@ -19,21 +19,22 @@ import { CompanyEntryListItem } from "./CompanyEntryListItem";
 const SEGMENT = "flex-1 px-3 hover:bg-ink/5";
 
 /**
- * Client Component: a coluna da esquerda da conta da imobiliária, no padrão da lista de condomínios: o título, o período (de e até, calendários de
- * dias, `DateSelect`) num cartão com a busca pela descrição embaixo, e os lançamentos do mais recente ao mais antigo, 10 de cada vez, com o aberto
- * marcado. Não há **+**: os lançamentos nascem do pagamento de um boleto com tarifa.
+ * Client Component: a coluna da esquerda da conta da imobiliária, no padrão da lista de condomínios: o título e, num cartão, o seletor de condomínio com caixa de
+ * busca ("Todos os condomínios" não filtra) e embaixo o período (de e até, calendários de dias, `DateSelect`); depois os lançamentos do mais recente ao mais antigo,
+ * 10 de cada vez, com o aberto marcado. Não há **+**: os lançamentos nascem do pagamento de um boleto com tarifa.
  */
 export function CompanyEntriesList({ openEntryId, className }: { openEntryId: string | null; className?: string }) {
-  const [search, setSearch] = useState("");
+  const [condominium, setCondominium] = useState("");
   const [from, setFrom] = useState("");
   const [until, setUntil] = useState("");
-  const term = useDebouncedValue(search.trim());
 
-  const { limit, showMore } = useGrowingLimit(`${term}|${from}|${until}`);
+  const { data: condominiums } = useCondominiumsList({ limit: 100 });
+
+  const { limit, showMore } = useGrowingLimit(`${condominium}|${from}|${until}`);
   const { data, isLoading, isPlaceholderData } = useCompanyEntriesList(
     {
       limit,
-      ...(term ? { query: term } : {}),
+      ...(condominium ? { condominium } : {}),
       ...(from ? { entry_date__gte: from } : {}),
       ...(until ? { entry_date__lte: until } : {}),
     },
@@ -53,23 +54,22 @@ export function CompanyEntriesList({ openEntryId, className }: { openEntryId: st
 
       <ScopeSearchCard
         scopes={
-          <>
-            <DateSelect className={SEGMENT} label="Data inicial" value={from} today={today} placeholder="A partir de" allLabel="Sem data inicial" onChange={setFrom} />
-            <ScopeDivider />
-            <DateSelect className={SEGMENT} label="Data final" value={until} today={today} placeholder="Até" allLabel="Sem data final" onChange={setUntil} />
-          </>
+          <ScopeSelect
+            variant="segment"
+            className="flex-1"
+            label="Condomínio"
+            value={condominium}
+            placeholder="Selecione o condomínio"
+            allLabel="Todos os condomínios"
+            onChange={setCondominium}
+            options={(condominiums?.results ?? []).map((item) => ({ value: item.id, label: `${formatCode(item.code)} · ${item.name}`, title: item.name }))}
+          />
         }
       >
-        <ScopeSearchRow>
-          <Search className="size-4 shrink-0" />
-          <input
-            type="search"
-            aria-label="Buscar lançamento pela descrição"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Buscar pela descrição"
-            className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint"
-          />
+        <ScopeSearchRow className="p-0">
+          <DateSelect className={SEGMENT} label="Data inicial" value={from} today={today} placeholder="A partir de" allLabel="Sem data inicial" onChange={setFrom} />
+          <ScopeDivider />
+          <DateSelect className={SEGMENT} label="Data final" value={until} today={today} placeholder="Até" allLabel="Sem data final" onChange={setUntil} />
         </ScopeSearchRow>
       </ScopeSearchCard>
 
@@ -82,7 +82,7 @@ export function CompanyEntriesList({ openEntryId, className }: { openEntryId: st
           </div>
         ) : results.length === 0 ? (
           <p className="px-2 py-6 text-center text-body text-ink-soft">
-            {term || from || until ? "Nenhum lançamento com esses filtros." : "Nenhum lançamento da imobiliária ainda."}
+            {condominium || from || until ? "Nenhum lançamento com esses filtros." : "Nenhum lançamento da imobiliária ainda."}
           </p>
         ) : (
           <ul className="space-y-0.5">

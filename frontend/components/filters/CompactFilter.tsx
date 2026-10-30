@@ -3,7 +3,7 @@
 import { Popover } from "@base-ui/react/popover";
 import { SlidersHorizontal } from "lucide-react";
 
-import type { FilterGroup } from "@/components/FilterMenu";
+import type { FilterGroup } from "@/components/filters/FilterMenu";
 import { cn } from "@/lib/utils";
 
 /** `required`: o campo é um escopo (ex.: o condomínio da lista), não um filtro: não tem "Todos" e não conta como filtro ativo. */

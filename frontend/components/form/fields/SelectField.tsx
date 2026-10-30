@@ -3,7 +3,7 @@
 import { useId } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
-import { inputClass } from "@/lib/ui";
+import { inputClass } from "@/lib/theme/ui";
 import { cn } from "@/lib/utils";
 
 import { FormField } from "../FormField";

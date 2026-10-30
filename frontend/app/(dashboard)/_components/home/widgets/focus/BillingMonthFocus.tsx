@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { LinkButton } from "@/components/LinkButton";
-import { formatMonth } from "@/lib/format";
+import { formatMonth } from "@/lib/format/format";
 
 import { BillingMonthBodyRuns } from "./BillingMonthRuns";
 import { useBillingSummary } from "../../use-billing-summary";

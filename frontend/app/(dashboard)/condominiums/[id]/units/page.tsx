@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { CondominiumHeader } from "../../_components/CondominiumHeader";
+import { CondominiumHeader } from "@/app/(dashboard)/condominiums/_components/condominium/CondominiumHeader";
 import { ListFallback } from "@/components/data-list";
 import { UnitsRegistryList } from "./_components/UnitsRegistryList";
 

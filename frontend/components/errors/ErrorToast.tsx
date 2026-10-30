@@ -3,7 +3,7 @@
 import { ChevronDown, OctagonXIcon, X } from "lucide-react";
 import { useState } from "react";
 
-import type { ErrorDetails } from "@/lib/error-details";
+import type { ErrorDetails } from "@/lib/errors/error-details";
 import { cn } from "@/lib/utils";
 
 /**

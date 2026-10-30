@@ -6,13 +6,14 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { ShowMore } from "@/components/data-list";
-import { ScopeSearchCard, ScopeSearchRow } from "@/components/ScopeSearchCard";
-import { ScopeSelect } from "@/components/ScopeSelect";
+import { ScopeSearchCard, ScopeSearchRow } from "@/components/filters/ScopeSearchCard";
+import { ScopeSelect } from "@/components/filters/ScopeSelect";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
-import { backTargetOf } from "@/lib/back-target";
+import { backTargetOf } from "@/lib/navigation/back-target";
 import { useBlocksList, useCondominiumsList } from "@/lib/api/generated";
-import { newBlockUrl } from "@/lib/block-workspace";
+import { newBlockUrl } from "@/lib/condominiums/block-workspace";
 import { cn } from "@/lib/utils";
 
 import { BlockListItem } from "./BlockListItem";
@@ -36,17 +37,14 @@ export function BlocksList({
   const [search, setSearch] = useState("");
   const [chosen, setChosen] = useState<string | null>(null);
   const activeCondominium = chosen ?? condominiumId;
+  const term = useDebouncedValue(search.trim());
+  const { limit, showMore } = useGrowingLimit(`${term}|${activeCondominium}`);
   const { data: condominiums } = useCondominiumsList({ limit: 100 });
   const { data, isLoading } = useBlocksList(
-    { condominium: activeCondominium ?? undefined, limit: 100 },
+    { condominium: activeCondominium ?? undefined, limit, ...(term ? { query: term } : {}) },
     { query: { enabled: Boolean(activeCondominium) } }
   );
-
-  const term = search.trim().toLowerCase();
-  const all = data?.results ?? [];
-  const matches = term ? all.filter((block) => block.name.toLowerCase().includes(term)) : all;
-  const { limit, showMore } = useGrowingLimit(`${term}|${activeCondominium}`);
-  const results = matches.slice(0, limit);
+  const results = data?.results ?? [];
   const loading = !activeCondominium || isLoading;
 
   return (
@@ -122,13 +120,13 @@ export function BlocksList({
         ) : (
           <ul className="space-y-0.5">
             {results.map((block) => (
-              <BlockListItem key={block.id} block={block} isOpen={block.id === openBlockId} dimmed={matches.some((item) => item.id === openBlockId)} from={from} />
+              <BlockListItem key={block.id} block={block} isOpen={block.id === openBlockId} dimmed={Boolean(openBlockId)} from={from} />
             ))}
           </ul>
         )}
       </nav>
 
-      {data && <ShowMore shown={results.length} total={matches.length} noun="bloco(s)" onMore={showMore} />}
+      {data && <ShowMore shown={results.length} total={data.count} noun="bloco(s)" onMore={showMore} />}
     </aside>
   );
 }

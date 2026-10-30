@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 import type { Condominium } from "@/lib/api/generated/models";
-import { brl } from "@/lib/format";
-import { statementUrl } from "@/lib/statement-workspace";
+import { brl } from "@/lib/format/format";
+import { statementUrl } from "@/lib/finance/statement-workspace";
 import { cn } from "@/lib/utils";
 
 /**

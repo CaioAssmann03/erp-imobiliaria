@@ -1,11 +1,11 @@
 "use client";
 
-import { BackLink } from "@/components/BackLink";
+import { BackLink } from "@/components/layout/BackLink";
 import { StatusText } from "@/components/StatusText";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCostCenterCatalogRetrieve } from "@/lib/api/generated";
-import { formatCode } from "@/lib/billing-entry-payload";
-import { catalogUrl } from "@/lib/cost-center-catalog-workspace";
+import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { catalogUrl } from "@/lib/finance/cost-center-catalog-workspace";
 
 /**
  * Client Component: o código (cinza, como na lista ao lado), o nome e a situação da sub-conta aberta, a situação em texto simples. Usa a mesma

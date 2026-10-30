@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { getDashboardRetrieveQueryKey, getUnitsListQueryKey, useUnitsDestroy } from "@/lib/api/generated";
 import { invalidateApportionment } from "@/lib/query/apportionment";
-import { toast } from "@/lib/toast";
-import { unitsUrl } from "@/lib/unit-workspace";
+import { toast } from "@/lib/errors/toast";
+import { unitsUrl } from "@/lib/condominiums/unit-workspace";
 
 /** Client Component: exclui a unidade aberta (confirmação) e volta à lista de unidades do condomínio. */
 export function UnitDeleteButton({ condominiumId, unitId, name }: { condominiumId: string; unitId: string; name: string }) {

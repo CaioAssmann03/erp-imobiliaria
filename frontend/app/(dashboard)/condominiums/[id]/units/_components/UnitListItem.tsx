@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import type { Unit } from "@/lib/api/generated/models";
 import { unitTypeLabel } from "@/lib/schemas/unit";
-import { unitListLabel, unitUrl } from "@/lib/unit-workspace";
+import { unitListLabel, unitUrl } from "@/lib/condominiums/unit-workspace";
 import { cn } from "@/lib/utils";
 
 import { currentLinks } from "./current-links";

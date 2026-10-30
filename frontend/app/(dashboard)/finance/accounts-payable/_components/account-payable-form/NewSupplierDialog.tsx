@@ -21,9 +21,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { getPersonsListQueryKey, getSuppliersListQueryKey, usePersonsCreate, useSuppliersCreate } from "@/lib/api/generated";
 import type { Person, Supplier } from "@/lib/api/generated/models";
-import { NewPersonFields } from "@/components/NewPersonFields";
-import { applyServerErrors } from "@/lib/form-errors";
-import { CONDOMINIUMS_MODULE } from "@/lib/person-module";
+import { NewPersonFields } from "@/components/persons/NewPersonFields";
+import { applyServerErrors } from "@/lib/errors/form-errors";
+import { CONDOMINIUMS_MODULE } from "@/lib/persons/person-module";
 import {
   SUPPLIER_ACCOUNT_KINDS,
   SUPPLIER_DEFAULTS,
@@ -33,7 +33,7 @@ import {
   type SupplierFormInput,
   type SupplierFormOutput,
 } from "@/lib/schemas/supplier";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 /** O documento da pessoa nova chega do servidor como `cpf` ou `cnpj`; no formulário é um campo só. */
 const formPath = (path: string): string => {

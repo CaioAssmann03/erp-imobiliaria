@@ -8,8 +8,8 @@ import { SearchSelectField, TextField } from "@/components/form/fields";
 import { FieldRow } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
 import { useBillingEventsList, useCondominiumApportionmentCriteriaList, useCostCentersList } from "@/lib/api/generated";
-import { defaultCostCenterId, formatCode } from "@/lib/billing-entry-payload";
-import { maskSignedMoney } from "@/lib/masks";
+import { defaultCostCenterId, formatCode } from "@/lib/billing/billing-entry-payload";
+import { maskSignedMoney } from "@/lib/format/masks";
 import { ALLOCATION_HINT, ALLOCATIONS } from "@/lib/schemas/billing-entry";
 import type { ExtraBillingFormInput } from "@/lib/schemas/extra-billing";
 

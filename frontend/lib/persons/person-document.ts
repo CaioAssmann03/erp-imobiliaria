@@ -1,5 +1,5 @@
 import type { Person } from "@/lib/api/generated/models";
-import { maskCpfCnpj } from "@/lib/masks";
+import { maskCpfCnpj } from "@/lib/format/masks";
 
 /** CPF (pessoa física) ou CNPJ (pessoa jurídica) só com dígitos; vazio se não houver documento. */
 export const personDocument = (person: Person) =>

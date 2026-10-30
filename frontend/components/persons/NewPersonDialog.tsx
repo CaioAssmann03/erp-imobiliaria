@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { NewPersonFields } from "@/components/NewPersonFields";
+import { NewPersonFields } from "@/components/persons/NewPersonFields";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -19,10 +19,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { getDashboardRetrieveQueryKey, getPersonsListQueryKey, usePersonsCreate } from "@/lib/api/generated";
 import type { Person } from "@/lib/api/generated/models";
-import { applyServerErrors } from "@/lib/form-errors";
-import { CONDOMINIUMS_MODULE } from "@/lib/person-module";
+import { applyServerErrors } from "@/lib/errors/form-errors";
+import { CONDOMINIUMS_MODULE } from "@/lib/persons/person-module";
 import { PERSON_DEFAULTS, personSchema, personToPayload, type PersonFormInput, type PersonFormOutput } from "@/lib/schemas/person";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 /** O documento da pessoa nova chega do servidor como `cpf` ou `cnpj`; no formulário é um campo só. */
 const formPath = (path: string): string => {

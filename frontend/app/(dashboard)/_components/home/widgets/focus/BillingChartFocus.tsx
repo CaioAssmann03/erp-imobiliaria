@@ -1,7 +1,7 @@
 "use client";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatMonth } from "@/lib/format";
+import { formatMonth } from "@/lib/format/format";
 
 import { BillingSummaryChart } from "../../BillingSummaryChart";
 import { useBillingSummary } from "../../use-billing-summary";

@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { getBlocksListQueryKey, getUnitsListQueryKey, useBlocksDestroy } from "@/lib/api/generated";
-import { condominiumPageUrl } from "@/lib/condominium-registry";
-import { toast } from "@/lib/toast";
+import { condominiumPageUrl } from "@/lib/condominiums/condominium-registry";
+import { toast } from "@/lib/errors/toast";
 
 /** Client Component: exclui o bloco aberto (confirmação) e volta à tela de blocos do condomínio. */
 export function BlockDeleteButton({ condominiumId, blockId, name }: { condominiumId: string; blockId: string; name: string }) {

@@ -24,8 +24,8 @@ import {
   type UnitFormOutput,
 } from "@/lib/schemas/unit";
 
-import { toast } from "@/lib/toast";
-import { unitsUrl } from "@/lib/unit-workspace";
+import { toast } from "@/lib/errors/toast";
+import { unitsUrl } from "@/lib/condominiums/unit-workspace";
 
 import { BillingSection } from "./unit-form/BillingSection";
 import { FractionsSection } from "./unit-form/FractionsSection";

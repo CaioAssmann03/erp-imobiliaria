@@ -3,7 +3,7 @@
 import { FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { useCompanyEntriesRetrieve } from "@/lib/api/generated";
-import { brl, formatDate, formatMonth } from "@/lib/format";
+import { brl, formatDate, formatMonth } from "@/lib/format/format";
 import { throwIfPageError } from "@/lib/query/page-error";
 
 function Item({ label, children }: { label: string; children: React.ReactNode }) {

@@ -3,7 +3,7 @@
 import { CheckboxField, SearchSelectField, SelectField, TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { useBlocksList } from "@/lib/api/generated";
-import { maskInteger } from "@/lib/masks";
+import { maskInteger } from "@/lib/format/masks";
 import { UNIT_TYPES } from "@/lib/schemas/unit";
 
 export function IdentificationSection({ condominiumId }: { condominiumId: string }) {

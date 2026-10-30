@@ -4,7 +4,7 @@ import {
   customAccentForeground,
   isHexColor,
   type Appearance,
-} from "@/lib/appearance";
+} from "@/lib/theme/appearance";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 const KEYS = ["mode", "accent", "accentCustom", "font", "text", "motion"] as const;

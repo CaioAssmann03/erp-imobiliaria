@@ -1,7 +1,7 @@
 "use client";
 
 import { useIsApplePlatform } from "@/hooks/use-platform";
-import { searchShortcutLabel } from "@/lib/platform";
+import { searchShortcutLabel } from "@/lib/navigation/platform";
 
 import { useRailExpanded } from "../use-rail-expanded";
 import { SettingsGroup, SettingsRow } from "./SettingsSection";

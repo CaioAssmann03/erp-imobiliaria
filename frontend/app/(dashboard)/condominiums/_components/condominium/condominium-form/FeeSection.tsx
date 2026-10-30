@@ -4,7 +4,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 
 import { CheckboxField, SelectField, TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
-import { maskDecimal, maskMoney } from "@/lib/masks";
+import { maskDecimal, maskMoney } from "@/lib/format/masks";
 import type { CondominiumFormInput } from "@/lib/schemas/condominium";
 
 const money = (value: string) => maskMoney(value, 10);

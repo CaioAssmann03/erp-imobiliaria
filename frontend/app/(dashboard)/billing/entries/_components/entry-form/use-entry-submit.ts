@@ -5,10 +5,10 @@ import type { UseFormSetError } from "react-hook-form";
 
 import { getBillingEntriesListQueryKey, useBillingEntriesCreate } from "@/lib/api/generated";
 import type { BillingEntry } from "@/lib/api/generated/models";
-import { entryToPayload } from "@/lib/billing-entry-payload";
-import { applyServerErrors } from "@/lib/form-errors";
+import { entryToPayload } from "@/lib/billing/billing-entry-payload";
+import { applyServerErrors } from "@/lib/errors/form-errors";
 import { billingEntryFormToValues, type BillingEntryFormInput, type BillingEntryFormOutput } from "@/lib/schemas/billing-entry";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 /** Os erros das unidades chegam como `units.<n>.<campo>`; o formulário mostra o da lista inteira em `units`. */
 const errorPath = (path: string): string => (path.startsWith("units") ? "units" : path);

@@ -6,9 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { useIsApplePlatform } from "@/hooks/use-platform";
-import { searchShortcutLabel } from "@/lib/platform";
+import { searchShortcutLabel } from "@/lib/navigation/platform";
 import { cn } from "@/lib/utils";
-import { centeredModalBackdropClass } from "@/lib/ui";
+import { centeredModalBackdropClass } from "@/lib/theme/ui";
 
 import { OPEN_SEARCH_EVENT } from "./search/open-search-event";
 import { SearchResults } from "./search/SearchResults";

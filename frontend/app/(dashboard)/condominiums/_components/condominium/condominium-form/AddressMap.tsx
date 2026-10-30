@@ -3,7 +3,7 @@
 import { useFormContext, useWatch } from "react-hook-form";
 
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { addressQuery, isAddressMappable, mapsEmbedUrl, mapsKeylessEmbedUrl } from "@/lib/maps";
+import { addressQuery, isAddressMappable, mapsEmbedUrl, mapsKeylessEmbedUrl } from "@/lib/condominiums/maps";
 import type { CondominiumFormInput } from "@/lib/schemas/condominium";
 
 const ADDRESS_FIELDS = ["zip_code", "street", "number", "district", "city", "state"] as const;

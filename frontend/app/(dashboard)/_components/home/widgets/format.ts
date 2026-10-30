@@ -1,4 +1,4 @@
-export { brl } from "@/lib/format";
+export { brl } from "@/lib/format/format";
 
 /** "2025-03" → "mar" */
 export function shortMonthLabel(value: string) {

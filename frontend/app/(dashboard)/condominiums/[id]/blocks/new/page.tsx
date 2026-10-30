@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
-import { BlockForm } from "../../../_components/BlockForm";
-import { PageHeader } from "@/components/PageHeader";
-import { condominiumPageUrl, condominiumUrl } from "@/lib/condominium-registry";
+import { BlockForm } from "@/app/(dashboard)/condominiums/_components/blocks/BlockForm";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { condominiumPageUrl, condominiumUrl } from "@/lib/condominiums/condominium-registry";
 
 export const metadata: Metadata = { title: "Novo bloco" };
 

@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 
 import { FormPage } from "@/components/form/FormPage";
-import { statementFrameState } from "@/lib/statement-workspace";
+import { statementFrameState } from "@/lib/finance/statement-workspace";
 import { cn } from "@/lib/utils";
 
 import { StatementList } from "./StatementList";

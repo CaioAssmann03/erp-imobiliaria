@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import { withFrom } from "@/lib/back-target";
-import { blockUnitsUrl, blockUrl } from "@/lib/block-workspace";
+import { withFrom } from "@/lib/navigation/back-target";
+import { blockUnitsUrl, blockUrl } from "@/lib/condominiums/block-workspace";
 import type { Block } from "@/lib/api/generated/models";
 import { cn } from "@/lib/utils";
 

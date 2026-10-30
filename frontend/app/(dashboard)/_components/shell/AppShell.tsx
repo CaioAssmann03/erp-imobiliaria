@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Brand } from "@/components/Brand";
+import { Brand } from "@/components/brand/Brand";
 import { GlobalSearch } from "./GlobalSearch";
 import { MobileMenu } from "./MobileMenu";
 import { Rail } from "./Rail";

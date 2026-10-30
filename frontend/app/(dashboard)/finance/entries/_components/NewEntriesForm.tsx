@@ -7,7 +7,7 @@ import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form"
 import { FormActions } from "@/components/form/FormActions";
 import { FormSection } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
-import { todayIso } from "@/lib/format";
+import { todayIso } from "@/lib/format/format";
 import {
   EMPTY_ENTRY_LINE,
   entriesBatchDefaults,
@@ -16,8 +16,8 @@ import {
   type EntriesBatchFormOutput,
 } from "@/lib/schemas/entry-batch";
 
-import { entriesUrl } from "@/lib/entry-batch-workspace";
-import { toast } from "@/lib/toast";
+import { entriesUrl } from "@/lib/finance/entry-batch-workspace";
+import { toast } from "@/lib/errors/toast";
 
 import { BatchSection } from "./entries-form/BatchSection";
 import { EntryLineFields } from "./entries-form/EntryLineFields";

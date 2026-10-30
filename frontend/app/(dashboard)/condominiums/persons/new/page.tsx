@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { BackLink } from "@/components/BackLink";
-import { personsUrl } from "@/lib/person-workspace";
+import { BackLink } from "@/components/layout/BackLink";
+import { personsUrl } from "@/lib/persons/person-workspace";
 import { PersonForm } from "../_components/PersonForm";
 
 export const metadata: Metadata = { title: "Nova pessoa" };

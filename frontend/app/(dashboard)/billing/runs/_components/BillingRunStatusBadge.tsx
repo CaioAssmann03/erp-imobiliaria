@@ -1,4 +1,4 @@
-import { issuedNothing, runStatusLabel, type RunCounts } from "@/lib/billing-documents";
+import { issuedNothing, runStatusLabel, type RunCounts } from "@/lib/billing/billing-documents";
 import { cn } from "@/lib/utils";
 
 const STYLE: Record<string, { text: string; dot: string }> = {

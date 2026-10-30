@@ -5,11 +5,11 @@ import { useFormContext, useFormState, useWatch } from "react-hook-form";
 
 import { SearchSelectField, SelectField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
-import { SCOPE_SELECT_MAX_RESULTS } from "@/components/ScopeSelect";
+import { SCOPE_SELECT_MAX_RESULTS } from "@/components/filters/ScopeSelect";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useCondominiumsList, useCostCentersList, useEntryTemplatesList, useSuppliersList, useSuppliersRetrieve } from "@/lib/api/generated";
 import type { Supplier } from "@/lib/api/generated/models";
-import { formattedPersonDocument } from "@/lib/person-document";
+import { formattedPersonDocument } from "@/lib/persons/person-document";
 import { PAYABLE_HOLDERS } from "@/lib/schemas/account-payable";
 
 import { NewSupplierDialog } from "./NewSupplierDialog";

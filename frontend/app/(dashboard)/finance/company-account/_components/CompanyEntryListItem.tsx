@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 import type { CompanyEntry } from "@/lib/api/generated/models";
-import { companyEntryUrl } from "@/lib/company-account-workspace";
-import { brl, formatDate } from "@/lib/format";
+import { companyEntryUrl } from "@/lib/finance/company-account-workspace";
+import { brl, formatDate } from "@/lib/format/format";
 import { cn } from "@/lib/utils";
 
 /**

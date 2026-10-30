@@ -1,5 +1,5 @@
-import { FEATURES } from "./content";
-import { Reveal } from "./Reveal";
+import { FEATURES } from "@/app/(marketing)/_components/content";
+import { Reveal } from "@/app/(marketing)/_components/motion/Reveal";
 
 /** Recursos em lista plana: linha fina no alto, número em rótulo, nome em serifa e descrição. */
 export function FeatureGrid() {

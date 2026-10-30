@@ -8,7 +8,7 @@ import {
   newAccountPayableUrl,
   OPEN_SECTIONS,
   payableSections,
-} from "../lib/account-payable-workspace.ts";
+} from "../lib/finance/account-payable-workspace.ts";
 
 test("the empty screen has the frame and, on a phone, only the list", () => {
   const state = accountsPayableFrameState("/finance/accounts-payable");

@@ -5,14 +5,14 @@ import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { CompactFilter } from "@/components/CompactFilter";
+import { CompactFilter } from "@/components/filters/CompactFilter";
 import { ShowMore } from "@/components/data-list";
-import type { FilterGroup } from "@/components/FilterMenu";
+import type { FilterGroup } from "@/components/filters/FilterMenu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useBillingEventsList } from "@/lib/api/generated";
-import { newEventUrl } from "@/lib/billing-event-workspace";
+import { newEventUrl } from "@/lib/billing/billing-event-workspace";
 import { cn } from "@/lib/utils";
 
 import { BillingEventListItem } from "./BillingEventListItem";

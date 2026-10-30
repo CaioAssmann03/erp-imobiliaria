@@ -1,11 +1,11 @@
 "use client";
 
-import { BackLink } from "@/components/BackLink";
+import { BackLink } from "@/components/layout/BackLink";
 import { StatusText } from "@/components/StatusText";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBillingEventsRetrieve } from "@/lib/api/generated";
-import { formatCode } from "@/lib/billing-entry-payload";
-import { eventsUrl } from "@/lib/billing-event-workspace";
+import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { eventsUrl } from "@/lib/billing/billing-event-workspace";
 
 /**
  * Client Component: o código (cinza, como na lista ao lado), o nome e a situação do evento aberto, a situação em texto simples (verde ativo,

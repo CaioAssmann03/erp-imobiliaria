@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { BackLink } from "@/components/BackLink";
-import { condominiumUrl } from "@/lib/condominium-registry";
+import { BackLink } from "@/components/layout/BackLink";
+import { condominiumUrl } from "@/lib/condominiums/condominium-registry";
 import { UnitForm } from "../_components/UnitForm";
 
 export const metadata: Metadata = { title: "Nova unidade" };

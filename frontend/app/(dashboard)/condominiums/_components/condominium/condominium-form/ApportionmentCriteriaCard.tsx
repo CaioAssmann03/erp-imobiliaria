@@ -18,7 +18,7 @@ import {
   useCondominiumsApportionment,
 } from "@/lib/api/generated";
 import type { CondominiumApportionmentCriterion } from "@/lib/api/generated/models";
-import { applyServerErrors, apiErrorMessage } from "@/lib/form-errors";
+import { applyServerErrors, apiErrorMessage } from "@/lib/errors/form-errors";
 import { invalidateApportionment } from "@/lib/query/apportionment";
 import {
   APPORTIONMENT_CRITERION_DEFAULTS,
@@ -26,7 +26,7 @@ import {
   type ApportionmentCriterionFormInput,
   type ApportionmentCriterionFormOutput,
 } from "@/lib/schemas/apportionment-criterion";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 import { cn } from "@/lib/utils";
 
 const fractionTotal = (value: string) =>

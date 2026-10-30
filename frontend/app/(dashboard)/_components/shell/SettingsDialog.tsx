@@ -5,9 +5,9 @@ import { Settings, X } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { DEFAULT_APPEARANCE, type Appearance } from "@/lib/appearance";
+import { DEFAULT_APPEARANCE, type Appearance } from "@/lib/theme/appearance";
 import { cn } from "@/lib/utils";
-import { centeredModalBackdropClass } from "@/lib/ui";
+import { centeredModalBackdropClass } from "@/lib/theme/ui";
 
 import { railButtonClass, RailLabel } from "./ModuleMenu";
 import { AccentSection } from "./settings/AccentSection";

@@ -1,6 +1,6 @@
 "use client";
 
-import { BackLink } from "@/components/BackLink";
+import { BackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCondominiumsRetrieve } from "@/lib/api/generated";
 import { cn } from "@/lib/utils";

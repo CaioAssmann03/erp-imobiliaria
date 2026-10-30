@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { getBillingEventsListQueryKey, useBillingEventsDestroy } from "@/lib/api/generated";
-import { eventsUrl } from "@/lib/billing-event-workspace";
-import { applyServerErrors } from "@/lib/form-errors";
-import { toast } from "@/lib/toast";
+import { eventsUrl } from "@/lib/billing/billing-event-workspace";
+import { applyServerErrors } from "@/lib/errors/form-errors";
+import { toast } from "@/lib/errors/toast";
 
 /** Client Component: exclui o evento aberto (confirmação) e volta à tela de eventos, sem nenhum aberto. Um evento usado por lançamentos não sai: o backend recusa e a mensagem vem no aviso (desative em vez de excluir). */
 export function BillingEventDeleteButton({ billingEventId, name }: { billingEventId: string; name: string }) {

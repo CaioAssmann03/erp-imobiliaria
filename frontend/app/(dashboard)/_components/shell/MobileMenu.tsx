@@ -5,10 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { Brand } from "@/components/Brand";
+import { Brand } from "@/components/brand/Brand";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { activeModule, APP_MODULES, isItemActive, type ModuleKey } from "@/lib/module-menu";
+import { activeModule, APP_MODULES, isItemActive, type ModuleKey } from "@/lib/navigation/module-menu";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "./LogoutButton";
 import { ITEM_ICONS, MODULE_ICONS } from "./menu-icons";

@@ -2,10 +2,10 @@
 
 import { useSearchParams } from "next/navigation";
 
-import { BackLink } from "@/components/BackLink";
+import { BackLink } from "@/components/layout/BackLink";
 import { useBlocksRetrieve, useCostCentersRetrieve } from "@/lib/api/generated";
-import { backTargetOf } from "@/lib/back-target";
-import { condominiumUrl } from "@/lib/condominium-registry";
+import { backTargetOf } from "@/lib/navigation/back-target";
+import { condominiumUrl } from "@/lib/condominiums/condominium-registry";
 
 /**
  * Client Component: o "voltar" da edição de um bloco ou de uma sub-conta: leva à página do condomínio dela, que fica marcado na lista de

@@ -6,16 +6,16 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import { CompactFilter, type CompactFilterGroup } from "@/components/CompactFilter";
+import { CompactFilter, type CompactFilterGroup } from "@/components/filters/CompactFilter";
 import { ShowMore } from "@/components/data-list";
-import { ScopeSearchCard, ScopeSearchRow } from "@/components/ScopeSearchCard";
-import { ScopeSelect } from "@/components/ScopeSelect";
+import { ScopeSearchCard, ScopeSearchRow } from "@/components/filters/ScopeSearchCard";
+import { ScopeSelect } from "@/components/filters/ScopeSelect";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { backTargetOf } from "@/lib/back-target";
+import { backTargetOf } from "@/lib/navigation/back-target";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useCondominiumsList, useCostCentersList } from "@/lib/api/generated";
-import { newCostCenterUrl } from "@/lib/cost-center-workspace";
+import { newCostCenterUrl } from "@/lib/condominiums/cost-center-workspace";
 import { cn } from "@/lib/utils";
 
 import { CostCenterListItem } from "./CostCenterListItem";

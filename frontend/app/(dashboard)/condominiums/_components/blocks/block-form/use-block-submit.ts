@@ -11,10 +11,10 @@ import {
   useBlocksPartialUpdate,
 } from "@/lib/api/generated";
 import type { Block } from "@/lib/api/generated/models";
-import { condominiumPageUrl } from "@/lib/condominium-registry";
-import { applyServerErrors } from "@/lib/form-errors";
+import { condominiumPageUrl } from "@/lib/condominiums/condominium-registry";
+import { applyServerErrors } from "@/lib/errors/form-errors";
 import { blockToPayload, type BlockFormInput, type BlockFormOutput } from "@/lib/schemas/block";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 export function useBlockSubmit(
   blockId: string | undefined,

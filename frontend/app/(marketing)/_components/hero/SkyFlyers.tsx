@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-import { brandRamp } from "@/lib/brand-ramp";
+import { brandRamp } from "@/lib/theme/brand-ramp";
 import { cn } from "@/lib/utils";
 
 import { LINE, PITCH } from "./skyline-layers";

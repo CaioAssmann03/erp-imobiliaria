@@ -5,7 +5,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 
 import { DateField, SelectField, TextField } from "@/components/form/fields";
 import { FieldRow } from "@/components/form/FormSection";
-import { maskCnpj, maskCpf, maskPhone } from "@/lib/masks";
+import { maskCnpj, maskCpf, maskPhone } from "@/lib/format/masks";
 import { MARITAL_STATUSES, PERSON_KINDS } from "@/lib/schemas/person";
 
 /** Os campos de uma pessoa nova, com os mesmos dados da tela de Pessoas (nos modais de pessoa nova e de fornecedor novo): identificação (os dados pessoais só da pessoa física) e contato. */

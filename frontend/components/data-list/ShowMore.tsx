@@ -1,4 +1,4 @@
-import { LIST_PAGE_SIZE } from "@/lib/list-size";
+import { LIST_PAGE_SIZE } from "@/lib/api/list-size";
 
 /**
  * O rodapé de uma lista que mostra só os primeiros registros: a contagem e, havendo mais, o botão que traz mais uns

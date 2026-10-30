@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Cell, Pie, PieChart } from "recharts";
 
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { brl } from "@/lib/format";
+import { brl } from "@/lib/format/format";
 import { cn } from "@/lib/utils";
 
 const config = {

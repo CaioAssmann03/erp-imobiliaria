@@ -2,10 +2,10 @@
 
 import { useSearchParams } from "next/navigation";
 
-import { SectionIndex } from "@/components/SectionIndex";
+import { SectionIndex } from "@/components/layout/SectionIndex";
 import { useCurrentUrl } from "@/hooks/use-current-url";
-import { pageKeepingOrigin, withFrom } from "@/lib/back-target";
-import { BLOCK_SECTIONS, blockUnitsUrl, blockUrl } from "@/lib/block-workspace";
+import { pageKeepingOrigin, withFrom } from "@/lib/navigation/back-target";
+import { BLOCK_SECTIONS, blockUnitsUrl, blockUrl } from "@/lib/condominiums/block-workspace";
 
 /**
  * O menu da direita do bloco aberto, que a moldura (`BlocksFrame`) desenha: só os **Dados gerais** e, em **Cadastros**, as **Unidades** do

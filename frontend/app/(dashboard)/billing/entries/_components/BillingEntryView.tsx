@@ -3,9 +3,9 @@
 import { FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { useBillingEntriesList, useBillingEntriesRetrieve } from "@/lib/api/generated";
-import { entryColumnTitle, formatCode } from "@/lib/billing-entry-payload";
-import { MAX_ENTRIES_PER_MONTH } from "@/lib/billing-entry-workspace";
-import { brl, formatMonth } from "@/lib/format";
+import { entryColumnTitle, formatCode } from "@/lib/billing/billing-entry-payload";
+import { MAX_ENTRIES_PER_MONTH } from "@/lib/billing/billing-entry-workspace";
+import { brl, formatMonth } from "@/lib/format/format";
 import { throwIfPageError } from "@/lib/query/page-error";
 import { ALLOCATIONS, RECURRENCES } from "@/lib/schemas/billing-entry";
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { BackLink } from "@/components/BackLink";
-import { entriesUrl } from "@/lib/entry-batch-workspace";
+import { BackLink } from "@/components/layout/BackLink";
+import { entriesUrl } from "@/lib/finance/entry-batch-workspace";
 
 import { NewEntriesForm } from "../_components/NewEntriesForm";
 

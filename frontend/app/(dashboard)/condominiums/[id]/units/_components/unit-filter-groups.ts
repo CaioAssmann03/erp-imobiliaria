@@ -1,4 +1,4 @@
-import type { FilterGroup } from "@/components/FilterMenu";
+import type { FilterGroup } from "@/components/filters/FilterMenu";
 import { UNIT_TYPES } from "@/lib/schemas/unit";
 
 

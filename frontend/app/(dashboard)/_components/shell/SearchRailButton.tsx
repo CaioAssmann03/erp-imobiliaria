@@ -3,7 +3,7 @@
 import { Search } from "lucide-react";
 
 import { useIsApplePlatform } from "@/hooks/use-platform";
-import { searchShortcutLabel } from "@/lib/platform";
+import { searchShortcutLabel } from "@/lib/navigation/platform";
 import { cn } from "@/lib/utils";
 
 import { railButtonClass, RailLabel } from "./ModuleMenu";

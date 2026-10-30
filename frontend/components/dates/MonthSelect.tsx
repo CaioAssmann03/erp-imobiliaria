@@ -4,8 +4,8 @@ import { Popover } from "@base-ui/react/popover";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
-import { formatMonth } from "@/lib/format";
-import { monthIso } from "@/lib/reports";
+import { formatMonth } from "@/lib/format/format";
+import { monthIso } from "@/lib/reports/reports";
 import { cn } from "@/lib/utils";
 
 /** Quantos anos para trás o calendário alcança, além do ano atual. */

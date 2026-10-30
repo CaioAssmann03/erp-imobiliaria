@@ -3,8 +3,8 @@
 import { useId } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
-import { SearchCombobox } from "@/components/SearchCombobox";
-import type { ScopeOption } from "@/components/ScopeSelect";
+import { SearchCombobox } from "@/components/filters/SearchCombobox";
+import type { ScopeOption } from "@/components/filters/ScopeSelect";
 
 import { FormField } from "../FormField";
 import type { BaseProps } from "./types";

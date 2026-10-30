@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { CondominiumHeader } from "../../_components/CondominiumHeader";
-import { CondominiumPeopleList } from "../../_components/CondominiumPeopleList";
+import { CondominiumHeader } from "@/app/(dashboard)/condominiums/_components/condominium/CondominiumHeader";
+import { CondominiumPeopleList } from "@/app/(dashboard)/condominiums/_components/condominium/CondominiumPeopleList";
 import { ListFallback } from "@/components/data-list";
 
 export const metadata: Metadata = { title: "Pessoas do condomínio" };

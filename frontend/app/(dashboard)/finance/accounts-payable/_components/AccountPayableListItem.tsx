@@ -1,8 +1,8 @@
 import Link from "next/link";
 
-import { accountPayableUrl } from "@/lib/account-payable-workspace";
+import { accountPayableUrl } from "@/lib/finance/account-payable-workspace";
 import type { AccountPayable } from "@/lib/api/generated/models";
-import { brl, formatDate } from "@/lib/format";
+import { brl, formatDate } from "@/lib/format/format";
 import { cn } from "@/lib/utils";
 
 /** A segunda linha da conta na lista: o vencimento (vencida em vermelho), ou quando foi paga, e o valor. */

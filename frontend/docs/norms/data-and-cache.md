@@ -19,7 +19,7 @@ Same pattern for `persons`, `units`, `unit-people`, `blocks`, `companies`, plus 
 Never write loose `fetch`/`axios` for API endpoints; never redeclare response types; filter/search/paginate on the server;
 ask the backend for new fields and regenerate.
 
-## Request path (`lib/api/mutator.ts`, `lib/api-client.ts`)
+## Request path (`lib/api/mutator.ts`, `lib/api/api-client.ts`)
 axios via `customInstance`; the query `signal` aborts stale requests. Base URL: the browser's own origin (`/api/...`, served by the Next handler that holds the HttpOnly token and adds `Authorization: Bearer`); no page calls Django from the server. Browser 401 → the session ended: go to `/login` (the handler already tried to renew); `proxy.ts` also renews on a page load. `/api/auth/*` is excluded (401 = bad credentials). See safeguards/auth-and-tokens.md.
 
 ## QueryClient (`lib/query/`)
@@ -41,6 +41,13 @@ A `[id]` page only passes the `id`. The form (or a `…Detail` component for a r
 Search/filters/page are query params (`hooks/use-list-params.ts`); `placeholderData: keepPreviousData`; debounce search
 (`useDebouncedValue`); deleting the last item of the last page goes back a page.
 
+**Never filter, search or paginate what the API returned on the client** (spec 064). Every criterion is a query param of the endpoint and every list is
+paginated by the API (`useGrowingLimit` + `ShowMore` send `limit`; the total is `data.count`). If the endpoint lacks the param, **add it to the backend**
+(a `FilterSet` field or `search_fields`, with a test), regenerate the client (`pnpm generate:api`) and send it: do not `.filter(...)` the `results`, do not
+`.slice` a big fetch into pages, do not compare dates or names in the browser to decide which records belong. The filter lives where the whole data is.
+Allowed on the client: presenting what one response already is (grouping the links of a person, a dropdown narrowing the few options of a closed select as
+you type, a static catalog such as the reports list or the navigation search). `tests/server-side-filters.test.mjs` fails on a list that filters `results`.
+
 ## Invalidate after mutation (generated key functions, never strings)
 | Mutation | Invalidate |
 |---|---|
@@ -54,8 +61,8 @@ Search/filters/page are query params (`hooks/use-list-params.ts`); `placeholderD
 | person | list, record, dashboard |
 
 ## Files (payment receipts)
-A file never goes through the Next proxy (it carries JSON only). The flow is: `useAccountsPayableReceiptsCreate` returns a signed URL, `uploadToBucket` (`lib/payment-receipts.ts`) `PUT`s the file straight to the bucket, `usePaymentReceiptsConfirm` makes the backend check it. That `PUT` is the one call outside the generated client on purpose: the URL is signed and must **not** carry the session token. A download asks for a fresh signed URL (`staleTime: 0`) and navigates to it. Errors of calls that are not forms use `apiErrorMessage` (`lib/form-errors.ts`).
+A file never goes through the Next proxy (it carries JSON only). The flow is: `useAccountsPayableReceiptsCreate` returns a signed URL, `uploadToBucket` (`lib/finance/payment-receipts.ts`) `PUT`s the file straight to the bucket, `usePaymentReceiptsConfirm` makes the backend check it. That `PUT` is the one call outside the generated client on purpose: the URL is signed and must **not** carry the session token. A download asks for a fresh signed URL (`staleTime: 0`) and navigates to it. Errors of calls that are not forms use `apiErrorMessage` (`lib/errors/form-errors.ts`).
 
 ## Do not
-Copy cache into `useState` (use form `reset`) · duplicate a query under another key · raise global `staleTime` to hide a problem ·
+Filter or search a list's `results` on the client (add the param to the API) · Copy cache into `useState` (use form `reset`) · duplicate a query under another key · raise global `staleTime` to hide a problem ·
 store business data or tokens in `localStorage` · share a `QueryClient` across requests on the server.

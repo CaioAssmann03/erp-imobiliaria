@@ -1,8 +1,8 @@
 "use client";
 
-import { SectionIndex } from "@/components/SectionIndex";
+import { SectionIndex } from "@/components/layout/SectionIndex";
 import { useCostCentersRetrieve } from "@/lib/api/generated";
-import { costCenterUrl } from "@/lib/cost-center-workspace";
+import { costCenterUrl } from "@/lib/condominiums/cost-center-workspace";
 
 /**
  * O menu da direita da edição de uma sub-conta: só os dados dela. Não há "Cadastros" aqui: nada é cadastrado dentro de uma sub-conta (contas

@@ -3,7 +3,7 @@
 import { FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { useCurrentAccountEntriesList, useEntryBatchesRetrieve } from "@/lib/api/generated";
-import { formatDate } from "@/lib/format";
+import { formatDate } from "@/lib/format/format";
 import { throwIfPageError } from "@/lib/query/page-error";
 
 import { StatementRow } from "../../_components/StatementRow";

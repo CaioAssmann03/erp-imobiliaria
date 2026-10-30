@@ -15,10 +15,10 @@ import {
   usePaymentReceiptsList,
 } from "@/lib/api/generated";
 import type { PaymentReceipt } from "@/lib/api/generated/models";
-import { apiErrorMessage } from "@/lib/form-errors";
-import { formatDateTime, formatFileSize } from "@/lib/format";
-import { RECEIPT_ACCEPT, receiptFileProblem, uploadToBucket } from "@/lib/payment-receipts";
-import { toast } from "@/lib/toast";
+import { apiErrorMessage } from "@/lib/errors/form-errors";
+import { formatDateTime, formatFileSize } from "@/lib/format/format";
+import { RECEIPT_ACCEPT, receiptFileProblem, uploadToBucket } from "@/lib/finance/payment-receipts";
+import { toast } from "@/lib/errors/toast";
 
 function formatSentAt(iso: string) {
   return formatDateTime(iso);

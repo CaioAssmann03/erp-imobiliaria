@@ -1,7 +1,7 @@
 "use client";
 
 import { useCompanyEntriesBalance } from "@/lib/api/generated";
-import { brl } from "@/lib/format";
+import { brl } from "@/lib/format/format";
 
 /** Client Component: o saldo da imobiliária (a soma de todos os lançamentos dela) em tipo grande, com o que ele é em uma linha. */
 export function CompanyBalance() {

@@ -5,9 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { modalBackdropClass } from "@/lib/ui";
+import { modalBackdropClass } from "@/lib/theme/ui";
 import { cn } from "@/lib/utils";
-import { type AppModule, isItemActive } from "@/lib/module-menu";
+import { type AppModule, isItemActive } from "@/lib/navigation/module-menu";
 import { ITEM_ICONS, MODULE_ICONS } from "./menu-icons";
 
 const RAIL_BUTTON =

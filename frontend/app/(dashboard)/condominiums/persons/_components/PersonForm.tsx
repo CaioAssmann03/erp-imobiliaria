@@ -9,7 +9,7 @@ import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { usePersonsRetrieve } from "@/lib/api/generated";
-import { personsUrl } from "@/lib/person-workspace";
+import { personsUrl } from "@/lib/persons/person-workspace";
 import { throwIfPageError } from "@/lib/query/page-error";
 import {
   PERSON_DEFAULTS,
@@ -18,7 +18,7 @@ import {
   type PersonFormInput,
   type PersonFormOutput,
 } from "@/lib/schemas/person";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 import { PersonDeleteButton } from "./PersonDeleteButton";
 import { ContactSection } from "./person-form/ContactSection";

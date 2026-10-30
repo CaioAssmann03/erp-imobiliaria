@@ -1,7 +1,7 @@
 import { toast as sonner, type ExternalToast } from "sonner";
 
-import { ErrorToast } from "@/components/ErrorToast";
-import { takeErrorDetails } from "@/lib/error-details";
+import { ErrorToast } from "@/components/errors/ErrorToast";
+import { takeErrorDetails } from "@/lib/errors/error-details";
 
 const ERROR_DURATION_MS = 6000;
 const ERROR_WITH_DETAILS_DURATION_MS = 12000;

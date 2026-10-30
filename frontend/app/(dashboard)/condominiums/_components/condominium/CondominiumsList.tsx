@@ -12,7 +12,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useCondominiumsList } from "@/lib/api/generated";
 import type { CondominiumsListPending } from "@/lib/api/generated/models";
-import { condominiumPageUrl, selectedCondominiumId, selectedCondominiumPage } from "@/lib/condominium-registry";
+import { condominiumPageUrl, selectedCondominiumId, selectedCondominiumPage } from "@/lib/condominiums/condominium-registry";
 import { cn } from "@/lib/utils";
 
 /**

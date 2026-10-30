@@ -1,11 +1,11 @@
-import { SectionIndex } from "@/components/SectionIndex";
+import { SectionIndex } from "@/components/layout/SectionIndex";
 import {
   CONDOMINIUM_PAGES,
   type CondominiumPageKey,
   condominiumPageUrl,
   condominiumUrl,
   REGISTRY_SECTIONS,
-} from "@/lib/condominium-registry";
+} from "@/lib/condominiums/condominium-registry";
 
 /**
  * O menu da direita das telas de um condomínio. Na página dele: as seções do formulário (o que é do condomínio em si, com o marcador que

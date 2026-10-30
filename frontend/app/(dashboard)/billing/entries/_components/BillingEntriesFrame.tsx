@@ -3,8 +3,8 @@
 import { usePathname } from "next/navigation";
 
 import { FormPage } from "@/components/form/FormPage";
-import { SectionIndex } from "@/components/SectionIndex";
-import { BILLING_ENTRY_SECTIONS, NEW_BILLING_ENTRY_SECTIONS, billingEntriesFrameState } from "@/lib/billing-entry-workspace";
+import { SectionIndex } from "@/components/layout/SectionIndex";
+import { BILLING_ENTRY_SECTIONS, NEW_BILLING_ENTRY_SECTIONS, billingEntriesFrameState } from "@/lib/billing/billing-entry-workspace";
 import { cn } from "@/lib/utils";
 
 import { BillingEntriesList } from "./BillingEntriesList";

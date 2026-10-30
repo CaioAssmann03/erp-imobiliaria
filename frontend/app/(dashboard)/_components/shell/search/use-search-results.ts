@@ -5,13 +5,13 @@ import { useMemo } from "react";
 
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useSearchRetrieve } from "@/lib/api/generated";
-import { condominiumPageUrl } from "@/lib/condominium-registry";
-import { personUrl } from "@/lib/person-workspace";
+import { condominiumPageUrl } from "@/lib/condominiums/condominium-registry";
+import { personUrl } from "@/lib/persons/person-workspace";
 import type { Search } from "@/lib/api/generated/models";
-import { brl, formatDate, formatMonth } from "@/lib/format";
-import { documentStatusLabel } from "@/lib/billing-documents";
+import { brl, formatDate, formatMonth } from "@/lib/format/format";
+import { documentStatusLabel } from "@/lib/billing/billing-documents";
 import { payableStatusLabel } from "@/lib/schemas/account-payable";
-import { isSearchable, searchStatic } from "@/lib/search-index";
+import { isSearchable, searchStatic } from "@/lib/navigation/search-index";
 
 import type { SearchResultItem } from "./types";
 

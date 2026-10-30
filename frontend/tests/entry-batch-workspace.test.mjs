@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { ENTRY_BATCH_SECTIONS, entriesUrl, entryBatchFrameState, entryBatchUrl, newEntryBatchUrl } from "../lib/entry-batch-workspace.ts";
+import { ENTRY_BATCH_SECTIONS, entriesUrl, entryBatchFrameState, entryBatchUrl, newEntryBatchUrl } from "../lib/finance/entry-batch-workspace.ts";
 
 test("the empty screen has the frame and, on a phone, only the list", () => {
   const state = entryBatchFrameState("/finance/entries");

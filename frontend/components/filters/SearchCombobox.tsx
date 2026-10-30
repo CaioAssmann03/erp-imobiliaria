@@ -4,8 +4,8 @@ import { Combobox } from "@base-ui/react/combobox";
 import { Check, ChevronDown, X } from "lucide-react";
 import { useRef, useState } from "react";
 
-import { SCOPE_SELECT_MAX_RESULTS, type ScopeOption } from "@/components/ScopeSelect";
-import { inputClass } from "@/lib/ui";
+import { SCOPE_SELECT_MAX_RESULTS, type ScopeOption } from "@/components/filters/ScopeSelect";
+import { inputClass } from "@/lib/theme/ui";
 import { cn } from "@/lib/utils";
 
 const normalize = (text: string) => text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();

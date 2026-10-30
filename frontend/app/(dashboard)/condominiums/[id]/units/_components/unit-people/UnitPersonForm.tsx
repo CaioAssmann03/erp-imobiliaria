@@ -7,20 +7,20 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { DateField, TextField } from "@/components/form/fields";
 import { FormField } from "@/components/form/FormField";
 import { FieldRow } from "@/components/form/FormSection";
-import { NewPersonDialog } from "@/components/NewPersonDialog";
-import { PersonSearchSelect } from "@/components/PersonSearchSelect";
+import { NewPersonDialog } from "@/components/persons/NewPersonDialog";
+import { PersonSearchSelect } from "@/components/persons/PersonSearchSelect";
 import { Button } from "@/components/ui/button";
 import { useUnitPeopleCreate } from "@/lib/api/generated";
 import type { Person, UnitPerson } from "@/lib/api/generated/models";
-import { applyServerErrors } from "@/lib/form-errors";
-import { maskDecimal } from "@/lib/masks";
+import { applyServerErrors } from "@/lib/errors/form-errors";
+import { maskDecimal } from "@/lib/format/masks";
 import {
   UNIT_PERSON_DEFAULTS,
   unitPersonSchema,
   type UnitPersonFormInput,
   type UnitPersonFormOutput,
 } from "@/lib/schemas/unit";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 import { newPendingKey, type PendingLink } from "./pending-link";
 

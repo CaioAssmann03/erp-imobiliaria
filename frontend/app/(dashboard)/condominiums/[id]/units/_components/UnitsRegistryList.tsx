@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import { CompactFilter } from "@/components/CompactFilter";
+import { CompactFilter } from "@/components/filters/CompactFilter";
 import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUrl } from "@/hooks/use-current-url";
@@ -14,7 +14,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useBlocksList, useUnitsList } from "@/lib/api/generated";
 import type { UnitsListPending, UnitsListType } from "@/lib/api/generated/models";
-import { newUnitUrl } from "@/lib/unit-workspace";
+import { newUnitUrl } from "@/lib/condominiums/unit-workspace";
 import { cn } from "@/lib/utils";
 
 import { UnitListItem } from "./UnitListItem";

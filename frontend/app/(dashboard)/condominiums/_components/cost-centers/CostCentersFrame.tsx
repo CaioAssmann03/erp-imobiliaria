@@ -5,8 +5,8 @@ import { Suspense } from "react";
 
 import { FormPage } from "@/components/form/FormPage";
 import { useCostCentersRetrieve } from "@/lib/api/generated";
-import { costCentersFrameState } from "@/lib/cost-center-workspace";
-import { CondominiumSideMenu } from "./CondominiumSideMenu";
+import { costCentersFrameState } from "@/lib/condominiums/cost-center-workspace";
+import { CondominiumSideMenu } from "@/app/(dashboard)/condominiums/_components/condominium/CondominiumSideMenu";
 import { CostCenterSideMenu } from "./CostCenterSideMenu";
 import { CostCentersList } from "./CostCentersList";
 

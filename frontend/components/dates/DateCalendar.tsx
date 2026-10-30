@@ -3,8 +3,8 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
-import { isoDate, monthLayout, shiftMonth } from "@/lib/calendar";
-import { formatDate } from "@/lib/format";
+import { isoDate, monthLayout, shiftMonth } from "@/lib/format/calendar";
+import { formatDate } from "@/lib/format/format";
 import { cn } from "@/lib/utils";
 
 const MONTH_NAMES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];

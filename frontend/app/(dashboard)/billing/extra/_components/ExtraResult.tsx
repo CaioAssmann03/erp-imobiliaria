@@ -4,8 +4,8 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import type { ExtraBillingResult } from "@/lib/api/generated/models";
-import { describeProblem, problemFix } from "@/lib/billing-run-problems";
-import { brl, formatDate } from "@/lib/format";
+import { describeProblem, problemFix } from "@/lib/billing/billing-run-problems";
+import { brl, formatDate } from "@/lib/format/format";
 
 interface ExtraResultProps {
   result: ExtraBillingResult;
@@ -21,7 +21,7 @@ export function ExtraResult({ result, condominiumId, onEdit, onNew }: ExtraResul
   const total = result.issued.reduce((sum, document) => sum + Math.round(Number(document.amount) * 100), 0) / 100;
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <section className="rounded-card bg-card p-6 shadow-card">
         <h2 className="text-heading">{result.issued.length > 0 ? `${result.issued.length} boleto(s) emitido(s)` : "Nenhum boleto foi emitido"}</h2>
         {result.issued.length > 0 && (

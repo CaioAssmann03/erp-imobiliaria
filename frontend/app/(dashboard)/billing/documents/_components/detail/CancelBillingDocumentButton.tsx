@@ -9,8 +9,8 @@ import {
   useBillingDocumentsCancel,
 } from "@/lib/api/generated";
 import type { BillingDocument } from "@/lib/api/generated/models";
-import { apiErrorMessage } from "@/lib/form-errors";
-import { toast } from "@/lib/toast";
+import { apiErrorMessage } from "@/lib/errors/form-errors";
+import { toast } from "@/lib/errors/toast";
 
 /** Cancela um documento emitido ou registrado; o mês da unidade fica livre para uma nova emissão. */
 export function CancelBillingDocumentButton({ document }: { document: BillingDocument }) {

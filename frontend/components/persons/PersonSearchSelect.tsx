@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 
-import { SearchCombobox } from "@/components/SearchCombobox";
-import { SCOPE_SELECT_MAX_RESULTS } from "@/components/ScopeSelect";
+import { SearchCombobox } from "@/components/filters/SearchCombobox";
+import { SCOPE_SELECT_MAX_RESULTS } from "@/components/filters/ScopeSelect";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { usePersonsList, usePersonsRetrieve } from "@/lib/api/generated";
 import type { Person } from "@/lib/api/generated/models";
-import { formattedPersonDocument } from "@/lib/person-document";
-import { CONDOMINIUMS_MODULE } from "@/lib/person-module";
+import { formattedPersonDocument } from "@/lib/persons/person-document";
+import { CONDOMINIUMS_MODULE } from "@/lib/persons/person-module";
 
 /**
  * O campo para escolher uma pessoa: o próprio campo é digitável (nome, CPF/CNPJ ou ID), a busca vai ao servidor e a lista mostra poucas por vez

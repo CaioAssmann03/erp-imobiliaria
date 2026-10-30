@@ -5,12 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { MetriLogo } from "@/components/MetriLogo";
+import { MetriLogo } from "@/components/brand/MetriLogo";
 import { ModeToggle } from "@/components/ModeToggle";
 import { cn } from "@/lib/utils";
 
-import { NAV_LINKS } from "./content";
-import { MarketingButton } from "./MarketingButton";
+import { NAV_LINKS } from "@/app/(marketing)/_components/content";
+import { MarketingButton } from "@/app/(marketing)/_components/MarketingButton";
 
 /**
  * Cabeçalho das páginas públicas: o logo METRI (casa e nome) à esquerda, a navegação em rótulos (caixa-alta) no meio e, à direita, o acesso

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
-import { CostCenterForm } from "../../../_components/CostCenterForm";
-import { PageHeader } from "@/components/PageHeader";
-import { condominiumUrl } from "@/lib/condominium-registry";
+import { CostCenterForm } from "@/app/(dashboard)/condominiums/_components/cost-centers/CostCenterForm";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { condominiumUrl } from "@/lib/condominiums/condominium-registry";
 
 export const metadata: Metadata = { title: "Nova sub-conta" };
 

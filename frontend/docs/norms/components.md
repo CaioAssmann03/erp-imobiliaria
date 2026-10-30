@@ -21,7 +21,7 @@ TanStack Query hooks, react-hook-form, `useRouter`/`usePathname`, browser APIs, 
 5. Props crossing server → client must be serializable. To put server content inside a client shell, pass it as `children`.
 
 ## Placement
-One route → `app/<route>/_components/`; two or more → `components/`; dashboard layout → `_components/shell/`; home → `_components/home/`;
+One route → `app/<route>/_components/` (when a route has many, one subfolder per resource, as in `condominiums/_components/{blocks,cost-centers,condominium}/`, `billing/documents/_components/{list,detail}/` and `(marketing)/_components/{layout,motion,sections}/`; a folder of about a dozen files that all belong to one frame/list/detail flow stays flat); two or more → `components/<group>/` (`data-list`, `form`, `dates`, `filters`, `persons`, `layout`, `errors`, `brand`; a loose file in `components/` only for a single-purpose button); dashboard layout → `_components/shell/`; home → `_components/home/`;
 shadcn primitives → `components/ui/` (add with `pnpm exec shadcn add`, do not edit casually).
 
 ## Size and responsibility
@@ -34,7 +34,7 @@ shadcn primitives → `components/ui/` (add with `pnpm exec shadcn add`, do not 
 ## Styling
 Tokens only (`bg-surface`, `text-ink-soft`, `rounded-card`); no hex, no `text-sm`/`rounded-xl`. `cn()` joins classes.
 Variants via `components/ui` props. Mobile first; hide secondary columns with `hidden md:table-cell`.
-Shared form class strings live in `lib/ui.ts`.
+Shared form class strings live in `lib/theme/ui.ts`.
 
 ## Done when
 Server by default · right folder · ≤ ~100 lines · tokens only · no `any` · Portuguese text · `tsc`/`eslint` clean.

@@ -5,10 +5,10 @@ import { Suspense } from "react";
 
 import { FormPage } from "@/components/form/FormPage";
 import { useBlocksRetrieve } from "@/lib/api/generated";
-import { blocksFrameState } from "@/lib/block-workspace";
+import { blocksFrameState } from "@/lib/condominiums/block-workspace";
 import { BlockSideMenu } from "./BlockSideMenu";
 import { BlocksList } from "./BlocksList";
-import { CondominiumSideMenu } from "./CondominiumSideMenu";
+import { CondominiumSideMenu } from "@/app/(dashboard)/condominiums/_components/condominium/CondominiumSideMenu";
 
 /**
  * Client Component: a moldura do cadastro e da edição de um bloco (os blocos do condomínio à esquerda, o formulário ao lado). Só envolve

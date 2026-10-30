@@ -1,4 +1,4 @@
-import { formatFileSize } from "@/lib/format";
+import { formatFileSize } from "@/lib/format/format";
 
 /** Mesmas regras do backend (spec 018); lá elas são conferidas de novo. Aqui só evitam um envio inútil. */
 export const RECEIPT_CONTENT_TYPES = ["application/pdf", "image/jpeg", "image/png"] as const;

@@ -10,7 +10,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { brl } from "@/lib/format";
+import { brl } from "@/lib/format/format";
 import type { BillingMonthSummary } from "@/lib/api/generated/models";
 
 import { longMonthLabel, shortMonthLabel } from "./widgets/format";

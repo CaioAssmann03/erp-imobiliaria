@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Fragment, useEffect, useRef, useState } from "react";
 
-import { markerSpan, pageSmallness, readingLine, sectionPosition } from "@/lib/condominium-registry";
+import { markerSpan, pageSmallness, readingLine, sectionPosition } from "@/lib/condominiums/condominium-registry";
 import { cn } from "@/lib/utils";
 
 /**

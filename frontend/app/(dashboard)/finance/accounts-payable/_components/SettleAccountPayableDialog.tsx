@@ -26,16 +26,16 @@ import {
   useAccountsPayableSettle,
 } from "@/lib/api/generated";
 import type { AccountPayable, PaymentMethodEnum } from "@/lib/api/generated/models";
-import { applyServerErrors } from "@/lib/form-errors";
-import { brl, todayIso } from "@/lib/format";
-import { maskMoney, moneyFromApi } from "@/lib/masks";
+import { applyServerErrors } from "@/lib/errors/form-errors";
+import { brl, todayIso } from "@/lib/format/format";
+import { maskMoney, moneyFromApi } from "@/lib/format/masks";
 import {
   PAYMENT_METHODS,
   settleAccountPayableSchema,
   type SettleAccountPayableFormInput,
   type SettleAccountPayableFormOutput,
 } from "@/lib/schemas/account-payable";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 /**
  * Baixa de uma conta a pagar em aberto. Uma despesa de condomínio gera o débito no extrato do

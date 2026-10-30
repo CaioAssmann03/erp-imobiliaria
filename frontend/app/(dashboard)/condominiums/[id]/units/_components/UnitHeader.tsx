@@ -2,14 +2,14 @@
 
 import { useSearchParams } from "next/navigation";
 
-import { BackLink } from "@/components/BackLink";
+import { BackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUnitsRetrieve } from "@/lib/api/generated";
 import { unitTypeLabel } from "@/lib/schemas/unit";
 import { cn } from "@/lib/utils";
-import { backTargetOf } from "@/lib/back-target";
-import { condominiumUrl } from "@/lib/condominium-registry";
-import { unitListLabel } from "@/lib/unit-workspace";
+import { backTargetOf } from "@/lib/navigation/back-target";
+import { condominiumUrl } from "@/lib/condominiums/condominium-registry";
+import { unitListLabel } from "@/lib/condominiums/unit-workspace";
 
 /**
  * Client Component: o nome da unidade aberta e, em texto simples ao lado (sem selo), se é a do síndico e se está ativa (verde) ou inativa (âmbar); usa a mesma consulta do

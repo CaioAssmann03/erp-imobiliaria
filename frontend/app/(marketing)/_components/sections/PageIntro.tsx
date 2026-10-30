@@ -1,4 +1,4 @@
-import { Reveal } from "./Reveal";
+import { Reveal } from "@/app/(marketing)/_components/motion/Reveal";
 
 /** Abertura das páginas internas públicas (Recursos, Como funciona): mesmo tom do hero da home. */
 export function PageIntro({ eyebrow, title, lead }: { eyebrow: string; title: string; lead: string }) {

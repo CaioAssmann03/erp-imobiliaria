@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { BlocksRegistryList } from "../../_components/BlocksRegistryList";
-import { CondominiumHeader } from "../../_components/CondominiumHeader";
+import { BlocksRegistryList } from "@/app/(dashboard)/condominiums/_components/blocks/BlocksRegistryList";
+import { CondominiumHeader } from "@/app/(dashboard)/condominiums/_components/condominium/CondominiumHeader";
 import { ListFallback } from "@/components/data-list";
 
 export const metadata: Metadata = { title: "Blocos" };

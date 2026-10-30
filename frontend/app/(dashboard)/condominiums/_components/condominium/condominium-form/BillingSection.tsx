@@ -4,8 +4,8 @@ import { useFormContext, useWatch } from "react-hook-form";
 
 import { CheckboxField, SelectField, TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
-import { billingExample, type CompetenceMonth, type DueMonth } from "@/lib/billing-example";
-import { maskDecimal, maskInteger, maskMoney } from "@/lib/masks";
+import { billingExample, type CompetenceMonth, type DueMonth } from "@/lib/billing/billing-example";
+import { maskDecimal, maskInteger, maskMoney } from "@/lib/format/masks";
 import type { CondominiumFormInput } from "@/lib/schemas/condominium";
 
 import type { ComponentProps } from "react";

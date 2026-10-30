@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { BackLink } from "@/components/BackLink";
-import { PageHeader } from "@/components/PageHeader";
+import { BackLink } from "@/components/layout/BackLink";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 import { DelinquencyReportView } from "./_components/DelinquencyReportView";
 

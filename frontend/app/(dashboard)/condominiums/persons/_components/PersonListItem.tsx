@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 import type { Person } from "@/lib/api/generated/models";
-import { formatCode } from "@/lib/billing-entry-payload";
-import { formattedPersonDocument } from "@/lib/person-document";
-import { type PersonContext, personUrl } from "@/lib/person-workspace";
+import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { formattedPersonDocument } from "@/lib/persons/person-document";
+import { type PersonContext, personUrl } from "@/lib/persons/person-workspace";
 import { cn } from "@/lib/utils";
 
 /**

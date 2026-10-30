@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { ScopeSearchCard } from "@/components/ScopeSearchCard";
-import { REPORT_GROUPS, REPORTS, REPORTS_URL, type ReportGroup } from "@/lib/report-catalog";
+import { ScopeSearchCard } from "@/components/filters/ScopeSearchCard";
+import { REPORT_GROUPS, REPORTS, REPORTS_URL, type ReportGroup } from "@/lib/reports/report-catalog";
 import { cn } from "@/lib/utils";
 
 const ALL = "Todos";

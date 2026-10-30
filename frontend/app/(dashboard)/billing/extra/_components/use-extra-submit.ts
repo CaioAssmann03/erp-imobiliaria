@@ -6,10 +6,10 @@ import type { UseFormSetError } from "react-hook-form";
 
 import { getBillingDocumentsListQueryKey, useBillingDocumentsExtra } from "@/lib/api/generated";
 import type { ExtraBillingDocument, ExtraBillingResult } from "@/lib/api/generated/models";
-import { extraErrorPath, extraToPayload } from "@/lib/extra-billing-payload";
-import { applyServerErrors } from "@/lib/form-errors";
+import { extraErrorPath, extraToPayload } from "@/lib/billing/extra-billing-payload";
+import { applyServerErrors } from "@/lib/errors/form-errors";
 import { extraBillingFormToValues, type ExtraBillingFormInput, type ExtraBillingFormOutput } from "@/lib/schemas/extra-billing";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 /** Emite os boletos extras e guarda a resposta (emitidos e unidades puladas) para a tela mostrar. */
 export function useExtraSubmit(setError: UseFormSetError<ExtraBillingFormInput>) {

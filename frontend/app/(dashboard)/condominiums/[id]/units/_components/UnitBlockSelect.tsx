@@ -1,4 +1,4 @@
-import { ScopeSelect } from "@/components/ScopeSelect";
+import { ScopeSelect } from "@/components/filters/ScopeSelect";
 import type { Block } from "@/lib/api/generated/models";
 
 /**

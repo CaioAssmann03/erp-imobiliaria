@@ -6,10 +6,10 @@ import { useRouter } from "next/navigation";
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { getBillingEntriesListQueryKey, getBillingEntriesRetrieveQueryKey, useBillingEntriesDestroy, useBillingEntriesEnd } from "@/lib/api/generated";
 import type { BillingEntry } from "@/lib/api/generated/models";
-import { billingEntriesUrl } from "@/lib/billing-entry-workspace";
-import { formatMonth } from "@/lib/format";
-import { applyServerErrors } from "@/lib/form-errors";
-import { toast } from "@/lib/toast";
+import { billingEntriesUrl } from "@/lib/billing/billing-entry-workspace";
+import { formatMonth } from "@/lib/format/format";
+import { applyServerErrors } from "@/lib/errors/form-errors";
+import { toast } from "@/lib/errors/toast";
 
 import { useEntriesScope } from "./use-entries-scope";
 

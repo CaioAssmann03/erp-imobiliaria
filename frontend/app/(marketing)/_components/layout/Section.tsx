@@ -1,4 +1,4 @@
-import { Reveal } from "./Reveal";
+import { Reveal } from "@/app/(marketing)/_components/motion/Reveal";
 
 interface SectionProps {
   id?: string;

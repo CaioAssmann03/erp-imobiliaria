@@ -3,7 +3,7 @@
 import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "@base-ui/react/alert-dialog"
 import { cn } from "@/lib/utils"
-import { centeredModalBackdropClass } from "@/lib/ui"
+import { centeredModalBackdropClass } from "@/lib/theme/ui"
 
 import { Button } from "@/components/ui/button"
 

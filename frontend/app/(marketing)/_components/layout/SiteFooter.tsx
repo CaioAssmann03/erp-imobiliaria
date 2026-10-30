@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-import { Brand } from "@/components/Brand";
+import { Brand } from "@/components/brand/Brand";
 
-import { CONTACT_HREF, FEATURES } from "./content";
-import { MarketingButton } from "./MarketingButton";
+import { CONTACT_HREF, FEATURES } from "@/app/(marketing)/_components/content";
+import { MarketingButton } from "@/app/(marketing)/_components/MarketingButton";
 
 const SITE_LINKS = [
   { href: "/", label: "Início" },

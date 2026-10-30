@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
-import { CondominiumForm } from "../_components/CondominiumForm";
-import { CondominiumHeader } from "../_components/CondominiumHeader";
-import { getMapsEmbedKey } from "@/lib/maps-embed-key";
+import { CondominiumForm } from "@/app/(dashboard)/condominiums/_components/condominium/CondominiumForm";
+import { CondominiumHeader } from "@/app/(dashboard)/condominiums/_components/condominium/CondominiumHeader";
+import { getMapsEmbedKey } from "@/lib/condominiums/maps-embed-key";
 
 export const metadata: Metadata = { title: "Condomínio" };
 

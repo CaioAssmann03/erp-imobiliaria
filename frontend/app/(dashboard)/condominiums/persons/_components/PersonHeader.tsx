@@ -2,14 +2,14 @@
 
 import { useSearchParams } from "next/navigation";
 
-import { BackLink } from "@/components/BackLink";
+import { BackLink } from "@/components/layout/BackLink";
 import { StatusText } from "@/components/StatusText";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePersonsRetrieve } from "@/lib/api/generated";
-import { formatCode } from "@/lib/billing-entry-payload";
-import { backTargetOf } from "@/lib/back-target";
-import { condominiumUrl } from "@/lib/condominium-registry";
-import { originCondominium, personsUrl } from "@/lib/person-workspace";
+import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { backTargetOf } from "@/lib/navigation/back-target";
+import { condominiumUrl } from "@/lib/condominiums/condominium-registry";
+import { originCondominium, personsUrl } from "@/lib/persons/person-workspace";
 
 /**
  * Client Component: o código (cinza, como na lista ao lado), o nome e a situação da pessoa aberta, a situação em texto simples (verde ativo,

@@ -7,27 +7,25 @@ import { useState } from "react";
 import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUrl } from "@/hooks/use-current-url";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useBlocksList } from "@/lib/api/generated";
-import { newBlockUrl } from "@/lib/block-workspace";
+import { newBlockUrl } from "@/lib/condominiums/block-workspace";
 
 import { BlockListItem } from "./BlockListItem";
 
 /**
  * Client Component: os blocos de um condomínio no padrão visual da lista de condomínios (título com **+**, busca em pílula, linhas simples
- * num cartão branco). Um condomínio tem poucos blocos e a API não tem busca por nome: vêm todos (até 100) e a busca filtra aqui.
+ * num cartão branco). A busca pelo nome e a paginação são da API.
  * Abrir um bloco leva à edição dele.
  */
 export function BlocksRegistryList({ condominiumId }: { condominiumId: string }) {
   const here = useCurrentUrl();
   const [search, setSearch] = useState("");
-  const { data, isLoading } = useBlocksList({ condominium: condominiumId, limit: 100 });
-
-  const term = search.trim().toLowerCase();
-  const all = data?.results ?? [];
-  const matches = term ? all.filter((block) => block.name.toLowerCase().includes(term)) : all;
+  const term = useDebouncedValue(search.trim());
   const { limit, showMore } = useGrowingLimit(`${term}|${condominiumId}`);
-  const results = matches.slice(0, limit);
+  const { data, isLoading } = useBlocksList({ condominium: condominiumId, limit, ...(term ? { query: term } : {}) });
+  const results = data?.results ?? [];
 
   return (
     <section aria-label="Blocos" className="flex flex-col gap-3">
@@ -76,7 +74,7 @@ export function BlocksRegistryList({ condominiumId }: { condominiumId: string })
           )}
         </nav>
 
-        {data && <ShowMore shown={results.length} total={matches.length} noun="bloco(s)" onMore={showMore} />}
+        {data && <ShowMore shown={results.length} total={data.count} noun="bloco(s)" onMore={showMore} />}
       </div>
     </section>
   );

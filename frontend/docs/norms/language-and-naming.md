@@ -15,7 +15,7 @@ skip-if: code formatting → norms/code-style.md
 
 - Code names follow the backend, so the generated client is used untranslated.
 - External Portuguese sources (ViaCEP) are converted to English at the edge (`hooks/use-cep-lookup.ts`).
-- Search keywords (`lib/search-index.ts`) stay Portuguese (users type them). Comments: either language.
+- Search keywords (`lib/navigation/search-index.ts`) stay Portuguese (users type them). Comments: either language.
 
 ## Names
 

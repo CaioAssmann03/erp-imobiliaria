@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { uuidParam } from "@/lib/uuid-param";
+import { uuidParam } from "@/lib/api/uuid-param";
 
 import { CatalogHeader } from "../_components/CatalogHeader";
 import { CatalogItemForm } from "../_components/CatalogItemForm";

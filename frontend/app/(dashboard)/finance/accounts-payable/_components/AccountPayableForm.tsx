@@ -8,7 +8,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
-import { accountsPayableUrl } from "@/lib/account-payable-workspace";
+import { accountsPayableUrl } from "@/lib/finance/account-payable-workspace";
 import { useAccountsPayableRetrieve } from "@/lib/api/generated";
 import { throwIfPageError } from "@/lib/query/page-error";
 import {
@@ -18,7 +18,7 @@ import {
   type AccountPayableFormInput,
   type AccountPayableFormOutput,
 } from "@/lib/schemas/account-payable";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 import { AccountPayableSummary } from "./AccountPayableSummary";
 import { CancelAccountPayableButton } from "./CancelAccountPayableButton";

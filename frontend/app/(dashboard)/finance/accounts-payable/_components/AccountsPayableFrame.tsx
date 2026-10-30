@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 
 import { FormPage } from "@/components/form/FormPage";
-import { accountsPayableFrameState } from "@/lib/account-payable-workspace";
+import { accountsPayableFrameState } from "@/lib/finance/account-payable-workspace";
 import { cn } from "@/lib/utils";
 
 import { AccountPayableSideMenu } from "./AccountPayableSideMenu";

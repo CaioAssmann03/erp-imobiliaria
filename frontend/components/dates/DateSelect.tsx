@@ -4,8 +4,8 @@ import { Popover } from "@base-ui/react/popover";
 import { CalendarDays } from "lucide-react";
 import { useState } from "react";
 
-import { DateCalendar } from "@/components/DateCalendar";
-import { formatDate } from "@/lib/format";
+import { DateCalendar } from "@/components/dates/DateCalendar";
+import { formatDate } from "@/lib/format/format";
 import { cn } from "@/lib/utils";
 
 /**

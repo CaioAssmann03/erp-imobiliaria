@@ -2,7 +2,7 @@
 
 import { DateField, TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
-import { maskInteger } from "@/lib/masks";
+import { maskInteger } from "@/lib/format/masks";
 
 export function AdjustmentSection() {
   return (

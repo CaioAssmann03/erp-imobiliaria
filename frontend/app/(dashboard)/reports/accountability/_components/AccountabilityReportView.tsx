@@ -4,17 +4,17 @@ import { keepPreviousData } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { ListFallback } from "@/components/data-list";
-import { MonthSelect } from "@/components/MonthSelect";
-import { ScopeDivider } from "@/components/ScopeSearchCard";
-import { ScopeSelect } from "@/components/ScopeSelect";
+import { MonthSelect } from "@/components/dates/MonthSelect";
+import { ScopeDivider } from "@/components/filters/ScopeSearchCard";
+import { ScopeSelect } from "@/components/filters/ScopeSelect";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   currentAccountEntriesAccountabilityPdf,
   useCondominiumsList,
   useCurrentAccountEntriesAccountability,
 } from "@/lib/api/generated";
-import { brl, formatDate, todayIso } from "@/lib/format";
-import { accountabilityPdfName, defaultAccountabilityMonth } from "@/lib/reports";
+import { brl, formatDate, todayIso } from "@/lib/format/format";
+import { accountabilityPdfName, defaultAccountabilityMonth } from "@/lib/reports/reports";
 import { cn } from "@/lib/utils";
 
 import { ReportFilterBar } from "../../_components/ReportFilterBar";

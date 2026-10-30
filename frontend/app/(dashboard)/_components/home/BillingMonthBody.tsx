@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { useBillingRunsList, useCondominiumsList } from "@/lib/api/generated";
+import { useBillingRunsCoverage, useBillingRunsList } from "@/lib/api/generated";
 
 import { Late } from "./Late";
 import { useBillingSummary } from "./use-billing-summary";
@@ -14,26 +14,22 @@ export const firstDayOfThisMonth = () => {
   return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-01`;
 };
 
-/** As execuções da emissão do mês corrente que terminaram com problema (condomínio sem boleto). */
+/** As execuções da emissão do mês corrente que terminaram com problema (condomínio sem boleto): uma consulta por situação, falha e parcial, que a API filtra. */
 export function useRunsWithProblem() {
-  const { data, isLoading } = useBillingRunsList({ reference_month: firstDayOfThisMonth(), limit: 100 });
-  const runs = (data?.results ?? []).filter((run) => run.status === "failed" || run.status === "partial");
-  return { runs, isLoading };
+  const month = firstDayOfThisMonth();
+  const failed = useBillingRunsList({ reference_month: month, status: "failed", limit: 100 });
+  const partial = useBillingRunsList({ reference_month: month, status: "partial", limit: 100 });
+  const runs = [...(failed.data?.results ?? []), ...(partial.data?.results ?? [])];
+  return { runs, isLoading: failed.isLoading || partial.isLoading };
 }
 
 /**
- * Quantos condomínios ativos já têm boleto emitido neste mês (uma execução que emitiu, ou que encontrou tudo já emitido) e quais ainda não.
- * `ready` só fica verdadeiro quando as duas consultas chegaram.
+ * Quantos condomínios ativos já têm boleto emitido neste mês (uma execução que emitiu, ou que encontrou tudo já emitido) e quais ainda não: a conta é da API
+ * (`/billing-runs/coverage/`). `ready` fica verdadeiro quando a resposta chegou.
  */
 export function useIssuanceCoverage() {
-  const runs = useBillingRunsList({ reference_month: firstDayOfThisMonth(), limit: 100 });
-  const condominiums = useCondominiumsList({ active: true, limit: 100 });
-  const issuedIds = new Set(
-    (runs.data?.results ?? []).filter((run) => run.issued_count + run.already_issued_count > 0).map((run) => run.condominium)
-  );
-  const active = condominiums.data?.results ?? [];
-  const missing = active.filter((condominium) => !issuedIds.has(condominium.id));
-  return { ready: Boolean(runs.data && condominiums.data), expected: active.length, issued: active.length - missing.length, missing };
+  const { data } = useBillingRunsCoverage({ reference_month: firstDayOfThisMonth() });
+  return { ready: Boolean(data), expected: data?.expected ?? 0, issued: data?.issued ?? 0, missing: data?.missing ?? [] };
 }
 
 /**

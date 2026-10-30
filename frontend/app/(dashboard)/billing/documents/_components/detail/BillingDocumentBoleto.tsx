@@ -1,8 +1,8 @@
 import { CopyButton } from "@/components/CopyButton";
 import { FormSection } from "@/components/form/FormSection";
 import type { BillingDocument } from "@/lib/api/generated/models";
-import { boletoState, deliveryFailureLabel, deliveryStatusLabel } from "@/lib/billing-documents";
-import { brl, formatDate, formatDateTime } from "@/lib/format";
+import { boletoState, deliveryFailureLabel, deliveryStatusLabel } from "@/lib/billing/billing-documents";
+import { brl, formatDate, formatDateTime } from "@/lib/format/format";
 
 import { DocumentItem } from "./DocumentItem";
 
@@ -31,7 +31,7 @@ export function BillingDocumentBoleto({ document }: { document: BillingDocument 
   const boletoUrl = registration?.boleto_url.startsWith("https://") ? registration.boleto_url : null;
 
   return (
-    <FormSection title="Boleto" description="O boleto registrado no gateway de pagamento e o que aconteceu com ele.">
+    <FormSection title="Boleto" hint="O boleto registrado no gateway de pagamento e o que aconteceu com ele.">
       {state === "waiting" && (
         <p className="text-body text-ink-soft">Ainda não registrado no gateway; o registro acontece logo depois da emissão.</p>
       )}

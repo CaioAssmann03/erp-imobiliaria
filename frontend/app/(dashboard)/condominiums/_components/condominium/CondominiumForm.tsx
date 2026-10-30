@@ -17,7 +17,7 @@ import {
   type CondominiumFormInput,
   type CondominiumFormOutput,
 } from "@/lib/schemas/condominium";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 import { AddressSection } from "./condominium-form/AddressSection";
 import { AdjustmentSection } from "./condominium-form/AdjustmentSection";

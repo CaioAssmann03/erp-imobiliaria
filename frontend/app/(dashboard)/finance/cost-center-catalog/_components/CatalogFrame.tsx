@@ -3,8 +3,8 @@
 import { usePathname } from "next/navigation";
 
 import { FormPage } from "@/components/form/FormPage";
-import { SectionIndex } from "@/components/SectionIndex";
-import { catalogFrameState, catalogSections } from "@/lib/cost-center-catalog-workspace";
+import { SectionIndex } from "@/components/layout/SectionIndex";
+import { catalogFrameState, catalogSections } from "@/lib/finance/cost-center-catalog-workspace";
 import { cn } from "@/lib/utils";
 
 import { CatalogList } from "./CatalogList";

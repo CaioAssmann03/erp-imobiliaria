@@ -3,8 +3,8 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
-import { QUESTIONS } from "./content";
-import { Reveal } from "./Reveal";
+import { QUESTIONS } from "@/app/(marketing)/_components/content";
+import { Reveal } from "@/app/(marketing)/_components/motion/Reveal";
 
 /**
  * Posição de cada card (mesma ordem de `QUESTIONS.items`) na grade de 4 colunas do desktop; as linhas têm altura

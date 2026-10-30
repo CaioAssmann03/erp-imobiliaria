@@ -2,7 +2,7 @@
 
 import { CheckboxField, SelectField, TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
-import { maskCnpj } from "@/lib/masks";
+import { maskCnpj } from "@/lib/format/masks";
 
 import { AdvisorField } from "./AdvisorField";
 

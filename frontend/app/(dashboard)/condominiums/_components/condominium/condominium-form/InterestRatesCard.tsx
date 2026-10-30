@@ -15,16 +15,16 @@ import {
   useLateInterestRatesList,
 } from "@/lib/api/generated";
 import type { LateInterestRate } from "@/lib/api/generated/models";
-import { applyServerErrors } from "@/lib/form-errors";
-import { formatDate } from "@/lib/format";
-import { maskDecimal } from "@/lib/masks";
+import { applyServerErrors } from "@/lib/errors/form-errors";
+import { formatDate } from "@/lib/format/format";
+import { maskDecimal } from "@/lib/format/masks";
 import {
   LATE_INTEREST_RATE_DEFAULTS,
   lateInterestRateSchema,
   type LateInterestRateFormInput,
   type LateInterestRateFormOutput,
 } from "@/lib/schemas/late-interest-rate";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 import { newPendingRateKey, type PendingInterestRate } from "./pending-interest-rate";
 

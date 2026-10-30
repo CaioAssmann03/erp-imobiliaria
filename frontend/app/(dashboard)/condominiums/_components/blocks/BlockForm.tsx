@@ -11,7 +11,7 @@ import { FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useBlocksRetrieve, useCondominiumsList } from "@/lib/api/generated";
-import { condominiumPageUrl } from "@/lib/condominium-registry";
+import { condominiumPageUrl } from "@/lib/condominiums/condominium-registry";
 import { throwIfPageError } from "@/lib/query/page-error";
 import {
   BLOCK_DEFAULTS,
@@ -20,7 +20,7 @@ import {
   type BlockFormInput,
   type BlockFormOutput,
 } from "@/lib/schemas/block";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 import { BlockDeleteButton } from "./BlockDeleteButton";
 import { useBlockSubmit } from "./block-form/use-block-submit";

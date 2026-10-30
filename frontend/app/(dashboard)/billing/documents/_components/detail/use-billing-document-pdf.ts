@@ -5,8 +5,8 @@ import { useState } from "react";
 
 import { billingDocumentsPdf, billingDocumentsPdf2 } from "@/lib/api/generated";
 import type { BillingDocumentPdfDownload } from "@/lib/api/generated/models";
-import { apiErrorMessage } from "@/lib/form-errors";
-import { toast } from "@/lib/toast";
+import { apiErrorMessage } from "@/lib/errors/form-errors";
+import { toast } from "@/lib/errors/toast";
 
 const NOT_GENERATED = "billing_document_pdf.not_generated";
 

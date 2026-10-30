@@ -5,7 +5,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 
 import { SearchSelectField } from "@/components/form/fields";
 import { useBillingEventsList } from "@/lib/api/generated";
-import { inputClass } from "@/lib/ui";
+import { inputClass } from "@/lib/theme/ui";
 
 /**
  * O evento pelo código (quem lança sabe que 250 é "Limpeza do condomínio") ou pela lista. Escolhê-lo preenche a

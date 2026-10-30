@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { newPersonUrl, originCondominium, PERSON_SECTIONS, personsFrameState, personsUrl, personUrl } from "../lib/person-workspace.ts";
+import { newPersonUrl, originCondominium, PERSON_SECTIONS, personsFrameState, personsUrl, personUrl } from "../lib/persons/person-workspace.ts";
 
 test("the empty screen has the frame and, on a phone, only the list", () => {
   const state = personsFrameState("/condominiums/persons");

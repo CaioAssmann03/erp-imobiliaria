@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import type { BillingDocument } from "@/lib/api/generated/models";
-import { canCancelDocument, canReissueDocument } from "@/lib/billing-documents";
+import { canCancelDocument, canReissueDocument } from "@/lib/billing/billing-documents";
 
 import { CancelBillingDocumentButton } from "./CancelBillingDocumentButton";
 import { ReissueBillingDocumentDialog } from "./ReissueBillingDocumentDialog";

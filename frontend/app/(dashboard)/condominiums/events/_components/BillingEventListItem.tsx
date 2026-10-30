@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 import type { BillingEvent } from "@/lib/api/generated/models";
-import { formatCode } from "@/lib/billing-entry-payload";
-import { eventUrl } from "@/lib/billing-event-workspace";
+import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { eventUrl } from "@/lib/billing/billing-event-workspace";
 import { cn } from "@/lib/utils";
 
 /**

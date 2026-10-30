@@ -5,7 +5,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 
 import { CheckboxField, DateField, SelectField, TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
-import { maskCnpj, maskCpf } from "@/lib/masks";
+import { maskCnpj, maskCpf } from "@/lib/format/masks";
 import type { PersonFormInput } from "@/lib/schemas/person";
 
 const MARITAL_STATUSES = ["Solteiro(a)", "Casado(a)", "Divorciado(a)", "Viúvo(a)", "União estável"];

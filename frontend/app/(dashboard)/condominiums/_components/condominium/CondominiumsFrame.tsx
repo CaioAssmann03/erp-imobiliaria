@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 
 import { FormPage } from "@/components/form/FormPage";
-import { registryLayout, selectedCondominiumId, selectedCondominiumPage } from "@/lib/condominium-registry";
+import { registryLayout, selectedCondominiumId, selectedCondominiumPage } from "@/lib/condominiums/condominium-registry";
 import { cn } from "@/lib/utils";
 import { CondominiumSideMenu } from "./CondominiumSideMenu";
 import { CondominiumsList } from "./CondominiumsList";

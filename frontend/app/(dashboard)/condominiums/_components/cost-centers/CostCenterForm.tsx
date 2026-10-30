@@ -13,11 +13,10 @@ import { Button } from "@/components/ui/button";
 import {
   useCondominiumsList,
   useCostCenterCatalogList,
-  useCostCentersList,
   useCostCentersRetrieve,
 } from "@/lib/api/generated";
-import { formatCode } from "@/lib/billing-entry-payload";
-import { condominiumPageUrl } from "@/lib/condominium-registry";
+import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { condominiumPageUrl } from "@/lib/condominiums/condominium-registry";
 import { throwIfPageError } from "@/lib/query/page-error";
 import {
   COST_CENTER_DEFAULTS,
@@ -26,7 +25,7 @@ import {
   type CostCenterFormInput,
   type CostCenterFormOutput,
 } from "@/lib/schemas/cost-center";
-import { toast } from "@/lib/toast";
+import { toast } from "@/lib/errors/toast";
 
 import { CostCenterDeleteButton } from "./CostCenterDeleteButton";
 import { useCostCenterSubmit } from "./cost-center-form/use-cost-center-submit";
@@ -55,18 +54,14 @@ export function CostCenterForm({
     mode: "onTouched",
   });
   const { handleSubmit, reset, setError, control } = methods;
-  // O catálogo (só as ativas) menos as que o condomínio escolhido já usa.
+  // O catálogo (só as ativas) menos as que o condomínio escolhido já usa: quem tira é a API (`unused_by_condominium`).
   const watchedCondominium = useWatch({ control, name: "condominium" });
   const chosenCondominium = condominiumId ?? watchedCondominium;
-  const { data: catalog } = useCostCenterCatalogList({ active: true, limit: 100 }, { query: { enabled: !isEdit } });
-  const { data: used } = useCostCentersList(
-    { condominium: chosenCondominium || undefined, limit: 100 },
-    { query: { enabled: !isEdit && Boolean(chosenCondominium) } }
+  const { data: catalog } = useCostCenterCatalogList(
+    { active: true, limit: 100, ...(chosenCondominium ? { unused_by_condominium: chosenCondominium } : {}) },
+    { query: { enabled: !isEdit } }
   );
-  const usedItems = new Set((used?.results ?? []).map((center) => center.catalog_item));
-  const catalogOptions = (catalog?.results ?? [])
-    .filter((item) => !usedItems.has(item.id))
-    .map((item) => ({ value: item.id, label: `${formatCode(item.code ?? 0)} · ${item.name}` }));
+  const catalogOptions = (catalog?.results ?? []).map((item) => ({ value: item.id, label: `${formatCode(item.code ?? 0)} · ${item.name}` }));
   const { submit, isSubmitting } = useCostCenterSubmit(costCenterId, setError);
   const returnUrl = costCenter ? condominiumPageUrl(costCenter.condominium, "cost-centers") : condominiumId ? condominiumPageUrl(condominiumId, "cost-centers") : "/condominiums";
 
