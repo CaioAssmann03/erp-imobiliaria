@@ -3,12 +3,13 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { BillingEntry } from "@/lib/api/generated/models";
 import { buildGrid } from "@/lib/billing-entry-payload";
+import type { BillingEntriesScope } from "@/lib/billing-entry-workspace";
 import { brl } from "@/lib/format";
 
 import { EntryColumnHeader } from "./EntryColumnHeader";
 
 /** A grade do mês: uma linha por unidade, uma coluna por lançamento e o total de cada boleto. */
-export function BillingEntriesGrid({ entries, referenceMonth }: { entries: BillingEntry[]; referenceMonth: string }) {
+export function BillingEntriesGrid({ entries, scope }: { entries: BillingEntry[]; scope: BillingEntriesScope }) {
   const grid = buildGrid(entries.map((entry) => ({ id: entry.id, month: entry.month })));
 
   return (
@@ -19,7 +20,7 @@ export function BillingEntriesGrid({ entries, referenceMonth }: { entries: Billi
             <TableHead className="sticky left-0 z-10 bg-card align-top">Unidade</TableHead>
             {entries.map((entry) => (
               <TableHead key={entry.id} className="align-top">
-                <EntryColumnHeader entry={entry} total={grid.entryTotals[entry.id] ?? "0.00"} referenceMonth={referenceMonth} />
+                <EntryColumnHeader entry={entry} total={grid.entryTotals[entry.id] ?? "0.00"} scope={scope} />
               </TableHead>
             ))}
             <TableHead className="text-right align-top">Total</TableHead>

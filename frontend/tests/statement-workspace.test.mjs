@@ -22,5 +22,5 @@ test("other finance routes are not the statement workspace", () => {
 test("the urls and the two sections", () => {
   assert.equal(statementUrl(), "/finance/statement");
   assert.equal(statementUrl("c1"), "/finance/statement/c1");
-  assert.deepEqual(STATEMENT_SECTIONS.map((section) => section.id), ["saldo", "lancamentos"]);
+  assert.deepEqual(STATEMENT_SECTIONS.map((section) => section.id), ["saldo", "subcontas", "lancamentos"]);
 });

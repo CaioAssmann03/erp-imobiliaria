@@ -2,11 +2,11 @@
 
 import { isAxiosError } from "axios";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import { billingDocumentsPdf, billingDocumentsPdf2 } from "@/lib/api/generated";
 import type { BillingDocumentPdfDownload } from "@/lib/api/generated/models";
 import { apiErrorMessage } from "@/lib/form-errors";
+import { toast } from "@/lib/toast";
 
 const NOT_GENERATED = "billing_document_pdf.not_generated";
 

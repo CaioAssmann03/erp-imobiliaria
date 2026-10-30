@@ -4,9 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
-import { toast } from "sonner";
 
-import { CheckboxField, SelectField } from "@/components/form/fields";
+import { CheckboxField, SearchSelectField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
@@ -27,6 +26,7 @@ import {
   type CostCenterFormInput,
   type CostCenterFormOutput,
 } from "@/lib/schemas/cost-center";
+import { toast } from "@/lib/toast";
 
 import { CostCenterDeleteButton } from "./CostCenterDeleteButton";
 import { useCostCenterSubmit } from "./cost-center-form/use-cost-center-submit";
@@ -92,7 +92,7 @@ export function CostCenterForm({
           }
         >
           {!isEdit && !condominiumId && (
-            <SelectField
+            <SearchSelectField
               name="condominium"
               label="Condomínio"
               required
@@ -107,7 +107,7 @@ export function CostCenterForm({
               {costCenter?.name}
             </p>
           ) : (
-            <SelectField
+            <SearchSelectField
               name="catalog_item"
               label="Sub-conta do catálogo"
               required

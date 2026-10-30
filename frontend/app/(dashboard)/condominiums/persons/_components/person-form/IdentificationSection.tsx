@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
-import { CheckboxField, SelectField, TextField } from "@/components/form/fields";
+import { CheckboxField, DateField, SelectField, TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { maskCnpj, maskCpf } from "@/lib/masks";
 import type { PersonFormInput } from "@/lib/schemas/person";
@@ -60,7 +60,7 @@ export function IdentificationSection({ isEdit }: { isEdit: boolean }) {
       </FieldRow>
       {isIndividual && (
         <FieldRow columns={3}>
-          <TextField name="birthday" label="Data de nascimento" type="date" />
+          <DateField name="birthday" label="Data de nascimento" />
           <TextField
             name="marital_status"
             label="Estado civil"

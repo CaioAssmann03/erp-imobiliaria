@@ -13,9 +13,16 @@ import {
   requiredText,
 } from "./fields";
 
+export const PERSON_KINDS = [
+  { value: "individual", label: "Pessoa física" },
+  { value: "legal", label: "Pessoa jurídica" },
+] as const;
+
+export const MARITAL_STATUSES = ["Solteiro(a)", "Casado(a)", "Divorciado(a)", "Viúvo(a)", "União estável"];
+
 type DocumentInput = { kind: string; document: string };
 
-function documentError(values: DocumentInput): string | null {
+export function documentError(values: DocumentInput): string | null {
   const digits = onlyDigits(values.document ?? "");
   const isCpf = values.kind === "individual";
   const label = isCpf ? "CPF" : "CNPJ";

@@ -1,17 +1,25 @@
+import { FieldHint } from "./FieldHint";
+
 export function FormSection({
   title,
   description,
+  hint,
   children,
 }: {
   title?: string;
   description?: string;
+  /** Uma explicação ou exemplo da seção, atrás de um ícone de ajuda ao lado do título (como a dica de um campo), em vez de solta dentro da seção. */
+  hint?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <section className="rounded-card bg-card p-6 shadow-card">
       {title && (
         <header className="mb-5">
-          <h2 className="text-heading">{title}</h2>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-heading">{title}</h2>
+            {hint && <FieldHint label={title}>{hint}</FieldHint>}
+          </div>
           {description && <p className="mt-0.5 text-caption text-ink-soft">{description}</p>}
         </header>
       )}

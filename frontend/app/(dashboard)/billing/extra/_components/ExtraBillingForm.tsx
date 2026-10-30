@@ -3,19 +3,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
-import { toast } from "sonner";
 
-import { SelectField, TextField } from "@/components/form/fields";
+import { DateField, MonthField, SearchSelectField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
 import { useCondominiumsList } from "@/lib/api/generated";
-import { maskMonthYear } from "@/lib/billing-plan-payload";
 import {
   extraBillingDefaults,
   extraBillingSchema,
   type ExtraBillingFormInput,
   type ExtraBillingFormOutput,
 } from "@/lib/schemas/extra-billing";
+import { toast } from "@/lib/toast";
 
 import { UnitsPicker } from "../../entries/_components/entry-form/UnitsPicker";
 import { ExtraLines } from "./ExtraLines";
@@ -55,7 +54,7 @@ export function ExtraBillingForm() {
         className="mx-auto flex w-full max-w-4xl flex-col gap-4"
       >
         <FormSection title="Boleto" description="O vencimento é só deste boleto; a multa e os juros seguem as regras do condomínio.">
-          <SelectField
+          <SearchSelectField
             name="condominium"
             label="Condomínio"
             required
@@ -67,18 +66,13 @@ export function ExtraBillingForm() {
             options={(condominiums?.results ?? []).map((item) => ({ value: item.id, label: `${item.code} - ${item.name}` }))}
           />
           <FieldRow>
-            <TextField
+            <MonthField
               name="competence_month"
               label="Competência"
               required
-              inputMode="numeric"
-              placeholder="MM/AAAA"
-              maxLength={7}
-              mask={maskMonthYear}
-              autoComplete="off"
               hint="O mês a que a cobrança se refere."
             />
-            <TextField name="due_date" label="Vencimento" type="date" required />
+            <DateField name="due_date" label="Vencimento" required />
           </FieldRow>
         </FormSection>
         <FormSection title="Unidades" description="Quem recebe o boleto. Cada unidade recebe o seu, com a sua parte do rateio.">

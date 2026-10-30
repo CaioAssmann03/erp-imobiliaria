@@ -3,7 +3,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type { UseFormSetError } from "react-hook-form";
-import { toast } from "sonner";
 
 import {
   getCostCentersListQueryKey,
@@ -19,6 +18,7 @@ import {
   type CostCenterFormInput,
   type CostCenterFormOutput,
 } from "@/lib/schemas/cost-center";
+import { toast } from "@/lib/toast";
 
 export function useCostCenterSubmit(
   costCenterId: string | undefined,

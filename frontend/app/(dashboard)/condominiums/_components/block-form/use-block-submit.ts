@@ -3,7 +3,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type { UseFormSetError } from "react-hook-form";
-import { toast } from "sonner";
 
 import {
   getBlocksListQueryKey,
@@ -15,6 +14,7 @@ import type { Block } from "@/lib/api/generated/models";
 import { condominiumPageUrl } from "@/lib/condominium-registry";
 import { applyServerErrors } from "@/lib/form-errors";
 import { blockToPayload, type BlockFormInput, type BlockFormOutput } from "@/lib/schemas/block";
+import { toast } from "@/lib/toast";
 
 export function useBlockSubmit(
   blockId: string | undefined,

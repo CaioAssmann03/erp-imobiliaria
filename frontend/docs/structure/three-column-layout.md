@@ -1,6 +1,6 @@
 ---
 summary: The 3-column registry layout (list | content | right menu): frames as layouts, list, header, forms, sub-screens, back button, filters, phone, and the recipe to add a module.
-read-when: you build or change Condomínios, Unidades, Blocos, Sub-contas, Pessoas, Eventos, Contas a pagar, Extrato, Lançamento manual, Conta da imobiliária, Catálogo de sub-contas or any new screen in the 3-column layout
+read-when: you build or change Condomínios, Unidades, Blocos, Sub-contas, Pessoas, Eventos, Contas a pagar, Extrato, Lançamento manual, Conta da imobiliária, Catálogo de sub-contas, Inclusão de valores or any new screen in the 3-column layout
 skip-if: a plain form or table page → structure/component-patterns.md; the whole-resource recipe → operations/new-resource-page.md; routes only → structure/folders-and-routes.md
 ---
 # The 3-column layout (S — Structure)
@@ -21,7 +21,7 @@ The registry screens of the ERP share one layout. Every rule below is something 
 ## 1. Layout lives in frames, not in pages
 - The app shell (rail, global search) is `(dashboard)/layout.tsx`. The left list and the right menu belong to a **frame**: a client component rendered by a `layout.tsx` that reads the URL (`usePathname`) and draws `list + <FormPage aside={menu}>{children}</FormPage>`. Both stay mounted while you move between screens of the same frame (checked in a real browser: the same DOM element before and after a navigation).
 - A **page renders only its own content** (header + form or list). It never renders `FormPage aside=`, the list or the menu. A test (`tests/app-shell.test.mjs`) fails if a page under `condominiums/` uses `aside=`.
-- The frame decides what to draw with a pure function in `lib/`: `registryLayout`/`selectedCondominiumId` (condominium), `unitsFrameState`, `blocksFrameState`, `costCentersFrameState`, `personsFrameState`, `eventsFrameState`, `reportsFrameState` (`lib/report-catalog.ts`). Each returns `hasFrame`, the ids in the URL, `isNew`, and `showListOnPhone`/`showPageOnPhone`. A frame with `hasFrame: false` passes the children through (the plain pages keep their own `FormPage`).
+- The frame decides what to draw with a pure function in `lib/`: `registryLayout`/`selectedCondominiumId` (condominium), `unitsFrameState`, `blocksFrameState`, `costCentersFrameState`, `personsFrameState`, `eventsFrameState`, `billingEntriesFrameState`, `reportsFrameState` (`lib/report-catalog.ts`). Each returns `hasFrame`, the ids in the URL, `isNew`, and `showListOnPhone`/`showPageOnPhone`. A frame with `hasFrame: false` passes the children through (the plain pages keep their own `FormPage`).
 
 | Frame (layout) | Left list | Right menu |
 |---|---|---|
@@ -31,10 +31,11 @@ The registry screens of the ERP share one layout. Every rule below is something 
 | `PersonsFrame` | `PersonsList` | `SectionIndex` (Identificação, Contato) |
 | `BillingEventsFrame` | `BillingEventsList` | `SectionIndex` (Identificação) |
 | `AccountsPayableFrame` (`finance/accounts-payable/layout.tsx`) | `AccountsPayableList` (condominium scope, search by description, document or supplier, `CompactFilter` with situation, due period and expense; opens on the *open* accounts; rows show the due date, *Vencida* in red, and the amount) | `AccountPayableSideMenu` (`SectionIndex`: *Despesa*, *Conta*; a paid account: *Resumo*, *Comprovantes*; a cancelled one: *Resumo*) |
-| `StatementFrame` (`finance/statement/layout.tsx`) | `StatementList` (the condominiums by code with search, each with the balance of its current account, red when negative; no **+**: a statement is not registered) | `StatementSideMenu` (`SectionIndex`: *Saldo*, *Lançamentos*; *Condomínio → Dados do condomínio*) |
+| `StatementFrame` (`finance/statement/layout.tsx`) | `StatementList` (the condominiums by code with search, each with the balance of its current account, red when negative; no **+**: a statement is not registered) | `StatementSideMenu` (`SectionIndex`: *Saldo*, *Sub-contas*, *Lançamentos*; *Condomínio → Dados do condomínio*) |
 | `EntriesFrame` (`finance/entries/layout.tsx`) | `EntryBatchesList` (the batches newest first, date and origin, with the origin filter and **+** for a new batch; a batch is never deleted) | `SectionIndex` (*Lote*, *Lançamentos*) |
 | `CompanyAccountFrame` (`finance/company-account/layout.tsx`) | `CompanyEntriesList` (the administradora's own entries newest first: date range with the day calendar, search by description; no **+**: they come from paid boletos) | `SectionIndex` (*Lançamento*); the empty screen shows the balance, full width, with no menu |
 | `CatalogFrame` (`finance/cost-center-catalog/layout.tsx`) | `CatalogList` (code · name, the number of condominiums that use it, search by code or name, situation filter, **+**) | `SectionIndex` (*Identificação*, and *Condomínios* on an open sub-conta) |
+| `BillingEntriesFrame` (`billing/entries/layout.tsx`, inside a `Suspense`) | `BillingEntriesList` (the **condominium and month** as the scope, kept in the URL as `?condominium=&month=2026-10-01` so the grid and the detail follow it: `billingEntriesScope`, `useEntriesScope`; client search by the boleto name or sub-conta; rows show the name, the sub-conta and the month's total; **+** disabled until a condominium is chosen) | `SectionIndex` (*Lançamento*, *Rateio e valor*, *Unidades*, *Valores* on a new launch; *Lançamento*, *Valores* on an open one); the empty screen is the month's grid, full width, with no menu |
 | `ReportsFrame` (`reports/layout.tsx`) | `ReportsList` (subject filter card + report rows, no search or +) | none (a 2-column frame) |
 
 - Changing between two frames (or from a screen without a list, like the dashboard) remounts the columns; that is expected.

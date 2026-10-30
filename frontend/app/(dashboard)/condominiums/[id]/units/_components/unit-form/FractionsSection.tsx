@@ -1,17 +1,17 @@
 "use client";
 
-import Link from "next/link";
-
 import { TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { useCondominiumApportionmentCriteriaList } from "@/lib/api/generated";
 import { maskDecimal } from "@/lib/masks";
 
+import { NewCriterionDialog } from "./NewCriterionDialog";
+
 const fractionMask = (value: string) => maskDecimal(value, 8, 1);
 
 /**
  * A fração da unidade em cada critério de rateio do condomínio (de 0 a 1). Cada critério em uso
- * precisa somar 1 entre as unidades ativas; os critérios são cadastrados na tela do condomínio.
+ * precisa somar 1 entre as unidades ativas; o **+** cria um critério novo ali mesmo (também se cadastram na tela do condomínio).
  */
 export function FractionsSection({ condominiumId }: { condominiumId: string }) {
   const { data } = useCondominiumApportionmentCriteriaList({ condominium: condominiumId, limit: 100 });
@@ -34,13 +34,9 @@ export function FractionsSection({ condominiumId }: { condominiumId: string }) {
           />
         ))}
       </FieldRow>
-      <p className="text-caption text-ink-soft">
-        Precisa de outro critério de rateio?{" "}
-        <Link href={`/condominiums/${condominiumId}`} className="underline">
-          Cadastre na tela do condomínio
-        </Link>
-        .
-      </p>
+      <div>
+        <NewCriterionDialog condominiumId={condominiumId} />
+      </div>
     </FormSection>
   );
 }

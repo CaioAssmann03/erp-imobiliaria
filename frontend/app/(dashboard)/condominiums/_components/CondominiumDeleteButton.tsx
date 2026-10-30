@@ -2,7 +2,6 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import {
@@ -10,6 +9,7 @@ import {
   getDashboardRetrieveQueryKey,
   useCondominiumsDestroy,
 } from "@/lib/api/generated";
+import { toast } from "@/lib/toast";
 
 /** Client Component: exclui o condomínio aberto (confirmação) e volta à tela vazia do cadastro. */
 export function CondominiumDeleteButton({ condominiumId, name }: { condominiumId: string; name: string }) {

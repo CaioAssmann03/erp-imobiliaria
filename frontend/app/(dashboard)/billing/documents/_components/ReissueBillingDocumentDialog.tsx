@@ -4,9 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
 
-import { TextField } from "@/components/form/fields";
+import { DateField } from "@/components/form/fields";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -30,6 +29,7 @@ import {
   type ReissueBillingDocumentFormInput,
   type ReissueBillingDocumentFormOutput,
 } from "@/lib/schemas/billing-document";
+import { toast } from "@/lib/toast";
 
 /** Reemissão: um novo boleto com o novo vencimento; o antigo é cancelado no gateway e o registro dele fica guardado. */
 export function ReissueBillingDocumentDialog({ document }: { document: BillingDocument }) {
@@ -75,7 +75,7 @@ export function ReissueBillingDocumentDialog({ document }: { document: BillingDo
           </AlertDialogHeader>
           <FormProvider {...methods}>
             <form noValidate onSubmit={handleSubmit(submit)} className="space-y-3" id={`reissue-${document.id}`}>
-              <TextField name="due_date" label="Novo vencimento" type="date" required />
+              <DateField name="due_date" label="Novo vencimento" required />
             </form>
           </FormProvider>
           <AlertDialogFooter>

@@ -3,33 +3,37 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
-import { toast } from "sonner";
 
-import { TextField } from "@/components/form/fields";
+import { DateField, TextField } from "@/components/form/fields";
 import { FormField } from "@/components/form/FormField";
 import { FieldRow } from "@/components/form/FormSection";
-import { PersonPicker } from "@/components/PersonPicker";
+import { NewPersonDialog } from "@/components/NewPersonDialog";
+import { PersonSearchSelect } from "@/components/PersonSearchSelect";
 import { Button } from "@/components/ui/button";
 import { useUnitPeopleCreate } from "@/lib/api/generated";
 import type { Person, UnitPerson } from "@/lib/api/generated/models";
 import { applyServerErrors } from "@/lib/form-errors";
 import { maskDecimal } from "@/lib/masks";
-import { formattedPersonDocument } from "@/lib/person-document";
 import {
   UNIT_PERSON_DEFAULTS,
   unitPersonSchema,
   type UnitPersonFormInput,
   type UnitPersonFormOutput,
 } from "@/lib/schemas/unit";
+import { toast } from "@/lib/toast";
+
+import { newPendingKey, type PendingLink } from "./pending-link";
 
 interface UnitPersonFormProps {
-  unitId: string;
+  /** Sem unidade (cadastro novo) o vínculo não é gravado: vai para `onAdd` e é salvo junto com a unidade. */
+  unitId?: string;
   /** O papel da seção onde o formulário está (Proprietário ou Inquilino): não se escolhe. */
   role: "owner" | "tenant";
-  onCreated: () => void;
+  onCreated?: () => void;
+  onAdd?: (link: PendingLink) => void;
 }
 
-export function UnitPersonForm({ unitId, role: fixedRole, onCreated }: UnitPersonFormProps) {
+export function UnitPersonForm({ unitId, role: fixedRole, onCreated, onAdd }: UnitPersonFormProps) {
   const [person, setPerson] = useState<Person | null>(null);
   const [personError, setPersonError] = useState<string>();
   const createMutation = useUnitPeopleCreate();
@@ -52,6 +56,19 @@ export function UnitPersonForm({ unitId, role: fixedRole, onCreated }: UnitPerso
       setPersonError("Selecione uma pessoa");
       return;
     }
+    if (onAdd || !unitId) {
+      onAdd?.({
+        key: newPendingKey(),
+        person,
+        role: values.role as PendingLink["role"],
+        ownership_percentage: values.role === "owner" ? (values.ownership_percentage ?? null) : null,
+        start_date: values.start_date!,
+        end_date: values.end_date ?? null,
+      });
+      setPerson(null);
+      reset({ ...UNIT_PERSON_DEFAULTS, role: fixedRole });
+      return;
+    }
     createMutation.mutate(
       {
         data: {
@@ -69,7 +86,7 @@ export function UnitPersonForm({ unitId, role: fixedRole, onCreated }: UnitPerso
           setPerson(null);
           reset({ ...UNIT_PERSON_DEFAULTS, role: fixedRole });
           toast.success("Vínculo adicionado.");
-          onCreated();
+          onCreated?.();
         },
         onError: (error) => toast.error(applyServerErrors(error, setError)),
       },
@@ -81,29 +98,27 @@ export function UnitPersonForm({ unitId, role: fixedRole, onCreated }: UnitPerso
       <div className="space-y-3 rounded-panel border border-border p-4">
         <p className="mb-2 text-body font-medium">Adicionar vínculo</p>
 
-        <FormField id="link-person" label="Pessoa" required error={personError}>
-          {person ? (
-            <div className="flex h-9 items-center justify-between rounded-control bg-surface px-3 text-body">
-              <span className="truncate">
-                {person.name} · {formattedPersonDocument(person)}
-              </span>
-              <button
-                type="button"
-                className="text-caption text-ink-soft hover:text-danger"
-                onClick={() => setPerson(null)}
-              >
-                Trocar
-              </button>
-            </div>
-          ) : (
-            <PersonPicker
-              onSelect={(selected) => {
+        <div className="flex items-end gap-2">
+          <FormField id="link-person" label="Pessoa" required error={personError} className="min-w-0 flex-1">
+            <PersonSearchSelect
+              id="link-person"
+              label="Pessoa"
+              value={person?.id ?? ""}
+              invalid={Boolean(personError)}
+              describedBy={personError ? "link-person-message" : undefined}
+              onChange={(_id, selected) => {
                 setPerson(selected);
                 setPersonError(undefined);
               }}
             />
-          )}
-        </FormField>
+          </FormField>
+          <NewPersonDialog
+            onCreated={(created) => {
+              setPerson(created);
+              setPersonError(undefined);
+            }}
+          />
+        </div>
 
         <FieldRow
           template={role === "owner" ? "1fr 1fr 1fr" : "1fr 1fr"}
@@ -118,11 +133,10 @@ export function UnitPersonForm({ unitId, role: fixedRole, onCreated }: UnitPerso
               placeholder="100,00"
             />
           )}
-          <TextField name="start_date" label="Início" type="date" required />
-          <TextField
+          <DateField name="start_date" label="Início" required />
+          <DateField
             name="end_date"
             label="Fim"
-            type="date"
             hint="Vazio: vínculo ativo"
           />
         </FieldRow>

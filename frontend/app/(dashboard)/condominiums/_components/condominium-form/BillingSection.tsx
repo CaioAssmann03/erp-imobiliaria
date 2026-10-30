@@ -8,6 +8,8 @@ import { billingExample, type CompetenceMonth, type DueMonth } from "@/lib/billi
 import { maskDecimal, maskInteger, maskMoney } from "@/lib/masks";
 import type { CondominiumFormInput } from "@/lib/schemas/condominium";
 
+import type { ComponentProps } from "react";
+
 import { InterestRatesCard } from "./InterestRatesCard";
 
 const money = (value: string) => maskMoney(value, 10);
@@ -22,7 +24,7 @@ function currentMonth() {
 }
 
 /** Cobrança do condomínio: vencimento, competência, multa e juros por atraso, boleto, desconto. */
-export function BillingSection({ condominiumId }: { condominiumId?: string }) {
+export function BillingSection({ condominiumId, ...rates }: { condominiumId?: string } & Omit<ComponentProps<typeof InterestRatesCard>, "condominiumId">) {
   const { control } = useFormContext<CondominiumFormInput>();
   const [dueMonth, competenceMonth, hasInitialLateFee] = useWatch({
     control,
@@ -34,6 +36,7 @@ export function BillingSection({ condominiumId }: { condominiumId?: string }) {
       <FormSection
         title="Vencimento e competência"
         description="A referência é o mês a que a emissão se refere."
+        hint={billingExample(currentMonth(), dueMonth as DueMonth, competenceMonth as CompetenceMonth)}
       >
         <FieldRow>
           <TextField
@@ -73,9 +76,6 @@ export function BillingSection({ condominiumId }: { condominiumId?: string }) {
           />
           <CheckboxField name="exempts_manager_unit" label="Isentar a unidade do síndico" />
         </FieldRow>
-        <p className="rounded-panel bg-surface-muted px-4 py-2.5 text-body text-ink-soft" role="note">
-          {billingExample(currentMonth(), dueMonth as DueMonth, competenceMonth as CompetenceMonth)}
-        </p>
       </FormSection>
 
       <FormSection title="Multa por atraso" description="Até 2%, o limite do Código Civil para condomínio.">
@@ -136,7 +136,7 @@ export function BillingSection({ condominiumId }: { condominiumId?: string }) {
             hint="0: cobra desde o dia seguinte ao vencimento."
           />
         </FieldRow>
-        <InterestRatesCard condominiumId={condominiumId} />
+        <InterestRatesCard condominiumId={condominiumId} {...rates} />
       </FormSection>
 
       <FormSection title="Prestação de contas">

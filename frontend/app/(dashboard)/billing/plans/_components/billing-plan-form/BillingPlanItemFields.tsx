@@ -3,7 +3,7 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useFormContext, useWatch } from "react-hook-form";
 
-import { SelectField, TextField } from "@/components/form/fields";
+import { SearchSelectField, SelectField, TextField } from "@/components/form/fields";
 import { FieldRow } from "@/components/form/FormSection";
 import { Button } from "@/components/ui/button";
 import {
@@ -65,7 +65,7 @@ export function BillingPlanItemFields({ index, condominium, isFirst, isLast, can
         </div>
       </div>
       <FieldRow>
-        <SelectField
+        <SearchSelectField
           name={`${prefix}.event`}
           label="Evento"
           placeholder="Sem evento"
@@ -84,7 +84,7 @@ export function BillingPlanItemFields({ index, condominium, isFirst, isLast, can
         />
       </FieldRow>
       <FieldRow>
-        <SelectField
+        <SearchSelectField
           name={`${prefix}.cost_center`}
           label="Sub-conta"
           required
@@ -92,7 +92,7 @@ export function BillingPlanItemFields({ index, condominium, isFirst, isLast, can
           onValueChange={() => setValue(`${prefix}.entry_template`, "", { shouldDirty: true })}
           options={(costCenters?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
         />
-        <SelectField
+        <SearchSelectField
           name={`${prefix}.entry_template`}
           label="Modelo de lançamento"
           required
@@ -118,7 +118,7 @@ export function BillingPlanItemFields({ index, condominium, isFirst, isLast, can
         )}
       </FieldRow>
       {needsApportionmentCriterion(kind) && (
-        <SelectField
+        <SearchSelectField
           name={`${prefix}.apportionment_criterion`}
           label="Critério de rateio"
           required

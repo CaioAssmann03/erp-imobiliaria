@@ -1,36 +1,19 @@
 "use client";
 
-import { useFormContext, useWatch } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
-import { FormField } from "@/components/form/FormField";
-import { PersonPicker } from "@/components/PersonPicker";
-import { usePersonsRetrieve } from "@/lib/api/generated";
+import { PersonSelectField } from "@/components/form/fields";
+import { NewPersonDialog } from "@/components/NewPersonDialog";
 import type { CondominiumFormInput } from "@/lib/schemas/condominium";
 
-/** Assessor: mostra a pessoa escolhida (com "Remover") ou o buscador de pessoas. */
+/** Assessor: a pessoa escolhida no campo com busca (opcional: o "x" a remove) e o + que cadastra uma pessoa nova ali mesmo. */
 export function AdvisorField() {
-  const { control, setValue } = useFormContext<CondominiumFormInput>();
-  const advisorId = useWatch({ control, name: "advisor" });
-  const { data: advisor } = usePersonsRetrieve(advisorId ?? "", {
-    query: { enabled: !!advisorId },
-  });
+  const { setValue } = useFormContext<CondominiumFormInput>();
 
   return (
-    <FormField id="advisor" label="Assessor">
-      {advisorId ? (
-        <div className="flex h-9 items-center justify-between rounded-control bg-surface-muted px-3 text-body">
-          <span className="truncate">{advisor?.name ?? "Carregando…"}</span>
-          <button
-            type="button"
-            className="text-caption text-ink-soft hover:text-danger"
-            onClick={() => setValue("advisor", null)}
-          >
-            Remover
-          </button>
-        </div>
-      ) : (
-        <PersonPicker onSelect={(person) => setValue("advisor", person.id)} />
-      )}
-    </FormField>
+    <div className="flex items-end gap-2">
+      <PersonSelectField name="advisor" label="Assessor" emptyValue={null} className="min-w-0 flex-1" />
+      <NewPersonDialog onCreated={(person) => setValue("advisor", person.id, { shouldDirty: true, shouldValidate: true })} />
+    </div>
   );
 }

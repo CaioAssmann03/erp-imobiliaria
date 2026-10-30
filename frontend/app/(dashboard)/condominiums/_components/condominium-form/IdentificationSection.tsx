@@ -33,8 +33,8 @@ export function IdentificationSection() {
         />
       </FieldRow>
       <FieldRow>
-        <AdvisorField />
         <CheckboxField name="active" label="Cadastro ativo" />
+        <AdvisorField />
       </FieldRow>
     </FormSection>
   );

@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { TextField } from "@/components/form/fields";
@@ -27,6 +26,7 @@ import {
   type ApportionmentCriterionFormInput,
   type ApportionmentCriterionFormOutput,
 } from "@/lib/schemas/apportionment-criterion";
+import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 
 const fractionTotal = (value: string) =>

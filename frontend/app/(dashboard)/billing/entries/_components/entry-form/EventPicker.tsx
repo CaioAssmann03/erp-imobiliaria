@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
-import { SelectField } from "@/components/form/fields";
+import { SearchSelectField } from "@/components/form/fields";
 import { useBillingEventsList } from "@/lib/api/generated";
 import { inputClass } from "@/lib/ui";
 
@@ -53,7 +53,7 @@ export function EventPicker() {
           }}
         />
       </div>
-      <SelectField
+      <SearchSelectField
         name="event"
         label="Evento"
         placeholder="Sem evento"

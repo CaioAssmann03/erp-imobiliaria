@@ -5,9 +5,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
 
-import { SelectField, TextField } from "@/components/form/fields";
+import { DateField, SelectField, TextField } from "@/components/form/fields";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -36,6 +35,7 @@ import {
   type SettleAccountPayableFormInput,
   type SettleAccountPayableFormOutput,
 } from "@/lib/schemas/account-payable";
+import { toast } from "@/lib/toast";
 
 /**
  * Baixa de uma conta a pagar em aberto. Uma despesa de condomínio gera o débito no extrato do
@@ -116,7 +116,7 @@ export function SettleAccountPayableDialog({ account, solid = false }: { account
                 className="space-y-3"
                 id={`settle-${account.id}`}
               >
-                <TextField name="payment_date" label="Data do pagamento" type="date" required />
+                <DateField name="payment_date" label="Data do pagamento" required />
                 <TextField
                   name="amount_paid"
                   label="Valor pago"

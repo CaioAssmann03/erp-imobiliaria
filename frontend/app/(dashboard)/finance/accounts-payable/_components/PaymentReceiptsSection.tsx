@@ -2,7 +2,6 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { FormSection } from "@/components/form/FormSection";
@@ -19,6 +18,7 @@ import type { PaymentReceipt } from "@/lib/api/generated/models";
 import { apiErrorMessage } from "@/lib/form-errors";
 import { formatDateTime, formatFileSize } from "@/lib/format";
 import { RECEIPT_ACCEPT, receiptFileProblem, uploadToBucket } from "@/lib/payment-receipts";
+import { toast } from "@/lib/toast";
 
 function formatSentAt(iso: string) {
   return formatDateTime(iso);

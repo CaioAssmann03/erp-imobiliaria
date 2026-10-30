@@ -3,13 +3,13 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import type { UseFormSetError } from "react-hook-form";
-import { toast } from "sonner";
 
 import { getBillingDocumentsListQueryKey, useBillingDocumentsExtra } from "@/lib/api/generated";
 import type { ExtraBillingDocument, ExtraBillingResult } from "@/lib/api/generated/models";
 import { extraErrorPath, extraToPayload } from "@/lib/extra-billing-payload";
 import { applyServerErrors } from "@/lib/form-errors";
 import { extraBillingFormToValues, type ExtraBillingFormInput, type ExtraBillingFormOutput } from "@/lib/schemas/extra-billing";
+import { toast } from "@/lib/toast";
 
 /** Emite os boletos extras e guarda a resposta (emitidos e unidades puladas) para a tela mostrar. */
 export function useExtraSubmit(setError: UseFormSetError<ExtraBillingFormInput>) {

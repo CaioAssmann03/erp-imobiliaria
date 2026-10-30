@@ -3,7 +3,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type { UseFormSetError } from "react-hook-form";
-import { toast } from "sonner";
 
 import {
   getDashboardRetrieveQueryKey,
@@ -17,6 +16,7 @@ import { applyServerErrors } from "@/lib/form-errors";
 import { CONDOMINIUMS_MODULE } from "@/lib/person-module";
 import { personUrl } from "@/lib/person-workspace";
 import { personToPayload, type PersonFormInput, type PersonFormOutput } from "@/lib/schemas/person";
+import { toast } from "@/lib/toast";
 
 export function usePersonSubmit(personId: string | undefined, setError: UseFormSetError<PersonFormInput>) {
   const router = useRouter();

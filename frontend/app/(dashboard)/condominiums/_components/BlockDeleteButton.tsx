@@ -2,11 +2,11 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { getBlocksListQueryKey, getUnitsListQueryKey, useBlocksDestroy } from "@/lib/api/generated";
 import { condominiumPageUrl } from "@/lib/condominium-registry";
+import { toast } from "@/lib/toast";
 
 /** Client Component: exclui o bloco aberto (confirmação) e volta à tela de blocos do condomínio. */
 export function BlockDeleteButton({ condominiumId, blockId, name }: { condominiumId: string; blockId: string; name: string }) {

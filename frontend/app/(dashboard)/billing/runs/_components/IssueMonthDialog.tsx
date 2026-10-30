@@ -5,9 +5,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
 
-import { SelectField, TextField } from "@/components/form/fields";
+import { MonthField, SearchSelectField } from "@/components/form/fields";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -27,8 +26,9 @@ import {
 import type { BillingRun } from "@/lib/api/generated/models";
 import { applyServerErrors } from "@/lib/form-errors";
 import { issuedNothing } from "@/lib/billing-documents";
-import { currentMonthTyped, maskMonthYear } from "@/lib/billing-plan-payload";
+import { currentMonthTyped } from "@/lib/billing-plan-payload";
 import { issueMonthSchema, type IssueMonthFormInput, type IssueMonthFormOutput } from "@/lib/schemas/billing-run";
+import { toast } from "@/lib/toast";
 
 /** O aviso depois de emitir: sucesso só se emitiu algo; sem emissão nenhuma é um alerta que manda ver os problemas. */
 function notifyResult(run: BillingRun) {
@@ -83,20 +83,17 @@ export function IssueMonthDialog() {
           </AlertDialogHeader>
           <FormProvider {...methods}>
             <form noValidate onSubmit={handleSubmit(submit)} className="space-y-3" id="issue-month">
-              <SelectField
+              <SearchSelectField
                 name="condominium"
                 label="Condomínio"
                 required
                 placeholder="Selecione"
                 options={(condominiums?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
               />
-              <TextField
+              <MonthField
                 name="reference_month"
                 label="Mês de referência"
                 required
-                inputMode="numeric"
-                placeholder="03/2026"
-                mask={maskMonthYear}
                 hint="Mês/ano a que a emissão se refere."
               />
             </form>

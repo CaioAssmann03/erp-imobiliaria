@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
-import { toast } from "sonner";
 
 import { FormActions } from "@/components/form/FormActions";
 import { FormSection } from "@/components/form/FormSection";
@@ -18,6 +17,7 @@ import {
 } from "@/lib/schemas/entry-batch";
 
 import { entriesUrl } from "@/lib/entry-batch-workspace";
+import { toast } from "@/lib/toast";
 
 import { BatchSection } from "./entries-form/BatchSection";
 import { EntryLineFields } from "./entries-form/EntryLineFields";

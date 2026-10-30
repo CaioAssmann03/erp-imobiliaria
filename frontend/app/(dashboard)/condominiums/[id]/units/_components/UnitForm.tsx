@@ -3,9 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
@@ -25,6 +24,7 @@ import {
   type UnitFormOutput,
 } from "@/lib/schemas/unit";
 
+import { toast } from "@/lib/toast";
 import { unitsUrl } from "@/lib/unit-workspace";
 
 import { BillingSection } from "./unit-form/BillingSection";
@@ -33,6 +33,7 @@ import { IdentificationSection } from "./unit-form/IdentificationSection";
 import { MetersSection } from "./unit-form/MetersSection";
 import { useUnitSubmit } from "./unit-form/use-unit-submit";
 import { UnitDeleteButton } from "./UnitDeleteButton";
+import type { PendingLink } from "./unit-people/pending-link";
 import { UnitPeopleSection } from "./unit-people/UnitPeopleSection";
 
 interface UnitFormProps {
@@ -63,7 +64,9 @@ export function UnitForm({ condominiumId, unitId }: UnitFormProps) {
     mode: "onTouched",
   });
   const { handleSubmit, reset, setError } = methods;
-  const { submit, isSubmitting } = useUnitSubmit(condominiumId, unitId, setError);
+  // Na unidade nova, o proprietário e o inquilino escolhidos aguardam aqui: são gravados depois da unidade.
+  const [pending, setPending] = useState<PendingLink[]>([]);
+  const { submit, isSubmitting } = useUnitSubmit(condominiumId, unitId, setError, pending);
 
   useEffect(() => {
     if (unit) reset(unitToForm(unit));
@@ -90,10 +93,26 @@ export function UnitForm({ condominiumId, unitId }: UnitFormProps) {
           <FractionsSection condominiumId={condominiumId} />
         </div>
         <div id="proprietario" className="scroll-mt-20">
-          <UnitPeopleSection unitId={unit?.id} role="owner" links={unit?.unit_people ?? []} onChanged={refreshUnit} />
+          <UnitPeopleSection
+            unitId={unit?.id}
+            role="owner"
+            links={unit?.unit_people ?? []}
+            onChanged={refreshUnit}
+            pending={pending}
+            onAddPending={(link) => setPending((current) => [...current, link])}
+            onRemovePending={(key) => setPending((current) => current.filter((link) => link.key !== key))}
+          />
         </div>
         <div id="inquilino" className="scroll-mt-20">
-          <UnitPeopleSection unitId={unit?.id} role="tenant" links={unit?.unit_people ?? []} onChanged={refreshUnit} />
+          <UnitPeopleSection
+            unitId={unit?.id}
+            role="tenant"
+            links={unit?.unit_people ?? []}
+            onChanged={refreshUnit}
+            pending={pending}
+            onAddPending={(link) => setPending((current) => [...current, link])}
+            onRemovePending={(key) => setPending((current) => current.filter((link) => link.key !== key))}
+          />
         </div>
         <div id="cobranca" className="scroll-mt-20 space-y-4">
           <BillingSection />

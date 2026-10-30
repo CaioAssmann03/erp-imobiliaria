@@ -3,7 +3,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type { UseFormSetError } from "react-hook-form";
-import { toast } from "sonner";
 
 import {
   getBillingEventsListQueryKey,
@@ -19,6 +18,7 @@ import {
   type BillingEventFormInput,
   type BillingEventFormOutput,
 } from "@/lib/schemas/billing-event";
+import { toast } from "@/lib/toast";
 
 export function useBillingEventSubmit(billingEventId: string | undefined, setError: UseFormSetError<BillingEventFormInput>) {
   const router = useRouter();
