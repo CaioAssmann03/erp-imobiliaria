@@ -27,7 +27,7 @@ Source of truth: `app/globals.css` (Tailwind v4 `@theme`). shadcn tokens map to 
 
 ## Theming (Settings)
 Preferences are **cookies** (`ui_mode`, `ui_accent`, `ui_accent_custom`, `ui_font`, `ui_text`, `ui_motion`) → attributes on `<html>` (`data-mode`, `data-accent`, `data-font`, `data-text`, `data-motion`);
-CSS swaps variables only. The server does not read them (the HTML is the same for everyone): an inline script in the root layout's `<head>` (`APPEARANCE_INIT_SCRIPT`, `lib/theme/appearance.ts`) copies the cookies to `<html>` before the first paint, so there is no flash. The shell is the same for every mode and accent (spec 049): a narrow icon **rail** (`shell/Rail.tsx`) whose modules open a **module menu** card (`shell/ModuleMenu.tsx`, data in `lib/navigation/module-menu.ts`); both use only the tokens above, so a new mode or accent reaches them with no extra CSS.
+CSS swaps variables only. The server does not read them (the HTML is the same for everyone): an inline script in the root layout's `<head>` (`APPEARANCE_INIT_SCRIPT`, `lib/theme/appearance.ts`) copies the cookies to `<html>` before the first paint, so there is no flash. The shell is the same for every mode and accent (spec 049): a narrow icon **rail** (`shell/rail/Rail.tsx`) whose modules open a **module menu** card (`shell/menu/ModuleMenu.tsx`, data in `lib/navigation/module-menu.ts`); both use only the tokens above, so a new mode or accent reaches them with no extra CSS.
 
 | Preference | Values | Default |
 |---|---|---|
@@ -38,7 +38,7 @@ CSS swaps variables only. The server does not read them (the HTML is the same fo
 | Motion | `full`, `reduced` (animations and transitions cut to ~0 by `html[data-motion="reduced"]`) | `full` |
 
 Defined in `lib/theme/appearance.ts` (`DEFAULT_APPEARANCE`, `ACCENTS`...); validated by `parseAppearance` and, in the script, by the same lists; applied by
-`shell/settings/apply-appearance.ts` (cookie 1 year, `SameSite=Lax`). 
+`lib/theme/apply-appearance.ts` (cookie 1 year, `SameSite=Lax`). 
 A `custom` accent is two CSS variables on `<html>` (`--accent-custom`, `--accent-foreground`, the readable text color, set by the head script and `applyAppearance`); `html[data-accent="custom"]` derives `--color-brand-strong/-light` from it with `color-mix`. The settings row shows the orange dot (the default) and, beside it, a rainbow dot that opens the device color picker plus a hex field.
 Never hardcode a theme color; never use `localStorage` for appearance.
 

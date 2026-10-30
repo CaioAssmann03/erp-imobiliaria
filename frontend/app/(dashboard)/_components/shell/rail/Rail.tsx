@@ -7,11 +7,11 @@ import { useState } from "react";
 import { Brand } from "@/components/brand/Brand";
 import { activeModule, APP_MODULES } from "@/lib/navigation/module-menu";
 import { cn } from "@/lib/utils";
-import { LogoutButton } from "./LogoutButton";
-import { MODULE_ICONS } from "./menu-icons";
-import { ModuleMenu, railButtonClass, RailLabel } from "./ModuleMenu";
-import { SearchRailButton } from "./SearchRailButton";
-import { SettingsDialog } from "./SettingsDialog";
+import { LogoutButton } from "@/app/(dashboard)/_components/shell/menu/LogoutButton";
+import { MODULE_ICONS } from "@/app/(dashboard)/_components/shell/menu/menu-icons";
+import { ModuleMenu, railButtonClass, RailLabel } from "@/app/(dashboard)/_components/shell/menu/ModuleMenu";
+import { SearchRailButton } from "@/app/(dashboard)/_components/shell/search/SearchRailButton";
+import { SettingsDialog } from "@/app/(dashboard)/_components/shell/SettingsDialog";
 import { useRailExpanded } from "./use-rail-expanded";
 
 /**

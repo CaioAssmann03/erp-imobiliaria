@@ -12,7 +12,7 @@ import { activeModule, APP_MODULES, isItemActive, type ModuleKey } from "@/lib/n
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "./LogoutButton";
 import { ITEM_ICONS, MODULE_ICONS } from "./menu-icons";
-import { SettingsDialog } from "./SettingsDialog";
+import { SettingsDialog } from "@/app/(dashboard)/_components/shell/SettingsDialog";
 
 /** Linha do menu do celular: 44 px de altura, o mínimo confortável para o dedo. */
 const rowClass = (isActive: boolean) =>

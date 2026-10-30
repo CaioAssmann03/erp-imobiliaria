@@ -10,11 +10,11 @@ import { searchShortcutLabel } from "@/lib/navigation/platform";
 import { cn } from "@/lib/utils";
 import { centeredModalBackdropClass } from "@/lib/theme/ui";
 
-import { OPEN_SEARCH_EVENT } from "./search/open-search-event";
-import { SearchResults } from "./search/SearchResults";
-import type { SearchResultItem } from "./search/types";
-import { useSearchResults } from "./search/use-search-results";
-import { useSearchShortcut } from "./search/use-search-shortcut";
+import { OPEN_SEARCH_EVENT } from "./open-search-event";
+import { SearchResults } from "./SearchResults";
+import type { SearchResultItem } from "./types";
+import { useSearchResults } from "./use-search-results";
+import { useSearchShortcut } from "./use-search-shortcut";
 
 /**
  * Busca global estilo Spotlight: o header tem um botão de vidro e o painel de busca
@@ -87,7 +87,7 @@ export function GlobalSearch() {
 
       <Dialog.Portal>
         <Dialog.Backdrop className={cn("z-40", centeredModalBackdropClass)} />
-        <Dialog.Popup className="glass fixed top-[8vh] left-1/2 z-50 w-[min(40rem,94vw)] sm:top-[14vh] -translate-x-1/2 overflow-hidden rounded-[1.75rem] outline-none transition duration-200 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
+        <Dialog.Popup className="glass fixed top-[8vh] left-1/2 z-50 w-[min(40rem,94vw)] sm:top-[14vh] -translate-x-1/2 overflow-hidden rounded-shell outline-none transition duration-200 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
           <Dialog.Title className="sr-only">Busca</Dialog.Title>
           <input
             type="text"

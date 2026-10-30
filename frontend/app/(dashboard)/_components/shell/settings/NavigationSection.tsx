@@ -3,7 +3,7 @@
 import { useIsApplePlatform } from "@/hooks/use-platform";
 import { searchShortcutLabel } from "@/lib/navigation/platform";
 
-import { useRailExpanded } from "../use-rail-expanded";
+import { useRailExpanded } from "@/app/(dashboard)/_components/shell/rail/use-rail-expanded";
 import { SettingsGroup, SettingsRow } from "./SettingsSection";
 import { SettingsSwitch } from "./SettingsSwitch";
 

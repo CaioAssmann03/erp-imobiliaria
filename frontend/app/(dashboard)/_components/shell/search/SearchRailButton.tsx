@@ -6,8 +6,8 @@ import { useIsApplePlatform } from "@/hooks/use-platform";
 import { searchShortcutLabel } from "@/lib/navigation/platform";
 import { cn } from "@/lib/utils";
 
-import { railButtonClass, RailLabel } from "./ModuleMenu";
-import { requestOpenSearch } from "./search/open-search-event";
+import { railButtonClass, RailLabel } from "@/app/(dashboard)/_components/shell/menu/ModuleMenu";
+import { requestOpenSearch } from "./open-search-event";
 
 /**
  * O botão da busca global na rail, logo acima das configurações: a lupa com o atalho (embaixo dela, na rail recolhida; ao lado do nome,
