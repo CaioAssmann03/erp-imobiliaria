@@ -69,6 +69,57 @@ def test_event_crud_and_unique_code(api_client: APIClient, company: Company) -> 
     assert body(renamed)["name"] == "Limpeza"
 
 
+def test_an_event_left_without_code_gets_the_lowest_free_one_of_the_company(
+    api_client: APIClient, company: Company, other_company: Company
+) -> None:
+    _ = BillingEvent.objects.create(company=other_company, code=2, name="Alheio")
+
+    first = api_client.post(reverse(EVENTS), {"name": "Primeiro"}, format="json")
+    typed = api_client.post(reverse(EVENTS), {"code": 250, "name": "Limpeza"}, format="json")
+    second = api_client.post(reverse(EVENTS), {"name": "Segundo"}, format="json")
+    third = api_client.post(reverse(EVENTS), {"name": "Terceiro"}, format="json")
+
+    # 250 typed by hand does not move the sequence: 1, then 2, then 3. The other company's 2 does not count.
+    assert [body(response)["code"] for response in (first, typed, second, third)] == [1, 250, 2, 3]
+
+
+def test_the_sequence_skips_the_codes_taken_by_hand_and_fills_the_gaps(api_client: APIClient, company: Company) -> None:
+    for code in (1, 3, 4, 6):
+        _ = BillingEvent.objects.create(company=company, code=code, name=f"Evento {code}")
+
+    created = [body(api_client.post(reverse(EVENTS), {"name": f"Novo {n}"}, format="json"))["code"] for n in range(4)]
+
+    assert created == [2, 5, 7, 8]
+
+
+def test_a_code_freed_by_a_deletion_is_given_again(api_client: APIClient, company: Company) -> None:
+    for code in (1, 2, 3):
+        _ = BillingEvent.objects.create(company=company, code=code, name=f"Evento {code}")
+    _ = BillingEvent.objects.get(code=2).delete()
+
+    assert BillingEvent.next_code_in(company.pk) == 2
+    assert body(api_client.post(reverse(EVENTS), {"name": "Volta o 2"}, format="json"))["code"] == 2
+
+
+def test_a_null_code_is_refused_so_a_patch_never_changes_it_by_accident(api_client: APIClient, company: Company) -> None:
+    event = BillingEvent.objects.create(company=company, code=7, name="Taxa")
+
+    response = api_client.patch(reverse(EVENT, args=[event.pk]), {"code": None}, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    event.refresh_from_db()
+    assert event.code == 7
+
+
+def test_a_typed_code_still_has_to_be_free(api_client: APIClient, company: Company) -> None:
+    _ = BillingEvent.objects.create(company=company, code=5, name="TARIFA BANCO")
+
+    duplicate = api_client.post(reverse(EVENTS), {"code": 5, "name": "Outro"}, format="json")
+
+    assert duplicate.status_code == status.HTTP_400_BAD_REQUEST
+    assert "billing_event.code.duplicate_in_company" in error_codes(duplicate)
+
+
 def test_events_of_another_company_are_invisible(api_client: APIClient, other_company: Company) -> None:
     _ = BillingEvent.objects.create(company=other_company, code=1, name="Alheio")
 
