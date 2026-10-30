@@ -1,3 +1,8 @@
+---
+summary: Status report of calendar sprint 4 (2026-10-23 to 2026-11-05, partial, data up to 2026-10-29), in Portuguese: goal, result, planned items, quality, retrospective and next sprint.
+read-when: you need what the team reported so far for calendar sprint 4 (it counts calendar sprints, not the roadmap phases)
+skip-if: you need what is done or comes next in the project → roadmap/README.md; the previous sprint → view-report/status_sprint_2.md
+---
 # Status Report da Sprint 3 — ERP Imobiliária
 
 ## 1. Identificação
