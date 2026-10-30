@@ -25,12 +25,16 @@ from ..serializers import (
     BillingDocumentPdfDownloadSerializer,
     BillingDocumentReissueSerializer,
     BillingDocumentSerializer,
+    BillingMonthSummaryQuerySerializer,
+    BillingMonthSummarySerializer,
+    DelinquencyQuerySerializer,
     DelinquencyReportSerializer,
     ExtraBillingDocumentSerializer,
     ExtraBillingResultSerializer,
 )
+from ..services.build_billing_month_summary import build_billing_month_summary
 from ..services.cancel_billing_document import cancel_billing_document
-from ..services.build_delinquency_report import DelinquencyReport, build_delinquency_report
+from ..services.build_delinquency_report import DelinquencyPage, DelinquencyReport, build_delinquency_report
 from ..services.issue_extra_billing_document import issue_extra_billing_document
 from ..services.generate_billing_document_pdf import generate_billing_document_pdf
 from ..services.render_delinquency_pdf import render_delinquency_pdf
@@ -143,15 +147,37 @@ class BillingDocumentViewSet(CompanyScopedViewSetMixin, viewsets.ReadOnlyModelVi
         body = {"download_url": download_url, "expires_in": DOWNLOAD_URL_TTL_SECONDS, "generated_at": pdf.generated_at}
         return Response(BillingDocumentPdfDownloadSerializer(body).data, status=status_code)
 
-    def _delinquency_report(self) -> DelinquencyReport:
-        """The overdue report over what the user may see and the filters ask (`?condominium=`, `?reference_month=`)."""
-        return build_delinquency_report(self.filter_queryset(self.get_queryset()), timezone.localdate())
+    def _delinquency_report(self, page: DelinquencyPage | None = None) -> DelinquencyReport:
+        """The overdue report over what the user may see and the filters ask (`?condominium=`, `?reference_month=`); `page` for the screen."""
+        return build_delinquency_report(self.filter_queryset(self.get_queryset()), timezone.localdate(), page)
 
-    @extend_schema(parameters=DELINQUENCY_FILTERS, responses=DelinquencyReportSerializer, operation_id="billing_documents_delinquency")
+    @extend_schema(
+        parameters=[*DELINQUENCY_FILTERS, DelinquencyQuerySerializer],
+        responses=DelinquencyReportSerializer,
+        operation_id="billing_documents_delinquency",
+    )
     @action(detail=False, methods=["get"])
     def delinquency(self, request: Request) -> Response:
-        """Report: the boletos awaiting payment past their due date, with the days late and the totals."""
-        return Response(DelinquencyReportSerializer(self._delinquency_report()).data)
+        """Report: the boletos awaiting payment past their due date, with the days late and the totals; the rows come 10 per page by default (`?page=`, `?page_size=` up to 100)."""
+        query = DelinquencyQuerySerializer(data=request.query_params)
+        _ = query.is_valid(raise_exception=True)
+        page = DelinquencyPage(number=query.validated_data["page"], size=query.validated_data["page_size"])
+        return Response(DelinquencyReportSerializer(self._delinquency_report(page)).data)
+
+    @extend_schema(
+        parameters=[BillingMonthSummaryQuerySerializer],
+        responses=BillingMonthSummarySerializer(many=True),
+        operation_id="billing_documents_summary",
+    )
+    @action(detail=False, methods=["get"], pagination_class=None)
+    def summary(self, request: Request) -> Response:
+        """The boletos issued, paid and open per reference month over the last months (default 6), for the dashboard."""
+        query = BillingMonthSummaryQuerySerializer(data=request.query_params)
+        _ = query.is_valid(raise_exception=True)
+        lines = build_billing_month_summary(
+            self.filter_queryset(self.get_queryset()), query.validated_data["months"], timezone.localdate()
+        )
+        return Response(BillingMonthSummarySerializer(lines, many=True).data)
 
     @extend_schema(
         parameters=DELINQUENCY_FILTERS,

@@ -92,9 +92,11 @@ def test_registered_documents_count_and_totals_are_per_condominium(  # type: ign
     per_condominium = {line["condominium_name"]: (line["count"], Decimal(line["total_amount"])) for line in data["by_condominium"]}
     assert per_condominium[document.unit.condominium.name] == (2, document.amount + third.amount)
     assert per_condominium[other_condominium.name] == (1, second.amount)
-    # Ordered by condominium, then the oldest due date first.
-    ordered = [(row["condominium_name"], row["days_overdue"]) for row in data["rows"]]
+    # Ordered by the condominium's code, then the oldest due date first.
+    code_of = {document.unit.condominium.name: document.unit.condominium.code, other_condominium.name: other_condominium.code}
+    ordered = [(code_of[row["condominium_name"]], row["days_overdue"]) for row in data["rows"]]
     assert ordered == sorted(ordered, key=lambda pair: (pair[0], -pair[1]))
+    assert [line["condominium_name"] for line in data["by_condominium"]] == sorted(code_of, key=code_of.get)
 
 
 def test_filters_by_condominium_and_reference_month(
@@ -143,6 +145,53 @@ def test_rows_are_capped_but_totals_cover_everything(document: BillingDocument, 
     assert report.count == 1
 
 
+def _twelve_overdue(document: BillingDocument, new_document, make_unit) -> list[BillingDocument]:  # type: ignore[no-untyped-def]
+    """The fixture's document plus eleven more, all overdue (spec 057)."""
+    documents = [_due(document, 3)]
+    for number in range(11):
+        created = create_billing_document(new_document(unit=make_unit(f"3{number:02d}"), reference_month=date(2026, 9, 1), due_date=date(2026, 9, 10)))
+        documents.append(_due(created, 4 + number))
+    return documents
+
+
+def test_rows_come_ten_per_page(api_client: APIClient, document: BillingDocument, new_document, make_unit) -> None:  # type: ignore[no-untyped-def]
+    documents = _twelve_overdue(document, new_document, make_unit)
+
+    first = body(api_client.get(reverse(REPORT)))
+    second = body(api_client.get(reverse(REPORT), {"page": 2}))
+
+    assert (first["page"], first["page_size"], first["page_count"]) == (1, 10, 2)
+    assert len(first["rows"]) == 10
+    assert len(second["rows"]) == 2
+    shown = [row["document_id"] for row in first["rows"] + second["rows"]]
+    assert sorted(shown) == sorted(str(item.pk) for item in documents)
+    assert len(set(shown)) == 12
+
+
+def test_totals_cover_every_page_and_a_bad_page_is_refused(  # type: ignore[no-untyped-def]
+    api_client: APIClient, document: BillingDocument, new_document, make_unit
+) -> None:
+    documents = _twelve_overdue(document, new_document, make_unit)
+
+    second = body(api_client.get(reverse(REPORT), {"page": 2}))
+    past_the_end = body(api_client.get(reverse(REPORT), {"page": 9}))
+
+    assert second["count"] == past_the_end["count"] == 12
+    assert Decimal(second["total_amount"]) == sum((item.amount for item in documents), Decimal(0))
+    assert past_the_end["rows"] == []
+    for invalid in ("0", "-1", "two"):
+        assert api_client.get(reverse(REPORT), {"page": invalid}).status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_the_pdf_service_keeps_every_row(document: BillingDocument, new_document, make_unit) -> None:  # type: ignore[no-untyped-def]
+    _ = _twelve_overdue(document, new_document, make_unit)
+
+    report = build_delinquency_report(BillingDocument.objects.all(), timezone.localdate())
+
+    assert len(report.rows) == 12
+    assert (report.page, report.page_count) == (1, 1)
+
+
 def test_pdf_is_a_download_with_the_same_filters(api_client: APIClient, document: BillingDocument) -> None:
     _ = _due(document, 5)
 
@@ -164,3 +213,15 @@ def test_pdf_escapes_the_text_of_the_data(api_client: APIClient, document: Billi
 
     assert response.status_code == status.HTTP_200_OK
     assert response.content.startswith(b"%PDF")
+
+
+def test_the_page_size_can_be_asked_and_is_capped(api_client: APIClient, document: BillingDocument, new_document, make_unit) -> None:  # type: ignore[no-untyped-def]
+    _ = _twelve_overdue(document, new_document, make_unit)
+
+    big = body(api_client.get(reverse(REPORT), {"page_size": 25}))
+    small = body(api_client.get(reverse(REPORT), {"page_size": 5, "page": 3}))
+
+    assert (big["page_size"], big["page_count"], len(big["rows"])) == (25, 1, 12)
+    assert (small["page_size"], small["page_count"], len(small["rows"])) == (5, 3, 2)
+    for invalid in ("0", "101", "many"):
+        assert api_client.get(reverse(REPORT), {"page_size": invalid}).status_code == status.HTTP_400_BAD_REQUEST

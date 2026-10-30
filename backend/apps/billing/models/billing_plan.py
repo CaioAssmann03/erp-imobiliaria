@@ -42,7 +42,7 @@ class BillingPlan(BaseModel):
     class Meta:
         verbose_name = "Billing Plan"
         verbose_name_plural = "Billing Plans"
-        ordering = ("condominium__name", "name")
+        ordering = ("condominium__code", "name")
         constraints = (
             models.UniqueConstraint(
                 fields=("condominium", "name"),

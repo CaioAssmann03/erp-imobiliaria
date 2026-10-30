@@ -13,7 +13,7 @@ from ..serializers import CondominiumBillingRulesSerializer
 class CondominiumBillingRulesViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[CondominiumBillingRules]):
     """How each condominium is billed: the issuance day, the due date and the late-payment terms."""
 
-    queryset = CondominiumBillingRules.objects.order_by("condominium__name")
+    queryset = CondominiumBillingRules.objects.order_by("condominium__code")
     serializer_class = CondominiumBillingRulesSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ("condominium",)
