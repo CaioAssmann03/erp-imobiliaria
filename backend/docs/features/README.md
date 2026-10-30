@@ -71,5 +71,7 @@ One row per spec; update it in the same change that creates or closes the spec.
 | [059](059-entry-batch-condominium-filter.md) | Entry batch filter by condominium | lite | done | none |
 | [060](060-catalog-item-condominiums.md) | Condominiums of a catalog item | lite | done | none |
 | [061](061-code-ordering.md) | Code ordering | lite | done | none |
+| [062](062-soft-delete-archiving.md) | Soft delete (archiving) of registry records | full | done | none |
+| [063](063-admin-organization-and-archived-page.md) | Admin organization and the Arquivados page | lite | done | none |
 
 The finished specs (001–029 and 049–051) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.

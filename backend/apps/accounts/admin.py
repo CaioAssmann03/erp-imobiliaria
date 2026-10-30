@@ -4,9 +4,9 @@ from django.contrib import admin
 from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group
-from unfold.admin import ModelAdmin
 from unfold.forms import AdminPasswordChangeForm, UserChangeForm, UserCreationForm
 
+from apps.core.infrastructure.admin_base import MetriModelAdmin
 from apps.core.infrastructure.scoping import CompanyScopedAdminMixin
 
 from .models import User
@@ -16,7 +16,7 @@ admin.site.unregister(Group)
 
 @final
 @admin.register(User)
-class UserAdmin(CompanyScopedAdminMixin, BaseUserAdmin, ModelAdmin):  # type: ignore[type-arg]
+class UserAdmin(CompanyScopedAdminMixin, BaseUserAdmin, MetriModelAdmin):  # type: ignore[type-arg]
     fieldsets = (*(BaseUserAdmin.fieldsets or ()), ("Company", {"fields": ("company",)}))
     add_fieldsets = (
         *(BaseUserAdmin.add_fieldsets or ()),
@@ -30,5 +30,5 @@ class UserAdmin(CompanyScopedAdminMixin, BaseUserAdmin, ModelAdmin):  # type: ig
 
 @final
 @admin.register(Group)
-class GroupAdmin(BaseGroupAdmin, ModelAdmin):
+class GroupAdmin(BaseGroupAdmin, MetriModelAdmin):
     pass
