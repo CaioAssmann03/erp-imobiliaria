@@ -7,11 +7,13 @@ import { useState } from "react";
 
 import { CompactFilter, FilterSummary } from "@/components/CompactFilter";
 import type { FilterGroup } from "@/components/FilterMenu";
+import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { usePersonsList } from "@/lib/api/generated";
 import { CONDOMINIUMS_MODULE } from "@/lib/person-module";
-import { newPersonUrl, PERSON_LIST_PAGE_SIZE } from "@/lib/person-workspace";
+import { newPersonUrl } from "@/lib/person-workspace";
 import { cn } from "@/lib/utils";
 
 import { PersonListItem } from "./PersonListItem";
@@ -25,9 +27,10 @@ export function PersonsList({ openPersonId, className }: { openPersonId: string 
   const [filters, setFilters] = useState({ status: "", type: "" });
   const term = useDebouncedValue(search.trim());
 
+  const { limit, showMore } = useGrowingLimit(`${term}|${filters.status}|${filters.type}`);
   const { data, isLoading, isPlaceholderData } = usePersonsList(
     {
-      limit: PERSON_LIST_PAGE_SIZE,
+      limit,
       person_module: CONDOMINIUMS_MODULE,
       ...(term ? { query: term } : {}),
       ...(filters.status ? { active: filters.status === "active" } : {}),
@@ -119,13 +122,7 @@ export function PersonsList({ openPersonId, className }: { openPersonId: string 
         )}
       </nav>
 
-      {data && (
-        <p className="px-1 text-center text-caption text-ink-soft">
-          {data.count > results.length
-            ? `${results.length} de ${data.count}: refine a busca`
-            : `${data.count} pessoa(s)`}
-        </p>
-      )}
+      {data && <ShowMore shown={results.length} total={data.count} noun="pessoa(s)" onMore={showMore} />}
     </aside>
   );
 }

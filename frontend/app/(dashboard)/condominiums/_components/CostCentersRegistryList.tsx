@@ -7,10 +7,12 @@ import { useState } from "react";
 
 import { CompactFilter, FilterSummary } from "@/components/CompactFilter";
 import type { FilterGroup } from "@/components/FilterMenu";
+import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useCostCentersList } from "@/lib/api/generated";
-import { COST_CENTER_LIST_PAGE_SIZE, newCostCenterUrl } from "@/lib/cost-center-workspace";
+import { newCostCenterUrl } from "@/lib/cost-center-workspace";
 import { cn } from "@/lib/utils";
 
 import { CostCenterListItem } from "./CostCenterListItem";
@@ -25,10 +27,11 @@ export function CostCentersRegistryList({ condominiumId }: { condominiumId: stri
   const [status, setStatus] = useState("");
   const term = useDebouncedValue(search.trim());
 
+  const { limit, showMore } = useGrowingLimit(`${term}|${status}`);
   const { data, isLoading, isPlaceholderData } = useCostCentersList(
     {
       condominium: condominiumId,
-      limit: COST_CENTER_LIST_PAGE_SIZE,
+      limit,
       ...(term ? { query: term } : {}),
       ...(status ? { active: status === "active" } : {}),
     },
@@ -97,13 +100,7 @@ export function CostCentersRegistryList({ condominiumId }: { condominiumId: stri
           )}
         </nav>
 
-        {data && (
-          <p className="px-1 text-center text-caption text-ink-soft">
-            {data.count > results.length
-              ? `${results.length} de ${data.count}: refine a busca`
-              : `${data.count} sub-conta(s)`}
-          </p>
-        )}
+        {data && <ShowMore shown={results.length} total={data.count} noun="sub-conta(s)" onMore={showMore} />}
       </div>
     </section>
   );

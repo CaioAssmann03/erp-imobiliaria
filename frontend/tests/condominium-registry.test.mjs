@@ -11,6 +11,7 @@ import {
   registryLayout,
   sectionPosition,
   selectedCondominiumId,
+  selectedCondominiumPage,
 } from "../lib/condominium-registry.ts";
 
 test("the registry frame wraps the empty screen, the new form, one condominium and its lists of blocks and cost centers", () => {
@@ -20,6 +21,7 @@ test("the registry frame wraps the empty screen, the new form, one condominium a
   assert.equal(isRegistryPath("/condominiums/0a1b/blocks"), true);
   assert.equal(isRegistryPath("/condominiums/0a1b/units"), true);
   assert.equal(isRegistryPath("/condominiums/0a1b/cost-centers"), true);
+  assert.equal(isRegistryPath("/condominiums/0a1b/persons"), true);
 });
 
 test("the other condominium screens have no list column", () => {
@@ -50,8 +52,9 @@ test("a condominium URL can point at a section, and the page has only what is th
   assert.deepEqual(REGISTRY_SECTIONS.map((section) => section.id), ["dados-gerais", "taxa-e-cobranca"]);
 });
 
-test("blocks, units and cost centers are screens of their own, opened from the side menu", () => {
-  assert.deepEqual(CONDOMINIUM_PAGES.map((page) => page.label), ["Blocos", "Unidades", "Sub-contas"]);
+test("blocks, units, cost centers and people are screens of their own, opened from the side menu", () => {
+  assert.deepEqual(CONDOMINIUM_PAGES.map((page) => page.label), ["Blocos", "Unidades", "Sub-contas", "Pessoas"]);
+  assert.equal(condominiumPageUrl("x", "persons"), "/condominiums/x/persons");
   assert.equal(condominiumPageUrl("x", "blocks"), "/condominiums/x/blocks");
   assert.equal(condominiumPageUrl("x", "cost-centers"), "/condominiums/x/cost-centers");
   assert.equal(condominiumPageUrl("x", "units"), "/condominiums/x/units");
@@ -90,4 +93,12 @@ test("on a phone the list and the open page are separate screens", () => {
   assert.deepEqual(registryLayout("/condominiums/0a1b"), { hasFrame: true, showListOnPhone: false, showPageOnPhone: true });
   assert.deepEqual(registryLayout("/condominiums/new"), { hasFrame: true, showListOnPhone: false, showPageOnPhone: true });
   assert.deepEqual(registryLayout("/condominiums/units"), { hasFrame: false, showListOnPhone: false, showPageOnPhone: true });
+});
+
+test("the open screen of a condominium is kept when another one is picked", () => {
+  assert.equal(selectedCondominiumPage("/condominiums/0a1b/blocks"), "blocks");
+  assert.equal(selectedCondominiumPage("/condominiums/0a1b/persons"), "persons");
+  assert.equal(selectedCondominiumPage("/condominiums/0a1b"), null);
+  assert.equal(selectedCondominiumPage("/condominiums"), null);
+  assert.equal(selectedCondominiumPage("/condominiums/persons"), null);
 });

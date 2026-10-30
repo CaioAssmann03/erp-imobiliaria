@@ -4,12 +4,12 @@ export const PERSON_SECTIONS = [
   { id: "contato", label: "Contato" },
 ] as const;
 
-/** Quantas pessoas a coluna da lista carrega de uma vez; acima disso o usuário afina a busca. */
-export const PERSON_LIST_PAGE_SIZE = 50;
-
 export const personsUrl = () => "/condominiums/persons";
 export const newPersonUrl = () => "/condominiums/persons/new";
 export const personUrl = (personId: string) => `/condominiums/persons/${personId}`;
+
+/** Os papéis de uma pessoa numa unidade, como o usuário os lê. */
+export const UNIT_ROLE_LABELS = { owner: "Proprietário", tenant: "Inquilino" } as const;
 
 export interface PersonsFrameState {
   /** A coluna da lista só envolve as telas do cadastro de pessoas: a vazia, o cadastro novo e a pessoa aberta. */

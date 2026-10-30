@@ -11,6 +11,7 @@ export const CONDOMINIUM_PAGES = [
   { key: "blocks", label: "Blocos" },
   { key: "units", label: "Unidades" },
   { key: "cost-centers", label: "Sub-contas" },
+  { key: "persons", label: "Pessoas" },
 ] as const;
 
 export type CondominiumPageKey = (typeof CONDOMINIUM_PAGES)[number]["key"];
@@ -28,7 +29,7 @@ export function condominiumUrl(condominiumId: string, section?: RegistrySectionI
   return `/condominiums/${condominiumId}${section ? `#${section}` : ""}`;
 }
 
-/** Telas com a coluna da lista de condomínios: a vazia, o cadastro novo, a página de um condomínio e as listas de blocos, unidades e sub-contas dele. */
+/** Telas com a coluna da lista de condomínios: a vazia, o cadastro novo, a página de um condomínio e as listas de blocos, unidades, sub-contas e pessoas dele. */
 export function isRegistryPath(pathname: string | null) {
   if (!pathname) return false;
   const [, root, segment, extra, deeper] = pathname.split("/");
@@ -36,7 +37,7 @@ export function isRegistryPath(pathname: string | null) {
   if (segment === undefined || segment === "") return true;
   if (segment !== "new" && RESERVED_SEGMENTS.includes(segment)) return false;
   if (deeper) return false;
-  return extra === undefined || extra === "" || extra === "blocks" || extra === "units" || extra === "cost-centers";
+  return extra === undefined || extra === "" || extra === "blocks" || extra === "units" || extra === "cost-centers" || extra === "persons";
 }
 
 /** O condomínio aberto (o id da URL), ou `null` na tela vazia, no cadastro novo e fora do cadastro. */
