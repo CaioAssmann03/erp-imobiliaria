@@ -25,8 +25,8 @@ pytestmark = pytest.mark.django_db
 # ----- suppliers -----
 
 
-def test_a_supplier_with_an_open_account_payable_cannot_be_deleted(
-    api_client: APIClient, supplier: Supplier, make_account  # type: ignore[no-untyped-def]
+def test_a_supplier_with_an_open_account_payable_cannot_be_deleted(  # type: ignore[no-untyped-def]
+    api_client: APIClient, supplier: Supplier, make_account
 ) -> None:
     _ = make_account()
 
@@ -85,16 +85,16 @@ def test_a_deleted_cost_center_frees_its_name_and_code(condominium: Condominium)
 # ----- condominiums -----
 
 
-def test_an_open_account_payable_blocks_archiving_its_condominium(
-    condominium: Condominium, make_account  # type: ignore[no-untyped-def]
+def test_an_open_account_payable_blocks_archiving_its_condominium(  # type: ignore[no-untyped-def]
+    condominium: Condominium, make_account
 ) -> None:
     _ = make_account()
 
     assert CondominiumArchiveRules(condominium).has_open_accounts_payable()
 
 
-def test_archiving_a_condominium_keeps_its_ledger(
-    condominium: Condominium, current_account: CurrentAccount, make_entry  # type: ignore[no-untyped-def]
+def test_archiving_a_condominium_keeps_its_ledger(  # type: ignore[no-untyped-def]
+    condominium: Condominium, current_account: CurrentAccount, make_entry
 ) -> None:
     entry = make_entry()
     entry.save()

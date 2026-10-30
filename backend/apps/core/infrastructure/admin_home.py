@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, cast
 
 from django.conf import settings
 from django.contrib import admin
@@ -18,6 +18,6 @@ def _archived_total(request: HttpRequest) -> int:
 
 def dashboard_callback(request: HttpRequest, context: dict[str, Any]) -> dict[str, Any]:
     """The home of the Admin (spec 063): the sidebar groups as cards, so nothing is searched in a long list."""
-    context["home_groups"] = settings.UNFOLD["SIDEBAR"]["navigation"]
+    context["home_groups"] = cast(dict[str, Any], settings.UNFOLD)["SIDEBAR"]["navigation"]
     context["archived_total"] = _archived_total(request)
     return context

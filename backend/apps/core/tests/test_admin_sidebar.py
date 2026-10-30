@@ -1,13 +1,19 @@
 """Spec 063, R1/R2: the Admin sidebar is grouped, in Portuguese, and lists every registered model."""
 
+from typing import Any, cast
+
 import pytest
 from django.conf import settings
 from django.contrib import admin
 from django.urls import reverse
 
 
-def sidebar_groups() -> list[dict]:  # type: ignore[type-arg]
-    return settings.UNFOLD["SIDEBAR"]["navigation"]
+def unfold_settings() -> dict[str, Any]:
+    return cast(dict[str, Any], settings.UNFOLD)
+
+
+def sidebar_groups() -> list[dict[str, Any]]:
+    return cast(list[dict[str, Any]], unfold_settings()["SIDEBAR"]["navigation"])
 
 
 def test_the_sidebar_is_grouped_and_links_the_archived_page() -> None:
@@ -57,8 +63,8 @@ def test_the_home_shows_a_card_per_group_and_the_archived_count(client, company)
 
 
 def test_the_admin_uses_the_orange_of_the_site() -> None:
-    assert settings.UNFOLD["COLORS"]["primary"]["600"] == "#f05a28"
-    assert settings.UNFOLD["COLORS"]["base"]["900"] == "#21211f"
+    assert unfold_settings()["COLORS"]["primary"]["600"] == "#f05a28"
+    assert unfold_settings()["COLORS"]["base"]["900"] == "#21211f"
 
 
 @pytest.mark.django_db

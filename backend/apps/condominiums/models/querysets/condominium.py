@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from apps.core.infrastructure.search.term import ClassifiedTerm
 
 
-class CondominiumQuerySet(CountsByTypeQuerySet["Condominium"], SoftDeleteQuerySet["Condominium"]):
+class CondominiumQuerySet(CountsByTypeQuerySet["Condominium"], SoftDeleteQuerySet["Condominium"]):  # type: ignore[override]
     def without_cost_centers(self) -> "CondominiumQuerySet":
         """Active condominiums with no cost center (sub-conta): they block the finance."""
         return self.filter(active=True, cost_centers__isnull=True)
