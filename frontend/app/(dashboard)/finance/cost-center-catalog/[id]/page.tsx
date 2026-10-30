@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
-import { FormPage } from "@/components/form/FormPage";
-import { PageHeader } from "@/components/PageHeader";
+import { uuidParam } from "@/lib/uuid-param";
 
+import { CatalogHeader } from "../_components/CatalogHeader";
 import { CatalogItemForm } from "../_components/CatalogItemForm";
 
-export const metadata: Metadata = { title: "Editar sub-conta" };
+export const metadata: Metadata = { title: "Sub-conta" };
 
 export default async function EditCatalogItemPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const id = uuidParam((await params).id);
+  if (!id) notFound();
 
   return (
-    <FormPage>
-      <PageHeader back={{ href: "/finance/cost-center-catalog", label: "Catálogo de sub-contas" }} title="Editar sub-conta" />
+    <>
+      <CatalogHeader itemId={id} />
       <CatalogItemForm itemId={id} />
-    </FormPage>
+    </>
   );
 }

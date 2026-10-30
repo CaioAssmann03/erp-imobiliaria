@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { FormPage } from "@/components/form/FormPage";
-import { PageHeader } from "@/components/PageHeader";
+import { BackLink } from "@/components/BackLink";
+import { catalogUrl } from "@/lib/cost-center-catalog-workspace";
 
 import { CatalogItemForm } from "../_components/CatalogItemForm";
 
@@ -9,9 +9,14 @@ export const metadata: Metadata = { title: "Nova sub-conta" };
 
 export default function NewCatalogItemPage() {
   return (
-    <FormPage>
-      <PageHeader back={{ href: "/finance/cost-center-catalog", label: "Catálogo de sub-contas" }} title="Nova sub-conta" />
+    <>
+      <div className="mb-6">
+        <div className="lg:hidden">
+          <BackLink href={catalogUrl()} label="Sub-contas" />
+        </div>
+        <h1 className="text-title">Nova sub-conta</h1>
+      </div>
       <CatalogItemForm />
-    </FormPage>
+    </>
   );
 }

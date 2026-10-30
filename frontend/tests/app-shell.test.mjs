@@ -75,6 +75,14 @@ test("the blocks, the units, the cost centers and the people of a condominium ar
   }
 });
 
+test("the whole finance module is in the 3 columns: no sub-header with tabs is left", () => {
+  assert.equal(existsSync(join(DASHBOARD, "finance", "layout.tsx")), false);
+  for (const route of ["accounts-payable", "statement", "entries", "company-account", "cost-center-catalog"]) {
+    const layout = readFileSync(join(DASHBOARD, "finance", route, "layout.tsx"), "utf8");
+    assert.match(layout, /Frame/, route);
+  }
+});
+
 test("the right-hand menu is drawn by the layout frames, never by the pages, so it stays mounted between screens", () => {
   const frames = {
     "condominiums/_components/CondominiumsFrame.tsx": /CondominiumSideMenu/,
@@ -83,11 +91,23 @@ test("the right-hand menu is drawn by the layout frames, never by the pages, so 
     "condominiums/persons/_components/PersonsFrame.tsx": /SectionIndex/,
     "condominiums/[id]/units/_components/UnitsFrame.tsx": /UnitSideMenu/,
     "condominiums/events/_components/BillingEventsFrame.tsx": /SectionIndex/,
+    "finance/accounts-payable/_components/AccountsPayableFrame.tsx": /AccountPayableSideMenu/,
+    "finance/statement/_components/StatementFrame.tsx": /StatementSideMenu/,
+    "finance/entries/_components/EntriesFrame.tsx": /SectionIndex/,
+    "finance/company-account/_components/CompanyAccountFrame.tsx": /SectionIndex/,
+    "finance/cost-center-catalog/_components/CatalogFrame.tsx": /SectionIndex/,
   };
   for (const [file, menu] of Object.entries(frames)) {
     assert.match(readFileSync(join(DASHBOARD, ...file.split("/")), "utf8"), menu, file);
   }
-  const pages = sourceFiles(join(DASHBOARD, "condominiums")).filter((file) => /[\\/]page\.tsx$/.test(file));
+  const pages = [
+    ...sourceFiles(join(DASHBOARD, "condominiums")),
+    ...sourceFiles(join(DASHBOARD, "finance", "accounts-payable")),
+    ...sourceFiles(join(DASHBOARD, "finance", "statement")),
+    ...sourceFiles(join(DASHBOARD, "finance", "entries")),
+    ...sourceFiles(join(DASHBOARD, "finance", "company-account")),
+    ...sourceFiles(join(DASHBOARD, "finance", "cost-center-catalog")),
+  ].filter((file) => /[\\/]page\.tsx$/.test(file));
   assert.ok(pages.length > 10);
   for (const page of pages) {
     assert.doesNotMatch(readFileSync(page, "utf8"), /\baside=/, relative(ROOT, page));
