@@ -71,11 +71,11 @@ def test_list_is_paginated_and_ordered(
     response = api_client.get(reverse(LIST))
 
     assert set(body(response)) == {"count", "next", "previous", "results"}
-    # condominium name first ("Edifício Lua" < "Residencial Sol"), then the cost center name
+    # condominium name first ("Edifício Lua" < "Residencial Sol"), then the cost center code (the order they were created in)
     assert [(str(item["condominium"]), item["name"]) for item in results(response)] == [
         (str(other_condominium.pk), "A"),
-        (str(condominium.pk), "A"),
         (str(condominium.pk), "B"),
+        (str(condominium.pk), "A"),
     ]
 
 
@@ -84,7 +84,7 @@ def test_requires_authentication() -> None:
 
 
 def test_ordering_is_declared() -> None:
-    assert CostCenter._meta.ordering == ("condominium__name", "name")
+    assert CostCenter._meta.ordering == ("condominium__name", "code")
 
 
 # ----- R3: company scoping -----

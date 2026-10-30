@@ -46,7 +46,7 @@ class Person(SequentialCodeMixin, BaseModel):
     class Meta:
         verbose_name = "Person"
         verbose_name_plural = "Persons"
-        ordering = ("name",)
+        ordering = ("code",)
         indexes = (
             GinIndex(
                 OpClass(Upper("name"), name="gin_trgm_ops"), name="person_name_trgm"

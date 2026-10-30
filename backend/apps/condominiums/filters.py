@@ -4,7 +4,7 @@ import django_filters
 from django.db.models import QuerySet, TextChoices
 from django.utils import timezone
 
-from .models import Condominium, CondominiumAdministrationContract, Unit
+from .models import Condominium, CondominiumAdministrationContract, Unit, UnitPerson
 
 
 class CondominiumPending(TextChoices):
@@ -82,3 +82,14 @@ class UnitFilter(django_filters.FilterSet):
                 return queryset.filter(active=True).with_lease_ending_soon(today)  # type: ignore[attr-defined, no-any-return]
             case _:
                 return queryset.billing_blocked()  # type: ignore[attr-defined, no-any-return]
+
+
+@final
+class UnitPersonFilter(django_filters.FilterSet):
+    """Exact filters plus `?condominium=`: every link of the units of one condominium (its people)."""
+
+    condominium = django_filters.UUIDFilter(field_name="unit__condominium_id")
+
+    class Meta:
+        model = UnitPerson
+        fields = ("unit", "person", "role")

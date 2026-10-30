@@ -63,7 +63,7 @@ class Condominium(SequentialCodeMixin, BaseModel):
     class Meta:
         verbose_name = "Condominium"
         verbose_name_plural = "Condominiums"
-        ordering = ("name",)
+        ordering = ("code",)
 
     @override
     def save(self, *args: Any, **kwargs: Any) -> None:
