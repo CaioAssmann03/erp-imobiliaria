@@ -1,5 +1,5 @@
 /** Segmentos de `/condominiums/<segmento>` que não são o id de um condomínio. */
-const RESERVED_SEGMENTS = ["new", "units", "blocks", "cost-centers", "persons"];
+const RESERVED_SEGMENTS = ["new", "units", "blocks", "cost-centers", "persons", "events"];
 
 export interface CostCentersFrameState {
   /** A coluna da lista de sub-contas só envolve o cadastro e a edição de uma sub-conta (a tela de sub-contas do condomínio tem a lista no centro). */

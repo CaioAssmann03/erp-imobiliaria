@@ -1,31 +1,44 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+
 import { SectionIndex } from "@/components/SectionIndex";
-import { useBlocksRetrieve } from "@/lib/api/generated";
-import { blockUrl } from "@/lib/block-workspace";
-import { condominiumPageUrl, condominiumUrl } from "@/lib/condominium-registry";
+import { useCurrentUrl } from "@/hooks/use-current-url";
+import { pageKeepingOrigin, withFrom } from "@/lib/back-target";
+import { BLOCK_SECTIONS, blockUnitsUrl, blockUrl } from "@/lib/block-workspace";
 
 /**
- * O menu da direita da edição de um bloco: os dados dele, **as unidades do bloco** (a lista de unidades já filtrada por ele) e o caminho de
- * volta aos blocos e ao condomínio. O condomínio vem do próprio bloco (a mesma consulta do formulário); enquanto carrega, só reserva o espaço.
+ * O menu da direita do bloco aberto, que a moldura (`BlocksFrame`) desenha: só os **Dados gerais** e, em **Cadastros**, as **Unidades** do
+ * bloco, que abrem uma sub-tela no meio (daí, abrir uma unidade leva ao módulo de unidades). Na sub-tela os mesmos dois títulos, com os dados
+ * gerais levando de volta à página do bloco e as Unidades em destaque, como os menus do condomínio e da unidade. Os links levam a pilha do
+ * "voltar": a página do bloco abre as unidades com ela como origem, e a sub-tela volta à página do jeito que ela estava.
  */
-export function BlockSideMenu({ blockId }: { blockId: string }) {
-  const { data: block } = useBlocksRetrieve(blockId);
-  if (!block) return <div aria-hidden className="hidden w-48 shrink-0 xl:block 2xl:w-56" />;
+export function BlockSideMenu({ blockId, current }: { blockId: string; current?: "units" | null }) {
+  const here = useCurrentUrl();
+  const fromParam = useSearchParams().get("from");
+
+  if (current) {
+    return (
+      <SectionIndex
+        sections={[]}
+        label="Menu do bloco"
+        links={[
+          {
+            title: "Neste bloco",
+            items: BLOCK_SECTIONS.map((section) => ({ href: `${pageKeepingOrigin(blockUrl(blockId), fromParam)}#${section.id}`, label: section.label })),
+          },
+          { title: "Cadastros", items: [{ href: here, label: "Unidades", current: true }] },
+        ]}
+      />
+    );
+  }
 
   return (
     <SectionIndex
-      sections={[]}
-      label="Menu do bloco"
-      links={{
-        title: "Neste bloco",
-        items: [
-          { href: blockUrl(block.id), label: "Dados do bloco", current: true },
-          { href: `/condominiums/${block.condominium}/units?block=${block.id}`, label: "Unidades do bloco" },
-          { href: condominiumPageUrl(block.condominium, "blocks"), label: "Blocos do condomínio" },
-          { href: condominiumUrl(block.condominium), label: "Dados do condomínio" },
-        ],
-      }}
+      sections={BLOCK_SECTIONS}
+      label="Seções do bloco"
+      title="Neste bloco"
+      links={{ title: "Cadastros", items: [{ href: withFrom(blockUnitsUrl(blockId), here), label: "Unidades" }] }}
     />
   );
 }

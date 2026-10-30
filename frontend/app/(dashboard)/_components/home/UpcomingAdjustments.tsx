@@ -9,8 +9,6 @@ export function UpcomingAdjustments({ adjustments }: { adjustments: UpcomingAdju
     <RecentList
       title="Próximos reajustes"
       allHref="/condominiums"
-      metaLabel="Data"
-      extraLabel="Prazo"
       emptyText="Nenhum condomínio com reajuste configurado."
       items={adjustments.map((adjustment) => ({
         id: adjustment.id,

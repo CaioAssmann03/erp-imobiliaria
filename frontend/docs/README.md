@@ -11,6 +11,7 @@ Organized by the SPDD REASONS canvas. Find your task, open **only** the listed f
 | Task | Open |
 |---|---|
 | New CRUD resource / page | `operations/new-resource-page.md` → `structure/component-patterns.md` |
+| A module or screen in the **3-column layout** (list, content, right menu), the back button, scope filters, sub-screens | `structure/three-column-layout.md` |
 | Change a form or field | `norms/forms.md` · `entities/domain-model.md` |
 | Change a list / table / filter | `structure/component-patterns.md` · `norms/data-and-cache.md` |
 | Create or move a component | `norms/components.md` · `structure/folders-and-routes.md` |
@@ -31,5 +32,5 @@ Organized by the SPDD REASONS canvas. Find your task, open **only** the listed f
 `requirements/` scope · `entities/` domain model · `approach/` architecture and decisions · `structure/` folders, routes, patterns · `operations/` recipes ·
 `norms/` conventions · `safeguards/` security, performance, a11y, checklist.
 
-Always true: code English, UI text Portuguese · every page renders on the client (static shell + client queries) · tokens only · never edit `lib/api/generated/` · docs and `AGENTS.md` in English ·
+Always true: code English, UI text Portuguese · every page renders on the client (static shell + client queries) · registry screens use the 3-column layout, drawn by frames (pages render only their content) · tokens only · never edit `lib/api/generated/` · docs and `AGENTS.md` in English ·
 update the doc you changed in the same change.

@@ -18,35 +18,31 @@ const pick = (pair: readonly [string, string], amount: number) => (amount === 1 
 
 function Group({ group, summary }: { group: (typeof GROUPS)[number]; summary: Summary }) {
   return (
-    <>
-      <Link
-        href={group.href}
-        className="font-medium text-ink tabular-nums underline-offset-4 transition-colors hover:underline"
-      >
-        {summary.total} {pick(group.noun, summary.total)}
-      </Link>{" "}
-      <span className="text-ink-faint">
-        ({summary.active} {pick(group.adjective, summary.active)})
-      </span>
-    </>
+    <Link
+      href={group.href}
+      title={`${summary.active} ${pick(group.adjective, summary.active)}`}
+      className="tabular-nums underline-offset-4 transition-colors hover:text-ink hover:underline"
+    >
+      {summary.total} {pick(group.noun, summary.total)}
+    </Link>
   );
 }
 
 /**
- * Client Component: o resumo dos cadastros como uma frase no cabeçalho do painel, cada total com link para a sua lista
- * ("8 condomínios (7 ativos), 53 unidades (46 ativas) e 30 pessoas (28 ativas)"). Enquanto carrega, ou se a API falhar, fica a descrição
- * de sempre.
+ * Client Component: o resumo dos cadastros numa linha discreta sob o cumprimento, só os totais com link para a lista de cada um
+ * ("8 condomínios · 53 unidades · 30 pessoas"); quantos estão ativos aparece ao passar o mouse. Enquanto carrega, ou se a API falhar, fica a
+ * descrição de sempre.
  */
 export function RegistrySummary() {
   const { data: dash } = useDashboardRetrieve();
   if (!dash) return <span>{FALLBACK}</span>;
 
   return (
-    <span>
+    <span className="flex flex-wrap items-center gap-x-2">
       {GROUPS.map((group, position) => (
         <Fragment key={group.key}>
+          {position > 0 && <span aria-hidden>·</span>}
           <Group group={group} summary={dash[group.key]} />
-          {position < GROUPS.length - 2 ? ", " : position === GROUPS.length - 2 ? " e " : "."}
         </Fragment>
       ))}
     </span>

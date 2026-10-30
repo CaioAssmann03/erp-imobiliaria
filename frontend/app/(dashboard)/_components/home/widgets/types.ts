@@ -1,13 +1,13 @@
 import type { Dashboard } from "@/lib/api/generated/models";
 
-/** Ordem de exibição no painel: resumo, contas a pagar e pendências em destaque, depois os gráficos. */
+/** Ordem de exibição no painel: contas a pagar e receita fixa (números), depois pendências e os dois gráficos. */
 export const WIDGET_IDS = [
   "condominiums",
   "accounts-payable",
+  "fixed-revenue",
   "pending",
   "adjustments",
   "responsibles",
-  "fixed-revenue",
 ] as const;
 
 export type WidgetId = (typeof WIDGET_IDS)[number];

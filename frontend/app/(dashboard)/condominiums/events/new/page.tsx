@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
 
+import { BackLink } from "@/components/BackLink";
+import { eventsUrl } from "@/lib/billing-event-workspace";
 import { BillingEventForm } from "../_components/BillingEventForm";
-import { FormPage } from "@/components/form/FormPage";
-import { PageHeader } from "@/components/PageHeader";
 
 export const metadata: Metadata = { title: "Novo evento" };
 
 export default function NewBillingEventPage() {
   return (
-    <FormPage>
-      <PageHeader back={{ href: "/billing/events", label: "Eventos" }} title="Novo evento" />
+    <>
+      <div className="mb-6">
+        <div className="lg:hidden">
+          <BackLink href={eventsUrl()} label="Eventos" />
+        </div>
+        <h1 className="text-title">Novo evento</h1>
+      </div>
       <BillingEventForm />
-    </FormPage>
+    </>
   );
 }

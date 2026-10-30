@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 
 import { BlockForm } from "../../../_components/BlockForm";
-import { CondominiumSideMenu } from "../../../_components/CondominiumSideMenu";
-import { FormPage } from "@/components/form/FormPage";
 import { PageHeader } from "@/components/PageHeader";
 import { condominiumPageUrl, condominiumUrl } from "@/lib/condominium-registry";
 
@@ -13,9 +11,9 @@ export default async function NewCondominiumBlockPage({ params }: { params: Prom
   const listUrl = condominiumPageUrl(id, "blocks");
 
   return (
-    <FormPage aside={<CondominiumSideMenu condominiumId={id} current="blocks" />}>
+    <>
       <PageHeader back={{ href: condominiumUrl(id), label: "Condomínio" }} title="Novo bloco" />
       <BlockForm condominiumId={id} returnUrl={listUrl} />
-    </FormPage>
+    </>
   );
 }

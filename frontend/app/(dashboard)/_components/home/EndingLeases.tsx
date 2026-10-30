@@ -10,8 +10,6 @@ export function EndingLeases({ leases }: { leases: Lease[] }) {
     <RecentList
       title="Locações a vencer"
       allHref="/condominiums"
-      metaLabel="Locatário"
-      extraLabel="Fim"
       emptyText="Nenhuma locação termina nos próximos 60 dias."
       items={leases.map((lease) => ({
         id: lease.id,

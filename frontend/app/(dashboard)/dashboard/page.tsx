@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { ListFallback } from "@/components/data-list";
-import { LinkButton } from "@/components/LinkButton";
 import { PageHeader } from "@/components/PageHeader";
 
 import { DashboardHome } from "../_components/home/DashboardHome";
@@ -17,14 +16,6 @@ export default function DashboardHomePage() {
       <PageHeader
         title={<Greeting />}
         description={<RegistrySummary />}
-        actions={
-          <>
-            <LinkButton variant="secondary" href="/condominiums/persons/new">
-              Nova pessoa
-            </LinkButton>
-            <LinkButton href="/condominiums/new">Novo condomínio</LinkButton>
-          </>
-        }
       />
       <Suspense fallback={<ListFallback />}>
         <DashboardHome />

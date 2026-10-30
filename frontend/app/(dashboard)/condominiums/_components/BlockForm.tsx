@@ -65,6 +65,7 @@ export function BlockForm({
         onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))}
         className="space-y-4"
       >
+        <div id="dados-gerais" className="scroll-mt-20">
         <FormSection title="Identificação">
           {!isEdit && !condominiumId && (
             <SelectField
@@ -77,6 +78,7 @@ export function BlockForm({
           )}
           <TextField name="name" label="Bloco" required maxLength={60} placeholder="Ex.: Bloco A" autoComplete="off" />
         </FormSection>
+        </div>
         <FormActions
           isSubmitting={isSubmitting}
           danger={block && <BlockDeleteButton condominiumId={block.condominium} blockId={block.id} name={block.name} />}

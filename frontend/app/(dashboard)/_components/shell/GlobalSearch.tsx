@@ -2,12 +2,14 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import { Search } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 import { useIsApplePlatform } from "@/hooks/use-platform";
 import { searchShortcutLabel } from "@/lib/platform";
+import { cn } from "@/lib/utils";
 
+import { OPEN_SEARCH_EVENT } from "./search/open-search-event";
 import { SearchResults } from "./search/SearchResults";
 import type { SearchResultItem } from "./search/types";
 import { useSearchResults } from "./search/use-search-results";
@@ -16,10 +18,12 @@ import { useSearchShortcut } from "./search/use-search-shortcut";
 /**
  * Busca global estilo Spotlight: o header tem um botão de vidro e o painel de busca
  * abre centralizado sobre a página (⌘K no Mac, Ctrl+K no Windows). Cadastros vêm da API; páginas e gráficos do
- * painel são filtrados no navegador.
+ * painel são filtrados no navegador. No dashboard o botão é a barra inteira no header; nas outras telas o do header só aparece no celular
+ * e, no desktop, quem abre é o botão da rail (`SearchRailButton`, pelo evento `OPEN_SEARCH_EVENT`) ou o atalho. O painel abre no meio da tela.
  */
 export function GlobalSearch() {
   const router = useRouter();
+  const onDashboard = usePathname() === "/dashboard";
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
@@ -27,6 +31,11 @@ export function GlobalSearch() {
 
   const { items, searchable, waiting } = useSearchResults(query);
   useSearchShortcut(useCallback(() => setOpen((current) => !current), []));
+  useEffect(() => {
+    const onRequest = () => setOpen(true);
+    window.addEventListener(OPEN_SEARCH_EVENT, onRequest);
+    return () => window.removeEventListener(OPEN_SEARCH_EVENT, onRequest);
+  }, []);
 
   const close = () => {
     setOpen(false);
@@ -49,7 +58,7 @@ export function GlobalSearch() {
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setActive((activeIndex - 1 + count) % count);
-    } else if (event.key === "Enter" && items[activeIndex]) {
+    } else if ((event.key === "Enter" || (event.key === "Tab" && !event.shiftKey)) && items[activeIndex]) {
       event.preventDefault();
       go(items[activeIndex]);
     }
@@ -64,7 +73,10 @@ export function GlobalSearch() {
       }}
     >
       <Dialog.Trigger
-        className="flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink lg:glass-pill lg:h-11 lg:w-full lg:justify-between lg:px-5 lg:text-left lg:text-[0.9375rem]"
+        className={cn(
+          "flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink",
+          onDashboard ? "lg:glass-pill lg:h-11 lg:w-full lg:justify-between lg:px-5 lg:text-left lg:text-[0.9375rem]" : "lg:hidden"
+        )}
         aria-label="Abrir busca"
       >
         <Search className="size-5 lg:hidden" />

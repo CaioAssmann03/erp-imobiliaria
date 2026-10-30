@@ -10,13 +10,14 @@ import { cn } from "@/lib/utils";
 import { LogoutButton } from "./LogoutButton";
 import { MODULE_ICONS } from "./menu-icons";
 import { ModuleMenu, railButtonClass, RailLabel } from "./ModuleMenu";
+import { SearchRailButton } from "./SearchRailButton";
 import { SettingsDialog } from "./SettingsDialog";
 import { useRailExpanded } from "./use-rail-expanded";
 
 /**
  * Client Component: a lateral (só em telas grandes; no celular a navegação é o `MobileMenu`). Recolhida é uma faixa de ícones; expandida, os
  * ícones com o nome ao lado. Clicar no logo alterna os dois, e a escolha fica lembrada neste navegador. Um módulo com grupos abre o cartão
- * `ModuleMenu`; sem grupos (Painel, Pessoas) é um link direto. Embaixo ficam as configurações e o sair. Precisa do pathname para marcar o módulo ativo.
+ * `ModuleMenu`; sem grupos (Painel, Pessoas) é um link direto. Embaixo ficam a busca (`SearchRailButton`), as configurações e o sair. Precisa do pathname para marcar o módulo ativo.
  */
 export function Rail() {
   const current = activeModule(usePathname());
@@ -41,7 +42,7 @@ export function Rail() {
         aria-label={expanded ? "Recolher menu" : "Expandir menu"}
         aria-expanded={expanded}
         title={expanded ? "Recolher menu" : "Expandir menu"}
-        className="mb-4 flex h-11 items-center rounded-control px-2 outline-none transition-opacity hover:opacity-75 focus-visible:ring-2 focus-visible:ring-ring"
+        className="mb-8 flex h-11 items-center rounded-control px-2 outline-none transition-opacity hover:opacity-75 focus-visible:ring-2 focus-visible:ring-ring"
       >
         <Brand compact={!expanded} />
       </button>
@@ -70,6 +71,7 @@ export function Rail() {
       </nav>
 
       <div className="mt-auto flex flex-col gap-1.5">
+        <SearchRailButton expanded={expanded} />
         <SettingsDialog expanded={expanded} />
         <LogoutButton rail expanded={expanded} />
       </div>

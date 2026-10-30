@@ -1,7 +1,7 @@
 ---
 summary: End-to-end recipe to add a CRUD resource (generate client, schema, route files, components, cache, nav).
 read-when: you add a new resource page
-skip-if: a small task (field, widget, accent) → operations/recipes.md
+skip-if: a small task (field, widget, accent) → operations/recipes.md; a module in the 3-column layout (list | content | menu) → structure/three-column-layout.md
 ---
 # Recipe: add a resource (O — Operations)
 

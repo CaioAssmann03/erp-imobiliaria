@@ -1,7 +1,7 @@
 ---
 summary: Anatomy of a list, a form, related-records section and dashboard widget.
 read-when: you build a list, form or widget
-skip-if: step-by-step for a whole resource → operations/new-resource-page.md; component rules → norms/components.md
+skip-if: step-by-step for a whole resource → operations/new-resource-page.md; the 3-column registry layout, lists, back button → structure/three-column-layout.md; component rules → norms/components.md
 ---
 # Component patterns (S — Structure)
 
@@ -15,7 +15,7 @@ XxxRow.tsx      client  one row (ConfirmDeleteButton, RowLink, RowActions)
 `page.tsx` (server) only renders `PageHeader` and `<XxxTable/>` (inside `<Suspense fallback={<ListFallback/>}>` when the table reads `useSearchParams`); the table fetches in the browser. A filter that arrives in the URL (`?condominium=`, `?pending=`) is read by the table with `useSearchParams` and used as the initial filter.
 The first column of the people and condominium lists is the read-only `ID` (`code`: `hidden md:table-cell`, `tabular-nums`) and the row's mobile `sub` line starts with `ID n`; the search placeholder says it accepts the ID. A unit has no ID (it is its condominium plus its number). Anything that lists or offers people (list, `PersonPicker`, search) sends `module=condominiums` from `lib/person-module.ts`.
 State: `hooks/use-list-params.ts`. Blocks: `components/data-list/` (`Toolbar`, `SearchField`, `RowLink`,
-`RowActions`, `ListState`), `FilterMenu` (the "Filtros" button with a panel, for tables), `ShowMore` + `useGrowingLimit` (the footer of the side and registry lists: 10 records at first, *Mostrar mais* brings 10 more, back to 10 when the search or a filter changes), `CompactFilter` + `FilterSummary` (a small icon inside the search field and a one-line summary, for the side and registry lists), `Pagination`. Sections with sub-pages (Condomínios, Financeiro) share `components/SectionTabs.tsx` (underlined, collapsible tabs). Periods (due date, entry date) are ready-made options of the `FilterMenu`, never loose date inputs. Filter values are English (`status=active`).
+`RowActions`, `ListState`), `FilterMenu` (the "Filtros" button with a panel, for tables), `ShowMore` + `useGrowingLimit` (the footer of the side and registry lists: 10 records at first, *Mostrar mais* brings 10 more, back to 10 when the search or a filter changes), `FormPage` (the form column; a layout frame passes it the right-hand `aside`, a page outside the registry uses it without one), `ScopeSelect` (the searchable select; `variant="segment"` is a half of the scope row of `ScopeSearchCard`, the white card that glues the condominium | block/unit selects to the search of the side lists; 6 options at most), `CompactFilter` (`columns={2}` lays the selects side by side so the popover is shorter; a `wide` group takes the whole row) (a small icon inside the search field, highlighted with a count badge when a filter is active and the active ones in its tooltip; no summary line; for the side and registry lists), `Pagination`. Sections with sub-pages (Condomínios, Financeiro) share `components/SectionTabs.tsx` (underlined, collapsible tabs). Periods (due date, entry date) are ready-made options of the `FilterMenu`, never loose date inputs. Filter values are English (`status=active`).
 
 ## Form
 

@@ -1,5 +1,4 @@
 import type { FilterGroup } from "@/components/FilterMenu";
-import type { Block } from "@/lib/api/generated/models";
 import { UNIT_TYPES } from "@/lib/schemas/unit";
 
 import { PENDING_OPTIONS } from "./UnitsFilters";
@@ -14,24 +13,15 @@ export interface UnitFilters {
 
 export const NO_UNIT_FILTERS: UnitFilters = { block: "", type: "", status: "", pending: "" };
 
-/** Os filtros das listas de unidades (bloco só se o condomínio tem blocos; pendência só quando veio da URL), para o `CompactFilter`. */
+/**
+ * Os filtros da unidade para o `CompactFilter` (tipo e situação; pendência só quando veio da URL). O bloco não está aqui: é o recorte da lista,
+ * num seletor acima da busca (a pílula da coluna da esquerda, ou `UnitBlockSelect` na lista de cadastro).
+ */
 export function unitFilterGroups(
-  blocks: readonly Block[],
   filters: UnitFilters,
   onChange: (key: keyof UnitFilters, value: string) => void
 ): FilterGroup[] {
   return [
-    ...(blocks.length > 0
-      ? [
-          {
-            key: "block",
-            label: "Bloco",
-            value: filters.block,
-            onChange: (value: string) => onChange("block", value),
-            options: blocks.map((block) => ({ value: block.id, label: block.name })),
-          },
-        ]
-      : []),
     { key: "type", label: "Tipo", value: filters.type, onChange: (value) => onChange("type", value), options: UNIT_TYPES },
     {
       key: "status",

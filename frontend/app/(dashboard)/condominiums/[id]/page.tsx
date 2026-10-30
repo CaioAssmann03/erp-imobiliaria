@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 
 import { CondominiumForm } from "../_components/CondominiumForm";
 import { CondominiumHeader } from "../_components/CondominiumHeader";
-import { CondominiumSideMenu } from "../_components/CondominiumSideMenu";
-import { FormPage } from "@/components/form/FormPage";
 import { getMapsEmbedKey } from "@/lib/maps-embed-key";
 
 export const metadata: Metadata = { title: "Condomínio" };
@@ -13,9 +11,9 @@ export default async function CondominiumPage({ params }: { params: Promise<{ id
   const { id } = await params;
 
   return (
-    <FormPage aside={<CondominiumSideMenu condominiumId={id} />}>
+    <>
       <CondominiumHeader condominiumId={id} />
       <CondominiumForm condominiumId={id} mapsEmbedKey={getMapsEmbedKey()} />
-    </FormPage>
+    </>
   );
 }

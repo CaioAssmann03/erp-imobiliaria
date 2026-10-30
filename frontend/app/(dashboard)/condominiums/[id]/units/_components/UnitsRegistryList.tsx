@@ -6,9 +6,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import { CompactFilter, FilterSummary } from "@/components/CompactFilter";
+import { CompactFilter } from "@/components/CompactFilter";
 import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrentUrl } from "@/hooks/use-current-url";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useBlocksList, useUnitsList } from "@/lib/api/generated";
@@ -17,6 +18,7 @@ import { newUnitUrl } from "@/lib/unit-workspace";
 import { cn } from "@/lib/utils";
 
 import { UnitListItem } from "./UnitListItem";
+import { UnitBlockSelect } from "./UnitBlockSelect";
 import { NO_UNIT_FILTERS, unitFilterGroups, type UnitFilters } from "./unit-filter-groups";
 
 /**
@@ -26,6 +28,7 @@ import { NO_UNIT_FILTERS, unitFilterGroups, type UnitFilters } from "./unit-filt
  */
 export function UnitsRegistryList({ condominiumId }: { condominiumId: string }) {
   const searchParams = useSearchParams();
+  const here = useCurrentUrl();
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<UnitFilters>({
     ...NO_UNIT_FILTERS,
@@ -53,8 +56,9 @@ export function UnitsRegistryList({ condominiumId }: { condominiumId: string }) 
     { query: { placeholderData: keepPreviousData } }
   );
   const results = data?.results ?? [];
-  const filterGroups = unitFilterGroups(blocks, filters, (key, value) => setFilters((current) => ({ ...current, [key]: value })));
-  const clearFilters = () => setFilters(NO_UNIT_FILTERS);
+  const filterGroups = unitFilterGroups(filters, (key, value) => setFilters((current) => ({ ...current, [key]: value })));
+  // "Limpar" é dos filtros da unidade (tipo, situação, pendência); o bloco é o recorte da lista e fica no seletor acima da busca.
+  const clearFilters = () => setFilters((current) => ({ ...NO_UNIT_FILTERS, block: current.block }));
 
   return (
     <section aria-label="Unidades" className="flex flex-col gap-3">
@@ -71,6 +75,12 @@ export function UnitsRegistryList({ condominiumId }: { condominiumId: string }) 
       </div>
 
       <div className="flex flex-col gap-3 rounded-card bg-surface p-3 shadow-card">
+        <UnitBlockSelect
+          blocks={blocks}
+          value={filters.block}
+          onChange={(value) => setFilters((current) => ({ ...current, block: value }))}
+          onCard
+        />
         <div className="flex h-10 items-center gap-2 rounded-control bg-surface-muted pr-1.5 pl-3 text-ink-soft focus-within:ring-2 focus-within:ring-brand/50">
           <Search className="size-4 shrink-0" />
           <input
@@ -83,7 +93,6 @@ export function UnitsRegistryList({ condominiumId }: { condominiumId: string }) 
           />
           <CompactFilter groups={filterGroups} onClear={clearFilters} />
         </div>
-        <FilterSummary groups={filterGroups} onClear={clearFilters} />
 
         <nav aria-label="Lista de unidades" className={cn("transition-opacity", isPlaceholderData && "opacity-60")}>
           {isLoading ? (
@@ -99,7 +108,7 @@ export function UnitsRegistryList({ condominiumId }: { condominiumId: string }) 
           ) : (
             <ul className="space-y-0.5">
               {results.map((unit) => (
-                <UnitListItem key={unit.id} unit={unit} blockName={blockName(unit.block)} onCard />
+                <UnitListItem key={unit.id} unit={unit} blockName={blockName(unit.block)} onCard context={{ from: here }} />
               ))}
             </ul>
           )}

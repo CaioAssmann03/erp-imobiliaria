@@ -5,10 +5,11 @@ import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { CompactFilter, FilterSummary } from "@/components/CompactFilter";
+import { CompactFilter } from "@/components/CompactFilter";
 import type { FilterGroup } from "@/components/FilterMenu";
 import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrentUrl } from "@/hooks/use-current-url";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useCostCentersList } from "@/lib/api/generated";
@@ -23,6 +24,7 @@ import { CostCenterListItem } from "./CostCenterListItem";
  * filtro de situação são no servidor. Abrir uma sub-conta leva à edição dela.
  */
 export function CostCentersRegistryList({ condominiumId }: { condominiumId: string }) {
+  const here = useCurrentUrl();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const term = useDebouncedValue(search.trim());
@@ -78,7 +80,6 @@ export function CostCentersRegistryList({ condominiumId }: { condominiumId: stri
           />
           <CompactFilter groups={groups} onClear={() => setStatus("")} />
         </div>
-        <FilterSummary groups={groups} onClear={() => setStatus("")} />
 
         <nav aria-label="Lista de sub-contas" className={cn("transition-opacity", isPlaceholderData && "opacity-60")}>
           {isLoading ? (
@@ -94,7 +95,7 @@ export function CostCentersRegistryList({ condominiumId }: { condominiumId: stri
           ) : (
             <ul className="space-y-0.5">
               {results.map((costCenter) => (
-                <CostCenterListItem key={costCenter.id} costCenter={costCenter} onCard withStatus />
+                <CostCenterListItem key={costCenter.id} costCenter={costCenter} onCard withStatus from={here} />
               ))}
             </ul>
           )}

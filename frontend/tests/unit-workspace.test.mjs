@@ -69,3 +69,13 @@ test("the unit page has the four sections and the index marker follows the readi
   assert.equal(sectionPosition([-600, -250, 300, 700], 300), 2);
   assert.equal(sectionPosition([500, 900, 1200, 1500], 300), 0);
 });
+
+test("the people of a unit are a sub-screen of the open unit, inside the same frame", () => {
+  const screen = unitsFrameState("/condominiums/c1/units/u1/persons", {});
+  assert.deepEqual([screen.hasFrame, screen.condominiumId, screen.unitId, screen.subScreen, screen.isNew], [true, "c1", "u1", "persons", false]);
+  const page = unitsFrameState("/condominiums/c1/units/u1", {});
+  assert.deepEqual([page.unitId, page.subScreen], ["u1", null]);
+  for (const path of ["/condominiums/c1/units/new/persons", "/condominiums/c1/units/u1/persons/x", "/condominiums/c1/units/u1/other"]) {
+    assert.equal(unitsFrameState(path, {}).hasFrame, false, path);
+  }
+});

@@ -11,6 +11,7 @@ export * from './companies/companies';
 export * from './company-entries/company-entries';
 export * from './condominium-apportionment-criteria/condominium-apportionment-criteria';
 export * from './condominium-billing-rules/condominium-billing-rules';
+export * from './condominium-people/condominium-people';
 export * from './condominiums/condominiums';
 export * from './cost-center-catalog/cost-center-catalog';
 export * from './cost-centers/cost-centers';

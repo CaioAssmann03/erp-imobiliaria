@@ -40,3 +40,11 @@ test("a module with groups has no direct link, one without groups has", () => {
     assert.equal(appModule.groups.length === 0, appModule.href !== undefined);
   }
 });
+
+test("the events are in Condomínios (Cadastros), not in Cobrança", () => {
+  const labelsOf = (key) => APP_MODULES.find((appModule) => appModule.key === key).groups.flatMap((group) => group.items);
+  assert.equal(labelsOf("condominiums").find((item) => item.label === "Eventos")?.href, "/condominiums/events");
+  assert.equal(labelsOf("billing").some((item) => item.label === "Eventos"), false);
+  assert.equal(activeModule("/condominiums/events/new"), "condominiums");
+  assert.equal(activeModule("/billing/events"), "billing");
+});

@@ -3,8 +3,11 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
-import { unitsFrameState } from "@/lib/unit-workspace";
+import { FormPage } from "@/components/form/FormPage";
+import { SectionIndex } from "@/components/SectionIndex";
+import { UNIT_SECTIONS, unitsFrameState } from "@/lib/unit-workspace";
 import { cn } from "@/lib/utils";
+import { UnitSideMenu } from "./UnitSideMenu";
 import { UnitsList } from "./UnitsList";
 
 /**
@@ -18,6 +21,13 @@ export function UnitsFrame({ children }: { children: React.ReactNode }) {
   const state = unitsFrameState(pathname, { condominium: search.get("condominium"), pending: search.get("pending") });
   if (!state.hasFrame) return <>{children}</>;
 
+  // O menu da direita é desta moldura (layout): o da unidade aberta (seções e pessoas) ou o das seções no cadastro novo; a tela vazia não tem.
+  const aside = state.unitId ? (
+    <UnitSideMenu unitId={state.unitId} current={state.subScreen} />
+  ) : state.isNew ? (
+    <SectionIndex sections={UNIT_SECTIONS} label="Seções da unidade" title="Nesta unidade" />
+  ) : null;
+
   return (
     <div className="lg:flex lg:items-start lg:gap-8 2xl:gap-12">
       <UnitsList
@@ -25,7 +35,7 @@ export function UnitsFrame({ children }: { children: React.ReactNode }) {
         openUnitId={state.unitId}
         className={state.showListOnPhone ? "flex" : "hidden lg:flex"}
       />
-      <div className={cn("min-w-0 flex-1", !state.showPageOnPhone && "hidden lg:block")}>{children}</div>
+      <div className={cn("min-w-0 flex-1", !state.showPageOnPhone && "hidden lg:block")}>{aside ? <FormPage aside={aside}>{children}</FormPage> : children}</div>
     </div>
   );
 }

@@ -2,12 +2,15 @@
 
 import { Plus, Search } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import { CompactFilter } from "@/components/CompactFilter";
 import { ShowMore } from "@/components/data-list";
+import { ScopeSearchCard, ScopeSearchRow } from "@/components/ScopeSearchCard";
+import { ScopeSelect } from "@/components/ScopeSelect";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
+import { backTargetOf } from "@/lib/back-target";
 import { useBlocksList, useCondominiumsList } from "@/lib/api/generated";
 import { newBlockUrl } from "@/lib/block-workspace";
 import { cn } from "@/lib/utils";
@@ -16,9 +19,8 @@ import { BlockListItem } from "./BlockListItem";
 
 /**
  * Client Component: a coluna da esquerda do cadastro e da edição de um bloco, a lista dos blocos do condomínio dele no mesmo padrão
- * da lista de condomínios, com o aberto marcado. A escolha do condomínio fica no ícone de filtro dentro da busca (`CompactFilter`) e troca a
- * lista (e o **+**) sem sair da tela; o condomínio da lista se lê numa linha abaixo. Sem `condominiumId` (a edição ainda carregando o bloco)
- * mostra só o esqueleto.
+ * da lista de condomínios, com o aberto marcado. O condomínio é o seletor numa linha abaixo do título, como na coluna de unidades: trocar leva a lista (e o
+ * **+**) para o outro sem sair da tela. Sem `condominiumId` (a edição ainda carregando o bloco) mostra só o esqueleto.
  */
 export function BlocksList({
   condominiumId,
@@ -29,6 +31,8 @@ export function BlocksList({
   openBlockId: string | null;
   className?: string;
 }) {
+  // A origem com que o bloco foi aberto segue ao trocar de bloco pela lista: o "voltar" continua levando a ela.
+  const from = backTargetOf(useSearchParams().get("from"))?.href ?? null;
   const [search, setSearch] = useState("");
   const [chosen, setChosen] = useState<string | null>(null);
   const activeCondominium = chosen ?? condominiumId;
@@ -44,16 +48,12 @@ export function BlocksList({
   const { limit, showMore } = useGrowingLimit(`${term}|${activeCondominium}`);
   const results = matches.slice(0, limit);
   const loading = !activeCondominium || isLoading;
-  const activeCondominiumData = condominiums?.results.find((condominium) => condominium.id === activeCondominium);
-  const condominiumLabel = activeCondominiumData
-    ? `${String(activeCondominiumData.code).padStart(4, "0")} · ${activeCondominiumData.name}`
-    : null;
 
   return (
     <aside
       aria-label="Blocos"
       className={cn(
-        "w-full shrink-0 flex-col gap-3 lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:w-80 2xl:w-96",
+        "w-full shrink-0 flex-col gap-3 lg:sticky lg:top-[4.25rem] lg:h-[calc(100vh-5.25rem)] lg:w-80 2xl:w-96",
         className
       )}
     >
@@ -75,37 +75,38 @@ export function BlocksList({
         )}
       </div>
 
-      <div className="flex h-10 items-center gap-2 rounded-control bg-surface pr-1.5 pl-3 text-ink-soft shadow-card focus-within:ring-2 focus-within:ring-brand/50">
-        <Search className="size-4 shrink-0" />
-        <input
-          type="search"
-          aria-label="Buscar bloco"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Nome do bloco"
-          className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint"
-        />
-        <CompactFilter
-          groups={[
-            {
-              key: "condominium",
-              label: "Condomínio",
-              required: true,
-              value: activeCondominium ?? "",
-              onChange: (value) => {
-                setChosen(value || null);
-                setSearch("");
-              },
-              options: (condominiums?.results ?? []).map((condominium) => ({
-                value: condominium.id,
-                label: `${String(condominium.code).padStart(4, "0")} · ${condominium.name}`,
-              })),
-            },
-          ]}
-          onClear={() => setChosen(null)}
-        />
-      </div>
-      {condominiumLabel && <p className="truncate px-1 text-caption text-ink-soft">{condominiumLabel}</p>}
+      <ScopeSearchCard
+        scopes={
+          <ScopeSelect
+            variant="segment"
+            className="flex-1"
+            label="Condomínio"
+            value={activeCondominium ?? ""}
+            placeholder="Selecione o condomínio"
+            onChange={(value) => {
+              setChosen(value || null);
+              setSearch("");
+            }}
+            options={(condominiums?.results ?? []).map((condominium) => ({
+              value: condominium.id,
+              label: `${String(condominium.code).padStart(4, "0")} · ${condominium.name}`,
+              title: condominium.name,
+            }))}
+          />
+        }
+      >
+        <ScopeSearchRow>
+          <Search className="size-4 shrink-0" />
+          <input
+            type="search"
+            aria-label="Buscar bloco"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Nome do bloco"
+            className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint"
+          />
+        </ScopeSearchRow>
+      </ScopeSearchCard>
 
       <nav aria-label="Lista de blocos" className="min-h-0 flex-1 overflow-y-auto pr-1">
         {loading ? (
@@ -121,7 +122,7 @@ export function BlocksList({
         ) : (
           <ul className="space-y-0.5">
             {results.map((block) => (
-              <BlockListItem key={block.id} block={block} isOpen={block.id === openBlockId} dimmed={matches.some((item) => item.id === openBlockId)} />
+              <BlockListItem key={block.id} block={block} isOpen={block.id === openBlockId} dimmed={matches.some((item) => item.id === openBlockId)} from={from} />
             ))}
           </ul>
         )}

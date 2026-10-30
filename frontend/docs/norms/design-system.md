@@ -25,15 +25,20 @@ Source of truth: `app/globals.css` (Tailwind v4 `@theme`). shadcn tokens map to 
   plus shared `PageHeader`, `LinkButton`, `StatusBadge`, `ConfirmDeleteButton`, `FilterMenu`, `Pagination`, `data-list/`, `form/`.
 
 ## Theming (Settings)
-Preferences are **cookies** (`ui_mode`, `ui_accent`, `ui_font`) → attributes on `<html>` (`data-mode`, `data-accent`, `data-font`);
+Preferences are **cookies** (`ui_mode`, `ui_accent`, `ui_accent_custom`, `ui_font`, `ui_text`, `ui_motion`) → attributes on `<html>` (`data-mode`, `data-accent`, `data-font`, `data-text`, `data-motion`);
 CSS swaps variables only. The server does not read them (the HTML is the same for everyone): an inline script in the root layout's `<head>` (`APPEARANCE_INIT_SCRIPT`, `lib/appearance.ts`) copies the cookies to `<html>` before the first paint, so there is no flash. The shell is the same for every mode and accent (spec 049): a narrow icon **rail** (`shell/Rail.tsx`) whose modules open a **module menu** card (`shell/ModuleMenu.tsx`, data in `lib/module-menu.ts`); both use only the tokens above, so a new mode or accent reaches them with no extra CSS.
 
 | Preference | Values | Default |
 |---|---|---|
 | Mode | `dark`, `light`, `system` | `dark` |
-| Accent | orange, blue, green, violet, red, rose, graphite | orange |
+| Accent | `orange` (our brand color, the default) or `custom` (any #rrggbb from the color picker, cookie `ui_accent_custom`); no other presets | orange |
 | Font | Inter, DM Sans, Source Serif, system | Inter |
+| Text size | `normal` (100%), `large` (112.5%), `xlarge` (125%): the root `font-size`, so every rem scales | `normal` |
+| Motion | `full`, `reduced` (animations and transitions cut to ~0 by `html[data-motion="reduced"]`) | `full` |
 
 Defined in `lib/appearance.ts` (`DEFAULT_APPEARANCE`, `ACCENTS`...); validated by `parseAppearance` and, in the script, by the same lists; applied by
-`shell/settings/apply-appearance.ts` (cookie 1 year, `SameSite=Lax`). Reddish accents also override `--color-danger`.
+`shell/settings/apply-appearance.ts` (cookie 1 year, `SameSite=Lax`). 
+A `custom` accent is two CSS variables on `<html>` (`--accent-custom`, `--accent-foreground`, the readable text color, set by the head script and `applyAppearance`); `html[data-accent="custom"]` derives `--color-brand-strong/-light` from it with `color-mix`. The settings row shows the orange dot (the default) and, beside it, a rainbow dot that opens the device color picker plus a hex field.
 Never hardcode a theme color; never use `localStorage` for appearance.
+
+The **Configurações** window (`shell/SettingsDialog.tsx`) is a quiet two-pane dialog: a left pane with the title and three text tabs (a row on a phone) and, on the right, the tab's name and one line, then **rows** separated by hairlines (`SettingsGroup` + `SettingsRow` in `shell/settings/SettingsSection.tsx`: name and explanation on the left, the control on the right). Controls are few and small: `SegmentedControl` (theme, font shown in its own typeface, text size), color dots (accent) and `SettingsSwitch`. No cards, previews or icons; it closes with the X (a *Concluir* button only on a phone). Tabs: **Aparência** (theme, accent, font), **Acessibilidade** (text size, reduce animations) and **Navegação** (the sidebar's *Nome dos módulos* switch, which is the rail's `localStorage` state, and the keyboard shortcuts list). *Restaurar padrão* resets the appearance cookies only. Add a preference as a row component in `shell/settings/` plus a tab entry; a cookie-backed one also goes in `lib/appearance.ts` (list, default, cookie, init script) and both `apply-appearance.ts` files.

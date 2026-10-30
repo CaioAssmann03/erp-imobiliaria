@@ -12,6 +12,7 @@ import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { Button } from "@/components/ui/button";
 import { useBillingEventsRetrieve } from "@/lib/api/generated";
+import { eventsUrl } from "@/lib/billing-event-workspace";
 import { throwIfNotFound } from "@/lib/query/not-found";
 import {
   BILLING_EVENT_DEFAULTS,
@@ -21,7 +22,8 @@ import {
   type BillingEventFormOutput,
 } from "@/lib/schemas/billing-event";
 
-import { BILLING_EVENTS_URL, useBillingEventSubmit } from "./billing-event-form/use-billing-event-submit";
+import { BillingEventDeleteButton } from "./BillingEventDeleteButton";
+import { useBillingEventSubmit } from "./billing-event-form/use-billing-event-submit";
 
 /** Cadastro e edição de um evento (código e nome). */
 export function BillingEventForm({ billingEventId }: { billingEventId?: string }) {
@@ -49,8 +51,17 @@ export function BillingEventForm({ billingEventId }: { billingEventId?: string }
   return (
     <FormProvider {...methods}>
       <form noValidate onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))} className="space-y-4">
+        <div id="identificacao" className="scroll-mt-20">
         <FormSection title="Identificação">
-          <TextField name="code" label="Código" required inputMode="numeric" maxLength={6} placeholder="Ex.: 250" autoComplete="off" />
+          <TextField
+            name="code"
+            label="Código"
+            inputMode="numeric"
+            maxLength={6}
+            placeholder="Automático"
+            hint="O número pelo qual a equipe conhece o evento (ex.: 250 = Limpeza do condomínio). Em branco, o sistema dá o menor número livre (1, 2, 3…), pulando os que já existem."
+            autoComplete="off"
+          />
           <TextField name="name" label="Nome do evento" required maxLength={120} placeholder="Ex.: Limpeza do condomínio" autoComplete="off" />
           <FieldRow>
             <CheckboxField name="active" label="Cadastro ativo" />
@@ -61,8 +72,9 @@ export function BillingEventForm({ billingEventId }: { billingEventId?: string }
             />
           </FieldRow>
         </FormSection>
-        <FormActions isSubmitting={isSubmitting}>
-          <Button type="button" variant="secondary" onClick={() => router.push(BILLING_EVENTS_URL)}>
+        </div>
+        <FormActions isSubmitting={isSubmitting} danger={event && <BillingEventDeleteButton billingEventId={event.id} name={event.name} />}>
+          <Button type="button" variant="secondary" onClick={() => router.push(eventsUrl())}>
             Cancelar
           </Button>
         </FormActions>

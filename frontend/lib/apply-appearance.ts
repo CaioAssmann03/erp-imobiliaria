@@ -1,24 +1,41 @@
-import { APPEARANCE_COOKIES, type Appearance } from "@/lib/appearance";
+import {
+  APPEARANCE_COOKIES,
+  CUSTOM_ACCENT,
+  customAccentForeground,
+  isHexColor,
+  type Appearance,
+} from "@/lib/appearance";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
+const KEYS = ["mode", "accent", "accentCustom", "font", "text", "motion"] as const;
 
 /** Aplica no <html> (efeito imediato) e grava em cookie (o servidor renderiza já com o tema). */
 export function applyAppearance(next: Appearance) {
   const root = document.documentElement;
-  root.dataset.mode = next.mode;
-  root.dataset.accent = next.accent;
-  root.dataset.font = next.font;
-  for (const key of ["mode", "accent", "font"] as const) {
+  for (const key of KEYS) {
+    root.dataset[key] = next[key];
     document.cookie = `${APPEARANCE_COOKIES[key]}=${next[key]}; path=/; max-age=${ONE_YEAR}; samesite=lax`;
+  }
+  // O destaque personalizado entra por duas variáveis do <html>; o CSS deriva as variações dele (`html[data-accent="custom"]`).
+  if (next.accent === CUSTOM_ACCENT && isHexColor(next.accentCustom)) {
+    root.style.setProperty("--accent-custom", next.accentCustom);
+    root.style.setProperty("--accent-foreground", customAccentForeground(next.accentCustom));
+  } else {
+    root.style.removeProperty("--accent-custom");
+    root.style.removeProperty("--accent-foreground");
   }
 }
 
 /** Lê o tema aplicado no <html> (fonte da verdade depois de qualquer mudança). */
 export function readAppearance(fallback: Appearance): Appearance {
-  const { mode, accent, font } = document.documentElement.dataset;
+  const { dataset } = document.documentElement;
+  const read = <K extends (typeof KEYS)[number]>(key: K) => (dataset[key] as Appearance[K] | undefined) ?? fallback[key];
   return {
-    mode: (mode as Appearance["mode"]) ?? fallback.mode,
-    accent: (accent as Appearance["accent"]) ?? fallback.accent,
-    font: (font as Appearance["font"]) ?? fallback.font,
+    mode: read("mode"),
+    accent: read("accent"),
+    accentCustom: read("accentCustom"),
+    font: read("font"),
+    text: read("text"),
+    motion: read("motion"),
   };
 }
