@@ -100,13 +100,13 @@ The company has **one** Asaas account that issues every boleto and receives the 
 `seed_demo` is local/demo only: **never in production** with real data (the initial company comes from `core.0002_seed_company`). Logs go to stdout; no structured logging, error tracker or alerts yet (use `logging.getLogger(__name__)`, log ids and outcomes, never personal data). The database backup is described in *Database backup* below (spec 040). The receipt files live in R2, outside any Postgres dump, and are **not** covered by it.
 
 ## Database backup
-A `backup` container in the production stack (`backup/`) dumps the ERP database **every night at 03:00** (`America/Sao_Paulo`), encrypts it and uploads it to a **private R2 bucket outside the VPS**; it keeps the **last 30 days plus the first backup of each of the last 12 months** and prunes only after a successful upload (spec 040).
+A `backup` container in the production stack (`backend/backup/`) dumps the ERP database **every night at 03:00** (`America/Sao_Paulo`), encrypts it and uploads it to a **private R2 bucket outside the VPS**; it keeps the **last 30 days plus the first backup of each of the last 12 months** and prunes only after a successful upload (spec 040).
 
 **Enable it (once):**
 1. In Cloudflare R2 create a **private bucket just for backups** and an API token limited to it (read, write, list, delete). Do not reuse the receipts' bucket or token.
 2. Invent a passphrase of 16+ random characters. Save it in a password manager **and** in the VPS `.env`: losing it makes every backup unreadable.
 3. Add to the VPS `.env`: `BACKUP_S3_ENDPOINT_URL` (the account's `https://<account id>.r2.cloudflarestorage.com`), `BACKUP_S3_BUCKET`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY`, `BACKUP_PASSPHRASE`.
-4. Copy the `backup/` folder to the VPS next to the compose file, add the `backup` service from [`backup/README.md`](../../../backup/README.md) to the VPS `docker-compose.yml`, and `./deploy.sh`.
+4. Copy the `backend/backup/` folder to the VPS next to the compose file (as `backup/`), add the `backup` service from [`backend/backup/README.md`](../../backup/README.md) to the VPS `docker-compose.yml`, and `./deploy.sh`.
 5. Take the first one now and look at it: `docker compose exec backup python3 backup.py run-once`, then `docker compose exec backup python3 backup.py status`.
 6. **Do a restore drill before trusting it** (below). Real data must not enter the database before steps 1–6 are done.
 
