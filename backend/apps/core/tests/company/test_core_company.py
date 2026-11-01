@@ -1,37 +1,26 @@
+"""The company's own rules, on the model: the Admin is the only place that writes it (spec 067)."""
+
 import pytest
-from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APIClient
+from django.core.exceptions import ValidationError
 
 from apps.core.models import Company
-
 
 pytestmark = pytest.mark.django_db
 
 CNPJ = "11222333000181"
 
 
-def test_invalid_cnpj_is_rejected(superuser_client: APIClient) -> None:
-    response = superuser_client.post(
-        reverse("company-list"),
-        {"legal_name": "ACME", "cnpj": "11222333000180"},
-        format="json",
-    )
+def test_invalid_cnpj_is_rejected() -> None:
+    with pytest.raises(ValidationError) as raised:
+        Company(legal_name="ACME", cnpj="11222333000180").full_clean()
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "cnpj" in raised.value.message_dict
 
 
-def test_cnpj_is_unique(superuser_client: APIClient) -> None:
+def test_cnpj_is_unique() -> None:
     _ = Company.objects.create(legal_name="A", cnpj=CNPJ)
 
-    response = superuser_client.post(
-        reverse("company-list"), {"legal_name": "B", "cnpj": CNPJ}, format="json"
-    )
+    with pytest.raises(ValidationError) as raised:
+        Company(legal_name="B", cnpj=CNPJ).full_clean()
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-def test_requires_authentication() -> None:
-    response = APIClient().get(reverse("company-list"))
-
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert "cnpj" in raised.value.message_dict

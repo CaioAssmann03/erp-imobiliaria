@@ -75,5 +75,8 @@ One row per spec; update it in the same change that creates or closes the spec.
 | [063](063-admin-organization-and-archived-page.md) | Admin organization and the Arquivados page | lite | done | none |
 | [064](064-server-side-list-filters.md) | Server-side list filters | full | done | none |
 | [065](065-security-hardening.md) | Security hardening | full | done | none |
+| [066](066-server-side-ordering-and-roles.md) | Server-side ordering and roles | lite | done | none |
+| [067](067-api-scope-without-superuser-bypass.md) | API scope without superuser bypass | full | done | none |
+| [068](068-dashboard-focus-lists.md) | Dashboard focus lists | lite | done | none |
 
 The finished specs (001–029 and 049–051) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.

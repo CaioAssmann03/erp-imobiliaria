@@ -116,3 +116,35 @@ def test_a_bad_unit_id_is_a_400(api_client: APIClient) -> None:
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert [error["field"] for error in errors(response)] == ["unit"]
+
+
+def test_each_person_carries_the_roles_and_units_they_hold_in_the_scope(
+    api_client: APIClient, condominium: Condominium, other_condominium: Condominium
+) -> None:
+    unit_a = Unit.objects.create(condominium=condominium, name="101")
+    unit_b = Unit.objects.create(condominium=condominium, name="102")
+    unit_c = Unit.objects.create(condominium=condominium, name="205")
+    foreign = Unit.objects.create(condominium=other_condominium, name="9")
+    maria = link(unit_a, "Maria", "owner")
+    _ = UnitPerson.objects.create(unit=unit_b, person=maria, role="owner", ownership_percentage=100, start_date=date(2025, 1, 1))
+    _ = UnitPerson.objects.create(unit=unit_c, person=maria, role="tenant", start_date=date(2025, 1, 1))
+    _ = UnitPerson.objects.create(unit=foreign, person=maria, role="tenant", start_date=date(2025, 1, 1))  # another condominium
+    ended = UnitPerson.objects.create(unit=unit_a, person=maria, role="tenant", start_date=date(2024, 1, 1))
+    UnitPerson.objects.filter(pk=ended.pk).update(end_date=timezone.localdate() - timedelta(days=1))  # no longer current
+
+    scoped = results(api_client.get(reverse(URL), {"condominium": str(condominium.pk)}))
+    unscoped = results(api_client.get(reverse(URL)))
+
+    assert scoped[0]["unit_roles"] == [{"role": "owner", "units": ["101", "102"]}, {"role": "tenant", "units": ["205"]}]
+    assert unscoped[0]["unit_roles"] == []
+
+
+def test_the_unit_filter_limits_the_roles_to_that_unit(api_client: APIClient, condominium: Condominium) -> None:
+    unit_a = Unit.objects.create(condominium=condominium, name="101")
+    unit_b = Unit.objects.create(condominium=condominium, name="102")
+    maria = link(unit_a, "Maria", "owner")
+    _ = UnitPerson.objects.create(unit=unit_b, person=maria, role="tenant", start_date=date(2025, 1, 1))
+
+    people = results(api_client.get(reverse(URL), {"unit": str(unit_b.pk)}))
+
+    assert people[0]["unit_roles"] == [{"role": "tenant", "units": ["102"]}]

@@ -2,7 +2,7 @@ from typing import Any
 
 from rest_framework import serializers
 
-from ..services.build_delinquency_report import MAX_PAGE_SIZE, PAGE_SIZE
+from ..services.build_delinquency_report import CONDOMINIUMS_ORDERS, MAX_PAGE_SIZE, PAGE_SIZE, ROWS_ORDERS
 
 
 class DelinquencyRowSerializer(serializers.Serializer[Any]):
@@ -27,6 +27,18 @@ class DelinquencyCondominiumTotalSerializer(serializers.Serializer[Any]):
 class DelinquencyQuerySerializer(serializers.Serializer[Any]):
     page = serializers.IntegerField(min_value=1, default=1, required=False)
     page_size = serializers.IntegerField(min_value=1, max_value=MAX_PAGE_SIZE, default=PAGE_SIZE, required=False)
+    rows_order = serializers.ChoiceField(
+        choices=ROWS_ORDERS,
+        default="condominium",
+        required=False,
+        help_text="`condominium`: by condominium code, then the oldest due date. `oldest`: the longest overdue first, across condominiums.",
+    )
+    condominiums_order = serializers.ChoiceField(
+        choices=CONDOMINIUMS_ORDERS,
+        default="code",
+        required=False,
+        help_text="Order of `by_condominium`: `code`, or `amount` (the largest debt first).",
+    )
 
 
 class DelinquencyReportSerializer(serializers.Serializer[Any]):

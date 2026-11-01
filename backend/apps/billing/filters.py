@@ -5,7 +5,7 @@ import django_filters
 from django.db.models import QuerySet
 from django.utils import timezone
 
-from .models import BillingDocument, BillingEntry
+from .models import BillingDocument, BillingEntry, BillingRun
 
 
 @final
@@ -40,3 +40,18 @@ class BillingEntryFilter(django_filters.FilterSet):
         self, queryset: QuerySet[BillingEntry], name: str, value: date
     ) -> QuerySet[BillingEntry]:
         return queryset.in_force(value)  # type: ignore[attr-defined,no-any-return]
+
+
+@final
+class BillingRunFilter(django_filters.FilterSet):
+    """Exact filters plus `?has_problem=`: the runs that ended `partial` or `failed` (the dashboard lists them with one paginated query)."""
+
+    has_problem = django_filters.BooleanFilter(method="filter_has_problem")
+
+    class Meta:
+        model = BillingRun
+        fields = ("condominium", "reference_month", "status")
+
+    def filter_has_problem(self, queryset: QuerySet[BillingRun], name: str, value: bool) -> QuerySet[BillingRun]:
+        problem_statuses = [BillingRun.Status.PARTIAL, BillingRun.Status.FAILED]
+        return queryset.filter(status__in=problem_statuses) if value else queryset.exclude(status__in=problem_statuses)

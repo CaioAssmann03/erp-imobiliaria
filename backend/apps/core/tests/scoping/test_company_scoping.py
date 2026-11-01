@@ -109,14 +109,39 @@ def test_other_company_record_is_404_on_retrieve_update_delete(
 
 
 @pytest.mark.parametrize("basename", RESOURCES)
-def test_superuser_sees_all_companies(
+def test_superuser_sees_only_own_company(
     superuser_client: APIClient, mine: CompanyData, theirs: CompanyData, basename: str
 ) -> None:
+    """Spec 067, R1: the API has no superuser exception."""
     attribute = RESOURCES[basename]
 
     listed = ids(results(superuser_client.get(reverse(f"{basename}-list"))))
 
-    assert {str(getattr(mine, attribute).pk), str(getattr(theirs, attribute).pk)} <= listed
+    assert str(getattr(mine, attribute).pk) in listed
+    assert str(getattr(theirs, attribute).pk) not in listed
+
+
+@pytest.mark.parametrize("basename", RESOURCES)
+def test_superuser_cannot_open_other_company_record(
+    superuser_client: APIClient, mine: CompanyData, theirs: CompanyData, basename: str
+) -> None:
+    """Spec 067, R2."""
+    url = reverse(f"{basename}-detail", args=[getattr(theirs, RESOURCES[basename]).pk])
+
+    assert superuser_client.get(url).status_code == status.HTTP_404_NOT_FOUND
+    assert superuser_client.delete(url).status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_superuser_cannot_reference_other_company_record(
+    superuser_client: APIClient, theirs: CompanyData
+) -> None:
+    """Spec 067, R5."""
+    response = superuser_client.post(
+        reverse("unit-list"), {"condominium": str(theirs.condominium.pk), "name": "9"}, format="json"
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert error_codes(response, "condominium") == ["does_not_exist"]
 
 
 def test_other_company_user_sees_only_their_own(
