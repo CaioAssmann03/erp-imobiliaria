@@ -1,7 +1,7 @@
 "use client";
 
 import { useCondominiumsList } from "@/lib/api/generated";
-import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { formatCode } from "@/lib/format/format";
 import { extraBillingUrl } from "@/lib/billing/extra-billing-workspace";
 
 import { BillingDocumentHeader } from "../../documents/_components/BillingDocumentHeader";

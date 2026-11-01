@@ -28,6 +28,7 @@ import { IdentificationSection } from "./condominium-form/IdentificationSection"
 import type { PendingInterestRate } from "./condominium-form/pending-interest-rate";
 import { useCondominiumSubmit } from "./condominium-form/use-condominium-submit";
 import { CondominiumDeleteButton } from "./CondominiumDeleteButton";
+import { SectionAnchor } from "@/components/form/SectionAnchor";
 
 export function CondominiumForm({
   condominiumId,
@@ -74,11 +75,11 @@ export function CondominiumForm({
         onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))}
         className="space-y-4"
       >
-        <div id="dados-gerais" className="scroll-mt-20 space-y-4">
+        <SectionAnchor id="dados-gerais" className="space-y-4">
           <IdentificationSection />
           <AddressSection mapsEmbedKey={mapsEmbedKey} />
-        </div>
-        <div id="taxa-e-cobranca" className="scroll-mt-20 space-y-4">
+        </SectionAnchor>
+        <SectionAnchor id="taxa-e-cobranca" className="space-y-4">
           <FeeSection />
           <BillingSection
             condominiumId={condominiumId}
@@ -88,7 +89,7 @@ export function CondominiumForm({
           />
           <AdjustmentSection />
           {isEdit && <ApportionmentCriteriaCard condominiumId={condominiumId} />}
-        </div>
+        </SectionAnchor>
         <FormActions
           isSubmitting={isSubmitting}
           danger={condominium && <CondominiumDeleteButton condominiumId={condominium.id} name={condominium.name} />}

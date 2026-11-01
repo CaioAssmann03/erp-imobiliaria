@@ -1,11 +1,14 @@
+import { FixedRevenueBody } from "@/app/(dashboard)/_components/home/bodies/FixedRevenueBody";
+
 import { FixedRevenueFocus } from "./focus/FixedRevenueFocus";
 import type { WidgetBuilder } from "./types";
 
-/** Fora da grade do painel: aparece em destaque (`?focus=fixed-revenue`) e na busca. */
 export const buildFixedRevenueWidget: WidgetBuilder = (dash) => ({
-  title: "Receita fixa mensal",
+  title: "Receita mensal da administradora",
   description: "Taxa de administração dos condomínios com valor fixo",
   className: "lg:col-span-4",
   showHeader: true,
-  render: () => <FixedRevenueFocus dash={dash} />,
+  seeAll: { href: "/condominiums" },
+  renderFocus: () => <FixedRevenueFocus dash={dash} />,
+  render: () => <FixedRevenueBody revenue={dash?.fixed_revenue} />,
 });

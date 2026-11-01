@@ -1,22 +1,19 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ShowMore } from "@/components/data-list";
 import { ScopeDivider, ScopeSearchCard } from "@/components/filters/ScopeSearchCard";
 import { ScopeSelect, type ScopeOption } from "@/components/filters/ScopeSelect";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
-import { useBillingDocumentsList, useCondominiumsList } from "@/lib/api/generated";
+import { useBillingDocumentsList } from "@/lib/api/generated";
 import type { BillingDocument } from "@/lib/api/generated/models";
-import { formatCode } from "@/lib/billing/billing-entry-payload";
 import { extraBillingUrl, newExtraBillingUrl } from "@/lib/billing/extra-billing-workspace";
-import { cn } from "@/lib/utils";
+import { RegistryCreate, RegistryList } from "@/components/layout/RegistryList";
+import { CondominiumScopeSelect } from "@/components/filters/CondominiumScopeSelect";
 
 import { ExtraBillingListItem } from "./ExtraBillingListItem";
 import { useExtraScope } from "./use-extra-scope";
@@ -62,7 +59,6 @@ export function ExtraBillingList({ openDocumentId, className }: { openDocumentId
 
   const hasScope = scope.condominium !== "";
   const { limit, showMore } = useGrowingLimit(`${scope.condominium}|${filter}`);
-  const { data: condominiums } = useCondominiumsList({ limit: 100 });
   const { data: source } = useBillingDocumentsList(
     { condominium: scope.condominium, kind: "extra", limit: MAX_OPTIONS_SOURCE, ...(optionTerm ? { query: optionTerm } : {}) },
     { query: { enabled: hasScope, placeholderData: keepPreviousData } }
@@ -75,88 +71,55 @@ export function ExtraBillingList({ openDocumentId, className }: { openDocumentId
     { query: { enabled: hasScope, placeholderData: keepPreviousData } }
   );
   const documents = data?.results ?? [];
-  const plusClass = "flex size-8 items-center justify-center rounded-control text-ink-soft outline-none transition-colors";
 
   return (
-    <aside
-      aria-label="Boleto extra"
-      className={cn("w-full shrink-0 flex-col gap-3 lg:sticky lg:top-[4.25rem] lg:h-[calc(100vh-5.25rem)] lg:w-80 2xl:w-96", className)}
+    <RegistryList
+      label="Boleto extra"
+      title="Boleto extra"
+      actions={
+        <RegistryCreate
+          href={newExtraBillingUrl(scope)}
+          label="Novo boleto extra"
+          disabledHint={hasScope ? undefined : "Escolha o condomínio para emitir um boleto extra"}
+        />
+      }
+      toolbar={
+        <ScopeSearchCard
+          scopes={
+            <>
+              <CondominiumScopeSelect value={scope.condominium} onChange={(condominium) => router.push(extraBillingUrl({ condominium }))} />
+              {hasScope && (
+                <>
+                  <ScopeDivider />
+                  <ScopeSelect
+                    variant="segment"
+                    className="w-28"
+                    label="Unidade ou pagador"
+                    value={filter}
+                    placeholder="Unidade ou pagador"
+                    allLabel="Todos"
+                    options={filterOptions}
+                    onSearch={setOptionSearch}
+                    onChange={(value) => setPicked({ condominium: scope.condominium, value, label: filterOptions.find((option) => option.value === value)?.label ?? "" })}
+                  />
+                </>
+              )}
+            </>
+          }
+        />
+      }
+      navLabel="Lista de boletos extras"
+      blocked={hasScope ? null : "Escolha o condomínio para ver os boletos extras dele."}
+      isLoading={isLoading}
+      isPlaceholderData={isPlaceholderData}
+      isEmpty={documents.length === 0}
+      emptyMessage={filter ? "Nenhum boleto extra para essa unidade ou pagador." : "Nenhum boleto extra emitido ainda."}
+      footer={hasScope && data && <ShowMore shown={documents.length} total={data.count} noun="boleto(s)" onMore={showMore} />}
+      className={className}
     >
-      <div className="flex items-center justify-between gap-3 px-1">
-        <h2 className="text-heading">Boleto extra</h2>
-        {hasScope ? (
-          <Link
-            href={newExtraBillingUrl(scope)}
-            aria-label="Novo boleto extra"
-            title="Novo boleto extra"
-            className={cn(plusClass, "hover:bg-surface hover:text-ink focus-visible:ring-2 focus-visible:ring-ring")}
-          >
-            <Plus className="size-5" />
-          </Link>
-        ) : (
-          <span aria-disabled="true" title="Escolha o condomínio para emitir um boleto extra" className={cn(plusClass, "cursor-not-allowed opacity-40")}>
-            <Plus className="size-5" />
-          </span>
-        )}
-      </div>
-
-      <ScopeSearchCard
-        scopes={
-          <>
-            <ScopeSelect
-              variant="segment"
-              className="flex-1"
-              label="Condomínio"
-              value={scope.condominium}
-              placeholder="Selecione o condomínio"
-              onChange={(condominium) => router.push(extraBillingUrl({ condominium }))}
-              options={(condominiums?.results ?? []).map((item) => ({
-                value: item.id,
-                label: `${formatCode(item.code)} · ${item.name}`,
-                title: item.name,
-              }))}
-            />
-            {hasScope && (
-              <>
-                <ScopeDivider />
-                <ScopeSelect
-                  variant="segment"
-                  className="w-28"
-                  label="Unidade ou pagador"
-                  value={filter}
-                  placeholder="Unidade ou pagador"
-                  allLabel="Todos"
-                  options={filterOptions}
-                  onSearch={setOptionSearch}
-                  onChange={(value) => setPicked({ condominium: scope.condominium, value, label: filterOptions.find((option) => option.value === value)?.label ?? "" })}
-                />
-              </>
-            )}
-          </>
-        }
-      />
-
-      <nav aria-label="Lista de boletos extras" className={cn("min-h-0 flex-1 overflow-y-auto pr-1 transition-opacity", isPlaceholderData && "opacity-60")}>
-        {!hasScope ? (
-          <p className="px-2 py-6 text-center text-body text-ink-soft">Escolha o condomínio para ver os boletos extras dele.</p>
-        ) : isLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 8 }, (_, index) => (
-              <Skeleton key={index} className="h-12 rounded-panel" />
-            ))}
-          </div>
-        ) : documents.length === 0 ? (
-          <p className="px-2 py-6 text-center text-body text-ink-soft">{filter ? "Nenhum boleto extra para essa unidade ou pagador." : "Nenhum boleto extra emitido ainda."}</p>
-        ) : (
-          <ul className="space-y-0.5">
-            {documents.map((document) => (
-              <ExtraBillingListItem key={document.id} document={document} scope={scope} isOpen={document.id === openDocumentId} dimmed={Boolean(openDocumentId)} />
-            ))}
-          </ul>
-        )}
-      </nav>
-
-      {hasScope && data && <ShowMore shown={documents.length} total={data.count} noun="boleto(s)" onMore={showMore} />}
-    </aside>
+      {documents.map((document) => (
+        <ExtraBillingListItem key={document.id} document={document} scope={scope} isOpen={document.id === openDocumentId} dimmed={Boolean(openDocumentId)} />
+      ))}
+    </RegistryList>
   );
 }

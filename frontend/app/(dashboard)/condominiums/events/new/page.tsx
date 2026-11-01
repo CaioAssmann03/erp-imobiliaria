@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { BackLink } from "@/components/layout/BackLink";
+import { PhoneBackLink } from "@/components/layout/BackLink";
 import { eventsUrl } from "@/lib/billing/billing-event-workspace";
 import { BillingEventForm } from "../_components/BillingEventForm";
 
@@ -10,9 +10,7 @@ export default function NewBillingEventPage() {
   return (
     <>
       <div className="mb-6">
-        <div className="lg:hidden">
-          <BackLink href={eventsUrl()} label="Eventos" />
-        </div>
+        <PhoneBackLink href={eventsUrl()} label="Eventos" />
         <h1 className="text-title">Novo evento</h1>
       </div>
       <BillingEventForm />

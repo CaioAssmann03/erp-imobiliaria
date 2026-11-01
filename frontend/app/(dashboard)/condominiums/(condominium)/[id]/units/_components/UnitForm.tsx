@@ -35,6 +35,7 @@ import { useUnitSubmit } from "./unit-form/use-unit-submit";
 import { UnitDeleteButton } from "./UnitDeleteButton";
 import type { PendingLink } from "./unit-people/pending-link";
 import { UnitPeopleSection } from "./unit-people/UnitPeopleSection";
+import { SectionAnchor } from "@/components/form/SectionAnchor";
 
 interface UnitFormProps {
   condominiumId: string;
@@ -88,11 +89,11 @@ export function UnitForm({ condominiumId, unitId }: UnitFormProps) {
         onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))}
       />
       <div className="space-y-8">
-        <div id="dados-gerais" className="scroll-mt-20 space-y-4">
+        <SectionAnchor id="dados-gerais" className="space-y-4">
           <IdentificationSection condominiumId={condominiumId} />
           <FractionsSection condominiumId={condominiumId} />
-        </div>
-        <div id="proprietario" className="scroll-mt-20">
+        </SectionAnchor>
+        <SectionAnchor id="proprietario">
           <UnitPeopleSection
             unitId={unit?.id}
             role="owner"
@@ -102,8 +103,8 @@ export function UnitForm({ condominiumId, unitId }: UnitFormProps) {
             onAddPending={(link) => setPending((current) => [...current, link])}
             onRemovePending={(key) => setPending((current) => current.filter((link) => link.key !== key))}
           />
-        </div>
-        <div id="inquilino" className="scroll-mt-20">
+        </SectionAnchor>
+        <SectionAnchor id="inquilino">
           <UnitPeopleSection
             unitId={unit?.id}
             role="tenant"
@@ -113,11 +114,11 @@ export function UnitForm({ condominiumId, unitId }: UnitFormProps) {
             onAddPending={(link) => setPending((current) => [...current, link])}
             onRemovePending={(key) => setPending((current) => current.filter((link) => link.key !== key))}
           />
-        </div>
-        <div id="cobranca" className="scroll-mt-20 space-y-4">
+        </SectionAnchor>
+        <SectionAnchor id="cobranca" className="space-y-4">
           <BillingSection />
           <MetersSection />
-        </div>
+        </SectionAnchor>
         <FormActions
           isSubmitting={isSubmitting}
           formId={FORM_ID}

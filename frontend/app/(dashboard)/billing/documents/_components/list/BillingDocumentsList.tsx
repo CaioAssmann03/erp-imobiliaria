@@ -1,7 +1,6 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
-import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -9,17 +8,16 @@ import { CompactFilter } from "@/components/filters/CompactFilter";
 import { ShowMore } from "@/components/data-list";
 import type { FilterGroup } from "@/components/filters/FilterMenu";
 import { MonthSelect } from "@/components/dates/MonthSelect";
-import { ScopeDivider, ScopeSearchCard, ScopeSearchRow } from "@/components/filters/ScopeSearchCard";
-import { ScopeSelect } from "@/components/filters/ScopeSelect";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ScopeDivider, ScopeSearchCard } from "@/components/filters/ScopeSearchCard";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
-import { useBillingDocumentsList, useCondominiumsList } from "@/lib/api/generated";
+import { useBillingDocumentsList } from "@/lib/api/generated";
 import type { BillingDocumentsListKind, BillingDocumentsListStatus } from "@/lib/api/generated/models";
 import { billingDocumentsUrl } from "@/lib/billing/billing-document-workspace";
-import { formatCode } from "@/lib/billing/billing-entry-payload";
 import { todayIso } from "@/lib/format/format";
-import { cn } from "@/lib/utils";
+import { RegistryList } from "@/components/layout/RegistryList";
+import { CondominiumScopeSelect } from "@/components/filters/CondominiumScopeSelect";
+import { RegistrySearch } from "@/components/filters/RegistrySearch";
 
 import { BillingDocumentListItem } from "./BillingDocumentListItem";
 import { useDocumentsScope } from "./use-documents-scope";
@@ -38,7 +36,6 @@ export function BillingDocumentsList({ openDocumentId, className }: { openDocume
   const term = useDebouncedValue(search.trim());
 
   const { limit, showMore } = useGrowingLimit(`${scope.condominium}|${scope.month}|${term}|${filters.status}|${filters.kind}|${filters.overdue}`);
-  const { data: condominiums } = useCondominiumsList({ limit: 100 });
   const hasScope = scope.condominium !== "";
   const { data, isLoading, isPlaceholderData } = useBillingDocumentsList(
     {
@@ -89,85 +86,49 @@ export function BillingDocumentsList({ openDocumentId, className }: { openDocume
   ];
 
   return (
-    <aside
-      aria-label="Documentos de cobrança"
-      className={cn("w-full shrink-0 flex-col gap-3 lg:sticky lg:top-[4.25rem] lg:h-[calc(100vh-5.25rem)] lg:w-80 2xl:w-96", className)}
+    <RegistryList
+      label="Documentos de cobrança"
+      title="Documentos de cobrança"
+      toolbar={
+        <ScopeSearchCard
+          scopes={
+            <>
+              <CondominiumScopeSelect value={scope.condominium} onChange={(condominium) => router.push(billingDocumentsUrl({ ...scope, condominium }))} />
+              {hasScope && (
+                <>
+                  <ScopeDivider />
+                  <MonthSelect
+                    className="w-28"
+                    label="Mês de referência"
+                    value={scope.month}
+                    today={todayIso()}
+                    allLabel="Todos"
+                    onChange={(month) => router.push(billingDocumentsUrl({ ...scope, month }))}
+                  />
+                </>
+              )}
+            </>
+          }
+        >
+          {hasScope && (
+            <RegistrySearch label="Buscar documento pela unidade ou pelo pagador" placeholder="Unidade ou pagador" value={search} onChange={setSearch}>
+              <CompactFilter groups={groups} onClear={() => setFilters({ status: "", kind: "", overdue: "" })} />
+            </RegistrySearch>
+          )}
+        </ScopeSearchCard>
+      }
+      navLabel="Lista de documentos"
+      blocked={hasScope ? null : "Escolha o condomínio para ver os documentos dele."}
+      isLoading={isLoading}
+      isPlaceholderData={isPlaceholderData}
+      isEmpty={documents.length === 0}
+      emptyMessage={hasFilter ? "Nenhum documento com esses filtros." : "Nenhum documento emitido neste mês. Eles aparecem quando a emissão do mês roda."}
+      footer={hasScope && data && <ShowMore shown={documents.length} total={data.count} noun="documento(s)" onMore={showMore} />}
+      className={className}
     >
-      <div className="px-1">
-        <h2 className="text-heading">Documentos de cobrança</h2>
-      </div>
-
-      <ScopeSearchCard
-        scopes={
-          <>
-            <ScopeSelect
-              variant="segment"
-              className="flex-1"
-              label="Condomínio"
-              value={scope.condominium}
-              placeholder="Selecione o condomínio"
-              onChange={(condominium) => router.push(billingDocumentsUrl({ ...scope, condominium }))}
-              options={(condominiums?.results ?? []).map((item) => ({
-                value: item.id,
-                label: `${formatCode(item.code)} · ${item.name}`,
-                title: item.name,
-              }))}
-            />
-            {hasScope && (
-              <>
-                <ScopeDivider />
-                <MonthSelect
-                  className="w-28"
-                  label="Mês de referência"
-                  value={scope.month}
-                  today={todayIso()}
-                  allLabel="Todos"
-                  onChange={(month) => router.push(billingDocumentsUrl({ ...scope, month }))}
-                />
-              </>
-            )}
-          </>
-        }
-      >
-        {hasScope && (
-          <ScopeSearchRow>
-            <Search className="size-4 shrink-0" />
-            <input
-              type="search"
-              aria-label="Buscar documento pela unidade ou pelo pagador"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Unidade ou pagador"
-              className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint"
-            />
-            <CompactFilter groups={groups} onClear={() => setFilters({ status: "", kind: "", overdue: "" })} />
-          </ScopeSearchRow>
-        )}
-      </ScopeSearchCard>
-
-      <nav aria-label="Lista de documentos" className={cn("min-h-0 flex-1 overflow-y-auto pr-1 transition-opacity", isPlaceholderData && "opacity-60")}>
-        {!hasScope ? (
-          <p className="px-2 py-6 text-center text-body text-ink-soft">Escolha o condomínio para ver os documentos dele.</p>
-        ) : isLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 8 }, (_, index) => (
-              <Skeleton key={index} className="h-12 rounded-panel" />
-            ))}
-          </div>
-        ) : documents.length === 0 ? (
-          <p className="px-2 py-6 text-center text-body text-ink-soft">
-            {hasFilter ? "Nenhum documento com esses filtros." : "Nenhum documento emitido neste mês. Eles aparecem quando a emissão do mês roda."}
-          </p>
-        ) : (
-          <ul className="space-y-0.5">
-            {documents.map((document) => (
-              <BillingDocumentListItem key={document.id} document={document} scope={scope} isOpen={document.id === openDocumentId} dimmed={Boolean(openDocumentId)} />
-            ))}
-          </ul>
-        )}
-      </nav>
-
-      {hasScope && data && <ShowMore shown={documents.length} total={data.count} noun="documento(s)" onMore={showMore} />}
-    </aside>
+      {documents.map((document) => (
+        <BillingDocumentListItem key={document.id} document={document} scope={scope} isOpen={document.id === openDocumentId} dimmed={Boolean(openDocumentId)} />
+      ))}
+    </RegistryList>
   );
 }

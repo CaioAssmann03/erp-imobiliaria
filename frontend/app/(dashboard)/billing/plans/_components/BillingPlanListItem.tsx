@@ -1,8 +1,6 @@
-import Link from "next/link";
-
 import type { BillingPlan } from "@/lib/api/generated/models";
 import { billingPlanUrl, type BillingPlansScope } from "@/lib/billing/billing-plan-workspace";
-import { cn } from "@/lib/utils";
+import { RegistryListItem } from "@/components/layout/RegistryList";
 
 /**
  * Um plano na lista no padrão da lista de condomínios: o nome em cima e, embaixo, o condomínio (só quando a lista mostra todos), a quantidade de itens e
@@ -23,19 +21,9 @@ export function BillingPlanListItem({
   const sub = [scope.condominium ? null : plan.condominium_name, itemCount, plan.active === false ? "Inativo" : null].filter(Boolean).join(" · ");
 
   return (
-    <li>
-      <Link
-        href={billingPlanUrl(plan.id, scope)}
-        aria-current={isOpen ? "page" : undefined}
-        className={cn(
-          "block rounded-panel px-3 py-2 transition-[background-color,opacity] hover:bg-surface",
-          isOpen && "bg-surface shadow-card shadow-[inset_3px_0_0_var(--color-brand)]",
-          dimmed && !isOpen && "opacity-60 hover:opacity-100 focus-visible:opacity-100"
-        )}
-      >
-        <span className="block truncate text-body font-medium">{plan.name}</span>
-        <span className="block truncate text-caption text-ink-soft">{sub}</span>
-      </Link>
-    </li>
+    <RegistryListItem href={billingPlanUrl(plan.id, scope)} isOpen={isOpen} dimmed={dimmed}>
+      <span className="block truncate text-body font-medium">{plan.name}</span>
+      <span className="block truncate text-caption text-ink-soft">{sub}</span>
+    </RegistryListItem>
   );
 }

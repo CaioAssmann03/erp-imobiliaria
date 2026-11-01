@@ -1,18 +1,17 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
-import { Plus, Search } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 
 import { CompactFilter, type CompactFilterGroup } from "@/components/filters/CompactFilter";
 import { ShowMore } from "@/components/data-list";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useCostCenterCatalogList } from "@/lib/api/generated";
 import { newCatalogItemUrl } from "@/lib/finance/cost-center-catalog-workspace";
-import { cn } from "@/lib/utils";
+import { RegistryCreate, RegistryList } from "@/components/layout/RegistryList";
+import { RegistrySearch } from "@/components/filters/RegistrySearch";
+import { ScopeSearchCard } from "@/components/filters/ScopeSearchCard";
 
 import { CatalogListItem } from "./CatalogListItem";
 
@@ -46,56 +45,28 @@ export function CatalogList({ openItemId, className }: { openItemId: string | nu
   ];
 
   return (
-    <aside
-      aria-label="Catálogo de sub-contas"
-      className={cn("w-full shrink-0 flex-col gap-3 lg:sticky lg:top-[4.25rem] lg:h-[calc(100vh-5.25rem)] lg:w-80 2xl:w-96", className)}
+    <RegistryList
+      label="Catálogo de sub-contas"
+      title="Sub-contas"
+      actions={<RegistryCreate href={newCatalogItemUrl()} label="Nova sub-conta" />}
+      toolbar={
+        <ScopeSearchCard>
+          <RegistrySearch label="Buscar sub-conta por código ou nome" placeholder="Código ou nome" value={search} onChange={setSearch}>
+            <CompactFilter groups={groups} onClear={() => setStatus("")} />
+          </RegistrySearch>
+        </ScopeSearchCard>
+      }
+      navLabel="Lista de sub-contas"
+      isLoading={isLoading}
+      isPlaceholderData={isPlaceholderData}
+      isEmpty={results.length === 0}
+      emptyMessage={term || status ? "Nenhuma sub-conta com esses filtros." : "Nenhuma sub-conta no catálogo ainda."}
+      footer={data && <ShowMore shown={results.length} total={data.count} noun="sub-conta(s)" onMore={showMore} />}
+      className={className}
     >
-      <div className="flex items-center justify-between gap-3 px-1">
-        <h2 className="text-heading">Sub-contas</h2>
-        <Link
-          href={newCatalogItemUrl()}
-          aria-label="Nova sub-conta"
-          title="Nova sub-conta"
-          className="flex size-8 items-center justify-center rounded-control text-ink-soft outline-none transition-colors hover:bg-surface hover:text-ink focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <Plus className="size-5" />
-        </Link>
-      </div>
-
-      <div className="flex h-10 items-center gap-2 rounded-control bg-surface pr-1.5 pl-3 text-ink-soft shadow-card focus-within:ring-2 focus-within:ring-brand/50">
-        <Search className="size-4 shrink-0" />
-        <input
-          type="search"
-          aria-label="Buscar sub-conta por código ou nome"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Código ou nome"
-          className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint"
-        />
-        <CompactFilter groups={groups} onClear={() => setStatus("")} />
-      </div>
-
-      <nav aria-label="Lista de sub-contas" className={cn("min-h-0 flex-1 overflow-y-auto pr-1 transition-opacity", isPlaceholderData && "opacity-60")}>
-        {isLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 8 }, (_, index) => (
-              <Skeleton key={index} className="h-12 rounded-panel" />
-            ))}
-          </div>
-        ) : results.length === 0 ? (
-          <p className="px-2 py-6 text-center text-body text-ink-soft">
-            {term || status ? "Nenhuma sub-conta com esses filtros." : "Nenhuma sub-conta no catálogo ainda."}
-          </p>
-        ) : (
-          <ul className="space-y-0.5">
-            {results.map((item) => (
-              <CatalogListItem key={item.id} item={item} isOpen={item.id === openItemId} dimmed={Boolean(openItemId)} />
-            ))}
-          </ul>
-        )}
-      </nav>
-
-      {data && <ShowMore shown={results.length} total={data.count} noun="sub-conta(s)" onMore={showMore} />}
-    </aside>
+      {results.map((item) => (
+        <CatalogListItem key={item.id} item={item} isOpen={item.id === openItemId} dimmed={Boolean(openItemId)} />
+      ))}
+    </RegistryList>
   );
 }

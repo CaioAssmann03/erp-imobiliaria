@@ -1,22 +1,20 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
-import { Plus, Search } from "lucide-react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { CompactFilter, type CompactFilterGroup } from "@/components/filters/CompactFilter";
 import { ShowMore } from "@/components/data-list";
-import { ScopeSearchCard, ScopeSearchRow } from "@/components/filters/ScopeSearchCard";
-import { ScopeSelect } from "@/components/filters/ScopeSelect";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ScopeSearchCard } from "@/components/filters/ScopeSearchCard";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { backTargetOf } from "@/lib/navigation/back-target";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
-import { useCondominiumsList, useCostCentersList } from "@/lib/api/generated";
+import { useCostCentersList } from "@/lib/api/generated";
 import { newCostCenterUrl } from "@/lib/condominiums/cost-center-workspace";
-import { cn } from "@/lib/utils";
+import { RegistryCreate, RegistryList } from "@/components/layout/RegistryList";
+import { CondominiumScopeSelect } from "@/components/filters/CondominiumScopeSelect";
+import { RegistrySearch } from "@/components/filters/RegistrySearch";
 
 import { CostCenterListItem } from "./CostCenterListItem";
 
@@ -43,7 +41,6 @@ export function CostCentersList({
   const activeCondominium = chosen ?? condominiumId;
   const term = useDebouncedValue(search.trim());
 
-  const { data: condominiums } = useCondominiumsList({ limit: 100 });
   const { limit, showMore } = useGrowingLimit(`${term}|${activeCondominium}|${status}`);
   const { data, isLoading, isPlaceholderData } = useCostCentersList(
     {
@@ -71,96 +68,51 @@ export function CostCentersList({
   ];
 
   return (
-    <aside
-      aria-label="Sub-contas"
-      className={cn(
-        "w-full shrink-0 flex-col gap-3 lg:sticky lg:top-[4.25rem] lg:h-[calc(100vh-5.25rem)] lg:w-80 2xl:w-96",
-        className
-      )}
+    <RegistryList
+      label="Sub-contas"
+      title="Sub-contas"
+      actions={
+        <RegistryCreate
+          href={activeCondominium ? newCostCenterUrl(activeCondominium) : undefined}
+          label="Nova sub-conta"
+          disabledHint={activeCondominium ? undefined : "Escolha o condomínio para cadastrar uma sub-conta"}
+        />
+      }
+      toolbar={
+        <ScopeSearchCard
+          scopes={
+            <CondominiumScopeSelect
+              value={activeCondominium ?? ""}
+              onChange={(value) => {
+                setChosen(value || null);
+                setSearch("");
+                setStatus("");
+              }}
+            />
+          }
+        >
+          <RegistrySearch label="Buscar sub-conta" placeholder="Código ou nome" value={search} onChange={setSearch}>
+            <CompactFilter groups={groups} onClear={() => setStatus("")} />
+          </RegistrySearch>
+        </ScopeSearchCard>
+      }
+      navLabel="Lista de sub-contas"
+      isLoading={loading}
+      isPlaceholderData={isPlaceholderData}
+      isEmpty={results.length === 0}
+      emptyMessage={term || status ? "Nenhuma sub-conta com esses filtros." : "Este condomínio ainda não tem sub-contas."}
+      footer={data && <ShowMore shown={results.length} total={data.count} noun="sub-conta(s)" onMore={showMore} />}
+      className={className}
     >
-      <div className="flex items-center justify-between gap-3 px-1">
-        <h2 className="text-heading">Sub-contas</h2>
-        {activeCondominium ? (
-          <Link
-            href={newCostCenterUrl(activeCondominium)}
-            aria-label="Nova sub-conta"
-            title="Nova sub-conta"
-            className="flex size-8 items-center justify-center rounded-control text-ink-soft outline-none transition-colors hover:bg-surface hover:text-ink focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <Plus className="size-5" />
-          </Link>
-        ) : (
-          <span aria-disabled="true" className="flex size-8 items-center justify-center text-ink-soft opacity-40">
-            <Plus className="size-5" />
-          </span>
-        )}
-      </div>
-
-      <ScopeSearchCard
-        scopes={
-          <ScopeSelect
-            variant="segment"
-            className="flex-1"
-            label="Condomínio"
-            value={activeCondominium ?? ""}
-            placeholder="Selecione o condomínio"
-            onChange={(value) => {
-              setChosen(value || null);
-              setSearch("");
-              setStatus("");
-            }}
-            options={(condominiums?.results ?? []).map((condominium) => ({
-              value: condominium.id,
-              label: `${String(condominium.code).padStart(4, "0")} · ${condominium.name}`,
-              title: condominium.name,
-            }))}
-          />
-        }
-      >
-        <ScopeSearchRow>
-          <Search className="size-4 shrink-0" />
-          <input
-            type="search"
-            aria-label="Buscar sub-conta"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Código ou nome"
-            className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint"
-          />
-          <CompactFilter groups={groups} onClear={() => setStatus("")} />
-        </ScopeSearchRow>
-      </ScopeSearchCard>
-
-      <nav
-        aria-label="Lista de sub-contas"
-        className={cn("min-h-0 flex-1 overflow-y-auto pr-1 transition-opacity", isPlaceholderData && "opacity-60")}
-      >
-        {loading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 6 }, (_, index) => (
-              <Skeleton key={index} className="h-11 rounded-panel" />
-            ))}
-          </div>
-        ) : results.length === 0 ? (
-          <p className="px-2 py-6 text-center text-body text-ink-soft">
-            {term || status ? "Nenhuma sub-conta com esses filtros." : "Este condomínio ainda não tem sub-contas."}
-          </p>
-        ) : (
-          <ul className="space-y-0.5">
-            {results.map((costCenter) => (
-              <CostCenterListItem
-                key={costCenter.id}
-                costCenter={costCenter}
-                isOpen={costCenter.id === openCostCenterId}
-                dimmed={results.some((item) => item.id === openCostCenterId)}
-                from={from}
-              />
-            ))}
-          </ul>
-        )}
-      </nav>
-
-      {data && <ShowMore shown={results.length} total={data.count} noun="sub-conta(s)" onMore={showMore} />}
-    </aside>
+      {results.map((costCenter) => (
+        <CostCenterListItem
+          key={costCenter.id}
+          costCenter={costCenter}
+          isOpen={costCenter.id === openCostCenterId}
+          dimmed={results.some((item) => item.id === openCostCenterId)}
+          from={from}
+        />
+      ))}
+    </RegistryList>
   );
 }

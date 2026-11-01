@@ -13,10 +13,28 @@ react-hook-form + Zod. File layout: structure/component-patterns.md.
 2. `xxxToForm(record)`: API record → form values (masks, `""` instead of `null`).
 3. `xxxToPayload(values, isEdit)`: form → API body, including nested objects (`address`, `administration_contract`,
    `people_individual`...). Create: omit empty fields. Edit (PATCH): cleared field → `null` (or `""` for non-null text).
-4. `use-xxx-submit.ts`: `useXxxCreate`/`useXxxPartialUpdate`, invalidate caches, `toast`, navigate.
+4. `use-xxx-submit.ts`: a thin wrapper over `useRecordSubmit` (`hooks/use-record-submit.ts`), which creates or updates, invalidates, shows the `toast`, maps server errors to fields and navigates. The module passes only `toPayload`, the `useXxxCreate`/`useXxxPartialUpdate` mutations, the `invalidate` keys for the saved record, the `messages` and `redirect` (none = stay on the page, what saving an edit does). A create that needs an extra argument (`params`) wraps its mutation (see `use-person-submit.ts`). A save with several steps (condominium: rules and rates; unit: links) keeps its own hook.
 5. `applyServerErrors(error, setError)` (`lib/errors/form-errors.ts`) puts DRF errors (nested too) on fields; a non-field error also goes to `root.server`. Returns the toast message.
 5b. **Where a form sits:** always through `FormPage` (`components/form/FormPage.tsx`): flush left, `max-w-3xl`, with the right menu as `aside`; without a menu it reserves the same space on wide screens, so the form is at the same point with or without it (never centered).
 6. Errors show in three places: under each field (icon + red message, on a single line laid over the 20 px gap between fields: `FormField` reserves no space for it, so fields stay close and an error that appears pushes nothing; the full text is in the `title` and in the summary), in `FormErrorSummary` (rendered by `FormActions`, above the action bar: a plain solid bar (no glass, tint or glow) flush with the bottom edge of the screen (top corners rounded; when the form ends and the bar is released it becomes a fully rounded card, detected by the bar observing itself with `-bottom-px`), with the text "Alterações não salvas" while the form is dirty, on an existing record the Excluir (`ConfirmDeleteButton appearance="solid"`, passed as `danger`) on the left and Cancelar before Salvar on the right. The summary is a flat card: a count line ("Há 3 campos para corrigir") and one row per field, the label on the left and the message in the danger color on the right; a field that is not on screen or repeats in a list is named by `lib/errors/form-labels.ts` ("Item 2 · Valor"): the general server error and one clickable line per invalid field, after a save attempt), and in a toast.
+
+## The form shell (written once)
+```tsx
+const { data: record, isLoading, error } = useXxxRetrieve(id ?? "", { query: { enabled: isEdit } });
+throwIfPageError(error);
+const methods = useRecordForm({ schema: xxxSchema, defaults: XXX_DEFAULTS, record, toForm: xxxToForm });
+const { submit, isSubmitting } = useXxxSubmit(id, methods.setError);
+if (isEdit && isLoading) return <FormSkeleton sections={2} />;
+return (
+  <RecordForm methods={methods} onSubmit={submit} isSubmitting={isSubmitting} cancelHref={xxxUrl()} danger={record && <XxxDeleteButton … />}>
+    <SectionAnchor id="identificacao"><IdentificationSection /></SectionAnchor>
+  </RecordForm>
+);
+```
+- `useRecordForm` (`hooks/use-record-form.ts`) is `useForm` + the Zod resolver + `mode: "onTouched"` + the `reset(toForm(record))` when the record arrives. `toForm` must be a module function (stable). A create-only form passes no `record`/`toForm`.
+- `RecordForm` (`components/form/RecordForm.tsx`) is the `FormProvider`, the `<form noValidate>` with the "Corrija os campos destacados." toast, the sections, and the action bar: Salvar (`submitLabel`/`submittingLabel` rename it), Cancelar to `cancelHref` (`cancelLabel`), extra `actions` before it, and `danger` (Excluir) on an existing record.
+- `SectionAnchor` (`components/form/SectionAnchor.tsx`) is the `id` + `scroll-mt-20` that the right menu (`SectionIndex`) scrolls to; never write that `<div>` by hand.
+- Not in the shell on purpose: the condominium and unit forms (their save has several steps and pending lists), and the small dialogs.
 
 ## react-hook-form
 ```tsx
@@ -24,6 +42,7 @@ const methods = useForm<XxxFormInput, unknown, XxxFormOutput>({
   resolver: zodResolver(xxxSchema), defaultValues: XXX_DEFAULTS, mode: "onTouched",
 });
 ```
+(What `useRecordForm` does; use `useForm` directly only in a form that does not fit the shell, such as a dialog.)
 - Generics: input, context, output; `handleSubmit` receives the output. `<FormProvider {...methods}>`, `noValidate` on `<form>`.
 - `defaultValues` define every field (`""`, not `undefined`).
 - `useWatch` in the smallest component that must react; `getValues` in handlers; avoid top-level `watch()`.

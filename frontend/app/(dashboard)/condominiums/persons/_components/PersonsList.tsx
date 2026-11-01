@@ -1,25 +1,24 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
-import { Plus, Search } from "lucide-react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { CompactFilter, type CompactFilterGroup } from "@/components/filters/CompactFilter";
 import { ShowMore } from "@/components/data-list";
-import { ScopeSearchCard, ScopeSearchRow, ScopeDivider } from "@/components/filters/ScopeSearchCard";
+import { ScopeSearchCard, ScopeDivider } from "@/components/filters/ScopeSearchCard";
 import { ScopeSelect } from "@/components/filters/ScopeSelect";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
-import { useCondominiumPeopleList, useCondominiumsList, usePersonsList, useUnitsList } from "@/lib/api/generated";
+import { useCondominiumPeopleList, usePersonsList, useUnitsList } from "@/lib/api/generated";
 import { backTargetOf } from "@/lib/navigation/back-target";
 import { CONDOMINIUMS_MODULE } from "@/lib/persons/person-module";
 import { unitTypeLabel } from "@/lib/schemas/unit";
 import { unitListLabel } from "@/lib/condominiums/unit-workspace";
 import { newPersonUrl, originCondominium, type PersonContext } from "@/lib/persons/person-workspace";
-import { cn } from "@/lib/utils";
+import { RegistryCreate, RegistryList } from "@/components/layout/RegistryList";
+import { CondominiumScopeSelect } from "@/components/filters/CondominiumScopeSelect";
+import { RegistrySearch } from "@/components/filters/RegistrySearch";
 
 import { PersonListItem } from "./PersonListItem";
 
@@ -43,7 +42,6 @@ export function PersonsList({ openPersonId, className }: { openPersonId: string 
   const term = useDebouncedValue(search.trim());
 
   const { limit, showMore } = useGrowingLimit(`${term}|${filters.status}|${filters.type}|${condominium}|${unit}`);
-  const { data: condominiums } = useCondominiumsList({ limit: 100 });
   const params = {
     limit,
     person_module: CONDOMINIUMS_MODULE,
@@ -89,105 +87,55 @@ export function PersonsList({ openPersonId, className }: { openPersonId: string 
   const clearFilters = () => setFilters({ status: "", type: "" });
 
   return (
-    <aside
-      aria-label="Pessoas"
-      className={cn(
-        "w-full shrink-0 flex-col gap-3 lg:sticky lg:top-[4.25rem] lg:h-[calc(100vh-5.25rem)] lg:w-80 2xl:w-96",
-        className
-      )}
-    >
-      <div className="flex items-center justify-between gap-3 px-1">
-        <h2 className="text-heading">Pessoas</h2>
-        <Link
-          href={newPersonUrl()}
-          aria-label="Nova pessoa"
-          title="Nova pessoa"
-          className="flex size-8 items-center justify-center rounded-control text-ink-soft outline-none transition-colors hover:bg-surface hover:text-ink focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <Plus className="size-5" />
-        </Link>
-      </div>
-
-      <ScopeSearchCard
-        scopes={
-          <>
-            <ScopeSelect
-              variant="segment"
-              className="flex-1"
-              label="Condomínio"
-              value={condominium}
-              allLabel="Todos os condomínios"
-              onChange={(value) => {
-                setPicked(value);
-                setPickedUnit("");
-              }}
-              options={(condominiums?.results ?? []).map((item) => ({
-                value: item.id,
-                label: `${String(item.code).padStart(4, "0")} · ${item.name}`,
-                title: item.name,
-              }))}
-            />
-            {condominium && (
-              <>
-                <ScopeDivider />
-                <ScopeSelect
-                  variant="segment"
-                  className="max-w-[45%] shrink-0"
-                  label="Unidade"
-                  value={unit}
-                  allLabel="Todas as unidades"
-                  onChange={setPickedUnit}
-                  options={(units?.results ?? []).map((item) => ({ value: item.id, label: unitListLabel(unitTypeLabel(item.type), item.name) }))}
-                />
-              </>
-            )}
-          </>
-        }
-      >
-        <ScopeSearchRow>
-          <Search className="size-4 shrink-0" />
-          <input
-            type="search"
-            aria-label="Buscar pessoa por nome, CPF/CNPJ ou e-mail"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Nome ou CPF/CNPJ"
-            className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint"
-          />
-          <CompactFilter groups={groups} onClear={clearFilters} columns={2} />
-        </ScopeSearchRow>
-      </ScopeSearchCard>
-
-      <nav
-        aria-label="Lista de pessoas"
-        className={cn("min-h-0 flex-1 overflow-y-auto pr-1 transition-opacity", isPlaceholderData && "opacity-60")}
-      >
-        {isLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 8 }, (_, index) => (
-              <Skeleton key={index} className="h-12 rounded-panel" />
-            ))}
-          </div>
-        ) : results.length === 0 ? (
-          <p className="px-2 py-6 text-center text-body text-ink-soft">
-            {hasFilters ? "Nenhuma pessoa com esses filtros." : "Nenhuma pessoa cadastrada ainda."}
-          </p>
-        ) : (
-          <ul className="space-y-0.5">
-            {results.map((person) => (
-              <PersonListItem
-                key={person.id}
-                person={person}
-                isOpen={person.id === openPersonId}
-                dimmed={Boolean(openPersonId)}
-                context={context}
+    <RegistryList
+      label="Pessoas"
+      title="Pessoas"
+      actions={<RegistryCreate href={newPersonUrl()} label="Nova pessoa" />}
+      toolbar={
+        <ScopeSearchCard
+          scopes={
+            <>
+              <CondominiumScopeSelect
+                value={condominium}
+                allLabel="Todos os condomínios"
+                onChange={(value) => {
+                  setPicked(value);
+                  setPickedUnit("");
+                }}
               />
-            ))}
-          </ul>
-        )}
-      </nav>
-
-      {data && <ShowMore shown={results.length} total={data.count} noun="pessoa(s)" onMore={showMore} />}
-    </aside>
+              {condominium && (
+                <>
+                  <ScopeDivider />
+                  <ScopeSelect
+                    variant="segment"
+                    className="max-w-[45%] shrink-0"
+                    label="Unidade"
+                    value={unit}
+                    allLabel="Todas as unidades"
+                    onChange={setPickedUnit}
+                    options={(units?.results ?? []).map((item) => ({ value: item.id, label: unitListLabel(unitTypeLabel(item.type), item.name) }))}
+                  />
+                </>
+              )}
+            </>
+          }
+        >
+          <RegistrySearch label="Buscar pessoa por nome, CPF/CNPJ ou e-mail" placeholder="Nome ou CPF/CNPJ" value={search} onChange={setSearch}>
+            <CompactFilter groups={groups} onClear={clearFilters} columns={2} />
+          </RegistrySearch>
+        </ScopeSearchCard>
+      }
+      navLabel="Lista de pessoas"
+      isLoading={isLoading}
+      isPlaceholderData={isPlaceholderData}
+      isEmpty={results.length === 0}
+      emptyMessage={hasFilters ? "Nenhuma pessoa com esses filtros." : "Nenhuma pessoa cadastrada ainda."}
+      footer={data && <ShowMore shown={results.length} total={data.count} noun="pessoa(s)" onMore={showMore} />}
+      className={className}
+    >
+      {results.map((person) => (
+        <PersonListItem key={person.id} person={person} isOpen={person.id === openPersonId} dimmed={Boolean(openPersonId)} context={context} />
+      ))}
+    </RegistryList>
   );
 }

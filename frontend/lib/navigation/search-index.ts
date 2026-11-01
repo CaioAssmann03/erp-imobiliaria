@@ -30,7 +30,7 @@ export const STATIC_SEARCH_ITEMS: StaticSearchItem[] = [
   { title: "Nova pessoa", subtitle: "Cadastro", href: "/condominiums/persons/new", keywords: "criar adicionar cadastrar" },
   { title: "Unidades com responsável", subtitle: "Painel · gráfico", href: "/dashboard?focus=responsibles", keywords: "pontos proprietario locatario cobrar vinculo grafico" },
   { title: "Reajustes", subtitle: "Painel · gráfico", href: "/dashboard?focus=adjustments", keywords: "barras atrasados proximos meses igpm incc contrato grafico" },
-  { title: "Receita fixa mensal", subtitle: "Painel · gráfico", href: "/dashboard?focus=fixed-revenue", keywords: "taxa administracao dinheiro faturamento grafico" },
+  { title: "Receita mensal da administradora", subtitle: "Painel · taxa fixa", href: "/dashboard?focus=fixed-revenue", keywords: "receita fixa mensal taxa administracao dinheiro faturamento" },
   { title: "Pendências", subtitle: "Painel", href: "/dashboard?focus=pending", keywords: "sem responsavel rateio fracao ideal reajuste locacao centros de custo plano de contas bloqueio atencao" },
   { title: "Resumo dos cadastros", subtitle: "Painel", href: "/dashboard?focus=condominiums", keywords: "total ativos condominios unidades pessoas" },
   { title: "Inadimplência (painel)", subtitle: "Painel", href: "/dashboard?focus=delinquency", keywords: "boletos vencidos nao pagos devendo atrasados condominios receber" },

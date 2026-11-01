@@ -24,7 +24,7 @@ import {
   useCondominiumsRetrieve,
 } from "@/lib/api/generated";
 import type { CondominiumApportionmentCriterion } from "@/lib/api/generated/models";
-import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { formatCode } from "@/lib/format/format";
 import { applyServerErrors } from "@/lib/errors/form-errors";
 import { invalidateApportionment } from "@/lib/query/apportionment";
 import {

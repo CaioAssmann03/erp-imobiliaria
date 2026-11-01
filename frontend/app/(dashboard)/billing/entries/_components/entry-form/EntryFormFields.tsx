@@ -6,7 +6,8 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { MonthField, SearchSelectField, TextField } from "@/components/form/fields";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { useCondominiumApportionmentCriteriaList, useCondominiumsList, useCostCentersList } from "@/lib/api/generated";
-import { defaultCostCenterId, formatCode, needsApportionmentCriterion, needsInstallments } from "@/lib/billing/billing-entry-payload";
+import { defaultCostCenterId, needsApportionmentCriterion, needsInstallments } from "@/lib/billing/billing-entry-payload";
+import { formatCode } from "@/lib/format/format";
 import { maskSignedMoney } from "@/lib/format/masks";
 import {
   ALLOCATION_HINT,

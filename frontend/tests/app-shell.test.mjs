@@ -132,6 +132,46 @@ test("the right-hand menu is drawn by the layout frames, never by the pages, so 
   }
 });
 
+test("the registry layout is written once: frames use RegistryFrame, lists use RegistryList, nobody copies their markup", () => {
+  const files = sourceFiles(DASHBOARD);
+  const frames = files.filter((file) => /Frame\.tsx$/.test(file));
+  const lists = files.filter((file) => /[\\/](?!Registry)\w+List\.tsx$/.test(file) && readFileSync(file, "utf8").includes("<RegistryList"));
+  assert.ok(frames.length >= 17);
+  assert.ok(lists.length >= 16);
+  for (const frame of frames) {
+    const source = readFileSync(frame, "utf8");
+    assert.match(source, /<RegistryFrame/, relative(ROOT, frame));
+    assert.doesNotMatch(source, /lg:flex lg:items-start/, relative(ROOT, frame));
+    assert.doesNotMatch(source, /<FormPage/, relative(ROOT, frame));
+  }
+  for (const file of files) {
+    const source = readFileSync(file, "utf8");
+    // The column markup and the "+" button of a list live in components/layout/RegistryList.tsx only.
+    assert.doesNotMatch(source, /lg:sticky lg:top-\[4\.25rem\]/, relative(ROOT, file));
+    assert.doesNotMatch(source, /flex size-8 items-center justify-center rounded-control/, relative(ROOT, file));
+  }
+});
+
+test("the registry forms are written once: RecordForm for the shell, useRecordSubmit for the save, SectionAnchor for the anchors", () => {
+  const files = sourceFiles(DASHBOARD);
+  const forms = files.filter((file) => /[\\/]\w+Form\.tsx$/.test(file) && readFileSync(file, "utf8").includes("<RecordForm"));
+  const submits = files.filter((file) => /[\\/]use-[\w-]+-submit\.ts$/.test(file) && readFileSync(file, "utf8").includes("useRecordSubmit"));
+  assert.ok(forms.length >= 9);
+  assert.ok(submits.length >= 7);
+  for (const form of forms) {
+    const source = readFileSync(form, "utf8");
+    assert.doesNotMatch(source, /<FormProvider|<FormActions|Corrija os campos destacados/, relative(ROOT, form));
+  }
+  for (const submit of submits) {
+    // Mapping the server errors to the fields and the success toast are in the shared hook.
+    assert.doesNotMatch(readFileSync(submit, "utf8"), /applyServerErrors|toast\.success\(\s*message/, relative(ROOT, submit));
+  }
+  for (const file of files) {
+    // The anchor of a section of a record page is `SectionAnchor`, never a hand-written `<div id className="scroll-mt-20">`.
+    assert.doesNotMatch(readFileSync(file, "utf8"), /<div id=[^>]*scroll-mt-20/, relative(ROOT, file));
+  }
+});
+
 test("the shell and the registry use design tokens, never a hard-coded color", () => {
   const files = [
     // The settings folder is exempt (it may paint literal colors, e.g. the accent dots).

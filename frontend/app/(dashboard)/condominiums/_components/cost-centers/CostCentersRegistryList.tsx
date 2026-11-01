@@ -1,14 +1,14 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
-import { Plus, Search } from "lucide-react";
-import Link from "next/link";
+import { Search } from "lucide-react";
 import { useState } from "react";
 
 import { CompactFilter } from "@/components/filters/CompactFilter";
 import type { FilterGroup } from "@/components/filters/FilterMenu";
 import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RegistryCreate } from "@/components/layout/RegistryList";
 import { useCurrentUrl } from "@/hooks/use-current-url";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
@@ -57,14 +57,7 @@ export function CostCentersRegistryList({ condominiumId }: { condominiumId: stri
     <section aria-label="Sub-contas" className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3 px-1">
         <h2 className="text-heading">Sub-contas</h2>
-        <Link
-          href={newCostCenterUrl(condominiumId)}
-          aria-label="Nova sub-conta"
-          title="Nova sub-conta"
-          className="flex size-8 items-center justify-center rounded-control text-ink-soft outline-none transition-colors hover:bg-surface hover:text-ink focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <Plus className="size-5" />
-        </Link>
+        <RegistryCreate href={newCostCenterUrl(condominiumId)} label="Nova sub-conta" />
       </div>
 
       <div className="flex flex-col gap-3 rounded-card bg-surface p-3 shadow-card">

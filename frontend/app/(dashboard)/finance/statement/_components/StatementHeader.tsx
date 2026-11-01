@@ -1,6 +1,6 @@
 "use client";
 
-import { BackLink } from "@/components/layout/BackLink";
+import { PhoneBackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCondominiumsRetrieve } from "@/lib/api/generated";
 import { statementUrl } from "@/lib/finance/statement-workspace";
@@ -13,9 +13,7 @@ export function StatementHeader({ condominiumId }: { condominiumId: string }) {
   const { data: condominium } = useCondominiumsRetrieve(condominiumId);
 
   const back = (
-    <div className="lg:hidden">
-      <BackLink href={statementUrl()} label="Extrato" />
-    </div>
+    <PhoneBackLink href={statementUrl()} label="Extrato" />
   );
 
   if (!condominium)

@@ -1,6 +1,6 @@
 "use client";
 
-import { BackLink } from "@/components/layout/BackLink";
+import { PhoneBackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBillingPlansRetrieve } from "@/lib/api/generated";
 import { billingPlansUrl } from "@/lib/billing/billing-plan-workspace";
@@ -13,9 +13,7 @@ function BackToPlans() {
   const scope = usePlansScope();
 
   return (
-    <div className="lg:hidden">
-      <BackLink href={billingPlansUrl(scope)} label="Planos de cobrança" />
-    </div>
+    <PhoneBackLink href={billingPlansUrl(scope)} label="Planos de cobrança" />
   );
 }
 

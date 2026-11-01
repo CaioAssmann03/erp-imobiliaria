@@ -79,9 +79,6 @@ export function defaultCostCenterId(costCenters: readonly CostCenterLike[]): str
   return (active.find((costCenter) => costCenter.code === 0) ?? active[0])?.id ?? "";
 }
 
-/** Código de uma sub-conta como a equipe o conhece ("0002"). */
-export const formatCode = (code: number | undefined, digits = 4): string => String(code ?? 0).padStart(digits, "0");
-
 export interface EntryUnitAmount {
   unit: string;
   unit_name: string;

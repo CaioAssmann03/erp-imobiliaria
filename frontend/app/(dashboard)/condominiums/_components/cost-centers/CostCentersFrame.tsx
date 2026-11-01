@@ -3,10 +3,11 @@
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 
-import { FormPage } from "@/components/form/FormPage";
+import { RegistryFrame } from "@/components/layout/RegistryFrame";
 import { useCostCentersRetrieve } from "@/lib/api/generated";
 import { costCentersFrameState } from "@/lib/condominiums/cost-center-workspace";
 import { CondominiumSideMenu } from "@/app/(dashboard)/condominiums/_components/condominium/CondominiumSideMenu";
+
 import { CostCenterSideMenu } from "./CostCenterSideMenu";
 import { CostCentersList } from "./CostCentersList";
 
@@ -25,18 +26,19 @@ export function CostCentersFrame({ children }: { children: React.ReactNode }) {
     <CostCenterSideMenu costCenterId={state.costCenterId} />
   ) : state.condominiumId ? (
     <CondominiumSideMenu condominiumId={state.condominiumId} current="cost-centers" />
-  ) : null;
+  ) : undefined;
 
   return (
-    <div className="lg:flex lg:items-start lg:gap-8 2xl:gap-12">
-      <Suspense fallback={null}>
-        <CostCentersList
-          condominiumId={state.condominiumId ?? costCenter?.condominium ?? null}
-          openCostCenterId={state.costCenterId}
-          className="hidden lg:flex"
-        />
-      </Suspense>
-      <div className="min-w-0 flex-1">{aside ? <FormPage aside={aside}>{children}</FormPage> : children}</div>
-    </div>
+    <RegistryFrame
+      list={(className) => (
+        <Suspense fallback={null}>
+          <CostCentersList condominiumId={state.condominiumId ?? costCenter?.condominium ?? null} openCostCenterId={state.costCenterId} className={className} />
+        </Suspense>
+      )}
+      aside={aside}
+      showListOnPhone={false}
+    >
+      {children}
+    </RegistryFrame>
   );
 }

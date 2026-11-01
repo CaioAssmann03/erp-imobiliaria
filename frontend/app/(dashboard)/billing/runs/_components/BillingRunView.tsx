@@ -8,6 +8,7 @@ import { formatDateTime } from "@/lib/format/format";
 import { BillingRunCounts } from "./BillingRunCounts";
 import { BillingRunProblems } from "./BillingRunProblems";
 import { BillingRunStatusBadge } from "./BillingRunStatusBadge";
+import { SectionAnchor } from "@/components/form/SectionAnchor";
 
 /**
  * O resumo numa linha só (a situação, quando rodou e o atalho para os documentos do mês) com as contagens embaixo, e os problemas explicados. O título da página
@@ -16,7 +17,7 @@ import { BillingRunStatusBadge } from "./BillingRunStatusBadge";
 export function BillingRunView({ run }: { run: BillingRun }) {
   return (
     <div className="space-y-4">
-      <div id="resumo" className="scroll-mt-20">
+      <SectionAnchor id="resumo">
         <FormSection>
           {run.status !== "failed" && issuedNothing(run) && (
             <p role="alert" className="rounded-panel bg-warning-soft px-4 py-2.5 text-body text-ink">
@@ -37,12 +38,12 @@ export function BillingRunView({ run }: { run: BillingRun }) {
           </div>
           <BillingRunCounts run={run} />
         </FormSection>
-      </div>
-      <div id="problemas" className="scroll-mt-20">
+      </SectionAnchor>
+      <SectionAnchor id="problemas">
         <FormSection title="Problemas" hint="Unidades puladas ou com falha e o que impediu a emissão.">
           <BillingRunProblems run={run} />
         </FormSection>
-      </div>
+      </SectionAnchor>
     </div>
   );
 }

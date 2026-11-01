@@ -7,8 +7,8 @@ import {
   defaultCostCenterId,
   entryColumnTitle,
   entryToPayload,
-  formatCode,
 } from "../lib/billing/billing-entry-payload.ts";
+import { formatCode } from "../lib/format/format.ts";
 import { maskSignedMoney } from "../lib/format/masks.ts";
 
 const values = (overrides = {}) => ({

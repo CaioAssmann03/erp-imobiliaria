@@ -1,6 +1,6 @@
 "use client";
 
-import { BackLink } from "@/components/layout/BackLink";
+import { PhoneBackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBillingDocumentsRetrieve } from "@/lib/api/generated";
 import { formatMonth } from "@/lib/format/format";
@@ -14,9 +14,7 @@ export function BillingDocumentHeader({ documentId, back }: { documentId: string
 
   return (
     <>
-      <div className="lg:hidden">
-        <BackLink href={back.href} label={back.label} />
-      </div>
+      <PhoneBackLink href={back.href} label={back.label} />
       {document ? (
         <div className="mb-6 flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h1 className="text-title">Unidade {document.unit_name}</h1>

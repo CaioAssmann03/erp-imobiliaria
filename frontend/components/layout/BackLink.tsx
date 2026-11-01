@@ -17,3 +17,12 @@ export function BackLink({ href, label }: { href: string; label: string }) {
     </LinkButton>
   );
 }
+
+/** O "voltar" que só existe no celular: no computador a lista do módulo fica ao lado, então a seta ao alto da tela seria redundante. */
+export function PhoneBackLink({ href, label }: { href: string; label: string }) {
+  return (
+    <div className="lg:hidden">
+      <BackLink href={href} label={label} />
+    </div>
+  );
+}

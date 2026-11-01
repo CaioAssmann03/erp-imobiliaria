@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { BackLink } from "@/components/layout/BackLink";
+import { PhoneBackLink } from "@/components/layout/BackLink";
 import { catalogUrl } from "@/lib/finance/cost-center-catalog-workspace";
 
 import { CatalogItemForm } from "../_components/CatalogItemForm";
@@ -11,9 +11,7 @@ export default function NewCatalogItemPage() {
   return (
     <>
       <div className="mb-6">
-        <div className="lg:hidden">
-          <BackLink href={catalogUrl()} label="Sub-contas" />
-        </div>
+        <PhoneBackLink href={catalogUrl()} label="Sub-contas" />
         <h1 className="text-title">Nova sub-conta</h1>
       </div>
       <CatalogItemForm />

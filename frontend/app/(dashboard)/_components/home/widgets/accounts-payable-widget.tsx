@@ -1,27 +1,29 @@
-import { cn } from "@/lib/utils";
 import type { AccountsPayable, PayableTotal, UpcomingPayable } from "@/lib/api/generated/models";
-
 import { Late } from "@/app/(dashboard)/_components/home/shared/Late";
 import { formatDate, relativeDays } from "@/app/(dashboard)/_components/home/shared/relative-days";
+
 import { Caption } from "./Caption";
-import { brl } from "./format";
+import { brl, brlWhole, integer } from "./format";
 import { AccountsPayableFocus } from "./focus/AccountsPayableFocus";
 import type { WidgetBuilder } from "./types";
 
 const SHORT_LIST = 4;
 
-const accountsLabel = (count: number) => `${count} conta${count === 1 ? "" : "s"}`;
+const accountsLabel = (count: number) => `${integer(count)} conta${count === 1 ? "" : "s"}`;
 
-/** O que pede atenção: o valor atrasado, grande, e em vermelho só quando há atraso. */
+/** O que pede atenção: o valor atrasado, grande e sozinho; o vermelho fica na nota do pé, que diz quantas contas estão vencidas. */
 function Overdue({ value }: { value: PayableTotal | undefined }) {
-  const late = (value?.count ?? 0) > 0;
+  return <div className="text-title tabular-nums">{value ? brlWhole(value.total) : "–"}</div>;
+}
+
+/** No pé do card: quantas contas estão vencidas (em vermelho) ou que não há atraso. */
+function OverdueNote({ value }: { value: PayableTotal | undefined }) {
+  if (!value) return null;
+  const late = value.count > 0;
   return (
-    <div>
-      <div className={cn("text-title tabular-nums", late && "text-danger")}>{value ? brl(value.total) : "–"}</div>
-      <Caption>
-        {!value ? "" : late ? `${accountsLabel(value.count)} vencida${value.count === 1 ? "" : "s"}` : "Nenhuma conta atrasada"}
-      </Caption>
-    </div>
+    <p className="mt-auto pt-3 text-caption text-ink-faint">
+      {late ? <Late>{accountsLabel(value.count)} vencida{value.count === 1 ? "" : "s"}</Late> : "Nenhuma conta atrasada"}
+    </p>
   );
 }
 
@@ -31,7 +33,7 @@ function WindowRow({ label, value }: { label: string; value: PayableTotal | unde
     <div className="grid grid-cols-[minmax(0,1fr)_auto_7rem] items-baseline gap-x-3 py-2">
       <dt className="text-ink-soft">{label}</dt>
       <dd className="text-caption text-ink-faint tabular-nums">{value ? accountsLabel(value.count) : ""}</dd>
-      <dd className="text-right tabular-nums">{value ? brl(value.total) : "–"}</dd>
+      <dd className="text-right tabular-nums">{value ? brlWhole(value.total) : "–"}</dd>
     </div>
   );
 }
@@ -88,6 +90,7 @@ export const buildAccountsPayableWidget: WidgetBuilder = (dash) => {
           <WindowRow label="Próximos 7 dias" value={payables?.due_next_7_days} />
           <WindowRow label="Neste mês" value={payables?.due_this_month} />
         </dl>
+        <OverdueNote value={payables?.overdue} />
         {large && (
           <div className="mt-6 border-t border-border pt-4">
             <Caption>Mais antigas em aberto</Caption>

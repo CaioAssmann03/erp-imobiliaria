@@ -1,10 +1,8 @@
-import Link from "next/link";
-
 import type { EntryBatch } from "@/lib/api/generated/models";
 import { entryBatchUrl } from "@/lib/finance/entry-batch-workspace";
 import { formatDate } from "@/lib/format/format";
 import { BATCH_ORIGINS } from "@/lib/schemas/entry-batch";
-import { cn } from "@/lib/utils";
+import { RegistryListItem } from "@/components/layout/RegistryList";
 
 /** A origem do lote em texto: "Banco", "Caixa nº 12" ou "Caixa extra nº 3". */
 export function batchOriginLabel(batch: Pick<EntryBatch, "origin" | "cash_number">) {
@@ -18,19 +16,9 @@ export function batchOriginLabel(batch: Pick<EntryBatch, "origin" | "cash_number
  */
 export function EntryBatchListItem({ batch, isOpen = false, dimmed = false }: { batch: EntryBatch; isOpen?: boolean; dimmed?: boolean }) {
   return (
-    <li>
-      <Link
-        href={entryBatchUrl(batch.id)}
-        aria-current={isOpen ? "page" : undefined}
-        className={cn(
-          "block rounded-panel px-3 py-2 transition-[background-color,opacity] hover:bg-surface",
-          isOpen && "bg-surface shadow-card shadow-[inset_3px_0_0_var(--color-brand)]",
-          dimmed && !isOpen && "opacity-60 hover:opacity-100 focus-visible:opacity-100"
-        )}
-      >
-        <span className="block truncate text-body font-medium tabular-nums">{formatDate(batch.batch_date)}</span>
-        <span className="block truncate text-caption text-ink-soft">{batchOriginLabel(batch)}</span>
-      </Link>
-    </li>
+    <RegistryListItem href={entryBatchUrl(batch.id)} isOpen={isOpen} dimmed={dimmed}>
+      <span className="block truncate text-body font-medium tabular-nums">{formatDate(batch.batch_date)}</span>
+      <span className="block truncate text-caption text-ink-soft">{batchOriginLabel(batch)}</span>
+    </RegistryListItem>
   );
 }

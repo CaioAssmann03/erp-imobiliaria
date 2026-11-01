@@ -1,57 +1,43 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-
 import { CheckboxField, TextField } from "@/components/form/fields";
-import { FormActions } from "@/components/form/FormActions";
+
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
-import { Button } from "@/components/ui/button";
+
 import { useBillingEventsRetrieve } from "@/lib/api/generated";
 import { eventsUrl } from "@/lib/billing/billing-event-workspace";
 import { throwIfPageError } from "@/lib/query/page-error";
-import {
-  BILLING_EVENT_DEFAULTS,
-  billingEventSchema,
-  billingEventToForm,
-  type BillingEventFormInput,
-  type BillingEventFormOutput,
-} from "@/lib/schemas/billing-event";
-import { toast } from "@/lib/errors/toast";
+import { BILLING_EVENT_DEFAULTS, billingEventSchema, billingEventToForm } from "@/lib/schemas/billing-event";
 
 import { BillingEventDeleteButton } from "./BillingEventDeleteButton";
 import { useBillingEventSubmit } from "./billing-event-form/use-billing-event-submit";
+import { RecordForm } from "@/components/form/RecordForm";
+import { SectionAnchor } from "@/components/form/SectionAnchor";
+import { useRecordForm } from "@/hooks/use-record-form";
 
 /** Cadastro e edição de um evento (código e nome). */
 export function BillingEventForm({ billingEventId }: { billingEventId?: string }) {
-  const router = useRouter();
   const isEdit = billingEventId !== undefined;
   const { data: event, isLoading, error: loadError } = useBillingEventsRetrieve(billingEventId ?? "", {
     query: { enabled: isEdit },
   });
   throwIfPageError(loadError);
 
-  const methods = useForm<BillingEventFormInput, unknown, BillingEventFormOutput>({
-    resolver: zodResolver(billingEventSchema),
-    defaultValues: BILLING_EVENT_DEFAULTS,
-    mode: "onTouched",
-  });
-  const { handleSubmit, reset, setError } = methods;
-  const { submit, isSubmitting } = useBillingEventSubmit(billingEventId, setError);
-
-  useEffect(() => {
-    if (event) reset(billingEventToForm(event));
-  }, [event, reset]);
+  const methods = useRecordForm({ schema: billingEventSchema, defaults: BILLING_EVENT_DEFAULTS, record: event, toForm: billingEventToForm });
+  const { submit, isSubmitting } = useBillingEventSubmit(billingEventId, methods.setError);
 
   if (isEdit && isLoading) return <FormSkeleton sections={1} />;
 
   return (
-    <FormProvider {...methods}>
-      <form noValidate onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))} className="space-y-4">
-        <div id="identificacao" className="scroll-mt-20">
+    <RecordForm
+      methods={methods}
+      onSubmit={submit}
+      isSubmitting={isSubmitting}
+      cancelHref={eventsUrl()}
+      danger={event && <BillingEventDeleteButton billingEventId={event.id} name={event.name} />}
+    >
+      <SectionAnchor id="identificacao">
         <FormSection title="Identificação">
           <TextField
             name="code"
@@ -72,13 +58,7 @@ export function BillingEventForm({ billingEventId }: { billingEventId?: string }
             />
           </FieldRow>
         </FormSection>
-        </div>
-        <FormActions isSubmitting={isSubmitting} danger={event && <BillingEventDeleteButton billingEventId={event.id} name={event.name} />}>
-          <Button type="button" variant="secondary" onClick={() => router.push(eventsUrl())}>
-            Cancelar
-          </Button>
-        </FormActions>
-      </form>
-    </FormProvider>
+      </SectionAnchor>
+    </RecordForm>
   );
 }

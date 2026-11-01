@@ -8,6 +8,7 @@ import { throwIfPageError } from "@/lib/query/page-error";
 
 import { StatementRow } from "../../_components/StatementRow";
 import { batchOriginLabel } from "./EntryBatchListItem";
+import { SectionAnchor } from "@/components/form/SectionAnchor";
 
 /**
  * Client Component: um lote aberto, só para consulta (um lançamento nunca se altera nem se apaga): os dados do lote e os lançamentos dele, de vários
@@ -25,7 +26,7 @@ export function EntryBatchView({ batchId }: { batchId: string }) {
 
   return (
     <div className="space-y-4">
-      <div id="lote" className="scroll-mt-20">
+      <SectionAnchor id="lote">
         <FormSection title="Lote" description="Um lote pode reunir lançamentos de vários condomínios.">
           <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-3">
             <div>
@@ -44,9 +45,9 @@ export function EntryBatchView({ batchId }: { batchId: string }) {
             ) : null}
           </dl>
         </FormSection>
-      </div>
+      </SectionAnchor>
 
-      <div id="lancamentos" className="scroll-mt-20">
+      <SectionAnchor id="lancamentos">
         <FormSection title="Lançamentos" description="Um lançamento não se altera: um erro se corrige com o estorno.">
           {loadingEntries ? (
             <p className="text-body text-ink-soft">Carregando…</p>
@@ -60,7 +61,7 @@ export function EntryBatchView({ batchId }: { batchId: string }) {
             </ul>
           )}
         </FormSection>
-      </div>
+      </SectionAnchor>
     </div>
   );
 }

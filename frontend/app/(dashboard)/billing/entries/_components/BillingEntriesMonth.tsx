@@ -4,7 +4,7 @@ import { keepPreviousData } from "@tanstack/react-query";
 
 import { ListState } from "@/components/data-list";
 import { useBillingEntriesList, useCondominiumsList } from "@/lib/api/generated";
-import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { formatCode } from "@/lib/format/format";
 import { MAX_ENTRIES_PER_MONTH } from "@/lib/billing/billing-entry-workspace";
 import { formatMonth } from "@/lib/format/format";
 

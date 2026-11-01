@@ -2,28 +2,25 @@
 
 import { usePathname } from "next/navigation";
 
-import { FormPage } from "@/components/form/FormPage";
+import { RegistryFrame } from "@/components/layout/RegistryFrame";
 import { statementFrameState } from "@/lib/finance/statement-workspace";
-import { cn } from "@/lib/utils";
 
 import { StatementList } from "./StatementList";
 import { StatementSideMenu } from "./StatementSideMenu";
 
-/**
- * Client Component: a moldura do extrato, as 3 colunas das telas do cadastro: a lista de condomínios (com o saldo de cada um) à esquerda, o extrato
- * do escolhido no meio e o índice de seções à direita (os dois são desta moldura, por isso continuam montados ao trocar de condomínio). Só envolve as
- * telas do extrato (`statementFrameState`); a tela vazia ocupa a largura toda. No celular, a lista e o extrato são telas separadas.
- */
+/** Client Component: a moldura do extrato: a lista de condomínios (com o saldo de cada um), o extrato do escolhido e o índice de seções (`statementFrameState`); a tela vazia ocupa a largura toda. */
 export function StatementFrame({ children }: { children: React.ReactNode }) {
   const state = statementFrameState(usePathname());
   if (!state.hasFrame) return <>{children}</>;
 
   return (
-    <div className="lg:flex lg:items-start lg:gap-8 2xl:gap-12">
-      <StatementList openCondominiumId={state.condominiumId} className={state.showListOnPhone ? "flex" : "hidden lg:flex"} />
-      <div className={cn("min-w-0 flex-1", !state.showPageOnPhone && "hidden lg:block")}>
-        {state.condominiumId ? <FormPage aside={<StatementSideMenu condominiumId={state.condominiumId} />}>{children}</FormPage> : children}
-      </div>
-    </div>
+    <RegistryFrame
+      list={(className) => (<StatementList openCondominiumId={state.condominiumId} className={className} />)}
+      aside={state.condominiumId ? <StatementSideMenu condominiumId={state.condominiumId} /> : undefined}
+      showListOnPhone={state.showListOnPhone}
+      showPageOnPhone={state.showPageOnPhone}
+    >
+      {children}
+    </RegistryFrame>
   );
 }
