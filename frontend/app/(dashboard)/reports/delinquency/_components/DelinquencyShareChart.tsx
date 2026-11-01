@@ -14,7 +14,7 @@ const config = {
 
 /** Até quantos condomínios a rosca é a melhor leitura; acima disso as fatias não se distinguem e vale o ranking. */
 const DONUT_MAX = 8;
-/** Quantos condomínios ganham fatia (ou linha) própria; o resto fica em "Outros" (rosca) ou em "Ver todos" (ranking). */
+/** Quantos condomínios ganham fatia (ou linha) própria; o resto fica em "Outros" (a rosca abre a lista; o ranking só diz quantos são). */
 const TOP = 5;
 /** Opacidade da cor de destaque em cada fatia, da maior para a menor: um tom só, o do tema (laranja ou o personalizado). */
 const SHADES = [100, 75, 55, 40, 28, 18];
@@ -140,8 +140,8 @@ const rowClass =
 
 /**
  * Client Component: a participação de cada condomínio no total vencido. Até `DONUT_MAX` condomínios, uma rosca com a legenda ao lado (os 5 maiores
- * e "Outros", que abre a lista do que ele junta); acima disso, o ranking dos 5 maiores com uma barra fina e "Ver todos", que abre a lista com
- * rolagem. Altura fixa em qualquer caso; escolher um condomínio (`onSelect`) filtra o relatório.
+ * e "Outros", que abre a lista do que ele junta); acima disso, o ranking dos 5 maiores com uma barra fina e, no fim, um texto com quantos
+ * outros condomínios têm inadimplência. Altura fixa em qualquer caso; escolher um condomínio (`onSelect`) filtra o relatório.
  */
 export function DelinquencyShareChart({
   lines,
@@ -180,15 +180,9 @@ export function DelinquencyShareChart({
             </li>
           ))}
         </ul>
-        <MoreList
-          entries={entries}
-          selected={selected}
-          onSelect={onSelect}
-          label={`Ver todos os ${entries.length} condomínios`}
-          className="mt-1 rounded-control px-2 py-1.5 text-caption text-ink-soft outline-none transition-colors hover:text-ink focus-visible:text-ink"
-        >
-          Ver todos ({entries.length})
-        </MoreList>
+        <p className="mt-1 px-2 py-1.5 text-caption text-ink-soft">
+          Outros ({entries.length - top.length} condomínios com inadimplência)
+        </p>
       </div>
     );
   }

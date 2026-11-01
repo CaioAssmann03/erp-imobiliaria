@@ -1,6 +1,6 @@
 "use client";
 
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts";
 
 import {
   type ChartConfig,
@@ -16,38 +16,35 @@ import type { BillingMonthSummary } from "@/lib/api/generated/models";
 import { longMonthLabel, shortMonthLabel } from "@/app/(dashboard)/_components/home/widgets/format";
 
 const config = {
-  issued: { label: "Emitido", color: "var(--color-ink-faint)" },
-  paid: { label: "Recebido", color: "var(--color-brand)" },
+  paid: { label: "Boletos recebidos", color: "var(--color-brand)" },
+  open: { label: "Boletos em aberto", color: "var(--color-ink-faint)" },
 } satisfies ChartConfig;
 
 /**
- * Client Component: duas áreas sobrepostas (gráfico do shadcn), o que foi emitido (cinza, atrás) e o que foi recebido (cor de destaque, na
- * frente) em cada mês: o vão entre elas é o que ainda não entrou.
+ * Client Component: uma barra horizontal por mês (gráfico do shadcn). O comprimento é o que foi emitido, dividido no que já foi recebido
+ * (cor de destaque) e no que segue em aberto (cinza), com a porcentagem recebida no fim: dá para comparar o tamanho dos meses e quanto de
+ * cada um já entrou.
  */
 export function BillingSummaryChart({ lines, className = "h-52 w-full" }: { lines: readonly BillingMonthSummary[]; className?: string }) {
-  const data = lines.map((line) => ({
-    label: shortMonthLabel(line.reference_month.slice(0, 7)),
-    tooltipLabel: longMonthLabel(line.reference_month.slice(0, 7)),
-    issued: Number(line.issued_total),
-    paid: Number(line.paid_total),
-  }));
+  const data = lines.map((line) => {
+    const issued = Number(line.issued_total);
+    const paid = Number(line.paid_total);
+    return {
+      label: shortMonthLabel(line.reference_month.slice(0, 7)),
+      tooltipLabel: longMonthLabel(line.reference_month.slice(0, 7)),
+      paid,
+      open: Math.max(issued - paid, 0),
+      share: issued > 0 ? Math.round((paid / issued) * 100) : 0,
+    };
+  });
 
   return (
     <ChartContainer config={config} className={className}>
-      <AreaChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
-        <defs>
-          {(["issued", "paid"] as const).map((key) => (
-            <linearGradient key={key} id={`billing-fill-${key}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={`var(--color-${key})`} stopOpacity={key === "paid" ? 0.4 : 0.22} />
-              <stop offset="100%" stopColor={`var(--color-${key})`} stopOpacity={0.02} />
-            </linearGradient>
-          ))}
-        </defs>
-        <CartesianGrid vertical={false} stroke="var(--color-surface-sunken)" />
-        <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} interval={0} tick={{ fontSize: 11, fill: "var(--color-ink-soft)" }} />
-        <YAxis hide domain={[0, (max: number) => Math.max(max, 1)]} />
+      <BarChart data={data} layout="vertical" margin={{ top: 4, right: 36, left: 0, bottom: 0 }} barCategoryGap="26%">
+        <XAxis type="number" hide />
+        <YAxis type="category" dataKey="label" width={36} tickLine={false} axisLine={false} interval={0} tick={{ fontSize: 11, fill: "var(--color-ink-soft)" }} />
         <ChartTooltip
-          cursor={{ stroke: "var(--color-ink-faint)", strokeDasharray: "3 3" }}
+          cursor={{ fill: "var(--color-surface-muted)", opacity: 0.6 }}
           content={
             <ChartTooltipContent
               labelFormatter={(_, payload) => payload?.[0]?.payload?.tooltipLabel}
@@ -61,9 +58,11 @@ export function BillingSummaryChart({ lines, className = "h-52 w-full" }: { line
           }
         />
         <ChartLegend content={<ChartLegendContent />} />
-        <Area type="monotone" dataKey="issued" stroke="var(--color-issued)" strokeWidth={1.5} fill="url(#billing-fill-issued)" dot={false} activeDot={{ r: 4 }} />
-        <Area type="monotone" dataKey="paid" stroke="var(--color-paid)" strokeWidth={2} fill="url(#billing-fill-paid)" dot={{ r: 3, fill: "var(--color-paid)", strokeWidth: 0 }} activeDot={{ r: 5 }} />
-      </AreaChart>
+        <Bar dataKey="paid" stackId="month" fill="var(--color-paid)" radius={[4, 0, 0, 4]} />
+        <Bar dataKey="open" stackId="month" fill="var(--color-open)" fillOpacity={0.4} radius={[0, 4, 4, 0]}>
+          <LabelList dataKey="share" position="right" formatter={(value) => `${value}%`} className="fill-ink-soft text-[11px] tabular-nums" />
+        </Bar>
+      </BarChart>
     </ChartContainer>
   );
 }

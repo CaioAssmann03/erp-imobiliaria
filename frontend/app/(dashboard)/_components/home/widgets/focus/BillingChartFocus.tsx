@@ -8,7 +8,7 @@ import { useBillingSummary } from "@/app/(dashboard)/_components/home/shared/use
 import { brl } from "../format";
 import { FocusSection, percent } from "./parts";
 
-/** Client Component: os últimos 12 meses emitidos × recebidos, no gráfico e numa tabela com o que ainda está em aberto. */
+/** Client Component: os boletos emitidos × recebidos dos últimos 12 meses, no gráfico e numa tabela com o que ainda está em aberto. */
 export function BillingChartFocus() {
   const { lines, isLoading } = useBillingSummary(12);
   if (lines.length === 0) return <p className="py-6 text-ink-soft">{isLoading ? "Carregando…" : "Não foi possível carregar os boletos."}</p>;
@@ -21,8 +21,8 @@ export function BillingChartFocus() {
           <TableHeader>
             <TableRow>
               <TableHead>Mês</TableHead>
-              <TableHead className="text-right">Emitido</TableHead>
-              <TableHead className="text-right">Recebido</TableHead>
+              <TableHead className="text-right">Boletos emitidos</TableHead>
+              <TableHead className="text-right">Boletos recebidos</TableHead>
               <TableHead className="hidden text-right sm:table-cell">Em aberto</TableHead>
             </TableRow>
           </TableHeader>
