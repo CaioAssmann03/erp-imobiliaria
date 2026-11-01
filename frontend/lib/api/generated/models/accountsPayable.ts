@@ -5,8 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { PayableTotal } from './payableTotal';
-import type { UpcomingPayable } from './upcomingPayable';
+import type { PayableTotal } from './payableTotal.ts';
+import type { UpcomingPayable } from './upcomingPayable.ts';
 
 export interface AccountsPayable {
   /** Em aberto e vencidas */

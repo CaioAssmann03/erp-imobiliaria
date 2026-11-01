@@ -27,7 +27,7 @@ const VIEWS = [
 
 /**
  * Client Component: o mês de um condomínio na conta corrente. No alto, o cartão do condomínio e do mês com o botão do PDF ao lado
- * (`ReportFilterBar`, como na inadimplência); abaixo, um único cartão: só o saldo final em tipo grande e, numa alternância, uma tabela por vez:
+ * (`ReportFilterBar`, como na inadimplência); abaixo, um único cartão sem subtítulos, no mesmo desenho da inadimplência: o saldo final (em vermelho se negativo) com "saldo final" ao lado e, numa alternância, uma tabela por vez:
  * as sub-contas (com o total do mês na última linha: saldo anterior, créditos, débitos e saldo final) ou os lançamentos.
  */
 export function AccountabilityReportView() {
@@ -93,12 +93,15 @@ export function AccountabilityReportView() {
       ) : isError || !report ? (
         <p className="rounded-card bg-surface p-6 text-body text-ink-soft">Não foi possível carregar o relatório.</p>
       ) : (
-        <div className="rounded-card bg-surface p-5 sm:p-6">
-          <p className={cn("text-display tabular-nums", negative && "text-danger")} aria-label={`Saldo final: ${brl(report.closing_balance)}`}>
-            {brl(report.closing_balance)}
+        <div className="rounded-card bg-surface p-6 sm:p-8">
+          <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <span className={cn("text-title tabular-nums", negative && "text-danger")} aria-label={`Saldo final: ${brl(report.closing_balance)}`}>
+              {brl(report.closing_balance)}
+            </span>
+            <span className="text-body text-ink-soft">saldo final</span>
           </p>
 
-          <div className="mt-8 flex gap-1" role="group" aria-label="Ver">
+          <div className="mt-6 flex gap-1" role="group" aria-label="Ver">
             {VIEWS.map((option) => (
               <button
                 key={option.key}

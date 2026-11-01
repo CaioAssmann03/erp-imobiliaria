@@ -21,16 +21,16 @@ export function UnitsFrame({ children }: { children: React.ReactNode }) {
   const state = unitsFrameState(pathname, { condominium: search.get("condominium") });
   if (!state.hasFrame) return <>{children}</>;
 
-  // O menu da direita é desta moldura (layout): o da unidade aberta (seções e pessoas) ou o das seções no cadastro novo; a tela vazia não tem.
+  // O menu da direita é desta moldura (layout): o da unidade aberta (seções e pessoas) ou o das seções no cadastro novo; a tela vazia e a nova unidade ainda sem condomínio não têm.
   const aside = state.unitId ? (
     <UnitSideMenu unitId={state.unitId} current={state.subScreen} />
-  ) : state.isNew ? (
+  ) : state.isNew && state.condominiumId ? (
     <SectionIndex sections={UNIT_SECTIONS} label="Seções da unidade" title="Nesta unidade" />
   ) : undefined;
 
   return (
     <RegistryFrame
-      list={(className) => <UnitsList condominiumId={state.condominiumId} openUnitId={state.unitId} className={className} />}
+      list={(className) => <UnitsList condominiumId={state.condominiumId} openUnitId={state.unitId} isNew={state.isNew} className={className} />}
       aside={aside}
       showListOnPhone={state.showListOnPhone}
       showPageOnPhone={state.showPageOnPhone}

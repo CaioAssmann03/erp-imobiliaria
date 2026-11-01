@@ -5,10 +5,10 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BillingRecipientEnum } from './billingRecipientEnum';
-import type { UnitApportionmentFraction } from './unitApportionmentFraction';
-import type { UnitPerson } from './unitPerson';
-import type { UnitTypeEnum } from './unitTypeEnum';
+import type { BillingRecipientEnum } from './billingRecipientEnum.ts';
+import type { UnitApportionmentFraction } from './unitApportionmentFraction.ts';
+import type { UnitPerson } from './unitPerson.ts';
+import type { UnitTypeEnum } from './unitTypeEnum.ts';
 
 /**
  * Serializer mixin: input is validated by the model's rules, never by rules written here.

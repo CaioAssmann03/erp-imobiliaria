@@ -3,9 +3,11 @@
 import Lenis from "lenis";
 import { useEffect } from "react";
 
+import { isLite } from "@/lib/theme/use-lite";
+
 export function SmoothScroll() {
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (isLite()) return;
 
     const lenis = new Lenis({ lerp: 0.09, anchors: true });
     let frame = requestAnimationFrame(function raf(time) {

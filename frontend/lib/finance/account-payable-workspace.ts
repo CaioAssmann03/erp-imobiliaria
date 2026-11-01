@@ -1,6 +1,7 @@
 import { registryFrame } from "../navigation/registry-frame.ts";
 
-export const accountsPayableUrl = () => "/finance/accounts-payable";
+/** A lista das contas a pagar, com o período de vencimento (`?due=`, um dos `DUE_OPTIONS`) já escolhido, como o painel a abre; sem ele, a lista toda. */
+export const accountsPayableUrl = (due = "") => (due ? `/finance/accounts-payable?due=${due}` : "/finance/accounts-payable");
 export const newAccountPayableUrl = () => "/finance/accounts-payable/new";
 export const accountPayableUrl = (accountId: string) => `/finance/accounts-payable/${accountId}`;
 
@@ -44,3 +45,6 @@ export const DUE_OPTIONS = [
   { value: "next_7_days", label: "Próximos 7 dias" },
   { value: "this_month", label: "Neste mês" },
 ];
+
+/** O período lido de `?due=`: só um dos `DUE_OPTIONS` vale (o valor vira um filtro da lista). */
+export const dueParam = (value: string | null): string => (DUE_OPTIONS.some((option) => option.value === value) ? (value as string) : "");

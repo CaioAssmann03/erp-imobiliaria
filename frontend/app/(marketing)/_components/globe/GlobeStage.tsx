@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { brandRamp } from "@/lib/theme/brand-ramp";
 import { subscribeMode } from "@/lib/theme/mode";
+import { isLite } from "@/lib/theme/use-lite";
 
 import { LINE, PITCH } from "../hero/skyline-layers";
 import { MASK, MASK_BASE64 } from "./brazil-mask";
@@ -174,7 +175,7 @@ export function GlobeStage({ children }: { children: React.ReactNode }) {
     const context = canvas?.getContext("2d");
     if (!stage || !area || !canvas || !context) return;
 
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduceMotion = isLite();
     const ramp = brandRamp(canvas);
     const tones = [ramp(0.76), ramp(0.65), ramp(0.54), ramp(0.42), ramp(0.3), ramp(0.16)];
     const slabColor = ramp(0.1);

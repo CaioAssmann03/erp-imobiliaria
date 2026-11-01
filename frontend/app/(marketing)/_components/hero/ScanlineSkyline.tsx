@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 
 import { brandRamp } from "@/lib/theme/brand-ramp";
+import { isLite } from "@/lib/theme/use-lite";
 import { cn } from "@/lib/utils";
 
 import { LINE, PAD, PARALLAX_BACK, PARALLAX_FRONT, PITCH, renderLayers, type SkylineColors, type SkylineLayers } from "./skyline-layers";
@@ -46,7 +47,7 @@ export function ScanlineSkyline({ className, variant = "hero" }: { className?: s
     const context = canvas?.getContext("2d");
     if (!canvas || !context) return;
 
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduceMotion = isLite();
     // No fecho da página os prédios têm outra silhueta (colina) e sobem quando chegam à tela, não ao carregar.
     const closing = variant === "footer";
     const shape = closing ? "hill" : "valley";

@@ -33,7 +33,7 @@ export function SegmentedControl<T extends string>({
             onClick={() => onChange(option.value)}
             style={option.style}
             className={cn(
-              "h-8 min-w-0 truncate rounded-[0.5rem] px-3.5 text-body whitespace-nowrap outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand/60",
+              "h-8 min-w-0 truncate rounded-button px-3.5 text-body whitespace-nowrap outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand/60",
               selected ? "bg-surface font-medium text-ink shadow-card" : "text-ink-soft hover:text-ink",
               option.className
             )}

@@ -5,8 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { Person } from './person';
-import type { RoleEnum } from './roleEnum';
+import type { Person } from './person.ts';
+import type { RoleEnum } from './roleEnum.ts';
 
 /**
  * Serializer mixin: input is validated by the model's rules, never by rules written here.
@@ -29,6 +29,8 @@ export interface UnitPerson {
   start_date: string;
   /** @nullable */
   end_date?: string | null;
+  /** No end date, or ending today or later (the server's date). */
+  readonly is_current: boolean;
   readonly created_at: string;
   readonly updated_at: string;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ListFallback } from "@/components/data-list";
@@ -13,22 +14,26 @@ import {
   useBillingDocumentsDelinquency,
   useCondominiumsList,
 } from "@/lib/api/generated";
+import { useUrlScope } from "@/hooks/use-url-scope";
 import { brl, formatDate, formatMonth, todayIso } from "@/lib/format/format";
+import { condominiumMonthScope, monthScopeUrl } from "@/lib/navigation/url-scope";
 import { daysLateLabel, delinquencyPdfName } from "@/lib/reports/reports";
 import { cn } from "@/lib/utils";
 
 import { ReportFilterBar } from "../../_components/ReportFilterBar";
 import { REPORT_PAGE_SIZES, ReportPager } from "../../_components/ReportPager";
-import { DelinquencyShareChart } from "./DelinquencyShareChart";
 
 /**
  * Client Component: os boletos vencidos e não pagos. No alto, o cartão do condomínio e do mês com o botão do PDF ao lado (`ReportFilterBar`); abaixo, um único
- * cartão: o total em vermelho, a rosca com a participação dos condomínios (tamanho fixo; clicar filtra) e os boletos em atraso,
- * 10 por página (ou mais, à escolha).
+ * cartão sem subtítulos: o total vencido (em vermelho) com a contagem ao lado e a tabela dos boletos, 10 por página (ou mais, à escolha). O condomínio e o mês
+ * vêm da URL, que o seletor do alto escreve (o card do painel abre o relatório de um condomínio por ela).
  */
 export function DelinquencyReportView() {
-  const [condominium, setCondominium] = useState("");
-  const [referenceMonth, setReferenceMonth] = useState("");
+  const router = useRouter();
+  // O condomínio e o mês ficam na URL (`?condominium=&reference_month=`): o card de inadimplência do painel abre o relatório já filtrado, e o endereço se compartilha.
+  const scope = useUrlScope(condominiumMonthScope);
+  const condominium = scope.condominium;
+  const referenceMonth = scope.month;
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(REPORT_PAGE_SIZES[0]);
   const params = {
@@ -42,12 +47,10 @@ export function DelinquencyReportView() {
     { query: { placeholderData: keepPreviousData } }
   );
   const late = (report?.count ?? 0) > 0;
-  const total = Number(report?.total_amount ?? 0);
-  const canBreakDown = (report?.by_condominium.length ?? 0) > 1;
 
-  const choose = (setter: (value: string) => void) => (value: string) => {
-    setter(value);
+  const choose = (key: "condominium" | "month") => (value: string) => {
     setPage(1);
+    router.replace(monthScopeUrl("/reports/delinquency", { ...scope, [key]: value }));
   };
 
   return (
@@ -64,7 +67,7 @@ export function DelinquencyReportView() {
                 label="Condomínio"
                 value={condominium}
                 allLabel="Todos os condomínios"
-                onChange={choose(setCondominium)}
+                onChange={choose("condominium")}
                 options={(condominiums?.results ?? []).map((item) => ({
                   value: item.id,
                   label: `${String(item.code).padStart(4, "0")} · ${item.name}`,
@@ -78,7 +81,7 @@ export function DelinquencyReportView() {
                 value={referenceMonth}
                 allLabel="Todos os meses"
                 today={todayIso()}
-                onChange={choose(setReferenceMonth)}
+                onChange={choose("month")}
               />
             </>
           }
@@ -89,24 +92,17 @@ export function DelinquencyReportView() {
       ) : isError || !report ? (
         <p className="rounded-card bg-surface p-6 text-body text-ink-soft">Não foi possível carregar o relatório.</p>
       ) : (
-        <div className="rounded-card bg-surface p-5 sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-x-10 gap-y-6">
-            <div>
-              <p className={cn("text-display tabular-nums", late && "text-danger")} aria-label={`Total vencido e não pago: ${brl(report.total_amount)}`}>
-                {brl(report.total_amount)}
-              </p>
-              {!late && <p className="mt-1 text-body text-ink-soft">Nenhum boleto em atraso.</p>}
-            </div>
-
-            {late && canBreakDown && (
-              <DelinquencyShareChart
-                lines={report.by_condominium}
-                total={total}
-                selected={condominium}
-                onSelect={choose(setCondominium)}
-              />
-            )}
-          </div>
+        <div className="rounded-card bg-surface p-6 sm:p-8">
+          <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <span className={cn("text-title tabular-nums", late && "text-danger")} aria-label={`Total vencido e não pago: ${brl(report.total_amount)}`}>
+              {brl(report.total_amount)}
+            </span>
+            <span className="text-body text-ink-soft">
+              {late
+                ? `${report.count} boleto${report.count === 1 ? "" : "s"} vencido${report.count === 1 ? "" : "s"}`
+                : "Nenhum boleto em atraso."}
+            </span>
+          </p>
 
           {late && (
             <div className={cn("mt-6 transition-opacity", isPlaceholderData && "opacity-60")}>

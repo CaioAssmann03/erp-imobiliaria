@@ -105,12 +105,12 @@ export function FilterMenu({ groups, onClear }: { groups: FilterGroup[]; onClear
       <Popover.Root>
         <Popover.Trigger
           className={cn(
-            "flex h-9 items-center gap-2 rounded-full bg-surface px-4 text-body font-medium shadow-card outline-none transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-brand/50 data-[popup-open]:bg-surface-muted"
+            "flex h-9 items-center gap-2 rounded-button bg-surface px-4 text-body font-medium shadow-card outline-none transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-brand/50 data-[popup-open]:bg-surface-muted"
           )}
         >
           Filtros
           {active.length > 0 && (
-            <span className="flex size-5 items-center justify-center rounded-full bg-ink text-[11px] leading-none text-ink-foreground tabular-nums">
+            <span className="flex size-5 items-center justify-center rounded-badge bg-ink text-[11px] leading-none text-ink-foreground tabular-nums">
               {active.length}
             </span>
           )}
@@ -137,7 +137,7 @@ export function FilterMenu({ groups, onClear }: { groups: FilterGroup[]; onClear
                             aria-checked={selected}
                             onClick={() => group.onChange(selected ? "" : option.value)}
                             className={cn(
-                              "h-8 rounded-full px-3.5 text-body outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand/50",
+                              "h-8 rounded-button px-3.5 text-body outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand/50",
                               selected
                                 ? "bg-ink font-medium text-ink-foreground"
                                 : "bg-ink/5 text-ink-soft hover:bg-ink/10 hover:text-ink"
@@ -174,7 +174,7 @@ export function FilterMenu({ groups, onClear }: { groups: FilterGroup[]; onClear
           type="button"
           onClick={() => group.onChange("")}
           title="Remover filtro"
-          className="group flex h-8 items-center gap-1.5 rounded-full bg-surface-muted px-3 text-caption text-ink outline-none transition-colors hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-brand/50"
+          className="group flex h-8 items-center gap-1.5 rounded-button bg-surface-muted px-3 text-caption text-ink outline-none transition-colors hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-brand/50"
         >
           <span className="text-ink-soft">{group.label}:</span>
           {group.options.find((option) => option.value === group.value)?.label}

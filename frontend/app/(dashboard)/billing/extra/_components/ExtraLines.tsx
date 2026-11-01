@@ -12,7 +12,7 @@ import type { ExtraBillingFormInput } from "@/lib/schemas/extra-billing";
 
 import { ExtraLineFields } from "./ExtraLineFields";
 
-/** Os valores do boleto: cada linha é escrita como um lançamento da Inclusão de valores; a tarifa de registro é uma delas. */
+/** Os valores do boleto: cada linha é escrita como um lançamento da Inclusão de valores, separadas por uma divisória fina (sem cartão dentro do cartão); a tarifa de registro é uma delas. Os dois botões de baixo são discretos (sem fundo até o mouse passar). */
 export function ExtraLines() {
   const { control, formState } = useFormContext<ExtraBillingFormInput>();
   const { fields, append, remove } = useFieldArray({ control, name: "lines" });
@@ -29,7 +29,7 @@ export function ExtraLines() {
 
   return (
     <FormSection title="Valores">
-      <ul className="space-y-3">
+      <ul className="divide-y divide-line">
         {fields.map((field, index) => (
           <ExtraLineFields key={field.id} index={index} condominium={condominium} onRemove={fields.length > 1 ? () => remove(index) : undefined} />
         ))}
@@ -39,15 +39,15 @@ export function ExtraLines() {
           {listError}
         </p>
       )}
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="secondary" size="sm" onClick={() => append(newLine())}>
+      <div className="-ml-3 flex flex-wrap gap-1 pt-1">
+        <Button type="button" variant="ghost" size="sm" onClick={() => append(newLine())}>
           <Plus className="size-4" />
           Adicionar valor
         </Button>
         {feeEvent && (
           <Button
             type="button"
-            variant="secondary"
+            variant="ghost"
             size="sm"
             onClick={() => append(feeLine(feeEvent.id, suggestedFee ? maskMoney(Number(suggestedFee).toFixed(2).replace(".", ",")) : ""))}
           >

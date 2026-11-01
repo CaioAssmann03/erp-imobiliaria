@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { PaymentReceipt } from './paymentReceipt';
+import type { PaymentReceipt } from './paymentReceipt.ts';
 
 export interface PaginatedPaymentReceiptList {
   count: number;

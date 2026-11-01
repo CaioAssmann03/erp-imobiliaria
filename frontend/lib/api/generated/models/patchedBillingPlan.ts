@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BillingPlanItem } from './billingPlanItem';
+import type { BillingPlanItem } from './billingPlanItem.ts';
 
 /**
  * A billing plan of a condominium with its items. Sending `items` replaces the whole list, in that order.

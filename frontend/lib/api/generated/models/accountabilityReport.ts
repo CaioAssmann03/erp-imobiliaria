@@ -5,8 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { AccountabilityCostCenter } from './accountabilityCostCenter';
-import type { AccountabilityEntry } from './accountabilityEntry';
+import type { AccountabilityCostCenter } from './accountabilityCostCenter.ts';
+import type { AccountabilityEntry } from './accountabilityEntry.ts';
 
 /**
  * A condominium's month in its current account, in total and per sub-conta, with one page of each list (10 per page on the screen endpoint; the PDF lists up to 2000 entries).

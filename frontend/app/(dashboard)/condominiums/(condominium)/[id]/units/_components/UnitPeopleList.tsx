@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { ShowMore } from "@/components/data-list";
-import { RegistryListItem } from "@/components/layout/RegistryList";
+import { RegistryCreate, RegistryListItem } from "@/components/layout/RegistryList";
 import { RegistrySubList } from "@/components/layout/RegistrySubList";
 import { PersonRowContent } from "@/components/persons/PersonRowContent";
 import { useCurrentUrl } from "@/hooks/use-current-url";
@@ -11,7 +11,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useUnitPeopleList } from "@/lib/api/generated";
 import { formatDate } from "@/lib/format/format";
-import { personUrl, UNIT_ROLE_LABELS } from "@/lib/persons/person-workspace";
+import { newPersonUrl, personUrl, UNIT_ROLE_LABELS } from "@/lib/persons/person-workspace";
 
 /**
  * Client Component: as pessoas da unidade aberta (o proprietário e o inquilino vigentes), numa sub-tela no meio, como as pessoas do condomínio, no
@@ -30,6 +30,7 @@ export function UnitPeopleList({ condominiumId, unitId }: { condominiumId: strin
     <RegistrySubList
       label="Pessoas da unidade"
       title="Pessoas"
+      actions={<RegistryCreate href={newPersonUrl({ condominium: condominiumId, unit: unitId, from: here })} label="Nova pessoa" />}
       search={{ label: "Buscar pessoa", placeholder: "Nome", value: search, onChange: setSearch }}
       navLabel="Lista de pessoas da unidade"
       isLoading={isLoading}

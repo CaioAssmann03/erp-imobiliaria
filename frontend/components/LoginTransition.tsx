@@ -1,6 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useLite } from "@/lib/theme/use-lite";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -54,7 +55,7 @@ function BuildingLogo({ still }: { still: boolean }) {
  */
 export function LoginTransition() {
   const pathname = usePathname();
-  const still = useReducedMotion() ?? false;
+  const still = useLite();
   const [visible, setVisible] = useState(false);
   const shownAt = useRef(0);
 

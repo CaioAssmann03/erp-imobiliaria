@@ -28,7 +28,7 @@ import type {
   PaginatedCompanyEntryList
 } from '../models';
 
-import { customInstance } from '../../mutator';
+import { customInstance } from '../../mutator.ts';
 
 
 

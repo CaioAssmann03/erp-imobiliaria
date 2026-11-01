@@ -19,7 +19,7 @@ import { ModeSection } from "./settings/ModeSection";
 import { NavigationSection } from "./settings/NavigationSection";
 
 const TRIGGER_COMPACT =
-  "flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink";
+  "flex size-10 items-center justify-center rounded-button text-ink-soft transition-colors hover:bg-surface hover:text-ink";
 
 const TABS = [
   { id: "appearance", label: "Aparência", description: "Como o sistema se parece, salvo neste navegador." },
@@ -122,7 +122,7 @@ export function SettingsDialog({
               </div>
               <Dialog.Close
                 aria-label="Fechar"
-                className="-mt-1 -mr-2 hidden size-9 shrink-0 items-center justify-center rounded-full text-ink-soft outline-none transition-colors hover:bg-surface-muted hover:text-ink focus-visible:ring-2 focus-visible:ring-brand/60 sm:flex"
+                className="-mt-1 -mr-2 hidden size-9 shrink-0 items-center justify-center rounded-button text-ink-soft outline-none transition-colors hover:bg-surface-muted hover:text-ink focus-visible:ring-2 focus-visible:ring-brand/60 sm:flex"
               >
                 <X className="size-5" />
               </Dialog.Close>

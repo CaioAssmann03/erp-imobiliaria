@@ -57,6 +57,7 @@ export const APP_MODULES: readonly AppModule[] = [
         items: [
           { label: "Condomínios", description: "Cadastro e ficha completa", icon: "building", href: "/condominiums" },
           { label: "Unidades", description: "Apartamentos, salas e garagens", icon: "door", href: "/condominiums/units" },
+          { label: "Sub-contas", description: "Contas de cada condomínio", icon: "list", href: "/condominiums/cost-centers" },
           { label: "Pessoas", description: "Proprietários, inquilinos e síndicos", icon: "users", href: "/condominiums/persons" },
           { label: "Eventos", description: "Itens que entram no boleto", icon: "layers", href: "/condominiums/events" },
           { label: "Áreas", description: "Áreas comuns e reservas", icon: "home" },

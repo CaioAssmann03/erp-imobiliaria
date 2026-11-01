@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { CodeEnum } from './codeEnum';
+import type { CodeEnum } from './codeEnum.ts';
 
 /**
  * A selected unit that was not issued, and why.

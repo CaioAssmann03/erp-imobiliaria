@@ -53,7 +53,7 @@ export function AccentSection({ appearance, onChange }: SectionProps) {
                 onClick={() => onChange({ accent: accent.value })}
                 style={{ background: accent.color }}
                 className={cn(
-                  "flex size-7 items-center justify-center rounded-full text-white outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-brand/60",
+                  "flex size-7 items-center justify-center rounded-button text-white outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-brand/60",
                   selected
                     ? "ring-2 ring-ink ring-offset-2 ring-offset-surface"
                     : "hover:ring-2 hover:ring-ink-faint hover:ring-offset-2 hover:ring-offset-surface"
@@ -71,7 +71,7 @@ export function AccentSection({ appearance, onChange }: SectionProps) {
           <label
             title="Escolher outra cor"
             className={cn(
-              "relative flex size-7 cursor-pointer items-center justify-center rounded-full text-white transition-shadow focus-within:ring-2 focus-within:ring-brand/60",
+              "relative flex size-7 cursor-pointer items-center justify-center rounded-button text-white transition-shadow focus-within:ring-2 focus-within:ring-brand/60",
               isCustom ? "ring-2 ring-ink ring-offset-2 ring-offset-surface" : "hover:ring-2 hover:ring-ink-faint hover:ring-offset-2 hover:ring-offset-surface"
             )}
             style={{ background: isCustom ? customColor : RAINBOW }}
@@ -81,7 +81,7 @@ export function AccentSection({ appearance, onChange }: SectionProps) {
               aria-label="Escolher outra cor"
               value={customColor}
               onChange={(event) => pickCustom(event.target.value)}
-              className="absolute inset-0 size-full cursor-pointer rounded-full opacity-0"
+              className="absolute inset-0 size-full cursor-pointer rounded-button opacity-0"
             />
             {isCustom ? <Check aria-hidden className="size-3.5" strokeWidth={3} /> : <Plus aria-hidden className="size-3.5 drop-shadow" strokeWidth={3} />}
           </label>

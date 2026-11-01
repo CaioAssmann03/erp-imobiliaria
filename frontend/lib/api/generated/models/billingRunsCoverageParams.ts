@@ -7,5 +7,14 @@
  */
 
 export type BillingRunsCoverageParams = {
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: number;
+/**
+ * @minimum 1
+ */
+page?: number;
 reference_month: string;
 };

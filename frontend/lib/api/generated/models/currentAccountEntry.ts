@@ -5,8 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { CurrentAccountEntryOriginEnum } from './currentAccountEntryOriginEnum';
-import type { EntryKindEnum } from './entryKindEnum';
+import type { CurrentAccountEntryOriginEnum } from './currentAccountEntryOriginEnum.ts';
+import type { EntryKindEnum } from './entryKindEnum.ts';
 
 /**
  * A line of the statement; only a manual entry is written here (the others come from services).

@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { CondominiumApportionmentCriterionTotal } from './condominiumApportionmentCriterionTotal';
+import type { CondominiumApportionmentCriterionTotal } from './condominiumApportionmentCriterionTotal.ts';
 
 /**
  * The active units of a condominium and the sum of each apportionment criterion's fractions over them.

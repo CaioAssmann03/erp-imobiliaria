@@ -1,8 +1,10 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 
-import { unitsUrl } from "@/lib/condominiums/unit-workspace";
+import { NewUnitChooseCondominium } from "@/app/(dashboard)/condominiums/(condominium)/[id]/units/_components/NewUnitChooseCondominium";
 
-/** Uma unidade nova nasce dentro de um condomínio: a tela de unidades pede o condomínio e tem o botão Nova. */
+export const metadata: Metadata = { title: "Nova unidade" };
+
+/** `/condominiums/units/new`: a nova unidade ainda sem condomínio (o **+** da lista sem condomínio escolhido); escolhido o condomínio, abre o formulário dele. */
 export default function NewUnitFromListPage() {
-  redirect(unitsUrl());
+  return <NewUnitChooseCondominium />;
 }

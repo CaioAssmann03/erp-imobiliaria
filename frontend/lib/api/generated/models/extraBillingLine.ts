@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { AllocationEnum } from './allocationEnum';
+import type { AllocationEnum } from './allocationEnum.ts';
 
 /**
  * A line of the extra boleto, written like a launch of *Inclusão de valores* (the launch's own rules validate it).

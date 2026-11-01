@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useLite } from "@/lib/theme/use-lite";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -24,7 +25,7 @@ type ErrorScreenProps = {
 /** Tela de erro: o código em linhas laranja, o texto do código, o que fazer e as saídas, tudo centralizado. */
 export function ErrorScreen({ code, onRetry, reference, full = false }: ErrorScreenProps) {
   const router = useRouter();
-  const reduced = useReducedMotion();
+  const reduced = useLite();
   const info = resolveErrorScreen(code) ?? resolveErrorScreen(500)!;
   const [wait, setWait] = useState(info.retryAfter ?? 0);
 

@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type CompaniesListParams = {
+export type DashboardAdjustmentsListParams = {
 /**
  * Número de resultados a serem retornados por página.
  */
@@ -15,8 +15,4 @@ limit?: number;
  * Um número de página dentro do conjunto de resultados paginado.
  */
 page?: number;
-/**
- * Termo de busca (nome, documento, ID…).
- */
-query?: string;
 };

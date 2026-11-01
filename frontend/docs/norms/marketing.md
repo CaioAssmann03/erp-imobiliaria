@@ -55,7 +55,7 @@ leak in and nothing switches after hydration. **The mode is shared with the ERP:
 - **Login to panel transition:** on a successful login `LoginForm` calls `startLoginTransition()` (`lib/auth/login-transition.ts`) and `components/LoginTransition.tsx`, mounted in the root layout so it survives the page change,
   covers the screen (`bg-canvas`) with the house logo building itself bottom-up in 16 horizontal bands that slide in from the left, then breathing slowly. It leaves in a fade when the
   path is no longer `/login` and at least 1.7 s have passed (10 s at most). With reduced motion the logo shows whole and still.
-- **Sky flyers:** `hero/SkyFlyers.tsx` sends a plane (with a fading contrail) or a V-shaped flock of birds across the hero sky above the title every 6–13 s, drawn as the same orange scanlines (sprites are rows of segments on the 4px grid). It only draws while something is in the air, never when the tab is hidden or the hero is covered, and not at all for `prefers-reduced-motion`.
+- **Sky flyers:** `hero/SkyFlyers.tsx` sends a plane (with a fading contrail) or a V-shaped flock of birds across the hero sky above the title every 6–13 s, drawn as the same orange scanlines (sprites are rows of segments on the 4px grid). It only draws while something is in the air, never when the tab is hidden or the hero is covered, and not at all in the lite mode (`isLite()`, see norms/design-system.md).
 - **Hero to Summary transition (curtain):** the hero is `sticky top-0 h-svh` and everything after it lives in a
   `relative z-10 bg-canvas` wrapper in `page.tsx`, so the next section slides over the pinned hero and covers the
   buildings; the hero text fades out over the first 350px. No melt, no extra canvas. Keep the wrapper opaque.
@@ -63,7 +63,7 @@ leak in and nothing switches after hydration. **The mode is shared with the ERP:
   rules are allowed here. No glow, spotlight or gradient cards.
 - **Motion:** `Reveal` on enter; Lenis smooth scroll; scroll-linked motion (the hero text fade) via
   `useScroll` + `useTransform`; the hero skyline is the only continuous animation. Everything
-  stops for `prefers-reduced-motion`.
+  stops in the lite mode (`isLite()`).
 - **Canvas performance:** draw static parts once per size into offscreen canvases (`hero/skyline-layers.ts`) and only
   composite per frame at the display rate (no fps cap: throttling looks choppy on 120 Hz screens); cap the pixel ratio
   (1.5); start loops after idle; pause when off-screen or once the next section has covered the hero.

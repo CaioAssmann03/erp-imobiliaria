@@ -1,6 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useLite } from "@/lib/theme/use-lite";
 
 import { cn } from "@/lib/utils";
 
@@ -24,7 +25,7 @@ type ScreenListProps = {
  * aparece no ponto da vez, ao lado da guia fina onde corre a linha laranja do tempo.
  */
 export function ScreenList({ step, running, onPick }: ScreenListProps) {
-  const still = useReducedMotion();
+  const still = useLite();
   const fade = { duration: still ? 0 : 0.35, ease: EASE };
 
   return (

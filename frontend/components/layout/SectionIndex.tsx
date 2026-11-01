@@ -124,7 +124,7 @@ export function SectionIndex({
   };
   const chipClass = (active: boolean) =>
     cn(
-      "flex h-9 shrink-0 items-center rounded-full px-3.5 text-body whitespace-nowrap outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand/50",
+      "flex h-9 shrink-0 items-center rounded-button px-3.5 text-body whitespace-nowrap outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand/50",
       active ? "bg-ink font-medium text-ink-foreground" : "bg-surface text-ink-soft"
     );
 
@@ -133,7 +133,7 @@ export function SectionIndex({
     <nav aria-label={label} className="sticky top-14 z-20 order-first -mx-4 lg:top-16 lg:-mx-8 xl:hidden">
       <div
         ref={barRef}
-        className="flex items-center gap-2 overflow-x-auto bg-shell/90 px-4 py-2.5 backdrop-blur-md lg:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex items-center gap-2 overflow-x-auto bg-shell/90 px-4 py-2.5 backdrop-blur-md lite:bg-shell lg:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {sections.map((section, index) => (
           <button

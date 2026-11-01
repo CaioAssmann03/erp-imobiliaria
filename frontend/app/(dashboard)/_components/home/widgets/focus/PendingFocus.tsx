@@ -1,71 +1,58 @@
-import Link from "next/link";
-
 import type { Dashboard } from "@/lib/api/generated/models";
 import { cn } from "@/lib/utils";
 
+import { integer } from "../format";
 import { pendingRows, SEVERITY_LABELS, type Severity } from "../pending-rows";
-import { FocusStat } from "./parts";
+import { FocusRow } from "./parts";
 
-const DOT: Record<Severity, string> = {
-  critical: "bg-danger",
-  attention: "bg-warning",
-  info: "bg-ink-soft",
-};
+/** Uma coluna de cada vez: as críticas à esquerda, que bloqueiam a cobrança, e à direita o que pede atenção e o que é só para acompanhar. */
+const COLUMNS: Severity[][] = [["critical"], ["attention", "info"]];
 
-const ORDER: Severity[] = ["critical", "attention", "info"];
-
-/** Visão completa das pendências: separadas por gravidade, cada uma com a explicação e o atalho para resolver. */
+/**
+ * Visão completa das pendências, sem barra nem legenda: só os blocos de cada gravidade com o seu total, e em cada um os tipos de pendência com a explicação
+ * embaixo e o número à direita (em vermelho nas críticas). A linha inteira leva a quem resolve. Os tipos zerados aparecem apagados.
+ */
 export function PendingFocus({ pending }: { pending: Dashboard["pending"] | undefined }) {
   const rows = pendingRows(pending);
-  const withPending = rows.filter((row) => row.count > 0);
-  const total = withPending.reduce((sum, row) => sum + row.count, 0);
+  const total = rows.reduce((sum, row) => sum + row.count, 0);
+
+  if (pending && total === 0) return <p className="py-6 text-ink-soft">Nenhuma pendência. Tudo em dia.</p>;
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-3 sm:grid-cols-3">
-        <FocusStat label="Tipos com pendência" value={pending ? `${withPending.length} de ${rows.length}` : "–"} />
-        <FocusStat label="Itens a resolver" value={pending ? total : "–"} tone={total > 0 ? "danger" : "success"} />
-        <FocusStat
-          label="Críticas"
-          value={pending ? withPending.filter((row) => row.severity === "critical").length : "–"}
-          hint="Impedem a cobrança"
-        />
-      </div>
-
-      {pending && total === 0 && <p className="py-4 text-ink-soft">Nenhuma pendência. Tudo em dia.</p>}
-
-      {ORDER.map((severity) => {
-        const group = rows.filter((row) => row.severity === severity);
-        return (
-          <section key={severity} className="space-y-2">
-            <h3 className="flex items-center gap-2 text-heading">
-              <span className={cn("size-2 rounded-full", DOT[severity])} />
-              {SEVERITY_LABELS[severity]}
-            </h3>
-            <ul className="space-y-1.5">
-              {group.map((row) => (
-                <li key={row.label}>
-                  <Link
-                    href={row.href}
-                    className="grid grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-3 rounded-panel bg-surface-muted px-4 py-3 transition-colors hover:bg-surface-sunken"
-                  >
-                    <span className={cn("text-title tabular-nums", row.count === 0 && "text-ink-faint")}>
-                      {pending ? row.count : "–"}
-                    </span>
-                    <span className="min-w-0">
-                      <span className={cn("block truncate font-medium", row.count === 0 && "text-ink-faint")}>
-                        {row.label}
-                      </span>
-                      <span className="block text-caption text-ink-soft">{row.detail}</span>
-                    </span>
-                    <span className="text-body text-ink-soft">{row.count > 0 ? "Resolver →" : "Ver →"}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        );
-      })}
+    <div className="grid gap-x-10 gap-y-10 md:grid-cols-2">
+      {COLUMNS.map((severities, index) => (
+        <div key={index} className={cn("space-y-8", index > 0 && "md:border-l md:border-border/50 md:pl-10")}>
+          {severities.map((severity) => {
+            const group = rows.filter((row) => row.severity === severity);
+            const sum = group.reduce((acc, row) => acc + row.count, 0);
+            return (
+              <section key={severity}>
+                <div className="flex items-baseline justify-between gap-3 px-3">
+                  <h3 className="text-heading">{SEVERITY_LABELS[severity]}</h3>
+                  <span className="shrink-0 text-caption tabular-nums text-ink-soft">{pending ? `${integer(sum)} ${sum === 1 ? "item" : "itens"}` : ""}</span>
+                </div>
+                <div className="mt-3">
+                  {group.map((row) => (
+                    <FocusRow
+                      key={row.label}
+                      href={row.href}
+                      title={row.detail}
+                      sub={row.detail}
+                      detail={
+                        <span className={cn("text-body", row.count === 0 ? "text-ink-faint" : severity === "critical" && "text-danger")}>
+                          {pending ? integer(row.count) : "–"}
+                        </span>
+                      }
+                    >
+                      <span className={cn(row.count === 0 && "text-ink-faint")}>{row.label}</span>
+                    </FocusRow>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }

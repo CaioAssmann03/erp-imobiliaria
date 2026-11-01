@@ -1,7 +1,6 @@
 import type { Unit } from "@/lib/api/generated/models";
 
-/** Vínculos vigentes: sem data final ou com data final ainda no futuro. */
+/** Vínculos vigentes: quem diz é a API (`is_current`, com a data do servidor), não o relógio do navegador. */
 export function currentLinks(unit: Unit) {
-  const today = new Date().toISOString().slice(0, 10);
-  return unit.unit_people.filter((link) => !link.end_date || link.end_date >= today);
+  return unit.unit_people.filter((link) => link.is_current);
 }

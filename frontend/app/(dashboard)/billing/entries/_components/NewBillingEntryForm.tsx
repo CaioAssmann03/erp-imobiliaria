@@ -3,13 +3,14 @@
 import { useRouter } from "next/navigation";
 
 import { monthFromApi } from "@/lib/billing/billing-plan-payload";
-import { billingEntriesUrl, billingEntryUrl, type BillingEntriesScope } from "@/lib/billing/billing-entry-workspace";
+import { billingEntriesUrl, billingEntryUrl, newBillingEntryUrl, type BillingEntriesScope } from "@/lib/billing/billing-entry-workspace";
 import { billingEntryDefaults, billingEntrySchema } from "@/lib/schemas/billing-entry";
 
 import { EntryAmountSection, EntryIdentitySection, EntryUnitsSection } from "./entry-form/EntryFormFields";
 import { EntryPreview } from "./entry-form/EntryPreview";
 import { useEntrySubmit } from "./entry-form/use-entry-submit";
 import { useEntriesScope } from "./use-entries-scope";
+import { ChooseCondominiumCard } from "@/components/form/ChooseCondominiumCard";
 import { SectionAnchor } from "@/components/form/SectionAnchor";
 import { RecordForm } from "@/components/form/RecordForm";
 import { useRecordForm } from "@/hooks/use-record-form";
@@ -41,16 +42,12 @@ function Form({ scope }: { scope: BillingEntriesScope }) {
   );
 }
 
-/** Client Component: o lançamento novo, no condomínio e no mês da lista. Sem condomínio escolhido não há o que preencher. */
+/** Client Component: o lançamento novo, no condomínio e no mês da lista. Sem condomínio escolhido, pede o condomínio antes do resto do formulário. */
 export function NewBillingEntryForm() {
+  const router = useRouter();
   const scope = useEntriesScope();
 
-  if (scope.condominium === "")
-    return (
-      <div className="rounded-card bg-surface p-8 text-center">
-        <p className="text-body text-ink-soft">Escolha o condomínio na lista para incluir um valor nos boletos dele.</p>
-      </div>
-    );
+  if (scope.condominium === "") return <ChooseCondominiumCard what="do lançamento" onChoose={(condominium) => router.replace(newBillingEntryUrl({ ...scope, condominium }))} />;
 
   return <Form scope={scope} />;
 }

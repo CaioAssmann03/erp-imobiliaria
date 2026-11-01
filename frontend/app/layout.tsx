@@ -35,6 +35,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       data-font={DEFAULT_APPEARANCE.font}
       data-text={DEFAULT_APPEARANCE.text}
       data-motion={DEFAULT_APPEARANCE.motion}
+      data-device="standard"
+      data-perf="full"
       suppressHydrationWarning
       className={`${inter.variable} ${dmSans.variable} ${sourceSerif.variable} h-full`}
     >

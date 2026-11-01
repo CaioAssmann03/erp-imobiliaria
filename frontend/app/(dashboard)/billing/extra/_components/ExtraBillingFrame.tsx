@@ -8,16 +8,18 @@ import { BILLING_DOCUMENT_SECTIONS } from "@/lib/billing/billing-document-worksp
 import { NEW_EXTRA_BILLING_SECTIONS, extraBillingFrameState } from "@/lib/billing/extra-billing-workspace";
 
 import { ExtraBillingList } from "./ExtraBillingList";
+import { useExtraScope } from "./use-extra-scope";
 
-/** Client Component: a moldura do boleto extra: a lista dos boletos extras emitidos, o boleto novo (ou o emitido aberto) e o índice de seções (`extraBillingFrameState`); a tela vazia ocupa a largura toda. */
+/** Client Component: a moldura do boleto extra: a lista dos boletos extras emitidos, o boleto novo (ou o emitido aberto) e o índice de seções (`extraBillingFrameState`); a tela vazia ocupa a largura toda e o boleto novo ainda sem condomínio só pede o condomínio (sem índice). */
 export function ExtraBillingFrame({ children }: { children: React.ReactNode }) {
   const state = extraBillingFrameState(usePathname());
+  const scope = useExtraScope();
   if (!state.hasFrame) return <>{children}</>;
 
   return (
     <RegistryFrame
-      list={(className) => (<ExtraBillingList openDocumentId={state.documentId} className={className} />)}
-      aside={state.isNew || state.documentId !== null ? <SectionIndex sections={state.isNew ? NEW_EXTRA_BILLING_SECTIONS : BILLING_DOCUMENT_SECTIONS} label="Seções do boleto extra" title="Neste boleto" /> : undefined}
+      list={(className) => (<ExtraBillingList openDocumentId={state.documentId} isNew={state.isNew} className={className} />)}
+      aside={(state.isNew && scope.condominium !== "") || state.documentId !== null ? <SectionIndex sections={state.isNew ? NEW_EXTRA_BILLING_SECTIONS : BILLING_DOCUMENT_SECTIONS} label="Seções do boleto extra" title="Neste boleto" /> : undefined}
       showListOnPhone={state.showListOnPhone}
       showPageOnPhone={state.showPageOnPhone}
     >

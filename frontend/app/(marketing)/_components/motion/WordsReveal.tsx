@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useInView, useReducedMotion } from "motion/react";
+import { motion, useInView } from "motion/react";
+import { useLite } from "@/lib/theme/use-lite";
 import { Fragment, useRef } from "react";
 
 /**
@@ -10,7 +11,7 @@ import { Fragment, useRef } from "react";
 export function WordsReveal({ text }: { text: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const shown = useInView(ref, { once: true, margin: "0px 0px -80px 0px" });
-  const still = useReducedMotion();
+  const still = useLite();
   if (still) return <>{text}</>;
 
   return (

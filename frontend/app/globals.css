@@ -68,6 +68,10 @@
   --radius-card: 1.25rem;
   --radius-panel: 0.875rem;
   --radius-control: 0.75rem;
+  /* Botões, chips e filtros em pílula: cantos arredondados, nunca ovais nem circulares. */
+  --radius-button: 0.5rem;
+  /* Selos e contadores pequenos (até 1,25 rem de altura). */
+  --radius-badge: 0.25rem;
 
   /* Sombras */
   --shadow-card: 0 1px 2px rgb(28 27 25 / 0.04);
@@ -296,14 +300,37 @@ html[data-text="xlarge"] {
   font-size: 125%;
 }
 
-/* Animações reduzidas (Configurações → Acessibilidade). */
-html[data-motion="reduced"] *,
-html[data-motion="reduced"] *::before,
-html[data-motion="reduced"] *::after {
+/* Modo leve (Configurações → Acessibilidade → Animações e efeitos): o <html> ganha data-perf="lite" quando a pessoa escolhe
+   "Reduzidos", quando o sistema pede menos movimento, ou no "Automático" em máquina fraca (ver resolvePerf em lib/theme/appearance.ts).
+   Sem animações nem transições, sem blur e com o vidro sólido; os efeitos em canvas e o scroll suave leem o mesmo atributo
+   (lib/theme/use-lite.ts). Tudo continua funcionando, só mais simples. */
+@custom-variant lite (html[data-perf="lite"] &);
+
+html[data-perf="lite"] *,
+html[data-perf="lite"] *::before,
+html[data-perf="lite"] *::after {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+html[data-perf="lite"] :is(.glass, .glass-pill) {
+  background: var(--color-surface);
+}
+
+/* Quem desliga a transparência no sistema (macOS/Windows) também fica sem o blur e com o vidro sólido, mesmo no modo completo. */
+@media (prefers-reduced-transparency: reduce) {
+  *,
+  *::before,
+  *::after {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  :is(.glass, .glass-pill) {
+    background: var(--color-surface);
+  }
 }
 
 /* ==========================================================================

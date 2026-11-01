@@ -35,8 +35,8 @@ function periodParams(period: string, today: string): Pick<CurrentAccountEntries
 }
 
 /**
- * Client Component: o extrato de um condomínio, do mais recente ao mais antigo, num cartão só: o saldo atual em tipo grande (vermelho se negativo),
- * o saldo por sub-conta em uma seção própria e os lançamentos com a busca e o filtro no padrão das listas de Unidades. As seções `saldo`, `subcontas` e `lancamentos` são as do índice da direita.
+ * Client Component: o extrato de um condomínio, do mais recente ao mais antigo, num cartão só: o saldo atual (vermelho se negativo) e o de cada sub-conta num
+ * fileira só (quebra de linha quando não cabe): o saldo atual em tamanho de título e, ao lado, o de cada sub-conta, menor, cada um com o nome em cima do valor, sem títulos nem divisórias, e os lançamentos com a busca e o filtro no padrão das listas de Unidades. As seções `saldo`, `subcontas` e `lancamentos` são as do índice da direita.
  */
 export function StatementView({ condominiumId }: { condominiumId: string }) {
   const { search, setSearch, page, setPage, limit, setLimit, params, filters, setFilter, clearFilters } =
@@ -60,10 +60,14 @@ export function StatementView({ condominiumId }: { condominiumId: string }) {
   return (
     <div className="rounded-card bg-surface p-5 sm:p-6">
       <section id="saldo" aria-label="Saldo da conta corrente" className="scroll-mt-20">
-        <p className={cn("text-display tabular-nums", balance < 0 && "text-danger")}>{loadingAccount ? "–" : brl(balance)}</p>
+        <dl className="flex flex-wrap items-end gap-x-10 gap-y-4">
+          <div>
+            <dt className="text-caption text-ink-soft">Saldo atual</dt>
+            <dd className={cn("text-title tabular-nums", balance < 0 && "text-danger")}>{loadingAccount ? "–" : brl(balance)}</dd>
+          </div>
+          <StatementBalances accountId={account?.id} />
+        </dl>
       </section>
-
-      <StatementBalances accountId={account?.id} />
 
       <section id="lancamentos" aria-label="Lançamentos" className="mt-8 scroll-mt-20 border-t border-line pt-6">
         <div className="mb-3">

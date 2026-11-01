@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useLite } from "@/lib/theme/use-lite";
 import Image from "next/image";
 
 import { cn } from "@/lib/utils";
@@ -24,7 +25,7 @@ type ScreenFrameProps = {
 
 /** A tela da vez, aproximada na região em foco. As quatro imagens ficam empilhadas e trocam por fade; um clique alterna zoom e tela inteira. */
 export function ScreenFrame({ current, focus, onToggle }: ScreenFrameProps) {
-  const still = useReducedMotion();
+  const still = useLite();
   const { scale, x, y } = zoomTransform(focus);
 
   return (

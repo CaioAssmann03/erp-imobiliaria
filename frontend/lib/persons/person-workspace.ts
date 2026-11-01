@@ -19,7 +19,8 @@ const withContext = (path: string, context: PersonContext): string =>
   scopeUrl(path, { condominium: context.condominium ?? "", unit: context.unit ?? "", from: context.from ?? "" });
 
 export const personsUrl = (context: PersonContext = {}) => withContext("/condominiums/persons", context);
-export const newPersonUrl = () => "/condominiums/persons/new";
+/** A tela de nova pessoa; o `context` mantém a lista da esquerda filtrada no que se olhava (as pessoas do condomínio ou da unidade). */
+export const newPersonUrl = (context: PersonContext = {}) => withContext("/condominiums/persons/new", context);
 /** A pessoa aberta; o `context` (de onde se chegou) mantém a lista filtrada e leva o "voltar" de volta à tela de origem. */
 export const personUrl = (personId: string, context: PersonContext = {}) => withContext(`/condominiums/persons/${personId}`, context);
 

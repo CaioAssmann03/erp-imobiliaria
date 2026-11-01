@@ -38,7 +38,7 @@ export function CompactFilter({ groups, onClear, columns = 1 }: { groups: readon
         {activeCount > 0 && (
           <span
             aria-hidden
-            className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-brand text-[0.625rem] leading-none font-semibold text-brand-foreground"
+            className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-badge bg-brand text-[0.625rem] leading-none font-semibold text-brand-foreground"
           >
             {activeCount}
           </span>

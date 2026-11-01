@@ -19,8 +19,8 @@ import { CondominiumScopeSelect } from "@/components/filters/CondominiumScopeSel
 import { EntryBatchListItem } from "./EntryBatchListItem";
 
 /**
- * Client Component: a coluna da esquerda do lançamento manual, no padrão da lista de condomínios: título com **+** de novo lote, o condomínio como escopo (seletor,
- * "Todos os condomínios": os lotes que têm lançamento dele), abaixo a data do lote (calendário de dias, `DateSelect`, como o `MonthSelect`) com o filtro
+ * Client Component: a coluna da esquerda do lançamento manual, no padrão da lista de condomínios: título com **+** de novo lote, o condomínio como escopo (seletor, que abre em
+ * "Todos os condomínios"; escolher um mostra os lotes que têm lançamento dele), abaixo a data do lote (digitável em `dd/mm/aaaa` ou pelo calendário de dias, `DateSelect`, como o `MonthSelect`) com o filtro
  * discreto de origem (`CompactFilter`) e os lotes do mais recente ao mais antigo, 10 de cada vez, com o aberto marcado. Um lote nunca se exclui.
  */
 export function EntryBatchesList({ openBatchId, className }: { openBatchId: string | null; className?: string }) {
@@ -55,7 +55,7 @@ export function EntryBatchesList({ openBatchId, className }: { openBatchId: stri
               label="Data do lote"
               value={date}
               today={todayIso()}
-              placeholder="Filtrar pela data"
+              placeholder="Digite ou escolha a data"
               allLabel="Todas as datas"
               onChange={setDate}
             />

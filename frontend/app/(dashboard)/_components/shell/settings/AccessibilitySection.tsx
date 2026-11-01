@@ -1,7 +1,7 @@
 import type { Appearance } from "@/lib/theme/appearance";
 
+import { MotionSection } from "./MotionSection";
 import { SettingsGroup } from "./SettingsSection";
-import { SettingsSwitch } from "./SettingsSwitch";
 import { TextSizeSection } from "./TextSizeSection";
 
 interface SectionProps {
@@ -9,17 +9,12 @@ interface SectionProps {
   onChange: (patch: Partial<Appearance>) => void;
 }
 
-/** Texto maior e menos movimento. */
+/** Texto maior e modo leve (menos movimento e efeitos). */
 export function AccessibilitySection({ appearance, onChange }: SectionProps) {
   return (
     <SettingsGroup>
       <TextSizeSection appearance={appearance} onChange={onChange} />
-      <SettingsSwitch
-        title="Reduzir animações"
-        description="Tira as transições e os movimentos das janelas, menus e listas."
-        checked={appearance.motion === "reduced"}
-        onChange={(checked) => onChange({ motion: checked ? "reduced" : "full" })}
-      />
+      <MotionSection appearance={appearance} onChange={onChange} />
     </SettingsGroup>
   );
 }

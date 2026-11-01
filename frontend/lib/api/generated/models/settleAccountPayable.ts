@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { PaymentMethodEnum } from './paymentMethodEnum';
+import type { PaymentMethodEnum } from './paymentMethodEnum.ts';
 
 /**
  * Payment data to settle an open account.

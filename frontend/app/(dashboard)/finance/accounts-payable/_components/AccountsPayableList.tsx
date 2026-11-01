@@ -1,6 +1,7 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { CompactFilter, type CompactFilterGroup } from "@/components/filters/CompactFilter";
@@ -8,7 +9,7 @@ import { ShowMore } from "@/components/data-list";
 import { ScopeSearchCard } from "@/components/filters/ScopeSearchCard";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
-import { DUE_OPTIONS, newAccountPayableUrl } from "@/lib/finance/account-payable-workspace";
+import { DUE_OPTIONS, dueParam, newAccountPayableUrl } from "@/lib/finance/account-payable-workspace";
 import { useAccountsPayableList } from "@/lib/api/generated";
 import type { AccountsPayableListParams, AccountsPayableListStatus } from "@/lib/api/generated/models";
 import { addDays, monthBounds, todayIso } from "@/lib/format/format";
@@ -45,12 +46,19 @@ function dueParams(due: string, today: string): Pick<AccountsPayableListParams, 
 /**
  * Client Component: a coluna da esquerda das contas a pagar, no padrão da lista de condomínios: título com **+** de nova conta, o condomínio como
  * escopo (seletor), busca no servidor (descrição, documento ou fornecedor) com o filtro discreto dentro (`CompactFilter`, em 2 colunas: situação,
- * vencimento e despesa) e as contas por vencimento, 10 de cada vez, com a aberta marcada. Abre mostrando as contas em aberto.
+ * vencimento e despesa) e as contas por vencimento, 10 de cada vez, com a aberta marcada. Abre mostrando as contas em aberto, e `?due=` (os cards do painel)
+ * já abre no período de vencimento escolhido.
  */
 export function AccountsPayableList({ openAccountId, className }: { openAccountId: string | null; className?: string }) {
   const [search, setSearch] = useState("");
   const [condominium, setCondominium] = useState("");
-  const [filters, setFilters] = useState({ status: "open", due: "", holder: "" });
+  const rawDue = useSearchParams().get("due");
+  const [filters, setFilters] = useState({ status: "open", due: dueParam(rawDue), holder: "" });
+  const [seenDue, setSeenDue] = useState(rawDue);
+  if (rawDue !== seenDue) {
+    setSeenDue(rawDue);
+    if (rawDue !== null) setFilters((current) => ({ ...current, due: dueParam(rawDue) }));
+  }
   const term = useDebouncedValue(search.trim());
   const today = todayIso();
 

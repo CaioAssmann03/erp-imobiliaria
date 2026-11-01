@@ -19,7 +19,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Rail />
 
       <div className="flex min-h-screen min-w-0 flex-1 flex-col bg-shell">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-2 bg-shell/90 px-4 backdrop-blur-md lg:h-16 lg:justify-center lg:px-8">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-2 bg-shell/90 px-4 backdrop-blur-md lite:bg-shell lg:h-16 lg:justify-center lg:px-8">
           <MobileMenu />
           <Link href="/dashboard" className="lg:hidden">
             <Brand />

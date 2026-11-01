@@ -1,23 +1,27 @@
 "use client";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import Link from "next/link";
+import { useState } from "react";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCondominiumsList, useUnitsList } from "@/lib/api/generated";
 import type { Dashboard } from "@/lib/api/generated/models";
 
 import { DotMatrix } from "@/app/(dashboard)/_components/home/charts/DotMatrix";
-import { FocusSection, FocusStat, percent } from "./parts";
+import { FOCUS_PAGE_SIZE, FocusPager, FocusSection, FocusStat, percent } from "./parts";
 
-const SHOWN = 10;
-
-/** Client Component: a cobertura, os pontos e a lista de quem ainda não tem ninguém para cobrar (uma falha só esvazia a lista). */
+/** Client Component: a cobertura, os pontos e a lista de quem ainda não tem ninguém para cobrar, 10 por página (uma falha só esvazia a lista). */
 export function ResponsiblesFocus({ stats }: { stats: Dashboard["responsibles"] | undefined }) {
   const active = stats?.active_units ?? 0;
   const covered = stats?.with_responsible ?? 0;
   const missing = active - covered;
 
-  const { data: units } = useUnitsList({ pending: "without_responsible", active: true, limit: SHOWN });
+  const [page, setPage] = useState(1);
+  const { data: units } = useUnitsList(
+    { pending: "without_responsible", active: true, limit: FOCUS_PAGE_SIZE, ...(page > 1 ? { page } : {}) },
+    { query: { placeholderData: keepPreviousData } }
+  );
   const { data: condominiums } = useCondominiumsList({ limit: 100 });
   const condominiumName = (id: string) => condominiums?.results.find((item) => item.id === id)?.name ?? "–";
 
@@ -59,6 +63,7 @@ export function ResponsiblesFocus({ stats }: { stats: Dashboard["responsibles"] 
             </TableBody>
           </Table>
         )}
+        {units && <FocusPager page={page} count={units.count} noun={units.count === 1 ? "unidade" : "unidades"} onPage={setPage} />}
       </FocusSection>
     </div>
   );

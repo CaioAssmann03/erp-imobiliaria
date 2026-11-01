@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { PaymentReceiptUploadUploadHeaders } from './paymentReceiptUploadUploadHeaders';
+import type { PaymentReceiptUploadUploadHeaders } from './paymentReceiptUploadUploadHeaders.ts';
 
 export interface PaymentReceiptUpload {
   id: string;

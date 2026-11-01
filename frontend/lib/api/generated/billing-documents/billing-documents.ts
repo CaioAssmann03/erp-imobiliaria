@@ -40,7 +40,7 @@ import type {
   PaginatedBillingDocumentList
 } from '../models';
 
-import { customInstance } from '../../mutator';
+import { customInstance } from '../../mutator.ts';
 
 
 
@@ -518,7 +518,7 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getBillingDocumentsReissueMutationOptions(options), queryClient);
     }
     /**
- * Report: the boletos awaiting payment past their due date, with the days late and the totals; the rows come 10 per page by default (`?page=`, `?page_size=` up to 100).
+ * Report: the boletos awaiting payment past their due date, with the days late and the totals; the rows come 10 per page by default (`?page=`, `?page_size=` up to 100); `?rows_order=` and `?condominiums_order=` choose the order.
  */
 export const billingDocumentsDelinquency = (
     params?: BillingDocumentsDelinquencyParams,

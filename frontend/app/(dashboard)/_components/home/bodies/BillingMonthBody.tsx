@@ -1,9 +1,10 @@
 "use client";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import Link from "next/link";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { useBillingRunsCoverage, useBillingRunsList } from "@/lib/api/generated";
+import { useBillingRunsCoverage } from "@/lib/api/generated";
 import { useBillingSummary } from "@/app/(dashboard)/_components/home/shared/use-billing-summary";
 import { brlWhole, integer } from "@/app/(dashboard)/_components/home/widgets/format";
 
@@ -14,22 +15,16 @@ export const firstDayOfThisMonth = () => {
   return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-01`;
 };
 
-/** As execuções da emissão do mês corrente que terminaram com problema (condomínio sem boleto): uma consulta por situação, falha e parcial, que a API filtra. */
-export function useRunsWithProblem() {
-  const month = firstDayOfThisMonth();
-  const failed = useBillingRunsList({ reference_month: month, status: "failed", limit: 100 });
-  const partial = useBillingRunsList({ reference_month: month, status: "partial", limit: 100 });
-  const runs = [...(failed.data?.results ?? []), ...(partial.data?.results ?? [])];
-  return { runs, isLoading: failed.isLoading || partial.isLoading };
-}
-
 /**
  * Quantos condomínios ativos já têm boleto emitido neste mês (uma execução que emitiu, ou que encontrou tudo já emitido) e quais ainda não: a conta é da API
- * (`/billing-runs/coverage/`). `ready` fica verdadeiro quando a resposta chegou.
+ * (`/billing-runs/coverage/`: o total dos que faltam e uma página deles, 10 por vez). `ready` fica verdadeiro quando a resposta chegou.
  */
-export function useIssuanceCoverage() {
-  const { data } = useBillingRunsCoverage({ reference_month: firstDayOfThisMonth() });
-  return { ready: Boolean(data), expected: data?.expected ?? 0, issued: data?.issued ?? 0, missing: data?.missing ?? [] };
+export function useIssuanceCoverage(page = 1, limit = 10) {
+  const { data } = useBillingRunsCoverage(
+    { reference_month: firstDayOfThisMonth(), limit, ...(page > 1 ? { page } : {}) },
+    { query: { placeholderData: keepPreviousData } }
+  );
+  return { ready: Boolean(data), expected: data?.expected ?? 0, issued: data?.issued ?? 0, missingCount: data?.missing_count ?? 0, missing: data?.missing ?? [] };
 }
 
 /**
@@ -48,7 +43,7 @@ export function BillingMonthBody() {
   const rate = issued > 0 ? (paid / issued) * 100 : 0;
   const previous = lines.length > 1 && Number(lines[0].issued_total) > 0 ? lines[0] : undefined;
   const previousRate = previous ? (Number(previous.paid_total) / Number(previous.issued_total)) * 100 : null;
-  const missing = coverage.ready ? coverage.missing.length : 0;
+  const missing = coverage.ready ? coverage.missingCount : 0;
   const count = current?.issued_count ?? 0;
 
   return (

@@ -21,6 +21,17 @@ export function condominiumPageUrl(condominiumId: string, page: CondominiumPageK
   return `/condominiums/${condominiumId}/${page}`;
 }
 
+/** As pendências de condomínio que o painel aponta (`?pending=`), com o mesmo nome do card de Pendências; o filtro compacto da lista as oferece. */
+export const CONDOMINIUM_PENDING_OPTIONS = [
+  { value: "inconsistent_apportionment", label: "Rateio que não fecha 100%" },
+  { value: "overdue_adjustment", label: "Reajustes atrasados" },
+  { value: "upcoming_adjustment", label: "Reajustes em 30 dias" },
+  { value: "without_cost_centers", label: "Sem centros de custo" },
+];
+
+/** A pendência lida de `?pending=`: só uma das conhecidas vale (o valor vira um filtro da lista). */
+export const condominiumPendingParam = (value: string | null): string => (CONDOMINIUM_PENDING_OPTIONS.some((option) => option.value === value) ? (value as string) : "");
+
 /** Primeiro segmento depois de `/condominiums` que não é o id de um condomínio. */
 const RESERVED_SEGMENTS = ["new", "units", "blocks", "cost-centers", "persons", "events"];
 
@@ -58,7 +69,8 @@ export function selectedCondominiumPage(pathname: string | null): CondominiumPag
  * A linha de leitura (px, a partir do topo da janela) do índice de seções: a 30% da altura da tela; nos últimos 60% da tela que faltam
  * rolar até o fim da página ela desce até a borda de baixo, para a última seção (mesmo curta, que nunca chegaria aos 30%) ser alcançada.
  * Com `firstTop` (o topo da primeira seção na página, em px), no topo da página a linha parte dele, e o marcador repousa no primeiro item, e
- * sobe até a linha normal à medida que se rola.
+ * sobe até a linha normal à medida que se rola: chega a ela depois de `lead` px de rolagem, ou no fim da página se ela rolar menos que isso
+ * (numa página que rola pouco a descida da borda de baixo já começa no topo, e sem isso o marcador abriria numa seção adiante).
  */
 export function readingLine(viewportHeight: number, scrolled: number, maxScroll: number, firstTop?: number): number {
   const base = Math.max(120, viewportHeight * 0.3);
@@ -67,8 +79,9 @@ export function readingLine(viewportHeight: number, scrolled: number, maxScroll:
   const progress = remaining >= stretch ? 0 : 1 - remaining / stretch;
   const line = base + (viewportHeight - base) * progress;
 
-  const lead = firstTop === undefined ? 0 : Math.max(0, base - firstTop);
-  const lift = lead === 0 ? 0 : Math.max(0, 1 - scrolled / lead);
+  const lead = firstTop === undefined ? 0 : Math.max(0, line - firstTop);
+  const reach = Math.min(lead, maxScroll);
+  const lift = reach <= 0 ? 0 : Math.max(0, 1 - scrolled / reach);
   return line - lead * lift;
 }
 

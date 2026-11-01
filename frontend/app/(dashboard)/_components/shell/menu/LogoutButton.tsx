@@ -32,7 +32,7 @@ export function LogoutButton({ compact = false, rail = false, expanded = false }
         className={
           rail
             ? railButtonClass(false, false, expanded)
-            : "flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink"
+            : "flex size-10 items-center justify-center rounded-button text-ink-soft transition-colors hover:bg-surface hover:text-ink"
         }
       >
         <LogOut className="size-5 shrink-0" />

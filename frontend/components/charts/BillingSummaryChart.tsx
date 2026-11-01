@@ -3,9 +3,8 @@
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import { type ChartConfig, ChartContainer, ChartLegend, ChartTooltip } from "@/components/ui/chart";
-import { brl } from "@/lib/format/format";
 import type { BillingMonthSummary } from "@/lib/api/generated/models";
-import { longMonthLabel, shortMonthLabel } from "@/app/(dashboard)/_components/home/widgets/format";
+import { brl, longMonthLabel, shortMonthLabel } from "@/lib/format/format";
 
 const config = {
   issued: { label: "Boletos emitidos", color: "var(--color-ink-faint)" },

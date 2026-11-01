@@ -9,6 +9,9 @@ export const PAYABLE_WINDOWS: readonly { id: PayableWindow; label: string }[] = 
   { id: "month", label: "Neste mês" },
 ];
 
+/** A janela como o período de vencimento da lista das contas a pagar (`?due=`); "Todas" não filtra. */
+export const WINDOW_DUE: Record<PayableWindow, string> = { all: "", overdue: "overdue", today: "today", week: "next_7_days", month: "this_month" };
+
 export interface DueDateRange {
   due_date_after?: string;
   due_date_before?: string;

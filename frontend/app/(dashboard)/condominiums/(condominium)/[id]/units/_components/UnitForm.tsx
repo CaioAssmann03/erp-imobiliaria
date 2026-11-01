@@ -90,7 +90,7 @@ export function UnitForm({ condominiumId, unitId }: UnitFormProps) {
       />
       <div className="space-y-8">
         <SectionAnchor id="dados-gerais" className="space-y-4">
-          <IdentificationSection condominiumId={condominiumId} />
+          <IdentificationSection condominiumId={condominiumId} isNew={!unitId} />
           <FractionsSection condominiumId={condominiumId} />
         </SectionAnchor>
         <SectionAnchor id="proprietario">

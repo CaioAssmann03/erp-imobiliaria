@@ -5,8 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BillingDocumentDeliveryStatusEnum } from './billingDocumentDeliveryStatusEnum';
-import type { ChannelEnum } from './channelEnum';
+import type { BillingDocumentDeliveryStatusEnum } from './billingDocumentDeliveryStatusEnum.ts';
+import type { ChannelEnum } from './channelEnum.ts';
 
 export interface BillingDocumentDelivery {
   readonly id: string;

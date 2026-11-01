@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 
 import { RegistryFrame } from "@/components/layout/RegistryFrame";
 import { accountsPayableFrameState } from "@/lib/finance/account-payable-workspace";
@@ -15,7 +16,11 @@ export function AccountsPayableFrame({ children }: { children: React.ReactNode }
 
   return (
     <RegistryFrame
-      list={(className) => (<AccountsPayableList openAccountId={state.accountId} className={className} />)}
+      list={(className) => (
+        <Suspense fallback={null}>
+          <AccountsPayableList openAccountId={state.accountId} className={className} />
+        </Suspense>
+      )}
       aside={state.isNew || state.accountId !== null ? <AccountPayableSideMenu accountId={state.accountId} /> : undefined}
       showListOnPhone={state.showListOnPhone}
       showPageOnPhone={state.showPageOnPhone}

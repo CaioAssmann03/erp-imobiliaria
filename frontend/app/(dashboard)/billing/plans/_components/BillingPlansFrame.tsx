@@ -15,7 +15,7 @@ export function BillingPlansFrame({ children }: { children: React.ReactNode }) {
 
   return (
     <RegistryFrame
-      list={(className) => (<BillingPlansList openPlanId={state.planId} className={className} />)}
+      list={(className) => (<BillingPlansList openPlanId={state.planId} isNew={state.isNew} className={className} />)}
       aside={state.isNew || state.planId !== null ? <SectionIndex sections={BILLING_PLAN_SECTIONS} label="Seções do plano" title="Neste plano" /> : undefined}
       showListOnPhone={state.showListOnPhone}
       showPageOnPhone={state.showPageOnPhone}

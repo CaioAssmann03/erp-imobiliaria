@@ -5,13 +5,13 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { Company } from './company';
+import type { CondominiumPerson } from './condominiumPerson.ts';
 
-export interface PaginatedCompanyList {
+export interface PaginatedCondominiumPersonList {
   count: number;
   /** @nullable */
   next?: string | null;
   /** @nullable */
   previous?: string | null;
-  results: Company[];
+  results: CondominiumPerson[];
 }

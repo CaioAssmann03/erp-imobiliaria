@@ -1,65 +1,78 @@
 "use client";
 
-import Link from "next/link";
-
-import { LinkButton } from "@/components/LinkButton";
-import { formatMonth } from "@/lib/format/format";
+import { useState } from "react";
 
 import { BillingMonthBodyRuns } from "./BillingMonthRuns";
 import { useBillingSummary } from "@/app/(dashboard)/_components/home/shared/use-billing-summary";
-import { firstDayOfThisMonth, useIssuanceCoverage } from "@/app/(dashboard)/_components/home/bodies/BillingMonthBody";
-import { brl } from "../format";
-import { FocusSection, FocusStat, ShareBar, percent } from "./parts";
+import { useIssuanceCoverage } from "@/app/(dashboard)/_components/home/bodies/BillingMonthBody";
+import { brl, integer, longMonthLabel } from "../format";
+import { FocusList, FocusPager, FocusRow, LedgerRow, SegmentedBar, boletos, percent } from "./parts";
 
-/** Client Component: o mês corrente em reais e em quantidade, o quanto já foi recebido e as execuções com problema. */
+/**
+ * Client Component: a emissão do mês corrente. À esquerda, o quadro do mês (emitido, recebido e em aberto, com a quantidade de boletos de cada um) sob uma barra
+ * do quanto já foi recebido, os condomínios com boleto e o mês anterior para comparar; à direita, o que ainda pede ação (condomínios sem boleto, execuções com problema), que só aparece quando existe.
+ */
 export function BillingMonthFocus() {
-  const { current, isLoading } = useBillingSummary(1);
-  const coverage = useIssuanceCoverage();
+  const { lines, current, isLoading } = useBillingSummary(2);
+  const [missingPage, setMissingPage] = useState(1);
+  const coverage = useIssuanceCoverage(missingPage);
   if (!current) return <p className="py-6 text-ink-soft">{isLoading ? "Carregando a emissão…" : "Não foi possível carregar a emissão."}</p>;
 
   const issued = Number(current.issued_total);
   const paid = Number(current.paid_total);
+  const rate = percent(paid, issued);
+  const previous = lines.length > 1 && lines[0].issued_count > 0 ? lines[0] : undefined;
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-3 sm:grid-cols-3">
-        <FocusStat label="Emitido" value={brl(issued)} hint={`${current.issued_count} boletos`} />
-        <FocusStat label="Recebido" value={brl(paid)} tone="success" hint={`${current.paid_count} boletos · ${percent(paid, issued)}%`} />
-        <FocusStat label="Em aberto" value={brl(current.open_total)} hint={`${current.open_count} boletos`} />
+    <div className="grid gap-x-10 gap-y-10 md:grid-cols-2">
+      <div>
+        <section>
+          <h3 className="text-heading first-letter:uppercase">{longMonthLabel(current.reference_month.slice(0, 7))}</h3>
+          {current.issued_count === 0 ? (
+            <p className="mt-3 text-ink-soft">Nenhum boleto emitido neste mês ainda.</p>
+          ) : (
+            <>
+              <div className="mt-4">
+                <SegmentedBar label={`${rate}% recebido`} max={issued} segments={[{ value: paid, className: "bg-brand" }]} />
+              </div>
+              <p className="mt-2 text-caption text-ink-soft tabular-nums">{rate}% recebido</p>
+              <dl className="mt-4">
+                <LedgerRow label="Emitido" detail={boletos(current.issued_count)} value={brl(issued)} />
+                <LedgerRow label="Recebido" detail={boletos(current.paid_count)} value={brl(paid)} />
+                <LedgerRow label="Em aberto" detail={boletos(current.open_count)} value={brl(current.open_total)} />
+              </dl>
+              {coverage.ready && coverage.expected > 0 && (
+                <dl className="mt-4 border-t border-border/50 pt-2">
+                  <LedgerRow label="Condomínios com boleto" value={`${integer(coverage.issued)} de ${integer(coverage.expected)}`} />
+                </dl>
+              )}
+            </>
+          )}
+        </section>
+
+        {previous && (
+          <section className="mt-8 border-t border-border/50 pt-8">
+            <h3 className="text-heading first-letter:uppercase">{longMonthLabel(previous.reference_month.slice(0, 7))}</h3>
+            <dl className="mt-3">
+              <LedgerRow muted label="Emitido" detail={boletos(previous.issued_count)} value={brl(previous.issued_total)} />
+              <LedgerRow muted label="Recebido" detail={`${percent(Number(previous.paid_total), Number(previous.issued_total))}%`} value={brl(previous.paid_total)} />
+            </dl>
+          </section>
+        )}
       </div>
 
-      <FocusSection title={`Recebido em ${formatMonth(firstDayOfThisMonth())}`}>
-        <ShareBar label="Valor recebido" value={paid} max={issued} text={`${percent(paid, issued)}% de ${brl(issued)}`} />
-        <ShareBar label="Boletos pagos" value={current.paid_count} max={current.issued_count} text={`${current.paid_count} de ${current.issued_count}`} />
-      </FocusSection>
-
-      {coverage.ready && coverage.missing.length > 0 && (
-        <FocusSection title={`Condomínios sem boleto neste mês (${coverage.missing.length} de ${coverage.expected})`} action={{ href: "/billing/runs", label: "Emitir o mês" }}>
-          <ul className="divide-y divide-border">
+      <div className="divide-y divide-border/50 md:border-l md:border-border/50 md:pl-10 [&>*]:py-8 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
+        {coverage.ready && coverage.missingCount > 0 && (
+          <FocusList title="Sem boleto neste mês" action={{ href: "/billing/runs", label: "Emitir" }}>
             {coverage.missing.map((condominium) => (
-              <li key={condominium.id}>
-                <Link href={`/condominiums/${condominium.id}`} className="flex items-baseline justify-between gap-3 py-2.5 hover:underline">
-                  <span className="truncate">{condominium.name}</span>
-                  <span className="shrink-0 text-caption tabular-nums text-ink-faint">{String(condominium.code).padStart(4, "0")}</span>
-                </Link>
-              </li>
+              <FocusRow key={condominium.id} href={`/condominiums/${condominium.id}`}>
+                {condominium.name}
+              </FocusRow>
             ))}
-          </ul>
-        </FocusSection>
-      )}
-
-      <BillingMonthBodyRuns />
-
-      <div className="flex flex-wrap gap-2">
-        <LinkButton variant="secondary" href="/billing/documents">
-          Boletos emitidos
-        </LinkButton>
-        <LinkButton variant="secondary" href="/billing/runs">
-          Execuções
-        </LinkButton>
-        <Link href="/billing/entries" className="self-center text-body text-ink-soft hover:text-ink hover:underline">
-          Inclusão de valores →
-        </Link>
+            <FocusPager page={missingPage} count={coverage.missingCount} noun="condomínios" onPage={setMissingPage} />
+          </FocusList>
+        )}
+        <BillingMonthBodyRuns />
       </div>
     </div>
   );

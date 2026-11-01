@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import { AccountKindEnum } from './accountKindEnum';
-import { BlankEnum } from './blankEnum';
+import { AccountKindEnum } from './accountKindEnum.ts';
+import { BlankEnum } from './blankEnum.ts';
 
 export const PatchedSupplierAccountKind = {...AccountKindEnum,...BlankEnum,} as const

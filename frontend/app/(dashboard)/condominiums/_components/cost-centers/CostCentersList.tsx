@@ -1,7 +1,7 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { CompactFilter, type CompactFilterGroup } from "@/components/filters/CompactFilter";
@@ -22,18 +22,22 @@ import { CostCenterListItem } from "./CostCenterListItem";
  * Client Component: a coluna da esquerda do cadastro e da edição de uma sub-conta, as do condomínio dela no mesmo padrão da lista de
  * condomínios, com a aberta marcada. O condomínio é um seletor acima da busca, como na coluna de unidades (troca a lista e o **+**
  * sem sair da tela) e a situação; o condomínio da lista se lê numa linha abaixo. Sem `condominiumId` (a edição ainda carregando a
- * sub-conta) mostra só o esqueleto.
+ * sub-conta) mostra só o esqueleto; na tela vazia do módulo, sem condomínio escolhido, pede para escolher um.
  */
 export function CostCentersList({
   condominiumId,
   openCostCenterId,
+  isNew = false,
   className,
 }: {
   condominiumId: string | null;
   openCostCenterId: string | null;
+  /** Numa sub-conta nova, escolher outro condomínio aqui leva ao cadastro dele, para a tela e a lista andarem juntas. */
+  isNew?: boolean;
   className?: string;
 }) {
   // A origem com que a sub-conta foi aberta segue ao trocar de sub-conta pela lista: o "voltar" continua levando a ela.
+  const router = useRouter();
   const from = backTargetOf(useSearchParams().get("from"))?.href ?? null;
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
@@ -52,7 +56,8 @@ export function CostCentersList({
     { query: { enabled: Boolean(activeCondominium), placeholderData: keepPreviousData } }
   );
   const results = data?.results ?? [];
-  const loading = !activeCondominium || isLoading;
+  const needsCondominium = !activeCondominium && !openCostCenterId;
+  const loading = activeCondominium ? isLoading : !needsCondominium;
 
   const groups: CompactFilterGroup[] = [
     {
@@ -72,11 +77,7 @@ export function CostCentersList({
       label="Sub-contas"
       title="Sub-contas"
       actions={
-        <RegistryCreate
-          href={activeCondominium ? newCostCenterUrl(activeCondominium) : undefined}
-          label="Nova sub-conta"
-          disabledHint={activeCondominium ? undefined : "Escolha o condomínio para cadastrar uma sub-conta"}
-        />
+        <RegistryCreate href={newCostCenterUrl(activeCondominium ?? undefined)} label="Nova sub-conta" />
       }
       toolbar={
         <ScopeSearchCard
@@ -84,6 +85,10 @@ export function CostCentersList({
             <CondominiumScopeSelect
               value={activeCondominium ?? ""}
               onChange={(value) => {
+                if (isNew && value) {
+                  router.push(newCostCenterUrl(value));
+                  return;
+                }
                 setChosen(value || null);
                 setSearch("");
                 setStatus("");
@@ -97,6 +102,7 @@ export function CostCentersList({
         </ScopeSearchCard>
       }
       navLabel="Lista de sub-contas"
+      blocked={needsCondominium ? "Escolha o condomínio para ver as sub-contas." : null}
       isLoading={loading}
       isPlaceholderData={isPlaceholderData}
       isEmpty={results.length === 0}

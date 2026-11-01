@@ -5,13 +5,13 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BillingDocumentDelivery } from './billingDocumentDelivery';
-import type { BillingDocumentItem } from './billingDocumentItem';
-import type { BillingDocumentKindEnum } from './billingDocumentKindEnum';
-import type { BillingDocumentPayment } from './billingDocumentPayment';
-import type { BillingDocumentRegistration } from './billingDocumentRegistration';
-import type { BillingDocumentStatusEnum } from './billingDocumentStatusEnum';
-import type { InterestCalculationEnum } from './interestCalculationEnum';
+import type { BillingDocumentDelivery } from './billingDocumentDelivery.ts';
+import type { BillingDocumentItem } from './billingDocumentItem.ts';
+import type { BillingDocumentKindEnum } from './billingDocumentKindEnum.ts';
+import type { BillingDocumentPayment } from './billingDocumentPayment.ts';
+import type { BillingDocumentRegistration } from './billingDocumentRegistration.ts';
+import type { BillingDocumentStatusEnum } from './billingDocumentStatusEnum.ts';
+import type { InterestCalculationEnum } from './interestCalculationEnum.ts';
 
 /**
  * A unit's boleto as a record. Documents are issued by the monthly issuance; the API only reads and cancels them.

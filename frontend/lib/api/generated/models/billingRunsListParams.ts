@@ -5,10 +5,11 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BillingRunsListStatus } from './billingRunsListStatus';
+import type { BillingRunsListStatus } from './billingRunsListStatus.ts';
 
 export type BillingRunsListParams = {
 condominium?: string;
+has_problem?: boolean;
 /**
  * Número de resultados a serem retornados por página.
  */
