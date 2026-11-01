@@ -21,12 +21,13 @@ class CondominiumApportionmentCriterionQuerySet(
     def with_total(
         self, units: "UnitQuerySet | None" = None
     ) -> "CondominiumApportionmentCriterionQuerySet":
-        """Each criterion with `total`: the sum of its fractions over the active units (0 when nobody has one).
+        """Each criterion with `total`: the sum of its fractions over the active, non-archived units (0 when nobody has one).
 
         `units` limits the sum to the active units of that queryset instead of every active unit.
         """
+        # A join does not go through the default manager: the archived units are left out here by hand.
         counted_units = (
-            Q(unit_fractions__unit__active=True)
+            Q(unit_fractions__unit__active=True, unit_fractions__unit__deleted_at__isnull=True)
             if units is None
             else Q(unit_fractions__unit__in=units.active())
         )

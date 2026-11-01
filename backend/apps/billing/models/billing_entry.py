@@ -227,9 +227,13 @@ class BillingEntry(BaseModel):
             weights = self.fractions_of(units)
         return self._split(units, weights)
 
+    def charged_links(self) -> list["BillingEntryUnit"]:
+        """The selected units that are charged: a unit made inactive or deleted after the entry was saved drops out."""
+        return [link for link in self.entry_units.all() if link.unit.active and not link.unit.is_archived]
+
     def amounts_for_selected_units(self) -> dict[uuid.UUID, Decimal]:
-        """What each selected unit that is active pays (the units come with their own override, if any)."""
-        links = [link for link in self.entry_units.all() if link.unit.active]
+        """What each charged unit pays (the units come with their own override, if any)."""
+        links = self.charged_links()
         return self.amounts_by_unit(
             [link.unit for link in links],
             {link.unit_id: link.amount for link in links if link.amount is not None},

@@ -39,7 +39,7 @@ class UnitRules(ModelRules["Unit"]):
         for fraction in unit.fractions.all():
             other_units_total: Decimal = (
                 type(fraction)
-                .objects.filter(criterion_id=fraction.criterion_id, unit__active=True)
+                .objects.filter(criterion_id=fraction.criterion_id, unit__active=True, unit__deleted_at__isnull=True)
                 .exclude(unit_id=unit.pk)
                 .aggregate(total=Coalesce(Sum("value"), Decimal(0)))["total"]
             )

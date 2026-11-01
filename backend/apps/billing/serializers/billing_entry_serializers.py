@@ -112,8 +112,7 @@ class BillingEntrySerializer(ModelRulesMixin, serializers.ModelSerializer[Billin
             "installment": entry.installment_label(reference_month),
             "unit_amounts": [
                 {"unit": link.unit_id, "unit_name": link.unit.name, "amount": amounts[link.unit_id]}
-                for link in entry.entry_units.all()
-                if link.unit.active
+                for link in entry.charged_links()
             ],
         }
 
