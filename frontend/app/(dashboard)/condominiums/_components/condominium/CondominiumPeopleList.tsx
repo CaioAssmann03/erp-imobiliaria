@@ -1,17 +1,16 @@
 "use client";
 
-import { Search } from "lucide-react";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { ShowMore } from "@/components/data-list";
-import { Skeleton } from "@/components/ui/skeleton";
+import { RegistryListItem } from "@/components/layout/RegistryList";
+import { RegistrySubList } from "@/components/layout/RegistrySubList";
+import { PersonRowContent } from "@/components/persons/PersonRowContent";
 import { useCurrentUrl } from "@/hooks/use-current-url";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useUnitPeopleList, useUnitsList } from "@/lib/api/generated";
 import type { Person } from "@/lib/api/generated/models";
-import { formatCode } from "@/lib/format/format";
 import { personUrl, UNIT_ROLE_LABELS } from "@/lib/persons/person-workspace";
 
 /** Quantos vínculos (e unidades) a tela lê de uma vez: o máximo que a API entrega por página. */
@@ -57,59 +56,28 @@ export function CondominiumPeopleList({ condominiumId }: { condominiumId: string
   const results = people.slice(0, limit);
 
   return (
-    <section aria-label="Pessoas" className="flex flex-col gap-3">
-      <h2 className="px-1 text-heading">Pessoas</h2>
-
-      <div className="flex flex-col gap-3 rounded-card bg-surface p-3 shadow-card">
-        <label className="flex h-10 items-center gap-2 rounded-control bg-surface-muted px-3 text-ink-soft focus-within:ring-2 focus-within:ring-brand/50">
-          <Search className="size-4 shrink-0" />
-          <span className="sr-only">Buscar pessoa</span>
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Nome ou CPF/CNPJ"
-            className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint"
-          />
-        </label>
-
-        <nav aria-label="Lista de pessoas do condomínio">
-          {isLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 4 }, (_, index) => (
-                <Skeleton key={index} className="h-12 rounded-panel" />
-              ))}
-            </div>
-          ) : results.length === 0 ? (
-            <p className="px-2 py-6 text-center text-body text-ink-soft">
-              {term ? "Nenhuma pessoa com essa busca." : "Este condomínio ainda não tem pessoas vinculadas às unidades."}
-            </p>
-          ) : (
-            <ul className="space-y-0.5">
-              {results.map(({ person, roles }) => (
-                <li key={person.id}>
-                  <Link
-                    href={personUrl(person.id, { condominium: condominiumId, from: here })}
-                    className="block rounded-panel px-3 py-2 outline-none transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <span className="block truncate text-body font-medium">
-                      <span className="tabular-nums">{formatCode(person.code)}</span>
-                      <span className="text-ink-faint"> · </span>
-                      {person.name}
-                    </span>
-                    <span className="block truncate text-caption text-ink-soft">{roles.join("  ·  ")}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+    <RegistrySubList
+      label="Pessoas"
+      title="Pessoas"
+      search={{ label: "Buscar pessoa", placeholder: "Nome ou CPF/CNPJ", value: search, onChange: setSearch }}
+      navLabel="Lista de pessoas do condomínio"
+      isLoading={isLoading}
+      isEmpty={results.length === 0}
+      emptyMessage={term ? "Nenhuma pessoa com essa busca." : "Este condomínio ainda não tem pessoas vinculadas às unidades."}
+      footer={
+        <>
+          {!isLoading && people.length > 0 && <ShowMore shown={results.length} total={people.length} noun="pessoa(s)" onMore={showMore} />}
+          {links && links.count > LINKS_LIMIT && (
+            <p className="px-1 text-center text-caption text-ink-soft">Mostrando os primeiros {LINKS_LIMIT} vínculos do condomínio.</p>
           )}
-        </nav>
-
-        {!isLoading && people.length > 0 && <ShowMore shown={results.length} total={people.length} noun="pessoa(s)" onMore={showMore} />}
-        {links && links.count > LINKS_LIMIT && (
-          <p className="px-1 text-center text-caption text-ink-soft">Mostrando os primeiros {LINKS_LIMIT} vínculos do condomínio.</p>
-        )}
-      </div>
-    </section>
+        </>
+      }
+    >
+      {results.map(({ person, roles }) => (
+        <RegistryListItem key={person.id} href={personUrl(person.id, { condominium: condominiumId, from: here })} onCard>
+          <PersonRowContent code={person.code} name={person.name} detail={roles.join("  ·  ")} />
+        </RegistryListItem>
+      ))}
+    </RegistrySubList>
   );
 }
