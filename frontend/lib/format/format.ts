@@ -4,6 +4,13 @@
 export const brl = (value: number | string) =>
   Number(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+/** "45476494.54" → "R$ 45.476.495": sem centavos, para o valor em tipo grande (o exato fica nas linhas de detalhe). */
+export const brlWhole = (value: number | string) =>
+  Number(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+
+/** 54865 → "54.865": contagens com o separador de milhar. */
+export const integer = (value: number) => value.toLocaleString("pt-BR");
+
 /** "2025-03-31" → "31/03/2025" */
 export const formatDate = (iso: string) => iso.split("-").reverse().join("/");
 
@@ -65,3 +72,6 @@ export function formatFileSize(bytes: number): string {
   }
   return `${value.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${units[unit]}`;
 }
+
+/** O código de um cadastro (condomínio, evento, sub-conta…) como a equipe o digita: com zeros à esquerda, "0007". */
+export const formatCode = (code: number | undefined, digits = 4): string => String(code ?? 0).padStart(digits, "0");

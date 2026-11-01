@@ -47,6 +47,7 @@ export interface BillingEntry {
   /** @pattern ^-?\d{0,10}(?:\.\d{0,2})?$ */
   amount: string;
   units: BillingEntryUnit[];
+  /** The list annotates it for the whole page; a record just created, or one outside the list, asks the database. */
   readonly is_used: boolean;
   readonly month: BillingEntryMonth | null;
   readonly created_at: string;

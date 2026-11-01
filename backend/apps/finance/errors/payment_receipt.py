@@ -26,6 +26,10 @@ class PaymentReceiptError(RuleError):
         "payment_receipt.file.size_mismatch",
         "The uploaded file does not have the declared size.",
     )
+    FILE_CONTENT_MISMATCH = (
+        "payment_receipt.file.content_mismatch",
+        "The uploaded file is not of the declared type.",
+    )
     ALREADY_CONFIRMED = (
         "payment_receipt.already_confirmed",
         "The receipt is already confirmed.",

@@ -1,6 +1,6 @@
 "use client";
 
-import { BackLink } from "@/components/layout/BackLink";
+import { PhoneBackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { accountsPayableUrl } from "@/lib/finance/account-payable-workspace";
 import { useAccountsPayableRetrieve } from "@/lib/api/generated";
@@ -16,9 +16,7 @@ export function AccountPayableHeader({ accountId }: { accountId: string }) {
   const { data: account } = useAccountsPayableRetrieve(accountId);
 
   const back = (
-    <div className="lg:hidden">
-      <BackLink href={accountsPayableUrl()} label="Contas a pagar" />
-    </div>
+    <PhoneBackLink href={accountsPayableUrl()} label="Contas a pagar" />
   );
 
   if (!account)

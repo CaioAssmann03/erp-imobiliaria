@@ -3,7 +3,8 @@
 import { FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { useBillingEntriesList, useBillingEntriesRetrieve } from "@/lib/api/generated";
-import { entryColumnTitle, formatCode } from "@/lib/billing/billing-entry-payload";
+import { entryColumnTitle } from "@/lib/billing/billing-entry-payload";
+import { formatCode } from "@/lib/format/format";
 import { MAX_ENTRIES_PER_MONTH } from "@/lib/billing/billing-entry-workspace";
 import { brl, formatMonth } from "@/lib/format/format";
 import { throwIfPageError } from "@/lib/query/page-error";
@@ -11,6 +12,7 @@ import { ALLOCATIONS, RECURRENCES } from "@/lib/schemas/billing-entry";
 
 import { EntryActions } from "./EntryActions";
 import { useEntriesScope } from "./use-entries-scope";
+import { SectionAnchor } from "@/components/form/SectionAnchor";
 
 const labelOf = (options: readonly { value: string; label: string }[], value: string) => options.find((item) => item.value === value)?.label ?? value;
 
@@ -46,7 +48,7 @@ export function BillingEntryView({ entryId }: { entryId: string }) {
 
   return (
     <div className="space-y-4">
-      <div id="lancamento" className="scroll-mt-20">
+      <SectionAnchor id="lancamento">
         <FormSection title="Lançamento" description="Um lançamento não se altera: para mudar um valor, exclua e inclua outro.">
           <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
             <Fact label="Condomínio">{entry.condominium_name}</Fact>
@@ -71,9 +73,9 @@ export function BillingEntryView({ entryId }: { entryId: string }) {
           </dl>
           <EntryActions entry={entry} title={title} />
         </FormSection>
-      </div>
+      </SectionAnchor>
 
-      <div id="valores" className="scroll-mt-20">
+      <SectionAnchor id="valores">
         <FormSection title={`Valores de ${formatMonth(scope.month)}`} description="O que cada unidade paga neste lançamento no mês escolhido na lista.">
           {!ofMonth || ofMonth.unit_amounts.length === 0 ? (
             <p className="text-body text-ink-soft">Este lançamento não entra nos boletos de {formatMonth(scope.month)}.</p>
@@ -94,7 +96,7 @@ export function BillingEntryView({ entryId }: { entryId: string }) {
             </>
           )}
         </FormSection>
-      </div>
+      </SectionAnchor>
     </div>
   );
 }

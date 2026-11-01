@@ -69,6 +69,12 @@ class BillingDocumentDelivery(BaseModel):
                 violation_error_message=BillingDocumentDeliveryError.PROVIDER_ID_REQUIRED.message,
                 violation_error_code=BillingDocumentDeliveryError.PROVIDER_ID_REQUIRED.value,
             ),
+            models.CheckConstraint(
+                name="billing_document_delivery_sent_has_destination",
+                condition=~Q(status__in=("sent", "delivered")) | ~Q(destination=""),
+                violation_error_message=BillingDocumentDeliveryError.DESTINATION_BLANK.message,
+                violation_error_code=BillingDocumentDeliveryError.DESTINATION_BLANK.value,
+            ),
         )
         indexes = (
             models.Index(

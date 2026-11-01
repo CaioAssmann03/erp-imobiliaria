@@ -4,7 +4,7 @@ from apps.core.infrastructure.errors.base import RuleError
 class BillingDocumentDeliveryError(RuleError):
     DESTINATION_BLANK = (
         "billing_document_delivery.destination.blank",
-        "A delivery names its destination unless it failed for lack of one.",
+        "A sent or delivered e-mail names its destination.",
     )
     DUPLICATE_FOR_REGISTRATION = (
         "billing_document_delivery.registration.duplicate_channel",

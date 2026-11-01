@@ -108,6 +108,19 @@ def test_renaming_an_item_renames_the_sub_contas_that_use_it(
         assert (cost_center.name, cost_center.code) == ("Reserva", 9)
 
 
+def test_renaming_an_item_renames_its_deleted_sub_contas_too(company: Company, condominium: Condominium) -> None:
+    reserve = item(company, "Fundo de Reserva", code=1)
+    gone = CostCenter.objects.create(condominium=condominium, catalog_item=reserve)
+    _ = gone.delete()
+
+    reserve.name = "Reserva"
+    reserve.save()
+
+    restored = CostCenter.all_objects.get(pk=gone.pk)
+    assert restored.name == "Reserva"
+    restored.restore()
+
+
 def test_an_item_in_use_cannot_be_deleted(api_client: APIClient, company: Company, condominium: Condominium) -> None:
     used = item(company, "Fundo de Obras")
     _ = CostCenter.objects.create(condominium=condominium, catalog_item=used)
@@ -117,6 +130,20 @@ def test_an_item_in_use_cannot_be_deleted(api_client: APIClient, company: Compan
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert error_codes(response, None) == ["cost_center_catalog_item.deletion.in_use"]
     assert CostCenterCatalogItem.objects.filter(pk=used.pk).exists()
+
+
+def test_an_item_used_only_by_a_deleted_sub_conta_is_not_counted_and_cannot_be_deleted(
+    api_client: APIClient, company: Company, condominium: Condominium
+) -> None:
+    used = item(company, "Fundo de Obras")
+    _ = CostCenter.objects.create(condominium=condominium, catalog_item=used).delete()
+
+    listed = results(api_client.get(reverse(LIST)))
+    response = api_client.delete(reverse(DETAIL, args=[used.pk]))
+
+    assert [row["cost_center_count"] for row in listed] == [0]
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert error_codes(response, None) == ["cost_center_catalog_item.deletion.in_use"]
 
 
 def test_an_inactive_item_cannot_start_a_new_sub_conta_but_existing_ones_stay(

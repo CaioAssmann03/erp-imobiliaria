@@ -4,10 +4,10 @@ import Link from "next/link";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBillingRunsCoverage, useBillingRunsList } from "@/lib/api/generated";
-
-import { Late } from "@/app/(dashboard)/_components/home/shared/Late";
 import { useBillingSummary } from "@/app/(dashboard)/_components/home/shared/use-billing-summary";
-import { brl } from "@/app/(dashboard)/_components/home/widgets/format";
+import { brlWhole, integer } from "@/app/(dashboard)/_components/home/widgets/format";
+
+const oneDecimal = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 export const firstDayOfThisMonth = () => {
   const today = new Date();
@@ -33,19 +33,23 @@ export function useIssuanceCoverage() {
 }
 
 /**
- * Client Component: a emissão do mês corrente em reais. O emitido em tipo grande (com a quantidade de boletos ao lado), a barra do que já foi recebido
- * e três colunas de rótulo e valor: recebido (com a %), em aberto e em quantos condomínios já se emitiu. Só se houver execução com problema vem uma linha de aviso.
+ * Client Component: a emissão do mês corrente: o emitido sozinho em tipo grande, a barra fina do que já foi recebido, uma linha com o percentual
+ * recebido e o valor em aberto e, em duas linhas de detalhe, quantos boletos já foram pagos e quanto se recebeu do mês anterior (para comparar).
+ * No pé, a quantidade de boletos emitidos e, só quando ainda falta algum condomínio, em quantos já se emitiu (com link para as emissões).
+ * As execuções com problema ficam na visão ampliada.
  */
 export function BillingMonthBody() {
-  const { current, isLoading } = useBillingSummary(1);
-  const { runs, isLoading: loadingRuns } = useRunsWithProblem();
+  const { lines, current, isLoading } = useBillingSummary(2);
   const coverage = useIssuanceCoverage();
   if (isLoading) return <Skeleton className="h-24 rounded-panel" />;
 
   const issued = Number(current?.issued_total ?? 0);
   const paid = Number(current?.paid_total ?? 0);
-  const share = issued > 0 ? Math.round((paid / issued) * 100) : 0;
+  const rate = issued > 0 ? (paid / issued) * 100 : 0;
+  const previous = lines.length > 1 && Number(lines[0].issued_total) > 0 ? lines[0] : undefined;
+  const previousRate = previous ? (Number(previous.paid_total) / Number(previous.issued_total)) * 100 : null;
   const missing = coverage.ready ? coverage.missing.length : 0;
+  const count = current?.issued_count ?? 0;
 
   return (
     <>
@@ -53,43 +57,39 @@ export function BillingMonthBody() {
         <p className="py-2 text-ink-soft">Nenhum boleto emitido neste mês ainda.</p>
       ) : (
         <>
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="text-title tabular-nums">{brl(issued)}</span>
-            <span className="text-caption text-ink-faint tabular-nums">
-              {current.issued_count} boleto{current.issued_count === 1 ? "" : "s"}
-            </span>
+          <div className="text-title tabular-nums">{brlWhole(issued)}</div>
+          <div role="img" aria-label={`${oneDecimal.format(rate)}% recebido`} className="mt-3 h-1.5 overflow-hidden rounded-full bg-ink-faint/30">
+            <div className="h-full rounded-full bg-brand" style={{ width: `${rate}%` }} />
           </div>
-          <div role="img" aria-label={`${share}% recebido`} className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-sunken">
-            <div className="h-full rounded-full bg-brand" style={{ width: `${share}%` }} />
-          </div>
-          <dl className="mt-4 grid grid-cols-[1.2fr_1.2fr_0.8fr] gap-3">
-            <div>
-              <dt className="text-caption text-ink-faint">Recebido · {share}%</dt>
-              <dd className="mt-0.5 text-body tabular-nums">{brl(paid)}</dd>
+          <p className="mt-3 text-ink-soft tabular-nums">
+            {oneDecimal.format(rate)}% recebido · {brlWhole(current.open_total)} em aberto
+          </p>
+          <dl className="mt-4 divide-y divide-border tabular-nums">
+            <div className="flex items-baseline justify-between gap-3 py-2">
+              <dt className="text-ink-soft">Boletos pagos</dt>
+              <dd>
+                {integer(current.paid_count)} <span className="text-ink-faint">de</span> {integer(current.issued_count)}
+              </dd>
             </div>
-            <div>
-              <dt className="text-caption text-ink-faint">Em aberto</dt>
-              <dd className="mt-0.5 text-body tabular-nums">{brl(current.open_total)}</dd>
-            </div>
-            {coverage.ready && coverage.expected > 0 && (
-              <div>
-                <dt className="text-caption text-ink-faint">Condomínios</dt>
-                <dd className="mt-0.5 text-body tabular-nums">
-                  <Link href="/billing/runs" className="hover:underline">
-                    {missing > 0 ? <Late>{coverage.issued} de {coverage.expected}</Late> : <>{coverage.issued} de {coverage.expected}</>}
-                  </Link>
-                </dd>
+            {previousRate !== null && (
+              <div className="flex items-baseline justify-between gap-3 py-2">
+                <dt className="text-ink-soft">Mês anterior</dt>
+                <dd>{oneDecimal.format(previousRate)}% recebido</dd>
               </div>
             )}
           </dl>
+          <p className="mt-auto pt-3 text-caption text-ink-faint tabular-nums">
+            {integer(count)} boleto{count === 1 ? "" : "s"} emitido{count === 1 ? "" : "s"}
+            {missing > 0 && (
+              <>
+                {" · "}
+                <Link href="/billing/runs" className="hover:text-ink hover:underline">
+                  {integer(coverage.issued)} de {integer(coverage.expected)} condomínios
+                </Link>
+              </>
+            )}
+          </p>
         </>
-      )}
-      {!loadingRuns && runs.length > 0 && (
-        <Link href="/billing/runs" className="mt-3 block text-caption hover:underline">
-          <Late>
-            {runs.length} execuç{runs.length === 1 ? "ão" : "ões"} com problema
-          </Late>
-        </Link>
       )}
     </>
   );

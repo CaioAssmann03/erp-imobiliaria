@@ -1,10 +1,8 @@
 "use client";
 
-import { BackLink } from "@/components/layout/BackLink";
-import { StatusText } from "@/components/StatusText";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PhoneBackLink } from "@/components/layout/BackLink";
+import { RegistryHeader } from "@/components/layout/RegistryHeader";
 import { useCostCenterCatalogRetrieve } from "@/lib/api/generated";
-import { formatCode } from "@/lib/billing/billing-entry-payload";
 import { catalogUrl } from "@/lib/finance/cost-center-catalog-workspace";
 
 /**
@@ -14,31 +12,10 @@ import { catalogUrl } from "@/lib/finance/cost-center-catalog-workspace";
 export function CatalogHeader({ itemId }: { itemId: string }) {
   const { data: item } = useCostCenterCatalogRetrieve(itemId);
 
-  const back = (
-    <div className="lg:hidden">
-      <BackLink href={catalogUrl()} label="Sub-contas" />
-    </div>
-  );
-
-  if (!item)
-    return (
-      <>
-        {back}
-        <Skeleton className="mb-6 h-9 w-72 rounded-control" />
-      </>
-    );
-
   return (
-    <>
-      {back}
-      <div className="mb-6 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h1 className="text-title">
-          <span className="tabular-nums text-ink-faint">{formatCode(item.code ?? 0)}</span>
-          <span className="text-ink-faint"> · </span>
-          {item.name}
-        </h1>
-        <StatusText active={item.active ?? true} />
-      </div>
-    </>
+    <RegistryHeader
+      back={<PhoneBackLink href={catalogUrl()} label="Sub-contas" />}
+      record={item && { code: item.code, name: item.name, active: item.active ?? true }}
+    />
   );
 }

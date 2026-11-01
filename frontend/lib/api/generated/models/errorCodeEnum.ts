@@ -216,6 +216,7 @@ export const ErrorCodeEnum = {
   payment_receiptaccount_payablenot_paid: 'payment_receipt.account_payable.not_paid',
   payment_receiptalready_confirmed: 'payment_receipt.already_confirmed',
   payment_receiptcontent_typenot_allowed: 'payment_receipt.content_type.not_allowed',
+  payment_receiptfilecontent_mismatch: 'payment_receipt.file.content_mismatch',
   payment_receiptfilemissing_in_storage: 'payment_receipt.file.missing_in_storage',
   payment_receiptfilesize_mismatch: 'payment_receipt.file.size_mismatch',
   payment_receiptsize_bytesnot_positive: 'payment_receipt.size_bytes.not_positive',
@@ -236,6 +237,7 @@ export const ErrorCodeEnum = {
   person_module_membershipmoduleunknown: 'person_module_membership.module.unknown',
   person_module_membershippersonalready_released: 'person_module_membership.person.already_released',
   required: 'required',
+  soft_deleterestoreparent_archived: 'soft_delete.restore.parent_archived',
   supplierarchivehas_open_accounts_payable: 'supplier.archive.has_open_accounts_payable',
   supplierbank_dataincomplete: 'supplier.bank_data.incomplete',
   supplierpersonhas_archived_supplier: 'supplier.person.has_archived_supplier',
@@ -261,6 +263,7 @@ export const ErrorCodeEnum = {
   unit_personpersonnot_in_condominiums: 'unit_person.person.not_in_condominiums',
   unit_personpersonother_company: 'unit_person.person.other_company',
   unsupported_media_type: 'unsupported_media_type',
+  usercompanyimmutable: 'user.company.immutable',
   user_inactive: 'user_inactive',
   user_not_found: 'user_not_found',
 } as const;

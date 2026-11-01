@@ -10,7 +10,7 @@ import { useCurrentUrl } from "@/hooks/use-current-url";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useUnitPeopleList } from "@/lib/api/generated";
-import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { formatCode } from "@/lib/format/format";
 import { formatDate } from "@/lib/format/format";
 import { personUrl, UNIT_ROLE_LABELS } from "@/lib/persons/person-workspace";
 

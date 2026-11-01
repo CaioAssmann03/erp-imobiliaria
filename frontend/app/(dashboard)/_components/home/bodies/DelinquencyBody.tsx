@@ -4,14 +4,12 @@ import Link from "next/link";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBillingDocumentsDelinquency } from "@/lib/api/generated";
-import { cn } from "@/lib/utils";
-
-import { Caption } from "@/app/(dashboard)/_components/home/widgets/Caption";
-import { brl } from "@/app/(dashboard)/_components/home/widgets/format";
+import { Late } from "@/app/(dashboard)/_components/home/shared/Late";
+import { brlWhole, integer } from "@/app/(dashboard)/_components/home/widgets/format";
 
 const SHOWN = 3;
 
-/** Client Component: o que a imobiliária tem a receber e já venceu: o total, a quantidade de boletos e os condomínios que mais devem (o relatório de inadimplência). */
+/** Client Component: o que a imobiliária tem a receber e já venceu: o total sozinho em tipo grande, os condomínios que mais devem (o relatório de inadimplência) e, no pé, a quantidade de boletos. */
 export function DelinquencyBody() {
   const { data, isLoading } = useBillingDocumentsDelinquency();
   const late = (data?.count ?? 0) > 0;
@@ -21,21 +19,29 @@ export function DelinquencyBody() {
 
   return (
     <>
-      <div className={cn("text-title tabular-nums", late && "text-danger")}>{data ? brl(data.total_amount) : "–"}</div>
-      <Caption>
-        {!data ? "" : late ? `${data.count} boleto${data.count === 1 ? "" : "s"} vencido${data.count === 1 ? "" : "s"} e não pago${data.count === 1 ? "" : "s"}` : "Nenhum boleto vencido"}
-      </Caption>
+      <div className="text-title tabular-nums">{data ? brlWhole(data.total_amount) : "–"}</div>
       {top.length > 0 && (
-        <ul className="mt-4 divide-y divide-border">
+        <ul className="mt-3 divide-y divide-border">
           {top.map((item) => (
             <li key={item.condominium_id}>
               <Link href={`/reports/delinquency?condominium=${item.condominium_id}`} className="flex items-baseline justify-between gap-3 py-2 transition-colors hover:text-ink">
                 <span className="min-w-0 truncate text-ink-soft">{item.condominium_name}</span>
-                <span className="shrink-0 tabular-nums">{brl(item.total_amount)}</span>
+                <span className="shrink-0 tabular-nums">{brlWhole(item.total_amount)}</span>
               </Link>
             </li>
           ))}
         </ul>
+      )}
+      {data && (
+        <p className="mt-auto pt-3 text-caption text-ink-faint">
+          {late ? (
+            <Late>
+              {integer(data.count)} boleto{data.count === 1 ? "" : "s"} vencido{data.count === 1 ? "" : "s"} e não pago{data.count === 1 ? "" : "s"}
+            </Late>
+          ) : (
+            "Nenhum boleto vencido"
+          )}
+        </p>
       )}
     </>
   );

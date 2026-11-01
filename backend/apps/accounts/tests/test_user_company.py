@@ -1,7 +1,10 @@
 """Every user belongs to a company (spec 004, R1)."""
 
 import pytest
+from django.contrib import admin
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
+from django.test import RequestFactory
 
 from apps.accounts.admin import UserAdmin
 from apps.accounts.models import User
@@ -72,3 +75,30 @@ def test_the_admin_forms_show_the_company() -> None:
 
     assert in_fieldsets
     assert in_add_fieldsets
+
+
+def test_a_user_cannot_change_company(other_company: Company) -> None:
+    user = User.objects.create_user("maria", password="x", company=seeded_company())
+    user.company = other_company
+
+    with pytest.raises(ValidationError) as error:
+        user.full_clean(exclude=("password",))
+
+    assert error.value.error_dict["company"][0].code == "user.company.immutable"
+
+
+def test_saving_a_user_again_in_the_same_company_is_fine() -> None:
+    user = User.objects.create_user("maria", password="x")
+    user.first_name = "Maria"
+
+    user.full_clean(exclude=("password",))
+    user.save()
+
+
+def test_the_admin_shows_the_company_read_only_on_an_existing_user() -> None:
+    user = User.objects.create_user("maria", password="x")
+    model_admin = UserAdmin(User, admin_site=admin.site)
+    request = RequestFactory().get("/")
+
+    assert "company" in model_admin.get_readonly_fields(request, user)
+    assert "company" not in model_admin.get_readonly_fields(request, None)

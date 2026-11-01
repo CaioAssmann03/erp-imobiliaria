@@ -1,9 +1,10 @@
-from typing import final
+from typing import final, override
 
 from django.contrib import admin
 from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group
+from django.http import HttpRequest
 from unfold.forms import AdminPasswordChangeForm, UserChangeForm, UserCreationForm
 
 from apps.core.infrastructure.admin_base import MetriModelAdmin
@@ -26,6 +27,11 @@ class UserAdmin(CompanyScopedAdminMixin, BaseUserAdmin, MetriModelAdmin):  # typ
     form = UserChangeForm
     add_form = UserCreationForm
     change_password_form = AdminPasswordChangeForm
+
+    @override
+    def get_readonly_fields(self, request: HttpRequest, obj: User | None = None) -> tuple[str, ...]:
+        """The company is chosen when the user is created and never changes."""
+        return (*super().get_readonly_fields(request, obj), "company") if obj is not None else ()
 
 
 @final

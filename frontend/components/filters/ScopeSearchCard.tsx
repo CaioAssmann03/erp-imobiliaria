@@ -3,12 +3,13 @@ import { cn } from "@/lib/utils";
 /**
  * O cartão do alto das listas laterais: numa linha, os seletores de escopo (`ScopeSelect variant="segment"`, condomínio e, quando há, bloco ou
  * unidade, separados por `ScopeDivider`) e, **colada embaixo**, a busca (`children`), tudo num cartão branco só, sem espaço nem linha entre elas.
- * Sem `children` (a lista ainda não tem escopo escolhido) o cartão é só a linha dos seletores.
+ * Sem `children` (a lista ainda não tem escopo escolhido) o cartão é só a linha dos seletores; sem `scopes`, só a busca.
  */
-export function ScopeSearchCard({ scopes, children }: { scopes: React.ReactNode; children?: React.ReactNode }) {
+export function ScopeSearchCard({ scopes, children }: { scopes?: React.ReactNode; children?: React.ReactNode }) {
   return (
-    <div className="rounded-control bg-surface shadow-card">
-      <div className="flex h-12 items-center p-1">{scopes}</div>
+    // Sem seletores de escopo (o catálogo, os eventos) o cartão é só a busca: ela passa a arredondar os quatro cantos.
+    <div className={cn("rounded-control bg-surface shadow-card", !scopes && "[&>*]:rounded-control")}>
+      {scopes && <div className="flex h-12 items-center p-1">{scopes}</div>}
       {children}
     </div>
   );

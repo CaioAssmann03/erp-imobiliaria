@@ -1,10 +1,8 @@
 "use client";
 
-import { BackLink } from "@/components/layout/BackLink";
-import { StatusText } from "@/components/StatusText";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PhoneBackLink } from "@/components/layout/BackLink";
+import { RegistryHeader } from "@/components/layout/RegistryHeader";
 import { useBillingEventsRetrieve } from "@/lib/api/generated";
-import { formatCode } from "@/lib/billing/billing-entry-payload";
 import { eventsUrl } from "@/lib/billing/billing-event-workspace";
 
 /**
@@ -15,31 +13,10 @@ import { eventsUrl } from "@/lib/billing/billing-event-workspace";
 export function BillingEventHeader({ billingEventId }: { billingEventId: string }) {
   const { data: event } = useBillingEventsRetrieve(billingEventId);
 
-  const back = (
-    <div className="lg:hidden">
-      <BackLink href={eventsUrl()} label="Eventos" />
-    </div>
-  );
-
-  if (!event)
-    return (
-      <>
-        {back}
-        <Skeleton className="mb-6 h-9 w-72 rounded-control" />
-      </>
-    );
-
   return (
-    <>
-      {back}
-      <div className="mb-6 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h1 className="text-title">
-          <span className="tabular-nums text-ink-faint">{formatCode(event.code)}</span>
-          <span className="text-ink-faint"> · </span>
-          {event.name}
-        </h1>
-        <StatusText active={event.active ?? true} />
-      </div>
-    </>
+    <RegistryHeader
+      back={<PhoneBackLink href={eventsUrl()} label="Eventos" />}
+      record={event && { code: event.code, name: event.name, active: event.active ?? true }}
+    />
   );
 }

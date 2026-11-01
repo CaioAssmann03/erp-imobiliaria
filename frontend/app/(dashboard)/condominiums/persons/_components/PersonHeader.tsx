@@ -2,11 +2,9 @@
 
 import { useSearchParams } from "next/navigation";
 
-import { BackLink } from "@/components/layout/BackLink";
-import { StatusText } from "@/components/StatusText";
-import { Skeleton } from "@/components/ui/skeleton";
+import { BackLink, PhoneBackLink } from "@/components/layout/BackLink";
+import { RegistryHeader } from "@/components/layout/RegistryHeader";
 import { usePersonsRetrieve } from "@/lib/api/generated";
-import { formatCode } from "@/lib/billing/billing-entry-payload";
 import { backTargetOf } from "@/lib/navigation/back-target";
 import { condominiumUrl } from "@/lib/condominiums/condominium-registry";
 import { originCondominium, personsUrl } from "@/lib/persons/person-workspace";
@@ -24,33 +22,10 @@ export function PersonHeader({ personId }: { personId: string }) {
   // A tela de onde se chegou (`?from=`); sem ela, o condomínio pelo qual a lista estava filtrada; sem nenhum, só a lista no celular.
   const target = backTargetOf(search.get("from")) ?? (condominiumId ? { href: condominiumUrl(condominiumId), label: "Condomínio" } : null);
 
-  const back = target ? (
-    <BackLink href={target.href} label={target.label} />
-  ) : (
-    <div className="lg:hidden">
-      <BackLink href={personsUrl()} label="Pessoas" />
-    </div>
-  );
-
-  if (!person)
-    return (
-      <>
-        {back}
-        <Skeleton className="mb-6 h-9 w-72 rounded-control" />
-      </>
-    );
-
   return (
-    <>
-      {back}
-      <div className="mb-6 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h1 className="text-title">
-          <span className="tabular-nums text-ink-faint">{formatCode(person.code)}</span>
-          <span className="text-ink-faint"> · </span>
-          {person.name}
-        </h1>
-        <StatusText active={person.active ?? true} />
-      </div>
-    </>
+    <RegistryHeader
+      back={target ? <BackLink href={target.href} label={target.label} /> : <PhoneBackLink href={personsUrl()} label="Pessoas" />}
+      record={person && { code: person.code, name: person.name, active: person.active ?? true }}
+    />
   );
 }

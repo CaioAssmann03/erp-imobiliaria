@@ -17,7 +17,7 @@ docker compose exec backend python manage.py seed_demo         # demo data (--cl
 
 Local file storage: the compose also starts an S3-compatible **`s3` service** (Adobe S3Mock, port 9090; it creates the bucket `erp-dev` itself and accepts any key), so the boleto PDF and the receipts work in development; production uses the Cloudflare R2 bucket. (MinIO no longer publishes images on Docker Hub, which broke the first version of this.) `AWS_S3_ENDPOINT_URL` defaults to `http://host.docker.internal:9090` (it must be reachable from the container *and* from the browser, which opens the signed URLs); on Linux without Docker Desktop add `127.0.0.1 host.docker.internal` to `/etc/hosts`. Without a bucket the PDF endpoints answer 503. On Windows, `scripts/local-up.ps1` does the whole first run (keys, containers, migrate, admin user, demo data): `powershell -ExecutionPolicy Bypass -File .\scripts\local-up.ps1` (`-Reset` starts over, `-NoSeed` skips the demo data).
 
-URLs: API docs `localhost:8000/api/docs/` · schema `/api/schema/` · admin `/admin/` · frontend `localhost:3000`.
+URLs (`DEBUG=true`; with `DEBUG=false` the docs need a superuser token): API docs `localhost:8000/api/docs/` · schema `/api/schema/` · admin `/admin/` · frontend `localhost:3000`.
 
 `docker compose up` fails with "port is already allocated" when another Postgres already uses 5432 (the Windows service, another project's container). Set `POSTGRES_HOST_PORT=5434` (any free port) in `.env`: it only changes the port on your computer; the containers still reach `db:5432`, so `POSTGRES_PORT` stays `5432`. `manage.py` and pytest run outside Docker then need `POSTGRES_PORT=5434` too. The tests never touch the data you see in the app: pytest creates its own database (`test_<POSTGRES_DB>`) and drops it when the session ends (a run with `--reuse-db` keeps it on purpose; the CI never does).
 
@@ -64,6 +64,7 @@ The address map (spec 021) is Google's **Maps Embed API** under the condominium 
 | `SECURE_HSTS_SECONDS` | `3600` when `DEBUG=false`, `0` in development | no `includeSubDomains`, no `preload`; raise to `31536000` only when the final domain exists |
 | `ADMIN_URL` | `admin/` | set a non-obvious path in production (obscurity only); an empty, absolute (`://`) or `..` value stops startup |
 | `INTERNAL_API_KEY` | none | mandatory when `DEBUG=false`; the same value on the backend and the Next server |
+| `DEBUG` | **false** | off unless `DEBUG=true`: a missing variable means production (spec 065). Local runs set `DEBUG=true` in `.env`; with it off `SECRET_KEY` (≥ 32 chars) and `INTERNAL_API_KEY` are mandatory and the API docs need a superuser token |
 
 **Checklist for a new host** (checked on the VPS on 2026-10-08):
 - [x] TLS is terminated in front: Caddy serves the browser over HTTPS and proxies to the Next server. Django is not reached by the browser at all; it listens only on the private Docker network.
@@ -74,6 +75,8 @@ The address map (spec 021) is Google's **Maps Embed API** under the condominium 
 - [ ] `GATEWAY_CREDENTIALS_KEY` (spec 030) is set in the host `.env` before deploying the gateway accounts: without it the backend refuses to start. Generate it once and keep a copy outside the server; rotating it needs the stored credentials re-encrypted
 - [x] `ADMIN_URL` is set to a non-obvious path in the host `.env` (2026-10-19; the value is never written in git). The Admin is not published by Caddy and the Next proxy only forwards `/api/...` segments (`frontend/lib/api-path.ts`); it is opened through the SSH tunnel below.
 - [ ] After every deploy, smoke test that the proxy cannot leave `/api`: `curl -s -o /dev/null -w '%{http_code}' --path-as-is https://<name>/api/..%2fadmin/login/` must print `404` (it printed `200`, the Django Admin login page, until the segment check was added).
+
+**Login lockout and dependencies (spec 065):** a username with 10 failed logins is locked for 15 minutes; release it in the Admin (*Sistema → Tentativas de acesso*) or `docker compose exec backend python manage.py axes_reset_username <name>`. The backend image runs as user `app` (uid 10001): a host volume mounted on `/app` must be writable by that uid. CI runs `pip-audit` and `pnpm audit` (both blocking); `.github/dependabot.yml` opens weekly update PRs.
 
 ### Django Admin through an SSH tunnel
 The backend publishes port 8000 on the VPS **loopback only** (`127.0.0.1:8000`, in the VPS `docker-compose.yml`); nothing new is reachable from the internet. From your computer:
@@ -100,13 +103,13 @@ The company has **one** Asaas account that issues every boleto and receives the 
 `seed_demo` is local/demo only: **never in production** with real data (the initial company comes from `core.0002_seed_company`). Logs go to stdout; no structured logging, error tracker or alerts yet (use `logging.getLogger(__name__)`, log ids and outcomes, never personal data). The database backup is described in *Database backup* below (spec 040). The receipt files live in R2, outside any Postgres dump, and are **not** covered by it.
 
 ## Database backup
-A `backup` container in the production stack (`backup/`) dumps the ERP database **every night at 03:00** (`America/Sao_Paulo`), encrypts it and uploads it to a **private R2 bucket outside the VPS**; it keeps the **last 30 days plus the first backup of each of the last 12 months** and prunes only after a successful upload (spec 040).
+A `backup` container in the production stack (`backend/backup/`) dumps the ERP database **every night at 03:00** (`America/Sao_Paulo`), encrypts it and uploads it to a **private R2 bucket outside the VPS**; it keeps the **last 30 days plus the first backup of each of the last 12 months** and prunes only after a successful upload (spec 040).
 
 **Enable it (once):**
 1. In Cloudflare R2 create a **private bucket just for backups** and an API token limited to it (read, write, list, delete). Do not reuse the receipts' bucket or token.
 2. Invent a passphrase of 16+ random characters. Save it in a password manager **and** in the VPS `.env`: losing it makes every backup unreadable.
 3. Add to the VPS `.env`: `BACKUP_S3_ENDPOINT_URL` (the account's `https://<account id>.r2.cloudflarestorage.com`), `BACKUP_S3_BUCKET`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY`, `BACKUP_PASSPHRASE`.
-4. Copy the `backup/` folder to the VPS next to the compose file, add the `backup` service from [`backup/README.md`](../../../backup/README.md) to the VPS `docker-compose.yml`, and `./deploy.sh`.
+4. Copy the `backend/backup/` folder to the VPS next to the compose file (as `backup/`), add the `backup` service from [`backend/backup/README.md`](../../backup/README.md) to the VPS `docker-compose.yml`, and `./deploy.sh`.
 5. Take the first one now and look at it: `docker compose exec backup python3 backup.py run-once`, then `docker compose exec backup python3 backup.py status`.
 6. **Do a restore drill before trusting it** (below). Real data must not enter the database before steps 1–6 are done.
 

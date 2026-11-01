@@ -1,9 +1,7 @@
-import Link from "next/link";
-
 import type { Unit } from "@/lib/api/generated/models";
 import { unitTypeLabel } from "@/lib/schemas/unit";
 import { unitListLabel, unitUrl } from "@/lib/condominiums/unit-workspace";
-import { cn } from "@/lib/utils";
+import { RegistryListItem } from "@/components/layout/RegistryList";
 
 import { currentLinks } from "./current-links";
 
@@ -42,20 +40,9 @@ export function UnitListItem({
     .join(" · ");
 
   return (
-    <li>
-      <Link
-        href={`${unitUrl(unit.condominium, unit.id)}${query.size > 0 ? `?${query}` : ""}`}
-        aria-current={isOpen ? "page" : undefined}
-        className={cn(
-          "block rounded-panel px-3 py-2 transition-[background-color,opacity]",
-          onCard ? "hover:bg-surface-muted" : "hover:bg-surface",
-          isOpen && "bg-surface shadow-card shadow-[inset_3px_0_0_var(--color-brand)]",
-          dimmed && !isOpen && "opacity-60 hover:opacity-100 focus-visible:opacity-100"
-        )}
-      >
-        <span className="block truncate text-body font-medium">{unitListLabel(unitTypeLabel(unit.type), unit.name)}</span>
-        <span className="block truncate text-caption text-ink-soft">{sub || "—"}</span>
-      </Link>
-    </li>
+    <RegistryListItem href={`${unitUrl(unit.condominium, unit.id)}${query.size > 0 ? `?${query}` : ""}`} isOpen={isOpen} dimmed={dimmed} onCard={onCard}>
+      <span className="block truncate text-body font-medium">{unitListLabel(unitTypeLabel(unit.type), unit.name)}</span>
+      <span className="block truncate text-caption text-ink-soft">{sub || "—"}</span>
+    </RegistryListItem>
   );
 }

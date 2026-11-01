@@ -1,6 +1,6 @@
 "use client";
 
-import { BackLink } from "@/components/layout/BackLink";
+import { PhoneBackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCondominiumsRetrieve } from "@/lib/api/generated";
 import { cn } from "@/lib/utils";
@@ -14,9 +14,7 @@ export function CondominiumHeader({ condominiumId }: { condominiumId: string }) 
   const { data: condominium } = useCondominiumsRetrieve(condominiumId);
 
   const back = (
-    <div className="lg:hidden">
-      <BackLink href="/condominiums" label="Condomínios" />
-    </div>
+    <PhoneBackLink href="/condominiums" label="Condomínios" />
   );
 
   if (!condominium)

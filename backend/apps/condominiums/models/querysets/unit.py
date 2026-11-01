@@ -27,7 +27,7 @@ class UnitQuerySet(CountsByTypeQuerySet["Unit"], SoftDeleteQuerySet["Unit"]):  #
         active_units = self.active().filter(condominium__active=True)
         criteria = CondominiumApportionmentCriterion.objects.filter(
             condominium__in=active_units.values("condominium")
-        ).inconsistent(active_units)
+        ).inconsistent()
         return list(
             criteria.order_by().values_list("condominium_id", flat=True).distinct()
         )

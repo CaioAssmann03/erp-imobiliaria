@@ -2,8 +2,10 @@ import uuid
 from typing import ClassVar, final, override
 
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 
+from apps.accounts.errors import UserError
 from apps.core.models import Company
 
 from .user_manager import UserManager
@@ -22,6 +24,15 @@ class User(AbstractUser):
         verbose_name = "User"
         verbose_name_plural = "Users"
         ordering = ("username",)
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self._state.adding:
+            return
+        stored_company_id = type(self).objects.filter(pk=self.pk).values_list("company_id", flat=True).first()
+        if stored_company_id is not None and stored_company_id != self.company_id:
+            raise ValidationError({"company": UserError.COMPANY_IMMUTABLE.to_validation_error()})
 
     @override
     def __str__(self) -> str:

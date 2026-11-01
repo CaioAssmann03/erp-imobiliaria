@@ -9,6 +9,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.infrastructure.api.throttling import TrustedProxyScopedRateThrottle
+
 from ..infrastructure.gateway.svix_signature import verify_svix_signature
 from ..models import BillingDocumentDelivery
 
@@ -24,6 +26,8 @@ class ResendWebhookView(APIView):
 
     authentication_classes: list[Any] = []
     permission_classes = [AllowAny]
+    throttle_classes = (TrustedProxyScopedRateThrottle,)
+    throttle_scope = "webhook_resend"
 
     def post(self, request: Request) -> Response:
         meta = request.META

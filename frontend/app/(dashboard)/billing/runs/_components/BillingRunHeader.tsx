@@ -1,6 +1,6 @@
 "use client";
 
-import { BackLink } from "@/components/layout/BackLink";
+import { PhoneBackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBillingRunsRetrieve } from "@/lib/api/generated";
 import { billingRunsUrl } from "@/lib/billing/billing-run-workspace";
@@ -18,9 +18,7 @@ export function BillingRunHeader({ runId }: { runId: string }) {
 
   return (
     <>
-      <div className="lg:hidden">
-        <BackLink href={billingRunsUrl(scope)} label="Execuções" />
-      </div>
+      <PhoneBackLink href={billingRunsUrl(scope)} label="Execuções" />
       {run ? (
         <div className="mb-6 flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h1 className="text-title">Emissão de {formatMonth(run.reference_month)}</h1>

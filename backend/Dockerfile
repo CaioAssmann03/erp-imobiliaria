@@ -12,7 +12,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# The app runs without root (spec 065); /app is owned by that user because it writes `staticfiles/` and `celerybeat-schedule` there.
+RUN useradd --system --create-home --uid 10001 app && chown app:app /app
+COPY --chown=app:app . .
+USER app
 
 EXPOSE 8000
 

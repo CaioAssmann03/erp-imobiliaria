@@ -25,14 +25,14 @@ export function pendingRows(pending: Dashboard["pending"] | undefined): PendingR
       severity: "critical",
       count: pending?.units_without_responsible ?? 0,
       label: "Unidades sem responsável",
-      detail: "Ativas, sem proprietário ou locatário: não há a quem cobrar",
+      detail: "Sem proprietário ou locatário",
       href: "/condominiums/units?pending=without_responsible",
     },
     {
       severity: "critical",
       count: pending?.inconsistent_apportionment ?? 0,
       label: "Rateio que não fecha 100%",
-      detail: "Condomínios em que alguma fração ideal em uso não soma 100%",
+      detail: "Fração ideal em uso que não soma 100%",
       href: "/condominiums?pending=inconsistent_apportionment",
     },
     {
@@ -63,7 +63,7 @@ export function pendingRows(pending: Dashboard["pending"] | undefined): PendingR
       severity: "critical",
       count: pending?.without_cost_centers ?? 0,
       label: "Sem centros de custo",
-      detail: "Condomínios sem centros de custo: bloqueiam o financeiro",
+      detail: "Bloqueiam o financeiro",
       href: "/condominiums?pending=without_cost_centers",
     },
     {

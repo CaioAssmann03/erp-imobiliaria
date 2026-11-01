@@ -10,6 +10,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.infrastructure.api.throttling import TrustedProxyScopedRateThrottle
+
 from ..models import GatewayAccount, GatewayEvent
 from ..tasks import process_gateway_event_task
 
@@ -27,6 +29,9 @@ class AsaasWebhookView(APIView):
 
     authentication_classes: list[Any] = []
     permission_classes = [AllowAny]
+    # Public endpoint: every call looks the token up account by account, so a flood is cut before it costs CPU (spec 065).
+    throttle_classes = (TrustedProxyScopedRateThrottle,)
+    throttle_scope = "webhook_asaas"
 
     def post(self, request: Request) -> Response:
         account = _account_of_token(request.META.get(TOKEN_HEADER, ""))

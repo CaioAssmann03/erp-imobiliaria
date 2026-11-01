@@ -1,6 +1,6 @@
 "use client";
 
-import { BackLink } from "@/components/layout/BackLink";
+import { PhoneBackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBillingEntriesRetrieve } from "@/lib/api/generated";
 import { billingEntriesUrl } from "@/lib/billing/billing-entry-workspace";
@@ -17,9 +17,7 @@ export function BillingEntryHeader({ entryId }: { entryId: string }) {
   const { data: entry } = useBillingEntriesRetrieve(entryId);
 
   const back = (
-    <div className="lg:hidden">
-      <BackLink href={billingEntriesUrl(scope)} label="Inclusão de valores" />
-    </div>
+    <PhoneBackLink href={billingEntriesUrl(scope)} label="Inclusão de valores" />
   );
 
   if (!entry)

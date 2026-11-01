@@ -3,6 +3,7 @@
 from datetime import date, timedelta
 
 import pytest
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
@@ -12,7 +13,7 @@ from apps.core.models import Company
 from apps.persons.models import Person
 
 from ..models import Block, Condominium, Unit, UnitPerson
-from .base import error_codes, results
+from .base import add_fraction, error_codes, results
 
 pytestmark = pytest.mark.django_db
 
@@ -164,3 +165,35 @@ def test_registering_the_cnpj_of_a_deleted_condominium_is_refused(
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert error_codes(response, "cnpj") == ["condominium.cnpj.archived"]
+
+
+# ----- joins do not go through the default manager -----
+
+
+def test_the_fractions_of_a_deleted_unit_leave_the_apportionment_total(condominium: Condominium) -> None:
+    gone = Unit.objects.create(condominium=condominium, name="101")
+    add_fraction(gone, 1)
+    _ = gone.delete()
+    stays = Unit.objects.create(condominium=condominium, name="102")
+    fraction = add_fraction(stays, 1)
+
+    fraction.full_clean()
+
+    assert condominium.apportionment_criteria.with_total().get(position=1).total == 1
+
+
+def test_a_record_is_not_restored_while_its_condominium_stays_deleted(inactive_condominium: Condominium) -> None:
+    block = Block.objects.create(condominium=inactive_condominium, name="Bloco A")
+    unit = Unit.objects.create(condominium=inactive_condominium, block=block, name="101")
+    _ = unit.delete()
+    _ = block.delete()
+    _ = inactive_condominium.delete()
+
+    with pytest.raises(ValidationError) as error:
+        Unit.all_objects.get(pk=unit.pk).restore()
+
+    assert error.value.error_dict["condominium"][0].code == "soft_delete.restore.parent_archived"
+    Condominium.all_objects.get(pk=inactive_condominium.pk).restore()
+    Block.all_objects.get(pk=block.pk).restore()
+    Unit.all_objects.get(pk=unit.pk).restore()
+    assert Unit.objects.filter(pk=unit.pk).exists()

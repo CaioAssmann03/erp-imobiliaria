@@ -70,6 +70,11 @@ jobs:
         working-directory: backend
         run: pip install -r requirements-dev.txt
 
+      # Known vulnerabilities in the pinned dependencies (spec 065): a new advisory fails the build until the pin is raised.
+      - name: Audit dependencies (pip-audit)
+        working-directory: backend
+        run: pip install pip-audit && pip-audit -r requirements.txt --progress-spinner off
+
       - name: Check for missing migrations
         working-directory: backend
         run: python manage.py makemigrations --check --dry-run
@@ -92,6 +97,7 @@ jobs:
 
       # The nightly backup (spec 040): retention, failures and a real pg_dump / openssl / pg_restore round trip.
       - name: Backup tests
+        working-directory: backend
         run: python -m unittest discover -s backup/tests -v
 
   frontend:
@@ -114,6 +120,11 @@ jobs:
       - name: Install dependencies
         working-directory: frontend
         run: pnpm install --frozen-lockfile
+
+      # High and critical advisories fail the build (spec 065); transitive fixes go in `overrides` of pnpm-workspace.yaml.
+      - name: Audit dependencies (pnpm audit)
+        working-directory: frontend
+        run: pnpm audit --prod --audit-level=high
 
       - name: Lint
         working-directory: frontend

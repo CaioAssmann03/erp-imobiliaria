@@ -2,6 +2,8 @@
 
 from typing import Any
 
+from apps.core.infrastructure.storage.object_storage import ObjectStorage
+
 
 class FakeObjectStorage:
     """Same methods as `ObjectStorage`; `objects` maps a key to the size of the file "uploaded" there."""
@@ -26,11 +28,17 @@ class FakeObjectStorage:
     def object_size(self, key: str) -> int | None:
         return self.objects.get(key)
 
+    def read_head(self, key: str, length: int) -> bytes:
+        return self.contents.get(key, b"")[:length]
+
     def delete_object(self, key: str) -> None:
         if self.fail_deletes:
             raise RuntimeError("bucket unreachable")
         self.objects.pop(key, None)
         self.contents.pop(key, None)
+
+    # The real method (it only calls `delete_object`), so the tests see the same log-and-leave-an-orphan behaviour.
+    discard_object = ObjectStorage.discard_object
 
 
 def as_storage(fake: FakeObjectStorage) -> Any:

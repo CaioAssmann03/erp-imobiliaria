@@ -3,10 +3,10 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
-import { FormPage } from "@/components/form/FormPage";
+import { RegistryFrame } from "@/components/layout/RegistryFrame";
 import { SectionIndex } from "@/components/layout/SectionIndex";
 import { UNIT_SECTIONS, unitsFrameState } from "@/lib/condominiums/unit-workspace";
-import { cn } from "@/lib/utils";
+
 import { UnitSideMenu } from "./UnitSideMenu";
 import { UnitsList } from "./UnitsList";
 
@@ -26,17 +26,17 @@ export function UnitsFrame({ children }: { children: React.ReactNode }) {
     <UnitSideMenu unitId={state.unitId} current={state.subScreen} />
   ) : state.isNew ? (
     <SectionIndex sections={UNIT_SECTIONS} label="Seções da unidade" title="Nesta unidade" />
-  ) : null;
+  ) : undefined;
 
   return (
-    <div className="lg:flex lg:items-start lg:gap-8 2xl:gap-12">
-      <UnitsList
-        condominiumId={state.condominiumId}
-        openUnitId={state.unitId}
-        className={state.showListOnPhone ? "flex" : "hidden lg:flex"}
-      />
-      <div className={cn("min-w-0 flex-1", !state.showPageOnPhone && "hidden lg:block")}>{aside ? <FormPage aside={aside}>{children}</FormPage> : children}</div>
-    </div>
+    <RegistryFrame
+      list={(className) => <UnitsList condominiumId={state.condominiumId} openUnitId={state.unitId} className={className} />}
+      aside={aside}
+      showListOnPhone={state.showListOnPhone}
+      showPageOnPhone={state.showPageOnPhone}
+    >
+      {children}
+    </RegistryFrame>
   );
 }
 

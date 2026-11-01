@@ -10,6 +10,7 @@ import { BillingDocumentActions } from "./BillingDocumentActions";
 import { BillingDocumentBoleto } from "./BillingDocumentBoleto";
 import { BillingDocumentStatusBadge } from "@/app/(dashboard)/billing/documents/_components/BillingDocumentStatusBadge";
 import { DocumentItem } from "./DocumentItem";
+import { SectionAnchor } from "@/components/form/SectionAnchor";
 
 const percent = (value: string) => `${Number(value).toLocaleString("pt-BR")}%`;
 
@@ -22,7 +23,7 @@ const percent = (value: string) => `${Number(value).toLocaleString("pt-BR")}%`;
 export function BillingDocumentView({ document }: { document: BillingDocument }) {
   return (
     <div className="space-y-4">
-      <div id="resumo" className="scroll-mt-20">
+      <SectionAnchor id="resumo">
         <FormSection>
           <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
             <DocumentItem label="Valor">
@@ -51,13 +52,13 @@ export function BillingDocumentView({ document }: { document: BillingDocument })
             )}
           </dl>
         </FormSection>
-      </div>
+      </SectionAnchor>
 
-      <div id="boleto" className="scroll-mt-20">
+      <SectionAnchor id="boleto">
         <BillingDocumentBoleto document={document} />
-      </div>
+      </SectionAnchor>
 
-      <div id="itens" className="scroll-mt-20">
+      <SectionAnchor id="itens">
         <FormSection title="Itens">
           <Table>
             <TableHeader>
@@ -78,9 +79,9 @@ export function BillingDocumentView({ document }: { document: BillingDocument })
             </TableBody>
           </Table>
         </FormSection>
-      </div>
+      </SectionAnchor>
 
-      <div id="condicoes" className="scroll-mt-20">
+      <SectionAnchor id="condicoes">
         <FormSection title="Condições na emissão" hint="Copiadas das regras do condomínio quando o documento foi emitido.">
           <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
             <DocumentItem label="Desconto">
@@ -101,7 +102,7 @@ export function BillingDocumentView({ document }: { document: BillingDocument })
             </DocumentItem>
           </dl>
         </FormSection>
-      </div>
+      </SectionAnchor>
     </div>
   );
 }

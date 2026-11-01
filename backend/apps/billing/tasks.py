@@ -1,7 +1,9 @@
 from datetime import date
 
+from botocore.exceptions import BotoCoreError, ClientError  # pyright: ignore[reportMissingTypeStubs]
 from celery import shared_task
 from django.conf import settings
+from django.db import IntegrityError, OperationalError
 from django.utils import timezone
 
 from apps.billing.infrastructure.gateway.asaas_client import GatewayUnavailable
@@ -23,17 +25,25 @@ from apps.billing.services.send_billing_document_email import (
     send_billing_document_email,
 )
 from apps.condominiums.models import Condominium
+from apps.core.infrastructure.storage.object_storage import ObjectStorageUnavailable
+
+# What is worth another try: the database or the bucket unreachable, or two workers racing for the same row.
+# Anything else (a missing record, a rule, a bug) fails at once instead of repeating five times.
+PDF_RETRY_ERRORS = (OperationalError, ObjectStorageUnavailable, BotoCoreError, ClientError)
+EVENT_RETRY_ERRORS = (OperationalError, IntegrityError)
 
 
 @shared_task
 def issue_due_billing() -> int:
     """Daily: enqueue the issuance of every active condominium whose issuance day is today.
 
+    A condominium whose issuance day was one of the last `BILLING_ISSUANCE_CATCH_UP_DAYS - 1` days and has no run
+    this month is enqueued too: the day the beat or the worker was down is not lost.
     The reference month is the month of today. Returns how many condominiums were enqueued.
     """
     today = timezone.localdate()
-    condominium_ids = CondominiumBillingRules.objects.filter(
-        issuance_day=today.day, condominium__active=True
+    condominium_ids = CondominiumBillingRules.objects.due_for_issuance(
+        today, settings.BILLING_ISSUANCE_CATCH_UP_DAYS
     ).values_list("condominium_id", flat=True)
     count = 0
     for condominium_id in condominium_ids:
@@ -52,12 +62,12 @@ def issue_condominium_billing_task(condominium_id: str, reference_month: str) ->
     return str(run.pk)
 
 
-@shared_task(autoretry_for=(Exception,), retry_backoff=True, max_retries=3)
+@shared_task(autoretry_for=PDF_RETRY_ERRORS, retry_backoff=True, max_retries=3)
 def generate_billing_document_pdf_task(document_id: str) -> str:
     """Generate (or replace) the draft PDF of one document; the id of its `BillingDocumentPdf`.
 
-    Retried with backoff; once the retries run out the error stays in the task log, and the issuance that
-    enqueued it is not affected.
+    Retried with backoff while the database or the bucket is unreachable; once the retries run out the error stays
+    in the task log, and the issuance that enqueued it is not affected.
     """
     document = (
         BillingDocument.objects.select_related(
@@ -84,9 +94,9 @@ def register_billing_document_task(document_id: str) -> str:
     return str(register_billing_document(document).pk)
 
 
-@shared_task(autoretry_for=(Exception,), retry_backoff=True, max_retries=5)
+@shared_task(autoretry_for=EVENT_RETRY_ERRORS, retry_backoff=True, max_retries=5)
 def process_gateway_event_task(event_id: str) -> str:
-    """Process one stored gateway event; its outcome. Retried on an unexpected error (the event stays `pending`)."""
+    """Process one stored gateway event; its outcome. Retried when the database fails or two workers race (the event stays `pending`)."""
     return str(process_gateway_event(GatewayEvent.objects.get(pk=event_id)).outcome)
 
 

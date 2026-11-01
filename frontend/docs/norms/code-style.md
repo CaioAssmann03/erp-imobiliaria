@@ -17,6 +17,7 @@ skip-if: naming → norms/language-and-naming.md; component rules → norms/comp
 - Do not mutate variables during render (lint rule `react-hooks/immutability`).
 - Keys are stable ids, not indexes. Handlers: inline arrow if short, `handleXxx` if longer.
 - No business logic in JSX: payloads, formatting and calculations are pure functions in `lib/` or a hook.
+- Shown numbers go through `lib/format/format.ts`: `brl` for money, `brlWhole` (no cents) for a figure in large type, `integer` for counts (`54.865`, never `54865`). Red (`text-danger`, `Late`) marks only what is late, in the small note or row, never the big figure of a card.
 
 **Imports**
 - `@/` = frontend root. Inside a route use **relative** paths for that route's components

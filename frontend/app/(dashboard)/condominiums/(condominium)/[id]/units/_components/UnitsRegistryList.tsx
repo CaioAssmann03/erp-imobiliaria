@@ -1,14 +1,14 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
-import { Plus, Search } from "lucide-react";
-import Link from "next/link";
+import { Search } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { CompactFilter } from "@/components/filters/CompactFilter";
 import { ShowMore } from "@/components/data-list";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RegistryCreate } from "@/components/layout/RegistryList";
 import { useCurrentUrl } from "@/hooks/use-current-url";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
@@ -64,14 +64,7 @@ export function UnitsRegistryList({ condominiumId }: { condominiumId: string }) 
     <section aria-label="Unidades" className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3 px-1">
         <h2 className="text-heading">Unidades</h2>
-        <Link
-          href={newUnitUrl(condominiumId)}
-          aria-label="Nova unidade"
-          title="Nova unidade"
-          className="flex size-8 items-center justify-center rounded-control text-ink-soft outline-none transition-colors hover:bg-surface hover:text-ink focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <Plus className="size-5" />
-        </Link>
+        <RegistryCreate href={newUnitUrl(condominiumId)} label="Nova unidade" />
       </div>
 
       <div className="flex flex-col gap-3 rounded-card bg-surface p-3 shadow-card">

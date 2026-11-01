@@ -3,9 +3,9 @@
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 
-import { FormPage } from "@/components/form/FormPage";
+import { RegistryFrame } from "@/components/layout/RegistryFrame";
 import { registryLayout, selectedCondominiumId, selectedCondominiumPage } from "@/lib/condominiums/condominium-registry";
-import { cn } from "@/lib/utils";
+
 import { CondominiumSideMenu } from "./CondominiumSideMenu";
 import { CondominiumsList } from "./CondominiumsList";
 
@@ -20,18 +20,19 @@ export function CondominiumsFrame({ children }: { children: React.ReactNode }) {
 
   // O menu da direita é desta moldura (layout): ao trocar de tela do condomínio ele continua o mesmo, só muda o item aberto.
   const condominiumId = selectedCondominiumId(pathname);
-  const content = condominiumId ? (
-    <FormPage aside={<CondominiumSideMenu condominiumId={condominiumId} current={selectedCondominiumPage(pathname) ?? undefined} />}>{children}</FormPage>
-  ) : (
-    children
-  );
 
   return (
-    <div className="lg:flex lg:items-start lg:gap-8 2xl:gap-12">
-      <Suspense>
-        <CondominiumsList className={showListOnPhone ? "flex" : "hidden lg:flex"} />
-      </Suspense>
-      <div className={cn("min-w-0 flex-1", !showPageOnPhone && "hidden lg:block")}>{content}</div>
-    </div>
+    <RegistryFrame
+      list={(className) => (
+        <Suspense>
+          <CondominiumsList className={className} />
+        </Suspense>
+      )}
+      aside={condominiumId ? <CondominiumSideMenu condominiumId={condominiumId} current={selectedCondominiumPage(pathname) ?? undefined} /> : undefined}
+      showListOnPhone={showListOnPhone}
+      showPageOnPhone={showPageOnPhone}
+    >
+      {children}
+    </RegistryFrame>
   );
 }

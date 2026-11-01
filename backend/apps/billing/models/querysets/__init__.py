@@ -1,4 +1,5 @@
 from .billing_document import BillingDocumentQuerySet as BillingDocumentQuerySet
 from .billing_plan import BillingPlanQuerySet as BillingPlanQuerySet
 from .late_interest_rate import LateInterestRateQuerySet as LateInterestRateQuerySet
+from .condominium_billing_rules import CondominiumBillingRulesQuerySet as CondominiumBillingRulesQuerySet
 from .billing_entry import BillingEntryQuerySet as BillingEntryQuerySet

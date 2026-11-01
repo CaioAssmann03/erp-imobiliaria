@@ -1,7 +1,10 @@
 from typing import Any, ClassVar, Generic, Self, TypeVar, override
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+
+from apps.core.infrastructure.errors.soft_delete import SoftDeleteError
 
 ModelT = TypeVar("ModelT", bound=models.Model)
 
@@ -66,8 +69,21 @@ class SoftDeleteMixin(models.Model):
     def hard_delete(self) -> tuple[int, dict[str, int]]:
         return models.Model.delete(self)
 
+    def validate_restorable(self) -> None:
+        """A record does not come back while the archived record it belongs to (its condominium, its person) stays deleted."""
+        for field in self._meta.concrete_fields:
+            parent_model = field.related_model
+            if not (field.many_to_one or field.one_to_one) or not (
+                isinstance(parent_model, type) and issubclass(parent_model, SoftDeleteMixin)
+            ):
+                continue
+            parent = getattr(self, field.name)
+            if parent is not None and parent.is_archived:
+                raise ValidationError({field.name: SoftDeleteError.RESTORE_PARENT_ARCHIVED.to_validation_error()})
+
     def restore(self) -> None:
         """Bring the record back; its uniqueness is checked again against the live records."""
+        self.validate_restorable()
         self.deleted_at = None
         self.full_clean()
         self.save(update_fields=["deleted_at"])

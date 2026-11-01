@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from django.db.models import Q
+from django.db.models import FilteredRelation, Q
 
 from apps.core.infrastructure.search.ranking import any_of, exact_code, relevance_rank
 from apps.core.models import SoftDeleteQuerySet
@@ -13,8 +13,10 @@ if TYPE_CHECKING:
 
 class CondominiumQuerySet(CountsByTypeQuerySet["Condominium"], SoftDeleteQuerySet["Condominium"]):  # type: ignore[override]
     def without_cost_centers(self) -> "CondominiumQuerySet":
-        """Active condominiums with no cost center (sub-conta): they block the finance."""
-        return self.filter(active=True, cost_centers__isnull=True)
+        """Active condominiums with no live cost center (sub-conta): they block the finance."""
+        # A join does not go through the default manager: the relation is narrowed to the live cost centers by hand.
+        live_cost_centers = FilteredRelation("cost_centers", condition=Q(cost_centers__deleted_at__isnull=True))
+        return self.filter(active=True).annotate(live_cost_centers=live_cost_centers).filter(live_cost_centers__isnull=True)
 
     def with_inconsistent_apportionment(self) -> "CondominiumQuerySet":
         """Condominiums whose active units' ideal fractions do not close at 1 (see `UnitQuerySet`)."""

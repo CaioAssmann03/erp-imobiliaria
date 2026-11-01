@@ -6,13 +6,11 @@ import { useState } from "react";
 import { DateSelect } from "@/components/dates/DateSelect";
 import { ShowMore } from "@/components/data-list";
 import { ScopeDivider, ScopeSearchCard, ScopeSearchRow } from "@/components/filters/ScopeSearchCard";
-import { ScopeSelect } from "@/components/filters/ScopeSelect";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
-import { useCompanyEntriesList, useCondominiumsList } from "@/lib/api/generated";
-import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { useCompanyEntriesList } from "@/lib/api/generated";
 import { todayIso } from "@/lib/format/format";
-import { cn } from "@/lib/utils";
+import { RegistryList } from "@/components/layout/RegistryList";
+import { CondominiumScopeSelect } from "@/components/filters/CondominiumScopeSelect";
 
 import { CompanyEntryListItem } from "./CompanyEntryListItem";
 
@@ -28,7 +26,6 @@ export function CompanyEntriesList({ openEntryId, className }: { openEntryId: st
   const [from, setFrom] = useState("");
   const [until, setUntil] = useState("");
 
-  const { data: condominiums } = useCondominiumsList({ limit: 100 });
 
   const { limit, showMore } = useGrowingLimit(`${condominium}|${from}|${until}`);
   const { data, isLoading, isPlaceholderData } = useCompanyEntriesList(
@@ -44,56 +41,29 @@ export function CompanyEntriesList({ openEntryId, className }: { openEntryId: st
   const today = todayIso();
 
   return (
-    <aside
-      aria-label="Conta da imobiliária"
-      className={cn("w-full shrink-0 flex-col gap-3 lg:sticky lg:top-[4.25rem] lg:h-[calc(100vh-5.25rem)] lg:w-80 2xl:w-96", className)}
+    <RegistryList
+      label="Conta da imobiliária"
+      title="Conta da imobiliária"
+      toolbar={
+        <ScopeSearchCard scopes={<CondominiumScopeSelect value={condominium} allLabel="Todos os condomínios" onChange={setCondominium} />}>
+          <ScopeSearchRow className="p-0">
+            <DateSelect className={SEGMENT} label="Data inicial" value={from} today={today} placeholder="A partir de" allLabel="Sem data inicial" onChange={setFrom} />
+            <ScopeDivider />
+            <DateSelect className={SEGMENT} label="Data final" value={until} today={today} placeholder="Até" allLabel="Sem data final" onChange={setUntil} />
+          </ScopeSearchRow>
+        </ScopeSearchCard>
+      }
+      navLabel="Lista de lançamentos"
+      isLoading={isLoading}
+      isPlaceholderData={isPlaceholderData}
+      isEmpty={results.length === 0}
+      emptyMessage={condominium || from || until ? "Nenhum lançamento com esses filtros." : "Nenhum lançamento da imobiliária ainda."}
+      footer={data && <ShowMore shown={results.length} total={data.count} noun="lançamento(s)" onMore={showMore} />}
+      className={className}
     >
-      <div className="px-1">
-        <h2 className="text-heading">Conta da imobiliária</h2>
-      </div>
-
-      <ScopeSearchCard
-        scopes={
-          <ScopeSelect
-            variant="segment"
-            className="flex-1"
-            label="Condomínio"
-            value={condominium}
-            placeholder="Selecione o condomínio"
-            allLabel="Todos os condomínios"
-            onChange={setCondominium}
-            options={(condominiums?.results ?? []).map((item) => ({ value: item.id, label: `${formatCode(item.code)} · ${item.name}`, title: item.name }))}
-          />
-        }
-      >
-        <ScopeSearchRow className="p-0">
-          <DateSelect className={SEGMENT} label="Data inicial" value={from} today={today} placeholder="A partir de" allLabel="Sem data inicial" onChange={setFrom} />
-          <ScopeDivider />
-          <DateSelect className={SEGMENT} label="Data final" value={until} today={today} placeholder="Até" allLabel="Sem data final" onChange={setUntil} />
-        </ScopeSearchRow>
-      </ScopeSearchCard>
-
-      <nav aria-label="Lista de lançamentos" className={cn("min-h-0 flex-1 overflow-y-auto pr-1 transition-opacity", isPlaceholderData && "opacity-60")}>
-        {isLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 8 }, (_, index) => (
-              <Skeleton key={index} className="h-12 rounded-panel" />
-            ))}
-          </div>
-        ) : results.length === 0 ? (
-          <p className="px-2 py-6 text-center text-body text-ink-soft">
-            {condominium || from || until ? "Nenhum lançamento com esses filtros." : "Nenhum lançamento da imobiliária ainda."}
-          </p>
-        ) : (
-          <ul className="space-y-0.5">
-            {results.map((entry) => (
-              <CompanyEntryListItem key={entry.id} entry={entry} isOpen={entry.id === openEntryId} dimmed={Boolean(openEntryId)} />
-            ))}
-          </ul>
-        )}
-      </nav>
-
-      {data && <ShowMore shown={results.length} total={data.count} noun="lançamento(s)" onMore={showMore} />}
-    </aside>
+      {results.map((entry) => (
+        <CompanyEntryListItem key={entry.id} entry={entry} isOpen={entry.id === openEntryId} dimmed={Boolean(openEntryId)} />
+      ))}
+    </RegistryList>
   );
 }

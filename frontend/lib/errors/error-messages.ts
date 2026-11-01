@@ -247,6 +247,7 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "payment_receipt.account_payable.not_paid": "Só uma conta paga pode ter comprovante.",
   "payment_receipt.already_confirmed": "O comprovante já foi confirmado.",
   "payment_receipt.content_type.not_allowed": "O comprovante deve ser um arquivo PDF, JPEG ou PNG.",
+  "payment_receipt.file.content_mismatch": "O arquivo enviado não é do tipo informado. Anexe um PDF, JPEG ou PNG de verdade.",
   "payment_receipt.file.missing_in_storage": "O arquivo não foi enviado. Tente anexar de novo.",
   "payment_receipt.file.size_mismatch": "O arquivo enviado não tem o tamanho informado. Tente anexar de novo.",
   "payment_receipt.size_bytes.not_positive": "O arquivo não pode estar vazio.",
@@ -259,6 +260,7 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "percentage.out_of_range": "O percentual deve ficar entre 0 e 100.",
   permission_denied: "Você não tem permissão para esta ação.",
   required: "Campo obrigatório.",
+  "soft_delete.restore.parent_archived": "Este registro pertence a um registro excluído: restaure o principal antes.",
   "supplier.bank_data.incomplete": "Informe banco, agência e conta juntos.",
   throttled: "Muitas tentativas. Aguarde um instante e tente novamente.",
   token_not_valid: "Sessão inválida ou expirada. Entre novamente.",
@@ -294,6 +296,7 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "unit_person.person.not_in_condominiums": "Esta pessoa não está cadastrada para Condomínios.",
   "unit_person.person.other_company": "A pessoa pertence a outra empresa.",
   unsupported_media_type: "Formato de envio não suportado.",
+  "user.company.immutable": "O usuário permanece na empresa em que foi criado: crie um novo usuário para a outra empresa.",
   user_inactive: "Usuário inativo.",
   user_not_found: "Usuário não encontrado.",
 };

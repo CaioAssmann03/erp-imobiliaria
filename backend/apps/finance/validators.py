@@ -6,6 +6,19 @@ from apps.finance.errors.validators import FinanceValidatorError
 
 ALLOWED_RECEIPT_CONTENT_TYPES = ("application/pdf", "image/jpeg", "image/png")
 MAX_RECEIPT_SIZE_BYTES = 10 * 1024 * 1024
+# The first bytes of each allowed type: the browser announces the type, the stored file has to prove it (spec 065).
+RECEIPT_SIGNATURES = {
+    "application/pdf": b"%PDF-",
+    "image/jpeg": b"\xff\xd8\xff",
+    "image/png": b"\x89PNG\r\n\x1a\n",
+}
+RECEIPT_SIGNATURE_LENGTH = max(len(signature) for signature in RECEIPT_SIGNATURES.values())
+
+
+def receipt_signature_matches(content_type: str, first_bytes: bytes) -> bool:
+    """Whether the start of the stored file is what its declared type begins with."""
+    signature = RECEIPT_SIGNATURES.get(content_type)
+    return signature is not None and first_bytes.startswith(signature)
 
 
 def validate_bank_code(bank_code: str) -> None:

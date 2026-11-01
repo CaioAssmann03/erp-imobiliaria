@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { BackLink } from "@/components/layout/BackLink";
+import { PhoneBackLink } from "@/components/layout/BackLink";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 import { DelinquencyReportView } from "./_components/DelinquencyReportView";
@@ -12,9 +12,7 @@ export default function DelinquencyReportPage() {
     <div>
       <PageHeader
         backSlot={
-          <div className="lg:hidden">
-            <BackLink href="/reports" label="Relatórios" />
-          </div>
+          <PhoneBackLink href="/reports" label="Relatórios" />
         }
         title="Inadimplência"
         description="Boletos vencidos e ainda não pagos, por condomínio. O valor é o do boleto, sem multa nem juros."

@@ -11,7 +11,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useUnitPeopleList, useUnitsList } from "@/lib/api/generated";
 import type { Person } from "@/lib/api/generated/models";
-import { formatCode } from "@/lib/billing/billing-entry-payload";
+import { formatCode } from "@/lib/format/format";
 import { personUrl, UNIT_ROLE_LABELS } from "@/lib/persons/person-workspace";
 
 /** Quantos vínculos (e unidades) a tela lê de uma vez: o máximo que a API entrega por página. */

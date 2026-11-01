@@ -5,6 +5,7 @@ import { Fragment } from "react";
 
 import { useDashboardRetrieve } from "@/lib/api/generated";
 import type { Summary } from "@/lib/api/generated/models";
+import { integer } from "@/lib/format/format";
 
 const FALLBACK = "O que pede atenção na administração de condomínios, locações, vendas e financeiro.";
 
@@ -20,10 +21,10 @@ function Group({ group, summary }: { group: (typeof GROUPS)[number]; summary: Su
   return (
     <Link
       href={group.href}
-      title={`${summary.active} ${pick(group.adjective, summary.active)}`}
+      title={`${integer(summary.active)} ${pick(group.adjective, summary.active)}`}
       className="tabular-nums underline-offset-4 transition-colors hover:text-ink hover:underline"
     >
-      {summary.total} {pick(group.noun, summary.total)}
+      {integer(summary.total)} {pick(group.noun, summary.total)}
     </Link>
   );
 }

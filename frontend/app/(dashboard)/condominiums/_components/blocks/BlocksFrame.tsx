@@ -3,12 +3,13 @@
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 
-import { FormPage } from "@/components/form/FormPage";
+import { RegistryFrame } from "@/components/layout/RegistryFrame";
 import { useBlocksRetrieve } from "@/lib/api/generated";
 import { blocksFrameState } from "@/lib/condominiums/block-workspace";
+import { CondominiumSideMenu } from "@/app/(dashboard)/condominiums/_components/condominium/CondominiumSideMenu";
+
 import { BlockSideMenu } from "./BlockSideMenu";
 import { BlocksList } from "./BlocksList";
-import { CondominiumSideMenu } from "@/app/(dashboard)/condominiums/_components/condominium/CondominiumSideMenu";
 
 /**
  * Client Component: a moldura do cadastro e da edição de um bloco (os blocos do condomínio à esquerda, o formulário ao lado). Só envolve
@@ -21,14 +22,19 @@ export function BlocksFrame({ children }: { children: React.ReactNode }) {
   if (!state.hasFrame) return <>{children}</>;
 
   // O menu da direita é desta moldura (layout): o do bloco na edição, o do condomínio (com Blocos aberto) no cadastro.
-  const aside = state.blockId ? <BlockSideMenu blockId={state.blockId} current={state.subScreen} /> : state.condominiumId ? <CondominiumSideMenu condominiumId={state.condominiumId} current="blocks" /> : null;
+  const aside = state.blockId ? <BlockSideMenu blockId={state.blockId} current={state.subScreen} /> : state.condominiumId ? <CondominiumSideMenu condominiumId={state.condominiumId} current="blocks" /> : undefined;
 
   return (
-    <div className="lg:flex lg:items-start lg:gap-8 2xl:gap-12">
-      <Suspense fallback={null}>
-        <BlocksList condominiumId={state.condominiumId ?? block?.condominium ?? null} openBlockId={state.blockId} className="hidden lg:flex" />
-      </Suspense>
-      <div className="min-w-0 flex-1">{aside ? <FormPage aside={aside}>{children}</FormPage> : children}</div>
-    </div>
+    <RegistryFrame
+      list={(className) => (
+        <Suspense fallback={null}>
+          <BlocksList condominiumId={state.condominiumId ?? block?.condominium ?? null} openBlockId={state.blockId} className={className} />
+        </Suspense>
+      )}
+      aside={aside}
+      showListOnPhone={false}
+    >
+      {children}
+    </RegistryFrame>
   );
 }

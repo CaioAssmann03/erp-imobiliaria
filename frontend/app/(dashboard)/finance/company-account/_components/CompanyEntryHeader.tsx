@@ -1,6 +1,6 @@
 "use client";
 
-import { BackLink } from "@/components/layout/BackLink";
+import { PhoneBackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCompanyEntriesRetrieve } from "@/lib/api/generated";
 import { companyAccountUrl } from "@/lib/finance/company-account-workspace";
@@ -10,9 +10,7 @@ export function CompanyEntryHeader({ entryId }: { entryId: string }) {
   const { data: entry } = useCompanyEntriesRetrieve(entryId);
 
   const back = (
-    <div className="lg:hidden">
-      <BackLink href={companyAccountUrl()} label="Conta da imobiliária" />
-    </div>
+    <PhoneBackLink href={companyAccountUrl()} label="Conta da imobiliária" />
   );
 
   if (!entry)

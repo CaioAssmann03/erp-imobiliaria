@@ -29,13 +29,16 @@ Every rule has a test; a constraint is tested twice (serializer 400 + `Integrity
 ## Security
 | Area | Today |
 |---|---|
-| Auth | Passwords hashed with **Argon2id** (spec 023). SimpleJWT signed with **EdDSA (Ed25519)** from `JWT_SIGNING_KEY` (spec 022; access 30 min, refresh 7 days, rotating and **revoked after use**); logout revokes a refresh token; login 5/min, refresh 30/min, logout 30/min per client on a Redis cache, no lockout. The throttle key is the client address forwarded by the Next server, trusted only with the shared `INTERNAL_API_KEY` (mandatory when `DEBUG=false`); a cache failure lets login through (logged). The Django Admin login is not throttled (gap #26). The frontend keeps tokens in `HttpOnly` cookies (`frontend/docs/safeguards/auth-and-tokens.md`) |
-| Authorization | `IsAuthenticated` + **company scoping**: every queryset, related field and admin is limited to `user.company` (a superuser bypasses); `/api/companies/` create and delete are superuser-only. **No roles yet** (phase 7) |
+| Auth | Passwords hashed with **Argon2id** (spec 023). SimpleJWT signed with **EdDSA (Ed25519)** from `JWT_SIGNING_KEY` (spec 022; access 30 min, refresh 7 days, rotating and **revoked after use**); logout revokes a refresh token; login 5/min, refresh 30/min, logout 30/min per client on a Redis cache; **lockout** (django-axes, spec 065): 10 failed logins for a username lock it for 15 minutes, in the API (429 `throttled`) and in the Admin, and a good login clears the counter. The throttle key is the client address forwarded by the Next server, trusted only with the shared `INTERNAL_API_KEY` (mandatory when `DEBUG=false`); a cache failure lets login through (logged).  The frontend keeps tokens in `HttpOnly` cookies (`frontend/docs/safeguards/auth-and-tokens.md`) |
+| Authorization | `IsAuthenticated` + a default **600/min per user** limit (429) + **company scoping**: every queryset, related field and admin is limited to `user.company` (a superuser bypasses); `/api/companies/` create and delete are superuser-only. **No roles yet** (phase 7) |
 | Network | CORS allow-list (`CORS_ALLOWED_ORIGINS`); `SECURE_PROXY_SSL_HEADER` for a TLS-terminating proxy; plain HTTP redirected to HTTPS with a short HSTS; the Admin path comes from `ADMIN_URL` (`operations.md`) |
-| Input | ORM only (no raw SQL); explicit serializer `fields` |
+| Input | ORM only (no raw SQL); explicit serializer `fields`. A receipt's first bytes must match its declared type (PDF, JPEG, PNG) when it is confirmed (spec 065) |
+| API docs | `/api/schema/` and `/api/docs/` are open only with `DEBUG=true`; otherwise superuser-only (spec 065) |
+| Webhooks | `/api/webhooks/asaas/` (token) and `/api/webhooks/resend/` (Svix signature) are public by nature and limited to 1000 and 300 calls/min per address |
+| Supply chain | `pip-audit` blocks the CI on a known vulnerability; `pnpm audit --prod --audit-level=high` blocks it too; Dependabot opens weekly update PRs. The container runs as an unprivileged user |
 
 **Rules for new code**
-1. Secrets only from env vars (`SECRET_KEY` ≥ 32 chars; `JWT_SIGNING_KEY` signs the JWTs); never in code, fixtures, migrations, logs or errors. `.env` is gitignored; `.env.example` holds placeholders.
+1. Secrets only from env vars (`SECRET_KEY` ≥ 32 chars, enforced when `DEBUG` is not `true`; `DEBUG` is off unless set; `JWT_SIGNING_KEY` signs the JWTs); never in code, fixtures, migrations, logs or errors. `.env` is gitignored; `.env.example` holds placeholders.
 2. ORM only; if raw SQL is unavoidable, parametrize.
 3. Explicit serializer `fields` (never `"__all__"`: a new model field must not reach the API unreviewed); ids, timestamps and derived data `read_only`.
 4. Validate on the server whatever the UI validates: a broken rule is a 400.

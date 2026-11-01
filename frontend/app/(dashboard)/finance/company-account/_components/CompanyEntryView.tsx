@@ -5,6 +5,7 @@ import { FormSkeleton } from "@/components/form/FormSkeleton";
 import { useCompanyEntriesRetrieve } from "@/lib/api/generated";
 import { brl, formatDate, formatMonth } from "@/lib/format/format";
 import { throwIfPageError } from "@/lib/query/page-error";
+import { SectionAnchor } from "@/components/form/SectionAnchor";
 
 function Item({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -24,7 +25,7 @@ export function CompanyEntryView({ entryId }: { entryId: string }) {
   if (!entry) return null;
 
   return (
-    <div id="lancamento" className="scroll-mt-20">
+    <SectionAnchor id="lancamento">
       <FormSection title="Lançamento" description="Registrado quando o boleto foi pago. Não pode ser alterado.">
         <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
           <Item label="Data">
@@ -40,6 +41,6 @@ export function CompanyEntryView({ entryId }: { entryId: string }) {
           <Item label="Unidade">{entry.unit_name || "—"}</Item>
         </dl>
       </FormSection>
-    </div>
+    </SectionAnchor>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { BackLink } from "@/components/layout/BackLink";
+import { PhoneBackLink } from "@/components/layout/BackLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEntryBatchesRetrieve } from "@/lib/api/generated";
 import { entriesUrl } from "@/lib/finance/entry-batch-workspace";
@@ -16,9 +16,7 @@ export function EntryBatchHeader({ batchId }: { batchId: string }) {
   const { data: batch } = useEntryBatchesRetrieve(batchId);
 
   const back = (
-    <div className="lg:hidden">
-      <BackLink href={entriesUrl()} label="Lançamento manual" />
-    </div>
+    <PhoneBackLink href={entriesUrl()} label="Lançamento manual" />
   );
 
   if (!batch)

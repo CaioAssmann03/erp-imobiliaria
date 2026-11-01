@@ -1,29 +1,20 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-
 import { SearchSelectField, TextField } from "@/components/form/fields";
-import { FormActions } from "@/components/form/FormActions";
+
 import { FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
-import { Button } from "@/components/ui/button";
+
 import { useBlocksRetrieve, useCondominiumsList } from "@/lib/api/generated";
 import { condominiumPageUrl } from "@/lib/condominiums/condominium-registry";
 import { throwIfPageError } from "@/lib/query/page-error";
-import {
-  BLOCK_DEFAULTS,
-  blockSchema,
-  blockToForm,
-  type BlockFormInput,
-  type BlockFormOutput,
-} from "@/lib/schemas/block";
-import { toast } from "@/lib/errors/toast";
+import { BLOCK_DEFAULTS, blockSchema, blockToForm } from "@/lib/schemas/block";
 
 import { BlockDeleteButton } from "./BlockDeleteButton";
 import { useBlockSubmit } from "./block-form/use-block-submit";
+import { RecordForm } from "@/components/form/RecordForm";
+import { SectionAnchor } from "@/components/form/SectionAnchor";
+import { useRecordForm } from "@/hooks/use-record-form";
 
 /** Cadastro e edição de bloco. O condomínio só é escolhido no cadastro. */
 export function BlockForm({
@@ -37,35 +28,31 @@ export function BlockForm({
   /** Para onde volta ao salvar ou cancelar; sem ele, à seção de blocos do condomínio. */
   returnUrl?: string;
 }) {
-  const router = useRouter();
   const isEdit = blockId !== undefined;
 
   const { data: block, isLoading, error: loadError } = useBlocksRetrieve(blockId ?? "", { query: { enabled: isEdit } });
   throwIfPageError(loadError);
   const { data: condominiums } = useCondominiumsList({ limit: 100 });
 
-  const methods = useForm<BlockFormInput, unknown, BlockFormOutput>({
-    resolver: zodResolver(blockSchema),
-    defaultValues: { ...BLOCK_DEFAULTS, condominium: condominiumId ?? "" },
-    mode: "onTouched",
+  const methods = useRecordForm({
+    schema: blockSchema,
+    defaults: { ...BLOCK_DEFAULTS, condominium: condominiumId ?? "" },
+    record: block,
+    toForm: blockToForm,
   });
-  const { handleSubmit, reset, setError } = methods;
-  const { submit, isSubmitting } = useBlockSubmit(blockId, setError, returnUrl);
-
-  useEffect(() => {
-    if (block) reset(blockToForm(block));
-  }, [block, reset]);
+  const { submit, isSubmitting } = useBlockSubmit(blockId, methods.setError, returnUrl);
 
   if (isEdit && isLoading) return <FormSkeleton sections={1} />;
 
   return (
-    <FormProvider {...methods}>
-      <form
-        noValidate
-        onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))}
-        className="space-y-4"
-      >
-        <div id="dados-gerais" className="scroll-mt-20">
+    <RecordForm
+      methods={methods}
+      onSubmit={submit}
+      isSubmitting={isSubmitting}
+      cancelHref={returnUrl ?? (block ? condominiumPageUrl(block.condominium, "blocks") : "/condominiums")}
+      danger={block && <BlockDeleteButton condominiumId={block.condominium} blockId={block.id} name={block.name} />}
+    >
+      <SectionAnchor id="dados-gerais">
         <FormSection title="Identificação">
           {!isEdit && !condominiumId && (
             <SearchSelectField
@@ -78,16 +65,7 @@ export function BlockForm({
           )}
           <TextField name="name" label="Bloco" required maxLength={60} placeholder="Ex.: Bloco A" autoComplete="off" />
         </FormSection>
-        </div>
-        <FormActions
-          isSubmitting={isSubmitting}
-          danger={block && <BlockDeleteButton condominiumId={block.condominium} blockId={block.id} name={block.name} />}
-        >
-          <Button type="button" variant="secondary" onClick={() => router.push(returnUrl ?? (block ? condominiumPageUrl(block.condominium, "blocks") : "/condominiums"))}>
-            Cancelar
-          </Button>
-        </FormActions>
-      </form>
-    </FormProvider>
+      </SectionAnchor>
+    </RecordForm>
   );
 }
