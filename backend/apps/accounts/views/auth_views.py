@@ -10,14 +10,15 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from apps.core.infrastructure.api.throttling import TrustedProxyScopedRateThrottle
 
-from ..serializers import LogoutSerializer
+from ..serializers import LoginSerializer, LogoutSerializer
 from ..services.revoke_refresh_token import revoke_refresh_token
 
 
 @final
 class LoginView(TokenObtainPairView):
-    """Username + password -> access and refresh tokens (rate limited)."""
+    """Username + password -> access and refresh tokens (rate limited; a username that keeps failing is locked, spec 065)."""
 
+    serializer_class = LoginSerializer
     throttle_classes = (TrustedProxyScopedRateThrottle,)
     throttle_scope = "auth_login"
 

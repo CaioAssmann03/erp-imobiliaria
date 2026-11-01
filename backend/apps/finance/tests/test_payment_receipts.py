@@ -16,7 +16,7 @@ from ..services.settle_account_payable import (
     AccountPayablePayment,
     settle_account_payable,
 )
-from ..validators import MAX_RECEIPT_SIZE_BYTES
+from ..validators import MAX_RECEIPT_SIZE_BYTES, RECEIPT_SIGNATURES, receipt_signature_matches
 from .base import body, error_codes, results
 from .fake_storage import FakeObjectStorage
 
@@ -34,6 +34,7 @@ TOO_LARGE = "payment_receipt.size_bytes.too_large"
 NOT_POSITIVE = "payment_receipt.size_bytes.not_positive"
 MISSING = "payment_receipt.file.missing_in_storage"
 MISMATCH = "payment_receipt.file.size_mismatch"
+CONTENT_MISMATCH = "payment_receipt.file.content_mismatch"
 ALREADY_CONFIRMED = "payment_receipt.already_confirmed"
 UNAVAILABLE = "object_storage.unavailable"
 
@@ -66,6 +67,7 @@ def uploaded_receipt(client: APIClient, account: AccountPayable, storage: FakeOb
     assert created.status_code == status.HTTP_201_CREATED, created.data
     receipt = PaymentReceipt.objects.get(pk=body(created)["id"])
     storage.objects[receipt.file_key] = receipt.size_bytes
+    storage.contents[receipt.file_key] = RECEIPT_SIGNATURES[receipt.content_type] + b"rest of the file"
     return str(receipt.pk)
 
 
@@ -156,6 +158,30 @@ def test_confirm_rejects_and_deletes_a_size_mismatch(
     assert error_codes(response, None) == [MISMATCH]
     assert not PaymentReceipt.objects.filter(pk=receipt_id).exists()
     assert key not in storage.objects
+
+
+def test_confirm_rejects_and_deletes_a_file_that_is_not_its_declared_type(
+    api_client: APIClient, paid_account: AccountPayable, storage: FakeObjectStorage
+) -> None:
+    receipt_id = uploaded_receipt(api_client, paid_account, storage, content_type="application/pdf")
+    key = PaymentReceipt.objects.get(pk=receipt_id).file_key
+    storage.contents[key] = b"<html><script>alert(1)</script>"  # announced as a PDF, it is a page
+
+    response = api_client.post(reverse(CONFIRM, args=[receipt_id]))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert error_codes(response, None) == [CONTENT_MISMATCH]
+    assert not PaymentReceipt.objects.filter(pk=receipt_id).exists()
+    assert key not in storage.objects
+
+
+def test_a_file_signature_matches_its_type() -> None:
+    assert receipt_signature_matches("application/pdf", b"%PDF-1.7 ...")
+    assert receipt_signature_matches("image/jpeg", b"\xff\xd8\xff\xe0")
+    assert receipt_signature_matches("image/png", b"\x89PNG\r\n\x1a\n\x00")
+    assert not receipt_signature_matches("image/png", b"%PDF-1.7")
+    assert not receipt_signature_matches("application/pdf", b"")
+    assert not receipt_signature_matches("text/html", b"<html>")
 
 
 def test_confirm_rejects_a_missing_object(

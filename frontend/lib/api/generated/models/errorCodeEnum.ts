@@ -216,6 +216,7 @@ export const ErrorCodeEnum = {
   payment_receiptaccount_payablenot_paid: 'payment_receipt.account_payable.not_paid',
   payment_receiptalready_confirmed: 'payment_receipt.already_confirmed',
   payment_receiptcontent_typenot_allowed: 'payment_receipt.content_type.not_allowed',
+  payment_receiptfilecontent_mismatch: 'payment_receipt.file.content_mismatch',
   payment_receiptfilemissing_in_storage: 'payment_receipt.file.missing_in_storage',
   payment_receiptfilesize_mismatch: 'payment_receipt.file.size_mismatch',
   payment_receiptsize_bytesnot_positive: 'payment_receipt.size_bytes.not_positive',

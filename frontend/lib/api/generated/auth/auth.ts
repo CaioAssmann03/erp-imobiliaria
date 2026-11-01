@@ -17,8 +17,8 @@ import type {
 
 import type {
   ErrorResponse,
+  Login,
   Logout,
-  TokenObtainPair,
   TokenRefresh
 } from '../models';
 
@@ -55,18 +55,18 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 
 
 /**
- * Username + password -> access and refresh tokens (rate limited).
+ * Username + password -> access and refresh tokens (rate limited; a username that keeps failing is locked, spec 065).
  */
 export const authLoginCreate = (
-    tokenObtainPair: NonReadonly<TokenObtainPair>,
+    login: Login,
  signal?: AbortSignal
 ) => {
 
 
-      return customInstance<TokenObtainPair>(
+      return customInstance<Login>(
       {url: `/api/auth/login/`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: tokenObtainPair, signal
+      data: login, signal
     },
       );
     }
@@ -104,9 +104,9 @@ const {mutation: mutationOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type AuthLoginCreateMutationResult = NonNullable<Awaited<ReturnType<typeof authLoginCreate>>>
-    export type AuthLoginCreateMutationBody = NonReadonly<TokenObtainPair>
+    export type AuthLoginCreateMutationBody = Login
     export type AuthLoginCreateMutationError = ErrorResponse
-    export type AuthLoginCreateMutationVariables = {data: NonReadonly<TokenObtainPair>}
+    export type AuthLoginCreateMutationVariables = {data: Login}
 
     export const useAuthLoginCreate = <TError = ErrorResponse,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authLoginCreate>>, TError,AuthLoginCreateMutationVariables, TContext>, }

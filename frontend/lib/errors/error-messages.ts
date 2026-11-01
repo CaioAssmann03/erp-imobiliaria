@@ -247,6 +247,7 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "payment_receipt.account_payable.not_paid": "Só uma conta paga pode ter comprovante.",
   "payment_receipt.already_confirmed": "O comprovante já foi confirmado.",
   "payment_receipt.content_type.not_allowed": "O comprovante deve ser um arquivo PDF, JPEG ou PNG.",
+  "payment_receipt.file.content_mismatch": "O arquivo enviado não é do tipo informado. Anexe um PDF, JPEG ou PNG de verdade.",
   "payment_receipt.file.missing_in_storage": "O arquivo não foi enviado. Tente anexar de novo.",
   "payment_receipt.file.size_mismatch": "O arquivo enviado não tem o tamanho informado. Tente anexar de novo.",
   "payment_receipt.size_bytes.not_positive": "O arquivo não pode estar vazio.",

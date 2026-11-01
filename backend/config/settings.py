@@ -12,14 +12,17 @@ from django.urls import reverse_lazy
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEBUG = os.environ.get("DEBUG", "true").lower() == "true"
+# Off unless asked: a missing variable must mean production, never a debug server (spec 065). Development sets DEBUG=true in `.env`.
+DEBUG = os.environ.get("DEBUG", "false").strip().lower() == "true"
 
 # The insecure fallback exists only for local development; production must provide SECRET_KEY.
-SECRET_KEY = os.environ.get("SECRET_KEY") or (
-    "django-insecure-change-me-in-production" if DEBUG else None
-)
+DEVELOPMENT_SECRET_KEY = "django-insecure-change-me-in-production"
+MINIMUM_SECRET_KEY_LENGTH = 32
+SECRET_KEY = os.environ.get("SECRET_KEY") or (DEVELOPMENT_SECRET_KEY if DEBUG else None)
 if SECRET_KEY is None:
-    raise ImproperlyConfigured("SECRET_KEY must be set when DEBUG is false.")
+    raise ImproperlyConfigured("SECRET_KEY must be set when DEBUG is false (DEBUG=true is for local development only).")
+if not DEBUG and (len(SECRET_KEY) < MINIMUM_SECRET_KEY_LENGTH or SECRET_KEY == DEVELOPMENT_SECRET_KEY):
+    raise ImproperlyConfigured(f"SECRET_KEY must have at least {MINIMUM_SECRET_KEY_LENGTH} characters when DEBUG is false.")
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
@@ -41,6 +44,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_filters",
     "auditlog",
+    "axes",
     "apps.accounts",
     "apps.core",
     "apps.persons",
@@ -66,6 +70,8 @@ MIDDLEWARE = [
     "auditlog.middleware.AuditlogMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Last: answers the lockout of the Admin login (spec 065).
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -120,6 +126,21 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
 ]
 
+# Login lockout (spec 065): a username that fails 10 times is locked for 15 minutes, in the API login and in the Admin.
+# Keyed by username only: the per-address throttle already exists and, behind the Next server, an address is not a reliable key.
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+AXES_FAILURE_LIMIT = 10
+AXES_COOLOFF_TIME = timedelta(minutes=15)
+AXES_LOCKOUT_PARAMETERS = ["username"]
+AXES_RESET_ON_SUCCESS = True
+# Successful logins are not logged: the table would only grow.
+AXES_DISABLE_ACCESS_LOG = True
+# W006 asks for the address; the lockout is deliberately per username (see above).
+SILENCED_SYSTEM_CHECKS = ["axes.W006"]
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
@@ -156,12 +177,17 @@ REST_FRAMEWORK = {
         "apps.accounts.authentication.AuditedJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    # Every authenticated call counts against the user (spec 065); the views that need another limit set their own throttle.
+    "DEFAULT_THROTTLE_CLASSES": ("rest_framework.throttling.UserRateThrottle",),
     "DEFAULT_PAGINATION_CLASS": "apps.core.infrastructure.api.pagination.StandardPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_THROTTLE_RATES": {
         "auth_login": "5/min",
         "auth_refresh": "30/min",
         "auth_logout": "30/min",
+        "user": "600/min",
+        "webhook_asaas": "1000/min",
+        "webhook_resend": "300/min",
     },
 }
 
@@ -174,6 +200,11 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API do sistema de administração de condomínios, locações, vendas e financeiro.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # The schema maps every endpoint: open in development (the frontend client is generated from it), superuser-only otherwise (spec 065).
+    "SERVE_PERMISSIONS": (
+        ["rest_framework.permissions.AllowAny"] if DEBUG else ["apps.core.infrastructure.api.permissions.IsSuperuser"]
+    ),
+    "SERVE_AUTHENTICATION": ["apps.accounts.authentication.AuditedJWTAuthentication"],
     # Two models have a `kind` choice: name them, or the client gets hash-suffixed enum names.
     "ENUM_NAME_OVERRIDES": {
         "AccountKindEnum": "apps.finance.models.AccountKind",
@@ -455,6 +486,9 @@ UNFOLD = {
                     ("Log de auditoria", "history", "auditlog_logentry"),
                     ("Tokens pendentes", "key_vertical", "token_blacklist_outstandingtoken"),
                     ("Tokens na lista negra", "block", "token_blacklist_blacklistedtoken"),
+                    ("Tentativas de acesso (bloqueios)", "lock", "axes_accessattempt"),
+                    ("Falhas de acesso", "report", "axes_accessfailurelog"),
+                    ("Registros de acesso", "login", "axes_accesslog"),
                 ],
             ),
         ],

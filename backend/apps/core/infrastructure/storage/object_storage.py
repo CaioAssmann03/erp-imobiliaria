@@ -77,6 +77,12 @@ class ObjectStorage:
             raise
         return int(head["ContentLength"])
 
+    def read_head(self, key: str, length: int) -> bytes:
+        """The first `length` bytes of the stored object (a ranged read: the file is never downloaded whole)."""
+        response: dict[str, Any] = self._client.get_object(Bucket=self._bucket, Key=key, Range=f"bytes=0-{length - 1}")
+        content: bytes = response["Body"].read()
+        return content
+
     def delete_object(self, key: str) -> None:
         self._client.delete_object(Bucket=self._bucket, Key=key)
 

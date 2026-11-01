@@ -28,6 +28,9 @@ class FakeObjectStorage:
     def object_size(self, key: str) -> int | None:
         return self.objects.get(key)
 
+    def read_head(self, key: str, length: int) -> bytes:
+        return self.contents.get(key, b"")[:length]
+
     def delete_object(self, key: str) -> None:
         if self.fail_deletes:
             raise RuntimeError("bucket unreachable")
