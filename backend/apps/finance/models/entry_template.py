@@ -3,6 +3,7 @@ from typing import final, override
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.db.models.functions import Lower
 
 from apps.core.models.base import BaseModel
 from apps.core.infrastructure.validators import validate_percentage
@@ -41,7 +42,8 @@ class EntryTemplate(BaseModel):
                 violation_error_code=EntryTemplateError.ADMIN_FEE_PERCENTAGE_OUT_OF_RANGE.value,
             ),
             models.UniqueConstraint(
-                fields=("cost_center", "name"),
+                "cost_center",
+                Lower("name"),
                 name="entry_template_unique_name_per_cost_center",
                 violation_error_message=EntryTemplateError.NAME_DUPLICATE_IN_COST_CENTER.message,
                 violation_error_code=EntryTemplateError.NAME_DUPLICATE_IN_COST_CENTER.value,

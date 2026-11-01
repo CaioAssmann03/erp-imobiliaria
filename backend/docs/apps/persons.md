@@ -9,7 +9,7 @@ The business "person": owners, tenants, advisors, any contact. Depends on `core`
 
 ## Rules worth knowing
 - `PeopleIndividual` (CPF) and `PeopleLegal` (CNPJ) are 1:1 with `Person` and use it as their primary key. A person has one or the other (the UI enforces it; the kind does not change after creation).
-- Each document carries a copy of `person.company` (filled and checked by `clean()`), so the database can hold "one CPF, one CNPJ and one RG per company" as constraints; the same document may exist in another company. A duplicate is a 400 reported as a non-field error under `people_individual` / `people_legal`.
+- Each document carries a copy of `person.company` (filled and checked by `clean()`), so the database can hold "one CPF, one CNPJ and one RG per company" as constraints (the RG ignores case: `12345x` and `12345X` are the same); the same document may exist in another company. A duplicate is a 400 reported as a non-field error under `people_individual` / `people_legal`.
 - Documents are stored as digits only, never formatted.
 - A person referenced by a unit link cannot be deleted (`PROTECT`); as an advisor it is `SET_NULL`. The planned `Person.user` link to `accounts.User` is not implemented.
 - **`code`** is the person's "ID": a number from the sequence `person_code_seq` (`core`'s `sequential_code_field`), unique, assigned by the database on insert, never reused and read-only in the API and the Admin. One person has one `code`, whatever its modules (spec 019).

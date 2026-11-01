@@ -3,6 +3,7 @@ from typing import final, override
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.db.models.functions import Lower
 
 from apps.core.models import Company
 from apps.core.infrastructure.validators import validate_cpf
@@ -45,7 +46,8 @@ class PeopleIndividual(models.Model):
                 violation_error_code=PeopleIndividualError.CPF_DUPLICATE_IN_COMPANY.value,
             ),
             models.UniqueConstraint(
-                fields=("company", "rg"),
+                "company",
+                Lower("rg"),
                 condition=Q(rg__isnull=False),
                 name="people_individual_unique_rg_per_company",
                 violation_error_message=PeopleIndividualError.RG_DUPLICATE_IN_COMPANY.message,

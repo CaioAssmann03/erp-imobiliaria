@@ -2,6 +2,7 @@ from typing import final, override
 
 from django.db import models
 from django.db.models import Q
+from django.db.models.functions import Lower
 
 from apps.condominiums.errors import BlockError
 from apps.condominiums.models.condominium import Condominium
@@ -29,7 +30,8 @@ class Block(SoftDeleteMixin, UUIDModel):
         ordering = ("name",)
         constraints = (
             models.UniqueConstraint(
-                fields=("condominium", "name"),
+                "condominium",
+                Lower("name"),
                 condition=Q(deleted_at__isnull=True),
                 name="block_unique_name_per_condominium",
                 violation_error_message=BlockError.NAME_DUPLICATE_IN_CONDOMINIUM.message,

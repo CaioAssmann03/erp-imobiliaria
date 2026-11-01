@@ -137,3 +137,12 @@ def test_individual_document_copies_the_company(api_client: APIClient, company: 
 
     assert response.status_code == status.HTTP_201_CREATED
     assert PeopleIndividual.objects.get(cpf=CPF_A).company == company
+
+
+def test_rg_ignores_case() -> None:
+    first = make_individual(cpf=CPF_A)
+    _ = PeopleIndividual.objects.filter(pk=first.pk).update(rg="12345x")
+
+    second = make_individual(name="Outra", cpf="11144477735")
+    with pytest.raises(IntegrityError), transaction.atomic():
+        _ = PeopleIndividual.objects.filter(pk=second.pk).update(rg="12345X")
