@@ -5,7 +5,7 @@ from decimal import Decimal
 from django.db import transaction
 
 from apps.billing.models import BillingDocument, BillingDocumentItem, BillingEntry
-from apps.condominiums.models import Unit
+from apps.condominiums.models import Condominium, Unit
 from apps.finance.models import CostCenter, EntryTemplate
 from apps.persons.models import Person
 
@@ -28,6 +28,14 @@ class NewBillingDocument:
     due_date: date
     items: tuple[NewBillingDocumentItem, ...]
     kind: BillingDocument.Kind = BillingDocument.Kind.MONTHLY
+    # The rate in force on the due date; a caller issuing many documents with one due date looks it up once, otherwise it is looked up here.
+    monthly_interest_percentage: Decimal | None = None
+
+
+def monthly_interest_percentage_on(condominium: Condominium, due_date: date) -> Decimal:
+    """The condominium's monthly late-payment interest in force on the due date (zero before its first rate)."""
+    late_interest_rate = condominium.late_interest_rates.in_force_on(due_date)
+    return late_interest_rate.monthly_percentage if late_interest_rate else Decimal(0)
 
 
 def discounts_exceed_total(items: tuple[NewBillingDocumentItem, ...]) -> bool:
@@ -49,7 +57,9 @@ def create_billing_document(new_document: NewBillingDocument) -> BillingDocument
     """
     condominium = new_document.unit.condominium
     billing_rules = condominium.billing_rules
-    late_interest_rate = condominium.late_interest_rates.in_force_on(new_document.due_date)
+    monthly_interest_percentage = new_document.monthly_interest_percentage
+    if monthly_interest_percentage is None:
+        monthly_interest_percentage = monthly_interest_percentage_on(condominium, new_document.due_date)
     document = BillingDocument(
         unit=new_document.unit,
         payer=new_document.payer,
@@ -65,7 +75,7 @@ def create_billing_document(new_document: NewBillingDocument) -> BillingDocument
         initial_late_fee_days=billing_rules.initial_late_fee_days,
         interest_calculation=billing_rules.interest_calculation,
         interest_grace_days=billing_rules.interest_grace_days,
-        monthly_interest_percentage=late_interest_rate.monthly_percentage if late_interest_rate else 0,
+        monthly_interest_percentage=monthly_interest_percentage,
     )
     document.full_clean()
     document.save()

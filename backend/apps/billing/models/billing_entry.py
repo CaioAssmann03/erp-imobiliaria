@@ -242,6 +242,14 @@ class BillingEntry(BaseModel):
     def fractions_of(self, units: Sequence[Unit]) -> dict[uuid.UUID, Decimal]:
         """The units' fractions in the entry's criterion (0 for a unit that has none)."""
         assert self.apportionment_criterion_id is not None
+        if all("fractions" in getattr(unit, "_prefetched_objects_cache", {}) for unit in units):
+            return {
+                unit.pk: next(
+                    (fraction.value for fraction in unit.fractions.all() if fraction.criterion_id == self.apportionment_criterion_id),
+                    Decimal(0),
+                )
+                for unit in units
+            }
         values_by_unit_id = dict(
             UnitApportionmentFraction.objects.filter(
                 criterion_id=self.apportionment_criterion_id,

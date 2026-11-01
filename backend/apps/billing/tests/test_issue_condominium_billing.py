@@ -4,9 +4,11 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 
 from apps.condominiums.models import Condominium, Unit
-from apps.billing.models import CondominiumBillingRules
+from apps.billing.models import CondominiumBillingRules, LateInterestRate
 
 from ..models import BillingDocument, BillingRun
 from ..services.issue_condominium_billing import issue_condominium_billing
@@ -360,3 +362,19 @@ def test_an_installment_that_is_over_is_not_billed_again(  # type: ignore[no-unt
     _ = issue_condominium_billing(condominium, OCTOBER)
 
     assert [line.description for line in BillingDocument.objects.get().items.all()] == ["Taxa condominial"]
+
+
+def test_the_interest_rate_is_looked_up_once_and_copied_to_every_document(  # type: ignore[no-untyped-def]
+    condominium: Condominium, billing_rules: CondominiumBillingRules, make_unit, link, make_plan_item
+) -> None:
+    _ = LateInterestRate.objects.create(condominium=condominium, start_date=date(2026, 6, 1), monthly_percentage=Decimal("1.50"))
+    for name in ("101", "102", "103"):
+        link(make_unit(name), f"Owner {name}")
+    _ = make_plan_item()
+
+    with CaptureQueriesContext(connection) as captured:
+        _ = issue_condominium_billing(condominium, OCTOBER)
+
+    rate_lookups = [query for query in captured.captured_queries if '"billing_lateinterestrate"' in query["sql"] and "SELECT" in query["sql"]]
+    assert len(rate_lookups) == 1
+    assert {document.monthly_interest_percentage for document in BillingDocument.objects.all()} == {Decimal("1.50")}

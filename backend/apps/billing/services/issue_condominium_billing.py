@@ -22,6 +22,7 @@ from apps.billing.services.create_billing_document import (
     NewBillingDocumentItem,
     create_billing_document,
     discounts_exceed_total,
+    monthly_interest_percentage_on,
 )
 from apps.billing.services.schedule_billing_document_tasks import schedule_billing_document_tasks
 from apps.condominiums.models import Condominium, Unit
@@ -80,6 +81,7 @@ def _issue_units(run: BillingRun) -> None:
     today = timezone.localdate()
     due_date = billing_rules.due_date_of(reference_month)
     competence_month = billing_rules.competence_month_of(reference_month)
+    monthly_interest_percentage = monthly_interest_percentage_on(condominium, due_date)
     for unit in units:
         if unit.pk in already_issued_unit_ids:
             run.already_issued_count += 1
@@ -120,6 +122,7 @@ def _issue_units(run: BillingRun) -> None:
                 competence_month=competence_month,
                 due_date=due_date,
                 items=tuple(lines),
+                monthly_interest_percentage=monthly_interest_percentage,
             ),
             registers_at_gateway,
         )

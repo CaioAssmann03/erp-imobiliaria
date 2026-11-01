@@ -1,6 +1,6 @@
-from typing import Any, final
+from typing import Any, final, override
 
-from django.db.models import Prefetch
+from django.db.models import Exists, OuterRef, Prefetch, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -13,7 +13,7 @@ from apps.core.infrastructure.api.filters import QuerySearchFilter
 from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin
 
 from ..filters import BillingEntryFilter
-from ..models import BillingEntry, BillingEntryUnit
+from ..models import BillingDocumentItem, BillingEntry, BillingEntryUnit
 from ..serializers import (
     BillingEntryEndSerializer,
     BillingEntryPreviewSerializer,
@@ -28,15 +28,23 @@ from ..services.preview_billing_entry import preview_billing_entry
 class BillingEntryViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[BillingEntry]):
     """The values launched for the boletos (*Inclusão de valores*): list a condominium's month, create, change, end."""
 
-    queryset = BillingEntry.objects.select_related(
-        "condominium", "event", "cost_center", "apportionment_criterion"
-    ).prefetch_related(
-        Prefetch("entry_units", queryset=BillingEntryUnit.objects.select_related("unit"))
+    queryset = (
+        BillingEntry.objects.select_related("condominium", "event", "cost_center", "apportionment_criterion")
+        .prefetch_related(Prefetch("entry_units", queryset=BillingEntryUnit.objects.select_related("unit")))
+        .annotate(has_document_items=Exists(BillingDocumentItem.objects.filter(billing_entry=OuterRef("pk"))))
     )
     serializer_class = BillingEntrySerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)
     search_fields = ("event__name", "description", "cost_center__name")
     filterset_class = BillingEntryFilter
+
+    @override
+    def get_queryset(self) -> QuerySet[BillingEntry]:
+        queryset = super().get_queryset()
+        if self.action == "list" and self.request.query_params.get("reference_month"):
+            # The month's amounts of a fraction entry read the units' fractions: one query for the page, not one per entry.
+            queryset = queryset.prefetch_related("entry_units__unit__fractions")
+        return queryset
 
     def get_serializer_context(self) -> dict[str, Any]:
         context = dict(super().get_serializer_context())

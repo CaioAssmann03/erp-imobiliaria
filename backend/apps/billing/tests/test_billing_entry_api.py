@@ -5,6 +5,8 @@ from decimal import Decimal
 from typing import Any
 
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -226,6 +228,30 @@ def test_the_list_of_a_month_carries_the_values_of_that_month(
     assert len(november) == 1 and november[0]["month"]["installment"] == "2/3"
     assert sum(Decimal(row["amount"]) for row in november[0]["month"]["unit_amounts"]) == Decimal("100.00")
     assert january == []
+
+
+def test_the_list_of_a_month_does_not_query_once_per_entry(
+    api_client: APIClient, condominium: Condominium, cost_center: CostCenter, entry_template: EntryTemplate
+) -> None:
+    units = make_units(condominium)
+    criterion = str(criterion_at(condominium).pk)
+
+    def add_entries(count: int) -> None:
+        for _ in range(count):
+            payload = entry_payload(condominium, cost_center, units, allocation="fraction", apportionment_criterion=criterion)
+            assert api_client.post(reverse(ENTRIES), payload, format="json").status_code == status.HTTP_201_CREATED
+
+    def queries_of_the_month_list() -> int:
+        with CaptureQueriesContext(connection) as captured:
+            response = api_client.get(reverse(ENTRIES), {"reference_month": "2026-10-01"})
+        assert len(results(response)) > 0
+        return len(captured)
+
+    add_entries(2)
+    with_two_entries = queries_of_the_month_list()
+    add_entries(4)
+
+    assert queries_of_the_month_list() == with_two_entries
 
 
 # ----- R8: freeze, end -----
