@@ -4,7 +4,7 @@ from typing import final
 import django_filters
 from django.db.models import QuerySet
 
-from .models import AccountPayable, CompanyEntry, CostCenter, CostCenterCatalogItem, CurrentAccountEntry, EntryBatch, EntryTemplate
+from .models import AccountPayable, CompanyEntry, CostCenter, CostCenterCatalogItem, CurrentAccount, CurrentAccountEntry, EntryBatch, EntryTemplate
 
 
 @final
@@ -40,9 +40,15 @@ class AccountPayableFilter(django_filters.FilterSet):
 class CurrentAccountEntryFilter(django_filters.FilterSet):
     """The statement: `?condominium=<id>`, an entry-date range and a competence month (`?competence_month=2026-10-01`)."""
 
-    condominium = django_filters.UUIDFilter(field_name="current_account__condominium")
+    condominium = django_filters.UUIDFilter(method="filter_condominium")
     entry_date_after = django_filters.DateFilter(field_name="entry_date", lookup_expr="gte")
     entry_date_before = django_filters.DateFilter(field_name="entry_date", lookup_expr="lte")
+
+    def filter_condominium(self, queryset: QuerySet[CurrentAccountEntry], name: str, value: uuid.UUID) -> QuerySet[CurrentAccountEntry]:
+        """Filters by the condominium's one current account, found first: through a join the planner walks the whole ledger in
+        `registry` order looking for the account's rows, which is slow for an account with few or old entries."""
+        account_id = CurrentAccount.objects.filter(condominium=value).values_list("pk", flat=True).first()
+        return queryset.filter(current_account_id=account_id) if account_id is not None else queryset.none()
 
     class Meta:
         model = CurrentAccountEntry

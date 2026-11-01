@@ -111,6 +111,7 @@ class CurrentAccountEntry(BaseModel):
         verbose_name = "Current Account Entry"
         verbose_name_plural = "Current Account Entries"
         ordering = ("registry",)
+        indexes = (models.Index(fields=("current_account", "registry"), name="entry_account_registry_idx"),)
         constraints = (
             models.CheckConstraint(
                 name="current_account_entry_amount_positive",
