@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { QUESTIONS } from "@/app/(marketing)/_components/content";
 import { Reveal } from "@/app/(marketing)/_components/motion/Reveal";
+import { useLite } from "@/lib/theme/use-lite";
 
 /**
  * Posição de cada card (mesma ordem de `QUESTIONS.items`) na grade de 4 colunas do desktop; as linhas têm altura
@@ -30,6 +31,7 @@ const AREAS = [
  * sobre a faixa escura); clicar de novo fecha. O primeiro já começa aberto para a seção não aparecer toda fechada.
  */
 export function Questions() {
+  const still = useLite();
   const [open, setOpen] = useState<ReadonlySet<number>>(new Set([0]));
   const toggle = (index: number) =>
     setOpen((current) => {
@@ -68,10 +70,10 @@ export function Questions() {
                     {isOpen && (
                       <motion.span
                         key="answer"
-                        initial={{ opacity: 0, y: 8 }}
+                        initial={still ? false : { opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 8 }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: still ? 0 : 0.3 }}
                         className="block max-w-[46ch] text-[0.9375rem] leading-[1.55] text-ink/75"
                       >
                         {item.text}

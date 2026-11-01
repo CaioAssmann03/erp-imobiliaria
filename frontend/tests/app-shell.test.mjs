@@ -267,6 +267,15 @@ test("the lite mode rules live in the CSS and the effects read the same attribut
   assert.deepEqual(own.map((file) => relative(ROOT, file)), []);
 });
 
+test("every public-page file that animates with motion/react honors the lite mode", () => {
+  // SiteHeader only reads the scroll position to restyle itself; it animates nothing.
+  const animated = sourceFiles(join(ROOT, "app", "(marketing)")).filter((file) => {
+    const text = readFileSync(file, "utf8");
+    return /from "motion\/react"/.test(text) && !/useLite|isLite/.test(text) && !file.endsWith("SiteHeader.tsx");
+  });
+  assert.deepEqual(animated.map((file) => relative(ROOT, file)), []);
+});
+
 // The rail expands and collapses (click on the logo), but the choice lives only in the browser (`localStorage`): the server renders the
 // same HTML for everyone, so there is no <html> attribute, no cookie and no CSS variant for it.
 test("the rail state is not on <html>: no attribute, cookie or variant", () => {

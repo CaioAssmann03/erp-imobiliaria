@@ -3,6 +3,8 @@
 import { motion } from "motion/react";
 import Image from "next/image";
 
+import { useLite } from "@/lib/theme/use-lite";
+
 import { PHOTOS } from "./photos";
 import type { GlobeLocation } from "./locations";
 
@@ -11,12 +13,13 @@ import type { GlobeLocation } from "./locations";
  * e a cidade. Entra com uma cortina de cima para baixo; ao trocar de condomínio sai esmaecendo.
  */
 export function LocationCard({ location }: { location: GlobeLocation }) {
+  const still = useLite();
   return (
     <motion.figure
-      initial={{ opacity: 0, y: 14, clipPath: "inset(0 0 100% 0)" }}
+      initial={still ? false : { opacity: 0, y: 14, clipPath: "inset(0 0 100% 0)" }}
       animate={{ opacity: 1, y: 0, clipPath: "inset(0 0 0% 0)" }}
-      exit={{ opacity: 0, y: -8, transition: { duration: 0.2 } }}
-      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      exit={{ opacity: 0, y: -8, transition: { duration: still ? 0 : 0.2 } }}
+      transition={{ duration: still ? 0 : 0.7, ease: [0.22, 1, 0.36, 1] }}
       className="m-0 w-full max-w-60 rounded-sharp border border-ink/15 bg-surface p-2"
     >
       <div className="relative aspect-[7/5] overflow-hidden">

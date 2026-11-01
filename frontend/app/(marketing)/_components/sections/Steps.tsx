@@ -5,9 +5,11 @@ import { useRef } from "react";
 
 import { STEPS } from "@/app/(marketing)/_components/content";
 import { Reveal } from "@/app/(marketing)/_components/motion/Reveal";
+import { useLite } from "@/lib/theme/use-lite";
 
 /** Passos numerados numa linha vertical que se preenche de laranja conforme o scroll. */
 export function Steps() {
+  const still = useLite();
   const ref = useRef<HTMLOListElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 70%", "end 60%"] });
   const scaleY = useSpring(scrollYProgress, { stiffness: 120, damping: 24 });
@@ -17,7 +19,7 @@ export function Steps() {
       <span aria-hidden className="absolute top-1 bottom-1 left-[1.1rem] w-px bg-ink/15" />
       <motion.span
         aria-hidden
-        style={{ scaleY, transformOrigin: "top" }}
+        style={{ scaleY: still ? 1 : scaleY, transformOrigin: "top" }}
         className="absolute top-1 bottom-1 left-[1.1rem] w-px bg-brand"
       />
       {STEPS.map((step, index) => (
