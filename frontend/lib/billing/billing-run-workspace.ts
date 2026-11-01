@@ -1,3 +1,5 @@
+import { registryFrame } from "../navigation/registry-frame.ts";
+
 /** Seções da página de uma execução da emissão, na ordem em que aparecem; o índice da direita usa estes ids. */
 export const BILLING_RUN_SECTIONS = [
   { id: "resumo", label: "Resumo" },
@@ -43,11 +45,6 @@ export interface BillingRunsFrameState {
 
 /** Que moldura uma URL tem: `/billing/runs` (a vazia) e `/billing/runs/[runId]`. */
 export function billingRunsFrameState(pathname: string | null): BillingRunsFrameState {
-  const none: BillingRunsFrameState = { hasFrame: false, runId: null, showListOnPhone: false, showPageOnPhone: true };
-  if (!pathname) return none;
-  const [, root, second, third, extra] = pathname.split("/");
-  if (root !== "billing" || second !== "runs" || extra !== undefined) return none;
-
-  if (third === undefined || third === "") return { ...none, hasFrame: true, showListOnPhone: true, showPageOnPhone: false };
-  return { ...none, hasFrame: true, runId: third };
+  const { hasFrame, id, showListOnPhone, showPageOnPhone } = registryFrame(pathname, "billing", "runs", false);
+  return { hasFrame, runId: id, showListOnPhone, showPageOnPhone };
 }

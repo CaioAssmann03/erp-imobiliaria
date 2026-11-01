@@ -1,3 +1,5 @@
+import { registryFrame } from "../navigation/registry-frame.ts";
+
 /** Quantos lançamentos um condomínio pode ter num mês: a lista da esquerda, a grade e o detalhe leem este mesmo tanto (uma só consulta). */
 export const MAX_ENTRIES_PER_MONTH = 100;
 
@@ -63,14 +65,6 @@ export interface BillingEntriesFrameState {
 
 /** Que moldura uma URL tem: `/billing/entries` (a vazia), `/billing/entries/new` e `/billing/entries/[entryId]`. */
 export function billingEntriesFrameState(pathname: string | null): BillingEntriesFrameState {
-  const none: BillingEntriesFrameState = { hasFrame: false, entryId: null, isNew: false, showListOnPhone: false, showPageOnPhone: true };
-  if (!pathname) return none;
-  const [, root, second, third, extra] = pathname.split("/");
-  if (root !== "billing" || second !== "entries" || extra !== undefined) return none;
-
-  if (third === undefined || third === "") {
-    return { ...none, hasFrame: true, showListOnPhone: true, showPageOnPhone: false };
-  }
-  if (third === "new") return { ...none, hasFrame: true, isNew: true };
-  return { ...none, hasFrame: true, entryId: third };
+  const { id, ...frame } = registryFrame(pathname, "billing", "entries");
+  return { ...frame, entryId: id };
 }

@@ -1,3 +1,5 @@
+import { registryFrame } from "../navigation/registry-frame.ts";
+
 /** Seções da página de uma pessoa, na ordem em que aparecem; o índice da direita usa estes ids. */
 export const PERSON_SECTIONS = [
   { id: "identificacao", label: "Identificação" },
@@ -45,14 +47,6 @@ export interface PersonsFrameState {
 
 /** Que moldura uma URL tem: `/condominiums/persons` (a vazia), `/condominiums/persons/new` e `/condominiums/persons/[personId]`. */
 export function personsFrameState(pathname: string | null): PersonsFrameState {
-  const none: PersonsFrameState = { hasFrame: false, personId: null, isNew: false, showListOnPhone: false, showPageOnPhone: true };
-  if (!pathname) return none;
-  const [, root, second, third, extra] = pathname.split("/");
-  if (root !== "condominiums" || second !== "persons" || extra !== undefined) return none;
-
-  if (third === undefined || third === "") {
-    return { ...none, hasFrame: true, showListOnPhone: true, showPageOnPhone: false };
-  }
-  if (third === "new") return { ...none, hasFrame: true, isNew: true };
-  return { ...none, hasFrame: true, personId: third };
+  const { id, ...frame } = registryFrame(pathname, "condominiums", "persons");
+  return { ...frame, personId: id };
 }

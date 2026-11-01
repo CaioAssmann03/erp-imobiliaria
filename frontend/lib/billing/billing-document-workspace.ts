@@ -1,3 +1,5 @@
+import { registryFrame } from "../navigation/registry-frame.ts";
+
 /** Seções da página de um documento de cobrança, na ordem em que aparecem; o índice da direita usa estes ids (a do Boleto extra também). */
 export const BILLING_DOCUMENT_SECTIONS = [
   { id: "resumo", label: "Resumo" },
@@ -45,11 +47,6 @@ export interface BillingDocumentsFrameState {
 
 /** Que moldura uma URL tem: `/billing/documents` (a vazia) e `/billing/documents/[documentId]`. */
 export function billingDocumentsFrameState(pathname: string | null): BillingDocumentsFrameState {
-  const none: BillingDocumentsFrameState = { hasFrame: false, documentId: null, showListOnPhone: false, showPageOnPhone: true };
-  if (!pathname) return none;
-  const [, root, second, third, extra] = pathname.split("/");
-  if (root !== "billing" || second !== "documents" || extra !== undefined) return none;
-
-  if (third === undefined || third === "") return { ...none, hasFrame: true, showListOnPhone: true, showPageOnPhone: false };
-  return { ...none, hasFrame: true, documentId: third };
+  const { hasFrame, id, showListOnPhone, showPageOnPhone } = registryFrame(pathname, "billing", "documents", false);
+  return { hasFrame, documentId: id, showListOnPhone, showPageOnPhone };
 }

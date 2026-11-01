@@ -1,3 +1,5 @@
+import { registryFrame } from "../navigation/registry-frame.ts";
+
 /** Seções da página de um boleto extra novo, na ordem em que aparecem; o índice da direita usa estes ids. */
 export const NEW_EXTRA_BILLING_SECTIONS = [
   { id: "boleto", label: "Boleto" },
@@ -36,12 +38,6 @@ export interface ExtraBillingFrameState {
 
 /** Que moldura uma URL tem: `/billing/extra` (a vazia), `/billing/extra/new` e `/billing/extra/[documentId]`. */
 export function extraBillingFrameState(pathname: string | null): ExtraBillingFrameState {
-  const none: ExtraBillingFrameState = { hasFrame: false, documentId: null, isNew: false, showListOnPhone: false, showPageOnPhone: true };
-  if (!pathname) return none;
-  const [, root, second, third, extra] = pathname.split("/");
-  if (root !== "billing" || second !== "extra" || extra !== undefined) return none;
-
-  if (third === undefined || third === "") return { ...none, hasFrame: true, showListOnPhone: true, showPageOnPhone: false };
-  if (third === "new") return { ...none, hasFrame: true, isNew: true };
-  return { ...none, hasFrame: true, documentId: third };
+  const { id, ...frame } = registryFrame(pathname, "billing", "extra");
+  return { ...frame, documentId: id };
 }

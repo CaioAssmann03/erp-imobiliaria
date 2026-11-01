@@ -20,7 +20,7 @@ hooks/        shared hooks (debounce, list params, CEP lookup)
 lib/          one folder per concern, no loose files except `utils.ts` (the shadcn alias):
                 api/ (generated: never edit · mutator · api-client · api-path · pagination)  query/  schemas/ (Zod, per resource)
                 auth/ (cookies, jwt, safe-redirect)  errors/ (messages, details, screens, form-errors, toast)  theme/ (appearance, mode, zoom, `ui.ts` class strings)
-                format/ (format, masks, validators, calendar)  navigation/ (module-menu, search-index, back-target, platform)
+                format/ (format, masks, validators, calendar)  navigation/ (module-menu, search-index, back-target, platform, `registry-frame` the shared URL → frame state of the plain registry modules)
                 billing/ condominiums/ finance/ persons/ reports/ (per domain: `*-workspace` URL + frame state, payload builders, rules)
 proxy.ts      route protection + token refresh
 docs/         REASONS documentation

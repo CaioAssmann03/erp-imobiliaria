@@ -1,3 +1,5 @@
+import { registryFrame } from "../navigation/registry-frame.ts";
+
 /** Seções da página de um plano (novo ou aberto), na ordem em que aparecem; o índice da direita usa estes ids. */
 export const BILLING_PLAN_SECTIONS = [
   { id: "plano", label: "Plano" },
@@ -35,12 +37,6 @@ export interface BillingPlansFrameState {
 
 /** Que moldura uma URL tem: `/billing/plans` (a vazia), `/billing/plans/new` e `/billing/plans/[planId]`. */
 export function billingPlansFrameState(pathname: string | null): BillingPlansFrameState {
-  const none: BillingPlansFrameState = { hasFrame: false, planId: null, isNew: false, showListOnPhone: false, showPageOnPhone: true };
-  if (!pathname) return none;
-  const [, root, second, third, extra] = pathname.split("/");
-  if (root !== "billing" || second !== "plans" || extra !== undefined) return none;
-
-  if (third === undefined || third === "") return { ...none, hasFrame: true, showListOnPhone: true, showPageOnPhone: false };
-  if (third === "new") return { ...none, hasFrame: true, isNew: true };
-  return { ...none, hasFrame: true, planId: third };
+  const { id, ...frame } = registryFrame(pathname, "billing", "plans");
+  return { ...frame, planId: id };
 }

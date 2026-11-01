@@ -1,3 +1,5 @@
+import { registryFrame } from "../navigation/registry-frame.ts";
+
 export const companyAccountUrl = () => "/finance/company-account";
 export const companyEntryUrl = (entryId: string) => `/finance/company-account/${entryId}`;
 
@@ -15,13 +17,6 @@ export interface CompanyAccountFrameState {
 
 /** Que moldura uma URL tem: `/finance/company-account` (a vazia) e `/finance/company-account/[entryId]`. */
 export function companyAccountFrameState(pathname: string | null): CompanyAccountFrameState {
-  const none: CompanyAccountFrameState = { hasFrame: false, entryId: null, showListOnPhone: false, showPageOnPhone: true };
-  if (!pathname) return none;
-  const [, root, second, third, extra] = pathname.split("/");
-  if (root !== "finance" || second !== "company-account" || extra !== undefined) return none;
-
-  if (third === undefined || third === "") {
-    return { ...none, hasFrame: true, showListOnPhone: true, showPageOnPhone: false };
-  }
-  return { ...none, hasFrame: true, entryId: third };
+  const { hasFrame, id, showListOnPhone, showPageOnPhone } = registryFrame(pathname, "finance", "company-account", false);
+  return { hasFrame, entryId: id, showListOnPhone, showPageOnPhone };
 }

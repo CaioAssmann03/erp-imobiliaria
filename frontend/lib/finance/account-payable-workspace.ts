@@ -1,3 +1,5 @@
+import { registryFrame } from "../navigation/registry-frame.ts";
+
 export const accountsPayableUrl = () => "/finance/accounts-payable";
 export const newAccountPayableUrl = () => "/finance/accounts-payable/new";
 export const accountPayableUrl = (accountId: string) => `/finance/accounts-payable/${accountId}`;
@@ -31,16 +33,8 @@ export interface AccountsPayableFrameState {
 
 /** Que moldura uma URL tem: `/finance/accounts-payable` (a vazia), `/finance/accounts-payable/new` e `/finance/accounts-payable/[accountId]`. */
 export function accountsPayableFrameState(pathname: string | null): AccountsPayableFrameState {
-  const none: AccountsPayableFrameState = { hasFrame: false, accountId: null, isNew: false, showListOnPhone: false, showPageOnPhone: true };
-  if (!pathname) return none;
-  const [, root, second, third, extra] = pathname.split("/");
-  if (root !== "finance" || second !== "accounts-payable" || extra !== undefined) return none;
-
-  if (third === undefined || third === "") {
-    return { ...none, hasFrame: true, showListOnPhone: true, showPageOnPhone: false };
-  }
-  if (third === "new") return { ...none, hasFrame: true, isNew: true };
-  return { ...none, hasFrame: true, accountId: third };
+  const { id, ...frame } = registryFrame(pathname, "finance", "accounts-payable");
+  return { ...frame, accountId: id };
 }
 
 /** Os períodos de vencimento do filtro da lista (a lista os traduz em datas para a API). */
