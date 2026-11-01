@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models import Q
 
 from apps.billing.errors import CondominiumBillingRulesError
+from apps.billing.models.querysets import CondominiumBillingRulesQuerySet
 from apps.billing.models.rules import CondominiumBillingRulesRules
 from apps.condominiums.models import Condominium
 from apps.core.infrastructure.dates import add_months
@@ -130,6 +131,8 @@ class CondominiumBillingRules(UUIDModel):
 
     should_show_qr_code = models.BooleanField(default=False, db_default=False)
     should_show_fee_statement = models.BooleanField(default=False, db_default=False)
+
+    objects = CondominiumBillingRulesQuerySet.as_manager()
 
     company_lookup = "condominium__company"
 

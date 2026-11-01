@@ -1,11 +1,7 @@
-import logging
-
 from django.db import transaction
 
 from apps.core.infrastructure.storage import object_storage
 from apps.finance.models import PaymentReceipt
-
-logger = logging.getLogger(__name__)
 
 
 def delete_payment_receipt(receipt: PaymentReceipt) -> None:
@@ -14,11 +10,4 @@ def delete_payment_receipt(receipt: PaymentReceipt) -> None:
     file_key = receipt.file_key
     with transaction.atomic():
         receipt.delete()
-        transaction.on_commit(lambda: _delete_object(storage, file_key))
-
-
-def _delete_object(storage: object_storage.ObjectStorage, file_key: str) -> None:
-    try:
-        storage.delete_object(file_key)
-    except Exception:
-        logger.exception("Receipt file %s could not be deleted from the bucket; it is now an orphan.", file_key)
+        transaction.on_commit(lambda: storage.discard_object(file_key, "Receipt file"))

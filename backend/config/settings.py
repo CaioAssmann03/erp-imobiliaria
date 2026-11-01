@@ -303,6 +303,8 @@ RESEND_FROM = os.environ.get("RESEND_FROM", "")
 RESEND_WEBHOOK_SECRET = os.environ.get("RESEND_WEBHOOK_SECRET", "")
 # Days back the daily reconciliation looks for received payments (Asaas keeps undelivered events for 14 days).
 GATEWAY_RECONCILIATION_WINDOW_DAYS = int(os.environ.get("GATEWAY_RECONCILIATION_WINDOW_DAYS", "3"))
+# Days (today included) the daily issuance looks back for a condominium whose day was missed; 1 turns the catch-up off.
+BILLING_ISSUANCE_CATCH_UP_DAYS = int(os.environ.get("BILLING_ISSUANCE_CATCH_UP_DAYS", "3"))
 ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS = int(os.environ.get("ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS", "60"))
 
 CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")

@@ -8,7 +8,7 @@ skip-if: business people → apps/persons.md; API auth conventions → architect
 Authentication identity only: `User(AbstractUser)` with a UUID id and a required `company` (PROTECT); `AUTH_USER_MODEL = "accounts.User"`. Outside this app use `get_user_model()` / `settings.AUTH_USER_MODEL`.
 
 ## Rules worth knowing
-- Only admins log in today, no roles. Every user belongs to one company and sees only its data; a superuser bypasses the scope (`core/scoping.py`).
+- Only admins log in today, no roles. Every user belongs to one company and sees only its data; a superuser bypasses the scope (`core/scoping.py`). The company is fixed when the user is created: `User.clean()` refuses a change (`user.company.immutable`) and the Admin shows it read-only, so a person who moves company gets a new user. The JWT carries only `user_id` (plus `token_type`, `exp`, `iat`, `jti`); the company and the flags are read from the database on every request, so a change applies at once.
 - `create_user` / `create_superuser` fill `company` with `default_company()`: `DJANGO_SUPERUSER_COMPANY` (an id or a CNPJ) if set, else the only existing company (the one migration `core.0002` seeds); with several it must be given (`ValueError`).
 - The business entity is `persons.Person`, not the user. The future link is `Person.user` (a 1:1 in `persons`), so `accounts` never depends on the domain.
 - Login (5/min), refresh (30/min) and logout (30/min) are in `views/auth_views.py`, all with `TrustedProxyScopedRateThrottle`. Logout is idempotent (always 204) and calls the `revoke_refresh_token` service. `AuditedJWTAuthentication` (the DRF default) also tells the audit trail who acts.

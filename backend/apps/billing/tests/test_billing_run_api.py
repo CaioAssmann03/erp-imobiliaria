@@ -118,6 +118,49 @@ def test_the_daily_task_skips_inactive_condominiums(condominium: Condominium) ->
     delay.assert_not_called()
 
 
+def enqueued_on(today: date) -> tuple[int, mock.MagicMock]:
+    with (
+        mock.patch("apps.billing.tasks.timezone.localdate", return_value=today),
+        mock.patch.object(tasks.issue_condominium_billing_task, "delay") as delay,
+    ):
+        return tasks.issue_due_billing(), delay
+
+
+def test_the_daily_task_catches_up_a_day_the_worker_missed(condominium: Condominium) -> None:
+    _ = CondominiumBillingRules.objects.create(condominium=condominium, issuance_day=10)
+
+    enqueued, delay = enqueued_on(date(2026, 10, 12))
+
+    assert enqueued == 1
+    delay.assert_called_once_with(str(condominium.pk), "2026-10-01")
+
+
+def test_the_catch_up_stops_after_its_window(condominium: Condominium) -> None:
+    _ = CondominiumBillingRules.objects.create(condominium=condominium, issuance_day=10)
+
+    enqueued, _delay = enqueued_on(date(2026, 10, 13))
+
+    assert enqueued == 0
+
+
+def test_the_catch_up_leaves_out_a_month_that_already_has_a_run(condominium: Condominium) -> None:
+    _ = CondominiumBillingRules.objects.create(condominium=condominium, issuance_day=10)
+    _ = BillingRun.objects.create(condominium=condominium, reference_month=date(2026, 10, 1))
+
+    enqueued, _delay = enqueued_on(date(2026, 10, 11))
+
+    assert enqueued == 0
+
+
+def test_a_window_of_one_day_turns_the_catch_up_off(condominium: Condominium, settings) -> None:  # type: ignore[no-untyped-def]
+    settings.BILLING_ISSUANCE_CATCH_UP_DAYS = 1
+    _ = CondominiumBillingRules.objects.create(condominium=condominium, issuance_day=10)
+
+    enqueued, _delay = enqueued_on(date(2026, 10, 11))
+
+    assert enqueued == 0
+
+
 def test_the_condominium_task_runs_the_issuance(condominium: Condominium, issuable: None) -> None:
     run_id = tasks.issue_condominium_billing_task(str(condominium.pk), "2026-10-01")
 
