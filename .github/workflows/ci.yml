@@ -55,7 +55,7 @@ jobs:
       - name: Check docs (headers, links, roadmap and spec statuses)
         run: python backend/docs/tools/check_docs.py
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: "pip"
