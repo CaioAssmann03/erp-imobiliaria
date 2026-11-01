@@ -1,4 +1,5 @@
 import { registryFrame } from "../navigation/registry-frame.ts";
+import { condominiumMonthScope, monthScopeUrl, type CondominiumMonthScope } from "../navigation/url-scope.ts";
 
 /** Seções da página de um documento de cobrança, na ordem em que aparecem; o índice da direita usa estes ids (a do Boleto extra também). */
 export const BILLING_DOCUMENT_SECTIONS = [
@@ -9,29 +10,12 @@ export const BILLING_DOCUMENT_SECTIONS = [
 ] as const;
 
 /** O escopo da lista: o condomínio (obrigatório: sem ele a lista não mostra nada) e o mês de referência (primeiro dia, "2026-10-01"; vazio = todos os meses). Viaja na URL (`?condominium=&reference_month=`). */
-export interface BillingDocumentsScope {
-  condominium: string;
-  month: string;
-}
-
-// Sem importar `uuidParam`: este módulo é testado direto pelo Node, que não resolve os imports sem extensão do projeto.
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const MONTH = /^\d{4}-(0[1-9]|1[0-2])-01$/;
+export type BillingDocumentsScope = CondominiumMonthScope;
 
 /** O escopo lido da URL: só um UUID vale como condomínio e só um primeiro dia de mês como mês (o link das Execuções já usa estes nomes). */
-export function billingDocumentsScope(params: { get: (name: string) => string | null }): BillingDocumentsScope {
-  const condominium = params.get("condominium") ?? "";
-  const month = params.get("reference_month") ?? "";
-  return { condominium: UUID.test(condominium) ? condominium : "", month: MONTH.test(month) ? month : "" };
-}
+export const billingDocumentsScope = condominiumMonthScope;
 
-const withScope = (path: string, scope: BillingDocumentsScope): string => {
-  const query = new URLSearchParams();
-  if (scope.condominium) query.set("condominium", scope.condominium);
-  if (scope.month) query.set("reference_month", scope.month);
-  const text = query.toString();
-  return text ? `${path}?${text}` : path;
-};
+const withScope = monthScopeUrl;
 
 export const billingDocumentsUrl = (scope: BillingDocumentsScope) => withScope("/billing/documents", scope);
 export const billingDocumentUrl = (documentId: string, scope: BillingDocumentsScope) => withScope(`/billing/documents/${documentId}`, scope);

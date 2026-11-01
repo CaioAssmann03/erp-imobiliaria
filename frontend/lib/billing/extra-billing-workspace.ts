@@ -1,4 +1,5 @@
 import { registryFrame } from "../navigation/registry-frame.ts";
+import { condominiumScope, scopeUrl, type CondominiumScope } from "../navigation/url-scope.ts";
 
 /** Seções da página de um boleto extra novo, na ordem em que aparecem; o índice da direita usa estes ids. */
 export const NEW_EXTRA_BILLING_SECTIONS = [
@@ -8,19 +9,12 @@ export const NEW_EXTRA_BILLING_SECTIONS = [
 ] as const;
 
 /** O escopo da lista: o condomínio de que se veem (e se emitem) os boletos extras. Viaja na URL. */
-export interface ExtraBillingScope {
-  condominium: string;
-}
-
-// Sem importar `uuidParam`: este módulo é testado direto pelo Node, que não resolve os imports sem extensão do projeto.
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export type ExtraBillingScope = CondominiumScope;
 
 /** O escopo lido da URL: só um UUID vale como condomínio. */
-export function extraBillingScope(params: { get: (name: string) => string | null }): ExtraBillingScope {
-  return { condominium: UUID.test(params.get("condominium") ?? "") ? (params.get("condominium") as string) : "" };
-}
+export const extraBillingScope = condominiumScope;
 
-const withScope = (path: string, scope: ExtraBillingScope): string => (scope.condominium ? `${path}?condominium=${scope.condominium}` : path);
+const withScope = (path: string, scope: ExtraBillingScope): string => scopeUrl(path, scope);
 
 export const extraBillingUrl = (scope: ExtraBillingScope) => withScope("/billing/extra", scope);
 export const newExtraBillingUrl = (scope: ExtraBillingScope) => withScope("/billing/extra/new", scope);

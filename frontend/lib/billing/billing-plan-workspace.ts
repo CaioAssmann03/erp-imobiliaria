@@ -1,4 +1,5 @@
 import { registryFrame } from "../navigation/registry-frame.ts";
+import { condominiumScope, scopeUrl, type CondominiumScope } from "../navigation/url-scope.ts";
 
 /** Seções da página de um plano (novo ou aberto), na ordem em que aparecem; o índice da direita usa estes ids. */
 export const BILLING_PLAN_SECTIONS = [
@@ -7,19 +8,12 @@ export const BILLING_PLAN_SECTIONS = [
 ] as const;
 
 /** O escopo da lista: o condomínio de que se veem os planos ("" = todos). Viaja na URL. */
-export interface BillingPlansScope {
-  condominium: string;
-}
-
-// Sem importar `uuidParam`: este módulo é testado direto pelo Node, que não resolve os imports sem extensão do projeto.
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export type BillingPlansScope = CondominiumScope;
 
 /** O escopo lido da URL: só um UUID vale como condomínio. */
-export function billingPlansScope(params: { get: (name: string) => string | null }): BillingPlansScope {
-  return { condominium: UUID.test(params.get("condominium") ?? "") ? (params.get("condominium") as string) : "" };
-}
+export const billingPlansScope = condominiumScope;
 
-const withScope = (path: string, scope: BillingPlansScope): string => (scope.condominium ? `${path}?condominium=${scope.condominium}` : path);
+const withScope = (path: string, scope: BillingPlansScope): string => scopeUrl(path, scope);
 
 export const billingPlansUrl = (scope: BillingPlansScope) => withScope("/billing/plans", scope);
 export const newBillingPlanUrl = (scope: BillingPlansScope) => withScope("/billing/plans/new", scope);

@@ -1,4 +1,5 @@
 import { registryFrame } from "../navigation/registry-frame.ts";
+import { condominiumScope, monthParam, scopeUrl, type CondominiumMonthScope, type UrlParams } from "../navigation/url-scope.ts";
 
 /** Quantos lançamentos um condomínio pode ter num mês: a lista da esquerda, a grade e o detalhe leem este mesmo tanto (uma só consulta). */
 export const MAX_ENTRIES_PER_MONTH = 100;
@@ -18,14 +19,7 @@ export const BILLING_ENTRY_SECTIONS = [
 ] as const;
 
 /** O escopo da lista: o condomínio e o mês (primeiro dia, "2026-10-01") que ela, a grade e o detalhe mostram. Viaja na URL. */
-export interface BillingEntriesScope {
-  condominium: string;
-  month: string;
-}
-
-// Sem importar `uuidParam` e `todayIso`: este módulo é testado direto pelo Node, que não resolve os imports sem extensão do projeto.
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const MONTH = /^\d{4}-(0[1-9]|1[0-2])-01$/;
+export type BillingEntriesScope = CondominiumMonthScope;
 
 /** O primeiro dia do mês de hoje (no fuso local), o mês em que a lista abre. */
 export const currentMonthIso = (): string => {
@@ -34,20 +28,11 @@ export const currentMonthIso = (): string => {
 };
 
 /** O escopo lido da URL: só um UUID vale como condomínio e só um primeiro dia de mês como mês (senão, o mês atual). */
-export function billingEntriesScope(params: { get: (name: string) => string | null }): BillingEntriesScope {
-  const month = params.get("month");
-  return {
-    condominium: UUID.test(params.get("condominium") ?? "") ? (params.get("condominium") as string) : "",
-    month: month && MONTH.test(month) ? month : currentMonthIso(),
-  };
+export function billingEntriesScope(params: UrlParams): BillingEntriesScope {
+  return { ...condominiumScope(params), month: monthParam(params.get("month")) ?? currentMonthIso() };
 }
 
-const withScope = (path: string, scope: BillingEntriesScope): string => {
-  const query = new URLSearchParams();
-  if (scope.condominium) query.set("condominium", scope.condominium);
-  query.set("month", scope.month);
-  return `${path}?${query.toString()}`;
-};
+const withScope = (path: string, scope: BillingEntriesScope): string => scopeUrl(path, scope);
 
 export const billingEntriesUrl = (scope: BillingEntriesScope) => withScope("/billing/entries", scope);
 export const newBillingEntryUrl = (scope: BillingEntriesScope) => withScope("/billing/entries/new", scope);

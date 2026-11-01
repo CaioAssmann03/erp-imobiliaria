@@ -1,4 +1,6 @@
+import { uuidParam } from "../api/uuid-param.ts";
 import { registryFrame } from "../navigation/registry-frame.ts";
+import { scopeUrl } from "../navigation/url-scope.ts";
 
 /** Seções da página de uma pessoa, na ordem em que aparecem; o índice da direita usa estes ids. */
 export const PERSON_SECTIONS = [
@@ -13,24 +15,16 @@ export interface PersonContext {
   from?: string | null;
 }
 
-function contextQuery(context: PersonContext): string {
-  const params = new URLSearchParams();
-  if (context.condominium) params.set("condominium", context.condominium);
-  if (context.unit) params.set("unit", context.unit);
-  if (context.from) params.set("from", context.from);
-  const query = params.toString();
-  return query ? `?${query}` : "";
-}
+const withContext = (path: string, context: PersonContext): string =>
+  scopeUrl(path, { condominium: context.condominium ?? "", unit: context.unit ?? "", from: context.from ?? "" });
 
-export const personsUrl = (context: PersonContext = {}) => `/condominiums/persons${contextQuery(context)}`;
+export const personsUrl = (context: PersonContext = {}) => withContext("/condominiums/persons", context);
 export const newPersonUrl = () => "/condominiums/persons/new";
 /** A pessoa aberta; o `context` (de onde se chegou) mantém a lista filtrada e leva o "voltar" de volta à tela de origem. */
-export const personUrl = (personId: string, context: PersonContext = {}) => `/condominiums/persons/${personId}${contextQuery(context)}`;
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const personUrl = (personId: string, context: PersonContext = {}) => withContext(`/condominiums/persons/${personId}`, context);
 
 /** Um id lido de `?condominium=` ou `?unit=`; só um UUID vale (o valor entra num endereço). */
-export const originCondominium = (value: string | null) => (value && UUID.test(value) ? value : null);
+export const originCondominium = uuidParam;
 
 /** Os papéis de uma pessoa numa unidade, como o usuário os lê. */
 export const UNIT_ROLE_LABELS = { owner: "Proprietário", tenant: "Inquilino" } as const;
