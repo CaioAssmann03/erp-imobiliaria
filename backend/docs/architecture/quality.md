@@ -35,7 +35,7 @@ Every rule has a test; a constraint is tested twice (serializer 400 + `Integrity
 | Input | ORM only (no raw SQL); explicit serializer `fields`. A receipt's first bytes must match its declared type (PDF, JPEG, PNG) when it is confirmed (spec 065) |
 | API docs | `/api/schema/` and `/api/docs/` are open only with `DEBUG=true`; otherwise superuser-only (spec 065) |
 | Webhooks | `/api/webhooks/asaas/` (token) and `/api/webhooks/resend/` (Svix signature) are public by nature and limited to 1000 and 300 calls/min per address |
-| Supply chain | `pip-audit` blocks the CI on a known vulnerability; `pnpm audit --prod --audit-level=high` blocks it too; Dependabot opens weekly update PRs. The container runs as an unprivileged user |
+| Supply chain | `pip-audit` blocks the CI on a known vulnerability; `pnpm audit --prod --audit-level=high` blocks it too; Dependabot opens weekly update PRs (pip and npm: the minor and patch updates of the week in one grouped PR, each major in its own). The container runs as an unprivileged user |
 
 **Rules for new code**
 1. Secrets only from env vars (`SECRET_KEY` ≥ 32 chars, enforced when `DEBUG` is not `true`; `DEBUG` is off unless set; `JWT_SIGNING_KEY` signs the JWTs); never in code, fixtures, migrations, logs or errors. `.env` is gitignored; `.env.example` holds placeholders.
