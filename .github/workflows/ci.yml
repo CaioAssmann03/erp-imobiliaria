@@ -50,7 +50,7 @@ jobs:
       REDIS_URL: redis://localhost:6379/0
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check docs (headers, links, roadmap and spec statuses)
         run: python backend/docs/tools/check_docs.py
@@ -104,7 +104,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Version from "packageManager" in frontend/package.json.
       - uses: pnpm/action-setup@v4
