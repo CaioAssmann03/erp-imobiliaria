@@ -30,6 +30,8 @@ export const ErrorCodeEnum = {
   account_payablesupplierother_company: 'account_payable.supplier.other_company',
   amountnot_positive: 'amount.not_positive',
   amountzero: 'amount.zero',
+  assistantunavailable: 'assistant.unavailable',
+  assistant_questionquestionsensitive_data: 'assistant_question.question.sensitive_data',
   authentication_failed: 'authentication_failed',
   bad_authorization_header: 'bad_authorization_header',
   bad_gateway: 'bad_gateway',

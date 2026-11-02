@@ -1,4 +1,5 @@
 export * from './accounts-payable/accounts-payable.ts';
+export * from './assistant/assistant.ts';
 export * from './auth/auth.ts';
 export * from './bank-accounts/bank-accounts.ts';
 export * from './billing-documents/billing-documents.ts';

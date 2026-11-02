@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AssistantChat } from "@/components/assistant/AssistantChat";
 import { Brand } from "@/components/brand/Brand";
 import { GlobalSearch } from "./search/GlobalSearch";
 import { MobileMenu } from "./menu/MobileMenu";
@@ -33,6 +34,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <main className="min-w-0 flex-1 px-4 pt-2 pb-8 lg:px-8 lg:pt-1">{children}</main>
       </div>
+
+      <AssistantChat />
     </div>
   );
 }
