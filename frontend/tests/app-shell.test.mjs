@@ -10,10 +10,12 @@ const ROOT = new URL("..", import.meta.url).pathname;
 const DASHBOARD = join(ROOT, "app", "(dashboard)");
 
 /** Run the inline <head> script against a fake document, like the browser does before the first paint. */
-function runInitScript(cookie, { cores = 8, memory = 8, saveData = false, osReduceMotion = false } = {}) {
+function runInitScript(cookie, { cores = 8, memory = 8, saveData = false, osReduceMotion = false, gpu = true } = {}) {
   const dataset = {};
   const style = { props: {}, setProperty(name, value) { this.props[name] = value; } };
-  const fakeDocument = { cookie, documentElement: { dataset, style } };
+  // `gpu: false` = sem aceleração de hardware: com `failIfMajorPerformanceCaveat` o navegador devolve null em vez do contexto WebGL.
+  const canvas = { getContext: () => (gpu ? { getExtension: () => null } : null) };
+  const fakeDocument = { cookie, documentElement: { dataset, style }, createElement: () => canvas };
   const navigator = { hardwareConcurrency: cores, deviceMemory: memory, connection: { saveData } };
   const matchMedia = (query) => ({ matches: osReduceMotion && query.includes("prefers-reduced-motion") });
   new Function("document", "navigator", "matchMedia", APPEARANCE_INIT_SCRIPT)(fakeDocument, navigator, matchMedia);
@@ -244,7 +246,10 @@ test("the head script resolves the lite mode from the preference and the device"
   assert.equal(DEFAULT_APPEARANCE.motion, "auto");
   assert.equal(runInitScript("").perf, "full");
   assert.equal(runInitScript("", { cores: 2 }).perf, "lite");
-  assert.equal(runInitScript("", { memory: 4 }).perf, "lite");
+  assert.equal(runInitScript("", { memory: 2 }).perf, "lite");
+  assert.equal(runInitScript("", { gpu: false }).perf, "lite");
+  // A common 4-core / 4 GB laptop with a GPU keeps the full version.
+  assert.equal(runInitScript("", { cores: 4, memory: 4 }).perf, "full");
   assert.equal(runInitScript("", { saveData: true }).perf, "lite");
   assert.equal(runInitScript("", { osReduceMotion: true }).perf, "lite");
   // A machine that reports nothing (Safari, Firefox) is not treated as weak.
@@ -252,7 +257,7 @@ test("the head script resolves the lite mode from the preference and the device"
 
   // The explicit choices: "reduced" is always lite; "full" ignores a weak machine, but not the OS request for less motion.
   assert.equal(runInitScript("ui_motion=reduced").perf, "lite");
-  assert.equal(runInitScript("ui_motion=full", { cores: 2 }).perf, "full");
+  assert.equal(runInitScript("ui_motion=full", { cores: 2, gpu: false }).perf, "full");
   assert.equal(runInitScript("ui_motion=full", { osReduceMotion: true }).perf, "lite");
 });
 

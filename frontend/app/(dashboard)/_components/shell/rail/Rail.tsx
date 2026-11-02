@@ -29,7 +29,8 @@ export function Rail() {
     <aside
       className={cn(
         // z-[60]: acima do fundo dos modais (z-40 e z-50), que não escurece o menu lateral.
-        "sticky top-0 z-[60] hidden h-screen shrink-0 flex-col gap-1.5 overflow-hidden bg-canvas px-3.5 py-4 lg:flex",
+        // overflow-y-auto: com o texto ampliado e a janela baixa os botões de baixo (busca, configurações, sair) não cabem; rolam em vez de serem cortados.
+        "sticky top-0 z-[60] hidden h-screen shrink-0 flex-col gap-1.5 overflow-x-hidden overflow-y-auto overscroll-contain bg-canvas px-3.5 py-4 [scrollbar-width:none] lg:flex [&::-webkit-scrollbar]:hidden",
         expanded ? "w-60" : "w-[4.5rem]",
         animated && "transition-[width] duration-200 ease-out",
       )}
