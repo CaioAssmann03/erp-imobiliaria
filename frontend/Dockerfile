@@ -2,7 +2,7 @@
 #   dev        -> usado pelo docker-compose (servidor de desenvolvimento com hot reload)
 #   production -> último estágio, usado em produção na VPS (build de produção + `next start`)
 
-FROM node:22-slim AS base
+FROM node:26-slim AS base
 WORKDIR /app
 # pnpm pinned like "packageManager" in package.json.
 RUN npm install -g pnpm@12.6.0
