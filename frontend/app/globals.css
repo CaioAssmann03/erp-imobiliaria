@@ -22,6 +22,7 @@
   --color-ink-soft: #6e6d68;
   --color-ink-faint: #a5a49e;
   --color-ink-foreground: #ffffff; /* texto sobre ink (botões escuros) */
+  --color-band: #1c1b19; /* faixa invertida das páginas públicas (rodapé, lados dos prédios): preta no claro, só um pouco acima do fundo no escuro */
 
   /* Marca (laranja) */
   --color-brand: #f05a28;
@@ -235,6 +236,7 @@ html[data-mode="dark"] {
   --color-ink-soft: #a4a39d;
   --color-ink-faint: #706f6a;
   --color-ink-foreground: #1c1b19;
+  --color-band: #21211f;
   --color-success: #3ecf7a;
   --color-danger: #ff5d6e;
   --color-warning: #e9b440;
@@ -259,6 +261,7 @@ html[data-mode="dark"] {
     --color-ink-soft: #a4a39d;
     --color-ink-faint: #706f6a;
     --color-ink-foreground: #1c1b19;
+    --color-band: #21211f;
     --color-success: #3ecf7a;
     --color-danger: #ff5d6e;
     --color-warning: #e9b440;
@@ -360,5 +363,32 @@ html[data-mode="dark"] .theme-public {
 @media (prefers-color-scheme: dark) {
   html[data-mode="system"] .theme-public {
     --color-danger: #ff5d6e;
+  }
+}
+
+/* Faixa invertida (rodapé): no escuro ela é cinza-escuro, não branca, então o texto dentro dela segue claro e os botões invertidos seguem escuros sobre claro. */
+html[data-mode="dark"] .band {
+  --color-ink: #21211f;
+  --color-ink-foreground: #f2f2ef;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-mode="system"] .band {
+    --color-ink: #21211f;
+    --color-ink-foreground: #f2f2ef;
+  }
+}
+
+/* Prints do sistema nos dois modos: cada tela tem uma imagem clara (.print-light) e uma escura (.print-dark), e só a do modo
+   que está valendo aparece (data-mode no <html>; o modo "sistema" segue o SO). A que não aparece não chega a ser baixada. */
+html[data-mode="dark"] .print-light,
+html:not([data-mode="dark"]) .print-dark {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-mode="system"] .print-light {
+    display: none;
+  }
+  html[data-mode="system"] .print-dark {
+    display: block;
   }
 }

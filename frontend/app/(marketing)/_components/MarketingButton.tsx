@@ -8,7 +8,7 @@ const VARIANTS = {
   /** Ação secundária sobre fundo claro. */
   outline: "border border-ink/20 text-ink hover:bg-ink/5",
   /** Ação principal sobre a faixa preta. */
-  inverse: "bg-surface text-ink hover:bg-surface/85",
+  inverse: "bg-ink-foreground text-ink hover:bg-ink-foreground/85",
   /** Ação secundária sobre a faixa preta. */
   "inverse-outline": "border border-ink-foreground/25 text-ink-foreground hover:bg-ink-foreground/10",
 } as const;

@@ -9,6 +9,7 @@ const SITE_LINKS = [
   { href: "/", label: "Início" },
   { href: "/features", label: "Recursos" },
   { href: "/how-it-works", label: "Como funciona" },
+  { href: CONTACT_HREF, label: "Contato" },
 ] as const;
 
 const ACCESS_LINKS = [
@@ -27,10 +28,10 @@ function FooterColumn({ title, children }: { title: string; children: React.Reac
   );
 }
 
-/** Rodapé das páginas públicas: faixa preta de ponta a ponta com a chamada de contato (`#contato`), os mapas do site e dos módulos. */
+/** Rodapé das páginas públicas: faixa preta de ponta a ponta com a chamada de contato, os mapas do site e dos módulos. */
 export function SiteFooter() {
   return (
-    <footer id="contato" className="mt-12 scroll-mt-16 bg-ink text-ink-foreground">
+    <footer className="band mt-12 bg-band text-ink-foreground">
       <div className="mx-auto max-w-6xl px-6 pt-20 pb-10">
         <div className="grid gap-14 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-10">
           <div>

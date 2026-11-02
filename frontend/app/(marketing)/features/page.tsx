@@ -1,25 +1,32 @@
 import type { Metadata } from "next";
 
-import { FeatureGrid } from "@/app/(marketing)/_components/sections/FeatureGrid";
-import { PageIntro } from "@/app/(marketing)/_components/sections/PageIntro";
-import { Section } from "@/app/(marketing)/_components/layout/Section";
+import { pageMetadata } from "@/lib/site/page-metadata";
 
-export const metadata: Metadata = {
+import { MODULES } from "@/app/(marketing)/_components/content";
+import { AcronymReveal } from "@/app/(marketing)/_components/sections/AcronymReveal";
+import { ModuleSection } from "@/app/(marketing)/_components/sections/ModuleSection";
+import { BillingFlow } from "@/app/(marketing)/_components/visuals/BillingFlow";
+import { CondominiumPlan } from "@/app/(marketing)/_components/visuals/CondominiumPlan";
+
+export const metadata: Metadata = pageMetadata({
   title: "Recursos",
   description: "Conheça os módulos do ERP para administradoras de condomínios.",
-};
+  path: "/features",
+});
 
 export default function FeaturesPage() {
   return (
     <>
-      <PageIntro
-        eyebrow="Recursos"
-        title="Um sistema, todos os módulos"
-        lead="Cadastros, cobrança, financeiro e documentos conversam entre si, sem retrabalho."
-      />
-      <Section eyebrow="Módulos" title="O que você encontra dentro">
-        <FeatureGrid />
-      </Section>
+      <AcronymReveal />
+      <div className="pb-32 md:pb-48">
+        <ModuleSection {...MODULES.condominiums}>
+          <CondominiumPlan />
+        </ModuleSection>
+        <ModuleSection {...MODULES.entries} placement="below" />
+        <ModuleSection {...MODULES.billing} placement="right">
+          <BillingFlow />
+        </ModuleSection>
+      </div>
     </>
   );
 }

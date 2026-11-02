@@ -1,9 +1,11 @@
 /**
  * O logo METRI (`public/LOGO_METRI_TEXT.svg`): a casa em laranja e a palavra com a cor do texto, num quadro cortado rente ao desenho.
  * Dê o tamanho pela altura (`h-8`) e a cor da palavra por `text-ink` (ou outra); a casa usa `brand`, ou a mesma cor da
- * palavra com `mono`.
+ * palavra com `mono`; `house={false}` desenha só a palavra.
  */
 const VIEW_BOX = "155 305.719 890.5 285.281";
+// Só a palavra (sem a casa): o quadro recorta rente às cinco letras.
+const WORD_VIEW_BOX = "490 405 555.5 121";
 
 const HOUSE = "M430 591 L155 591 L156 582.5 L292.5 582 L293 568 L155 568 L155 559 L292.5 559 L293 545 L155 545 L155 536 L212 536 L212 522 L155 522 L155 513 L212 513 L211 499.5 L155 499 L155 490 L212 490 L212 476 L155 476 L155 467 L211 466.5 L211.5 453 L155 453 L155 444 L211 443.5 C212.988 433.561 211.346 436.769 220 431 C218.146 428.219 163.707 429.068 155 429 L155 421 C163.226 420.947 232.231 420.921 233 420.5 C236.358 418.663 241.423 414.306 244.69 411.904 C247.648 409.73 250 409.415 250 406 L160 406 C160.96 404.079 166.987 399.837 169 398.5 C171.599 396.774 260.261 399.281 263 397.5 C268.043 394.221 275.094 387.184 280 383 L191 383 C193.847 380.627 197.048 377.593 200 375.5 C200.133 375.405 282.862 375.05 292 375 C291.947 380.793 291.794 429.468 291.5 430 C291.172 430.595 275.596 442.37 274.087 443.544 C271.811 445.314 256.45 456.558 255.5 458 C255.36 458.212 255.05 528.188 255 536 L374 536 L373.53 442.018 C373.528 441.543 373.665 436.184 373.5 436 C368.879 430.86 353.517 423.184 350 418.5 C349.58 417.941 347.145 414.081 347 414 C346.785 413.879 344.483 413.596 344 413.5 C342.978 413.298 302.9 382.474 298.458 379.12 C298.06 378.819 293.033 375.197 293 375 C292.421 371.516 293 363.972 293 360 L224 360 C224.722 355.666 226.14 355.21 230 352.5 C230.118 352.417 285.824 351.6 292 351.5 L292 337.5 L251 337 C251 335.223 252.539 335 254.164 333.943 C255.995 332.753 259.152 330.343 261 329.5 C262.099 328.999 288.131 328.625 292 328.5 L292.5 315 L282 314 C282.909 313.242 290.946 306.508 291 306.5 C296.508 305.719 347.008 346.598 353.827 351.756 C359.454 356.013 429.012 407.978 429.5 409 C431.233 412.626 429.944 570.442 430 591 Z";
 
@@ -15,10 +17,10 @@ const WORD = [
   "M1016 405 L1045.5 406 L1045 526 L1016 526 Z",
 ];
 
-export function MetriLogo({ className, mono = false }: { className?: string; mono?: boolean }) {
+export function MetriLogo({ className, mono = false, house = true }: { className?: string; mono?: boolean; house?: boolean }) {
   return (
-    <svg viewBox={VIEW_BOX} role="img" aria-label="METRI" className={className}>
-      <path d={HOUSE} className={mono ? "fill-current" : "fill-brand"} />
+    <svg viewBox={house ? VIEW_BOX : WORD_VIEW_BOX} role="img" aria-label="METRI" className={className}>
+      {house && <path d={HOUSE} className={mono ? "fill-current" : "fill-brand"} />}
       {WORD.map((d) => (
         <path key={d} d={d} fill="currentColor" />
       ))}
