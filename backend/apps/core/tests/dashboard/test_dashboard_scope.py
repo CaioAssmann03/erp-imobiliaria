@@ -101,4 +101,4 @@ def test_superuser_search_ignores_other_company_records(
 ) -> None:
     other = build_company_data(other_company, seed=2)
 
-    assert search(superuser_client, other.condominium.name)["condominiums"] == []  # type: ignore[arg-type]
+    assert search(superuser_client, other.condominium.name)["condominiums"] == []

@@ -19,7 +19,7 @@ class HistoryMessageSerializer(serializers.Serializer[dict[str, str]]):
 
 class QuestionSerializer(serializers.Serializer[dict[str, Any]]):
     question = serializers.CharField(max_length=MAXIMUM_QUESTION_LENGTH)
-    history = HistoryMessageSerializer(many=True, required=False, max_length=MAXIMUM_HISTORY_MESSAGES)
+    history = serializers.ListField(child=HistoryMessageSerializer(), required=False, max_length=MAXIMUM_HISTORY_MESSAGES)
 
     def validate_question(self, value: str) -> str:
         if find_sensitive_data(value):

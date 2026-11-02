@@ -45,8 +45,8 @@ def test_adjustments_come_by_date_ten_to_a_page(api_client: APIClient, company: 
     first = body(api_client.get(reverse("dashboard-adjustments"), {"limit": 10}))
     second = results(api_client.get(reverse("dashboard-adjustments"), {"limit": 10, "page": 2}))
 
-    assert first["count"] == 12  # type: ignore[index]
-    assert len(first["results"]) == 10  # type: ignore[index,arg-type]
+    assert first["count"] == 12
+    assert len(first["results"]) == 10
     assert [item["name"] for item in second] == ["Condominio 11", "Condominio 12"]
 
 

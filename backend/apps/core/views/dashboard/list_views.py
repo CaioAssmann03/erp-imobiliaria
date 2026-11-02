@@ -1,4 +1,4 @@
-from typing import final
+from typing import Any, final
 
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
@@ -16,7 +16,7 @@ from .scoped_data import ScopedData
 
 
 @final
-class UpcomingAdjustmentListView(GenericAPIView[None]):
+class UpcomingAdjustmentListView(GenericAPIView[Any]):
     """Every condominium's next adjustment, by date, paginated (the dashboard card shows only the first few)."""
 
     serializer_class = UpcomingAdjustmentSerializer
@@ -25,12 +25,12 @@ class UpcomingAdjustmentListView(GenericAPIView[None]):
     @extend_schema(responses=UpcomingAdjustmentSerializer(many=True), operation_id="dashboard_adjustments_list")
     def get(self, request: Request) -> Response:
         data = ScopedData.for_user(request.user)
-        page = self.paginate_queryset(upcoming_adjustments(timezone.localdate(), data.contracts))  # type: ignore[arg-type]
-        return self.get_paginated_response(UpcomingAdjustmentSerializer(page, many=True).data)
+        page = self.paginate_queryset(upcoming_adjustments(timezone.localdate(), data.contracts))
+        return self.get_paginated_response(UpcomingAdjustmentSerializer(page, many=True).data)  # type: ignore[arg-type]
 
 
 @final
-class LargestFeeListView(GenericAPIView[None]):
+class LargestFeeListView(GenericAPIView[Any]):
     """The active condominiums with a fixed fee, the largest first, paginated (the dashboard card shows only the top few)."""
 
     serializer_class = CondominiumFeeSerializer
@@ -40,5 +40,5 @@ class LargestFeeListView(GenericAPIView[None]):
     def get(self, request: Request) -> Response:
         data = ScopedData.for_user(request.user)
         contracts = data.contracts.of_active_condominiums().largest_fixed_fees()
-        page = self.paginate_queryset(contracts)  # type: ignore[arg-type]
-        return self.get_paginated_response(CondominiumFeeSerializer([fee_row(contract) for contract in page or []], many=True).data)
+        page = self.paginate_queryset(contracts)
+        return self.get_paginated_response(CondominiumFeeSerializer([fee_row(contract) for contract in page or []], many=True).data)  # type: ignore[arg-type]

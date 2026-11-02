@@ -214,7 +214,7 @@ def test_coverage_says_which_active_condominiums_have_no_boleto_in_the_month(
 def test_coverage_lists_the_missing_condominiums_a_page_at_a_time(
     api_client: APIClient, condominium: Condominium, other_condominium: Condominium
 ) -> None:
-    month = {"reference_month": "2026-11-01"}
+    month: dict[str, str | int] = {"reference_month": "2026-11-01"}
 
     first = body(api_client.get(reverse("billing-run-coverage"), {**month, "limit": 1}))
     second = body(api_client.get(reverse("billing-run-coverage"), {**month, "limit": 1, "page": 2}))

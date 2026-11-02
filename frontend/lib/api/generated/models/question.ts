@@ -10,5 +10,6 @@ import type { HistoryMessage } from './historyMessage.ts';
 export interface Question {
   /** @maxLength 500 */
   question: string;
+  /** @maxItems 6 */
   history?: HistoryMessage[];
 }
