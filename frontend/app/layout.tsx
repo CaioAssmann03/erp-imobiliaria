@@ -4,6 +4,7 @@ import "./globals.css";
 import { LoginTransition } from "@/components/LoginTransition";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site/site";
 import { APPEARANCE_INIT_SCRIPT, DEFAULT_APPEARANCE } from "@/lib/theme/appearance";
 import { Providers } from "./providers";
 
@@ -21,8 +22,10 @@ const sourceSerif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: { default: "METRI", template: "%s · METRI" },
-  description: "Administração de condomínios, locações, vendas e financeiro.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: SITE_NAME, template: `%s · ${SITE_NAME}` },
+  description: SITE_DESCRIPTION,
+  openGraph: { type: "website", siteName: SITE_NAME, locale: "pt_BR", title: SITE_NAME, description: SITE_DESCRIPTION },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -35,6 +38,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       data-font={DEFAULT_APPEARANCE.font}
       data-text={DEFAULT_APPEARANCE.text}
       data-motion={DEFAULT_APPEARANCE.motion}
+      data-device="standard"
+      data-perf="full"
       suppressHydrationWarning
       className={`${inter.variable} ${dmSans.variable} ${sourceSerif.variable} h-full`}
     >

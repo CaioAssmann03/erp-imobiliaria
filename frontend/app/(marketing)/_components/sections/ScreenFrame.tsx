@@ -1,19 +1,27 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
-import Image from "next/image";
+import { motion } from "motion/react";
+import { useLite } from "@/lib/theme/use-lite";
 
 import { cn } from "@/lib/utils";
 import { zoomTransform, type ScreenFocus } from "@/lib/theme/screen-zoom";
-import extrato from "@/public/marketing/extrato.png";
-import inadimplencia from "@/public/marketing/inadimplencia.png";
-import painel from "@/public/marketing/painel.png";
+import cobrancas from "@/public/marketing/cobrancas.png";
+import cobrancasDark from "@/public/marketing/cobrancas-dark.png";
+import lancamentos from "@/public/marketing/lancamentos.png";
+import lancamentosDark from "@/public/marketing/lancamentos-dark.png";
 import unidades from "@/public/marketing/unidades.png";
+import unidadesDark from "@/public/marketing/unidades-dark.png";
+
+import { ThemedImage } from "@/app/(marketing)/_components/ThemedImage";
 
 import { SCREENS } from "@/app/(marketing)/_components/content";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
-const IMAGES = [painel, unidades, extrato, inadimplencia];
+const IMAGES = [
+  { light: unidades, dark: unidadesDark },
+  { light: lancamentos, dark: lancamentosDark },
+  { light: cobrancas, dark: cobrancasDark },
+];
 
 type ScreenFrameProps = {
   current: number;
@@ -22,9 +30,9 @@ type ScreenFrameProps = {
   onToggle: () => void;
 };
 
-/** A tela da vez, aproximada na região em foco. As quatro imagens ficam empilhadas e trocam por fade; um clique alterna zoom e tela inteira. */
+/** A tela da vez, aproximada na região em foco. As três imagens ficam empilhadas e trocam por fade; um clique alterna zoom e tela inteira. */
 export function ScreenFrame({ current, focus, onToggle }: ScreenFrameProps) {
-  const still = useReducedMotion();
+  const still = useLite();
   const { scale, x, y } = zoomTransform(focus);
 
   return (
@@ -52,7 +60,7 @@ export function ScreenFrame({ current, focus, onToggle }: ScreenFrameProps) {
             transition={{ duration: still ? 0 : 0.5, ease: EASE }}
             className="absolute inset-0"
           >
-            <Image src={IMAGES[index]} alt={entry.alt} sizes="(min-width: 1024px) 1440px, 180vw" className="block h-full w-full" />
+            <ThemedImage light={IMAGES[index].light} dark={IMAGES[index].dark} alt={entry.alt} sizes="(min-width: 1024px) 1440px, 180vw" className="block h-full w-full" />
           </motion.div>
         ))}
       </motion.div>

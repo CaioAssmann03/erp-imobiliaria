@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useInView, useReducedMotion } from "motion/react";
+import { motion, useInView } from "motion/react";
+import { useLite } from "@/lib/theme/use-lite";
 import { useRef } from "react";
 
 import { SUMMARY } from "@/app/(marketing)/_components/content";
@@ -16,7 +17,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 export function Summary() {
   const ref = useRef<HTMLElement>(null);
   const shown = useInView(ref, { once: true, margin: "0px 0px -15% 0px" });
-  const still = useReducedMotion();
+  const still = useLite();
   const on = still || shown;
 
   /** Um bloco do texto sobe e aparece; `index` escalona a entrada. */

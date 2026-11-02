@@ -5,10 +5,10 @@ import { ACCESS_COOKIE, REFRESH_COOKIE } from "./lib/auth/auth";
 import { clearAuthCookies, setAuthCookies } from "./lib/auth/auth-cookies";
 import { refreshTokens } from "./lib/api/backend";
 import { isTokenExpiring } from "./lib/auth/jwt";
+import { PUBLIC_PATHS as MARKETING_PATHS } from "./lib/site/public-pages";
 
 const PUBLIC_PATHS = ["/login"];
-// Páginas de apresentação do produto: abertas a todos, sem redirecionar quem já está logado.
-const MARKETING_PATHS = ["/", "/features", "/how-it-works"];
+// As páginas de apresentação do produto (`lib/site/public-pages.ts`) são abertas a todos, sem redirecionar quem já está logado.
 
 function redirectToLogin(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -55,6 +55,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|icon).*)",
+    "/((?!api|_next/static|_next/image|icon|robots.txt|sitemap.xml|opengraph-image).*)",
   ],
 };

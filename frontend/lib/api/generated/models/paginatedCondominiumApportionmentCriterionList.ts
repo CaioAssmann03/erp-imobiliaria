@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { CondominiumApportionmentCriterion } from './condominiumApportionmentCriterion';
+import type { CondominiumApportionmentCriterion } from './condominiumApportionmentCriterion.ts';
 
 export interface PaginatedCondominiumApportionmentCriterionList {
   count: number;

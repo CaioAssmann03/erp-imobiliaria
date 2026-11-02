@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BankAccountsListKind } from './bankAccountsListKind';
+import type { BankAccountsListKind } from './bankAccountsListKind.ts';
 
 export type BankAccountsListParams = {
 active?: boolean;

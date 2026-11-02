@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
 
-import { BlockForm } from "@/app/(dashboard)/condominiums/_components/blocks/BlockForm";
-import { FormPage } from "@/components/form/FormPage";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { NewBlockChooseCondominium } from "@/app/(dashboard)/condominiums/_components/blocks/NewBlockChooseCondominium";
 
 export const metadata: Metadata = { title: "Novo bloco" };
 
+/** `/condominiums/blocks/new`: o novo bloco ainda sem condomínio; escolhido o condomínio, abre o formulário dele. */
 export default function NewBlockPage() {
-  return (
-    <FormPage>
-      <PageHeader back={{ href: "/condominiums", label: "Condomínios" }} title="Novo bloco" />
-      <BlockForm />
-    </FormPage>
-  );
+  return <NewBlockChooseCondominium />;
 }

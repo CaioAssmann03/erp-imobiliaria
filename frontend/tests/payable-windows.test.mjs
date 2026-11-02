@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { PAYABLE_WINDOWS, windowRange } from "../lib/finance/payable-windows.ts";
+import { PAYABLE_WINDOWS, WINDOW_DUE, windowRange } from "../lib/finance/payable-windows.ts";
 
 test("each window becomes the due date range the API receives", () => {
   assert.deepEqual(windowRange("all", "2026-10-30"), {});
@@ -22,4 +22,8 @@ test("the windows keep their order", () => {
     PAYABLE_WINDOWS.map((window) => window.id),
     ["all", "overdue", "today", "week", "month"]
   );
+});
+
+test("each window names the due period the payables list opens on", () => {
+  assert.deepEqual(WINDOW_DUE, { all: "", overdue: "overdue", today: "today", week: "next_7_days", month: "this_month" });
 });

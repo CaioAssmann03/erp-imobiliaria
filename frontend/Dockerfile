@@ -21,6 +21,10 @@ FROM base AS build
 # por API_INTERNAL_URL): nada de NEXT_PUBLIC_* da API é embutido no build.
 RUN pnpm install --frozen-lockfile
 COPY . .
+# Públicos por natureza e lidos no build (as páginas são estáticas): domínio do site e canais de contato.
+ARG NEXT_PUBLIC_SITE_URL
+ARG NEXT_PUBLIC_CONTACT_EMAIL
+ARG NEXT_PUBLIC_CONTACT_WHATSAPP
 RUN pnpm build
 
 # ---- produção (padrão: último estágio) ----

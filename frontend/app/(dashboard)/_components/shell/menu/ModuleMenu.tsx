@@ -92,7 +92,7 @@ export function ModuleMenu({ appModule, isActive, expanded = false }: { appModul
                             <span className="block truncate text-caption text-ink-soft">{item.description}</span>
                           </span>
                           {!item.href && (
-                            <span className="shrink-0 rounded-full bg-surface-muted px-2 py-0.5 text-caption text-ink-soft">
+                            <span className="shrink-0 rounded-badge bg-surface-muted px-2 py-0.5 text-caption text-ink-soft">
                               Em breve
                             </span>
                           )}

@@ -1,9 +1,12 @@
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 import pytest
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
+from django.urls import reverse
+from django.utils import timezone
+from rest_framework.test import APIClient
 
 from apps.core.testing import seeded_company
 from apps.persons.models import Person
@@ -171,3 +174,29 @@ class TestPersonModuleRule:
         serializer = UnitPersonSerializer(link, data={"end_date": "2025-06-01"}, partial=True)
 
         assert serializer.is_valid(), serializer.errors
+
+
+@pytest.mark.django_db
+class TestIsCurrent:
+    """`is_current` is the server's answer to "does this link still hold today?" (no end date, or ending today or later)."""
+
+    def test_a_link_without_end_date_is_current(self) -> None:
+        assert link(role="tenant").is_current(date(2025, 6, 1))
+
+    def test_a_link_ending_on_the_day_is_still_current(self) -> None:
+        assert link(role="tenant", end_date=date(2025, 6, 1)).is_current(date(2025, 6, 1))
+
+    def test_a_link_that_ended_before_the_day_is_not(self) -> None:
+        assert not link(role="tenant", end_date=date(2025, 5, 31)).is_current(date(2025, 6, 1))
+
+    def test_the_unit_payload_tells_which_links_are_current(self, api_client: APIClient, unit: Unit, person: Person) -> None:
+        today = timezone.localdate()
+        _ = UnitPerson.objects.create(unit=unit, person=person, role="tenant", start_date=today - timedelta(days=90), end_date=today)
+        _ = UnitPerson.objects.create(unit=unit, person=person, role="owner", ownership_percentage=100, start_date=today - timedelta(days=90))
+        gone = condominium_person("Foi embora")
+        _ = UnitPerson.objects.create(unit=unit, person=gone, role="tenant", start_date=today - timedelta(days=90), end_date=today - timedelta(days=1))
+
+        payload = api_client.get(reverse("unit-detail", args=[unit.pk])).json()
+
+        current_by_person = {(link["person_detail"]["name"], link["role"]): link["is_current"] for link in payload["unit_people"]}
+        assert current_by_person == {("Maria", "tenant"): True, ("Maria", "owner"): True, ("Foi embora", "tenant"): False}

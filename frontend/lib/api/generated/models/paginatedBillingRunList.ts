@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BillingRun } from './billingRun';
+import type { BillingRun } from './billingRun.ts';
 
 export interface PaginatedBillingRunList {
   count: number;

@@ -1,29 +1,37 @@
 "use client";
 
-import Link from "next/link";
+import { keepPreviousData } from "@tanstack/react-query";
+import { useState } from "react";
 
-import { useRunsWithProblem } from "@/app/(dashboard)/_components/home/bodies/BillingMonthBody";
-import { FocusSection } from "./parts";
+import { firstDayOfThisMonth } from "@/app/(dashboard)/_components/home/bodies/BillingMonthBody";
+import { useBillingRunsList } from "@/lib/api/generated";
+import { FOCUS_PAGE_SIZE, FocusList, FocusPager, FocusRow } from "./parts";
 
-/** As execuções da emissão do mês que terminaram com problema, cada uma com o link para ver o que falhou. */
+/** As execuções da emissão do mês que terminaram com problema (`?has_problem=`, falha ou parcial), 10 por página, cada uma com o link para ver o que falhou. Sem nenhuma, não mostra nada. */
 export function BillingMonthBodyRuns() {
-  const { runs } = useRunsWithProblem();
-  if (runs.length === 0) return <p className="text-ink-soft">Nenhuma execução com problema neste mês.</p>;
+  const [page, setPage] = useState(1);
+  const { data } = useBillingRunsList(
+    { reference_month: firstDayOfThisMonth(), has_problem: true, limit: FOCUS_PAGE_SIZE, ...(page > 1 ? { page } : {}) },
+    { query: { placeholderData: keepPreviousData } }
+  );
+  if (!data || data.count === 0) return null;
 
   return (
-    <FocusSection title="Execuções com problema" action={{ href: "/billing/runs", label: "Ver execuções" }}>
-      <ul className="divide-y divide-border">
-        {runs.map((run) => (
-          <li key={run.id}>
-            <Link href={`/billing/runs/${run.id}`} className="flex items-baseline justify-between gap-3 py-2.5 hover:underline">
-              <span className="truncate">{run.condominium_name}</span>
-              <span className="shrink-0 text-caption text-danger">
-                {run.failed_count} falha{run.failed_count === 1 ? "" : "s"} · {run.issued_count} emitido{run.issued_count === 1 ? "" : "s"}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </FocusSection>
+    <FocusList title="Execuções com problema">
+      {data.results.map((run) => (
+        <FocusRow
+          key={run.id}
+          href={`/billing/runs/${run.id}`}
+          detail={
+            <span className="text-danger">
+              {run.failed_count} falha{run.failed_count === 1 ? "" : "s"}
+            </span>
+          }
+        >
+          {run.condominium_name}
+        </FocusRow>
+      ))}
+      <FocusPager page={page} count={data.count} noun={data.count === 1 ? "execução" : "execuções"} onPage={setPage} />
+    </FocusList>
   );
 }

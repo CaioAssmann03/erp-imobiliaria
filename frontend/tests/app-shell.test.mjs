@@ -10,11 +10,13 @@ const ROOT = new URL("..", import.meta.url).pathname;
 const DASHBOARD = join(ROOT, "app", "(dashboard)");
 
 /** Run the inline <head> script against a fake document, like the browser does before the first paint. */
-function runInitScript(cookie) {
+function runInitScript(cookie, { cores = 8, memory = 8, saveData = false, osReduceMotion = false } = {}) {
   const dataset = {};
   const style = { props: {}, setProperty(name, value) { this.props[name] = value; } };
   const fakeDocument = { cookie, documentElement: { dataset, style } };
-  new Function("document", APPEARANCE_INIT_SCRIPT)(fakeDocument);
+  const navigator = { hardwareConcurrency: cores, deviceMemory: memory, connection: { saveData } };
+  const matchMedia = (query) => ({ matches: osReduceMotion && query.includes("prefers-reduced-motion") });
+  new Function("document", "navigator", "matchMedia", APPEARANCE_INIT_SCRIPT)(fakeDocument, navigator, matchMedia);
   dataset.__style = style.props;
   return dataset;
 }
@@ -62,9 +64,23 @@ test("no module menu label is repeated inside one module", () => {
 });
 
 test("the old list routes still exist, as redirects", () => {
-  for (const route of ["condominiums/blocks", "condominiums/cost-centers", "condominiums/units/new"]) {
+  for (const route of ["condominiums/blocks"]) {
     const page = readFileSync(join(DASHBOARD, ...route.split("/"), "page.tsx"), "utf8");
     assert.match(page, /redirect\(/, route);
+  }
+});
+
+test("a new unit, block or sub-conta without a condominium asks for one instead of redirecting", () => {
+  for (const route of ["condominiums/units/new", "condominiums/blocks/new", "condominiums/cost-centers/new"]) {
+    const page = readFileSync(join(DASHBOARD, ...route.split("/"), "page.tsx"), "utf8");
+    assert.doesNotMatch(page, /redirect\(/, route);
+    assert.match(page, /ChooseCondominium/, route);
+  }
+});
+
+test("a new launch or extra boleto without a condominium asks for one", () => {
+  for (const file of ["billing/entries/_components/NewBillingEntryForm.tsx", "billing/extra/_components/ExtraBillingForm.tsx"]) {
+    assert.match(readFileSync(join(DASHBOARD, ...file.split("/")), "utf8"), /ChooseCondominiumCard/, file);
   }
 });
 
@@ -221,6 +237,43 @@ test("the head script also applies the text size and the reduced motion, and ign
   const tampered = runInitScript("ui_text=huge; ui_motion=<b>");
   assert.equal(tampered.text, DEFAULT_APPEARANCE.text);
   assert.equal(tampered.motion, DEFAULT_APPEARANCE.motion);
+});
+
+test("the head script resolves the lite mode from the preference and the device", () => {
+  // Automatic (the default): a normal machine keeps the full effects; a weak one, data saver or an OS request goes lite.
+  assert.equal(DEFAULT_APPEARANCE.motion, "auto");
+  assert.equal(runInitScript("").perf, "full");
+  assert.equal(runInitScript("", { cores: 2 }).perf, "lite");
+  assert.equal(runInitScript("", { memory: 4 }).perf, "lite");
+  assert.equal(runInitScript("", { saveData: true }).perf, "lite");
+  assert.equal(runInitScript("", { osReduceMotion: true }).perf, "lite");
+  // A machine that reports nothing (Safari, Firefox) is not treated as weak.
+  assert.equal(runInitScript("", { cores: undefined, memory: undefined }).perf, "full");
+
+  // The explicit choices: "reduced" is always lite; "full" ignores a weak machine, but not the OS request for less motion.
+  assert.equal(runInitScript("ui_motion=reduced").perf, "lite");
+  assert.equal(runInitScript("ui_motion=full", { cores: 2 }).perf, "full");
+  assert.equal(runInitScript("ui_motion=full", { osReduceMotion: true }).perf, "lite");
+});
+
+test("the lite mode rules live in the CSS and the effects read the same attribute", () => {
+  const css = readFileSync(join(ROOT, "app", "globals.css"), "utf8");
+  assert.match(css, /html\[data-perf="lite"\][^{]*\{[^}]*backdrop-filter: none/);
+  assert.match(css, /@custom-variant lite/);
+  // No component asks the OS on its own: the in-app choice and the device would be ignored.
+  const own = [...sourceFiles(join(ROOT, "app")), ...sourceFiles(join(ROOT, "components"))].filter((file) =>
+    /prefers-reduced-motion|useReducedMotion/.test(readFileSync(file, "utf8")),
+  );
+  assert.deepEqual(own.map((file) => relative(ROOT, file)), []);
+});
+
+test("every public-page file that animates with motion/react honors the lite mode", () => {
+  // SiteHeader only reads the scroll position to restyle itself; it animates nothing.
+  const animated = sourceFiles(join(ROOT, "app", "(marketing)")).filter((file) => {
+    const text = readFileSync(file, "utf8");
+    return /from "motion\/react"/.test(text) && !/useLite|isLite/.test(text) && !file.endsWith("SiteHeader.tsx");
+  });
+  assert.deepEqual(animated.map((file) => relative(ROOT, file)), []);
 });
 
 // The rail expands and collapses (click on the logo), but the choice lives only in the browser (`localStorage`): the server renders the

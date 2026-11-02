@@ -30,7 +30,7 @@ export function ReportPager({
         aria-label="Itens por página"
         value={pageSize}
         onChange={(event) => onPageSize(Number(event.target.value))}
-        className="h-7 cursor-pointer rounded-full bg-transparent px-2.5 text-caption text-ink-soft outline-none transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-brand/50"
+        className="h-7 cursor-pointer rounded-button bg-transparent px-2.5 text-caption text-ink-soft outline-none transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-brand/50"
       >
         {REPORT_PAGE_SIZES.map((size) => (
           <option key={size} value={size}>

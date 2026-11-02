@@ -163,3 +163,14 @@ def test_same_cost_center_is_accepted(api_client: APIClient, cost_center: CostCe
     )
 
     assert response.status_code == status.HTTP_200_OK
+
+
+def test_duplicate_name_ignores_case(api_client: APIClient, cost_center: CostCenter) -> None:
+    _ = EntryTemplate.objects.create(cost_center=cost_center, name="PG. DMAE")
+
+    response = api_client.post(
+        reverse(LIST), {"cost_center": str(cost_center.pk), "name": "pg. dmae"}, format="json"
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert errors(response)[0]["code"] == "entry_template.name.duplicate_in_cost_center"

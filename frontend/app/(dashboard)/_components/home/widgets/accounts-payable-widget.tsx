@@ -1,4 +1,8 @@
+import Link from "next/link";
+
+import { accountPayableUrl, accountsPayableUrl } from "@/lib/finance/account-payable-workspace";
 import type { AccountsPayable, PayableTotal, UpcomingPayable } from "@/lib/api/generated/models";
+import { ROW_LINK } from "@/app/(dashboard)/_components/home/shared/row-link";
 import { Late } from "@/app/(dashboard)/_components/home/shared/Late";
 import { formatDate, relativeDays } from "@/app/(dashboard)/_components/home/shared/relative-days";
 
@@ -13,7 +17,11 @@ const accountsLabel = (count: number) => `${integer(count)} conta${count === 1 ?
 
 /** O que pede atenção: o valor atrasado, grande e sozinho; o vermelho fica na nota do pé, que diz quantas contas estão vencidas. */
 function Overdue({ value }: { value: PayableTotal | undefined }) {
-  return <div className="text-title tabular-nums">{value ? brlWhole(value.total) : "–"}</div>;
+  return (
+    <Link href={accountsPayableUrl("overdue")} title="Abrir as contas atrasadas" className={`${ROW_LINK} block py-1 text-title tabular-nums`}>
+      {value ? brlWhole(value.total) : "–"}
+    </Link>
+  );
 }
 
 /** No pé do card: quantas contas estão vencidas (em vermelho) ou que não há atraso. */
@@ -27,20 +35,23 @@ function OverdueNote({ value }: { value: PayableTotal | undefined }) {
   );
 }
 
-/** Uma janela de vencimento como linha de razão: nome, quantidade e valor alinhado à direita. */
-function WindowRow({ label, value }: { label: string; value: PayableTotal | undefined }) {
+/** Uma janela de vencimento como linha de razão: nome, quantidade e valor alinhado à direita; abre a lista das contas daquele período (`?due=`). */
+function WindowRow({ label, value, due }: { label: string; value: PayableTotal | undefined; due: string }) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto_7rem] items-baseline gap-x-3 py-2">
-      <dt className="text-ink-soft">{label}</dt>
-      <dd className="text-caption text-ink-faint tabular-nums">{value ? accountsLabel(value.count) : ""}</dd>
-      <dd className="text-right tabular-nums">{value ? brlWhole(value.total) : "–"}</dd>
-    </div>
+    <li>
+      <Link href={accountsPayableUrl(due)} title={`Abrir as contas: ${label.toLowerCase()}`} className={`${ROW_LINK} grid grid-cols-[minmax(0,1fr)_auto_7rem] items-baseline gap-x-3 py-2`}>
+        <span className="text-ink-soft">{label}</span>
+        <span className="text-caption text-ink-faint tabular-nums">{value ? accountsLabel(value.count) : ""}</span>
+        <span className="text-right tabular-nums">{value ? brlWhole(value.total) : "–"}</span>
+      </Link>
+    </li>
   );
 }
 
 function UpcomingRow({ account }: { account: UpcomingPayable }) {
   return (
-    <li className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-2.5">
+    <li>
+      <Link href={accountPayableUrl(account.id)} className={`${ROW_LINK} grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-2.5`}>
       <div className="min-w-0">
         <div className="truncate font-medium">{account.description}</div>
         <div className="truncate text-caption text-ink-soft">
@@ -54,6 +65,7 @@ function UpcomingRow({ account }: { account: UpcomingPayable }) {
           {account.overdue ? <Late>{relativeDays(account.due_date)}</Late> : relativeDays(account.due_date)}
         </div>
       </div>
+      </Link>
     </li>
   );
 }
@@ -85,11 +97,11 @@ export const buildAccountsPayableWidget: WidgetBuilder = (dash) => {
     render: (large) => (
       <>
         <Overdue value={payables?.overdue} />
-        <dl className="mt-4 divide-y divide-border">
-          <WindowRow label="Vencem hoje" value={payables?.due_today} />
-          <WindowRow label="Próximos 7 dias" value={payables?.due_next_7_days} />
-          <WindowRow label="Neste mês" value={payables?.due_this_month} />
-        </dl>
+        <ul className="mt-4 divide-y divide-border">
+          <WindowRow label="Vencem hoje" value={payables?.due_today} due="today" />
+          <WindowRow label="Próximos 7 dias" value={payables?.due_next_7_days} due="next_7_days" />
+          <WindowRow label="Neste mês" value={payables?.due_this_month} due="this_month" />
+        </ul>
         <OverdueNote value={payables?.overdue} />
         {large && (
           <div className="mt-6 border-t border-border pt-4">

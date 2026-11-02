@@ -3,6 +3,7 @@ import {
   CUSTOM_ACCENT,
   customAccentForeground,
   isHexColor,
+  resolvePerf,
   type Appearance,
 } from "@/lib/theme/appearance";
 
@@ -16,6 +17,8 @@ export function applyAppearance(next: Appearance) {
     root.dataset[key] = next[key];
     document.cookie = `${APPEARANCE_COOKIES[key]}=${next[key]}; path=/; max-age=${ONE_YEAR}; samesite=lax`;
   }
+  // O modo leve depende da preferência e do aparelho (`data-device`, detectado pelo script do <head>).
+  root.dataset.perf = resolvePerf(next.motion, root.dataset.device);
   // O destaque personalizado entra por duas variáveis do <html>; o CSS deriva as variações dele (`html[data-accent="custom"]`).
   if (next.accent === CUSTOM_ACCENT && isHexColor(next.accentCustom)) {
     root.style.setProperty("--accent-custom", next.accentCustom);

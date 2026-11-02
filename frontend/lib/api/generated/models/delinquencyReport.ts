@@ -5,8 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { DelinquencyCondominiumTotal } from './delinquencyCondominiumTotal';
-import type { DelinquencyRow } from './delinquencyRow';
+import type { DelinquencyCondominiumTotal } from './delinquencyCondominiumTotal.ts';
+import type { DelinquencyRow } from './delinquencyRow.ts';
 
 /**
  * The overdue boletos as of a day: totals, the same per condominium, and the rows of one page (10 per page by default on the screen endpoint, `?page_size=` up to 100; the PDF lists up to 2000, `truncated` says if more).

@@ -15,7 +15,7 @@ export default async function EntryBatchPage({ params }: { params: Promise<{ id:
   return (
     <>
       <EntryBatchHeader batchId={id} />
-      <EntryBatchView batchId={id} />
+      <EntryBatchView key={id} batchId={id} />
     </>
   );
 }

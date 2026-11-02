@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { Dashboard } from "@/lib/api/generated/models";
+import { ROW_LINK } from "@/app/(dashboard)/_components/home/shared/row-link";
 import { brlWhole, integer } from "@/app/(dashboard)/_components/home/widgets/format";
 
 const SHORT_LIST = 5;
@@ -24,7 +25,7 @@ export function FixedRevenueBody({ revenue }: { revenue: Dashboard["fixed_revenu
         <ul className="mt-3 divide-y divide-border">
           {largest.map((item) => (
             <li key={item.id}>
-              <Link href={`/condominiums/${item.id}`} className="flex items-baseline justify-between gap-3 py-2 transition-colors hover:text-ink">
+              <Link href={`/condominiums/${item.id}`} className={`${ROW_LINK} flex items-baseline justify-between gap-3 py-2`}>
                 <span className="min-w-0 truncate text-ink-soft">{item.name}</span>
                 <span className="shrink-0 tabular-nums">{brlWhole(item.amount)}</span>
               </Link>

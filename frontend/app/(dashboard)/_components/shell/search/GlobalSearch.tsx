@@ -75,7 +75,7 @@ export function GlobalSearch() {
     >
       <Dialog.Trigger
         className={cn(
-          "flex size-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink",
+          "flex size-10 items-center justify-center rounded-button text-ink-soft transition-colors hover:bg-surface hover:text-ink",
           onDashboard ? "lg:glass-pill lg:h-11 lg:w-full lg:justify-between lg:px-5 lg:text-left lg:text-[0.9375rem]" : "lg:hidden"
         )}
         aria-label="Abrir busca"

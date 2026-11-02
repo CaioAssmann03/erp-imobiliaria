@@ -1,18 +1,17 @@
 "use client";
 
-import { Search } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 
 import { ShowMore } from "@/components/data-list";
-import { Skeleton } from "@/components/ui/skeleton";
+import { RegistryCreate, RegistryListItem } from "@/components/layout/RegistryList";
+import { RegistrySubList } from "@/components/layout/RegistrySubList";
+import { PersonRowContent } from "@/components/persons/PersonRowContent";
 import { useCurrentUrl } from "@/hooks/use-current-url";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useUnitPeopleList } from "@/lib/api/generated";
-import { formatCode } from "@/lib/format/format";
 import { formatDate } from "@/lib/format/format";
-import { personUrl, UNIT_ROLE_LABELS } from "@/lib/persons/person-workspace";
+import { newPersonUrl, personUrl, UNIT_ROLE_LABELS } from "@/lib/persons/person-workspace";
 
 /**
  * Client Component: as pessoas da unidade aberta (o proprietário e o inquilino vigentes), numa sub-tela no meio, como as pessoas do condomínio, no
@@ -28,66 +27,33 @@ export function UnitPeopleList({ condominiumId, unitId }: { condominiumId: strin
   const results = data?.results ?? [];
 
   return (
-    <section aria-label="Pessoas da unidade" className="flex flex-col gap-3">
-      <h2 className="px-1 text-heading">Pessoas</h2>
-
-      <div className="flex flex-col gap-3 rounded-card bg-surface p-3 shadow-card">
-        <label className="flex h-10 items-center gap-2 rounded-control bg-surface-muted px-3 text-ink-soft focus-within:ring-2 focus-within:ring-brand/50">
-          <Search className="size-4 shrink-0" />
-          <span className="sr-only">Buscar pessoa</span>
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Nome"
-            className="min-w-0 flex-1 bg-transparent text-body text-ink outline-none placeholder:text-ink-faint"
-          />
-        </label>
-
-        <nav aria-label="Lista de pessoas da unidade">
-          {isLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 3 }, (_, index) => (
-                <Skeleton key={index} className="h-12 rounded-panel" />
-              ))}
-            </div>
-          ) : results.length === 0 ? (
-            <p className="px-2 py-6 text-center text-body text-ink-soft">
-              {term ? "Nenhuma pessoa com essa busca." : "Esta unidade ainda não tem proprietário nem inquilino vigente."}
-            </p>
-          ) : (
-            <ul className="space-y-0.5">
-              {results.map((link) => {
-                const role = UNIT_ROLE_LABELS[link.role === "owner" ? "owner" : "tenant"];
-                const detail = [
-                  role,
-                  link.role === "owner" && link.ownership_percentage ? `${Number(link.ownership_percentage)}%` : null,
-                  `desde ${formatDate(link.start_date)}`,
-                ]
-                  .filter(Boolean)
-                  .join(" · ");
-                return (
-                  <li key={link.id}>
-                    <Link
-                      href={personUrl(link.person, { condominium: condominiumId, unit: unitId, from: here })}
-                      className="block rounded-panel px-3 py-2 outline-none transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <span className="block truncate text-body font-medium">
-                        <span className="tabular-nums">{formatCode(link.person_detail.code)}</span>
-                        <span className="text-ink-faint"> · </span>
-                        {link.person_detail.name}
-                      </span>
-                      <span className="block truncate text-caption text-ink-soft">{detail}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </nav>
-
-        {!isLoading && data && data.count > 0 && <ShowMore shown={results.length} total={data.count} noun="pessoa(s)" onMore={showMore} />}
-      </div>
-    </section>
+    <RegistrySubList
+      label="Pessoas da unidade"
+      title="Pessoas"
+      actions={<RegistryCreate href={newPersonUrl({ condominium: condominiumId, unit: unitId, from: here })} label="Nova pessoa" />}
+      search={{ label: "Buscar pessoa", placeholder: "Nome", value: search, onChange: setSearch }}
+      navLabel="Lista de pessoas da unidade"
+      isLoading={isLoading}
+      isEmpty={results.length === 0}
+      emptyMessage={term ? "Nenhuma pessoa com essa busca." : "Esta unidade ainda não tem proprietário nem inquilino vigente."}
+      skeletonRows={3}
+      footer={!isLoading && data && data.count > 0 && <ShowMore shown={results.length} total={data.count} noun="pessoa(s)" onMore={showMore} />}
+    >
+      {results.map((link) => {
+        const role = UNIT_ROLE_LABELS[link.role === "owner" ? "owner" : "tenant"];
+        const detail = [
+          role,
+          link.role === "owner" && link.ownership_percentage ? `${Number(link.ownership_percentage)}%` : null,
+          `desde ${formatDate(link.start_date)}`,
+        ]
+          .filter(Boolean)
+          .join(" · ");
+        return (
+          <RegistryListItem key={link.id} href={personUrl(link.person, { condominium: condominiumId, unit: unitId, from: here })} onCard>
+            <PersonRowContent code={link.person_detail.code} name={link.person_detail.name} detail={detail} />
+          </RegistryListItem>
+        );
+      })}
+    </RegistrySubList>
   );
 }

@@ -40,10 +40,22 @@ export const TEXT_SIZES = [
   { value: "xlarge", label: "Maior", hint: "125%" },
 ] as const;
 
+/** Animações e efeitos: `auto` liga o modo leve sozinho em máquina fraca (ver `resolvePerf`); `reduced` liga sempre; `full` nunca (salvo o sistema pedir menos movimento). */
 export const MOTIONS = [
-  { value: "full", label: "Normal" },
-  { value: "reduced", label: "Reduzidas" },
+  { value: "auto", label: "Automático" },
+  { value: "full", label: "Completos" },
+  { value: "reduced", label: "Reduzidos" },
 ] as const;
+
+/** O que o script do <head> detectou no aparelho: `reduce` = o sistema pede menos movimento; `lite` = máquina fraca ou economia de dados. */
+export type Device = "standard" | "lite" | "reduce";
+/** O modo efetivo (`data-perf` no <html>): `lite` corta animações, blur/vidro e os efeitos em canvas. */
+export type Perf = "full" | "lite";
+
+/** Preferência + aparelho → modo efetivo. O pedido do sistema por menos movimento vale mesmo com "Completos". Espelhado no script do <head>. */
+export function resolvePerf(motion: string | undefined, device: string | undefined): Perf {
+  return motion === "reduced" || device === "reduce" || (motion === "auto" && device === "lite") ? "lite" : "full";
+}
 
 export type Mode = (typeof MODES)[number]["value"];
 export type Accent = (typeof ACCENTS)[number]["value"] | typeof CUSTOM_ACCENT;
@@ -61,7 +73,7 @@ export interface Appearance {
   motion: Motion;
 }
 
-export const DEFAULT_APPEARANCE: Appearance = { mode: "dark", accent: "orange", accentCustom: "", font: "inter", text: "normal", motion: "full" };
+export const DEFAULT_APPEARANCE: Appearance = { mode: "dark", accent: "orange", accentCustom: "", font: "inter", text: "normal", motion: "auto" };
 
 export const APPEARANCE_COOKIES = {
   mode: "ui_mode",
@@ -94,7 +106,7 @@ export function parseAppearance(
 
 /**
  * Script inline do <head>: roda antes do primeiro paint e copia os cookies de aparência para
- * atributos do <html> (`data-mode`, `data-accent`, `data-font`, `data-text`, `data-motion`), sem piscar o tema padrão.
+ * atributos do <html> (`data-mode`, `data-accent`, `data-font`, `data-text`, `data-motion`) e detecta o aparelho (`data-device`, `data-perf`), sem piscar o tema padrão.
  * Valores fora da lista (cookie adulterado) caem no padrão.
  */
 export const APPEARANCE_INIT_SCRIPT = `(function(){try{
@@ -109,4 +121,10 @@ if(d.accent===${JSON.stringify(CUSTOM_ACCENT)}){if(ok){var n=parseInt(h.slice(1)
 d.font=pick(c[${JSON.stringify(APPEARANCE_COOKIES.font)}],${JSON.stringify(FONTS.map((o) => o.value))},${JSON.stringify(DEFAULT_APPEARANCE.font)});
 d.text=pick(c[${JSON.stringify(APPEARANCE_COOKIES.text)}],${JSON.stringify(TEXT_SIZES.map((o) => o.value))},${JSON.stringify(DEFAULT_APPEARANCE.text)});
 d.motion=pick(c[${JSON.stringify(APPEARANCE_COOKIES.motion)}],${JSON.stringify(MOTIONS.map((o) => o.value))},${JSON.stringify(DEFAULT_APPEARANCE.motion)});
+var v="standard";
+try{var n=navigator,k=n.connection;
+if(matchMedia("(prefers-reduced-motion: reduce)").matches)v="reduce";
+else if((k&&k.saveData)||n.hardwareConcurrency<=4||n.deviceMemory<=4)v="lite"}catch(e){}
+d.device=v;
+d.perf=d.motion==="reduced"||v==="reduce"||(d.motion==="auto"&&v==="lite")?"lite":"full";
 }catch(e){}})();`;

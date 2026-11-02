@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BillingEntryUnitAmount } from './billingEntryUnitAmount';
+import type { BillingEntryUnitAmount } from './billingEntryUnitAmount.ts';
 
 /**
  * An entry as the boleto of one month carries it.

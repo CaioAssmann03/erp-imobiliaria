@@ -1,19 +1,21 @@
 "use client";
 
-import { useWatch } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 import { CheckboxField, SearchSelectField } from "@/components/form/fields";
+import { CondominiumField } from "@/components/form/CondominiumField";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
+import { SectionAnchor } from "@/components/form/SectionAnchor";
 
 import { FormSkeleton } from "@/components/form/FormSkeleton";
 
 import {
-  useCondominiumsList,
   useCostCenterCatalogList,
   useCostCentersRetrieve,
 } from "@/lib/api/generated";
 import { formatCode } from "@/lib/format/format";
 import { condominiumPageUrl } from "@/lib/condominiums/condominium-registry";
+import { COST_CENTER_SECTIONS, newCostCenterUrl } from "@/lib/condominiums/cost-center-workspace";
 import { throwIfPageError } from "@/lib/query/page-error";
 import { COST_CENTER_DEFAULTS, costCenterSchema, costCenterToForm } from "@/lib/schemas/cost-center";
 
@@ -29,16 +31,16 @@ export function CostCenterForm({
   condominiumId,
 }: {
   costCenterId?: string;
-  /** Cadastro a partir de um condomínio: já vem escolhido e o campo some. */
+  /** Cadastro a partir de um condomínio: já vem escolhido e o campo do condomínio mostra o dele (trocá-lo abre o cadastro do outro). */
   condominiumId?: string;
 }) {
+  const router = useRouter();
   const isEdit = costCenterId !== undefined;
 
   const { data: costCenter, isLoading, error: loadError } = useCostCentersRetrieve(costCenterId ?? "", {
     query: { enabled: isEdit },
   });
   throwIfPageError(loadError);
-  const { data: condominiums } = useCondominiumsList({ limit: 100 });
 
   const methods = useRecordForm({
     schema: costCenterSchema,
@@ -46,11 +48,9 @@ export function CostCenterForm({
     record: costCenter,
     toForm: costCenterToForm,
   });
-  // O catálogo (só as ativas) menos as que o condomínio escolhido já usa: quem tira é a API (`unused_by_condominium`).
-  const watchedCondominium = useWatch({ control: methods.control, name: "condominium" });
-  const chosenCondominium = condominiumId ?? watchedCondominium;
+  // O catálogo (só as ativas) menos as que o condomínio já usa: quem tira é a API (`unused_by_condominium`).
   const { data: catalog } = useCostCenterCatalogList(
-    { active: true, limit: 100, ...(chosenCondominium ? { unused_by_condominium: chosenCondominium } : {}) },
+    { active: true, limit: 100, ...(condominiumId ? { unused_by_condominium: condominiumId } : {}) },
     { query: { enabled: !isEdit } }
   );
   const catalogOptions = (catalog?.results ?? []).map((item) => ({ value: item.id, label: `${formatCode(item.code ?? 0)} · ${item.name}` }));
@@ -67,47 +67,41 @@ export function CostCenterForm({
       cancelHref={returnUrl}
       danger={costCenter && <CostCenterDeleteButton condominiumId={costCenter.condominium} costCenterId={costCenter.id} name={costCenter.name} />}
     >
-      <FormSection
-        title="Sub-conta"
-        description={
-          isEdit
-            ? "O código e o nome vêm do catálogo da administradora; para mudá-los, edite a sub-conta lá."
-            : "Escolha, entre as sub-contas do catálogo da administradora, a que este condomínio vai usar."
-        }
-      >
-        {!isEdit && !condominiumId && (
-          <SearchSelectField
-            name="condominium"
-            label="Condomínio"
-            required
-            placeholder="Selecione"
-            options={(condominiums?.results ?? []).map((item) => ({ value: item.id, label: item.name }))}
-          />
-        )}
-        {isEdit ? (
-          <p className="rounded-control bg-surface-muted px-4 py-2 text-body">
-            <span className="tabular-nums text-ink-soft">{costCenter ? formatCode(costCenter.code) : ""}</span>
-            {" · "}
-            {costCenter?.name}
-          </p>
-        ) : (
-          <SearchSelectField
-            name="catalog_item"
-            label="Sub-conta do catálogo"
-            required
-            placeholder="Selecione"
-            options={catalogOptions}
-            hint={
-              catalogOptions.length === 0
-                ? "Não há sub-contas livres no catálogo para este condomínio. Cadastre-as em Financeiro → Catálogo de sub-contas."
-                : undefined
-            }
-          />
-        )}
-        <FieldRow>
-          <CheckboxField name="active" label="Cadastro ativo" />
-        </FieldRow>
-      </FormSection>
+      <SectionAnchor id={COST_CENTER_SECTIONS[0].id}>
+        <FormSection
+          title="Sub-conta"
+          description={
+            isEdit
+              ? "O código e o nome vêm do catálogo da administradora; para mudá-los, edite a sub-conta lá."
+              : "Escolha, entre as sub-contas do catálogo da administradora, a que este condomínio vai usar."
+          }
+        >
+          {!isEdit && condominiumId && <CondominiumField value={condominiumId} onChange={(condominium) => router.replace(newCostCenterUrl(condominium))} />}
+          {isEdit ? (
+            <p className="rounded-control bg-surface-muted px-4 py-2 text-body">
+              <span className="tabular-nums text-ink-soft">{costCenter ? formatCode(costCenter.code) : ""}</span>
+              {" · "}
+              {costCenter?.name}
+            </p>
+          ) : (
+            <SearchSelectField
+              name="catalog_item"
+              label="Sub-conta do catálogo"
+              required
+              placeholder="Selecione"
+              options={catalogOptions}
+              hint={
+                catalogOptions.length === 0
+                  ? "Não há sub-contas livres no catálogo para este condomínio. Cadastre-as em Financeiro → Catálogo de sub-contas."
+                  : undefined
+              }
+            />
+          )}
+          <FieldRow>
+            <CheckboxField name="active" label="Cadastro ativo" />
+          </FieldRow>
+        </FormSection>
+      </SectionAnchor>
     </RecordForm>
   );
 }

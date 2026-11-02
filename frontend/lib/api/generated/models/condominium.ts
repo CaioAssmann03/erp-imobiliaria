@@ -5,9 +5,9 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { Address } from './address';
-import type { CondominiumAdministrationContract } from './condominiumAdministrationContract';
-import type { CondominiumTypeEnum } from './condominiumTypeEnum';
+import type { Address } from './address.ts';
+import type { CondominiumAdministrationContract } from './condominiumAdministrationContract.ts';
+import type { CondominiumTypeEnum } from './condominiumTypeEnum.ts';
 
 /**
  * Serializer mixin: input is validated by the model's rules, never by rules written here.

@@ -1,8 +1,9 @@
 """Company scoping: one place decides which records a user may see (spec 004).
 
-Every model declares `company_lookup`, the path from the model to its company. A superuser
-bypasses the scope; everybody else is limited to `user.company`. The viewset mixin, the
-serializer relation field and the admin mixin only call `scope_to_company`.
+Every model declares `company_lookup`, the path from the model to its company. Everybody is
+limited to `user.company`, a superuser included (spec 067): the API never shows another company.
+The viewset mixin and the serializer relation field only call `scope_to_company`; the Django
+Admin mixin is the one place where a superuser sees every company.
 """
 
 from typing import Any, TypeVar
@@ -27,11 +28,9 @@ def company_lookup_of(model: type[Model]) -> str:
 
 
 def scope_to_company(queryset: QuerySet[ModelT], user: Any) -> QuerySet[ModelT]:
-    """Limit `queryset` to the user's company; a superuser sees every company."""
+    """Limit `queryset` to the user's company, whoever the user is (spec 067)."""
     if user is None or not getattr(user, "is_authenticated", False):
         return queryset.none()
-    if user.is_superuser:
-        return queryset
     lookup = company_lookup_of(queryset.model)
     return queryset.filter(**{lookup: user.company_id})
 
@@ -78,12 +77,13 @@ class CompanyScopedPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):  
 class CompanyScopedAdminMixin:
     """Django Admin mixin: lists and foreign-key choices follow the user's company.
 
-    A non-superuser sees a single company in a company field, already selected.
+    A superuser sees every company here (the Admin is where companies are managed); a
+    non-superuser sees a single company in a company field, already selected.
     """
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
         queryset: QuerySet[Any] = super().get_queryset(request)  # type: ignore[misc]
-        return scope_to_company(queryset, request.user)
+        return queryset if request.user.is_superuser else scope_to_company(queryset, request.user)
 
     def formfield_for_foreignkey(
         self, db_field: models.ForeignKey[Any], request: HttpRequest, **kwargs: Any
@@ -91,7 +91,8 @@ class CompanyScopedAdminMixin:
         related_model = db_field.remote_field.model
         user: Any = request.user
         if "queryset" not in kwargs and hasattr(related_model, "company_lookup"):
-            kwargs["queryset"] = scope_to_company(related_model._default_manager.all(), user)
+            everything = related_model._default_manager.all()
+            kwargs["queryset"] = everything if user.is_superuser else scope_to_company(everything, user)
             if related_model._meta.label == "core.Company" and not user.is_superuser:
                 kwargs.setdefault("initial", user.company_id)
         parent: ModelAdmin[Any] = super()  # type: ignore[assignment]

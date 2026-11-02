@@ -1,27 +1,20 @@
 "use client";
 
-import { StatusText } from "@/components/StatusText";
-import { Skeleton } from "@/components/ui/skeleton";
+import { CondominiumBackLink } from "@/app/(dashboard)/condominiums/_components/condominium/CondominiumBackLink";
+import { RegistryHeader } from "@/components/layout/RegistryHeader";
 import { useCostCentersRetrieve } from "@/lib/api/generated";
-import { formatCode } from "@/lib/format/format";
 
 /**
- * Client Component: o título da edição de uma sub-conta: o código (cinza, como na lista ao lado), o nome e a situação em texto simples
- * (verde ativo, preto inativo), como no cabeçalho do condomínio. Usa a mesma consulta do formulário (uma só chamada).
+ * Client Component: o título da edição de uma sub-conta: o "voltar" ao condomínio dela (ou à tela de origem), o código (cinza, como na lista ao
+ * lado), o nome e a situação em texto simples (verde ativo, preto inativo). Usa a mesma consulta do formulário (uma só chamada).
  */
 export function CostCenterHeader({ costCenterId }: { costCenterId: string }) {
   const { data: costCenter } = useCostCentersRetrieve(costCenterId);
 
-  if (!costCenter) return <Skeleton className="h-9 w-72 rounded-control" />;
-
   return (
-    <span className="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1">
-      <span>
-        <span className="tabular-nums text-ink-faint">{formatCode(costCenter.code)}</span>
-        <span className="text-ink-faint"> · </span>
-        {costCenter.name}
-      </span>
-      <StatusText active={costCenter.active ?? true} />
-    </span>
+    <RegistryHeader
+      back={<CondominiumBackLink costCenterId={costCenterId} />}
+      record={costCenter && { code: costCenter.code, name: costCenter.name, active: costCenter.active ?? true }}
+    />
   );
 }

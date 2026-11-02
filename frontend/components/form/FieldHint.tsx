@@ -15,7 +15,7 @@ export function FieldHint({ label, children }: { label: string; children: React.
         openOnHover
         delay={120}
         aria-label={`Ajuda: ${label}`}
-        className="inline-flex size-4 shrink-0 items-center justify-center rounded-full text-ink-faint transition-colors outline-none hover:text-ink focus-visible:text-ink focus-visible:ring-2 focus-visible:ring-brand/50"
+        className="inline-flex size-4 shrink-0 items-center justify-center rounded-badge text-ink-faint transition-colors outline-none hover:text-ink focus-visible:text-ink focus-visible:ring-2 focus-visible:ring-brand/50"
       >
         <Info aria-hidden className="size-3.5" />
       </Popover.Trigger>

@@ -23,10 +23,10 @@ import type {
 import type {
   CondominiumPeopleListParams,
   ErrorResponse,
-  PaginatedPersonList
+  PaginatedCondominiumPersonList
 } from '../models';
 
-import { customInstance } from '../../mutator';
+import { customInstance } from '../../mutator.ts';
 
 
 
@@ -47,7 +47,8 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * The people of the condominiums: the `persons` list (same filters, search and payload) narrowed by `?condominium=` and `?unit=`.
+ * The people of the condominiums: the `persons` list (same filters, search and payload) narrowed by `?condominium=` and `?unit=`,
+ * each with the owner/tenant roles and unit names they hold there (`unit_roles`).
  *
  * It lives here because `persons` must not know the condominiums.
  */
@@ -57,7 +58,7 @@ export const condominiumPeopleList = (
 ) => {
 
 
-      return customInstance<PaginatedPersonList>(
+      return customInstance<PaginatedCondominiumPersonList>(
       {url: `/api/condominium-people/`, method: 'GET',
         params, signal
     },

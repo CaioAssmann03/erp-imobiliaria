@@ -15,7 +15,7 @@ export function AddWidgetMenu() {
     <Popover.Root>
       <Popover.Trigger
         disabled={hidden.length === 0}
-        className="inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-body font-medium transition-colors outline-none hover:bg-ink-foreground/15 focus-visible:ring-2 focus-visible:ring-brand disabled:pointer-events-none disabled:opacity-40"
+        className="inline-flex h-8 items-center gap-1.5 rounded-button px-3 text-body font-medium transition-colors outline-none hover:bg-ink-foreground/15 focus-visible:ring-2 focus-visible:ring-brand disabled:pointer-events-none disabled:opacity-40"
       >
         <Plus className="size-4" />
         Adicionar

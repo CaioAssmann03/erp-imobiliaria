@@ -158,10 +158,15 @@ class BillingDocumentViewSet(CompanyScopedViewSetMixin, viewsets.ReadOnlyModelVi
     )
     @action(detail=False, methods=["get"])
     def delinquency(self, request: Request) -> Response:
-        """Report: the boletos awaiting payment past their due date, with the days late and the totals; the rows come 10 per page by default (`?page=`, `?page_size=` up to 100)."""
+        """Report: the boletos awaiting payment past their due date, with the days late and the totals; the rows come 10 per page by default (`?page=`, `?page_size=` up to 100); `?rows_order=` and `?condominiums_order=` choose the order."""
         query = DelinquencyQuerySerializer(data=request.query_params)
         _ = query.is_valid(raise_exception=True)
-        page = DelinquencyPage(number=query.validated_data["page"], size=query.validated_data["page_size"])
+        page = DelinquencyPage(
+            number=query.validated_data["page"],
+            size=query.validated_data["page_size"],
+            rows_order=query.validated_data["rows_order"],
+            condominiums_order=query.validated_data["condominiums_order"],
+        )
         return Response(DelinquencyReportSerializer(self._delinquency_report(page)).data)
 
     @extend_schema(

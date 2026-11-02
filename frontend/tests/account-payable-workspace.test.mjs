@@ -5,6 +5,7 @@ import {
   accountPayableUrl,
   accountsPayableFrameState,
   accountsPayableUrl,
+  dueParam,
   newAccountPayableUrl,
   OPEN_SECTIONS,
   payableSections,
@@ -39,4 +40,12 @@ test("an open account has the form sections; a closed one only the summary and, 
   assert.deepEqual(payableSections(undefined), OPEN_SECTIONS);
   assert.deepEqual(payableSections("cancelled").map((section) => section.id), ["resumo"]);
   assert.deepEqual(payableSections("paid").map((section) => section.id), ["resumo", "comprovantes"]);
+});
+
+test("the list opens on a due period from ?due=, and only a known one is kept", () => {
+  assert.equal(accountsPayableUrl(), "/finance/accounts-payable");
+  assert.equal(accountsPayableUrl("today"), "/finance/accounts-payable?due=today");
+  assert.equal(dueParam("next_7_days"), "next_7_days");
+  assert.equal(dueParam("evil"), "");
+  assert.equal(dueParam(null), "");
 });

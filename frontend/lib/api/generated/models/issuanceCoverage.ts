@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { IssuanceCoverageCondominium } from './issuanceCoverageCondominium';
+import type { IssuanceCoverageCondominium } from './issuanceCoverageCondominium.ts';
 
 /**
  * The active condominiums, how many have a boleto issued in the month and which do not.
@@ -13,5 +13,7 @@ import type { IssuanceCoverageCondominium } from './issuanceCoverageCondominium'
 export interface IssuanceCoverage {
   expected: number;
   issued: number;
+  /** How many condominiums have no boleto; `missing` is one page of them (`?page=`, `?limit=`). */
+  missing_count: number;
   missing: IssuanceCoverageCondominium[];
 }

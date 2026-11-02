@@ -22,10 +22,14 @@ import type {
 
 import type {
   Dashboard,
-  ErrorResponse
+  DashboardAdjustmentsListParams,
+  DashboardLargestFeesListParams,
+  ErrorResponse,
+  PaginatedCondominiumFeeList,
+  PaginatedUpcomingAdjustmentList
 } from '../models';
 
-import { customInstance } from '../../mutator';
+import { customInstance } from '../../mutator.ts';
 
 
 
@@ -120,6 +124,186 @@ export function useDashboardRetrieve<TData = Awaited<ReturnType<typeof dashboard
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getDashboardRetrieveQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * Every condominium's next adjustment, by date, paginated (the dashboard card shows only the first few).
+ */
+export const dashboardAdjustmentsList = (
+    params?: DashboardAdjustmentsListParams,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<PaginatedUpcomingAdjustmentList>(
+      {url: `/api/dashboard/adjustments/`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getDashboardAdjustmentsListQueryKey = (params?: DashboardAdjustmentsListParams,) => {
+    return [
+    `/api/dashboard/adjustments/`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getDashboardAdjustmentsListQueryOptions = <TData = Awaited<ReturnType<typeof dashboardAdjustmentsList>>, TError = ErrorResponse>(params?: DashboardAdjustmentsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardAdjustmentsList>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getDashboardAdjustmentsListQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof dashboardAdjustmentsList>>> = ({ signal }) => dashboardAdjustmentsList(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof dashboardAdjustmentsList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type DashboardAdjustmentsListQueryResult = NonNullable<Awaited<ReturnType<typeof dashboardAdjustmentsList>>>
+export type DashboardAdjustmentsListQueryError = ErrorResponse
+
+
+export function useDashboardAdjustmentsList<TData = Awaited<ReturnType<typeof dashboardAdjustmentsList>>, TError = ErrorResponse>(
+ params: undefined |  DashboardAdjustmentsListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardAdjustmentsList>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof dashboardAdjustmentsList>>,
+          TError,
+          Awaited<ReturnType<typeof dashboardAdjustmentsList>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDashboardAdjustmentsList<TData = Awaited<ReturnType<typeof dashboardAdjustmentsList>>, TError = ErrorResponse>(
+ params?: DashboardAdjustmentsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardAdjustmentsList>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof dashboardAdjustmentsList>>,
+          TError,
+          Awaited<ReturnType<typeof dashboardAdjustmentsList>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDashboardAdjustmentsList<TData = Awaited<ReturnType<typeof dashboardAdjustmentsList>>, TError = ErrorResponse>(
+ params?: DashboardAdjustmentsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardAdjustmentsList>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useDashboardAdjustmentsList<TData = Awaited<ReturnType<typeof dashboardAdjustmentsList>>, TError = ErrorResponse>(
+ params?: DashboardAdjustmentsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardAdjustmentsList>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getDashboardAdjustmentsListQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * The active condominiums with a fixed fee, the largest first, paginated (the dashboard card shows only the top few).
+ */
+export const dashboardLargestFeesList = (
+    params?: DashboardLargestFeesListParams,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<PaginatedCondominiumFeeList>(
+      {url: `/api/dashboard/largest-fees/`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getDashboardLargestFeesListQueryKey = (params?: DashboardLargestFeesListParams,) => {
+    return [
+    `/api/dashboard/largest-fees/`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getDashboardLargestFeesListQueryOptions = <TData = Awaited<ReturnType<typeof dashboardLargestFeesList>>, TError = ErrorResponse>(params?: DashboardLargestFeesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardLargestFeesList>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getDashboardLargestFeesListQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof dashboardLargestFeesList>>> = ({ signal }) => dashboardLargestFeesList(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof dashboardLargestFeesList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type DashboardLargestFeesListQueryResult = NonNullable<Awaited<ReturnType<typeof dashboardLargestFeesList>>>
+export type DashboardLargestFeesListQueryError = ErrorResponse
+
+
+export function useDashboardLargestFeesList<TData = Awaited<ReturnType<typeof dashboardLargestFeesList>>, TError = ErrorResponse>(
+ params: undefined |  DashboardLargestFeesListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardLargestFeesList>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof dashboardLargestFeesList>>,
+          TError,
+          Awaited<ReturnType<typeof dashboardLargestFeesList>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDashboardLargestFeesList<TData = Awaited<ReturnType<typeof dashboardLargestFeesList>>, TError = ErrorResponse>(
+ params?: DashboardLargestFeesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardLargestFeesList>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof dashboardLargestFeesList>>,
+          TError,
+          Awaited<ReturnType<typeof dashboardLargestFeesList>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDashboardLargestFeesList<TData = Awaited<ReturnType<typeof dashboardLargestFeesList>>, TError = ErrorResponse>(
+ params?: DashboardLargestFeesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardLargestFeesList>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useDashboardLargestFeesList<TData = Awaited<ReturnType<typeof dashboardLargestFeesList>>, TError = ErrorResponse>(
+ params?: DashboardLargestFeesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof dashboardLargestFeesList>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getDashboardLargestFeesListQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

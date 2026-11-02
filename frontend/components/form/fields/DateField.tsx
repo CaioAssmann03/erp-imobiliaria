@@ -6,9 +6,9 @@ import { useId, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
 import { DateCalendar } from "@/components/dates/DateCalendar";
+import { maskDate, toIso } from "@/lib/format/date-text";
 import { formatDate, todayIso } from "@/lib/format/format";
 import { inputClass } from "@/lib/theme/ui";
-import { isValidIsoDate } from "@/lib/format/validators";
 import { cn } from "@/lib/utils";
 
 import { FormField } from "../FormField";
@@ -16,19 +16,6 @@ import type { BaseProps } from "./types";
 import { useFieldError } from "./use-field-error";
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
-
-/** Só dígitos, no formato "dd/mm/aaaa" enquanto se digita. */
-const maskDate = (value: string) => {
-  const digits = value.replace(/\D/g, "").slice(0, 8);
-  return [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4)].filter(Boolean).join("/");
-};
-
-/** "28/10/2026" → "2026-10-28" (só se for uma data que existe). */
-const toIso = (text: string): string | undefined => {
-  if (text.length !== 10) return undefined;
-  const iso = `${text.slice(6)}-${text.slice(3, 5)}-${text.slice(0, 2)}`;
-  return isValidIsoDate(iso) ? iso : undefined;
-};
 
 /**
  * O campo de uma data de formulário: **dá para digitar** `dd/mm/aaaa` no próprio campo (com a máscara) e o ícone abre o calendário do resto do site

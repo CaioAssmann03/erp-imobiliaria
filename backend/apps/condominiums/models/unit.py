@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, final, override
 
 from django.db import models
 from django.db.models import Q
+from django.db.models.functions import Lower
 
 from apps.condominiums.errors import UnitError
 from apps.condominiums.models.block import Block
@@ -95,14 +96,17 @@ class Unit(SoftDeleteMixin, BaseModel):
         ordering = ("condominium__code", "block__name", "name")
         constraints = (
             models.UniqueConstraint(
-                fields=("condominium", "block", "name"),
+                "condominium",
+                "block",
+                Lower("name"),
                 condition=Q(deleted_at__isnull=True),
                 name="unit_unique_per_block",
                 violation_error_message=UnitError.NAME_DUPLICATE_IN_BLOCK.message,
                 violation_error_code=UnitError.NAME_DUPLICATE_IN_BLOCK.value,
             ),
             models.UniqueConstraint(
-                fields=("condominium", "name"),
+                "condominium",
+                Lower("name"),
                 condition=Q(block__isnull=True) & Q(deleted_at__isnull=True),
                 name="unit_unique_per_condominium",
                 violation_error_message=UnitError.NAME_DUPLICATE_IN_CONDOMINIUM.message,

@@ -45,4 +45,6 @@ Only in the `HttpOnly` cookies and in server memory for the length of one reques
 `API_INTERNAL_URL` (the Django address, **server only**, never `NEXT_PUBLIC_*`) and `INTERNAL_API_KEY` (same value as the backend).
 
 ## Code rules
+The public pages (`PUBLIC_PATHS` from `lib/site/public-pages.ts`) skip the login check in `proxy.ts`; `robots.txt`, `sitemap.xml` and `opengraph-image` are outside its matcher. A new public page goes in that list, nothing else.
+
 Cookie names from `lib/auth/auth.ts` (`ACCESS_COOKIE`, `REFRESH_COOKIE`), never literals. Read/write token cookies only in `lib/auth/auth-cookies.ts`, `app/api/[...path]/route.ts`, `proxy.ts` and the server branch of `lib/api/api-client.ts`. Never log, pass as props, or send a token to a third party. Authorization is the backend's job.

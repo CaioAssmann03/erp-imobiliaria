@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
 import { MonthField, SearchSelectField, TextField } from "@/components/form/fields";
+import { CondominiumField } from "@/components/form/CondominiumField";
 import { FieldRow, FormSection } from "@/components/form/FormSection";
-import { useCondominiumApportionmentCriteriaList, useCondominiumsList, useCostCentersList } from "@/lib/api/generated";
+import { useCondominiumApportionmentCriteriaList, useCostCentersList } from "@/lib/api/generated";
+import { newBillingEntryUrl } from "@/lib/billing/billing-entry-workspace";
 import { defaultCostCenterId, needsApportionmentCriterion, needsInstallments } from "@/lib/billing/billing-entry-payload";
 import { formatCode } from "@/lib/format/format";
 import { maskSignedMoney } from "@/lib/format/masks";
@@ -13,28 +16,34 @@ import {
   ALLOCATION_HINT,
   ALLOCATIONS,
   RECURRENCES,
+  billingEntryDefaults,
   type BillingEntryFormInput,
 } from "@/lib/schemas/billing-entry";
 
 import { EventPicker } from "./EventPicker";
+import { useEntriesScope } from "../use-entries-scope";
 import { SegmentedField } from "./SegmentedField";
 import { UnitsPicker } from "./UnitsPicker";
 
-/** A seção "Lançamento": o condomínio (o da lista ao lado, só para conferir), o mês de início, o evento e a descrição do boleto. */
+/**
+ * A seção "Lançamento": o condomínio (o da lista ao lado; trocá-lo leva a lista junto, pela URL, e limpa o resto do formulário, cujas unidades e eventos eram
+ * do outro), o mês de início, o evento e a descrição do boleto.
+ */
 export function EntryIdentitySection() {
+  const router = useRouter();
+  const scope = useEntriesScope();
+  const { getValues, reset } = useFormContext<BillingEntryFormInput>();
   const condominium = useWatch({ name: "condominium" }) as string;
-  const { data: condominiums } = useCondominiumsList({ limit: 100 });
-  const chosen = condominiums?.results.find((item) => item.id === condominium);
+
+  const chooseCondominium = (next: string) => {
+    reset(billingEntryDefaults(next, getValues("start_month")));
+    router.replace(newBillingEntryUrl({ ...scope, condominium: next }));
+  };
 
   return (
     <FormSection title="Lançamento" description="O que entra no boleto e a partir de que mês.">
       <FieldRow>
-        <div className="flex flex-col">
-          <span className="mb-1.5 text-caption font-medium text-ink-soft">Condomínio</span>
-          <p className="flex h-9 items-center truncate rounded-control bg-surface-muted px-3 text-body">
-            {chosen ? `${formatCode(chosen.code)} · ${chosen.name}` : "…"}
-          </p>
-        </div>
+        <CondominiumField value={condominium} onChange={chooseCondominium} />
         <MonthField
           name="start_month"
           label="Referência (mês de início)"
@@ -65,7 +74,7 @@ export function EntryAmountSection() {
     { condominium, limit: 100 },
     { query: { enabled: condominium !== "" && needsApportionmentCriterion(allocation) } }
   );
-  const costCenterOptions = [...(costCenters?.results ?? [])].sort((a, b) => (a.code ?? 0) - (b.code ?? 0));
+  const costCenterOptions = useMemo(() => costCenters?.results ?? [], [costCenters]);
 
   // A Conta Normal (código 0) já vem escolhida.
   useEffect(() => {

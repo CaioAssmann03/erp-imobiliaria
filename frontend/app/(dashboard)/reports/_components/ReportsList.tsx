@@ -4,20 +4,18 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { ScopeSearchCard } from "@/components/filters/ScopeSearchCard";
+import { ScopeSelect } from "@/components/filters/ScopeSelect";
 import { REPORT_GROUPS, REPORTS, REPORTS_URL, type ReportGroup } from "@/lib/reports/report-catalog";
-import { cn } from "@/lib/utils";
 import { RegistryList, RegistryListItem } from "@/components/layout/RegistryList";
-
-const ALL = "Todos";
 
 /**
  * Client Component: a coluna da esquerda de Relatórios, no desenho das listas dos cadastros: o título, o cartão branco do alto (aqui o assunto,
- * já que não há busca nem condomínio: Todos, Financeiro, Cobrança, Cadastros) e as linhas com o nome e, embaixo, o que o relatório mostra. O aberto
+ * já que não há busca nem condomínio, num `ScopeSelect` como o dos outros módulos) e as linhas com o nome e, embaixo, o que o relatório mostra. O aberto
  * fica marcado (fundo branco e a barra), os demais apagados enquanto há um aberto; um relatório sem tela fica apagado, com "Em breve".
  */
 export function ReportsList({ openHref, className }: { openHref: string | null; className?: string }) {
-  const [group, setGroup] = useState<ReportGroup | typeof ALL>(ALL);
-  const reports = REPORTS.filter((report) => group === ALL || report.group === group);
+  const [group, setGroup] = useState<ReportGroup | "">("");
+  const reports = REPORTS.filter((report) => group === "" || report.group === group);
 
   return (
     <RegistryList
@@ -30,26 +28,15 @@ export function ReportsList({ openHref, className }: { openHref: string | null; 
       toolbar={
         <ScopeSearchCard
           scopes={
-            <div role="radiogroup" aria-label="Assunto" className="flex h-full w-full items-center">
-              {[ALL, ...REPORT_GROUPS].map((option) => {
-                const selected = option === group;
-                return (
-                  <button
-                    key={option}
-                    type="button"
-                    role="radio"
-                    aria-checked={selected}
-                    onClick={() => setGroup(option as ReportGroup | typeof ALL)}
-                    className={cn(
-                      "h-full min-w-0 flex-1 truncate rounded-control px-2 text-body outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand/60",
-                      selected ? "bg-ink/[0.07] font-medium text-ink" : "text-ink-soft hover:text-ink"
-                    )}
-                  >
-                    {option}
-                  </button>
-                );
-              })}
-            </div>
+            <ScopeSelect
+              variant="segment"
+              className="flex-1"
+              label="Assunto"
+              value={group}
+              allLabel="Todos os assuntos"
+              onChange={(next) => setGroup(next as ReportGroup | "")}
+              options={REPORT_GROUPS.map((option) => ({ value: option, label: option }))}
+            />
           }
         />
       }

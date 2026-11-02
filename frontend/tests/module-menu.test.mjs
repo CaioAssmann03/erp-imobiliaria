@@ -51,3 +51,11 @@ test("the events are in Condomínios (Cadastros), not in Cobrança", () => {
   assert.equal(activeModule("/condominiums/events/new"), "condominiums");
   assert.equal(activeModule("/billing/events"), "billing");
 });
+
+test("the sub-contas are in Condomínios (Cadastros), and the unit's screens keep their own item active", () => {
+  const group = APP_MODULES.find((appModule) => appModule.key === "condominiums").groups[0].items;
+  const costCenters = group.find((item) => item.label === "Sub-contas");
+  assert.equal(costCenters?.href, "/condominiums/cost-centers");
+  assert.equal(isItemActive(costCenters, group, "/condominiums/cost-centers/k1"), true);
+  assert.equal(isItemActive(group[0], group, "/condominiums/cost-centers"), false);
+});

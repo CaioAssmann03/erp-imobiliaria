@@ -5,14 +5,14 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { AccountsPayable } from './accountsPayable';
-import type { AdjustmentByMonth } from './adjustmentByMonth';
-import type { FixedRevenue } from './fixedRevenue';
-import type { Lease } from './lease';
-import type { PendingItems } from './pendingItems';
-import type { Responsibles } from './responsibles';
-import type { Summary } from './summary';
-import type { UpcomingAdjustment } from './upcomingAdjustment';
+import type { AccountsPayable } from './accountsPayable.ts';
+import type { AdjustmentByMonth } from './adjustmentByMonth.ts';
+import type { FixedRevenue } from './fixedRevenue.ts';
+import type { Lease } from './lease.ts';
+import type { PendingItems } from './pendingItems.ts';
+import type { Responsibles } from './responsibles.ts';
+import type { Summary } from './summary.ts';
+import type { UpcomingAdjustment } from './upcomingAdjustment.ts';
 
 export interface Dashboard {
   condominiums: Summary;

@@ -5,10 +5,10 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BlankEnum } from './blankEnum';
-import type { CalculationKindEnum } from './calculationKindEnum';
-import type { NullEnum } from './nullEnum';
-import type { UnitValueFieldEnum } from './unitValueFieldEnum';
+import type { BlankEnum } from './blankEnum.ts';
+import type { CalculationKindEnum } from './calculationKindEnum.ts';
+import type { NullEnum } from './nullEnum.ts';
+import type { UnitValueFieldEnum } from './unitValueFieldEnum.ts';
 
 /**
  * One item of a plan. `position` is the item's place in the list it was sent in.

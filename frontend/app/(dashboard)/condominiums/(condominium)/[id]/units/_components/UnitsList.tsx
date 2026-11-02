@@ -1,7 +1,7 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { CompactFilter } from "@/components/filters/CompactFilter";
@@ -12,7 +12,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useBlocksList, useCondominiumsList, useUnitsList } from "@/lib/api/generated";
 import type { UnitsListPending, UnitsListType } from "@/lib/api/generated/models";
-import { newUnitUrl, unitsUrl } from "@/lib/condominiums/unit-workspace";
+import { newUnitUrl, unitsUrl, withBlockParam } from "@/lib/condominiums/unit-workspace";
 import { backTargetOf } from "@/lib/navigation/back-target";
 import { uuidParam } from "@/lib/api/uuid-param";
 import { RegistryCreate, RegistryList } from "@/components/layout/RegistryList";
@@ -31,28 +31,40 @@ import { PENDING_OPTIONS, unitFilterGroups, type UnitFilters } from "./unit-filt
 export function UnitsList({
   condominiumId: routeCondominiumId,
   openUnitId,
+  isNew = false,
   className,
 }: {
   condominiumId: string | null;
   openUnitId: string | null;
+  /** Numa unidade nova, escolher outro condomínio aqui leva ao cadastro dele (e não à lista), para a tela e a lista andarem juntas. */
+  isNew?: boolean;
   className?: string;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const urlParams = useSearchParams();
   // O bloco de onde se chegou (`?block=`, das unidades de um bloco) já recorta a lista e ela o mantém ao abrir outra unidade; a tela de origem
   // (`?from=`) segue junto, para o "voltar" da unidade continuar levando a ela. Se o endereço traz outro bloco, a lista o acompanha; se um link
-  // não traz bloco nenhum (a sub-tela de pessoas, por exemplo), ela **mantém** o que tinha: só o seletor ou outro condomínio o limpam.
-  const urlBlock = uuidParam(urlParams.get("block")) ?? "";
+  // não traz bloco nenhum (a sub-tela de pessoas, por exemplo), ela **mantém** o que tinha: só o seletor ou outro condomínio o limpam. O campo Bloco
+  // do formulário da unidade escreve o endereço com `?block=` (vazio, se ficou sem bloco), e aí a lista o acompanha, inclusive para limpar.
+  const rawUrlBlock = urlParams.get("block");
+  const urlBlock = uuidParam(rawUrlBlock) ?? "";
   // A pendência do painel (`?pending=`) abre a lista filtrada, de todos os condomínios, e segue nos links das unidades abertas por ela.
   const urlPendingParam = urlParams.get("pending") ?? "";
   const urlPending = PENDING_OPTIONS.some((option) => option.value === urlPendingParam) ? urlPendingParam : "";
   const from = backTargetOf(urlParams.get("from"))?.href ?? null;
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<UnitFilters>({ ...NO_UNIT_FILTERS, block: urlBlock, pending: urlPending });
-  const [seenUrlBlock, setSeenUrlBlock] = useState(urlBlock);
-  if (urlBlock !== seenUrlBlock) {
-    setSeenUrlBlock(urlBlock);
-    if (urlBlock) setFilters((current) => ({ ...current, block: urlBlock }));
+  const [seenUrlBlock, setSeenUrlBlock] = useState(rawUrlBlock);
+  if (rawUrlBlock !== seenUrlBlock) {
+    setSeenUrlBlock(rawUrlBlock);
+    if (rawUrlBlock !== null) setFilters((current) => ({ ...current, block: urlBlock }));
+  }
+  // Outro condomínio na rota (o campo Condomínio do cadastro) traz os blocos dele: o bloco do anterior deixa de valer.
+  const [seenCondominium, setSeenCondominium] = useState(routeCondominiumId);
+  if (routeCondominiumId !== seenCondominium) {
+    setSeenCondominium(routeCondominiumId);
+    setFilters((current) => ({ ...current, block: urlBlock }));
   }
   const [seenUrlPending, setSeenUrlPending] = useState(urlPending);
   if (urlPending !== seenUrlPending) {
@@ -96,6 +108,10 @@ export function UnitsList({
   const chooseCondominium = (id: string) => {
     setFilters({ ...NO_UNIT_FILTERS, pending: filters.pending });
     setSearch("");
+    if (isNew && id) {
+      router.push(newUnitUrl(id));
+      return;
+    }
     const url = unitsUrl(id || undefined);
     router.push(filters.pending ? `${url}${url.includes("?") ? "&" : "?"}pending=${filters.pending}` : url);
   };
@@ -106,9 +122,8 @@ export function UnitsList({
       title="Unidades"
       actions={
         <RegistryCreate
-          href={condominiumId ? newUnitUrl(condominiumId) : undefined}
+          href={newUnitUrl(condominiumId ?? undefined)}
           label="Nova unidade"
-          disabledHint={condominiumId ? undefined : "Escolha o condomínio para cadastrar uma unidade"}
         />
       }
       toolbar={
@@ -125,7 +140,11 @@ export function UnitsList({
                     label="Bloco"
                     value={filters.block}
                     allLabel="Todos os blocos"
-                    onChange={(value) => setFilters((current) => ({ ...current, block: value }))}
+                    onChange={(value) => {
+                      setFilters((current) => ({ ...current, block: value }));
+                      // Numa unidade nova o bloco da lista vai para o campo Bloco do formulário, pelo endereço.
+                      if (isNew) router.replace(`${pathname}?${withBlockParam(urlParams.toString(), value)}`);
+                    }}
                     options={blocks.map((block) => ({ value: block.id, label: block.name }))}
                   />
                 </>

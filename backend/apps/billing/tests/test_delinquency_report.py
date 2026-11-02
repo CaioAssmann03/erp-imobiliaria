@@ -225,3 +225,38 @@ def test_the_page_size_can_be_asked_and_is_capped(api_client: APIClient, documen
     assert (small["page_size"], small["page_count"], len(small["rows"])) == (5, 3, 2)
     for invalid in ("0", "101", "many"):
         assert api_client.get(reverse(REPORT), {"page_size": invalid}).status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_rows_can_come_oldest_first_across_condominiums(  # type: ignore[no-untyped-def]
+    api_client: APIClient, document: BillingDocument, new_document, make_unit, other_condominium: Condominium
+) -> None:
+    _ = _due(document, 5)
+    older = _document_of(other_condominium, document.payer, 90, date(2026, 8, 1))
+    middle = create_billing_document(new_document(unit=make_unit("202"), reference_month=date(2026, 8, 1), due_date=date(2026, 8, 10)))
+    _ = _due(middle, 40)
+
+    by_condominium_code = body(api_client.get(reverse(REPORT)))["rows"]
+    oldest_first = body(api_client.get(reverse(REPORT), {"rows_order": "oldest"}))["rows"]
+
+    assert [row["days_overdue"] for row in oldest_first] == [90, 40, 5]
+    assert oldest_first[0]["document_id"] == str(older.pk)
+    assert [row["days_overdue"] for row in by_condominium_code] != [90, 40, 5]
+
+
+def test_condominium_totals_can_come_largest_debt_first(  # type: ignore[no-untyped-def]
+    api_client: APIClient, document: BillingDocument, new_document, make_unit, other_condominium: Condominium
+) -> None:
+    small = _due(document, 5)
+    large = _document_of(other_condominium, document.payer, 20, date(2026, 9, 1))
+    _ = BillingDocument.objects.filter(pk=large.pk).update(amount=small.amount + Decimal("500.00"))
+
+    by_code = body(api_client.get(reverse(REPORT)))["by_condominium"]
+    by_amount = body(api_client.get(reverse(REPORT), {"condominiums_order": "amount"}))["by_condominium"]
+
+    assert [line["condominium_name"] for line in by_amount] == [other_condominium.name, document.unit.condominium.name]
+    assert {line["condominium_name"] for line in by_code} == {line["condominium_name"] for line in by_amount}
+
+
+def test_an_unknown_order_is_refused(api_client: APIClient, document: BillingDocument) -> None:
+    for param in ("rows_order", "condominiums_order"):
+        assert api_client.get(reverse(REPORT), {param: "random"}).status_code == status.HTTP_400_BAD_REQUEST

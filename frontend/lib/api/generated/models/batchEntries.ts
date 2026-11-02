@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BatchEntryLine } from './batchEntryLine';
+import type { BatchEntryLine } from './batchEntryLine.ts';
 
 /**
  * Several manual entries posted into one batch, all or none.

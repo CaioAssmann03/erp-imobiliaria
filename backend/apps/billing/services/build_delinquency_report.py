@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
-from typing import final
+from typing import Literal, final
 from uuid import UUID
 
 from django.db.models import Count, QuerySet, Sum
@@ -13,13 +13,25 @@ PAGE_SIZE = 10
 MAX_PAGE_SIZE = 100
 
 
+RowsOrder = Literal["condominium", "oldest"]
+CondominiumsOrder = Literal["code", "amount"]
+ROWS_ORDERS: tuple[RowsOrder, ...] = ("condominium", "oldest")
+CONDOMINIUMS_ORDERS: tuple[CondominiumsOrder, ...] = ("code", "amount")
+
+
 @final
 @dataclass(frozen=True)
 class DelinquencyPage:
-    """The page of rows the screen asks for: its number (1-based) and how many rows a page holds."""
+    """What the screen asks for: the page of rows (number, 1-based, and how many rows a page holds) and the order of the rows and of the condominium totals.
+
+    Rows: `condominium` (by condominium code, then the oldest due date) or `oldest` (the longest overdue first, whatever the condominium).
+    Condominium totals: `code` or `amount` (the largest debt first).
+    """
 
     number: int = 1
     size: int = PAGE_SIZE
+    rows_order: RowsOrder = "condominium"
+    condominiums_order: CondominiumsOrder = "code"
 
 
 @final
@@ -69,9 +81,13 @@ def build_delinquency_report(documents: QuerySet[BillingDocument], as_of: date, 
     page (`page.size` rows, 10 by default; the screen); without it they are the whole list up to `ROW_LIMIT` (the PDF).
     """
     overdue = documents.prefetch_related(None).overdue_on(as_of)  # type: ignore[attr-defined]
-    ordered = overdue.select_related("unit__condominium", "unit__block", "payer").order_by(
-        "unit__condominium__code", "due_date", "unit__name", "id"
+    rows_order = page.rows_order if page is not None else "condominium"
+    row_sorting = (
+        ("due_date", "unit__condominium__code", "unit__name", "id")
+        if rows_order == "oldest"
+        else ("unit__condominium__code", "due_date", "unit__name", "id")
     )
+    ordered = overdue.select_related("unit__condominium", "unit__block", "payer").order_by(*row_sorting)
     if page is None:
         fetched = list(ordered[: ROW_LIMIT + 1])
         shown = fetched[:ROW_LIMIT]
@@ -91,6 +107,8 @@ def build_delinquency_report(documents: QuerySet[BillingDocument], as_of: date, 
         )
         for document in shown
     ]
+    condominiums_order = page.condominiums_order if page is not None else "code"
+    condominium_sorting = ("-total", "unit__condominium__code") if condominiums_order == "amount" else ("unit__condominium__code",)
     by_condominium = [
         DelinquencyCondominiumTotal(
             condominium_id=line["unit__condominium"],
@@ -101,7 +119,7 @@ def build_delinquency_report(documents: QuerySet[BillingDocument], as_of: date, 
         for line in overdue.order_by()
         .values("unit__condominium", "unit__condominium__name")
         .annotate(count=Count("id"), total=Sum("amount"))
-        .order_by("unit__condominium__code")
+        .order_by(*condominium_sorting)
     ]
     count = sum(line.count for line in by_condominium)
     return DelinquencyReport(

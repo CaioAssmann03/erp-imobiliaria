@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { LateInterestRate } from './lateInterestRate';
+import type { LateInterestRate } from './lateInterestRate.ts';
 
 export interface PaginatedLateInterestRateList {
   count: number;

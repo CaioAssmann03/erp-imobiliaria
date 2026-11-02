@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, final, override
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.db.models.functions import Lower
 
 from apps.condominiums.models import Condominium
 from apps.core.models import SoftDeleteManager, SoftDeleteMixin
@@ -61,7 +62,8 @@ class CostCenter(SoftDeleteMixin, BaseModel):
                 violation_error_code=CostCenterError.CODE_DUPLICATE_IN_CONDOMINIUM.value,
             ),
             models.UniqueConstraint(
-                fields=("condominium", "name"),
+                "condominium",
+                Lower("name"),
                 condition=Q(deleted_at__isnull=True),
                 name="cost_center_unique_name_per_condominium",
                 violation_error_message=CostCenterError.NAME_DUPLICATE_IN_CONDOMINIUM.message,

@@ -1,8 +1,8 @@
 import type { Person } from "@/lib/api/generated/models";
-import { formatCode } from "@/lib/format/format";
 import { formattedPersonDocument } from "@/lib/persons/person-document";
 import { type PersonContext, personUrl } from "@/lib/persons/person-workspace";
 import { RegistryListItem } from "@/components/layout/RegistryList";
+import { PersonRowContent } from "@/components/persons/PersonRowContent";
 
 /**
  * Uma pessoa na lista no padrão da lista de condomínios: o código (cinza) e o nome em cima; embaixo o CPF/CNPJ (ou o e-mail) e "Inativa".
@@ -24,12 +24,7 @@ export function PersonListItem({
 
   return (
     <RegistryListItem href={personUrl(person.id, context)} isOpen={isOpen} dimmed={dimmed}>
-      <span className="block truncate text-body font-medium">
-        <span className="tabular-nums">{formatCode(person.code)}</span>
-        <span className="text-ink-faint"> · </span>
-        {person.name}
-      </span>
-      <span className="block truncate text-caption text-ink-soft">{sub || "—"}</span>
+      <PersonRowContent code={person.code} name={person.name} detail={sub || "—"} />
     </RegistryListItem>
   );
 }

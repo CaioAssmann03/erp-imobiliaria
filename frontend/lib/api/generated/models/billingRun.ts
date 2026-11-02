@@ -5,8 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BillingRunProblem } from './billingRunProblem';
-import type { BillingRunStatusEnum } from './billingRunStatusEnum';
+import type { BillingRunProblem } from './billingRunProblem.ts';
+import type { BillingRunStatusEnum } from './billingRunStatusEnum.ts';
 
 /**
  * An execution of the monthly issuance. Creating one issues the condominium's month now and answers its result.

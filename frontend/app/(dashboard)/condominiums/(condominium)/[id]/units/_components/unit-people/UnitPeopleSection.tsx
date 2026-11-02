@@ -25,10 +25,7 @@ interface UnitPeopleSectionProps {
 /** Os vínculos de um papel (proprietário ou inquilino): os vigentes primeiro, depois os encerrados, e o formulário para vincular. Na unidade nova os vínculos escolhidos ficam numa lista local e são gravados com a unidade. */
 export function UnitPeopleSection({ unitId, role, links, onChanged, pending = [], onAddPending, onRemovePending }: UnitPeopleSectionProps) {
   const destroyMutation = useUnitPeopleDestroy();
-  const today = new Date().toISOString().slice(0, 10);
-  const ofRole = links
-    .filter((link) => link.role === role)
-    .toSorted((a, b) => Number(Boolean(a.end_date && a.end_date < today)) - Number(Boolean(b.end_date && b.end_date < today)));
+  const ofRole = links.filter((link) => link.role === role).toSorted((a, b) => Number(!a.is_current) - Number(!b.is_current));
 
   const handleRemove = (linkId: string) => {
     destroyMutation.mutate(

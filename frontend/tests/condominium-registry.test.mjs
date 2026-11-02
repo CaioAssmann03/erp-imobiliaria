@@ -9,6 +9,8 @@ import {
   REGISTRY_SECTIONS,
   markerSpan,
   pageSmallness,
+  condominiumPendingParam,
+  CONDOMINIUM_PENDING_OPTIONS,
   readingLine,
   registryLayout,
   sectionPosition,
@@ -92,6 +94,22 @@ test("the reading line goes down to the bottom edge at the end of the page so a 
   assert.equal(readingLine(1000, 2000, 5000, 140), 300);
 });
 
+test("on a page that scrolls little the marker still rests on the first section at the top and reaches the last at the bottom", () => {
+  // 400px of scroll, 900px window, first section at 130px, second at 320px: the stretch toward the bottom edge is already running at the top
+  const line = (scrolled) => readingLine(900, scrolled, 400, 130);
+  assert.equal(line(0), 130);
+  assert.equal(sectionPosition([130, 320], line(0)), 0);
+  assert.equal(line(400), 900);
+  assert.equal(sectionPosition([130 - 400, 320 - 400], line(400)), 1);
+  // it never goes backwards while scrolling down
+  let previous = -Infinity;
+  for (let scrolled = 0; scrolled <= 400; scrolled += 20) {
+    const position = sectionPosition([130 - scrolled, 320 - scrolled], line(scrolled));
+    assert.ok(position >= previous, `at ${scrolled}`);
+    previous = position;
+  }
+});
+
 test("on a phone the list and the open page are separate screens", () => {
   assert.deepEqual(registryLayout("/condominiums"), { hasFrame: true, showListOnPhone: true, showPageOnPhone: false });
   assert.deepEqual(registryLayout("/condominiums/0a1b"), { hasFrame: true, showListOnPhone: false, showPageOnPhone: true });
@@ -120,4 +138,16 @@ test("the marker follows one item on a long page and covers every item on a shor
   assert.deepEqual(markerSpan(1.5, 1, 3), { start: 0, end: 3 });
   assert.deepEqual(markerSpan(1, 0.5, 3), { start: 0.5, end: 2.5 });
   assert.deepEqual(markerSpan(0, 1, 2), { start: 0, end: 2 });
+});
+
+test("the pending of the condominium list comes from ?pending= and only a known one is kept", () => {
+  assert.deepEqual(CONDOMINIUM_PENDING_OPTIONS.map((option) => option.value), [
+    "inconsistent_apportionment",
+    "overdue_adjustment",
+    "upcoming_adjustment",
+    "without_cost_centers",
+  ]);
+  assert.equal(condominiumPendingParam("inconsistent_apportionment"), "inconsistent_apportionment");
+  assert.equal(condominiumPendingParam("evil"), "");
+  assert.equal(condominiumPendingParam(null), "");
 });

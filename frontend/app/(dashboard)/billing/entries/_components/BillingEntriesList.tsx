@@ -11,7 +11,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGrowingLimit } from "@/hooks/use-growing-limit";
 import { useBillingEntriesList } from "@/lib/api/generated";
 import { buildGrid } from "@/lib/billing/billing-entry-payload";
-import { MAX_ENTRIES_PER_MONTH, billingEntriesUrl, newBillingEntryUrl } from "@/lib/billing/billing-entry-workspace";
+import { billingEntriesUrl, newBillingEntryUrl } from "@/lib/billing/billing-entry-workspace";
 import { todayIso } from "@/lib/format/format";
 import { RegistryCreate, RegistryList } from "@/components/layout/RegistryList";
 import { CondominiumScopeSelect } from "@/components/filters/CondominiumScopeSelect";
@@ -23,7 +23,7 @@ import { useEntriesScope } from "./use-entries-scope";
 /**
  * Client Component: a coluna da esquerda da inclusão de valores, no padrão da lista de condomínios: título com **+** de novo lançamento, o condomínio e o
  * mês como escopo (seletores; ficam na URL, então a grade e o detalhe os seguem), a busca pelo nome do boleto ou pela sub-conta e os lançamentos do mês,
- * 10 de cada vez, com o aberto marcado e o total de cada um. Um condomínio tem poucos lançamentos por mês, então a busca é no cliente.
+ * 10 de cada vez, com o aberto marcado e o total de cada um. A busca e a paginação são da API (`?query=`, `limit`).
  */
 export function BillingEntriesList({ openEntryId, className }: { openEntryId: string | null; className?: string }) {
   const router = useRouter();
@@ -33,7 +33,7 @@ export function BillingEntriesList({ openEntryId, className }: { openEntryId: st
 
   const { limit, showMore } = useGrowingLimit(`${scope.condominium}|${scope.month}|${term}`);
   const { data, isLoading, isPlaceholderData } = useBillingEntriesList(
-    { condominium: scope.condominium, reference_month: scope.month, limit: MAX_ENTRIES_PER_MONTH, ...(term ? { query: term } : {}) },
+    { condominium: scope.condominium, reference_month: scope.month, limit, ...(term ? { query: term } : {}) },
     { query: { enabled: scope.condominium !== "", placeholderData: keepPreviousData } }
   );
   const entries = data?.results ?? [];
@@ -46,11 +46,7 @@ export function BillingEntriesList({ openEntryId, className }: { openEntryId: st
       label="Inclusão de valores"
       title="Inclusão de valores"
       actions={
-        <RegistryCreate
-          href={newBillingEntryUrl(scope)}
-          label="Novo lançamento"
-          disabledHint={hasScope ? undefined : "Escolha o condomínio para incluir um valor"}
-        />
+        <RegistryCreate href={newBillingEntryUrl(scope)} label="Novo lançamento" />
       }
       toolbar={
         <ScopeSearchCard
@@ -77,10 +73,10 @@ export function BillingEntriesList({ openEntryId, className }: { openEntryId: st
       isPlaceholderData={isPlaceholderData}
       isEmpty={entries.length === 0}
       emptyMessage={term ? "Nenhum lançamento com essa busca." : "Nenhum lançamento neste mês."}
-      footer={hasScope && data && <ShowMore shown={Math.min(limit, entries.length)} total={entries.length} noun="lançamento(s)" onMore={showMore} />}
+      footer={hasScope && data && <ShowMore shown={entries.length} total={data.count} noun="lançamento(s)" onMore={showMore} />}
       className={className}
     >
-      {entries.slice(0, limit).map((entry) => (
+      {entries.map((entry) => (
         <BillingEntryListItem
           key={entry.id}
           entry={entry}

@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BillingEntry } from './billingEntry';
+import type { BillingEntry } from './billingEntry.ts';
 
 export interface PaginatedBillingEntryList {
   count: number;

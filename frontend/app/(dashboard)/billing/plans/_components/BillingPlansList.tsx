@@ -24,7 +24,7 @@ import { usePlansScope } from "./use-plans-scope";
  * (seletor; fica na URL, então o plano aberto e o formulário o seguem; "Todos os condomínios" não filtra), a busca no servidor pelo nome com o filtro
  * discreto da situação dentro e os planos, 10 de cada vez, com o aberto marcado.
  */
-export function BillingPlansList({ openPlanId, className }: { openPlanId: string | null; className?: string }) {
+export function BillingPlansList({ openPlanId, isNew = false, className }: { openPlanId: string | null; /** Num plano novo, escolher outro condomínio aqui mantém o plano novo (e o campo Condomínio do formulário o segue), em vez de ir à tela vazia. */ isNew?: boolean; className?: string }) {
   const router = useRouter();
   const scope = usePlansScope();
   const [search, setSearch] = useState("");
@@ -67,7 +67,7 @@ export function BillingPlansList({ openPlanId, className }: { openPlanId: string
             <CondominiumScopeSelect
               value={scope.condominium}
               allLabel="Todos os condomínios"
-              onChange={(condominium) => router.push(billingPlansUrl({ condominium }))}
+              onChange={(condominium) => router.push(isNew ? newBillingPlanUrl({ condominium }) : billingPlansUrl({ condominium }))}
             />
           }
         >

@@ -25,6 +25,9 @@ export const ERROR_MESSAGES: Record<ErrorCodeEnum, string> = {
   "account_payable.payment.required_when_paid": "Uma conta paga precisa de data, valor e forma de pagamento.",
   "account_payable.status.not_open": "Só uma conta a pagar em aberto pode ser alterada, baixada ou cancelada.",
   "account_payable.supplier.other_company": "O fornecedor pertence a outra empresa.",
+  "assistant.unavailable": "O assistente está indisponível no momento. Tente novamente mais tarde.",
+  "assistant_question.question.sensitive_data":
+    "A pergunta tem dados pessoais (e-mail ou um número longo, como CPF, telefone ou boleto). Tire-os e pergunte de novo.",
   "condominium_administration_contract.fee_amount.required_for_fixed": "Informe o valor da taxa fixa.",
   "condominium_administration_contract.fee_floor.exceeds_ceiling": "O piso não pode ser maior que o teto.",
   "condominium_administration_contract.variable_fee.requires_percentage_and_basis":

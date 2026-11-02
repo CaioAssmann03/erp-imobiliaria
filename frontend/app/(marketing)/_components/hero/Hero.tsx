@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
+import { useLite } from "@/lib/theme/use-lite";
 
 import { CONTACT_HREF } from "../content";
 import { MarketingButton } from "../MarketingButton";
@@ -19,7 +20,7 @@ const DESCRIPTION =
  * some aos poucos nesse trecho. A frase precisa caber numa linha em qualquer largura (até uns 21 caracteres).
  */
 export function Hero() {
-  const still = useReducedMotion();
+  const still = useLite();
   const { scrollY } = useScroll();
   const opacity = useTransform(scrollY, [0, 350], [1, 0]);
 

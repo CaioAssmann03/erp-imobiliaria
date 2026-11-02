@@ -22,6 +22,7 @@
   --color-ink-soft: #6e6d68;
   --color-ink-faint: #a5a49e;
   --color-ink-foreground: #ffffff; /* texto sobre ink (botões escuros) */
+  --color-band: #1c1b19; /* faixa invertida das páginas públicas (rodapé, lados dos prédios): preta no claro, só um pouco acima do fundo no escuro */
 
   /* Marca (laranja) */
   --color-brand: #f05a28;
@@ -68,6 +69,10 @@
   --radius-card: 1.25rem;
   --radius-panel: 0.875rem;
   --radius-control: 0.75rem;
+  /* Botões, chips e filtros em pílula: cantos arredondados, nunca ovais nem circulares. */
+  --radius-button: 0.5rem;
+  /* Selos e contadores pequenos (até 1,25 rem de altura). */
+  --radius-badge: 0.25rem;
 
   /* Sombras */
   --shadow-card: 0 1px 2px rgb(28 27 25 / 0.04);
@@ -231,6 +236,7 @@ html[data-mode="dark"] {
   --color-ink-soft: #a4a39d;
   --color-ink-faint: #706f6a;
   --color-ink-foreground: #1c1b19;
+  --color-band: #21211f;
   --color-success: #3ecf7a;
   --color-danger: #ff5d6e;
   --color-warning: #e9b440;
@@ -255,6 +261,7 @@ html[data-mode="dark"] {
     --color-ink-soft: #a4a39d;
     --color-ink-faint: #706f6a;
     --color-ink-foreground: #1c1b19;
+    --color-band: #21211f;
     --color-success: #3ecf7a;
     --color-danger: #ff5d6e;
     --color-warning: #e9b440;
@@ -296,14 +303,37 @@ html[data-text="xlarge"] {
   font-size: 125%;
 }
 
-/* Animações reduzidas (Configurações → Acessibilidade). */
-html[data-motion="reduced"] *,
-html[data-motion="reduced"] *::before,
-html[data-motion="reduced"] *::after {
+/* Modo leve (Configurações → Acessibilidade → Animações e efeitos): o <html> ganha data-perf="lite" quando a pessoa escolhe
+   "Reduzidos", quando o sistema pede menos movimento, ou no "Automático" em máquina fraca (ver resolvePerf em lib/theme/appearance.ts).
+   Sem animações nem transições, sem blur e com o vidro sólido; os efeitos em canvas e o scroll suave leem o mesmo atributo
+   (lib/theme/use-lite.ts). Tudo continua funcionando, só mais simples. */
+@custom-variant lite (html[data-perf="lite"] &);
+
+html[data-perf="lite"] *,
+html[data-perf="lite"] *::before,
+html[data-perf="lite"] *::after {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+html[data-perf="lite"] :is(.glass, .glass-pill) {
+  background: var(--color-surface);
+}
+
+/* Quem desliga a transparência no sistema (macOS/Windows) também fica sem o blur e com o vidro sólido, mesmo no modo completo. */
+@media (prefers-reduced-transparency: reduce) {
+  *,
+  *::before,
+  *::after {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  :is(.glass, .glass-pill) {
+    background: var(--color-surface);
+  }
 }
 
 /* ==========================================================================
@@ -333,5 +363,32 @@ html[data-mode="dark"] .theme-public {
 @media (prefers-color-scheme: dark) {
   html[data-mode="system"] .theme-public {
     --color-danger: #ff5d6e;
+  }
+}
+
+/* Faixa invertida (rodapé): no escuro ela é cinza-escuro, não branca, então o texto dentro dela segue claro e os botões invertidos seguem escuros sobre claro. */
+html[data-mode="dark"] .band {
+  --color-ink: #21211f;
+  --color-ink-foreground: #f2f2ef;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-mode="system"] .band {
+    --color-ink: #21211f;
+    --color-ink-foreground: #f2f2ef;
+  }
+}
+
+/* Prints do sistema nos dois modos: cada tela tem uma imagem clara (.print-light) e uma escura (.print-dark), e só a do modo
+   que está valendo aparece (data-mode no <html>; o modo "sistema" segue o SO). A que não aparece não chega a ser baixada. */
+html[data-mode="dark"] .print-light,
+html:not([data-mode="dark"]) .print-dark {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-mode="system"] .print-light {
+    display: none;
+  }
+  html[data-mode="system"] .print-dark {
+    display: block;
   }
 }

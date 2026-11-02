@@ -68,7 +68,7 @@ export function DraggableSlot({ id, title, children }: { id: DashboardItemId; ti
           aria-label={`Tirar ${title} do painel`}
           title="Tirar do painel"
           onClick={() => actions.hide(id)}
-          className="absolute -left-2 -top-2 z-10 grid size-6 place-items-center rounded-full bg-ink text-ink-foreground opacity-0 shadow-float transition-opacity outline-none group-hover/slot:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-brand [@media(hover:none)]:opacity-100"
+          className="absolute -left-2 -top-2 z-10 grid size-6 place-items-center rounded-button bg-ink text-ink-foreground opacity-0 shadow-float transition-opacity outline-none group-hover/slot:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-brand [@media(hover:none)]:opacity-100"
         >
           <X className="size-3.5" />
         </button>

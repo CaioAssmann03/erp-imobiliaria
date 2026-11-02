@@ -7,9 +7,11 @@ interface PaginationProps {
   count: number;
   onPageChange: (page: number) => void;
   onLimitChange: (limit: number) => void;
+  /** Os tamanhos de página oferecidos; o padrão é o das listagens (`PAGE_SIZE_OPTIONS`). */
+  pageSizes?: readonly number[];
 }
 
-export function Pagination({ page, limit, count, onPageChange, onLimitChange }: PaginationProps) {
+export function Pagination({ page, limit, count, onPageChange, onLimitChange, pageSizes = PAGE_SIZE_OPTIONS }: PaginationProps) {
   if (count === 0) return null;
 
   const totalPages = Math.max(1, Math.ceil(count / limit));
@@ -27,9 +29,9 @@ export function Pagination({ page, limit, count, onPageChange, onLimitChange }: 
           aria-label="Itens por página"
           value={limit}
           onChange={(event) => onLimitChange(Number(event.target.value))}
-          className="h-7 cursor-pointer rounded-full bg-transparent px-2.5 text-caption text-ink-soft outline-none transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-brand/50"
+          className="h-7 cursor-pointer rounded-button bg-transparent px-2.5 text-caption text-ink-soft outline-none transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-brand/50"
         >
-          {PAGE_SIZE_OPTIONS.map((size) => (
+          {pageSizes.map((size) => (
             <option key={size} value={size}>
               {size} por página
             </option>

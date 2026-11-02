@@ -9,6 +9,7 @@ import {
   unitsFrameState,
   unitsUrl,
   unitUrl,
+  withBlockParam,
 } from "../lib/condominiums/unit-workspace.ts";
 
 test("the unit screen without a condominium asks for one, on its own screen on a phone", () => {
@@ -80,4 +81,18 @@ test("the people of a unit are a sub-screen of the open unit, inside the same fr
   for (const path of ["/condominiums/c1/units/new/persons", "/condominiums/c1/units/u1/persons/x", "/condominiums/c1/units/u1/other"]) {
     assert.equal(unitsFrameState(path, {}).hasFrame, false, path);
   }
+});
+
+test("a new unit without a condominium has the frame and asks for the condominium", () => {
+  const state = unitsFrameState("/condominiums/units/new");
+  assert.deepEqual([state.hasFrame, state.condominiumId, state.unitId, state.isNew, state.showListOnPhone, state.showPageOnPhone], [true, null, null, true, false, true]);
+  assert.equal(newUnitUrl(), "/condominiums/units/new");
+  assert.equal(unitsFrameState("/condominiums/units/new/extra").hasFrame, false);
+});
+
+test("the block of the form and of the list travel in ?block=, keeping the rest of the address", () => {
+  assert.equal(withBlockParam("", "b1"), "block=b1");
+  assert.equal(withBlockParam("from=%2Fx&block=b0", "b1"), "from=%2Fx&block=b1");
+  // no block: present and empty, so the list clears its block instead of ignoring the address
+  assert.equal(withBlockParam("from=%2Fx", ""), "from=%2Fx&block=");
 });

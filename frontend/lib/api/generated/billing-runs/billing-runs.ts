@@ -33,7 +33,7 @@ import type {
   PaginatedBillingRunList
 } from '../models';
 
-import { customInstance } from '../../mutator';
+import { customInstance } from '../../mutator.ts';
 
 // https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
 type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
@@ -324,7 +324,7 @@ export function useBillingRunsRetrieve<TData = Awaited<ReturnType<typeof billing
 
 
 /**
- * The active condominiums, how many already have a boleto issued in `?reference_month=` and which do not (the dashboard).
+ * The active condominiums, how many already have a boleto issued in `?reference_month=` and which do not (the dashboard): `missing` is one page of them (`?page=`, `?limit=`, 10 by default) and `missing_count` the total.
  */
 export const billingRunsCoverage = (
     params: BillingRunsCoverageParams,

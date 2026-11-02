@@ -27,6 +27,7 @@ test("other routes are not the persons workspace", () => {
 test("the urls of the persons flow and the two sections", () => {
   assert.equal(personsUrl(), "/condominiums/persons");
   assert.equal(newPersonUrl(), "/condominiums/persons/new");
+  assert.equal(newPersonUrl({ condominium: "1b7ab73b-092f-4514-8532-573173c2bd73" }), "/condominiums/persons/new?condominium=1b7ab73b-092f-4514-8532-573173c2bd73");
   assert.equal(personUrl("p1"), "/condominiums/persons/p1");
   assert.deepEqual(PERSON_SECTIONS.map((section) => section.id), ["identificacao", "contato"]);
 });

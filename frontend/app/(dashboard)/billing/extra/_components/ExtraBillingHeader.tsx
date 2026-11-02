@@ -1,32 +1,17 @@
 "use client";
 
-import { useCondominiumsList } from "@/lib/api/generated";
-import { formatCode } from "@/lib/format/format";
 import { extraBillingUrl } from "@/lib/billing/extra-billing-workspace";
 
 import { BillingDocumentHeader } from "../../documents/_components/BillingDocumentHeader";
 import { BackLinkToExtra } from "./BackLinkToExtra";
 import { useExtraScope } from "./use-extra-scope";
 
-function Title({ title, detail }: { title: string; detail?: string }) {
-  return (
-    <div className="mb-6 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-      <h1 className="text-title">{title}</h1>
-      {detail && <span className="text-body text-ink-soft">{detail}</span>}
-    </div>
-  );
-}
-
-/** Client Component: o boleto novo, com o condomínio da lista em cinza ao lado do título (no formulário ele não se repete). */
+/** O boleto novo: só o título (o condomínio é o primeiro campo do formulário). */
 export function NewExtraBillingHeader() {
-  const scope = useExtraScope();
-  const { data: condominiums } = useCondominiumsList({ limit: 100 });
-  const condominium = condominiums?.results.find((item) => item.id === scope.condominium);
-
   return (
     <>
       <BackLinkToExtra />
-      <Title title="Novo boleto extra" detail={condominium ? `${formatCode(condominium.code)} · ${condominium.name}` : undefined} />
+      <h1 className="mb-6 text-title">Novo boleto extra</h1>
     </>
   );
 }

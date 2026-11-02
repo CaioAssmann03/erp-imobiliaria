@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useInView, useReducedMotion } from "motion/react";
+import { motion, useInView } from "motion/react";
+import { useLite } from "@/lib/theme/use-lite";
 import { useEffect, useRef, useState } from "react";
 
 import { SCREENS } from "@/app/(marketing)/_components/content";
@@ -24,7 +25,7 @@ export function ScreenStack() {
   const ref = useRef<HTMLElement>(null);
   const seen = useInView(ref, { once: true, margin: "0px 0px -15% 0px" });
   const visible = useInView(ref, { margin: "-15% 0px -15% 0px" });
-  const still = useReducedMotion();
+  const still = useLite();
   const [step, setStep] = useState<Step>({ screen: 0, point: 0 });
   const [zoomed, setZoomed] = useState(true);
   const [touring, setTouring] = useState(true);
