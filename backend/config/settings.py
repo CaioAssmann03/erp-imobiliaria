@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "apps.rentals",
     "apps.sales",
     "apps.seed",
+    "apps.assistant",
 ]
 
 MIDDLEWARE = [
@@ -188,6 +189,7 @@ REST_FRAMEWORK = {
         "user": "600/min",
         "webhook_asaas": "1000/min",
         "webhook_resend": "300/min",
+        "assistant_erp": "30/hour",
     },
 }
 
@@ -337,6 +339,13 @@ GATEWAY_RECONCILIATION_WINDOW_DAYS = int(os.environ.get("GATEWAY_RECONCILIATION_
 # Days (today included) the daily issuance looks back for a condominium whose day was missed; 1 turns the catch-up off.
 BILLING_ISSUANCE_CATCH_UP_DAYS = int(os.environ.get("BILLING_ISSUANCE_CATCH_UP_DAYS", "3"))
 ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS = int(os.environ.get("ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS", "60"))
+
+# Help assistant (spec 069). Free hosted models, tried in this order; a provider without a key is skipped. The models are
+# settings because free models are retired over time. The assistant never receives data from the database.
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
 
 CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL", "redis://redis:6379/0")
