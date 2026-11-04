@@ -24,18 +24,18 @@ interface StoryPhotoProps {
   className?: string;
 }
 
-/** Até `xl` a foto flutua ao lado do parágrafo (o texto a contorna); de `xl` para cima fica na margem, com a largura em `vw`. */
+/** No celular a foto é uma faixa na largura da coluna, entre o intertítulo e o texto; de `sm` até `xl` flutua ao lado do parágrafo (o texto a contorna); de `xl` para cima fica na margem, com a largura em `vw`. */
 const SHAPES = {
-  portrait: "aspect-[4/5] w-[38%] xl:w-[min(17vw,280px)]",
-  tall: "aspect-[3/4] w-[38%] xl:w-[min(19vw,320px)]",
-  square: "aspect-square w-[32%] xl:w-[min(15vw,240px)]",
+  portrait: "aspect-[16/10] w-full sm:aspect-[4/5] sm:w-[38%] xl:w-[min(17vw,280px)]",
+  tall: "aspect-[16/10] w-full sm:aspect-[3/4] sm:w-[38%] xl:w-[min(19vw,320px)]",
+  square: "aspect-[16/10] w-full sm:aspect-square sm:w-[32%] xl:w-[min(15vw,240px)]",
 } as const;
 
 /**
  * Uma foto ilustrativa de condomínio vista pela persiana de linhas finas, como a dos cartões do mapa e a dos prédios do
  * hero. Entra com uma cortina de cima para baixo quando chega à tela e fica sempre ao lado do texto, nunca por cima dele: nas
  * telas muito largas, na margem, andando um pouco mais devagar (ou mais depressa) que a página, para dar profundidade; nas
- * outras, flutuando junto ao parágrafo, que a contorna. Some só no celular, onde não há largura para o lado. Decorativa.
+ * outras, flutuando junto ao parágrafo, que a contorna. No celular não há lado: ela vem numa faixa de largura cheia, com a mesma cortina e, enquanto se rola, a imagem se desloca devagar dentro do quadro. Decorativa.
  */
 export function StoryPhoto({ photo, side, shape = "portrait", drift = 70, focus = "50% 50%", className }: StoryPhotoProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -43,6 +43,8 @@ export function StoryPhoto({ photo, side, shape = "portrait", drift = 70, focus 
   const shown = useInView(ref, { once: true, margin: "0px 0px -12% 0px" });
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [drift, -drift]);
+  // Fora da margem a foto não anda; em vez disso a imagem se desloca dentro do quadro (ela é maior que ele, então não aparece vão).
+  const inner = useTransform(scrollYProgress, [0, 1], ["-7%", "7%"]);
   // O deslocamento só vale na margem; ao lado do parágrafo a foto fica onde está, para não passar por cima do texto.
   const [margin, setMargin] = useState(false);
   useEffect(() => {
@@ -59,9 +61,9 @@ export function StoryPhoto({ photo, side, shape = "portrait", drift = 70, focus 
       aria-hidden
       style={still || !margin ? undefined : { y }}
       className={cn(
-        "pointer-events-none mb-4 hidden sm:block xl:absolute xl:mb-0 xl:float-none",
+        "pointer-events-none mb-6 block sm:mb-4 xl:absolute xl:mb-0 xl:float-none",
         SHAPES[shape],
-        side === "left" ? "float-left mr-6 xl:left-[4vw] xl:mr-0" : "float-right ml-6 xl:right-[4vw] xl:ml-0",
+        side === "left" ? "sm:float-left sm:mr-6 xl:left-[4vw] xl:mr-0" : "sm:float-right sm:ml-6 xl:right-[4vw] xl:ml-0",
         className,
       )}
     >
@@ -71,7 +73,9 @@ export function StoryPhoto({ photo, side, shape = "portrait", drift = 70, focus 
         transition={{ duration: still ? 0 : 1.2, ease: EASE }}
         className="relative size-full overflow-hidden"
       >
-        <Image src={PHOTOS[photo]} alt="" className="size-full object-cover" style={{ objectPosition: focus }} sizes="(min-width: 1280px) 320px, 280px" />
+        <motion.div style={still || margin ? undefined : { y: inner }} className={cn("size-full", !margin && "scale-[1.18]")}>
+          <Image src={PHOTOS[photo]} alt="" className="size-full object-cover" style={{ objectPosition: focus }} sizes="(min-width: 1280px) 320px, (min-width: 640px) 280px, 100vw" />
+        </motion.div>
         <span
           className="absolute inset-0"
           style={{ background: "repeating-linear-gradient(to bottom, transparent 0, transparent 3px, var(--color-canvas) 3px, var(--color-canvas) 4px)" }}

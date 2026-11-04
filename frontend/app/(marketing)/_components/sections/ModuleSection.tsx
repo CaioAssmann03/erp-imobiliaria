@@ -49,7 +49,7 @@ export function ModuleSection({ title, paragraphs, slug, placement = "left", chi
     <motion.p
       key={paragraph}
       {...rise(index + 1)}
-      className="mb-4 text-justify text-base leading-[1.7] text-ink-soft hyphens-auto last:mb-0"
+      className="mb-4 text-left sm:text-justify text-base leading-[1.7] text-ink-soft hyphens-manual sm:hyphens-auto last:mb-0"
     >
       {paragraph}
     </motion.p>

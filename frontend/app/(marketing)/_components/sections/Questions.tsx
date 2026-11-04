@@ -9,7 +9,7 @@ import { useLite } from "@/lib/theme/use-lite";
 
 /**
  * Posição de cada card (mesma ordem de `QUESTIONS.items`) na grade de 4 colunas do desktop; as linhas têm altura
- * fixa, então o clique troca o conteúdo sem mexer nos vizinhos. Abaixo de `lg` os cards empilham com altura livre.
+ * fixa, então o clique troca o conteúdo sem mexer nos vizinhos. Abaixo de `lg` os cards empilham com altura livre; no celular fechado o card é só o título (sem altura mínima), para a lista ser curta.
  *
  *   A A B C
  *   A A D C
@@ -42,21 +42,21 @@ export function Questions() {
 
   return (
     <section className="bg-ink text-ink-foreground">
-      <div className="mx-auto w-full max-w-6xl px-6 py-24">
-        <Reveal className="mb-12 max-w-2xl">
+      <div className="mx-auto w-full max-w-6xl px-5 py-20 sm:px-6 sm:py-24">
+        <Reveal className="mb-8 max-w-2xl sm:mb-12">
           <h2 className="font-display text-section text-balance">{QUESTIONS.title}</h2>
         </Reveal>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:auto-rows-[14rem] lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:auto-rows-[14rem] lg:grid-cols-4">
           {QUESTIONS.items.map((item, index) => {
             const isOpen = open.has(index);
             return (
-              <Reveal key={item.title} delay={index * 0.05} className={`min-h-44 lg:min-h-0 ${AREAS[index]}`}>
+              <Reveal key={item.title} delay={index * 0.05} className={`sm:min-h-44 lg:min-h-0 ${AREAS[index]}`}>
                 <button
                   type="button"
                   aria-expanded={isOpen}
                   onClick={() => toggle(index)}
-                  className={`flex h-full w-full cursor-pointer flex-col justify-between gap-6 overflow-hidden rounded-sharp border p-6 text-left transition-colors duration-300 ${
+                  className={`flex h-full w-full cursor-pointer flex-col justify-between gap-4 overflow-hidden rounded-sharp border p-5 text-left sm:gap-6 sm:p-6 transition-colors duration-300 ${
                     isOpen ? "border-ink-foreground bg-ink-foreground text-ink" : "border-ink-foreground/20 hover:bg-ink-foreground/10"
                   }`}
                 >

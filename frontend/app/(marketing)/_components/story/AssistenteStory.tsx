@@ -43,7 +43,7 @@ export function AssistenteStory() {
               <h2 className="mb-6 font-display text-title font-medium text-ink">{section.title}</h2>
               {section.paragraphs.map((paragraph, paragraphIndex) => (
                 <div key={paragraph}>
-                  <p className="mb-7 text-justify text-lg leading-[1.75] text-ink-soft hyphens-auto md:text-[1.3rem] md:leading-[1.7]">{paragraph}</p>
+                  <p className="mb-7 text-left sm:text-justify text-lg leading-[1.75] text-ink-soft hyphens-manual sm:hyphens-auto md:text-[1.3rem] md:leading-[1.7]">{paragraph}</p>
                   {DECORATIONS[index]?.filter((item) => item.after === paragraphIndex).map((item, itemIndex) => (
                     <div key={itemIndex}>{item.node}</div>
                   ))}

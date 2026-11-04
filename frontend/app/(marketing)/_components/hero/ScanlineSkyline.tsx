@@ -16,10 +16,11 @@ const MAX_RATIO = 1.5;
 const LIT_RATIO = 0.15;
 const TOGGLES_PER_SECOND = 24;
 const LIGHT_RADIUS = 170;
-const LIGHT_RADIUS_SQUARED = LIGHT_RADIUS * LIGHT_RADIUS;
 /** Suavização por segundo (fração percorrida até o alvo): janelas e parallax. */
 const WINDOW_EASE = 0.98;
 const PARALLAX_EASE = 0.85;
+/** A luz do toque se apaga sozinha depois que o dedo sai (fração do raio recolhida por segundo). */
+const TOUCH_FADE = 0.93;
 /** Cores lidas dos tokens do tema (nada de cor fixa): três tons da mesma rampa dos prédios do login, janela apagada (tinta) e acesa (branco). */
 function palette(element: HTMLElement): SkylineColors {
   const style = getComputedStyle(element);
@@ -36,8 +37,9 @@ function palette(element: HTMLElement): SkylineColors {
  * Client Component: skyline de prédios laranja em linhas horizontais num <canvas>. As partes fixas são
  * pré-renderizadas (`skyline-layers.ts`); cada quadro cola as camadas e desenha só as janelas apagadas.
  * Os prédios sobem ao carregar, as janelas acendem e apagam sozinhas, o mouse ilumina as janelas por
- * perto e desloca as camadas (parallax). Para de desenhar quando a seção seguinte já cobriu o hero.
- * Parado para quem prefere menos movimento.
+ * perto e desloca as camadas (parallax). No celular não há mouse: o toque acende as janelas em volta do dedo (a luz
+ * encolhe e some quando ele sai) e o parallax acompanha a rolagem. Para de desenhar quando a seção seguinte já cobriu o
+ * hero. Parado para quem prefere menos movimento.
  */
 export function ScanlineSkyline({ className, variant = "hero" }: { className?: string; variant?: "hero" | "footer" }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -48,6 +50,7 @@ export function ScanlineSkyline({ className, variant = "hero" }: { className?: s
     if (!canvas || !context) return;
 
     const reduceMotion = isLite();
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
     // No fecho da página os prédios têm outra silhueta (colina) e sobem quando chegam à tela, não ao carregar.
     const closing = variant === "footer";
     const shape = closing ? "hill" : "valley";
@@ -62,10 +65,12 @@ export function ScanlineSkyline({ className, variant = "hero" }: { className?: s
     let last = 0;
     let startedAt = 0;
     let visible = true;
-    const pointer = { x: -9999, y: -9999, parallax: 0, parallaxTarget: 0 };
+    // `reach` é a fração do raio de luz em uso: 1 com o mouse; com o dedo, vai a 0 depois que ele sai.
+    const pointer = { x: -9999, y: -9999, parallax: 0, parallaxTarget: 0, reach: 1, reachTarget: 1 };
 
     const draw = (rise: number) => {
-      if (!layers) return;
+      // Sem tamanho (o hero do outro tamanho de tela está escondido): nada a desenhar, e uma camada vazia não pode ser colada.
+      if (!layers || !width || !height) return;
       context.clearRect(0, 0, width, height);
       const offset = (1 - rise) * height * 0.6;
       const front = pointer.parallax * PARALLAX_FRONT;
@@ -77,6 +82,8 @@ export function ScanlineSkyline({ className, variant = "hero" }: { className?: s
       // linhas separadas; só durante a subida, com tudo deslocado, a persiana passa por cima (uma mescla de tela inteira por quadro).
       const settled = rise >= 1;
       const windows = scene.windows;
+      const radius = LIGHT_RADIUS * pointer.reach;
+      const radiusSquared = radius * radius;
       context.fillStyle = colors.light;
       for (let index = 0; index < windows.length; index++) {
         const pane = windows[index];
@@ -86,9 +93,9 @@ export function ScanlineSkyline({ className, variant = "hero" }: { className?: s
         const dx = x + pane.w / 2 - pointer.x;
         const dy = y + pane.h / 2 - pointer.y;
         const distanceSquared = dx * dx + dy * dy;
-        if (distanceSquared < LIGHT_RADIUS_SQUARED) {
+        if (distanceSquared < radiusSquared) {
           // Branco cheio até metade do raio; depois esmaece até a borda (smoothstep), sem um mar de cinzas.
-          const reach = Math.min(1, 2 * (1 - Math.sqrt(distanceSquared) / LIGHT_RADIUS));
+          const reach = Math.min(1, 2 * (1 - Math.sqrt(distanceSquared) / radius));
           alpha = Math.max(reach * reach * (3 - 2 * reach), alpha);
         }
         if (alpha < 0.02) continue;
@@ -116,7 +123,8 @@ export function ScanlineSkyline({ className, variant = "hero" }: { className?: s
       canvas.height = Math.round(height * ratio);
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
       scene = buildSkyline(width, height, shape);
-      layers = renderLayers(scene, width, height, ratio, colors);
+      // Escondido (o hero do outro tamanho de tela): não há o que montar, e camadas de tamanho zero não podem ser coladas.
+      layers = width && height ? renderLayers(scene, width, height, ratio, colors) : null;
       litTarget = scene.windows.map((_, index) => (((index * 37) % 100) / 100 < LIT_RATIO ? 1 : 0));
       lit = [...litTarget];
     };
@@ -139,6 +147,7 @@ export function ScanlineSkyline({ className, variant = "hero" }: { className?: s
       const windowStep = ease(WINDOW_EASE, seconds);
       for (let index = 0; index < lit.length; index++) lit[index] += (litTarget[index] - lit[index]) * windowStep;
       pointer.parallax += (pointer.parallaxTarget - pointer.parallax) * ease(PARALLAX_EASE, seconds);
+      pointer.reach += (pointer.reachTarget - pointer.reach) * ease(pointer.reachTarget ? 0.99 : TOUCH_FADE, seconds);
       const t = Math.min((now - startedAt) / RISE_MS, 1);
       draw(1 - Math.pow(1 - t, 3));
     };
@@ -147,7 +156,16 @@ export function ScanlineSkyline({ className, variant = "hero" }: { className?: s
       const rect = canvas.getBoundingClientRect();
       pointer.x = event.clientX - rect.left;
       pointer.y = event.clientY - rect.top;
-      pointer.parallaxTarget = event.clientX / window.innerWidth - 0.5;
+      pointer.reachTarget = 1;
+      if (!coarse) pointer.parallaxTarget = event.clientX / window.innerWidth - 0.5;
+    };
+    /** O dedo saiu da tela: a luz encolhe até sumir (o mouse não passa por aqui). */
+    const onRelease = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") pointer.reachTarget = 0;
+    };
+    // Sem mouse, o parallax anda com a rolagem do hero: de -0,5 no topo a 0,5 quando ele já saiu da tela.
+    const onScroll = () => {
+      pointer.parallaxTarget = Math.min(window.scrollY / window.innerHeight, 1) - 0.5;
     };
     const onLeave = () => {
       pointer.x = -9999;
@@ -178,6 +196,14 @@ export function ScanlineSkyline({ className, variant = "hero" }: { className?: s
       if (reduceMotion) return draw(1);
       window.addEventListener("pointermove", onPointer, { passive: true });
       document.addEventListener("pointerleave", onLeave);
+      if (coarse) {
+        window.addEventListener("pointerdown", onPointer, { passive: true });
+        window.addEventListener("pointerup", onRelease, { passive: true });
+        window.addEventListener("pointercancel", onRelease, { passive: true });
+        if (!closing) window.addEventListener("scroll", onScroll, { passive: true });
+        if (!closing) onScroll();
+        pointer.reach = pointer.reachTarget = 0; // sem toque, sem luz
+      }
       startedAt = closing ? 0 : performance.now();
       last = performance.now();
       animation = requestAnimationFrame(tick);
@@ -191,6 +217,10 @@ export function ScanlineSkyline({ className, variant = "hero" }: { className?: s
       visibility.disconnect();
       window.removeEventListener("pointermove", onPointer);
       document.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("pointerdown", onPointer);
+      window.removeEventListener("pointerup", onRelease);
+      window.removeEventListener("pointercancel", onRelease);
+      window.removeEventListener("scroll", onScroll);
       cancelAnimationFrame(animation);
     };
   }, [variant]);

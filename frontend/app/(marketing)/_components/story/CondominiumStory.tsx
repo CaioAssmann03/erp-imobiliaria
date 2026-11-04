@@ -49,7 +49,7 @@ export function CondominiumStory() {
                 <h2 className="mb-6 font-display text-title font-medium text-ink">{section.title}</h2>
                 {photo && <StoryPhoto {...photo} className="xl:top-1/2 xl:-translate-y-1/2" />}
                 {section.paragraphs.map((paragraph) => (
-                  <p key={paragraph} className="mb-7 text-justify text-lg leading-[1.75] text-ink-soft hyphens-auto last:mb-0 md:text-[1.3rem] md:leading-[1.7]">
+                  <p key={paragraph} className="mb-7 text-left sm:text-justify text-lg leading-[1.75] text-ink-soft hyphens-manual sm:hyphens-auto last:mb-0 md:text-[1.3rem] md:leading-[1.7]">
                     {paragraph}
                   </p>
                 ))}

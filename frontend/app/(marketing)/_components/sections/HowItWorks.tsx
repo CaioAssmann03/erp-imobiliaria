@@ -69,7 +69,7 @@ export function HowItWorks({ title }: { title: string }) {
   return (
     <section aria-labelledby="how-it-works-title" className="mx-auto w-full max-w-6xl px-6 pt-32 md:pt-40 -mb-12">
       <header lang="pt-BR" className="pb-24 md:pb-32">
-        <h1 id="how-it-works-title" aria-label={title} className="text-[clamp(1.5rem,6.2vw,5rem)] leading-[1.05] font-bold tracking-[-0.05em]">
+        <h1 id="how-it-works-title" aria-label={title} className="text-[clamp(2.25rem,12vw,3.5rem)] leading-[1.02] font-bold tracking-[-0.05em] sm:text-[clamp(1.5rem,6.2vw,5rem)] sm:leading-[1.05]">
           {TITLE_LINES.map((line, index) => (
             <span key={line} aria-hidden className="block overflow-hidden pb-[0.08em]">
               <motion.span
@@ -100,7 +100,7 @@ export function HowItWorks({ title }: { title: string }) {
           <p className="max-w-3xl text-xl leading-snug text-balance md:text-[1.75rem]">{HOW_IT_WORKS_INTRO.lead}</p>
           <div className="mt-10 lg:columns-2 lg:gap-20">
             {HOW_IT_WORKS_INTRO.paragraphs.map((paragraph) => (
-              <p key={paragraph} className="mb-6 break-inside-avoid text-justify text-lg leading-[1.7] text-ink-soft hyphens-auto">
+              <p key={paragraph} className="mb-6 break-inside-avoid text-left sm:text-justify text-lg leading-[1.7] text-ink-soft hyphens-manual sm:hyphens-auto">
                 {paragraph}
               </p>
             ))}
