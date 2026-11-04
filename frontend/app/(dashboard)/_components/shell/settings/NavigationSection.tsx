@@ -33,9 +33,9 @@ export function NavigationSection() {
       <SettingsGroup title="Atalhos de teclado">
         {shortcuts.map((item) => (
           <SettingsRow key={item.action} title={item.action} compact>
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1.5">
               {item.keys.map((key) => (
-                <kbd key={key} className="min-w-6 rounded-md bg-surface-muted px-1.5 py-0.5 text-center text-caption font-medium text-ink">
+                <kbd key={key} className="min-w-7 rounded-badge bg-surface px-2 py-1 text-center text-caption font-medium text-ink shadow-card">
                   {key}
                 </kbd>
               ))}

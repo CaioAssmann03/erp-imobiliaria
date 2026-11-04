@@ -64,7 +64,7 @@ Rules live in the models (`BillingEntryRules`): kind-specific fields as in `Bill
 Done in this order: `CostCenter.code` and its migration; events; entries, rules and API; the issuance; the generated client; the frontend (events, entries screen, settings links). See *Pending before done* for what is left.
 
 ## N — Norms
-`conventions/practices.md` §2–§3b; frontend: `operations/new-resource-page.md` and `norms/forms.md`.
+`conventions/practices.md` §2–§3b; frontend: `frontend/docs/guides/recipes.md` and `frontend/docs/conventions/forms.md`.
 
 ## S — Safeguards
 - Money: the sum of the unit amounts of a collective or fraction launch equals its total to the cent; a launch never produces a zero or negative line.

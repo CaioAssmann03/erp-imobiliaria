@@ -130,7 +130,7 @@ export function SearchCombobox({
                 <Combobox.Item
                   key={option.value}
                   value={option}
-                  className="flex h-9 cursor-default items-center justify-between gap-2 rounded-control px-3 text-body text-ink-soft outline-none select-none data-[highlighted]:bg-ink/5 data-[highlighted]:text-ink data-[selected]:font-medium data-[selected]:text-ink"
+                  className="flex h-9 cursor-pointer items-center justify-between gap-2 rounded-control px-3 text-body text-ink-soft outline-none select-none data-[highlighted]:bg-ink/5 data-[highlighted]:text-ink data-[selected]:font-medium data-[selected]:text-ink"
                 >
                   <span className="min-w-0 truncate">{option.label}</span>
                   <Combobox.ItemIndicator>

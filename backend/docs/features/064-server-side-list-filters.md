@@ -25,7 +25,7 @@ The screens filtered on the client because the API lacked a parameter: the compa
 - [x] R5 — `GET /billing-runs/coverage/?reference_month=` answers the active condominiums (`expected`), how many have a boleto issued in the month (`issued`) and which do not (`missing`: id, code, name).
 - [x] R6 — `GET /billing-events/?credits_company=` keeps the administradora's own events (fees) or leaves them out.
 - [x] R7 — `GET /cost-center-catalog/?unused_by_condominium=<id>` leaves out the catalog items that condominium already has a sub-conta of.
-- [x] R8 — The frontend sends these parameters and no longer filters the lists (norm written in `frontend/docs/norms/data-and-cache.md`).
+- [x] R8 — The frontend sends these parameters and no longer filters the lists (norm written in `frontend/docs/conventions/data-and-cache.md`).
 
 ## E — Entities
 N/A — no model or field changes.

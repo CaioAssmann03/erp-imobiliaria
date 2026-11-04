@@ -10,12 +10,13 @@ interface SectionProps {
 
 export function TextSizeSection({ appearance, onChange }: SectionProps) {
   return (
-    <SettingsRow title="Tamanho do texto" description="Aumenta os textos e os espaços do sistema inteiro.">
+    <SettingsRow title="Tamanho do texto" description="Aumenta os textos e os espaços do sistema inteiro." stacked>
       <SegmentedControl
         label="Tamanho do texto"
         value={appearance.text}
         options={TEXT_SIZES.map((size) => ({ value: size.value, label: `${size.label} · ${size.hint}` }))}
         onChange={(text) => onChange({ text })}
+        fullWidth
       />
     </SettingsRow>
   );

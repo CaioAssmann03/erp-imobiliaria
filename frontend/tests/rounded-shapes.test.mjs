@@ -3,7 +3,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { test } from "node:test";
 
-/** Buttons, badges and chips are never oval or circular (`norms/design-system.md`): `rounded-full` is only for dots, bars and the switch. */
+/** Buttons, badges and chips are never oval or circular (`conventions/design-system.md`): `rounded-full` is only for dots, bars and the switch. */
 const ROOT = join(import.meta.dirname, "..");
 const FOLDERS = ["app/(dashboard)", "components"];
 
@@ -35,5 +35,5 @@ test("no button, badge or chip is round: rounded-full stays on dots, bars and th
   const offenders = FOLDERS.flatMap((folder) => sourceFiles(join(ROOT, folder)))
     .map((file) => relative(ROOT, file))
     .filter((file) => !SHAPES.has(file) && /rounded-full/.test(readFileSync(join(ROOT, file), "utf8")));
-  assert.deepEqual(offenders, [], "use rounded-button, rounded-badge or rounded-panel (norms/design-system.md)");
+  assert.deepEqual(offenders, [], "use rounded-button, rounded-badge or rounded-panel (conventions/design-system.md)");
 });

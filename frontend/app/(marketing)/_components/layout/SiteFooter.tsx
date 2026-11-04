@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Brand } from "@/components/brand/Brand";
 
-import { CONTACT_HREF, FEATURES } from "@/app/(marketing)/_components/content";
+import { CONTACT_HREF, MODULE_LINKS } from "@/app/(marketing)/_components/content";
 import { MarketingButton } from "@/app/(marketing)/_components/MarketingButton";
 
 const SITE_LINKS = [
@@ -28,7 +28,7 @@ function FooterColumn({ title, children }: { title: string; children: React.Reac
   );
 }
 
-/** Rodapé das páginas públicas: faixa preta de ponta a ponta com a chamada de contato, os mapas do site e dos módulos. */
+/** Rodapé das páginas públicas: faixa preta de ponta a ponta com a chamada de contato, os mapas do site e dos módulos (os mesmos do submenu de Recursos, `MODULE_LINKS`). */
 export function SiteFooter() {
   return (
     <footer className="band mt-12 bg-band text-ink-foreground">
@@ -61,10 +61,10 @@ export function SiteFooter() {
           </FooterColumn>
 
           <FooterColumn title="Módulos">
-            {FEATURES.map((feature) => (
-              <li key={feature.title}>
-                <Link href="/features" className={LINK_CLASS}>
-                  {feature.title}
+            {MODULE_LINKS.map((module) => (
+              <li key={module.href}>
+                <Link href={module.href} className={LINK_CLASS}>
+                  {module.label}
                 </Link>
               </li>
             ))}

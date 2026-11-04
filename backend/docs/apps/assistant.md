@@ -1,7 +1,7 @@
 ---
 summary: The help assistant (spec 069): a question (plus the last 6 messages of the conversation) → answer endpoint, for logged-in users only, over a curated text, the Gemini → Groq fallback, the sensitive-data filter, the limits and the knowledge files.
 read-when: you touch the assistant endpoints, its providers, its knowledge texts, the personal-data filter or its throttles
-skip-if: throttles and the trusted proxy in general → features/065-security-hardening.md; the chat widget → frontend/docs/norms/assistant.md; personal data and LGPD policy → architecture/quality.md
+skip-if: throttles and the trusted proxy in general → features/065-security-hardening.md; the chat widget → frontend/docs/features/assistant.md; personal data and LGPD policy → architecture/quality.md
 ---
 # App `assistant`
 

@@ -10,12 +10,13 @@ interface SectionProps {
 
 export function FontSection({ appearance, onChange }: SectionProps) {
   return (
-    <SettingsRow title="Fonte" description="Cada opção aparece na própria letra.">
+    <SettingsRow title="Fonte" description="Cada opção aparece na própria letra." stacked>
       <SegmentedControl
         label="Fonte"
         value={appearance.font}
         options={FONTS.map((font) => ({ value: font.value, label: font.label, style: { fontFamily: font.family } }))}
         onChange={(font) => onChange({ font })}
+        fullWidth
       />
     </SettingsRow>
   );

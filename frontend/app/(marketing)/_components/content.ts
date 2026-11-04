@@ -1,10 +1,5 @@
 import type { ModuleSlug } from "@/lib/site/public-pages";
 
-export interface Feature {
-  title: string;
-  description: string;
-}
-
 export interface HowItWorksFloor {
   label: string;
   text: string;
@@ -21,7 +16,7 @@ export const NAV_LINKS = [
 
 /**
  * Resumo logo abaixo do hero (`Summary`): um texto formal e justificado sobre o que é o sistema, um parágrafo de
- * abertura e os demais em duas colunas. Só afirma o que o sistema faz (ver `FEATURES` e `HOW_IT_WORKS`), sem números inventados.
+ * abertura e os demais em duas colunas. Só afirma o que o sistema faz (ver `MODULES` e `HOW_IT_WORKS`), sem números inventados.
  */
 export const SUMMARY = {
   lead: "O METRI é um sistema de gestão desenvolvido para administradoras de condomínios. Reúne, em uma única plataforma, o cadastro de condomínios, blocos, unidades e pessoas, a cobrança mensal, a conciliação bancária e o financeiro de cada condomínio administrado.",
@@ -34,7 +29,7 @@ export const SUMMARY = {
 
 /**
  * As partes do sistema, uma seção de Recursos cada (`ModuleSection`): um parágrafo de abertura e os demais, justificados
- * como no `SUMMARY`. Só afirma o que o sistema faz hoje (ver `docs/requirements/product-scope.md`), sem números inventados.
+ * como no `SUMMARY`. Só afirma o que o sistema faz hoje (ver `docs/overview.md`), sem números inventados.
  */
 export const MODULES = {
   condominiums: {
@@ -70,6 +65,16 @@ export const MODULES = {
       "O boleto é registrado com Pix, enviado por e-mail e acompanhado até o pagamento. O que passa do vencimento aparece como atraso, e um documento pode ser reemitido com nova data ou cancelado.",
     ],
   },
+  assistant: {
+    slug: "assistente",
+    title: "Assistente",
+    summary: "Tire dúvidas sobre o sistema, sem sair da tela.",
+    paragraphs: [
+      "O Assistente é um chat de ajuda dentro do sistema. Em vez de procurar a resposta num manual, a pessoa escreve a dúvida, como o que é a fração ideal, como funciona o reajuste anual ou o que é a taxa de administração fixa, e recebe a explicação em português, na hora.",
+      "Ele usa inteligência artificial para explicar como o sistema funciona, e só isso. Não busca nem altera nada do que está cadastrado: não consulta condomínios, unidades, pessoas, boletos ou valores, e não emite, cancela ou muda coisa alguma. Para achar um dado, valem as telas e a busca do sistema.",
+      "Por não ver os cadastros, ele também não recebe dados pessoais: o chat recusa perguntas com CPF, CNPJ, e-mail, telefone ou número de boleto, e lembra disso na própria janela. Como toda resposta de inteligência artificial, a explicação pode errar, e na dúvida vale o que a tela mostra.",
+    ],
+  },
 } as const;
 
 /** Os módulos com página própria, na ordem de Recursos: o submenu do cabeçalho os lista. */
@@ -89,7 +94,7 @@ export interface ModulePage {
 
 /**
  * O conteúdo das páginas "Saber mais", uma por módulo. Só afirma o que o sistema faz hoje (ver
- * `docs/requirements/product-scope.md` e `docs/entities/domain-model.md`), sem números inventados.
+ * `docs/overview.md` e `docs/domain-model.md`), sem números inventados.
  */
 export const MODULE_PAGES: Record<ModuleSlug, ModulePage> = {
   condominios: {
@@ -238,6 +243,40 @@ export const MODULE_PAGES: Record<ModuleSlug, ModulePage> = {
       },
     ],
   },
+  assistente: {
+    title: "Assistente",
+    lead: "Um chat de ajuda dentro do sistema, que usa inteligência artificial para explicar como tudo funciona. Ele explica; quem cadastra e consulta continua sendo você.",
+    sections: [
+      {
+        title: "Para que serve",
+        paragraphs: [
+          "O Assistente responde a dúvidas sobre o sistema: o que significa um termo, para que serve uma tela, como as regras de cobrança se combinam, como uma rotina costuma ser feita. Quem está começando entende o caminho sem interromper o trabalho de ninguém, e quem já conhece o sistema tira uma dúvida pontual em segundos.",
+          "A janela abre ao lado da tela em que a pessoa está, sem tirá-la dali. Ao abrir, ela mostra algumas perguntas de exemplo, que se enviam com um clique, e o campo para escrever a sua. A conversa segue de pergunta em pergunta, e o Assistente leva em conta o que já foi dito para entender a seguinte.",
+        ],
+      },
+      {
+        title: "O que ele não faz",
+        paragraphs: [
+          "O Assistente não tem acesso ao que está cadastrado. Ele não procura um condomínio, uma unidade, uma pessoa ou um boleto, não diz quanto alguém deve e não mostra valores. Também não faz nada no sistema: não emite o mês, não cancela um documento, não edita um cadastro.",
+          "Isso é proposital. Ele existe para explicar como o sistema funciona, e os dados continuam onde sempre estiveram, nas telas, com os filtros e a busca de cada uma.",
+        ],
+      },
+      {
+        title: "Cuidado com os dados",
+        paragraphs: [
+          "Como o Assistente não precisa de dados de ninguém, o chat recusa a pergunta que traz CPF, CNPJ, e-mail, telefone ou número de boleto, e diz o motivo, para que ela seja reescrita sem esses dados. Um aviso fixo, no pé da janela, lembra disso o tempo todo.",
+          "A conversa não fica guardada: ela existe só enquanto a página está aberta e some quando a página é recarregada. E, como qualquer resposta de inteligência artificial, a do Assistente pode errar. Na dúvida, vale o que a tela mostra.",
+        ],
+      },
+      {
+        title: "Só para quem está dentro",
+        paragraphs: [
+          "O Assistente aparece apenas dentro do sistema, para quem fez login, como um botão Ajuda no canto da tela. As páginas públicas não têm chat.",
+          "Quem prefere trabalhar sem ele pode desligá-lo em Configurações, na seção Assistente. A escolha vale para aquele navegador, e o botão deixa de aparecer.",
+        ],
+      },
+    ],
+  },
 };
 
 /**
@@ -298,8 +337,7 @@ export const QUESTIONS = {
 
 /**
  * As telas reais mostradas em `ScreenStack` (prints 1440×900 a 2x em `public/marketing`, tema claro, só dados fictícios de
- * `seed_demo`; se refeitos, manter o tema e o tamanho). Cada ponto aproxima a imagem de uma região do print: `x` e `y` são o centro,
- * em % da imagem, e `zoom` o aumento. O texto descreve só o que o print mostra.
+ * `seed_demo`; se refeitos, manter o tema e o tamanho). O texto descreve só o que o print mostra.
  */
 export const SCREENS = [
   {
@@ -307,62 +345,20 @@ export const SCREENS = [
     alt: "Unidade aberta: lista de unidades do condomínio, dados da unidade e frações ideais",
     title: "Condomínios",
     lead: "Cada unidade com as pessoas que respondem por ela. É dela que parte a cobrança.",
-    points: [
-      { term: "A lista", text: "As unidades do condomínio escolhido, cada uma com o bloco e o responsável.", focus: { x: 18, y: 44, zoom: 1.9 } },
-      { term: "Identificação", text: "O número, o tipo, o bloco, a matrícula do imóvel, o número de moradores e a marca de unidade do síndico.", focus: { x: 57, y: 33, zoom: 1.9 } },
-      { term: "Frações ideais", text: "A parte da unidade no rateio de cada critério. Um critério novo se cria ali mesmo.", focus: { x: 57, y: 63.5, zoom: 1.9 } },
-    ],
   },
   {
     key: "lancamentos",
     alt: "Inclusão de valores: os lançamentos do mês numa lista e, ao lado, a grade com o valor de cada unidade e o total",
     title: "Lançamentos",
     lead: "O que entra no boleto além do plano de cobrança, mês a mês, e quanto cada unidade paga.",
-    points: [
-      { term: "A lista do mês", text: "Os lançamentos do mês escolhido, cada um com o evento, a sub-conta, a parcela (3/6) ou o \"sempre\" e o valor.", focus: { x: 18, y: 32, zoom: 2 } },
-      { term: "A grade por unidade", text: "Uma coluna por lançamento, com o total dele, e uma linha por unidade, com o que ela paga em cada um.", focus: { x: 65, y: 34, zoom: 1.5 } },
-      { term: "O total do mês", text: "A soma de cada lançamento no pé da grade e, no canto, o total geral.", focus: { x: 65, y: 51, zoom: 1.6 } },
-    ],
   },
   {
     key: "cobrancas",
     alt: "Documento de cobrança aberto: valor, vencimento e situação, o boleto e os itens, ao lado da lista de documentos",
     title: "Cobranças",
     lead: "O documento de cada unidade, do valor ao pagador, e o que o compõe.",
-    points: [
-      { term: "Os documentos", text: "Os documentos do condomínio, por unidade e mês, com o pagador, o valor e a situação: emitido ou vencido.", focus: { x: 18, y: 41, zoom: 1.7 } },
-      { term: "O resumo", text: "O valor, o vencimento e a situação, o condomínio, a unidade e o pagador, com o PDF e o cancelamento a um clique.", focus: { x: 57, y: 26, zoom: 1.9 } },
-      { term: "Os itens", text: "O que compõe o valor, item a item, cada um com a sua sub-conta.", focus: { x: 57, y: 70, zoom: 1.9 } },
-    ],
   },
 ] as const;
-
-export const FEATURES: Feature[] = [
-  {
-    title: "Condomínios, blocos e unidades",
-    description: "Toda a estrutura do condomínio em um só lugar, com filtros e pendências à vista.",
-  },
-  {
-    title: "Pessoas e proprietários",
-    description: "Cadastro único de moradores, proprietários e fornecedores, com busca instantânea.",
-  },
-  {
-    title: "Cobrança automatizada",
-    description: "Planos de cobrança, emissão mensal em lote e boletos gerados sem planilhas.",
-  },
-  {
-    title: "Baixa e conciliação",
-    description: "Pagamentos confirmados por webhook e conciliados automaticamente com o extrato.",
-  },
-  {
-    title: "Contas a pagar",
-    description: "Despesas por centro de custo, baixa com um clique e histórico completo.",
-  },
-  {
-    title: "Documentos e PDFs",
-    description: "Segunda via, cancelamento e envio por e-mail direto da tela do documento.",
-  },
-];
 
 /**
  * A abertura de Como funciona: uma frase de destaque e os parágrafos que contam o caminho inteiro, justificados ao lado dela.

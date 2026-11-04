@@ -1,7 +1,7 @@
 ---
 summary: A help chat inside the ERP (logged-in users only) answered by a free AI API (Gemini, then Groq) that only knows curated help texts, never the database, and refuses questions that contain personal data.
 read-when: you touch the assistant app, its providers, its knowledge files, the sensitive-data filter, or its throttles
-skip-if: how throttles and the trusted proxy work in general → features/065-security-hardening.md; the frontend widget → frontend/docs/norms/components.md
+skip-if: how throttles and the trusted proxy work in general → features/065-security-hardening.md; the frontend widget → frontend/docs/features/assistant.md
 ---
 # 069 — Help assistant
 

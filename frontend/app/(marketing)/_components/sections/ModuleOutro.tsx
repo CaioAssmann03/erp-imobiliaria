@@ -4,11 +4,12 @@ import type { ModuleSlug } from "@/lib/site/public-pages";
 
 import { MODULE_LINKS } from "@/app/(marketing)/_components/content";
 
-/** Para onde cada módulo leva no fim: Condomínios → Lançamentos → Cobranças → Como funciona. */
+/** Para onde cada módulo leva no fim: Condomínios → Lançamentos → Cobranças → Assistente → Como funciona. */
 const NEXT_STEP: Record<ModuleSlug, { href: string; label: string; summary: string }> = {
   condominios: MODULE_LINKS.find((link) => link.href === "/features/lancamentos")!,
   lancamentos: MODULE_LINKS.find((link) => link.href === "/features/cobrancas")!,
-  cobrancas: { href: "/how-it-works", label: "Como funciona", summary: "Configure uma vez e deixe o sistema cuidar da rotina mensal." },
+  cobrancas: MODULE_LINKS.find((link) => link.href === "/features/assistente")!,
+  assistente: { href: "/how-it-works", label: "Como funciona", summary: "Configure uma vez e deixe o sistema cuidar da rotina mensal." },
 };
 
 /**

@@ -2,20 +2,19 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isAxiosError } from "axios";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useAuthLoginCreate } from "@/lib/api/generated";
 import { startLoginTransition } from "@/lib/auth/login-transition";
 import { safeNextPath } from "@/lib/auth/safe-redirect";
 import { toast } from "@/lib/errors/toast";
 
 import { FieldLabel } from "./FieldLabel";
+import { RevealInput } from "./RevealInput";
 
 const schema = z.object({
   username: z.string().min(1, "Informe o usuário"),
@@ -24,11 +23,13 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-/** Formulário de login: o servidor guarda os tokens em cookie HttpOnly; segue para `?next=` ou para o painel. */
+/**
+ * Formulário de login: o servidor guarda os tokens em cookie HttpOnly; segue para `?next=` ou para o painel. Usuário e senha começam
+ * escondidos (bolinhas), cada um com o seu olho para mostrar (`RevealInput`).
+ */
 export function LoginForm() {
   const router = useRouter();
   const loginMutation = useAuthLoginCreate();
-  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -75,12 +76,15 @@ export function LoginForm() {
         <FieldLabel htmlFor="username" error={errors.username?.message}>
           Usuário
         </FieldLabel>
-        <Input
+        <RevealInput
           id="username"
-          type="text"
+          subject="usuário"
+          hide="mask"
           autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
           autoFocus
-          className="h-11 rounded-sharp border-ink/20 bg-surface px-3.5"
+          className="h-11 rounded-sharp border-ink/20 bg-surface pl-3.5"
           aria-invalid={!!errors.username || credentialError}
           {...register("username")}
         />
@@ -90,25 +94,15 @@ export function LoginForm() {
         <FieldLabel htmlFor="password" error={errors.password?.message ?? loginErrorLabel}>
           Senha
         </FieldLabel>
-        <div className="relative">
-          <Input
-            id="password"
-            type={showPassword ? "text" : "password"}
-            autoComplete="current-password"
-            className="h-11 rounded-sharp border-ink/20 bg-surface pr-11 pl-3.5"
-            aria-invalid={!!errors.password || loginMutation.isError}
-            {...register("password")}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword((visible) => !visible)}
-            aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-            aria-pressed={showPassword}
-            className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-soft outline-none transition-colors hover:text-ink focus-visible:text-ink"
-          >
-            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-          </button>
-        </div>
+        <RevealInput
+          id="password"
+          subject="senha"
+          hide="type"
+          autoComplete="current-password"
+          className="h-11 rounded-sharp border-ink/20 bg-surface pl-3.5"
+          aria-invalid={!!errors.password || loginMutation.isError}
+          {...register("password")}
+        />
       </div>
 
       <div className="pt-2">

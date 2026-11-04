@@ -5,6 +5,7 @@ import { pageMetadata } from "@/lib/site/page-metadata";
 import { MODULES } from "@/app/(marketing)/_components/content";
 import { AcronymReveal } from "@/app/(marketing)/_components/sections/AcronymReveal";
 import { ModuleSection } from "@/app/(marketing)/_components/sections/ModuleSection";
+import { AssistantChat } from "@/app/(marketing)/_components/visuals/AssistantChat";
 import { BillingFlow } from "@/app/(marketing)/_components/visuals/BillingFlow";
 import { CondominiumPlan } from "@/app/(marketing)/_components/visuals/CondominiumPlan";
 
@@ -25,6 +26,9 @@ export default function FeaturesPage() {
         <ModuleSection {...MODULES.entries} placement="below" />
         <ModuleSection {...MODULES.billing} placement="right">
           <BillingFlow />
+        </ModuleSection>
+        <ModuleSection {...MODULES.assistant} placement="below">
+          <AssistantChat className="max-w-2xl" />
         </ModuleSection>
       </div>
     </>
