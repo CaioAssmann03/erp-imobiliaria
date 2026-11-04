@@ -11,6 +11,7 @@ interface SectionProps {
 export function MotionSection({ appearance, onChange }: SectionProps) {
   return (
     <SettingsRow
+      stacked
       title="Animações e efeitos"
       description="Reduzidos tira animações, desfoques e efeitos de fundo, e deixa o sistema mais leve. No Automático, isso acontece sozinho em computadores mais fracos ou quando o sistema pede menos movimento."
     >
@@ -19,6 +20,7 @@ export function MotionSection({ appearance, onChange }: SectionProps) {
         value={appearance.motion}
         options={MOTIONS}
         onChange={(motion) => onChange({ motion })}
+        fullWidth
       />
     </SettingsRow>
   );

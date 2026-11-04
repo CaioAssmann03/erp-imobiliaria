@@ -6,6 +6,7 @@ import { pageMetadata } from "@/lib/site/page-metadata";
 
 import { MODULE_PAGES } from "@/app/(marketing)/_components/content";
 import { ModuleOutro } from "@/app/(marketing)/_components/sections/ModuleOutro";
+import { AssistenteStory } from "@/app/(marketing)/_components/story/AssistenteStory";
 import { CobrancasStory } from "@/app/(marketing)/_components/story/CobrancasStory";
 import { CondominiumStory } from "@/app/(marketing)/_components/story/CondominiumStory";
 import { LancamentosStory } from "@/app/(marketing)/_components/story/LancamentosStory";
@@ -32,7 +33,15 @@ export default async function ModulePage({ params }: { params: Promise<{ slug: s
   return (
     <>
       {/* Cada módulo tem a sua landing, diferente das outras. */}
-      {slug === "condominios" ? <CondominiumStory /> : slug === "lancamentos" ? <LancamentosStory /> : <CobrancasStory />}
+      {slug === "condominios" ? (
+        <CondominiumStory />
+      ) : slug === "lancamentos" ? (
+        <LancamentosStory />
+      ) : slug === "cobrancas" ? (
+        <CobrancasStory />
+      ) : (
+        <AssistenteStory />
+      )}
       <ModuleOutro slug={slug} />
     </>
   );

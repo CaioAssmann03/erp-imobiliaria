@@ -62,8 +62,8 @@ export function Hero() {
         <SkyFlyers className="size-full" />
       </motion.div>
 
-      {/* Por cima do nome: o canvas é transparente, então só os prédios o encobrem. */}
-      <ScanlineSkyline className="absolute inset-x-0 bottom-0 z-10 h-[40svh] w-full md:h-[58svh]" />
+      {/* Por cima do nome: o canvas é transparente, então só os prédios o encobrem. Sem eventos de ponteiro, senão ele intercepta o clique do botão. */}
+      <ScanlineSkyline className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[40svh] w-full md:h-[58svh]" />
     </section>
   );
 }

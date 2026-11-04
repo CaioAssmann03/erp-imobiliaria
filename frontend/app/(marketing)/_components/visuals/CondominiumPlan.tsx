@@ -15,6 +15,8 @@ const BLOCKS = [
   { name: "C", floors: 6, tone: "var(--color-brand-light)" },
 ] as const;
 const PER_FLOOR = 2;
+/** Escala de todos os tempos da entrada (atrasos e durações): menor é mais rápido. */
+const PACE = 0.65;
 const IDLE_CAPTION = "Condomínio › blocos › unidades";
 
 /** As linhas horizontais do skyline (3 px cheios a cada 4) na cor do bloco. A casinha tem 48 ou 56 px por dentro (da borda), múltiplos de 4, para as linhas fecharem certas. */
@@ -47,7 +49,7 @@ export function CondominiumPlan({ className }: { className?: string }) {
   const appear = (delay: number) => ({
     initial: false as const,
     animate: { opacity: on ? 1 : 0, y: on ? 0 : 8 },
-    transition: { duration: 0.6, delay: still ? 0 : delay, ease: EASE },
+    transition: { duration: 0.6 * PACE, delay: still ? 0 : delay * PACE, ease: EASE },
   });
 
   return (
@@ -60,7 +62,7 @@ export function CondominiumPlan({ className }: { className?: string }) {
         <motion.span
           initial={false}
           animate={{ scaleX: on ? 1 : 0 }}
-          transition={{ duration: 0.9, delay: still ? 0 : 0.15, ease: EASE }}
+          transition={{ duration: 0.9 * PACE, delay: still ? 0 : 0.15 * PACE, ease: EASE }}
           className="absolute inset-0 origin-left border-x border-t border-ink"
         />
       </div>
@@ -95,7 +97,7 @@ export function CondominiumPlan({ className }: { className?: string }) {
                       <motion.span
                         initial={false}
                         animate={{ clipPath: on ? "inset(0 0 0% 0)" : "inset(0 0 100% 0)" }}
-                        transition={{ duration: 0.5, delay: still ? 0 : filled, ease: EASE }}
+                        transition={{ duration: 0.5 * PACE, delay: still ? 0 : filled * PACE, ease: EASE }}
                         className="absolute inset-0"
                         style={{ backgroundImage: active ? undefined : scanlines(block.tone), backgroundColor: active ? "var(--color-ink)" : undefined }}
                       />

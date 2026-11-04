@@ -38,7 +38,7 @@ export function AccentSection({ appearance, onChange }: SectionProps) {
 
   return (
     <SettingsRow title="Cor de destaque" description={`Botões, marcações e links. Atual: ${currentLabel}.`} stacked>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-3">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
         <div role="radiogroup" aria-label="Cores prontas" className="flex flex-wrap items-center gap-2.5">
           {ACCENTS.map((accent) => {
             const selected = !isCustom && appearance.accent === accent.value;
@@ -53,7 +53,7 @@ export function AccentSection({ appearance, onChange }: SectionProps) {
                 onClick={() => onChange({ accent: accent.value })}
                 style={{ background: accent.color }}
                 className={cn(
-                  "flex size-7 items-center justify-center rounded-button text-white outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-brand/60",
+                  "flex size-8 items-center justify-center rounded-button text-white outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-brand/60",
                   selected
                     ? "ring-2 ring-ink ring-offset-2 ring-offset-surface"
                     : "hover:ring-2 hover:ring-ink-faint hover:ring-offset-2 hover:ring-offset-surface"
@@ -65,13 +65,13 @@ export function AccentSection({ appearance, onChange }: SectionProps) {
           })}
         </div>
 
-        <span aria-hidden className="hidden h-6 w-px bg-border sm:block" />
+        <span aria-hidden className="hidden h-6 w-px bg-border/70 sm:block" />
 
         <div className="flex items-center gap-2.5">
           <label
             title="Escolher outra cor"
             className={cn(
-              "relative flex size-7 cursor-pointer items-center justify-center rounded-button text-white transition-shadow focus-within:ring-2 focus-within:ring-brand/60",
+              "relative flex size-8 cursor-pointer items-center justify-center rounded-button text-white transition-shadow focus-within:ring-2 focus-within:ring-brand/60",
               isCustom ? "ring-2 ring-ink ring-offset-2 ring-offset-surface" : "hover:ring-2 hover:ring-ink-faint hover:ring-offset-2 hover:ring-offset-surface"
             )}
             style={{ background: isCustom ? customColor : RAINBOW }}
@@ -99,7 +99,7 @@ export function AccentSection({ appearance, onChange }: SectionProps) {
               if (hex) pickCustom(hex);
             }}
             onBlur={() => setDraft(null)}
-            className="h-8 w-24 rounded-control bg-surface-muted px-2.5 text-body tabular-nums uppercase outline-none placeholder:text-ink-faint focus-visible:ring-2 focus-visible:ring-brand/60"
+            className="h-9 w-28 rounded-control bg-surface-sunken px-3 text-body tabular-nums uppercase outline-none placeholder:text-ink-faint focus-visible:ring-2 focus-visible:ring-brand/60"
           />
         </div>
       </div>

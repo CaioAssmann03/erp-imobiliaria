@@ -5,7 +5,7 @@ export interface PublicPage {
 }
 
 /** Os módulos de Recursos que têm página própria (`/features/[slug]`, conteúdo em `MODULE_PAGES` de `content.ts`). */
-export const MODULE_SLUGS = ["condominios", "lancamentos", "cobrancas"] as const;
+export const MODULE_SLUGS = ["condominios", "lancamentos", "cobrancas", "assistente"] as const;
 export type ModuleSlug = (typeof MODULE_SLUGS)[number];
 
 /**

@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog } from "@base-ui/react/dialog";
-import { Settings, X } from "lucide-react";
+import { Accessibility, MessageCircle, Palette, PanelLeft, RotateCcw, Settings, X } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -23,10 +23,10 @@ const TRIGGER_COMPACT =
   "flex size-10 items-center justify-center rounded-button text-ink-soft transition-colors hover:bg-surface hover:text-ink";
 
 const TABS = [
-  { id: "appearance", label: "Aparência", description: "Como o sistema se parece, salvo neste navegador." },
-  { id: "accessibility", label: "Acessibilidade", description: "Texto maior e menos movimento." },
-  { id: "navigation", label: "Navegação", description: "O menu lateral e os atalhos de teclado." },
-  { id: "assistant", label: "Assistente", description: "A ajuda por perguntas no canto da tela." },
+  { id: "appearance", label: "Aparência", icon: Palette, description: "Como o sistema se parece. As escolhas ficam salvas neste navegador." },
+  { id: "accessibility", label: "Acessibilidade", icon: Accessibility, description: "Texto maior e menos movimento, para ler e usar com mais conforto." },
+  { id: "navigation", label: "Navegação", icon: PanelLeft, description: "O menu lateral e os atalhos de teclado." },
+  { id: "assistant", label: "Assistente", icon: MessageCircle, description: "A ajuda por perguntas no canto da tela." },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -87,12 +87,12 @@ export function SettingsDialog({
 
       <Dialog.Portal>
         <Dialog.Backdrop className={cn("z-40", centeredModalBackdropClass)} />
-        <Dialog.Popup className="fixed inset-x-0 bottom-0 z-50 flex max-h-[88dvh] flex-col overflow-hidden rounded-t-card bg-surface shadow-float outline-none transition duration-200 data-[ending-style]:translate-y-full data-[starting-style]:translate-y-full sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:h-[min(34rem,90vh)] sm:max-h-none sm:w-[min(46rem,94vw)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:flex-row sm:rounded-card sm:data-[ending-style]:translate-y-[-50%] sm:data-[ending-style]:scale-95 sm:data-[ending-style]:opacity-0 sm:data-[starting-style]:translate-y-[-50%] sm:data-[starting-style]:scale-95 sm:data-[starting-style]:opacity-0">
+        <Dialog.Popup className="fixed inset-x-0 bottom-0 z-50 flex max-h-[88dvh] flex-col overflow-hidden rounded-t-card bg-surface shadow-float outline-none transition duration-200 data-[ending-style]:translate-y-full data-[starting-style]:translate-y-full sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:h-[min(38rem,90vh)] sm:max-h-none sm:w-[min(54rem,94vw)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:flex-row sm:rounded-card sm:data-[ending-style]:translate-y-[-50%] sm:data-[ending-style]:scale-95 sm:data-[ending-style]:opacity-0 sm:data-[starting-style]:translate-y-[-50%] sm:data-[starting-style]:scale-95 sm:data-[starting-style]:opacity-0">
           <div aria-hidden className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-ink-faint/40 sm:hidden" />
 
-          <nav className="flex shrink-0 flex-col gap-3 px-5 pt-4 pb-3 sm:w-52 sm:gap-6 sm:border-r sm:border-border sm:bg-surface-muted/50 sm:px-4 sm:py-7">
+          <nav className="flex shrink-0 flex-col gap-3 px-5 pt-4 pb-3 sm:w-60 sm:gap-7 sm:bg-surface-muted sm:px-4 sm:py-8">
             <Dialog.Title className="text-heading sm:px-3">Configurações</Dialog.Title>
-            <div role="tablist" aria-label="Seções" aria-orientation="vertical" className="flex gap-1 overflow-x-auto sm:flex-col sm:overflow-visible">
+            <div role="tablist" aria-label="Seções" aria-orientation="vertical" className="flex gap-1 overflow-x-auto sm:flex-col sm:gap-1.5 sm:overflow-visible">
               {TABS.map((item) => {
                 const selected = tab === item.id;
                 return (
@@ -105,10 +105,11 @@ export function SettingsDialog({
                     aria-controls="settings-panel"
                     onClick={() => setTab(item.id)}
                     className={cn(
-                      "h-9 shrink-0 rounded-control px-3 text-left text-body whitespace-nowrap outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand/60 sm:w-full",
-                      selected ? "bg-ink/[0.07] font-medium text-ink" : "text-ink-soft hover:text-ink"
+                      "flex h-10 shrink-0 items-center gap-2.5 rounded-control px-3 text-left text-body whitespace-nowrap outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand/60 sm:w-full",
+                      selected ? "bg-surface font-medium text-ink shadow-card" : "text-ink-soft hover:bg-surface/60 hover:text-ink"
                     )}
                   >
+                    <item.icon aria-hidden className={cn("size-4 shrink-0", selected ? "text-ink" : "text-ink-faint")} />
                     {item.label}
                   </button>
                 );
@@ -117,10 +118,10 @@ export function SettingsDialog({
           </nav>
 
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-            <header className="flex shrink-0 items-start justify-between gap-4 px-5 pt-2 pb-2 sm:px-8 sm:pt-7 sm:pb-3">
+            <header className="flex shrink-0 items-start justify-between gap-4 px-5 pt-3 pb-4 sm:px-10 sm:pt-9 sm:pb-6">
               <div>
                 <h2 className="text-title">{activeTab.label}</h2>
-                <Dialog.Description className="mt-1 text-body text-ink-soft">{activeTab.description}</Dialog.Description>
+                <Dialog.Description className="mt-1.5 max-w-md text-body leading-relaxed text-ink-soft">{activeTab.description}</Dialog.Description>
               </div>
               <Dialog.Close
                 aria-label="Fechar"
@@ -134,7 +135,7 @@ export function SettingsDialog({
               role="tabpanel"
               id="settings-panel"
               aria-labelledby={`settings-tab-${tab}`}
-              className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 sm:px-8"
+              className="min-h-0 flex-1 space-y-8 overflow-y-auto overscroll-contain px-5 pb-6 sm:px-10"
             >
               {tab === "appearance" && (
                 <SettingsGroup>
@@ -148,13 +149,14 @@ export function SettingsDialog({
               {tab === "assistant" && <AssistantSection />}
             </div>
 
-            <footer className="flex shrink-0 items-center justify-between gap-3 px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-8 sm:pt-4 sm:pb-6">
+            <footer className="flex shrink-0 items-center justify-between gap-3 px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-4 sm:pb-7">
               <button
                 type="button"
                 onClick={() => update(DEFAULT_APPEARANCE)}
                 disabled={isDefault}
-                className="h-9 text-body text-ink-soft transition-colors hover:text-ink disabled:pointer-events-none disabled:opacity-40"
+                className="-ml-3 flex h-9 items-center gap-2 rounded-button px-3 text-body text-ink-soft transition-colors hover:bg-surface-muted hover:text-ink disabled:pointer-events-none disabled:opacity-40"
               >
+                <RotateCcw aria-hidden className="size-3.5" />
                 Restaurar padrão
               </button>
               <Dialog.Close render={<Button type="button" size="lg" className="sm:hidden" />}>Concluir</Dialog.Close>

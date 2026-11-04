@@ -5,12 +5,12 @@ import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBillingDocumentsDelinquency } from "@/lib/api/generated";
 import { ROW_LINK } from "@/app/(dashboard)/_components/home/shared/row-link";
-import { Late } from "@/app/(dashboard)/_components/home/shared/Late";
+import { LateLink } from "@/app/(dashboard)/_components/home/shared/LateLink";
 import { brlWhole, integer } from "@/app/(dashboard)/_components/home/widgets/format";
 
 const SHOWN = 3;
 
-/** Client Component: o que a imobiliária tem a receber e já venceu: o total sozinho em tipo grande, os condomínios que mais devem (o relatório de inadimplência) e, no pé, a quantidade de boletos. */
+/** Client Component: o que a imobiliária tem a receber e já venceu: o total sozinho em tipo grande, os condomínios que mais devem (o relatório de inadimplência) e, no pé, a quantidade de boletos vencidos e não pagos (em vermelho, e clicável: abre o relatório de inadimplência com eles). */
 export function DelinquencyBody() {
   const { data, isLoading } = useBillingDocumentsDelinquency({ condominiums_order: "amount" });
   const late = (data?.count ?? 0) > 0;
@@ -40,9 +40,9 @@ export function DelinquencyBody() {
       {data && (
         <p className="mt-auto pt-3 text-caption text-ink-faint">
           {late ? (
-            <Late>
+            <LateLink href="/reports/delinquency" title="Abrir os boletos vencidos e não pagos">
               {integer(data.count)} boleto{data.count === 1 ? "" : "s"} vencido{data.count === 1 ? "" : "s"} e não pago{data.count === 1 ? "" : "s"}
-            </Late>
+            </LateLink>
           ) : (
             "Nenhum boleto vencido"
           )}

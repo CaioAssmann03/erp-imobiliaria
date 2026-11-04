@@ -4,6 +4,7 @@ import { accountPayableUrl, accountsPayableUrl } from "@/lib/finance/account-pay
 import type { AccountsPayable, PayableTotal, UpcomingPayable } from "@/lib/api/generated/models";
 import { ROW_LINK } from "@/app/(dashboard)/_components/home/shared/row-link";
 import { Late } from "@/app/(dashboard)/_components/home/shared/Late";
+import { LateLink } from "@/app/(dashboard)/_components/home/shared/LateLink";
 import { formatDate, relativeDays } from "@/app/(dashboard)/_components/home/shared/relative-days";
 
 import { Caption } from "./Caption";
@@ -24,13 +25,19 @@ function Overdue({ value }: { value: PayableTotal | undefined }) {
   );
 }
 
-/** No pé do card: quantas contas estão vencidas (em vermelho) ou que não há atraso. */
+/** No pé do card: quantas contas estão vencidas (em vermelho, e clicável: abre a lista das vencidas) ou que não há atraso. */
 function OverdueNote({ value }: { value: PayableTotal | undefined }) {
   if (!value) return null;
   const late = value.count > 0;
   return (
     <p className="mt-auto pt-3 text-caption text-ink-faint">
-      {late ? <Late>{accountsLabel(value.count)} vencida{value.count === 1 ? "" : "s"}</Late> : "Nenhuma conta atrasada"}
+      {late ? (
+        <LateLink href={accountsPayableUrl("overdue")} title="Abrir as contas vencidas">
+          {accountsLabel(value.count)} vencida{value.count === 1 ? "" : "s"}
+        </LateLink>
+      ) : (
+        "Nenhuma conta atrasada"
+      )}
     </p>
   );
 }

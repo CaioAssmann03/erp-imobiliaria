@@ -1,74 +1,101 @@
 "use client";
 
-import { motion, useInView } from "motion/react";
-import { useLite } from "@/lib/theme/use-lite";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { SCREENS } from "@/app/(marketing)/_components/content";
-import { ScreenFrame } from "./ScreenFrame";
-import { ScreenList, STEP_SECONDS, type Step } from "./ScreenList";
+import { Reveal } from "@/app/(marketing)/_components/motion/Reveal";
+import { ThemedImage } from "@/app/(marketing)/_components/ThemedImage";
+import { cn } from "@/lib/utils";
+import cobrancas from "@/public/marketing/cobrancas.png";
+import cobrancasDark from "@/public/marketing/cobrancas-dark.png";
+import lancamentos from "@/public/marketing/lancamentos.png";
+import lancamentosDark from "@/public/marketing/lancamentos-dark.png";
+import unidades from "@/public/marketing/unidades.png";
+import unidadesDark from "@/public/marketing/unidades-dark.png";
 
-const EASE = [0.22, 1, 0.36, 1] as const;
-
-/** O passo seguinte do passeio: o próximo ponto da tela e, no último, a primeira da tela seguinte (volta ao início no fim). */
-function nextStep({ screen, point }: Step): Step {
-  if (point + 1 < SCREENS[screen].points.length) return { screen, point: point + 1 };
-  return { screen: (screen + 1) % SCREENS.length, point: 0 };
-}
+const IMAGES = [
+  { light: unidades, dark: unidadesDark },
+  { light: lancamentos, dark: lancamentosDark },
+  { light: cobrancas, dark: cobrancasDark },
+];
 
 /**
- * Telas reais do sistema em passeio guiado: a imagem aproxima a região de cada ponto e, a cada ~5 s, segue para o próximo
- * (a linha laranja do ponto mostra o tempo). O passeio para quando o ponteiro está sobre a seção, fora da tela ou ao
- * primeiro clique: um título, um ponto ou a própria imagem (que alterna zoom e tela inteira) passam o controle a quem lê.
+ * As três telas reais do sistema numa linha só: a que está sob o mouse (ou com o foco, ou tocada) se abre e mostra a tela inteira; as
+ * outras viram tiras estreitas com o título de pé. A tela não se reescala ao abrir: ela tem sempre a altura da linha e a tira só a
+ * recorta, então o que muda é a largura (`flex-grow`, só CSS). Quinas retas e só um fio de contorno, sem sombra. O título e a frase da
+ * tela aberta ficam embaixo e trocam com ela. Sem voltar ao início ao tirar o mouse, para não tremer. Abaixo de `lg` não cabe uma linha:
+ * as telas vêm uma sob a outra, inteiras, cada uma com o seu texto.
  */
 export function ScreenStack() {
-  const ref = useRef<HTMLElement>(null);
-  const seen = useInView(ref, { once: true, margin: "0px 0px -15% 0px" });
-  const visible = useInView(ref, { margin: "-15% 0px -15% 0px" });
-  const still = useLite();
-  const [step, setStep] = useState<Step>({ screen: 0, point: 0 });
-  const [zoomed, setZoomed] = useState(true);
-  const [touring, setTouring] = useState(true);
-  const [hovering, setHovering] = useState(false);
-  const running = touring && visible && !hovering && !still;
-  const focus = SCREENS[step.screen].points[step.point].focus;
-
-  useEffect(() => {
-    if (!running) return;
-    const timer = setTimeout(() => setStep(nextStep), STEP_SECONDS * 1000);
-    return () => clearTimeout(timer);
-  }, [running, step]);
-
-  function pick(next: Step) {
-    setStep(next);
-    setZoomed(true);
-    setTouring(false);
-  }
+  const [active, setActive] = useState(0);
 
   return (
-    <section
-      ref={ref}
-      onPointerEnter={() => setHovering(true)}
-      onPointerLeave={() => setHovering(false)}
-      className="mx-auto grid w-full max-w-7xl gap-10 px-6 py-24 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:items-start lg:gap-14"
-    >
-      <motion.div
-        initial={false}
-        animate={{ opacity: seen ? 1 : 0, y: seen ? 0 : 32 }}
-        transition={{ duration: still ? 0 : 0.8, ease: EASE }}
-        className="lg:order-2 lg:sticky lg:top-24"
-      >
-        <ScreenFrame
-          current={step.screen}
-          focus={zoomed ? focus : null}
-          onToggle={() => {
-            setZoomed((value) => !value);
-            setTouring(false);
-          }}
-        />
-      </motion.div>
-      <div className="lg:order-1">
-        <ScreenList step={step} running={running} onPick={pick} />
+    <section aria-label="Telas do sistema" className="mx-auto w-full max-w-6xl px-6 py-24">
+      <Reveal className="hidden lg:block">
+        {/* 1104 = a coluna (max-w-6xl menos o respiro); 540 = a altura em que a tela aberta (8 de 10 partes, menos os vãos) tem a proporção 1440/900 da print. */}
+        <div className="flex aspect-[1104/540] gap-3">
+          {SCREENS.map((screen, index) => {
+            const open = index === active;
+            return (
+              <button
+                key={screen.key}
+                type="button"
+                aria-pressed={open}
+                aria-label={screen.title}
+                onMouseEnter={() => setActive(index)}
+                onFocus={() => setActive(index)}
+                onClick={() => setActive(index)}
+                className={cn(
+                  "relative min-w-0 overflow-hidden rounded-sharp bg-surface text-left ring-1 ring-ink/10 outline-none transition-[flex-grow] duration-500 ease-out focus-visible:ring-2 focus-visible:ring-brand",
+                  open ? "grow-[8] cursor-default" : "grow cursor-pointer",
+                )}
+                style={{ flexBasis: 0 }}
+              >
+                {/* Altura da linha, largura da tela inteira: a tira só recorta, nada se reescala durante a troca. */}
+                <span className="absolute inset-y-0 left-0 block aspect-[1440/900]">
+                  <ThemedImage
+                    light={IMAGES[index].light}
+                    dark={IMAGES[index].dark}
+                    alt={screen.alt}
+                    sizes="900px"
+                    className="block h-full w-full max-w-none"
+                  />
+                </span>
+                <span
+                  aria-hidden
+                  className={cn("absolute inset-0 flex items-end justify-center bg-canvas/70 pb-6 transition-opacity duration-500", open ? "opacity-0" : "opacity-100")}
+                >
+                  <span className="font-display text-title font-normal text-ink [writing-mode:vertical-rl] rotate-180">{screen.title}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-6 grid">
+          {SCREENS.map((screen, index) => (
+            <div
+              key={screen.key}
+              aria-hidden={index !== active}
+              className={cn("col-start-1 row-start-1 transition-opacity duration-500", index === active ? "opacity-100" : "pointer-events-none opacity-0")}
+            >
+              <h3 className="font-display text-title font-normal text-ink">{screen.title}</h3>
+              <p className="mt-2 max-w-xl text-body text-ink-soft">{screen.lead}</p>
+            </div>
+          ))}
+        </div>
+      </Reveal>
+
+      <div className="space-y-16 lg:hidden">
+        {SCREENS.map((screen, index) => (
+          <article key={screen.key}>
+            <div className="relative aspect-[1440/900] overflow-hidden rounded-sharp bg-surface ring-1 ring-ink/10">
+              <ThemedImage light={IMAGES[index].light} dark={IMAGES[index].dark} alt={screen.alt} sizes="100vw" className="block h-full w-full" />
+            </div>
+            <h3 className="mt-6 font-display text-title font-normal text-ink">{screen.title}</h3>
+            <p className="mt-2 text-body text-ink-soft">{screen.lead}</p>
+          </article>
+        ))}
       </div>
     </section>
   );
