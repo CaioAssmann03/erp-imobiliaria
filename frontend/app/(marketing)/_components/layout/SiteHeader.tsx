@@ -12,10 +12,11 @@ import { cn } from "@/lib/utils";
 
 import { MODULE_LINKS, NAV_LINKS } from "@/app/(marketing)/_components/content";
 import { MarketingButton } from "@/app/(marketing)/_components/MarketingButton";
+import { MobileNav } from "./MobileNav";
 
 /**
  * Cabeçalho das páginas públicas: o logo METRI (casa e nome) à esquerda, a navegação em rótulos (caixa-alta) no meio e, à direita, o acesso
- * ao sistema; ganha fundo depois que a página rola.
+ * ao sistema; ganha fundo depois que a página rola. Abaixo de `md` a navegação vira o menu lateral (`MobileNav`, o botão à esquerda do logo).
  */
 export function SiteHeader() {
   const { scrollY } = useScroll();
@@ -32,7 +33,8 @@ export function SiteHeader() {
       )}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6">
-        <div className="flex flex-1 items-center">
+        <div className="flex flex-1 items-center gap-2">
+          <MobileNav />
           <Link href="/" aria-label="Página inicial">
             <MetriLogo className="h-7 w-auto" />
           </Link>

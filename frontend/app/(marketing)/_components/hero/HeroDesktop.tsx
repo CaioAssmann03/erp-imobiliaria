@@ -4,28 +4,26 @@ import { motion, useScroll, useTransform } from "motion/react";
 import { useLite } from "@/lib/theme/use-lite";
 
 import { CONTACT_HREF } from "../content";
+import { HERO_DESCRIPTION as DESCRIPTION, HERO_TITLE as TITLE } from "./hero-copy";
 import { MarketingButton } from "../MarketingButton";
 import { ScanlineSkyline } from "./ScanlineSkyline";
 import { SkyFlyers } from "./SkyFlyers";
 
-const TITLE = "Condomínio em dia.";
-const DESCRIPTION =
-  "Emita a cobrança do mês em lote, receba as baixas em tempo real e feche o extrato sem digitar nada, para todos os condomínios da administradora, no mesmo painel.";
 
 /**
- * Hero: uma frase só como título, grande, em negrito e numa linha (a mesma fonte do site), subindo de dentro de uma
+ * Hero do desktop (de `md` para cima; o do celular é `HeroMobile`): uma frase só como título, grande, em negrito e numa linha (a mesma fonte do site), subindo de dentro de uma
  * máscara; embaixo, uma descrição curta e o botão de agendar. O nome do negócio fica no cabeçalho. Fica no centro do hero, sobre o skyline
  * laranja em linhas (o canvas é transparente e fica por cima, então qualquer prédio que o alcance passa na frente). O
  * hero fica fixo no topo enquanto a seção seguinte (com fundo liso) sobe por cima e o cobre, como uma cortina; o texto
  * some aos poucos nesse trecho. A frase precisa caber numa linha em qualquer largura (até uns 21 caracteres).
  */
-export function Hero() {
+export function HeroDesktop() {
   const still = useLite();
   const { scrollY } = useScroll();
   const opacity = useTransform(scrollY, [0, 350], [1, 0]);
 
   return (
-    <section className="sticky top-0 h-svh overflow-x-clip">
+    <section className="sticky top-0 hidden h-svh overflow-x-clip md:block">
       <motion.div style={still ? undefined : { opacity }} className="absolute inset-0 flex flex-col items-center justify-center px-4">
         <h1 className="text-center font-display leading-[0.95] tracking-[-0.045em] whitespace-nowrap">
           <span className="block overflow-hidden px-[0.04em] pt-[0.1em] pb-[0.08em]">

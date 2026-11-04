@@ -10,7 +10,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 /**
  * Resumo logo abaixo do hero: um texto formal sobre o que é o sistema, como a página de um livro: uma única coluna
- * centralizada e estreita, com todos os parágrafos iguais (mesmo tamanho e peso), justificados e hifenizados. Entra por
+ * centralizada e estreita, com todos os parágrafos iguais (mesmo tamanho e peso), justificados e hifenizados (abaixo de `sm`, alinhados à esquerda e sem hifenização). Entra por
  * tempo, quando chega à tela: uma linha fina se desenha de um lado ao outro e, em seguida, os parágrafos sobem um a um.
  * Estático para quem prefere menos movimento.
  */
@@ -44,7 +44,7 @@ export function Summary() {
             <motion.p
               key={paragraph}
               {...rise(index)}
-              className="mb-7 text-justify text-[1.1875rem] leading-[1.75] text-ink hyphens-auto last:mb-0"
+              className="mb-7 text-left sm:text-justify text-[1.0625rem] leading-[1.7] text-ink sm:text-[1.1875rem] sm:leading-[1.75] hyphens-manual sm:hyphens-auto last:mb-0"
             >
               {paragraph}
             </motion.p>
