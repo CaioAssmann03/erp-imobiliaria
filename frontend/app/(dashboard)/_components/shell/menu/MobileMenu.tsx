@@ -1,10 +1,13 @@
 "use client";
 
-import { ChevronDown, Menu, Settings } from "lucide-react";
+import { ChevronDown, Menu, MessageCircle, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { ASSISTANT_COPY } from "@/components/assistant/assistant-copy";
+import { useAssistantEnabled } from "@/components/assistant/use-assistant-enabled";
+import { useAssistantOpen } from "@/components/assistant/use-assistant-open";
 import { Brand } from "@/components/brand/Brand";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -14,17 +17,17 @@ import { LogoutButton } from "./LogoutButton";
 import { ITEM_ICONS, MODULE_ICONS } from "./menu-icons";
 import { SettingsDialog } from "@/app/(dashboard)/_components/shell/SettingsDialog";
 
-/** Linha do menu do celular: 44 px de altura, o mínimo confortável para o dedo. */
+/** Linha do menu do celular: 44 px de altura, o mínimo confortável para o dedo. `shrink-0`: a navegação é uma coluna flex que rola, e sem isso as linhas encolhem quando um módulo se expande e o conteúdo passa da altura. */
 const rowClass = (isActive: boolean) =>
   cn(
-    "flex h-11 w-full items-center gap-3 rounded-control px-3 text-body font-medium transition-colors",
+    "flex h-11 w-full shrink-0 items-center gap-3 rounded-control px-3 text-body font-medium transition-colors",
     isActive ? "bg-ink text-ink-foreground" : "text-ink-soft hover:bg-surface hover:text-ink"
   );
 
 /**
  * Client Component: navegação do celular, um menu lateral aberto pelo botão da barra do topo. No alto a marca; depois os módulos, cada um
  * que tem telas recolhido numa linha (abre o do módulo em que se está, e abrir outro fecha o anterior), com só as telas que já existem
- * (as "Em breve" ficam só no menu do desktop). Embaixo, fixos, as configurações (o menu fecha e a janela abre sozinha) e o sair.
+ * (as "Em breve" ficam só no menu do desktop). Embaixo, fixos, a ajuda (o menu fecha e o assistente abre; só se ele estiver ligado, pois no celular o botão flutuante não existe), as configurações (o menu fecha e a janela abre sozinha) e o sair.
  * Fecha ao escolher uma tela. Só celular (no desktop a navegação é a `Rail`).
  */
 export function MobileMenu() {
@@ -33,6 +36,8 @@ export function MobileMenu() {
   const [open, setOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [expanded, setExpanded] = useState<ModuleKey | null>(current);
+  const [assistantEnabled] = useAssistantEnabled();
+  const [, setAssistantOpen] = useAssistantOpen();
 
   const close = () => setOpen(false);
 
@@ -83,7 +88,7 @@ export function MobileMenu() {
               const isExpanded = expanded === appModule.key;
 
               return (
-                <section key={appModule.key}>
+                <section key={appModule.key} className="shrink-0">
                   <button
                     type="button"
                     aria-expanded={isExpanded}
@@ -128,6 +133,19 @@ export function MobileMenu() {
           </nav>
 
           <div className="flex shrink-0 flex-col gap-1 border-t border-line px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            {assistantEnabled && (
+              <button
+                type="button"
+                onClick={() => {
+                  close();
+                  setAssistantOpen(true);
+                }}
+                className={rowClass(false)}
+              >
+                <MessageCircle className="size-[1.125rem] shrink-0" />
+                {ASSISTANT_COPY.trigger}
+              </button>
+            )}
             <button
               type="button"
               onClick={() => {
