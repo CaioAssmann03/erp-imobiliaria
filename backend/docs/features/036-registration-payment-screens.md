@@ -44,4 +44,4 @@ None.
 
 ## Done
 - [x] Tests green; `tsc`, `eslint` and the build clean; client regenerated
-- [x] `docs/apps/billing.md`, `frontend/docs/entities/domain-model.md`, roadmap part and phase, index updated
+- [x] `docs/apps/billing.md`, `frontend/docs/domain-model.md`, roadmap part and phase, index updated

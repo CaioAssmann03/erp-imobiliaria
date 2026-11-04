@@ -1,11 +1,11 @@
 ---
 summary: Form flow (schema → toForm → toPayload → server errors), react-hook-form and Zod usage, masks.
 read-when: you build or change a form
-skip-if: form file layout → structure/component-patterns.md; field names/rules → entities/domain-model.md
+skip-if: form file layout → conventions/components.md; field names and business rules → domain-model.md
 ---
-# Forms (N — Norms)
+# Forms
 
-react-hook-form + Zod. File layout: structure/component-patterns.md.
+react-hook-form + Zod. File layout: `conventions/components.md`.
 
 ## Flow
 1. `lib/schemas/<resource>.ts`: Zod schema (input = what the user typed, masked strings; output = normalized),

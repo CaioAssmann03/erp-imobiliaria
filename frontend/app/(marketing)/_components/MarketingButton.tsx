@@ -15,7 +15,7 @@ const VARIANTS = {
 
 type MarketingButtonProps = React.ComponentProps<typeof Link> & { variant?: keyof typeof VARIANTS };
 
-/** Botão das páginas públicas: retangular, rótulo em mono caixa-alta (ver docs/norms/marketing.md). */
+/** Botão das páginas públicas: retangular, rótulo em mono caixa-alta (ver docs/features/marketing.md). */
 export function MarketingButton({ variant = "primary", className, ...props }: MarketingButtonProps) {
   return (
     <Link

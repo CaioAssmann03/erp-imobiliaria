@@ -1,9 +1,9 @@
 ---
 summary: Entities, fields, enums, business rules and the dashboard summary as the UI sees them.
 read-when: you touch forms, tables or payloads of a resource
-skip-if: how to build the form → norms/forms.md; product scope → requirements/product-scope.md
+skip-if: how to build the form → conventions/forms.md; product scope → overview.md
 ---
-# Domain model (E — Entities)
+# Domain model
 
 Names are the backend's (and the generated client's). Ids are UUID strings. API enums are English values;
 the UI shows Portuguese labels.

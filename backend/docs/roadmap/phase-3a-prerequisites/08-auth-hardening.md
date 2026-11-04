@@ -16,7 +16,7 @@ Refresh tokens can be revoked, login is rate limited, and the frontend no longer
 - [x] `POST /api/auth/logout/` that blacklists the refresh token
 - [x] Redis-backed `CACHES` and DRF `ScopedRateThrottle` on login and refresh (no account lockout)
 - [x] Frontend: tokens in HttpOnly cookies through Next route handlers (the browser never reads the token)
-- [x] Update `architecture/quality.md`, `architecture/overview.md`, frontend `docs/safeguards/auth-and-tokens.md`; delete gap #3
+- [x] Update `architecture/quality.md`, `architecture/overview.md`, frontend `docs/quality/auth-and-tokens.md`; delete gap #3
 
 ## Draft for the spec
 Moved to the spec.
