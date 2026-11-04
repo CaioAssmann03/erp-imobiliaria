@@ -40,14 +40,14 @@ export const TEXT_SIZES = [
   { value: "xlarge", label: "Maior", hint: "125%" },
 ] as const;
 
-/** Animações e efeitos: `auto` liga o modo leve sozinho em máquina fraca (ver `resolvePerf`); `reduced` liga sempre; `full` nunca (salvo o sistema pedir menos movimento). */
+/** Animações e efeitos: `auto` liga o modo leve sozinho só em máquina fraca (ver `resolvePerf`); `reduced` liga sempre; `full` nunca (salvo o sistema pedir menos movimento). */
 export const MOTIONS = [
   { value: "auto", label: "Automático" },
   { value: "full", label: "Completos" },
   { value: "reduced", label: "Reduzidos" },
 ] as const;
 
-/** O que o script do <head> detectou no aparelho: `reduce` = o sistema pede menos movimento; `lite` = máquina fraca ou economia de dados. */
+/** O que o script do <head> detectou no aparelho: `reduce` = o sistema pede menos movimento; `lite` = máquina fraca (sem aceleração de hardware, ≤ 2 núcleos ou ≤ 2 GB) ou economia de dados. */
 export type Device = "standard" | "lite" | "reduce";
 /** O modo efetivo (`data-perf` no <html>): `lite` corta animações, blur/vidro e os efeitos em canvas. */
 export type Perf = "full" | "lite";
@@ -124,7 +124,9 @@ d.motion=pick(c[${JSON.stringify(APPEARANCE_COOKIES.motion)}],${JSON.stringify(M
 var v="standard";
 try{var n=navigator,k=n.connection;
 if(matchMedia("(prefers-reduced-motion: reduce)").matches)v="reduce";
-else if((k&&k.saveData)||n.hardwareConcurrency<=4||n.deviceMemory<=4)v="lite"}catch(e){}
+else if((k&&k.saveData)||n.hardwareConcurrency<=2||n.deviceMemory<=2)v="lite";
+else{try{var g=document.createElement("canvas").getContext("webgl",{failIfMajorPerformanceCaveat:true});if(g){var x=g.getExtension("WEBGL_lose_context");x&&x.loseContext()}else v="lite"}catch(e){}}
+}catch(e){}
 d.device=v;
 d.perf=d.motion==="reduced"||v==="reduce"||(d.motion==="auto"&&v==="lite")?"lite":"full";
 }catch(e){}})();`;
