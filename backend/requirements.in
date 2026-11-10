@@ -1,0 +1,25 @@
+# Direct runtime dependencies. Edit this file, then run (see docs/architecture/operations.md):
+#   docker run --rm -v "$PWD":/app -w /app python:3.12-slim sh -c \
+#     "pip install -q pip-tools==7.6.2 && pip-compile --generate-hashes --strip-extras requirements.in"
+# requirements.txt is the lockfile (every package pinned, with SHA-256 hashes); never edit it by hand.
+argon2-cffi
+boto3
+celery
+cryptography
+Django
+django-auditlog
+django-axes
+django-cors-headers
+django-filter
+django-unfold
+djangorestframework
+djangorestframework-simplejwt
+drf-spectacular
+gunicorn
+psycopg2-binary
+PyJWT
+python-dateutil
+redis
+urllib3
+weasyprint
+whitenoise
