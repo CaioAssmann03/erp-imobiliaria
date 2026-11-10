@@ -1,7 +1,7 @@
 # Runtime + development tools. Compiled to requirements-dev.txt (hashes); same versions as requirements.txt for shared packages.
 -r requirements.in
 -c requirements.txt
-pytest==8.*
+pytest==9.*
 pytest-django==4.*
 pytest-env==1.*
 mypy==2.*
