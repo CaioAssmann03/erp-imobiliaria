@@ -12,6 +12,7 @@ from rest_framework.exceptions import APIException, NotFound
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.core.infrastructure.api.deferred_join_pagination import DeferredJoinPaginationMixin
 from apps.core.infrastructure.api.filters import QuerySearchFilter
 from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin
 from apps.core.infrastructure.storage import object_storage
@@ -56,7 +57,9 @@ DELINQUENCY_FILTERS = [
 
 
 @final
-class BillingDocumentViewSet(CompanyScopedViewSetMixin, viewsets.ReadOnlyModelViewSet[BillingDocument]):
+class BillingDocumentViewSet(
+    CompanyScopedViewSetMixin, DeferredJoinPaginationMixin, viewsets.ReadOnlyModelViewSet[BillingDocument]
+):
     """Billing documents of the units: list and retrieve, and cancel one that is not paid."""
 
     queryset = BillingDocument.objects.select_related("unit__condominium", "payer", "payment").prefetch_related(

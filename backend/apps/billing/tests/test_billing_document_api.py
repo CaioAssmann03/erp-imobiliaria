@@ -155,3 +155,20 @@ def test_documents_show_the_active_registration(api_client: APIClient, document:
     assert (registration["digitable_line"], registration["pix_payload"]) == ("0001.2 3456", "00020126pix")
     assert listed["registration"]["boleto_url"] == "https://asaas.test/boleto/1"
     assert "pay_1" not in response.content.decode() and "secret" not in response.content.decode()
+
+
+def test_pages_keep_the_documented_order_and_the_count(  # type: ignore[no-untyped-def]
+    api_client: APIClient, document: BillingDocument, new_document
+) -> None:
+    """Newest month first, then condominium code and unit name; the page is cut after that order (deferred join)."""
+    for name in ("303", "202"):
+        unit = Unit.objects.create(condominium=document.unit.condominium, name=name)
+        _ = create_billing_document(new_document(unit=unit, reference_month=date(2026, 11, 1), due_date=date(2026, 11, 10)))
+
+    first = api_client.get(reverse(LIST), {"limit": 2})
+    second = api_client.get(reverse(LIST), {"limit": 2, "page": 2})
+
+    assert [item["unit_name"] for item in results(first)] == ["202", "303"]
+    assert [item["unit_name"] for item in results(second)] == ["101"]
+    assert body(first)["count"] == 3
+    assert results(first)[0]["items"], "the page rows still carry their prefetched items"
