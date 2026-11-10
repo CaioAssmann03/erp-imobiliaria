@@ -115,6 +115,10 @@ DATABASES = {
         "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
         "HOST": os.environ.get("POSTGRES_HOST", "db"),
         "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+        # A gunicorn thread keeps its connection for a minute instead of opening one per request (9 ms
+        # against 0.1 ms on the VPS); the health check replaces one that Postgres closed meanwhile.
+        "CONN_MAX_AGE": 60,
+        "CONN_HEALTH_CHECKS": True,
     }
 }
 
