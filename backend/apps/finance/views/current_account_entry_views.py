@@ -11,6 +11,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from apps.accounts.models import User
+from apps.core.infrastructure.api.deferred_join_pagination import DeferredJoinPaginationMixin
 from apps.core.infrastructure.api.filters import QuerySearchFilter
 from apps.condominiums.models import Condominium
 from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin, scope_to_company
@@ -32,6 +33,7 @@ from ..services.reverse_entry import reverse_entry
 @final
 class CurrentAccountEntryViewSet(
     CompanyScopedViewSetMixin,
+    DeferredJoinPaginationMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,

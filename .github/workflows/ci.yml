@@ -66,9 +66,19 @@ jobs:
       - name: Install system libraries (WeasyPrint renders the boleto PDF)
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0 fonts-liberation
 
+      # The lockfiles pin every package with SHA-256 hashes (supply chain): pip refuses anything not listed.
       - name: Install dependencies
         working-directory: backend
-        run: pip install -r requirements-dev.txt
+        run: pip install --require-hashes -r requirements-dev.txt
+
+      # A .in edited without recompiling would leave the lockfile stale: recompile (same Python as the image) and fail on any change.
+      - name: Check the lockfiles are up to date (pip-compile)
+        working-directory: backend
+        run: |
+          pip install pip-tools==7.6.2
+          pip-compile --quiet --generate-hashes --strip-extras requirements.in
+          pip-compile --quiet --generate-hashes --strip-extras requirements-dev.in
+          git diff --exit-code -- requirements.txt requirements-dev.txt
 
       # Known vulnerabilities in the pinned dependencies (spec 065): a new advisory fails the build until the pin is raised.
       - name: Audit dependencies (pip-audit)

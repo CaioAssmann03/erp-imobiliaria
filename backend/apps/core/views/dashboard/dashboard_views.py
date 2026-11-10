@@ -1,5 +1,7 @@
+from datetime import date
 from typing import Any, final
 
+from django.core.cache import cache
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework.request import Request
@@ -19,14 +21,26 @@ from .responsibles.data import count_responsibles
 from .scoped_data import ScopedData
 from .serializers import DashboardSerializer
 
+DASHBOARD_CACHE_SECONDS = 60
+
 
 @final
 class DashboardView(APIView):
+    """The dashboard of the user's company; the numbers may be up to a minute old (24 queries to build)."""
 
     @extend_schema(responses=DashboardSerializer, operation_id="dashboard_retrieve")
     def get(self, request: Request) -> Response:
+        reference_date = timezone.localdate()
+        cache_key = f"dashboard:{request.user.company_id}:{reference_date.isoformat()}"
+        body = cache.get(cache_key)
+        if body is None:
+            body = self._build(request, reference_date)
+            cache.set(cache_key, body, DASHBOARD_CACHE_SECONDS)
+        return Response(body)
+
+    def _build(self, request: Request, reference_date: date) -> dict[str, Any]:
         data = ScopedData.for_user(request.user)
-        context = DashboardContext.for_date(timezone.localdate(), data)
+        context = DashboardContext.for_date(reference_date, data)
 
         dashboard: dict[str, Any] = {
             "condominiums": summarize_by_type(
@@ -46,4 +60,4 @@ class DashboardView(APIView):
                 context.reference_date, data.accounts_payable
             ),
         }
-        return Response(DashboardSerializer(dashboard).data)
+        return dict(DashboardSerializer(dashboard).data)

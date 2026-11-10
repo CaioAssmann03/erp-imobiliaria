@@ -35,7 +35,7 @@ Every rule has a test; a constraint is tested twice (serializer 400 + `Integrity
 | Input | ORM only (no raw SQL); explicit serializer `fields`. A receipt's first bytes must match its declared type (PDF, JPEG, PNG) when it is confirmed (spec 065) |
 | API docs | `/api/schema/` and `/api/docs/` are open only with `DEBUG=true`; otherwise superuser-only (spec 065) |
 | Webhooks | `/api/webhooks/asaas/` (token) and `/api/webhooks/resend/` (Svix signature) are public by nature and limited to 1000 and 300 calls/min per address |
-| Supply chain | `pip-audit` blocks the CI on a known vulnerability; `pnpm audit --prod --audit-level=high` blocks it too; Dependabot opens monthly update PRs (pip and npm: the minor and patch updates of the month in one grouped PR, each major in its own; GitHub Actions in one PR; the Python and Node base images are changed by hand, about once a year, because the CI does not build them), and security updates arrive on their own. The container runs as an unprivileged user |
+| Supply chain | **Python lockfiles with hashes**: `requirements.in` / `requirements-dev.in` list the direct dependencies and `pip-compile --generate-hashes` writes `requirements.txt` / `requirements-dev.txt` (every package pinned, with SHA-256 hashes); the Dockerfile and the CI install with `--require-hashes` and the CI fails when a `.in` was edited without recompiling; `pip-audit` blocks the CI on a known vulnerability; `pnpm audit --prod --audit-level=high` blocks it too; Dependabot opens monthly update PRs (pip and npm: the minor and patch updates of the month in one grouped PR, each major in its own; GitHub Actions in one PR; the Python and Node base images are changed by hand, about once a year, because the CI does not build them), and security updates arrive on their own. The container runs as an unprivileged user |
 
 **Rules for new code**
 1. Secrets only from env vars (`SECRET_KEY` ≥ 32 chars, enforced when `DEBUG` is not `true`; `DEBUG` is off unless set; `JWT_SIGNING_KEY` signs the JWTs); never in code, fixtures, migrations, logs or errors. `.env` is gitignored; `.env.example` holds placeholders.
@@ -44,7 +44,7 @@ Every rule has a test; a constraint is tested twice (serializer 400 + `Integrity
 4. Validate on the server whatever the UI validates: a broken rule is a 400.
 5. Every new endpoint states who may call it; when roles exist set `permission_classes` and scope the queryset.
 6. Errors are short English strings, never stack traces. `/admin/` is staff-only, no demo users in production.
-7. Certificates live outside the repo and web root. Pin dependencies; run `pip audit` periodically.
+7. Certificates live outside the repo and web root. Dependencies are locked with hashes (never edit `requirements*.txt` by hand: see `operations.md`, *Dependencies*); `pip-audit` runs in the CI.
 
 **Personal data (LGPD):** the system holds CPF, CNPJ, name, e-mail, phones, birth date, marital status, job, address and property ownership. Collect only what a feature needs (a new personal field needs a reason in its spec); never log documents, e-mails, phones or tokens (log ids); expose the minimum on dashboards and search; do not duplicate documents in other tables or caches; seeds use fictitious valid documents. No retention or erasure policy yet (a person linked to units is `PROTECT`; erasure needs a spec).
 

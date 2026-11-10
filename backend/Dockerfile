@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# requirements.txt is a lockfile (pip-compile): --require-hashes refuses any package whose SHA-256 is not listed in it.
+RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 
 # The app runs without root (spec 065); /app is owned by that user because it writes `staticfiles/` and `celerybeat-schedule` there.
 RUN useradd --system --create-home --uid 10001 app && chown app:app /app

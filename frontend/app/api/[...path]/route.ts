@@ -5,6 +5,7 @@ import { backendApiPath } from "@/lib/api/api-path";
 import { clearAuthCookies, setAuthCookies, type Tokens } from "@/lib/auth/auth-cookies";
 import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/lib/auth/auth";
 import { API_URL, backendHeaders, refreshTokens } from "@/lib/api/backend";
+import { retryRead } from "@/lib/api/retry-read";
 import { isTokenExpiring } from "@/lib/auth/jwt";
 
 /**
@@ -43,13 +44,15 @@ async function callBackend(
   const headers = backendHeaders(request.headers);
   if (body) headers.set("Content-Type", "application/json");
   if (access) headers.set("Authorization", `Bearer ${access}`);
-  return fetch(`${API_URL}/api/${route}/${request.nextUrl.search}`, {
-    method: request.method,
-    headers,
-    body,
-    cache: "no-store",
-    redirect: "manual",
-  });
+  return retryRead(request.method, () =>
+    fetch(`${API_URL}/api/${route}/${request.nextUrl.search}`, {
+      method: request.method,
+      headers,
+      body,
+      cache: "no-store",
+      redirect: "manual",
+    })
+  );
 }
 
 /** Devolve status e corpo do Django como vieram (só o tipo do conteúdo é repassado). */
