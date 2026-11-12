@@ -7,6 +7,7 @@
  */
 import type { BillingDocumentsDelinquencyCondominiumsOrder } from './billingDocumentsDelinquencyCondominiumsOrder.ts';
 import type { BillingDocumentsDelinquencyRowsOrder } from './billingDocumentsDelinquencyRowsOrder.ts';
+import type { BillingDocumentsDelinquencyUnitsOrder } from './billingDocumentsDelinquencyUnitsOrder.ts';
 
 export type BillingDocumentsDelinquencyParams = {
 /**
@@ -21,6 +22,10 @@ condominium?: string;
  * @minLength 1
  */
 condominiums_order?: BillingDocumentsDelinquencyCondominiumsOrder;
+/**
+ * `false` answers no `rows` (the summary per unit); the default `true` answers the boletos as before.
+ */
+include_months?: boolean;
 /**
  * @minimum 1
  */
@@ -42,4 +47,22 @@ reference_month?: string;
  * @minLength 1
  */
 rows_order?: BillingDocumentsDelinquencyRowsOrder;
+/**
+ * Only this unit's boletos
+ */
+unit?: string;
+/**
+ * Order of `by_unit`: `condominium` (code, then unit), `amount` (the largest debt first) or `oldest` (the longest overdue first).
+ *
+ * * `condominium` - condominium
+ * * `amount` - amount
+ * * `oldest` - oldest
+ * @minLength 1
+ */
+units_order?: BillingDocumentsDelinquencyUnitsOrder;
+/**
+ * Page of `by_unit` (the same `page_size`).
+ * @minimum 1
+ */
+units_page?: number;
 };

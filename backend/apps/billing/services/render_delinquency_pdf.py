@@ -19,6 +19,19 @@ def render_delinquency_pdf(report: DelinquencyReport, company_name: str) -> byte
             {"name": line.condominium_name, "count": line.count, "total": format_money(line.total_amount)}
             for line in report.by_condominium
         ],
+        "units_truncated": report.units_truncated,
+        "by_unit": [
+            {
+                "condominium": line.condominium_name,
+                "unit": line.unit_name,
+                "payer": line.payer_name,
+                "count": line.count,
+                "total": format_money(line.total_amount),
+                "oldest_due_date": format_date(line.oldest_due_date),
+                "days_overdue": line.days_overdue,
+            }
+            for line in report.by_unit
+        ],
         "rows": [
             {
                 "condominium": row.condominium_name,

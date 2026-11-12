@@ -80,3 +80,10 @@ test("a boleto note says how late or when it was paid", () => {
   assert.equal(boletoNote({ is_overdue: false, days_overdue: 0, status: "paid", paid_on: "2026-10-05" }), "pago em 05/10/2026");
   assert.equal(boletoNote({ is_overdue: false, days_overdue: 0, status: "issued", paid_on: null }), "");
 });
+
+import { monthsOpenLabel } from "../lib/reports/reports.ts";
+
+test("the open months are counted in words", () => {
+  assert.equal(monthsOpenLabel(1), "1 mês");
+  assert.equal(monthsOpenLabel(3), "3 meses");
+});

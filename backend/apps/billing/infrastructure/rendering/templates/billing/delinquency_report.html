@@ -37,7 +37,20 @@
   <tr class="total"><td>Total</td><td class="amount">{{ count }}</td><td class="amount">{{ total }}</td></tr>
 </table>
 
-<h2>Boletos em atraso</h2>
+<h2>Por unidade</h2>
+{% if units_truncated %}<p class="warning">A lista mostra só as primeiras unidades; os totais acima consideram todas. Filtre por condomínio para ver o restante.</p>{% endif %}
+<table>
+  <tr><th>Condomínio</th><th>Unidade</th><th>Pagador</th><th class="amount">Meses em aberto</th><th>Mais antigo</th><th class="amount">Dias</th><th class="amount">Valor</th></tr>
+  {% for line in by_unit %}
+  <tr>
+    <td>{{ line.condominium }}</td><td>{{ line.unit }}</td><td>{{ line.payer }}</td><td class="amount">{{ line.count }}</td>
+    <td>{{ line.oldest_due_date }}</td><td class="amount">{{ line.days_overdue }}</td><td class="amount">{{ line.total }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+{% if rows %}
+<h2>Meses em aberto</h2>
 {% if truncated %}<p class="warning">A lista mostra só os primeiros boletos; os totais acima consideram todos. Filtre por condomínio para ver o restante.</p>{% endif %}
 <table>
   <tr><th>Condomínio</th><th>Unidade</th><th>Pagador</th><th>Referência</th><th>Vencimento</th><th class="amount">Dias</th><th class="amount">Valor</th></tr>
@@ -48,6 +61,7 @@
   </tr>
   {% endfor %}
 </table>
+{% endif %}
 {% else %}
 <p>Nenhum boleto em atraso.</p>
 {% endif %}

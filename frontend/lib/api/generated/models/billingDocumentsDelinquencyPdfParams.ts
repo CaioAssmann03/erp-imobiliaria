@@ -12,7 +12,15 @@ export type BillingDocumentsDelinquencyPdfParams = {
  */
 condominium?: string;
 /**
+ * `true` (default): the PDF also lists each unit's overdue months. `false`: only the summary per unit.
+ */
+include_months?: boolean;
+/**
  * Only the boletos of this reference month (first day)
  */
 reference_month?: string;
+/**
+ * Only this unit's boletos
+ */
+unit?: string;
 };

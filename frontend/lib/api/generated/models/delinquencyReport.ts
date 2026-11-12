@@ -7,6 +7,7 @@
  */
 import type { DelinquencyCondominiumTotal } from './delinquencyCondominiumTotal.ts';
 import type { DelinquencyRow } from './delinquencyRow.ts';
+import type { DelinquencyUnitTotal } from './delinquencyUnitTotal.ts';
 
 /**
  * The overdue boletos as of a day: totals, the same per condominium, and the rows of one page (10 per page by default on the screen endpoint, `?page_size=` up to 100; the PDF lists up to 2000, `truncated` says if more).
@@ -17,6 +18,11 @@ export interface DelinquencyReport {
   /** @pattern ^-?\d{0,12}(?:\.\d{0,2})?$ */
   total_amount: string;
   by_condominium: DelinquencyCondominiumTotal[];
+  by_unit: DelinquencyUnitTotal[];
+  unit_count: number;
+  units_page: number;
+  units_page_count: number;
+  units_truncated: boolean;
   rows: DelinquencyRow[];
   truncated: boolean;
   page: number;

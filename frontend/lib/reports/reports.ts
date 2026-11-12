@@ -75,3 +75,6 @@ export function boletoNote(boleto: { is_overdue: boolean; days_overdue: number; 
   if (boleto.status === "paid" && boleto.paid_on) return `pago em ${boleto.paid_on.split("-").reverse().join("/")}`;
   return "";
 }
+
+/** Quantos meses em aberto, em texto: 1 → "1 mês", 3 → "3 meses". */
+export const monthsOpenLabel = (count: number) => (count === 1 ? "1 mês" : `${count} meses`);

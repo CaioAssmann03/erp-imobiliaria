@@ -81,5 +81,6 @@ One row per spec; update it in the same change that creates or closes the spec.
 | [069](069-help-assistant.md) | Help assistant (free AI chat over curated texts) | full | in-progress | none |
 | [070](070-administration-fee-report.md) | Administration fee report (Taxa de administração) | full | in-progress | none |
 | [071](071-unit-sheet-report.md) | Unit sheet report (Ficha da unidade) | full | in-progress | none |
+| [072](072-delinquency-by-unit.md) | Delinquency report by unit (months on request) | lite | in-progress | none |
 
 The finished specs (001–029 and 049–051) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.

@@ -41,3 +41,18 @@ export function scopeUrl<Query extends { [Name in keyof Query]: string }>(path: 
 /** O endereço de uma tela com o escopo de condomínio e mês (`?condominium=&reference_month=`), a que `condominiumMonthScope` lê de volta. */
 export const monthScopeUrl = (path: string, scope: CondominiumMonthScope) =>
   scopeUrl(path, { condominium: scope.condominium, reference_month: scope.month });
+
+/** O escopo da inadimplência: condomínio, unidade e mês de referência (`?condominium=&unit=&reference_month=`). */
+export interface DelinquencyScope extends CondominiumMonthScope {
+  unit: string;
+}
+
+/** O condomínio, a unidade e o mês lidos da URL; o que não for UUID ou primeiro dia de mês fica vazio. */
+export const delinquencyScope = (params: UrlParams): DelinquencyScope => ({
+  ...condominiumMonthScope(params),
+  unit: uuidParam(params.get("unit")) ?? "",
+});
+
+/** O endereço da inadimplência com o escopo (os vazios saem), o que `delinquencyScope` lê de volta. */
+export const delinquencyScopeUrl = (path: string, scope: DelinquencyScope) =>
+  scopeUrl(path, { condominium: scope.condominium, unit: scope.unit, reference_month: scope.month });

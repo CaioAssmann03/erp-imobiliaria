@@ -2,7 +2,7 @@ from typing import Any
 
 from rest_framework import serializers
 
-from ..services.build_delinquency_report import CONDOMINIUMS_ORDERS, MAX_PAGE_SIZE, PAGE_SIZE, ROWS_ORDERS
+from ..services.build_delinquency_report import CONDOMINIUMS_ORDERS, MAX_PAGE_SIZE, PAGE_SIZE, ROWS_ORDERS, UNITS_ORDERS
 
 
 class DelinquencyRowSerializer(serializers.Serializer[Any]):
@@ -24,7 +24,39 @@ class DelinquencyCondominiumTotalSerializer(serializers.Serializer[Any]):
     total_amount = serializers.DecimalField(max_digits=14, decimal_places=2)
 
 
+class DelinquencyUnitTotalSerializer(serializers.Serializer[Any]):
+    unit_id = serializers.UUIDField()
+    condominium_id = serializers.UUIDField()
+    condominium_name = serializers.CharField()
+    unit_name = serializers.CharField()
+    payer_name = serializers.CharField(help_text="The payer of the unit's oldest overdue boleto.")
+    count = serializers.IntegerField()
+    total_amount = serializers.DecimalField(max_digits=14, decimal_places=2)
+    oldest_due_date = serializers.DateField()
+    days_overdue = serializers.IntegerField(help_text="Days overdue of the oldest boleto.")
+
+
+class DelinquencyPdfQuerySerializer(serializers.Serializer[Any]):
+    include_months = serializers.BooleanField(
+        default=True,
+        required=False,
+        help_text="`true` (default): the PDF also lists each unit's overdue months. `false`: only the summary per unit.",
+    )
+
+
 class DelinquencyQuerySerializer(serializers.Serializer[Any]):
+    units_page = serializers.IntegerField(min_value=1, default=1, required=False, help_text="Page of `by_unit` (the same `page_size`).")
+    units_order = serializers.ChoiceField(
+        choices=UNITS_ORDERS,
+        default="condominium",
+        required=False,
+        help_text="Order of `by_unit`: `condominium` (code, then unit), `amount` (the largest debt first) or `oldest` (the longest overdue first).",
+    )
+    include_months = serializers.BooleanField(
+        default=True,
+        required=False,
+        help_text="`false` answers no `rows` (the summary per unit); the default `true` answers the boletos as before.",
+    )
     page = serializers.IntegerField(min_value=1, default=1, required=False)
     page_size = serializers.IntegerField(min_value=1, max_value=MAX_PAGE_SIZE, default=PAGE_SIZE, required=False)
     rows_order = serializers.ChoiceField(
@@ -48,6 +80,11 @@ class DelinquencyReportSerializer(serializers.Serializer[Any]):
     count = serializers.IntegerField()
     total_amount = serializers.DecimalField(max_digits=14, decimal_places=2)
     by_condominium = DelinquencyCondominiumTotalSerializer(many=True)
+    by_unit = DelinquencyUnitTotalSerializer(many=True)
+    unit_count = serializers.IntegerField()
+    units_page = serializers.IntegerField()
+    units_page_count = serializers.IntegerField()
+    units_truncated = serializers.BooleanField()
     rows = DelinquencyRowSerializer(many=True)
     truncated = serializers.BooleanField()
     page = serializers.IntegerField()

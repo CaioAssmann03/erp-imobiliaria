@@ -608,7 +608,7 @@ export function useBillingDocumentsDelinquency<TData = Awaited<ReturnType<typeof
 
 
 /**
- * The same report as a PDF download.
+ * The same report as a PDF download: the units summary and, with `?include_months=true` (default), each unit's overdue months.
  */
 export const billingDocumentsDelinquencyPdf = (
     params?: BillingDocumentsDelinquencyPdfParams,

@@ -29,6 +29,7 @@ from ..serializers import (
     BillingMonthSummaryQuerySerializer,
     BillingMonthSummarySerializer,
     DelinquencyQuerySerializer,
+    DelinquencyPdfQuerySerializer,
     DelinquencyReportSerializer,
     ExtraBillingDocumentSerializer,
     ExtraBillingResultSerializer,
@@ -53,6 +54,7 @@ class GatewayNotAvailable(APIException):
 DELINQUENCY_FILTERS = [
     OpenApiParameter("condominium", OpenApiTypes.UUID, description="Only this condominium's boletos"),
     OpenApiParameter("reference_month", OpenApiTypes.DATE, description="Only the boletos of this reference month (first day)"),
+    OpenApiParameter("unit", OpenApiTypes.UUID, description="Only this unit's boletos"),
 ]
 
 
@@ -150,9 +152,9 @@ class BillingDocumentViewSet(
         body = {"download_url": download_url, "expires_in": DOWNLOAD_URL_TTL_SECONDS, "generated_at": pdf.generated_at}
         return Response(BillingDocumentPdfDownloadSerializer(body).data, status=status_code)
 
-    def _delinquency_report(self, page: DelinquencyPage | None = None) -> DelinquencyReport:
-        """The overdue report over what the user may see and the filters ask (`?condominium=`, `?reference_month=`); `page` for the screen."""
-        return build_delinquency_report(self.filter_queryset(self.get_queryset()), timezone.localdate(), page)
+    def _delinquency_report(self, page: DelinquencyPage | None = None, include_months: bool = True) -> DelinquencyReport:
+        """The overdue report over what the user may see and the filters ask (`?condominium=`, `?unit=`, `?reference_month=`); `page` for the screen."""
+        return build_delinquency_report(self.filter_queryset(self.get_queryset()), timezone.localdate(), page, include_months)
 
     @extend_schema(
         parameters=[*DELINQUENCY_FILTERS, DelinquencyQuerySerializer],
@@ -169,8 +171,10 @@ class BillingDocumentViewSet(
             size=query.validated_data["page_size"],
             rows_order=query.validated_data["rows_order"],
             condominiums_order=query.validated_data["condominiums_order"],
+            units_number=query.validated_data["units_page"],
+            units_order=query.validated_data["units_order"],
         )
-        return Response(DelinquencyReportSerializer(self._delinquency_report(page)).data)
+        return Response(DelinquencyReportSerializer(self._delinquency_report(page, query.validated_data["include_months"])).data)
 
     @extend_schema(
         parameters=[BillingMonthSummaryQuerySerializer],
@@ -188,14 +192,16 @@ class BillingDocumentViewSet(
         return Response(BillingMonthSummarySerializer(lines, many=True).data)
 
     @extend_schema(
-        parameters=DELINQUENCY_FILTERS,
+        parameters=[*DELINQUENCY_FILTERS, DelinquencyPdfQuerySerializer],
         responses={(200, "application/pdf"): OpenApiTypes.BINARY},
         operation_id="billing_documents_delinquency_pdf",
     )
     @action(detail=False, methods=["get"], url_path="delinquency/pdf")
     def delinquency_pdf(self, request: Request) -> HttpResponse:
-        """The same report as a PDF download."""
-        report = self._delinquency_report()
+        """The same report as a PDF download: the units summary and, with `?include_months=true` (default), each unit's overdue months."""
+        query = DelinquencyPdfQuerySerializer(data=request.query_params)
+        _ = query.is_valid(raise_exception=True)
+        report = self._delinquency_report(include_months=query.validated_data["include_months"])
         company = getattr(request.user, "company", None)
         content = render_delinquency_pdf(report, company.legal_name if company else "")
         response = HttpResponse(content, content_type="application/pdf")

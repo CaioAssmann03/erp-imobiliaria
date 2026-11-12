@@ -53,3 +53,6 @@ from .extra_billing_document_serializers import (
 from .extra_billing_document_serializers import (
     ExtraBillingResultSerializer as ExtraBillingResultSerializer,
 )
+from .delinquency_report_serializers import (
+    DelinquencyPdfQuerySerializer as DelinquencyPdfQuerySerializer,
+)

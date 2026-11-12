@@ -16,7 +16,7 @@ export default function DelinquencyReportPage() {
           <PhoneBackLink href="/reports" label="Relatórios" />
         }
         title="Inadimplência"
-        description="Boletos vencidos e ainda não pagos, por condomínio. O valor é o do boleto, sem multa nem juros."
+        description="Boletos vencidos e ainda não pagos, por unidade; os meses em aberto aparecem ao pedir. O valor é o do boleto, sem multa nem juros."
       />
       {/* `useSearchParams` (o condomínio e o mês da URL) precisa de um limite de Suspense para a página poder ser prerenderizada. */}
       <Suspense fallback={null}>
