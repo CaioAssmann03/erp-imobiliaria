@@ -16,6 +16,7 @@
 export interface PatchedCostCenter {
   readonly id?: string;
   condominium?: string;
+  readonly condominium_name?: string;
   catalog_item?: string;
   readonly code?: number;
   readonly name?: string;

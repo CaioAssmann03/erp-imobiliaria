@@ -1,10 +1,10 @@
 from typing import Any, final, override
 
+from apps.core.infrastructure.admin_base import MetriModelAdmin
 from auditlog.admin import LogEntryAdmin as LibraryLogEntryAdmin
 from auditlog.models import LogEntry
 from django.contrib import admin
 from django.http import HttpRequest
-from unfold.admin import ModelAdmin
 
 from .infrastructure.scoping import CompanyScopedAdminMixin
 from .models import Address, Company
@@ -12,7 +12,7 @@ from .models import Address, Company
 
 @final
 @admin.register(Company)
-class CompanyAdmin(CompanyScopedAdminMixin, ModelAdmin):
+class CompanyAdmin(CompanyScopedAdminMixin, MetriModelAdmin):
     list_display = ("legal_name", "trade_name", "cnpj", "city", "state", "active")
     search_fields = ("legal_name", "trade_name", "cnpj")
     list_filter = ("active", "state")
@@ -20,7 +20,7 @@ class CompanyAdmin(CompanyScopedAdminMixin, ModelAdmin):
 
 @final
 @admin.register(Address)
-class AddressAdmin(CompanyScopedAdminMixin, ModelAdmin):
+class AddressAdmin(CompanyScopedAdminMixin, MetriModelAdmin):
     list_display = ("street", "number", "city", "state", "zip_code")
     search_fields = ("street", "city", "zip_code")
 
@@ -30,7 +30,7 @@ admin.site.unregister(LogEntry)
 
 @final
 @admin.register(LogEntry)
-class AuditLogEntryAdmin(LibraryLogEntryAdmin, ModelAdmin):
+class AuditLogEntryAdmin(LibraryLogEntryAdmin, MetriModelAdmin):
     @staticmethod
     def _is_superuser(request: HttpRequest) -> bool:
         return bool(request.user.is_active and request.user.is_superuser)

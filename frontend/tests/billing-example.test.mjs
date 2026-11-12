@@ -7,7 +7,7 @@ import {
   competenceMonthOf,
   dueMonthOf,
   formatYearMonth,
-} from "../lib/billing-example.ts";
+} from "../lib/billing/billing-example.ts";
 
 const october = { year: 2026, month: 10 };
 

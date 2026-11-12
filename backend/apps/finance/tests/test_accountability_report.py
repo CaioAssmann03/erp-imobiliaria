@@ -11,7 +11,7 @@ from rest_framework.test import APIClient
 from apps.condominiums.models import Condominium
 
 from ..models import CostCenter, CurrentAccountEntry, EntryTemplate
-from ..services.build_accountability_report import build_accountability_report
+from ..services.build_accountability_report import AccountabilityPages, build_accountability_report
 from ..services.post_entry import post_entry
 from .base import body, error_codes
 
@@ -157,3 +157,56 @@ def test_pdf_escapes_the_text_of_the_entries(api_client: APIClient, condominium:
 
     assert response.status_code == status.HTTP_200_OK
     assert response.content.startswith(b"%PDF")
+
+
+@pytest.fixture
+def twelve_october_entries(make_entry):  # type: ignore[no-untyped-def]
+    for day in range(1, 13):
+        _ = post_entry(
+            make_entry(entry_date=date(2026, 10, day), competence_month=date(2026, 10, 1), kind=CREDIT, amount=Decimal("10.00"))
+        )
+
+
+def test_the_lists_come_ten_per_page(api_client: APIClient, condominium: Condominium, twelve_october_entries: None) -> None:
+    first = body(api_client.get(reverse(REPORT), query(condominium)))
+    second = body(api_client.get(reverse(REPORT), query(condominium) | {"entries_page": "2"}))
+
+    assert [first["entry_page"], first["entry_page_count"], first["entry_count"], first["page_size"]] == [1, 2, 12, 10]
+    assert [row["entry_date"] for row in first["entries"]] == [f"2026-10-{day:02d}" for day in range(1, 11)]
+    assert [row["entry_date"] for row in second["entries"]] == ["2026-10-11", "2026-10-12"]
+    assert [first["cost_center_page"], first["cost_center_page_count"], first["cost_center_count"]] == [1, 1, 1]
+
+
+def test_totals_cover_every_page_and_a_bad_page_is_refused(
+    api_client: APIClient, condominium: Condominium, twelve_october_entries: None
+) -> None:
+    past_the_end = body(api_client.get(reverse(REPORT), query(condominium) | {"entries_page": "9", "cost_centers_page": "9"}))
+    bad = api_client.get(reverse(REPORT), query(condominium) | {"entries_page": "0"})
+
+    assert past_the_end["entries"] == []
+    assert past_the_end["by_cost_center"] == []
+    assert Decimal(past_the_end["total_credits"]) == Decimal("120.00")
+    assert Decimal(past_the_end["closing_balance"]) == Decimal("120.00")
+    assert bad.status_code == status.HTTP_400_BAD_REQUEST
+    assert error_codes(bad, "entries_page")
+
+
+def test_the_pdf_service_keeps_every_line(condominium: Condominium, twelve_october_entries: None) -> None:
+    entries = CurrentAccountEntry.objects.filter(current_account__condominium=condominium)
+
+    whole = build_accountability_report(condominium, date(2026, 10, 1), entries)
+    paged = build_accountability_report(condominium, date(2026, 10, 1), entries, AccountabilityPages(cost_centers=1, entries=1))
+
+    assert len(whole.entries) == 12
+    assert len(paged.entries) == 10
+    assert whole.entry_count == paged.entry_count == 12
+
+
+def test_the_page_size_can_be_asked_and_is_capped(api_client: APIClient, condominium: Condominium, twelve_october_entries: None) -> None:
+    big = body(api_client.get(reverse(REPORT), query(condominium) | {"page_size": "25"}))
+    small = body(api_client.get(reverse(REPORT), query(condominium) | {"page_size": "5", "entries_page": "3"}))
+
+    assert (big["page_size"], big["entry_page_count"], len(big["entries"])) == (25, 1, 12)
+    assert (small["page_size"], small["entry_page_count"], len(small["entries"])) == (5, 3, 2)
+    for invalid in ("0", "101", "many"):
+        assert api_client.get(reverse(REPORT), query(condominium) | {"page_size": invalid}).status_code == status.HTTP_400_BAD_REQUEST

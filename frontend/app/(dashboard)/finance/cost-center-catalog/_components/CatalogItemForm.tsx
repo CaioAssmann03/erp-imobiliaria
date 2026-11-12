@@ -1,52 +1,51 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
-
 import { CheckboxField, TextField } from "@/components/form/fields";
-import { FormActions } from "@/components/form/FormActions";
+
 import { FieldRow, FormSection } from "@/components/form/FormSection";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
-import { Button } from "@/components/ui/button";
+
 import { useCostCenterCatalogRetrieve } from "@/lib/api/generated";
-import { throwIfNotFound } from "@/lib/query/not-found";
+import { catalogUrl } from "@/lib/finance/cost-center-catalog-workspace";
+import { throwIfPageError } from "@/lib/query/page-error";
 import {
   COST_CENTER_CATALOG_ITEM_DEFAULTS,
   costCenterCatalogItemSchema,
   costCenterCatalogItemToForm,
-  type CostCenterCatalogItemFormInput,
-  type CostCenterCatalogItemFormOutput,
 } from "@/lib/schemas/cost-center-catalog-item";
 
-import { COST_CENTER_CATALOG_URL, useCatalogItemSubmit } from "./catalog-form/use-catalog-item-submit";
+import { CatalogCondominiums } from "./CatalogCondominiums";
+import { CatalogDeleteButton } from "./CatalogDeleteButton";
+import { useCatalogItemSubmit } from "./catalog-form/use-catalog-item-submit";
+import { RecordForm } from "@/components/form/RecordForm";
+import { SectionAnchor } from "@/components/form/SectionAnchor";
+import { useRecordForm } from "@/hooks/use-record-form";
 
 /** Cadastro e edição de uma sub-conta do catálogo (código e nome valem para todos os condomínios que a usam). */
 export function CatalogItemForm({ itemId }: { itemId?: string }) {
-  const router = useRouter();
   const isEdit = itemId !== undefined;
   const { data: item, isLoading, error: loadError } = useCostCenterCatalogRetrieve(itemId ?? "", { query: { enabled: isEdit } });
-  throwIfNotFound(loadError);
+  throwIfPageError(loadError);
 
-  const methods = useForm<CostCenterCatalogItemFormInput, unknown, CostCenterCatalogItemFormOutput>({
-    resolver: zodResolver(costCenterCatalogItemSchema),
-    defaultValues: COST_CENTER_CATALOG_ITEM_DEFAULTS,
-    mode: "onTouched",
+  const methods = useRecordForm({
+    schema: costCenterCatalogItemSchema,
+    defaults: COST_CENTER_CATALOG_ITEM_DEFAULTS,
+    record: item,
+    toForm: costCenterCatalogItemToForm,
   });
-  const { handleSubmit, reset, setError } = methods;
-  const { submit, isSubmitting } = useCatalogItemSubmit(itemId, setError);
-
-  useEffect(() => {
-    if (item) reset(costCenterCatalogItemToForm(item));
-  }, [item, reset]);
+  const { submit, isSubmitting } = useCatalogItemSubmit(itemId, methods.setError);
 
   if (isEdit && isLoading) return <FormSkeleton sections={1} />;
 
   return (
-    <FormProvider {...methods}>
-      <form noValidate onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))} className="space-y-4">
+    <RecordForm
+      methods={methods}
+      onSubmit={submit}
+      isSubmitting={isSubmitting}
+      cancelHref={catalogUrl()}
+      danger={item && <CatalogDeleteButton itemId={item.id} name={item.name} />}
+    >
+      <SectionAnchor id="identificacao">
         <FormSection
           title="Identificação"
           description={
@@ -69,12 +68,12 @@ export function CatalogItemForm({ itemId }: { itemId?: string }) {
             <CheckboxField name="active" label="Cadastro ativo" hint="Uma sub-conta inativa não pode ser escolhida para novos condomínios; os que já a usam continuam." />
           </FieldRow>
         </FormSection>
-        <FormActions isSubmitting={isSubmitting}>
-          <Button type="button" variant="secondary" onClick={() => router.push(COST_CENTER_CATALOG_URL)}>
-            Cancelar
-          </Button>
-        </FormActions>
-      </form>
-    </FormProvider>
+      </SectionAnchor>
+      {item && (
+        <SectionAnchor id="condominios">
+          <CatalogCondominiums key={item.id} itemId={item.id} />
+        </SectionAnchor>
+      )}
+    </RecordForm>
   );
 }

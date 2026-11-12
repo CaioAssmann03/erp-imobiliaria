@@ -46,15 +46,15 @@ class Command(BaseCommand):
 
     def _clear(self) -> None:
         demo_names = [demo.name for demo in DEMO_CONDOMINIUMS]
-        condominiums = Condominium.objects.filter(name__in=demo_names)
+        condominiums = Condominium.all_objects.filter(name__in=demo_names)
         clear_demo_finance(condominiums)
         # Address é OneToOne com SET_NULL: apagar o condomínio deixaria o endereço órfão.
         _ = Address.objects.filter(condominium__in=condominiums).delete()
-        condos, _ = condominiums.delete()
+        condos, _ = condominiums.hard_delete()
         documents = [definition[2] for definition in demo_person_definitions()]
-        persons, _ = Person.objects.filter(
+        persons, _ = Person.all_objects.filter(
             Q(people_individual__cpf__in=documents) | Q(people_legal__cnpj__in=documents)
-        ).delete()
+        ).hard_delete()
         self.stdout.write(
             self.style.SUCCESS(
                 f"Removidos: {condos} registros de condomínios (com unidades/vínculos) e {persons} de pessoas."

@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 
-import { isApplePlatform } from "@/lib/platform";
+import { isApplePlatform } from "@/lib/navigation/platform";
 
 interface NavigatorWithUserAgentData extends Navigator {
   userAgentData?: { platform?: string };

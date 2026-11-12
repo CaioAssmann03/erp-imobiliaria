@@ -1,4 +1,4 @@
-"""The administration fee of a contract: fixed, variable, floor, ceiling and rounding (spec 056, R2, R3)."""
+"""The administration fee of a contract: fixed, variable, floor, ceiling and rounding (spec 070, R2, R3)."""
 
 from datetime import date
 from decimal import Decimal

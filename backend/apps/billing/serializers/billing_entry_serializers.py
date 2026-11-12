@@ -98,7 +98,9 @@ class BillingEntrySerializer(ModelRulesMixin, serializers.ModelSerializer[Billin
         read_only_fields = ("id", "entry_template", "created_at", "updated_at")
 
     def get_is_used(self, entry: BillingEntry) -> bool:
-        return entry.is_used()
+        """The list annotates it for the whole page; a record just created, or one outside the list, asks the database."""
+        annotated: bool | None = getattr(entry, "has_document_items", None)
+        return annotated if annotated is not None else entry.is_used()
 
     @extend_schema_field(BillingEntryMonthSerializer(allow_null=True))
     def get_month(self, entry: BillingEntry) -> dict[str, Any] | None:
@@ -112,8 +114,7 @@ class BillingEntrySerializer(ModelRulesMixin, serializers.ModelSerializer[Billin
             "installment": entry.installment_label(reference_month),
             "unit_amounts": [
                 {"unit": link.unit_id, "unit_name": link.unit.name, "amount": amounts[link.unit_id]}
-                for link in entry.entry_units.all()
-                if link.unit.active
+                for link in entry.charged_links()
             ],
         }
 

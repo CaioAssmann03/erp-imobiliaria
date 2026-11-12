@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { PageHeader } from "@/components/PageHeader";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 import { AdministrationFeeReportView } from "./_components/AdministrationFeeReportView";
 

@@ -20,4 +20,5 @@ page?: number;
  * Termo de busca (nome, documento, ID…).
  */
 query?: string;
+unused_by_condominium?: string;
 };

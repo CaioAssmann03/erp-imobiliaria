@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
 
+import { isLite } from "@/lib/theme/use-lite";
 import { cn } from "@/lib/utils";
 
 import { buildParticles, COMPACT_STEP, STEP } from "./logo/particles";
@@ -40,7 +41,7 @@ export function ParticleLogo({ className, compact = false }: { className?: strin
     const canvas = canvasRef.current;
     if (!active || !wrap || !canvas) return;
 
-    const animate = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const animate = !isLite();
     const simulation = createSimulation(canvas, buildParticles(compact ? COMPACT_STEP : STEP), animate);
     const measure = () => simulation.resize(wrap.clientWidth, wrap.clientHeight);
     measure();

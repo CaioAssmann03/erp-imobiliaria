@@ -5,6 +5,7 @@ from typing import Any
 import pytest
 
 from apps.core.infrastructure.storage.object_storage import (
+    ObjectStorage,
     ObjectStorageUnavailable,
     get_object_storage,
 )
@@ -49,3 +50,23 @@ def test_signed_urls_point_at_the_bucket_and_expire(settings: Any) -> None:
     assert "X-Amz-Expires=600" in upload
     assert "X-Amz-Expires=300" in download
     assert "response-content-disposition=attachment" in download
+
+
+def test_read_head_asks_for_a_range_of_the_object() -> None:
+    class Body:
+        def read(self) -> bytes:
+            return b"%PDF-"
+
+    class Client:
+        requests: list[dict[str, str]] = []
+
+        def get_object(self, **parameters: str) -> dict[str, Body]:
+            self.requests.append(parameters)
+            return {"Body": Body()}
+
+    client = Client()
+
+    head = ObjectStorage(client, "bucket").read_head("receipts/a.pdf", 8)
+
+    assert head == b"%PDF-"
+    assert client.requests == [{"Bucket": "bucket", "Key": "receipts/a.pdf", "Range": "bytes=0-7"}]

@@ -1,25 +1,14 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-
-import { ListFallback } from "@/components/data-list";
-import { LinkButton } from "@/components/LinkButton";
-import { PageHeader } from "@/components/PageHeader";
-
-import { CatalogTable } from "./_components/CatalogTable";
 
 export const metadata: Metadata = { title: "Catálogo de sub-contas" };
 
 export default function CostCenterCatalogPage() {
   return (
-    <div>
-      <PageHeader
-        title="Catálogo de sub-contas"
-        description="As sub-contas da administradora, com código e nome uma vez só. Cada condomínio escolhe as que usa; os saldos continuam por condomínio."
-        actions={<LinkButton href="/finance/cost-center-catalog/new">Nova sub-conta</LinkButton>}
-      />
-      <Suspense fallback={<ListFallback />}>
-        <CatalogTable />
-      </Suspense>
+    <div className="flex min-h-[24rem] flex-col items-center justify-center gap-3 rounded-card bg-surface p-10 text-center">
+      <h1 className="text-heading">Escolha uma sub-conta</h1>
+      <p className="max-w-sm text-body text-ink-soft">
+        Selecione uma sub-conta na lista para ver e editar, ou cadastre uma nova. As sub-contas da administradora têm código e nome uma vez só; cada condomínio escolhe as que usa, e os saldos continuam por condomínio.
+      </p>
     </div>
   );
 }

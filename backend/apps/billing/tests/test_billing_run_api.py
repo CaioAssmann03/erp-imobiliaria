@@ -118,6 +118,49 @@ def test_the_daily_task_skips_inactive_condominiums(condominium: Condominium) ->
     delay.assert_not_called()
 
 
+def enqueued_on(today: date) -> tuple[int, mock.MagicMock]:
+    with (
+        mock.patch("apps.billing.tasks.timezone.localdate", return_value=today),
+        mock.patch.object(tasks.issue_condominium_billing_task, "delay") as delay,
+    ):
+        return tasks.issue_due_billing(), delay
+
+
+def test_the_daily_task_catches_up_a_day_the_worker_missed(condominium: Condominium) -> None:
+    _ = CondominiumBillingRules.objects.create(condominium=condominium, issuance_day=10)
+
+    enqueued, delay = enqueued_on(date(2026, 10, 12))
+
+    assert enqueued == 1
+    delay.assert_called_once_with(str(condominium.pk), "2026-10-01")
+
+
+def test_the_catch_up_stops_after_its_window(condominium: Condominium) -> None:
+    _ = CondominiumBillingRules.objects.create(condominium=condominium, issuance_day=10)
+
+    enqueued, _delay = enqueued_on(date(2026, 10, 13))
+
+    assert enqueued == 0
+
+
+def test_the_catch_up_leaves_out_a_month_that_already_has_a_run(condominium: Condominium) -> None:
+    _ = CondominiumBillingRules.objects.create(condominium=condominium, issuance_day=10)
+    _ = BillingRun.objects.create(condominium=condominium, reference_month=date(2026, 10, 1))
+
+    enqueued, _delay = enqueued_on(date(2026, 10, 11))
+
+    assert enqueued == 0
+
+
+def test_a_window_of_one_day_turns_the_catch_up_off(condominium: Condominium, settings) -> None:  # type: ignore[no-untyped-def]
+    settings.BILLING_ISSUANCE_CATCH_UP_DAYS = 1
+    _ = CondominiumBillingRules.objects.create(condominium=condominium, issuance_day=10)
+
+    enqueued, _delay = enqueued_on(date(2026, 10, 11))
+
+    assert enqueued == 0
+
+
 def test_the_condominium_task_runs_the_issuance(condominium: Condominium, issuable: None) -> None:
     run_id = tasks.issue_condominium_billing_task(str(condominium.pk), "2026-10-01")
 
@@ -152,3 +195,42 @@ def test_a_whole_condominium_problem_has_no_unit_name(api_client: APIClient, con
     created = api_client.post(reverse(LIST), {"condominium": str(condominium.pk), "reference_month": "2026-10-01"}, format="json")
 
     assert body(created)["problems"] == [{"unit": None, "unit_name": None, "code": "no_plan_in_force"}]
+
+
+def test_coverage_says_which_active_condominiums_have_no_boleto_in_the_month(
+    api_client: APIClient, condominium: Condominium, other_condominium: Condominium
+) -> None:
+    _ = BillingRun.objects.create(condominium=condominium, reference_month=date(2026, 10, 1), issued_count=3)
+    _ = BillingRun.objects.create(condominium=other_condominium, reference_month=date(2026, 10, 1), failed_count=1)
+
+    october = body(api_client.get(reverse("billing-run-coverage"), {"reference_month": "2026-10-01"}))
+    november = body(api_client.get(reverse("billing-run-coverage"), {"reference_month": "2026-11-01"}))
+
+    assert (october["expected"], october["issued"], [row["name"] for row in october["missing"]]) == (2, 1, [other_condominium.name])
+    assert (november["expected"], november["issued"], len(november["missing"])) == (2, 0, 2)
+    assert (october["missing_count"], november["missing_count"]) == (1, 2)
+
+
+def test_coverage_lists_the_missing_condominiums_a_page_at_a_time(
+    api_client: APIClient, condominium: Condominium, other_condominium: Condominium
+) -> None:
+    month: dict[str, str | int] = {"reference_month": "2026-11-01"}
+
+    first = body(api_client.get(reverse("billing-run-coverage"), {**month, "limit": 1}))
+    second = body(api_client.get(reverse("billing-run-coverage"), {**month, "limit": 1, "page": 2}))
+
+    assert (first["missing_count"], len(first["missing"]), len(second["missing"])) == (2, 1, 1)
+    assert first["missing"][0]["id"] != second["missing"][0]["id"]
+
+
+def test_has_problem_lists_partial_and_failed_runs_in_one_query(api_client: APIClient, condominium: Condominium, other_condominium: Condominium) -> None:
+    month = date(2026, 10, 1)
+    failed = BillingRun.objects.create(condominium=condominium, reference_month=month, status=BillingRun.Status.FAILED)
+    partial = BillingRun.objects.create(condominium=other_condominium, reference_month=month, status=BillingRun.Status.PARTIAL)
+    _ = BillingRun.objects.create(condominium=condominium, reference_month=date(2026, 9, 1), status=BillingRun.Status.SUCCEEDED)
+
+    with_problem = {item["id"] for item in results(api_client.get(reverse(LIST), {"has_problem": "true"}))}
+    without = results(api_client.get(reverse(LIST), {"has_problem": "false"}))
+
+    assert with_problem == {str(failed.pk), str(partial.pk)}
+    assert [item["status"] for item in without] == ["succeeded"]

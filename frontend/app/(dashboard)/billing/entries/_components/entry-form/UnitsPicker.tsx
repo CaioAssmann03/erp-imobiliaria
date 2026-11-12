@@ -4,8 +4,8 @@ import { useFormContext, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { useUnitsList } from "@/lib/api/generated";
-import { maskSignedMoney } from "@/lib/masks";
-import { inputClass } from "@/lib/ui";
+import { maskSignedMoney } from "@/lib/format/masks";
+import { inputClass } from "@/lib/theme/ui";
 
 interface SelectedUnit {
   unit: string;

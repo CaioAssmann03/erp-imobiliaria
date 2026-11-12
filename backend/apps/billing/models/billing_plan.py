@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any, final, override
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Q
+from django.db.models.functions import Lower
 
 from apps.billing.errors import BillingPlanError
 from apps.billing.models.querysets import BillingPlanQuerySet
@@ -42,10 +43,11 @@ class BillingPlan(BaseModel):
     class Meta:
         verbose_name = "Billing Plan"
         verbose_name_plural = "Billing Plans"
-        ordering = ("condominium__name", "name")
+        ordering = ("condominium__code", "name")
         constraints = (
             models.UniqueConstraint(
-                fields=("condominium", "name"),
+                "condominium",
+                Lower("name"),
                 name="billing_plan_unique_name_per_condominium",
                 violation_error_message=BillingPlanError.NAME_DUPLICATE_IN_CONDOMINIUM.message,
                 violation_error_code=BillingPlanError.NAME_DUPLICATE_IN_CONDOMINIUM.value,

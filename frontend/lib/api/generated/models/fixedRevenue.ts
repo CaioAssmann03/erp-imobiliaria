@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { CondominiumFee } from './condominiumFee';
+import type { CondominiumFee } from './condominiumFee.ts';
 
 export interface FixedRevenue {
   /** @pattern ^-?\d{0,10}(?:\.\d{0,2})?$ */

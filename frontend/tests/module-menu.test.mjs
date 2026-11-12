@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { activeModule, APP_MODULES, isItemActive } from "../lib/module-menu.ts";
+import { activeModule, APP_MODULES, isItemActive } from "../lib/navigation/module-menu.ts";
 
 test("the active module follows the URL", () => {
   assert.equal(activeModule("/dashboard"), "home");
@@ -11,6 +11,9 @@ test("the active module follows the URL", () => {
   assert.equal(activeModule("/billing/entries"), "billing");
   assert.equal(activeModule("/condominiums/persons/new"), "condominiums");
   assert.equal(activeModule("/persons"), null);
+  // Reports live in the Condomínios menu, so that module stays selected on them.
+  assert.equal(activeModule("/reports"), "condominiums");
+  assert.equal(activeModule("/reports/delinquency"), "condominiums");
   assert.equal(activeModule("/login"), null);
   assert.equal(activeModule(null), null);
 });
@@ -35,4 +38,20 @@ test("a module with groups has no direct link, one without groups has", () => {
   for (const appModule of APP_MODULES) {
     assert.equal(appModule.groups.length === 0, appModule.href !== undefined);
   }
+});
+
+test("the events are in Condomínios (Cadastros), not in Cobrança", () => {
+  const labelsOf = (key) => APP_MODULES.find((appModule) => appModule.key === key).groups.flatMap((group) => group.items);
+  assert.equal(labelsOf("condominiums").find((item) => item.label === "Eventos")?.href, "/condominiums/events");
+  assert.equal(labelsOf("billing").some((item) => item.label === "Eventos"), false);
+  assert.equal(activeModule("/condominiums/events/new"), "condominiums");
+  assert.equal(activeModule("/billing/events"), "billing");
+});
+
+test("the sub-contas are in Condomínios (Cadastros), and the unit's screens keep their own item active", () => {
+  const group = APP_MODULES.find((appModule) => appModule.key === "condominiums").groups[0].items;
+  const costCenters = group.find((item) => item.label === "Sub-contas");
+  assert.equal(costCenters?.href, "/condominiums/cost-centers");
+  assert.equal(isItemActive(costCenters, group, "/condominiums/cost-centers/k1"), true);
+  assert.equal(isItemActive(group[0], group, "/condominiums/cost-centers"), false);
 });

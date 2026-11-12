@@ -5,10 +5,11 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { EntryBatchesPostEntriesOrigin } from './entryBatchesPostEntriesOrigin';
+import type { EntryBatchesPostEntriesOrigin } from './entryBatchesPostEntriesOrigin.ts';
 
 export type EntryBatchesPostEntriesParams = {
 batch_date?: string;
+condominium?: string;
 /**
  * Número de resultados a serem retornados por página.
  */

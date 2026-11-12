@@ -105,7 +105,8 @@ class BillingDocument(BaseModel):
     class Meta:
         verbose_name = "Billing Document"
         verbose_name_plural = "Billing Documents"
-        ordering = ("-reference_month", "unit__condominium__name", "unit__name")
+        ordering = ("-reference_month", "unit__condominium__code", "unit__name")
+        indexes = (models.Index(fields=("-reference_month",), name="billing_document_month_idx"),)
         constraints = (
             models.UniqueConstraint(
                 fields=("unit", "reference_month"),

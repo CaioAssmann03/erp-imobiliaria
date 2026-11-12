@@ -3,17 +3,23 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { test } from "node:test";
 
-import { APPEARANCE_INIT_SCRIPT, DEFAULT_APPEARANCE } from "../lib/appearance.ts";
-import { APP_MODULES } from "../lib/module-menu.ts";
+import { APPEARANCE_INIT_SCRIPT, DEFAULT_APPEARANCE } from "../lib/theme/appearance.ts";
+import { APP_MODULES } from "../lib/navigation/module-menu.ts";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const DASHBOARD = join(ROOT, "app", "(dashboard)");
 
 /** Run the inline <head> script against a fake document, like the browser does before the first paint. */
-function runInitScript(cookie) {
+function runInitScript(cookie, { cores = 8, memory = 8, saveData = false, osReduceMotion = false, gpu = true } = {}) {
   const dataset = {};
-  const fakeDocument = { cookie, documentElement: { dataset } };
-  new Function("document", APPEARANCE_INIT_SCRIPT)(fakeDocument);
+  const style = { props: {}, setProperty(name, value) { this.props[name] = value; } };
+  // `gpu: false` = sem aceleração de hardware: com `failIfMajorPerformanceCaveat` o navegador devolve null em vez do contexto WebGL.
+  const canvas = { getContext: () => (gpu ? { getExtension: () => null } : null) };
+  const fakeDocument = { cookie, documentElement: { dataset, style }, createElement: () => canvas };
+  const navigator = { hardwareConcurrency: cores, deviceMemory: memory, connection: { saveData } };
+  const matchMedia = (query) => ({ matches: osReduceMotion && query.includes("prefers-reduced-motion") });
+  new Function("document", "navigator", "matchMedia", APPEARANCE_INIT_SCRIPT)(fakeDocument, navigator, matchMedia);
+  dataset.__style = style.props;
   return dataset;
 }
 
@@ -60,26 +66,136 @@ test("no module menu label is repeated inside one module", () => {
 });
 
 test("the old list routes still exist, as redirects", () => {
-  for (const route of ["condominiums/blocks", "condominiums/cost-centers", "condominiums/units/new"]) {
+  for (const route of ["condominiums/blocks"]) {
     const page = readFileSync(join(DASHBOARD, ...route.split("/"), "page.tsx"), "utf8");
     assert.match(page, /redirect\(/, route);
   }
 });
 
-test("the blocks, the units and the cost centers of a condominium are screens of their own, with the side menu", () => {
-  for (const route of ["condominiums/[id]/blocks", "condominiums/[id]/units", "condominiums/[id]/cost-centers"]) {
+test("a new unit, block or sub-conta without a condominium asks for one instead of redirecting", () => {
+  for (const route of ["condominiums/units/new", "condominiums/blocks/new", "condominiums/cost-centers/new"]) {
     const page = readFileSync(join(DASHBOARD, ...route.split("/"), "page.tsx"), "utf8");
     assert.doesNotMatch(page, /redirect\(/, route);
-    assert.match(page, /CondominiumSideMenu/, route);
+    assert.match(page, /ChooseCondominium/, route);
+  }
+});
+
+test("a new launch or extra boleto without a condominium asks for one", () => {
+  for (const file of ["billing/entries/_components/NewBillingEntryForm.tsx", "billing/extra/_components/ExtraBillingForm.tsx"]) {
+    assert.match(readFileSync(join(DASHBOARD, ...file.split("/")), "utf8"), /ChooseCondominiumCard/, file);
+  }
+});
+
+test("the blocks, the units, the cost centers and the people of a condominium are screens of their own", () => {
+  for (const route of ["condominiums/(condominium)/[id]/blocks", "condominiums/(condominium)/[id]/units", "condominiums/(condominium)/[id]/cost-centers", "condominiums/(condominium)/[id]/persons"]) {
+    const page = readFileSync(join(DASHBOARD, ...route.split("/"), "page.tsx"), "utf8");
+    assert.doesNotMatch(page, /redirect\(/, route);
+  }
+});
+
+test("the whole finance module is in the 3 columns: no sub-header with tabs is left", () => {
+  assert.equal(existsSync(join(DASHBOARD, "finance", "layout.tsx")), false);
+  for (const route of ["accounts-payable", "statement", "entries", "company-account", "cost-center-catalog"]) {
+    const layout = readFileSync(join(DASHBOARD, "finance", route, "layout.tsx"), "utf8");
+    assert.match(layout, /Frame/, route);
+  }
+});
+
+test("the billing launches (Inclusão de valores) are in the 3 columns, with the frame as the layout", () => {
+  const layout = readFileSync(join(DASHBOARD, "billing", "entries", "layout.tsx"), "utf8");
+  assert.match(layout, /BillingEntriesFrame/);
+  for (const route of ["page.tsx", join("new", "page.tsx"), join("[id]", "page.tsx")]) {
+    assert.equal(existsSync(join(DASHBOARD, "billing", "entries", route)), true, route);
+  }
+});
+
+test("the right-hand menu is drawn by the layout frames, never by the pages, so it stays mounted between screens", () => {
+  const frames = {
+    "condominiums/_components/condominium/CondominiumsFrame.tsx": /CondominiumSideMenu/,
+    "condominiums/_components/blocks/BlocksFrame.tsx": /BlockSideMenu/,
+    "condominiums/_components/cost-centers/CostCentersFrame.tsx": /CostCenterSideMenu/,
+    "condominiums/persons/_components/PersonsFrame.tsx": /SectionIndex/,
+    "condominiums/(condominium)/[id]/units/_components/UnitsFrame.tsx": /UnitSideMenu/,
+    "condominiums/events/_components/BillingEventsFrame.tsx": /SectionIndex/,
+    "finance/accounts-payable/_components/AccountsPayableFrame.tsx": /AccountPayableSideMenu/,
+    "finance/statement/_components/StatementFrame.tsx": /StatementSideMenu/,
+    "finance/entries/_components/EntriesFrame.tsx": /SectionIndex/,
+    "finance/company-account/_components/CompanyAccountFrame.tsx": /SectionIndex/,
+    "finance/cost-center-catalog/_components/CatalogFrame.tsx": /SectionIndex/,
+    "billing/entries/_components/BillingEntriesFrame.tsx": /SectionIndex/,
+    "billing/extra/_components/ExtraBillingFrame.tsx": /SectionIndex/,
+    "billing/plans/_components/BillingPlansFrame.tsx": /SectionIndex/,
+    "billing/documents/_components/list/BillingDocumentsFrame.tsx": /SectionIndex/,
+    "billing/runs/_components/BillingRunsFrame.tsx": /SectionIndex/,
+  };
+  for (const [file, menu] of Object.entries(frames)) {
+    assert.match(readFileSync(join(DASHBOARD, ...file.split("/")), "utf8"), menu, file);
+  }
+  const pages = [
+    ...sourceFiles(join(DASHBOARD, "condominiums")),
+    ...sourceFiles(join(DASHBOARD, "finance", "accounts-payable")),
+    ...sourceFiles(join(DASHBOARD, "finance", "statement")),
+    ...sourceFiles(join(DASHBOARD, "finance", "entries")),
+    ...sourceFiles(join(DASHBOARD, "finance", "company-account")),
+    ...sourceFiles(join(DASHBOARD, "finance", "cost-center-catalog")),
+    ...sourceFiles(join(DASHBOARD, "billing", "entries")),
+    ...sourceFiles(join(DASHBOARD, "billing", "extra")),
+    ...sourceFiles(join(DASHBOARD, "billing", "plans")),
+    ...sourceFiles(join(DASHBOARD, "billing", "documents")),
+    ...sourceFiles(join(DASHBOARD, "billing", "runs")),
+  ].filter((file) => /[\\/]page\.tsx$/.test(file));
+  assert.ok(pages.length > 10);
+  for (const page of pages) {
+    assert.doesNotMatch(readFileSync(page, "utf8"), /\baside=/, relative(ROOT, page));
+  }
+});
+
+test("the registry layout is written once: frames use RegistryFrame, lists use RegistryList, nobody copies their markup", () => {
+  const files = sourceFiles(DASHBOARD);
+  const frames = files.filter((file) => /Frame\.tsx$/.test(file));
+  const lists = files.filter((file) => /[\\/](?!Registry)\w+List\.tsx$/.test(file) && readFileSync(file, "utf8").includes("<RegistryList"));
+  assert.ok(frames.length >= 17);
+  assert.ok(lists.length >= 16);
+  for (const frame of frames) {
+    const source = readFileSync(frame, "utf8");
+    assert.match(source, /<RegistryFrame/, relative(ROOT, frame));
+    assert.doesNotMatch(source, /lg:flex lg:items-start/, relative(ROOT, frame));
+    assert.doesNotMatch(source, /<FormPage/, relative(ROOT, frame));
+  }
+  for (const file of files) {
+    const source = readFileSync(file, "utf8");
+    // The column markup and the "+" button of a list live in components/layout/RegistryList.tsx only.
+    assert.doesNotMatch(source, /lg:sticky lg:top-\[4\.25rem\]/, relative(ROOT, file));
+    assert.doesNotMatch(source, /flex size-8 items-center justify-center rounded-control/, relative(ROOT, file));
+  }
+});
+
+test("the registry forms are written once: RecordForm for the shell, useRecordSubmit for the save, SectionAnchor for the anchors", () => {
+  const files = sourceFiles(DASHBOARD);
+  const forms = files.filter((file) => /[\\/]\w+Form\.tsx$/.test(file) && readFileSync(file, "utf8").includes("<RecordForm"));
+  const submits = files.filter((file) => /[\\/]use-[\w-]+-submit\.ts$/.test(file) && readFileSync(file, "utf8").includes("useRecordSubmit"));
+  assert.ok(forms.length >= 9);
+  assert.ok(submits.length >= 7);
+  for (const form of forms) {
+    const source = readFileSync(form, "utf8");
+    assert.doesNotMatch(source, /<FormProvider|<FormActions|Corrija os campos destacados/, relative(ROOT, form));
+  }
+  for (const submit of submits) {
+    // Mapping the server errors to the fields and the success toast are in the shared hook.
+    assert.doesNotMatch(readFileSync(submit, "utf8"), /applyServerErrors|toast\.success\(\s*message/, relative(ROOT, submit));
+  }
+  for (const file of files) {
+    // The anchor of a section of a record page is `SectionAnchor`, never a hand-written `<div id className="scroll-mt-20">`.
+    assert.doesNotMatch(readFileSync(file, "utf8"), /<div id=[^>]*scroll-mt-20/, relative(ROOT, file));
   }
 });
 
 test("the shell and the registry use design tokens, never a hard-coded color", () => {
   const files = [
-    // The settings previews (ModePreview) paint the themes they offer, so they are the one place with literal colors.
+    // The settings folder is exempt (it may paint literal colors, e.g. the accent dots).
     ...sourceFiles(join(DASHBOARD, "_components", "shell")).filter((file) => !file.includes(`${"settings"}/`)),
     ...sourceFiles(join(DASHBOARD, "condominiums", "_components")).filter((file) =>
-      /(CondominiumsList|CondominiumsFrame|CondominiumHeader|CondominiumSideMenu|RegistrySection|SectionIndex|CondominiumDeleteButton)\.tsx$/.test(file)
+      /(CondominiumsList|CondominiumsFrame|CondominiumHeader|CondominiumSideMenu|SectionIndex|CondominiumDeleteButton)\.tsx$/.test(file)
     ),
   ];
   assert.ok(files.length > 10);
@@ -91,14 +207,78 @@ test("the shell and the registry use design tokens, never a hard-coded color", (
 });
 
 test("the head script applies the saved mode, accent and font, and falls back to the defaults", () => {
-  const saved = runInitScript("ui_mode=light; ui_accent=blue; ui_font=dm-sans");
+  const saved = runInitScript("ui_mode=light; ui_accent=custom; ui_accent_custom=%232f6bff; ui_font=dm-sans");
   assert.equal(saved.mode, "light");
-  assert.equal(saved.accent, "blue");
+  assert.equal(saved.accent, "custom");
 
   const tampered = runInitScript("ui_mode=neon; ui_accent=<script>");
   assert.equal(tampered.mode, DEFAULT_APPEARANCE.mode);
   assert.equal(tampered.accent, DEFAULT_APPEARANCE.accent);
   assert.equal(tampered.font, DEFAULT_APPEARANCE.font);
+});
+
+test("the head script applies a custom accent only when the color is a valid #rrggbb", () => {
+  const custom = runInitScript("ui_accent=custom; ui_accent_custom=%2300aa55");
+  assert.equal(custom.accent, "custom");
+  assert.equal(custom.accentCustom, "#00aa55");
+  assert.equal(custom.__style["--accent-custom"], "#00aa55");
+  assert.equal(custom.__style["--accent-foreground"], "#ffffff");
+  assert.equal(runInitScript("ui_accent=custom; ui_accent_custom=%23ffe066").__style["--accent-foreground"], "#1c1b19");
+
+  const invalid = runInitScript("ui_accent=custom; ui_accent_custom=red");
+  assert.equal(invalid.accent, DEFAULT_APPEARANCE.accent);
+  assert.equal(invalid.accentCustom, "");
+  assert.deepEqual(invalid.__style, {});
+});
+
+test("the head script also applies the text size and the reduced motion, and ignores invalid values", () => {
+  const saved = runInitScript("ui_text=large; ui_motion=reduced");
+  assert.equal(saved.text, "large");
+  assert.equal(saved.motion, "reduced");
+
+  const tampered = runInitScript("ui_text=huge; ui_motion=<b>");
+  assert.equal(tampered.text, DEFAULT_APPEARANCE.text);
+  assert.equal(tampered.motion, DEFAULT_APPEARANCE.motion);
+});
+
+test("the head script resolves the lite mode from the preference and the device", () => {
+  // Automatic (the default): a normal machine keeps the full effects; a weak one, data saver or an OS request goes lite.
+  assert.equal(DEFAULT_APPEARANCE.motion, "auto");
+  assert.equal(runInitScript("").perf, "full");
+  assert.equal(runInitScript("", { cores: 2 }).perf, "lite");
+  assert.equal(runInitScript("", { memory: 2 }).perf, "lite");
+  assert.equal(runInitScript("", { gpu: false }).perf, "lite");
+  // A common 4-core / 4 GB laptop with a GPU keeps the full version.
+  assert.equal(runInitScript("", { cores: 4, memory: 4 }).perf, "full");
+  assert.equal(runInitScript("", { saveData: true }).perf, "lite");
+  assert.equal(runInitScript("", { osReduceMotion: true }).perf, "lite");
+  // A machine that reports nothing (Safari, Firefox) is not treated as weak.
+  assert.equal(runInitScript("", { cores: undefined, memory: undefined }).perf, "full");
+
+  // The explicit choices: "reduced" is always lite; "full" ignores a weak machine, but not the OS request for less motion.
+  assert.equal(runInitScript("ui_motion=reduced").perf, "lite");
+  assert.equal(runInitScript("ui_motion=full", { cores: 2, gpu: false }).perf, "full");
+  assert.equal(runInitScript("ui_motion=full", { osReduceMotion: true }).perf, "lite");
+});
+
+test("the lite mode rules live in the CSS and the effects read the same attribute", () => {
+  const css = readFileSync(join(ROOT, "app", "globals.css"), "utf8");
+  assert.match(css, /html\[data-perf="lite"\][^{]*\{[^}]*backdrop-filter: none/);
+  assert.match(css, /@custom-variant lite/);
+  // No component asks the OS on its own: the in-app choice and the device would be ignored.
+  const own = [...sourceFiles(join(ROOT, "app")), ...sourceFiles(join(ROOT, "components"))].filter((file) =>
+    /prefers-reduced-motion|useReducedMotion/.test(readFileSync(file, "utf8")),
+  );
+  assert.deepEqual(own.map((file) => relative(ROOT, file)), []);
+});
+
+test("every public-page file that animates with motion/react honors the lite mode", () => {
+  // SiteHeader only reads the scroll position to restyle itself; it animates nothing.
+  const animated = sourceFiles(join(ROOT, "app", "(marketing)")).filter((file) => {
+    const text = readFileSync(file, "utf8");
+    return /from "motion\/react"/.test(text) && !/useLite|isLite/.test(text) && !file.endsWith("SiteHeader.tsx");
+  });
+  assert.deepEqual(animated.map((file) => relative(ROOT, file)), []);
 });
 
 // The rail expands and collapses (click on the logo), but the choice lives only in the browser (`localStorage`): the server renders the
@@ -107,4 +287,36 @@ test("the rail state is not on <html>: no attribute, cookie or variant", () => {
   assert.equal(Object.hasOwn(runInitScript(""), "sidebar"), false);
   const css = readFileSync(join(ROOT, "app", "globals.css"), "utf8");
   assert.doesNotMatch(css, /sidebar-closed/);
+});
+
+test("the extra boleto is in the 3 columns, with the frame as the layout", () => {
+  const layout = readFileSync(join(DASHBOARD, "billing", "extra", "layout.tsx"), "utf8");
+  assert.match(layout, /ExtraBillingFrame/);
+  for (const route of ["page.tsx", join("new", "page.tsx"), join("[id]", "page.tsx")]) {
+    assert.equal(existsSync(join(DASHBOARD, "billing", "extra", route)), true, route);
+  }
+});
+
+test("the billing plans are in the 3 columns, with the frame as the layout", () => {
+  const layout = readFileSync(join(DASHBOARD, "billing", "plans", "layout.tsx"), "utf8");
+  assert.match(layout, /BillingPlansFrame/);
+  for (const route of ["page.tsx", join("new", "page.tsx"), join("[id]", "page.tsx")]) {
+    assert.equal(existsSync(join(DASHBOARD, "billing", "plans", route)), true, route);
+  }
+});
+
+test("the billing documents are in the 3 columns, with the frame as the layout", () => {
+  const layout = readFileSync(join(DASHBOARD, "billing", "documents", "layout.tsx"), "utf8");
+  assert.match(layout, /BillingDocumentsFrame/);
+  for (const route of ["page.tsx", join("[id]", "page.tsx")]) {
+    assert.equal(existsSync(join(DASHBOARD, "billing", "documents", route)), true, route);
+  }
+});
+
+test("the billing runs are in the 3 columns, with the frame as the layout", () => {
+  const layout = readFileSync(join(DASHBOARD, "billing", "runs", "layout.tsx"), "utf8");
+  assert.match(layout, /BillingRunsFrame/);
+  for (const route of ["page.tsx", join("[id]", "page.tsx")]) {
+    assert.equal(existsSync(join(DASHBOARD, "billing", "runs", route)), true, route);
+  }
 });

@@ -26,12 +26,14 @@ import type {
 
 import type {
   BillingRun,
+  BillingRunsCoverageParams,
   BillingRunsListParams,
   ErrorResponse,
+  IssuanceCoverage,
   PaginatedBillingRunList
 } from '../models';
 
-import { customInstance } from '../../mutator';
+import { customInstance } from '../../mutator.ts';
 
 // https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
 type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
@@ -310,6 +312,96 @@ export function useBillingRunsRetrieve<TData = Awaited<ReturnType<typeof billing
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getBillingRunsRetrieveQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * The active condominiums, how many already have a boleto issued in `?reference_month=` and which do not (the dashboard): `missing` is one page of them (`?page=`, `?limit=`, 10 by default) and `missing_count` the total.
+ */
+export const billingRunsCoverage = (
+    params: BillingRunsCoverageParams,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<IssuanceCoverage>(
+      {url: `/api/billing-runs/coverage/`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getBillingRunsCoverageQueryKey = (params?: BillingRunsCoverageParams,) => {
+    return [
+    `/api/billing-runs/coverage/`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getBillingRunsCoverageQueryOptions = <TData = Awaited<ReturnType<typeof billingRunsCoverage>>, TError = ErrorResponse>(params: BillingRunsCoverageParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingRunsCoverage>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getBillingRunsCoverageQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof billingRunsCoverage>>> = ({ signal }) => billingRunsCoverage(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof billingRunsCoverage>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type BillingRunsCoverageQueryResult = NonNullable<Awaited<ReturnType<typeof billingRunsCoverage>>>
+export type BillingRunsCoverageQueryError = ErrorResponse
+
+
+export function useBillingRunsCoverage<TData = Awaited<ReturnType<typeof billingRunsCoverage>>, TError = ErrorResponse>(
+ params: BillingRunsCoverageParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingRunsCoverage>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof billingRunsCoverage>>,
+          TError,
+          Awaited<ReturnType<typeof billingRunsCoverage>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBillingRunsCoverage<TData = Awaited<ReturnType<typeof billingRunsCoverage>>, TError = ErrorResponse>(
+ params: BillingRunsCoverageParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingRunsCoverage>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof billingRunsCoverage>>,
+          TError,
+          Awaited<ReturnType<typeof billingRunsCoverage>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBillingRunsCoverage<TData = Awaited<ReturnType<typeof billingRunsCoverage>>, TError = ErrorResponse>(
+ params: BillingRunsCoverageParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingRunsCoverage>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useBillingRunsCoverage<TData = Awaited<ReturnType<typeof billingRunsCoverage>>, TError = ErrorResponse>(
+ params: BillingRunsCoverageParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof billingRunsCoverage>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getBillingRunsCoverageQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

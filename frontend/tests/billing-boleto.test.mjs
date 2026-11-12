@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { boletoState, canReissueDocument, deliveryFailureLabel, deliveryStatusLabel } from "../lib/billing-documents.ts";
+import { boletoState, canReissueDocument, deliveryFailureLabel, deliveryStatusLabel } from "../lib/billing/billing-documents.ts";
 
 test("the boleto state follows the status and the registration", () => {
   assert.equal(boletoState({ status: "issued", hasRegistration: false }), "waiting");

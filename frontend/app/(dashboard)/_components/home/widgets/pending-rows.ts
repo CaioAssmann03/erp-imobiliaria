@@ -14,6 +14,8 @@ export interface PendingRow {
   label: string;
   detail: string;
   href: string;
+  /** Fora do card do painel (continua na visão ampliada): o assunto já tem lista própria no painel. */
+  hiddenOnPanel?: boolean;
 }
 
 /** Ordem = criticidade para a cobrança: sem pagador e rateio errado quebram o boleto. */
@@ -23,14 +25,14 @@ export function pendingRows(pending: Dashboard["pending"] | undefined): PendingR
       severity: "critical",
       count: pending?.units_without_responsible ?? 0,
       label: "Unidades sem responsável",
-      detail: "Ativas, sem proprietário ou locatário: não há a quem cobrar",
+      detail: "Sem proprietário ou locatário",
       href: "/condominiums/units?pending=without_responsible",
     },
     {
       severity: "critical",
       count: pending?.inconsistent_apportionment ?? 0,
       label: "Rateio que não fecha 100%",
-      detail: "Condomínios em que alguma fração ideal em uso não soma 100%",
+      detail: "Fração ideal em uso que não soma 100%",
       href: "/condominiums?pending=inconsistent_apportionment",
     },
     {
@@ -39,6 +41,7 @@ export function pendingRows(pending: Dashboard["pending"] | undefined): PendingR
       label: "Reajustes atrasados",
       detail: "A data do próximo reajuste já passou",
       href: "/condominiums?pending=overdue_adjustment",
+      hiddenOnPanel: true,
     },
     {
       severity: "info",
@@ -46,6 +49,7 @@ export function pendingRows(pending: Dashboard["pending"] | undefined): PendingR
       label: "Reajustes em 30 dias",
       detail: "Condomínios com reajuste previsto no próximo mês",
       href: "/condominiums?pending=upcoming_adjustment",
+      hiddenOnPanel: true,
     },
     {
       severity: "attention",
@@ -53,12 +57,13 @@ export function pendingRows(pending: Dashboard["pending"] | undefined): PendingR
       label: "Locações terminando",
       detail: "Vínculos de locatário que terminam em até 60 dias (ou já encerraram)",
       href: "/condominiums/units?pending=lease_ending",
+      hiddenOnPanel: true,
     },
     {
       severity: "critical",
       count: pending?.without_cost_centers ?? 0,
       label: "Sem centros de custo",
-      detail: "Condomínios sem centros de custo: bloqueiam o financeiro",
+      detail: "Bloqueiam o financeiro",
       href: "/condominiums?pending=without_cost_centers",
     },
     {

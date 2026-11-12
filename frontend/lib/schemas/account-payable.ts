@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import type { AccountPayable } from "@/lib/api/generated/models";
-import { moneyFromApi } from "@/lib/masks";
+import { moneyFromApi } from "@/lib/format/masks";
 
 import { dateField, decimalField, enumField, optionalText, requiredText } from "./fields";
 

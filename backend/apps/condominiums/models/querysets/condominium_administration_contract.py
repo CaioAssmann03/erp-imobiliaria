@@ -35,12 +35,12 @@ class CondominiumAdministrationContractQuerySet(models.QuerySet["CondominiumAdmi
         return total or Decimal(0)
 
     def largest_fixed_fees(self) -> "CondominiumAdministrationContractQuerySet":
-        """Fixed fees above zero, the largest first, with the condominium loaded."""
+        """Fixed fees above zero, the largest first (ties by condominium code, so a page never repeats a row), with the condominium loaded."""
         return (
             self.with_fixed_fee()
             .filter(fee_amount__gt=0)
             .select_related("condominium")
-            .order_by("-fee_amount")
+            .order_by("-fee_amount", "condominium__code")
         )
 
     def _adjustment_condominium_ids(

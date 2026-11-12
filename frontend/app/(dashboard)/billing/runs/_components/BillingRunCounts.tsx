@@ -1,4 +1,5 @@
 import type { BillingRun } from "@/lib/api/generated/models";
+import { cn } from "@/lib/utils";
 
 const COUNTS = [
   { key: "issued_count", label: "Emitidos" },
@@ -7,14 +8,16 @@ const COUNTS = [
   { key: "failed_count", label: "Falhas" },
 ] as const;
 
-/** As quatro contagens de uma execução. */
+/** As contagens de uma execução, em números grandes sem caixas: os emitidos sempre; as outras só quando houve (o que é zero não precisa ser lido). */
 export function BillingRunCounts({ run }: { run: BillingRun }) {
+  const shown = COUNTS.filter((count) => count.key === "issued_count" || run[count.key] > 0);
+
   return (
-    <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-      {COUNTS.map((count) => (
-        <div key={count.key} className="rounded-panel bg-surface-muted/40 p-4">
-          <dt className="text-caption uppercase tracking-wide text-ink-soft">{count.label}</dt>
-          <dd className="mt-1 text-title tabular-nums">{run[count.key]}</dd>
+    <dl className="flex flex-wrap gap-x-10 gap-y-4">
+      {shown.map((count) => (
+        <div key={count.key}>
+          <dt className="text-caption text-ink-soft">{count.label}</dt>
+          <dd className={cn("mt-0.5 text-title tabular-nums", count.key === "failed_count" && "text-danger")}>{run[count.key]}</dd>
         </div>
       ))}
     </dl>

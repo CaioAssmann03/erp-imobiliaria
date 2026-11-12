@@ -8,6 +8,7 @@
 
 export type CostCentersListParams = {
 active?: boolean;
+catalog_item?: string;
 condominium?: string;
 /**
  * Número de resultados a serem retornados por página.

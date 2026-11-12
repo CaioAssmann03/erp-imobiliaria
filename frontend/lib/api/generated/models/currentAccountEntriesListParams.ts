@@ -5,8 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { CurrentAccountEntriesListKind } from './currentAccountEntriesListKind';
-import type { CurrentAccountEntriesListOrigin } from './currentAccountEntriesListOrigin';
+import type { CurrentAccountEntriesListKind } from './currentAccountEntriesListKind.ts';
+import type { CurrentAccountEntriesListOrigin } from './currentAccountEntriesListOrigin.ts';
 
 export type CurrentAccountEntriesListParams = {
 batch?: string;

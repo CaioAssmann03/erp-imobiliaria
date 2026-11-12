@@ -17,7 +17,7 @@ docker compose exec backend python manage.py seed_demo         # demo data (--cl
 
 Local file storage: the compose also starts an S3-compatible **`s3` service** (Adobe S3Mock, port 9090; it creates the bucket `erp-dev` itself and accepts any key), so the boleto PDF and the receipts work in development; production uses the Cloudflare R2 bucket. (MinIO no longer publishes images on Docker Hub, which broke the first version of this.) `AWS_S3_ENDPOINT_URL` defaults to `http://host.docker.internal:9090` (it must be reachable from the container *and* from the browser, which opens the signed URLs); on Linux without Docker Desktop add `127.0.0.1 host.docker.internal` to `/etc/hosts`. Without a bucket the PDF endpoints answer 503. On Windows, `scripts/local-up.ps1` does the whole first run (keys, containers, migrate, admin user, demo data): `powershell -ExecutionPolicy Bypass -File .\scripts\local-up.ps1` (`-Reset` starts over, `-NoSeed` skips the demo data).
 
-URLs: API docs `localhost:8000/api/docs/` · schema `/api/schema/` · admin `/admin/` · frontend `localhost:3000`.
+URLs (`DEBUG=true`; with `DEBUG=false` the docs need a superuser token): API docs `localhost:8000/api/docs/` · schema `/api/schema/` · admin `/admin/` · frontend `localhost:3000`.
 
 `docker compose up` fails with "port is already allocated" when another Postgres already uses 5432 (the Windows service, another project's container). Set `POSTGRES_HOST_PORT=5434` (any free port) in `.env`: it only changes the port on your computer; the containers still reach `db:5432`, so `POSTGRES_PORT` stays `5432`. `manage.py` and pytest run outside Docker then need `POSTGRES_PORT=5434` too. The tests never touch the data you see in the app: pytest creates its own database (`test_<POSTGRES_DB>`) and drops it when the session ends (a run with `--reuse-db` keeps it on purpose; the CI never does).
 
@@ -28,7 +28,7 @@ venv/bin/python manage.py check
 venv/bin/python manage.py makemigrations --check --dry-run     # must be clean
 venv/bin/python manage.py makemigrations <app>
 ```
-After an API change: backend running → `cd frontend && pnpm generate:api` (it deletes and recreates `lib/api/generated/`, so **restart the frontend container afterwards**: the dev server keeps the empty folder in cache and answers 500), fix callers, `pnpm exec tsc --noEmit`, `pnpm exec eslint .`, `pnpm build`. Reset (destroys data): `docker compose down -v && docker compose up -d`, migrate, create the superuser; if the backend starts before Postgres, `docker compose restart backend`. Dev tools: `pip install -r requirements-dev.txt`.
+After an API change: backend running → `cd frontend && pnpm generate:api` (it deletes and recreates `lib/api/generated/`, so **restart the frontend container afterwards**: the dev server keeps the empty folder in cache and answers 500), fix callers, `pnpm exec tsc --noEmit`, `pnpm exec eslint .`, `pnpm build`. Reset (destroys data): `docker compose down -v && docker compose up -d`, migrate, create the superuser; if the backend starts before Postgres, `docker compose restart backend`. Dev tools: `pip install -r requirements-dev.txt` (hashes make pip check every package; see *Dependencies*).
 
 ## Environments
 | Env | How | Notes |
@@ -38,7 +38,7 @@ After an API change: backend running → `cd frontend && pnpm generate:api` (it 
 | Production | one VPS (Docker Compose), reached through the Caddy of a project that already runs there: see *Production on the VPS* | temporary name `erp.177-7-63-175.sslip.io` until the final domain exists. The old Render Blueprint was removed on 2026-10-19 |
 
 ## Deploy (backend)
-Docker image → `entrypoint.sh`: `migrate --noinput` → `collectstatic --noinput` → optional `createsuperuser --noinput` (idempotent) → `gunicorn` (`WEB_CONCURRENCY`, default 2; `PORT`). Health check `GET /api/health/` (200 if the app runs and the database answers, 503 otherwise; no auth, answered before the HTTPS redirect and the host check). **Migrations run on every container start.** The environment of the production stack is described in *Production on the VPS*; `ALLOWED_HOSTS` and `CORS_ALLOWED_ORIGINS` must match the real domain.
+Docker image → `entrypoint.sh`: `migrate --noinput` → `collectstatic --noinput` → optional `createsuperuser --noinput` (idempotent) → `gunicorn` (`gthread`: `WEB_CONCURRENCY` workers, default 3, × `GUNICORN_THREADS` threads, default 4, so 12 simultaneous requests; `GUNICORN_TIMEOUT`, default 30 s; workers recycled every ~1000 requests; `PORT`). Each thread holds its own database connection: keep workers × threads (plus the Celery worker) well under the Postgres `max_connections`. On a host with 1 core, lower `WEB_CONCURRENCY` instead of raising it. Health check `GET /api/health/` (200 if the app runs and the database answers, 503 otherwise; no auth, answered before the HTTPS redirect and the host check). **Migrations run on every container start.** The environment of the production stack is described in *Production on the VPS*; `ALLOWED_HOSTS` and `CORS_ALLOWED_ORIGINS` must match the real domain.
 
 ## Production on the VPS
 Decided on 2026-10-08 (it replaces the Supabase, Vercel and Render plans of phase 3a part 01). One Ubuntu VPS runs the ERP **next to** another, unrelated project (`/root/air-app-node`) without sharing anything except the Caddy that owns ports 80/443.
@@ -53,7 +53,11 @@ Decided on 2026-10-08 (it replaces the Supabase, Vercel and Render plans of phas
 | Deploy | `cd /root/erp-imobiliaria && ./deploy.sh --pull` (creates `erp_edge` if missing, then `docker compose up -d --build`). Migrations run on container start |
 | Files on the VPS | `docker-compose.yml`, `deploy.sh` and `deploy.env` live only on the VPS (`/root/erp-imobiliaria/`): they are **no longer versioned in this repository** (the copy that was in `deploy/vps/` was removed on 2026-10-27). The `.env` and the deploy key also stay only on the VPS; the Caddy block is in the other project's repository |
 
+**Postgres tuning (2026-11-06).** The VPS has 2 vCPUs and 8 GB, shared with the other project. A load test (read-only mix, 10 → 300 simulated users) showed Postgres at ~150% of 200% CPU from 25 users on, while gunicorn (~35%) and Next (~5%) were idle: the database is the bottleneck, not the workers × threads. The `db` service in the VPS `docker-compose.yml` now starts `postgres` with `shared_buffers=2GB`, `effective_cache_size=5GB`, `work_mem=16MB`, `maintenance_work_mem=256MB`, `max_parallel_workers_per_gather=0` (on 2 cores a parallel query takes 3 processes and they fight each other under concurrency), `random_page_cost=1.1` (SSD), `effective_io_concurrency=200`, `checkpoint_completion_target=0.9`, `wal_buffers=16MB`. Recreating the service (`docker compose up -d db`) is a few seconds of downtime; the previous file is `docker-compose.yml.bak-antes-pgtune`. Measured effect on the same ramp: throughput ceiling ~10 → ~16 req/s and p95 at 60 simulated users 7.9 s → 3.3 s. The dashboard cache (60 s per company) and `DeferredJoinPaginationMixin` on the two heaviest lists then took the ceiling to ~23 req/s (p95 at 60 simulated users 1.4 s). Rough capacity today: ~40 simulated users (1 request every 1–3 s) with p95 under 0.7 s, saturation at 60–80; a real user clicks far less often, so count 3–4 real users per simulated one. At the ceiling the whole machine is full (Postgres ~100% + gunicorn ~70% of 200% CPU, load 10+ on 2 cores): more workers or threads do not help, only fewer queries per request or more vCPUs. Persistent database connections (`CONN_MAX_AGE=60` with `CONN_HEALTH_CHECKS`; before, every request opened a connection: ~9 ms against 0.1 ms reused) then took it to ~33 req/s at 80 simulated users with p95 0.8 s (it was 23.8 req/s, p95 2.8 s); the peak was 13 Postgres connections of 100. Heaviest reads (isolated, warm): `billing-documents` list ~150 ms, `dashboard` ~140 ms (24 queries), `current-account-entries` ~80 ms; the rest are under 40 ms. The login throttle (`auth_login`, 5/min per address) is also a limit: an office behind one address cannot log in all at once.
+
 Receipts (spec 018) live in a private **Cloudflare R2** bucket, not on the VPS: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_STORAGE_BUCKET_NAME` and `AWS_S3_ENDPOINT_URL` in `.env` (without them the receipt endpoints answer 503). The bucket needs a CORS rule that allows `PUT` and `GET` from the ERP origin with the `Content-Type` header, otherwise the browser upload is blocked.
+
+The help assistant (spec 069) needs `GEMINI_API_KEY` and/or `GROQ_API_KEY` in `.env` (free keys; `GEMINI_MODEL`, `GROQ_MODEL` and `ASSISTANT_PUBLIC_DAILY_LIMIT` are optional). Without a key the chat answers "unavailable". Details in `apps/assistant.md`.
 
 The address map (spec 021) is Google's **Maps Embed API** under the condominium address. `GOOGLE_MAPS_EMBED_KEY` goes in `.env` and in the environment of the `frontend` service (the Next server reads it on every request: a new key needs a restart of the frontend, not a rebuild); without it the form shows the map through Google's keyless embed page (not the official API). The key is public by design (it is in the page's HTML), so in the Google Cloud console restrict it to **Websites** (HTTP referrers: `http://localhost:3000/*` and the production origin) and to the **Maps Embed API** only, and put a budget alert on the billing account: the API has no per-request charge, but Google Cloud requires a billing account. A blank frame under the address means the key is wrong or not allowed for that origin; the link below it still works.
 
@@ -64,6 +68,7 @@ The address map (spec 021) is Google's **Maps Embed API** under the condominium 
 | `SECURE_HSTS_SECONDS` | `3600` when `DEBUG=false`, `0` in development | no `includeSubDomains`, no `preload`; raise to `31536000` only when the final domain exists |
 | `ADMIN_URL` | `admin/` | set a non-obvious path in production (obscurity only); an empty, absolute (`://`) or `..` value stops startup |
 | `INTERNAL_API_KEY` | none | mandatory when `DEBUG=false`; the same value on the backend and the Next server |
+| `DEBUG` | **false** | off unless `DEBUG=true`: a missing variable means production (spec 065). Local runs set `DEBUG=true` in `.env`; with it off `SECRET_KEY` (≥ 32 chars) and `INTERNAL_API_KEY` are mandatory and the API docs need a superuser token |
 
 **Checklist for a new host** (checked on the VPS on 2026-10-08):
 - [x] TLS is terminated in front: Caddy serves the browser over HTTPS and proxies to the Next server. Django is not reached by the browser at all; it listens only on the private Docker network.
@@ -75,12 +80,21 @@ The address map (spec 021) is Google's **Maps Embed API** under the condominium 
 - [x] `ADMIN_URL` is set to a non-obvious path in the host `.env` (2026-10-19; the value is never written in git). The Admin is not published by Caddy and the Next proxy only forwards `/api/...` segments (`frontend/lib/api-path.ts`); it is opened through the SSH tunnel below.
 - [ ] After every deploy, smoke test that the proxy cannot leave `/api`: `curl -s -o /dev/null -w '%{http_code}' --path-as-is https://<name>/api/..%2fadmin/login/` must print `404` (it printed `200`, the Django Admin login page, until the segment check was added).
 
+**Dependencies (lockfile with hashes):** `requirements.in` (direct runtime packages) and `requirements-dev.in` (adds the dev tools, constrained by `requirements.txt`) are the files you edit; `requirements.txt` and `requirements-dev.txt` are generated by `pip-compile` with SHA-256 hashes for every package and never edited by hand. Compile with the same Python as the image (3.12), pinned pip-tools, from `backend/`:
+```bash
+docker run --rm -v "$PWD":/app -w /app python:3.12-slim sh -c \
+  "pip install -q pip-tools==7.6.2 && pip-compile --generate-hashes --strip-extras requirements.in && pip-compile --generate-hashes --strip-extras requirements-dev.in"
+```
+Add a package: add it to the `.in`, run the command above (the other pins stay as they are). Upgrade one: `pip-compile --generate-hashes --strip-extras --upgrade-package <name> requirements.in`, then recompile the dev file. The Dockerfile installs with `--require-hashes`, and the CI recompiles and fails when the committed files differ. Dependabot reads the `.in`/`.txt` pair.
+
+**Login lockout and dependencies (spec 065):** a username with 10 failed logins is locked for 15 minutes; release it in the Admin (*Sistema → Tentativas de acesso*) or `docker compose exec backend python manage.py axes_reset_username <name>`. The backend image runs as user `app` (uid 10001): a host volume mounted on `/app` must be writable by that uid. CI runs `pip-audit` and `pnpm audit` (both blocking); `.github/dependabot.yml` opens weekly update PRs.
+
 ### Django Admin through an SSH tunnel
 The backend publishes port 8000 on the VPS **loopback only** (`127.0.0.1:8000`, in the VPS `docker-compose.yml`); nothing new is reachable from the internet. From your computer:
 ```bash
 ssh -N -L 8000:127.0.0.1:8000 root@177.7.63.175   # keep it open while you use the Admin
 ```
-Then open `http://localhost:8000/<ADMIN_URL>` (the path is in the host `.env`). It needs `localhost` in `ALLOWED_HOSTS`. The session and CSRF cookies are `Secure` in production: Chrome and Firefox accept them on `http://localhost`, Safari does not (use another browser). Close the tunnel with Ctrl+C.
+Then open `http://localhost:8000/<ADMIN_URL>` (the path is in the host `.env`; read it with `ssh root@177.7.63.175 "grep ADMIN_URL /root/erp-imobiliaria/.env"`). If the local Docker backend already uses port 8000, open the tunnel on another local port (`-L 8001:127.0.0.1:8000`) and use `http://localhost:8001/<ADMIN_URL>`. The **Arquivados** page (restore of deleted records, spec 063) is at `<ADMIN_URL>archived/` and in the sidebar. It needs `localhost` in `ALLOWED_HOSTS`. The session and CSRF cookies are `Secure` in production: Chrome and Firefox accept them on `http://localhost`, Safari does not (use another browser). Close the tunnel with Ctrl+C.
 
 ## Gateway account (Asaas)
 The company has **one** Asaas account that issues every boleto and receives the money (spec 037). Set it up once per environment:
@@ -100,13 +114,13 @@ The company has **one** Asaas account that issues every boleto and receives the 
 `seed_demo` is local/demo only: **never in production** with real data (the initial company comes from `core.0002_seed_company`). Logs go to stdout; no structured logging, error tracker or alerts yet (use `logging.getLogger(__name__)`, log ids and outcomes, never personal data). The database backup is described in *Database backup* below (spec 040). The receipt files live in R2, outside any Postgres dump, and are **not** covered by it.
 
 ## Database backup
-A `backup` container in the production stack (`backup/`) dumps the ERP database **every night at 03:00** (`America/Sao_Paulo`), encrypts it and uploads it to a **private R2 bucket outside the VPS**; it keeps the **last 30 days plus the first backup of each of the last 12 months** and prunes only after a successful upload (spec 040).
+A `backup` container in the production stack (`backend/backup/`) dumps the ERP database **every night at 03:00** (`America/Sao_Paulo`), encrypts it and uploads it to a **private R2 bucket outside the VPS**; it keeps the **last 30 days plus the first backup of each of the last 12 months** and prunes only after a successful upload (spec 040).
 
 **Enable it (once):**
 1. In Cloudflare R2 create a **private bucket just for backups** and an API token limited to it (read, write, list, delete). Do not reuse the receipts' bucket or token.
 2. Invent a passphrase of 16+ random characters. Save it in a password manager **and** in the VPS `.env`: losing it makes every backup unreadable.
 3. Add to the VPS `.env`: `BACKUP_S3_ENDPOINT_URL` (the account's `https://<account id>.r2.cloudflarestorage.com`), `BACKUP_S3_BUCKET`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY`, `BACKUP_PASSPHRASE`.
-4. Copy the `backup/` folder to the VPS next to the compose file, add the `backup` service from [`backup/README.md`](../../../backup/README.md) to the VPS `docker-compose.yml`, and `./deploy.sh`.
+4. Copy the `backend/backup/` folder to the VPS next to the compose file (as `backup/`), add the `backup` service from [`backend/backup/README.md`](../../backup/README.md) to the VPS `docker-compose.yml`, and `./deploy.sh`.
 5. Take the first one now and look at it: `docker compose exec backup python3 backup.py run-once`, then `docker compose exec backup python3 backup.py status`.
 6. **Do a restore drill before trusting it** (below). Real data must not enter the database before steps 1–6 are done.
 

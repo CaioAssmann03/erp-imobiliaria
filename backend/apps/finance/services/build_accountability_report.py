@@ -11,7 +11,19 @@ from apps.core.infrastructure.dates import add_months
 from apps.finance.models import CostCenter, CurrentAccountEntry
 
 ROW_LIMIT = 2000
+PAGE_SIZE = 10
+MAX_PAGE_SIZE = 100
 MONEY = DecimalField(max_digits=14, decimal_places=2)
+
+
+@final
+@dataclass(frozen=True)
+class AccountabilityPages:
+    """The page of each list the screen shows (1-based) and how many lines a page holds; the lists are paged apart because only one is on screen."""
+
+    cost_centers: int
+    entries: int
+    size: int = PAGE_SIZE
 
 
 @final
@@ -54,6 +66,15 @@ class AccountabilityReport:
     entries: list[AccountabilityEntryRow]
     # True when `entries` holds only the first `ROW_LIMIT`; every total always covers the whole month.
     truncated: bool
+    # How many sub-contas and entries the month has, which page of each `by_cost_center` and `entries` are, and how many pages they make
+    # (one page holds the whole list without `pages`).
+    page_size: int
+    cost_center_count: int
+    cost_center_page: int
+    cost_center_page_count: int
+    entry_count: int
+    entry_page: int
+    entry_page_count: int
 
 
 def _signed_amount() -> Case:
@@ -70,14 +91,20 @@ def _sum_of_kind(kind: str) -> Sum:
     return Sum(Case(When(kind=kind, then=F("amount")), default=Value(Decimal(0), output_field=MONEY), output_field=MONEY))
 
 
+def _page_count(count: int, size: int) -> int:
+    return max(-(-count // size), 1)
+
+
 def build_accountability_report(
-    condominium: Condominium, month: date, entries: QuerySet[CurrentAccountEntry]
+    condominium: Condominium, month: date, entries: QuerySet[CurrentAccountEntry], pages: AccountabilityPages | None = None
 ) -> AccountabilityReport:
     """A condominium's month in its current account: opening balance, credits, debits and closing balance.
 
     `month` is the first day of the month and `entries` the entries of that condominium's account. The
     movement is by `entry_date` (the day the money moved), so `opening + credits - debits = closing`
     holds in total and for each sub-conta, and the closing balance of a month is the opening of the next.
+    With `pages` the sub-contas and the entries are those pages of `pages.size` lines, 10 by default (the screen) while the totals still
+    cover everything; without it they are the whole lists, the entries up to `ROW_LIMIT` (the PDF).
     """
     next_month = add_months(month, 1)
     before = entries.filter(entry_date__lt=month)
@@ -117,9 +144,20 @@ def build_accountability_report(
             )
         )
     by_cost_center.sort(key=lambda line: line.cost_center_code)
+    opening_total = sum((line.opening_balance for line in by_cost_center), Decimal(0))
+    credits_total = sum((line.total_credits for line in by_cost_center), Decimal(0))
+    debits_total = sum((line.total_debits for line in by_cost_center), Decimal(0))
+    cost_center_count = len(by_cost_center)
+    entry_count = in_month.count()
 
     ordered = in_month.select_related("cost_center", "entry_template", "unit__block").order_by("entry_date", "registry")
-    fetched = list(ordered[: ROW_LIMIT + 1])
+    if pages is None:
+        fetched = list(ordered[: ROW_LIMIT + 1])
+        shown = fetched[:ROW_LIMIT]
+    else:
+        shown_centers = by_cost_center[(pages.cost_centers - 1) * pages.size : pages.cost_centers * pages.size]
+        by_cost_center = shown_centers
+        fetched = shown = list(ordered[(pages.entries - 1) * pages.size : pages.entries * pages.size])
     rows = [
         AccountabilityEntryRow(
             id=entry.pk,
@@ -131,11 +169,8 @@ def build_accountability_report(
             entry_template_name=entry.entry_template.name,
             unit_name=entry.unit.display_name if entry.unit else None,
         )
-        for entry in fetched[:ROW_LIMIT]
+        for entry in shown
     ]
-    opening_total = sum((line.opening_balance for line in by_cost_center), Decimal(0))
-    credits_total = sum((line.total_credits for line in by_cost_center), Decimal(0))
-    debits_total = sum((line.total_debits for line in by_cost_center), Decimal(0))
     return AccountabilityReport(
         condominium_id=condominium.pk,
         condominium_code=condominium.code,
@@ -147,5 +182,12 @@ def build_accountability_report(
         closing_balance=opening_total + credits_total - debits_total,
         by_cost_center=by_cost_center,
         entries=rows,
-        truncated=len(fetched) > ROW_LIMIT,
+        truncated=pages is None and len(fetched) > ROW_LIMIT,
+        page_size=pages.size if pages is not None else ROW_LIMIT,
+        cost_center_count=cost_center_count,
+        cost_center_page=pages.cost_centers if pages else 1,
+        cost_center_page_count=_page_count(cost_center_count, pages.size) if pages else 1,
+        entry_count=entry_count,
+        entry_page=pages.entries if pages else 1,
+        entry_page_count=_page_count(entry_count, pages.size) if pages else 1,
     )

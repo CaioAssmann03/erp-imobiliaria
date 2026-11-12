@@ -3,6 +3,7 @@
 from datetime import date
 
 import pytest
+from django.utils import timezone
 
 from apps.core.models import Company
 from apps.core.infrastructure.search.term import classify_term
@@ -25,6 +26,13 @@ def test_search_by_payer_name(billing_rules, new_document, company: Company, mak
     create_billing_document(new_document())
     other_payer = Person.objects.create(company=company, name="Joao Lima")
     create_billing_document(new_document(unit=make_unit("102"), payer=other_payer))
+
+    assert found("souza") == [("Maria Souza", "101")]
+
+
+def test_search_still_finds_the_documents_of_a_deleted_payer(billing_rules, new_document) -> None:  # type: ignore[no-untyped-def]
+    document = create_billing_document(new_document())
+    _ = Person.all_objects.filter(pk=document.payer_id).update(deleted_at=timezone.now())
 
     assert found("souza") == [("Maria Souza", "101")]
 

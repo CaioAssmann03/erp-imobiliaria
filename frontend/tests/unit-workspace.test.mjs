@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { sectionPosition } from "../lib/condominium-registry.ts";
+import { sectionPosition } from "../lib/condominiums/condominium-registry.ts";
 import {
   newUnitUrl,
   UNIT_SECTIONS,
@@ -9,7 +9,8 @@ import {
   unitsFrameState,
   unitsUrl,
   unitUrl,
-} from "../lib/unit-workspace.ts";
+  withBlockParam,
+} from "../lib/condominiums/unit-workspace.ts";
 
 test("the unit screen without a condominium asks for one, on its own screen on a phone", () => {
   const state = unitsFrameState("/condominiums/units", {});
@@ -39,9 +40,11 @@ test("a new unit opens inside the frame, with no unit selected", () => {
   assert.equal(state.condominiumId, "c1");
 });
 
-test("the pendency table has no frame", () => {
-  assert.equal(unitsFrameState("/condominiums/units", { pending: "without_responsible" }).hasFrame, false);
-  assert.equal(unitsFrameState("/condominiums/units", { pending: "" }).hasFrame, true);
+test("a pendency shortcut (?pending=) keeps the frame, with no condominium chosen", () => {
+  const state = unitsFrameState("/condominiums/units");
+  assert.equal(state.hasFrame, true);
+  assert.equal(state.condominiumId, null);
+  assert.equal(state.showListOnPhone, true);
 });
 
 test("other routes are not the unit workspace", () => {
@@ -68,4 +71,28 @@ test("the unit page has the four sections and the index marker follows the readi
   // the owner section started above the line and the tenant one is on it: the marker is on the tenant item
   assert.equal(sectionPosition([-600, -250, 300, 700], 300), 2);
   assert.equal(sectionPosition([500, 900, 1200, 1500], 300), 0);
+});
+
+test("the people of a unit are a sub-screen of the open unit, inside the same frame", () => {
+  const screen = unitsFrameState("/condominiums/c1/units/u1/persons", {});
+  assert.deepEqual([screen.hasFrame, screen.condominiumId, screen.unitId, screen.subScreen, screen.isNew], [true, "c1", "u1", "persons", false]);
+  const page = unitsFrameState("/condominiums/c1/units/u1", {});
+  assert.deepEqual([page.unitId, page.subScreen], ["u1", null]);
+  for (const path of ["/condominiums/c1/units/new/persons", "/condominiums/c1/units/u1/persons/x", "/condominiums/c1/units/u1/other"]) {
+    assert.equal(unitsFrameState(path, {}).hasFrame, false, path);
+  }
+});
+
+test("a new unit without a condominium has the frame and asks for the condominium", () => {
+  const state = unitsFrameState("/condominiums/units/new");
+  assert.deepEqual([state.hasFrame, state.condominiumId, state.unitId, state.isNew, state.showListOnPhone, state.showPageOnPhone], [true, null, null, true, false, true]);
+  assert.equal(newUnitUrl(), "/condominiums/units/new");
+  assert.equal(unitsFrameState("/condominiums/units/new/extra").hasFrame, false);
+});
+
+test("the block of the form and of the list travel in ?block=, keeping the rest of the address", () => {
+  assert.equal(withBlockParam("", "b1"), "block=b1");
+  assert.equal(withBlockParam("from=%2Fx&block=b0", "b1"), "from=%2Fx&block=b1");
+  // no block: present and empty, so the list clears its block instead of ignoring the address
+  assert.equal(withBlockParam("from=%2Fx", ""), "from=%2Fx&block=");
 });

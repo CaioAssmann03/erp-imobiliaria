@@ -76,3 +76,10 @@ def test_in_force_follows_active_and_the_months(condominium: Condominium) -> Non
     assert names_in_force(date(2026, 3, 20)) == {always.name, works.name}
     assert names_in_force(date(2026, 12, 1)) == {always.name, works.name, from_april.name}
     assert names_in_force(date(2027, 1, 1)) == {always.name, from_april.name}
+
+
+def test_name_ignores_case(condominium: Condominium) -> None:
+    _ = BillingPlan.objects.create(condominium=condominium, name="Ordinária")
+
+    with pytest.raises(IntegrityError), transaction.atomic():
+        _ = BillingPlan.objects.create(condominium=condominium, name="ORDINÁRIA")

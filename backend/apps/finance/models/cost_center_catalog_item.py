@@ -70,11 +70,13 @@ class CostCenterCatalogItem(BaseModel):
             super().save(*args, **kwargs)
             # The sub-contas of the condominiums keep a copy of the code and the name (the ledger, the boleto
             # lines and the searches read them): the catalog is the one place that renames them.
-            _ = self.cost_centers.update(code=self.code, name=self.name)
+            # The deleted ones too: they come back with the catalog's code and name, not a stale copy.
+            _ = self.cost_centers.model.all_objects.filter(catalog_item=self).update(code=self.code, name=self.name)
 
     @override
     def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
-        if self.cost_centers.exists():
+        # An archived sub-conta still points here (PROTECT), so it counts too: the live-only `cost_centers` would let the delete reach the database.
+        if self.cost_centers.model.all_objects.filter(catalog_item=self).exists():
             raise CostCenterCatalogItemError.DELETION_IN_USE.to_validation_error()
         return super().delete(*args, **kwargs)
 

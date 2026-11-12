@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { RoleEnum } from './roleEnum';
+import type { RoleEnum } from './roleEnum.ts';
 
 export interface UnitSheetPerson {
   role: RoleEnum;

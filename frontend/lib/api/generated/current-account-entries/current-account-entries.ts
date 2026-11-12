@@ -41,7 +41,7 @@ import type {
   UnitSheet
 } from '../models';
 
-import { customInstance } from '../../mutator';
+import { customInstance } from '../../mutator.ts';
 
 // https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
 type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
@@ -397,7 +397,7 @@ const {mutation: mutationOptions} = options ?
       return useMutation(getCurrentAccountEntriesReverseMutationOptions(options), queryClient);
     }
     /**
- * Report: a condominium's month in the ledger, opening and closing balance, per sub-conta, with the entries.
+ * Report: a condominium's month in the ledger, opening and closing balance, per sub-conta, with the entries; both lists come 10 per page by default (`?page_size=` up to 100).
  */
 export const currentAccountEntriesAccountability = (
     params: CurrentAccountEntriesAccountabilityParams,

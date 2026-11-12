@@ -21,7 +21,7 @@ def test_str_of_documents() -> None:
 def test_delete_person_cascades_to_individual() -> None:
     person = make_individual()
 
-    _ = person.delete()
+    _ = person.hard_delete()
 
     assert not PeopleIndividual.objects.exists()
 
@@ -29,7 +29,7 @@ def test_delete_person_cascades_to_individual() -> None:
 def test_delete_person_cascades_to_legal() -> None:
     person = make_legal()
 
-    _ = person.delete()
+    _ = person.hard_delete()
 
     assert not PeopleLegal.objects.exists()
 
@@ -48,11 +48,12 @@ def test_cnpj_is_unique() -> None:
         _ = make_legal(name="Outra", cnpj=CNPJ_A)
 
 
-def test_person_is_ordered_by_name() -> None:
+def test_person_is_ordered_by_code() -> None:
     _ = Person.objects.create(company=seeded_company(), name="Zeca")
     _ = Person.objects.create(company=seeded_company(), name="Ana")
 
-    assert [person.name for person in Person.objects.all()] == ["Ana", "Zeca"]
+    # Created first, so the lower code, even though the name comes later in the alphabet.
+    assert [person.name for person in Person.objects.all()] == ["Zeca", "Ana"]
 
 
 @pytest.mark.parametrize("cpf", ["123", "11111111111", "52998224720", "abcdefghijk"])

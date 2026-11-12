@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { extraErrorPath, extraToPayload, feeLine, newLine } from "../lib/extra-billing-payload.ts";
+import { extraErrorPath, extraToPayload, feeLine, newLine } from "../lib/billing/extra-billing-payload.ts";
 
 const base = {
   condominium: "c1",

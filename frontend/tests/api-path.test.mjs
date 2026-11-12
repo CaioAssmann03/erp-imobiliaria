@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { backendApiPath } from "../lib/api-path.ts";
+import { backendApiPath } from "../lib/api/api-path.ts";
 
 const ACCOUNT_ID = "f7ca8b44-67fa-4e35-a87c-a589eda3ab19";
 

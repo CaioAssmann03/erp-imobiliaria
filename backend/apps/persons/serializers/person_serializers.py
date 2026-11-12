@@ -12,6 +12,23 @@ from .people_individual_serializers import PeopleIndividualSerializer
 from .people_legal_serializers import PeopleLegalSerializer
 
 
+PERSON_FIELDS = (
+    "id",
+    "code",
+    "company",
+    "name",
+    "home_phone",
+    "business_phone",
+    "cell_number",
+    "email",
+    "active",
+    "people_individual",
+    "people_legal",
+    "created_at",
+    "updated_at",
+)
+
+
 @final
 class PersonSerializer(ModelRulesMixin, serializers.ModelSerializer[Person]):
     people_individual = PeopleIndividualSerializer(required=False)
@@ -20,21 +37,7 @@ class PersonSerializer(ModelRulesMixin, serializers.ModelSerializer[Person]):
     @final
     class Meta:
         model = Person
-        fields = (
-            "id",
-            "code",
-            "company",
-            "name",
-            "home_phone",
-            "business_phone",
-            "cell_number",
-            "email",
-            "active",
-            "people_individual",
-            "people_legal",
-            "created_at",
-            "updated_at",
-        )
+        fields = PERSON_FIELDS
         read_only_fields = ("code", "company", "created_at", "updated_at")
 
     @override

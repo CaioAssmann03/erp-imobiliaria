@@ -2,9 +2,11 @@ from typing import final
 
 from django.contrib import admin
 from django.http import HttpRequest
-from unfold.admin import ModelAdmin, TabularInline
+from unfold.admin import TabularInline
 
+from apps.core.infrastructure.admin_base import MetriModelAdmin
 from apps.core.infrastructure.scoping import CompanyScopedAdminMixin
+from apps.core.infrastructure.soft_delete_admin import ArchivedListFilter, SoftDeleteAdminMixin
 
 from .models import (
     AccountPayable,
@@ -26,21 +28,24 @@ class EntryTemplateInline(CompanyScopedAdminMixin, TabularInline):
     model = EntryTemplate
     extra = 0
     show_change_link = True
+    tab = True
+    verbose_name_plural = "Modelos de lançamento"
 
 
 @final
 @admin.register(CostCenter)
-class CostCenterAdmin(CompanyScopedAdminMixin, ModelAdmin):
+class CostCenterAdmin(CompanyScopedAdminMixin, SoftDeleteAdminMixin, MetriModelAdmin):
+    archived_label = "Sub-contas"
     list_display = ("name", "condominium", "active")
     search_fields = ("name", "condominium__name")
     readonly_fields = ("code", "name")
-    list_filter = ("active", "condominium")
+    list_filter = ("active", "condominium", ArchivedListFilter)
     inlines = (EntryTemplateInline,)
 
 
 @final
 @admin.register(CostCenterCatalogItem)
-class CostCenterCatalogItemAdmin(CompanyScopedAdminMixin, ModelAdmin):
+class CostCenterCatalogItemAdmin(CompanyScopedAdminMixin, MetriModelAdmin):
     list_display = ("code", "name", "company", "active")
     search_fields = ("name",)
     list_filter = ("active",)
@@ -48,7 +53,7 @@ class CostCenterCatalogItemAdmin(CompanyScopedAdminMixin, ModelAdmin):
 
 @final
 @admin.register(EntryTemplate)
-class EntryTemplateAdmin(CompanyScopedAdminMixin, ModelAdmin):
+class EntryTemplateAdmin(CompanyScopedAdminMixin, MetriModelAdmin):
     list_display = ("name", "cost_center", "active", "admin_fee_incidence_percentage")
     search_fields = ("name", "cost_center__name")
     list_filter = ("active", "cost_center__condominium")
@@ -56,7 +61,7 @@ class EntryTemplateAdmin(CompanyScopedAdminMixin, ModelAdmin):
 
 @final
 @admin.register(BankAccount)
-class BankAccountAdmin(CompanyScopedAdminMixin, ModelAdmin):
+class BankAccountAdmin(CompanyScopedAdminMixin, MetriModelAdmin):
     list_display = ("nickname", "company", "condominium", "bank_code", "kind", "active")
     search_fields = ("nickname", "bank_name")
     list_filter = ("active", "kind")
@@ -64,19 +69,31 @@ class BankAccountAdmin(CompanyScopedAdminMixin, ModelAdmin):
 
 @final
 @admin.register(Supplier)
-class SupplierAdmin(CompanyScopedAdminMixin, ModelAdmin):
+class SupplierAdmin(CompanyScopedAdminMixin, SoftDeleteAdminMixin, MetriModelAdmin):
+    archived_label = "Fornecedores"
     list_display = ("person", "active")
     search_fields = ("person__name",)
-    list_filter = ("active",)
+    search_help_text = "Busque pelo nome do fornecedor."
+    list_filter = ("active", ArchivedListFilter)
     raw_id_fields = ("person",)
+    fieldsets = (
+        ("Fornecedor", {"fields": ("person", "active"), "classes": ["tab"]}),
+        ("Dados de pagamento", {"fields": ("bank_code", "branch", "account_number", "account_kind", "pix_key"), "classes": ["tab"]}),
+    )
 
 
 @final
 @admin.register(AccountPayable)
-class AccountPayableAdmin(CompanyScopedAdminMixin, ModelAdmin):
+class AccountPayableAdmin(CompanyScopedAdminMixin, MetriModelAdmin):
     list_display = ("description", "supplier", "condominium", "amount", "due_date", "status")
     search_fields = ("description", "document_number", "supplier__person__name")
+    search_help_text = "Busque pela descrição, documento ou fornecedor."
     list_filter = ("status", "condominium")
+    fieldsets = (
+        ("Despesa", {"fields": ("company", "condominium", "cost_center", "supplier", "entry_template"), "classes": ["tab"]}),
+        ("Conta", {"fields": ("description", "document_number", "amount", "issue_date", "due_date"), "classes": ["tab"]}),
+        ("Pagamento", {"fields": ("status", "payment_date", "amount_paid", "payment_method"), "classes": ["tab"]}),
+    )
     date_hierarchy = "due_date"
     raw_id_fields = ("supplier",)
     # The life cycle (status and payment) changes through settle/cancel, not by hand.
@@ -85,7 +102,7 @@ class AccountPayableAdmin(CompanyScopedAdminMixin, ModelAdmin):
 
 @final
 @admin.register(CurrentAccount)
-class CurrentAccountAdmin(CompanyScopedAdminMixin, ModelAdmin):
+class CurrentAccountAdmin(CompanyScopedAdminMixin, MetriModelAdmin):
     list_display = ("condominium", "balance")
     search_fields = ("condominium__name",)
     # The balance moves only when an entry is posted.
@@ -94,7 +111,7 @@ class CurrentAccountAdmin(CompanyScopedAdminMixin, ModelAdmin):
 
 @final
 @admin.register(EntryBatch)
-class EntryBatchAdmin(CompanyScopedAdminMixin, ModelAdmin):
+class EntryBatchAdmin(CompanyScopedAdminMixin, MetriModelAdmin):
     list_display = ("batch_date", "origin", "cash_number")
     list_filter = ("origin",)
     date_hierarchy = "batch_date"
@@ -102,7 +119,7 @@ class EntryBatchAdmin(CompanyScopedAdminMixin, ModelAdmin):
 
 @final
 @admin.register(CurrentAccountEntry)
-class CurrentAccountEntryAdmin(CompanyScopedAdminMixin, ModelAdmin):
+class CurrentAccountEntryAdmin(CompanyScopedAdminMixin, MetriModelAdmin):
     """Read-only: an entry is posted through the API (it moves the balance) and never changes."""
 
     list_display = ("registry", "current_account", "entry_date", "kind", "amount", "description")
@@ -122,7 +139,7 @@ class CurrentAccountEntryAdmin(CompanyScopedAdminMixin, ModelAdmin):
 
 @final
 @admin.register(PaymentReceipt)
-class PaymentReceiptAdmin(CompanyScopedAdminMixin, ModelAdmin):
+class PaymentReceiptAdmin(CompanyScopedAdminMixin, MetriModelAdmin):
     """Read-only: a receipt is sent and deleted through the API, which also moves the file in the bucket."""
 
     list_display = ("original_name", "account_payable", "content_type", "size_bytes", "confirmed_at")
@@ -140,7 +157,7 @@ class PaymentReceiptAdmin(CompanyScopedAdminMixin, ModelAdmin):
 
 @final
 @admin.register(CompanyEntry)
-class CompanyEntryAdmin(CompanyScopedAdminMixin, ModelAdmin):
+class CompanyEntryAdmin(CompanyScopedAdminMixin, MetriModelAdmin):
     """Read-only: the credits of the administradora (the registration fee) are posted when a boleto is paid."""
 
     list_display = ("entry_date", "amount", "description")

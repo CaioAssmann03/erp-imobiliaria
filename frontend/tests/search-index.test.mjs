@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { isSearchable, searchStatic } from "../lib/search-index.ts";
+import { isSearchable, searchStatic } from "../lib/navigation/search-index.ts";
 
 test("a term of only digits is an ID, searchable from the first digit", () => {
   assert.equal(isSearchable("7"), true);

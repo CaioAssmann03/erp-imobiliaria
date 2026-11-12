@@ -137,10 +137,10 @@ def test_in_force_on_is_available_from_the_condominium(condominium: Condominium)
     assert condominium.late_interest_rates.in_force_on(date(2026, 1, 1)) == rate
 
 
-def test_deleting_the_condominium_deletes_its_rates(condominium: Condominium) -> None:
+def test_removing_the_condominium_for_good_deletes_its_rates(condominium: Condominium) -> None:
     _ = make_rate(condominium, date(2026, 1, 1))
 
-    condominium.delete()
+    _ = condominium.hard_delete()
 
     assert not LateInterestRate.objects.exists()
 

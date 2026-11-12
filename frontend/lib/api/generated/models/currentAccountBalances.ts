@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { CostCenterBalance } from './costCenterBalance';
+import type { CostCenterBalance } from './costCenterBalance.ts';
 
 /**
  * The balance of an account and of each of its cost centers (the statement's *Saldo Sub-Contas*).

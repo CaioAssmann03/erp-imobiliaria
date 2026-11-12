@@ -2,33 +2,27 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { ListFallback } from "@/components/data-list";
-import { LinkButton } from "@/components/LinkButton";
-import { PageHeader } from "@/components/PageHeader";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { RegistrySummary } from "@/app/(dashboard)/_components/home/bodies/RegistrySummary";
 
 import { DashboardHome } from "../_components/home/DashboardHome";
 import { Greeting } from "../_components/home/Greeting";
-import { RegistrySummary } from "../_components/home/RegistrySummary";
+import { DashboardEditProvider } from "../_components/home/layout/DashboardEditProvider";
+import { EditLayoutButton } from "../_components/home/layout/EditLayoutButton";
 
 export const metadata: Metadata = { title: "Painel" };
 
 export default function DashboardHomePage() {
   return (
-    <div>
+    <DashboardEditProvider>
       <PageHeader
         title={<Greeting />}
         description={<RegistrySummary />}
-        actions={
-          <>
-            <LinkButton variant="secondary" href="/condominiums/persons/new">
-              Nova pessoa
-            </LinkButton>
-            <LinkButton href="/condominiums/new">Novo condomínio</LinkButton>
-          </>
-        }
+        actions={<EditLayoutButton />}
       />
       <Suspense fallback={<ListFallback />}>
         <DashboardHome />
       </Suspense>
-    </div>
+    </DashboardEditProvider>
   );
 }

@@ -10,3 +10,4 @@ from .condominium_serializers import CondominiumSerializer as CondominiumSeriali
 from .unit_apportionment_fraction_serializers import UnitApportionmentFractionSerializer as UnitApportionmentFractionSerializer
 from .unit_person_serializers import UnitPersonSerializer as UnitPersonSerializer
 from .unit_serializers import UnitSerializer as UnitSerializer
+from .condominium_person_serializers import CondominiumPersonSerializer as CondominiumPersonSerializer

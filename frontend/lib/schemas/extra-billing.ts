@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-import { currentMonthTyped, monthToApi } from "@/lib/billing-plan-payload";
-import { newLine, type ExtraValues } from "@/lib/extra-billing-payload";
-import { addDays, todayIso } from "@/lib/format";
-import { isValidIsoDate } from "@/lib/validators";
+import { currentMonthTyped, monthToApi } from "@/lib/billing/billing-plan-payload";
+import { newLine, type ExtraValues } from "@/lib/billing/extra-billing-payload";
+import { addDays, todayIso } from "@/lib/format/format";
+import { isValidIsoDate } from "@/lib/format/validators";
 
 import { ALLOCATIONS } from "./billing-entry";
 import { decimalField, enumField } from "./fields";
@@ -54,8 +54,8 @@ export const extraBillingSchema = z.object({
 export type ExtraBillingFormInput = z.input<typeof extraBillingSchema>;
 export type ExtraBillingFormOutput = z.output<typeof extraBillingSchema>;
 
-export const extraBillingDefaults = (): ExtraBillingFormInput => ({
-  condominium: "",
+export const extraBillingDefaults = (condominium = ""): ExtraBillingFormInput => ({
+  condominium,
   competence_month: currentMonthTyped(),
   due_date: addDays(todayIso(), DEFAULT_DUE_IN_DAYS),
   units: [],

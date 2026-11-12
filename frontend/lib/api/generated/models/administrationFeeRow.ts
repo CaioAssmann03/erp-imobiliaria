@@ -5,10 +5,10 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { AdministrationFeeRowStatusEnum } from './administrationFeeRowStatusEnum';
-import type { FeeBasisEnum } from './feeBasisEnum';
-import type { FeeTypeEnum } from './feeTypeEnum';
-import type { NullEnum } from './nullEnum';
+import type { AdministrationFeeRowStatusEnum } from './administrationFeeRowStatusEnum.ts';
+import type { FeeBasisEnum } from './feeBasisEnum.ts';
+import type { FeeTypeEnum } from './feeTypeEnum.ts';
+import type { NullEnum } from './nullEnum.ts';
 
 export interface AdministrationFeeRow {
   condominium_id: string;

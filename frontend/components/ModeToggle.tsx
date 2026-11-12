@@ -2,9 +2,9 @@
 
 import { Moon, Sun } from "lucide-react";
 
-import { DEFAULT_APPEARANCE } from "@/lib/appearance";
-import { applyAppearance, readAppearance } from "@/lib/apply-appearance";
-import { useResolvedMode } from "@/lib/mode";
+import { DEFAULT_APPEARANCE } from "@/lib/theme/appearance";
+import { applyAppearance, readAppearance } from "@/lib/theme/apply-appearance";
+import { useResolvedMode } from "@/lib/theme/mode";
 import { cn } from "@/lib/utils";
 
 /**

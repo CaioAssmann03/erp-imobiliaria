@@ -45,7 +45,7 @@ class Block(UUIDModel):  # BaseModel when it also has created_at/updated_at
         verbose_name_plural = "Blocks"
         ordering = ("name",)
         constraints = (
-            models.UniqueConstraint(fields=("condominium", "name"), name="block_unique_name_per_condominium",
+            models.UniqueConstraint("condominium", Lower("name"), name="block_unique_name_per_condominium",
                                     violation_error_message=BlockError.NAME_DUPLICATE_IN_CONDOMINIUM.message,
                                     violation_error_code=BlockError.NAME_DUPLICATE_IN_CONDOMINIUM.value),
         )
@@ -53,6 +53,7 @@ class Block(UUIDModel):  # BaseModel when it also has created_at/updated_at
     @override
     def __str__(self) -> str: return f"Block {self.name} of {self.condominium}"
 ```
+- **A name the staff types is unique ignoring case** ("A" and "a" are the same block): use `Lower(field)` as an expression in the `UniqueConstraint` (`Lower` from `django.db.models.functions`; a code, an id, a date or a CNPJ, which is validated upper-case, stays plain `fields=`). Mind one limit: an expression constraint is checked by the model rules and the database, but DRF builds no validator for it, and `ModelRulesMixin` skips a constraint whose `condition` or expressions read a relation that is absent from the input (that is why `bank_account_unique_*_account`, conditioned on `condominium`, still compares branch and account number case-sensitively: with `Lower` it answered 500 instead of 400). Add the case test for the new constraint through the API.
 - Inherit `BaseModel` (id + `created_at` + `updated_at`) or `UUIDModel` (the id only) from `core/models/base.py`; never declare those fields. `@final` on the concrete class, `@override` on dunders and `clean`.
 - `Meta.constraints` is **always a tuple**; `Meta.ordering` on anything the API lists (stable pagination).
 - `null=True` only when "unknown" differs from "empty"; optional text uses `blank=True`. Enums are nested `TextChoices` with English values and labels.

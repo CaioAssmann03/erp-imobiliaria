@@ -1,46 +1,38 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
-import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useFormContext, useWatch } from "react-hook-form";
 
-import { SelectField, TextField } from "@/components/form/fields";
+import { DateField, MonthField } from "@/components/form/fields";
+import { ChooseCondominiumCard } from "@/components/form/ChooseCondominiumCard";
+import { CondominiumField } from "@/components/form/CondominiumField";
+
 import { FieldRow, FormSection } from "@/components/form/FormSection";
-import { Button } from "@/components/ui/button";
-import { useCondominiumsList } from "@/lib/api/generated";
-import { maskMonthYear } from "@/lib/billing-plan-payload";
-import {
-  extraBillingDefaults,
-  extraBillingSchema,
-  type ExtraBillingFormInput,
-  type ExtraBillingFormOutput,
-} from "@/lib/schemas/extra-billing";
 
-import { UnitsPicker } from "../../entries/_components/entry-form/UnitsPicker";
+import { extraBillingUrl, newExtraBillingUrl, type ExtraBillingScope } from "@/lib/billing/extra-billing-workspace";
+import { extraBillingDefaults, extraBillingSchema } from "@/lib/schemas/extra-billing";
+
 import { ExtraLines } from "./ExtraLines";
+import { ExtraUnitsSelector } from "./ExtraUnitsSelector";
 import { ExtraResult } from "./ExtraResult";
+import { useExtraScope } from "./use-extra-scope";
 import { useExtraSubmit } from "./use-extra-submit";
+import { SectionAnchor } from "@/components/form/SectionAnchor";
+import { RecordForm } from "@/components/form/RecordForm";
+import { useRecordForm } from "@/hooks/use-record-form";
 
-/** A tela do boleto extra: condomínio, mês e vencimento, as unidades e as linhas; depois de emitir, mostra o que saiu. */
-export function ExtraBillingForm() {
-  const methods = useForm<ExtraBillingFormInput, unknown, ExtraBillingFormOutput>({
-    resolver: zodResolver(extraBillingSchema),
-    defaultValues: extraBillingDefaults(),
-    mode: "onTouched",
-  });
-  const { handleSubmit, reset, setError, setValue, getValues } = methods;
-  const { submit, isSubmitting, result, clearResult } = useExtraSubmit(setError);
-  const { data: condominiums } = useCondominiumsList({ limit: 100 });
+function Form({ scope }: { scope: ExtraBillingScope }) {
+  const methods = useRecordForm({ schema: extraBillingSchema, defaults: extraBillingDefaults(scope.condominium) });
+  const { submit, isSubmitting, result, clearResult } = useExtraSubmit(methods.setError);
 
   if (result) {
     return (
       <ExtraResult
         result={result}
-        condominiumId={getValues("condominium")}
+        condominiumId={scope.condominium}
         onEdit={clearResult}
         onNew={() => {
-          reset(extraBillingDefaults());
+          methods.reset(extraBillingDefaults(scope.condominium));
           clearResult();
         }}
       />
@@ -48,59 +40,67 @@ export function ExtraBillingForm() {
   }
 
   return (
-    <FormProvider {...methods}>
-      <form
-        noValidate
-        onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))}
-        className="mx-auto flex w-full max-w-4xl flex-col gap-4"
-      >
-        <FormSection title="Boleto" description="O vencimento é só deste boleto; a multa e os juros seguem as regras do condomínio.">
-          <SelectField
-            name="condominium"
-            label="Condomínio"
-            required
-            placeholder="Selecione"
-            onValueChange={() => {
-              setValue("units", [], { shouldDirty: true });
-              setValue("lines", extraBillingDefaults().lines);
-            }}
-            options={(condominiums?.results ?? []).map((item) => ({ value: item.id, label: `${item.code} - ${item.name}` }))}
-          />
+    <RecordForm
+      methods={methods}
+      onSubmit={submit}
+      isSubmitting={isSubmitting}
+      cancelHref={extraBillingUrl(scope)}
+      submitLabel="Emitir boleto extra"
+      submittingLabel="Emitindo…"
+    >
+      <SectionAnchor id="boleto">
+        <FormSection title="Boleto">
+          <ExtraCondominium />
           <FieldRow>
-            <TextField
-              name="competence_month"
-              label="Competência"
-              required
-              inputMode="numeric"
-              placeholder="MM/AAAA"
-              maxLength={7}
-              mask={maskMonthYear}
-              autoComplete="off"
-              hint="O mês a que a cobrança se refere."
-            />
-            <TextField name="due_date" label="Vencimento" type="date" required />
+            <MonthField name="competence_month" label="Competência" required hint="O mês a que a cobrança se refere." />
+            <DateField name="due_date" label="Vencimento" required hint="Só deste boleto; a multa e os juros seguem as regras do condomínio." />
           </FieldRow>
         </FormSection>
-        <FormSection title="Unidades" description="Quem recebe o boleto. Cada unidade recebe o seu, com a sua parte do rateio.">
+      </SectionAnchor>
+      <SectionAnchor id="unidades">
+        <FormSection title="Unidades">
           <ExtraUnits />
         </FormSection>
+      </SectionAnchor>
+      <SectionAnchor id="valores">
         <ExtraLines />
-        <div className="flex items-center justify-end gap-2">
-          <Button type="button" variant="secondary" onClick={() => reset(extraBillingDefaults())}>
-            Limpar
-          </Button>
-          <Button type="submit" disabled={isSubmitting} className="min-w-32">
-            {isSubmitting && <Loader2 className="size-4 animate-spin" />}
-            {isSubmitting ? "Emitindo…" : "Emitir boleto extra"}
-          </Button>
-        </div>
-      </form>
-    </FormProvider>
+      </SectionAnchor>
+    </RecordForm>
   );
 }
 
-/** O seletor de unidades da Inclusão de valores, com o condomínio escolhido acima. */
+/**
+ * O condomínio do boleto (o da lista ao lado; trocá-lo leva a lista junto, pela URL, e limpa o formulário, cujas unidades e linhas eram do outro
+ * condomínio).
+ */
+function ExtraCondominium() {
+  const router = useRouter();
+  const { reset } = useFormContext();
+  const condominium = useWatch({ name: "condominium" }) as string;
+
+  return (
+    <CondominiumField
+      value={condominium}
+      onChange={(next) => {
+        reset(extraBillingDefaults(next));
+        router.replace(newExtraBillingUrl({ condominium: next }));
+      }}
+    />
+  );
+}
+
+/** As unidades do boleto, escolhidas pela regra (todas, por bloco ou específicas); recriado a cada condomínio, para não levar os blocos e as unidades de outro. */
 function ExtraUnits() {
   const condominium = useWatch({ name: "condominium" }) as string;
-  return <UnitsPicker condominium={condominium} />;
+  return <ExtraUnitsSelector key={condominium} condominium={condominium} />;
+}
+
+/** Client Component: o boleto extra novo, no condomínio da lista: mês e vencimento, as unidades e as linhas; depois de emitir, mostra o que saiu. Sem condomínio escolhido, pede o condomínio antes do resto. */
+export function ExtraBillingForm() {
+  const router = useRouter();
+  const scope = useExtraScope();
+
+  if (scope.condominium === "") return <ChooseCondominiumCard what="do boleto" onChoose={(condominium) => router.replace(newExtraBillingUrl({ condominium }))} />;
+
+  return <Form scope={scope} />;
 }

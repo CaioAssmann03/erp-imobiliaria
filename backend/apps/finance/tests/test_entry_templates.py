@@ -77,13 +77,13 @@ def test_list_is_paginated_and_ordered(
     response = api_client.get(reverse(LIST))
 
     assert set(body(response)) == {"count", "next", "previous", "results"}
-    assert [item["name"] for item in results(response)] == ["Z", "A", "B"]  # Edifício Lua first
+    assert [item["name"] for item in results(response)] == ["A", "B", "Z"]  # the first condominium (lowest code) first
 
 
 def test_ordering_is_declared() -> None:
     assert EntryTemplate._meta.ordering == (
-        "cost_center__condominium__name",
-        "cost_center__name",
+        "cost_center__condominium__code",
+        "cost_center__code",
         "name",
     )
 
@@ -163,3 +163,14 @@ def test_same_cost_center_is_accepted(api_client: APIClient, cost_center: CostCe
     )
 
     assert response.status_code == status.HTTP_200_OK
+
+
+def test_duplicate_name_ignores_case(api_client: APIClient, cost_center: CostCenter) -> None:
+    _ = EntryTemplate.objects.create(cost_center=cost_center, name="PG. DMAE")
+
+    response = api_client.post(
+        reverse(LIST), {"cost_center": str(cost_center.pk), "name": "pg. dmae"}, format="json"
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert errors(response)[0]["code"] == "entry_template.name.duplicate_in_cost_center"

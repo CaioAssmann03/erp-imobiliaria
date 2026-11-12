@@ -6,8 +6,14 @@ import {
   daysLateLabel,
   defaultAccountabilityMonth,
   delinquencyPdfName,
+  monthIso,
   reportMonths,
-} from "../lib/reports.ts";
+} from "../lib/reports/reports.ts";
+
+test("a month is written as its first day", () => {
+  assert.equal(monthIso(2026, 3), "2026-03-01");
+  assert.equal(monthIso(2025, 12), "2025-12-01");
+});
 
 test("the month filter starts at the current month and walks back across the year", () => {
   assert.deepEqual(reportMonths("2026-02-15", 4), ["2026-02-01", "2026-01-01", "2025-12-01", "2025-11-01"]);
@@ -29,7 +35,7 @@ test("days late is singular for one day", () => {
   assert.equal(daysLateLabel(12), "12 dias");
 });
 
-import { administrationFeePdfName, feeRuleLabel, feeStatusNote } from "../lib/reports.ts";
+import { administrationFeePdfName, feeRuleLabel, feeStatusNote } from "../lib/reports/reports.ts";
 
 test("the administration fee PDF is named after the month", () => {
   assert.equal(administrationFeePdfName("2026-10-01"), "taxa-de-administracao-2026-10.pdf");
@@ -51,7 +57,7 @@ test("a fee that is not due says why", () => {
   assert.equal(feeStatusNote("due"), "");
 });
 
-import { boletoNote, defaultSheetPeriod, unitSheetPdfName, unitSheetUrl } from "../lib/reports.ts";
+import { boletoNote, defaultSheetPeriod, unitSheetPdfName, unitSheetUrl } from "../lib/reports/reports.ts";
 
 test("the unit sheet opens with the condominium and the unit chosen", () => {
   assert.equal(unitSheetUrl("c1", "u1"), "/reports/unit-sheet?condominium=c1&unit=u1");

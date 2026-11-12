@@ -1,9 +1,10 @@
+import uuid
 from typing import final
 
 import django_filters
 from django.db.models import QuerySet
 
-from .models import AccountPayable, CurrentAccountEntry, EntryTemplate
+from .models import AccountPayable, CompanyEntry, CostCenter, CostCenterCatalogItem, CurrentAccount, CurrentAccountEntry, EntryBatch, EntryTemplate
 
 
 @final
@@ -39,10 +40,55 @@ class AccountPayableFilter(django_filters.FilterSet):
 class CurrentAccountEntryFilter(django_filters.FilterSet):
     """The statement: `?condominium=<id>`, an entry-date range and a competence month (`?competence_month=2026-10-01`)."""
 
-    condominium = django_filters.UUIDFilter(field_name="current_account__condominium")
+    condominium = django_filters.UUIDFilter(method="filter_condominium")
     entry_date_after = django_filters.DateFilter(field_name="entry_date", lookup_expr="gte")
     entry_date_before = django_filters.DateFilter(field_name="entry_date", lookup_expr="lte")
+
+    def filter_condominium(self, queryset: QuerySet[CurrentAccountEntry], name: str, value: uuid.UUID) -> QuerySet[CurrentAccountEntry]:
+        """Filters by the condominium's one current account, found first: through a join the planner walks the whole ledger in
+        `registry` order looking for the account's rows, which is slow for an account with few or old entries."""
+        account_id = CurrentAccount.objects.filter(condominium=value).values_list("pk", flat=True).first()
+        return queryset.filter(current_account_id=account_id) if account_id is not None else queryset.none()
 
     class Meta:
         model = CurrentAccountEntry
         fields = ("current_account", "batch", "cost_center", "entry_template", "unit", "kind", "origin", "competence_month")
+
+
+@final
+class EntryBatchFilter(django_filters.FilterSet):
+    """`?origin=`, `?batch_date=` and `?condominium=<id>`: the batches that have at least one entry of that condominium (a batch may cover several)."""
+
+    condominium = django_filters.UUIDFilter(field_name="entries__current_account__condominium", distinct=True)
+
+    class Meta:
+        model = EntryBatch
+        fields = ("origin", "batch_date")
+
+
+@final
+class CompanyEntryFilter(django_filters.FilterSet):
+    """An entry-date range and `?condominium=<id>`: the entries of the documents of that condominium."""
+
+    condominium = django_filters.UUIDFilter(field_name="billing_document_item__document__unit__condominium")
+
+    class Meta:
+        model = CompanyEntry
+        fields = {"entry_date": ["gte", "lte"]}
+
+
+@final
+class CostCenterCatalogItemFilter(django_filters.FilterSet):
+    """`?active=` and `?unused_by_condominium=<id>`: the items that condominium has no sub-conta of yet."""
+
+    unused_by_condominium = django_filters.UUIDFilter(method="filter_unused_by_condominium")
+
+    class Meta:
+        model = CostCenterCatalogItem
+        fields = ("active",)
+
+    def filter_unused_by_condominium(
+        self, queryset: QuerySet[CostCenterCatalogItem], name: str, value: uuid.UUID
+    ) -> QuerySet[CostCenterCatalogItem]:
+        used = CostCenter.objects.filter(condominium_id=value).values("catalog_item_id")
+        return queryset.exclude(pk__in=used)

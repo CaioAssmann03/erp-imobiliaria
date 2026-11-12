@@ -9,6 +9,7 @@ from rest_framework.response import Response
 
 from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin
 
+from ..filters import EntryBatchFilter
 from ..models import EntryBatch
 from ..serializers import (
     BatchEntriesSerializer,
@@ -31,7 +32,7 @@ class EntryBatchViewSet(
     queryset = EntryBatch.objects.order_by("-batch_date", "-created_at")
     serializer_class = EntryBatchSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ("origin", "batch_date")
+    filterset_class = EntryBatchFilter
 
     @extend_schema(
         request=BatchEntriesSerializer,

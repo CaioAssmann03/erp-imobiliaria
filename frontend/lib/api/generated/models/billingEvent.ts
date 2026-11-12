@@ -20,7 +20,7 @@ export interface BillingEvent {
      * @minimum 0
      * @maximum 2147483647
      */
-  code: number;
+  code?: number;
   /** @maxLength 120 */
   name: string;
   active?: boolean;

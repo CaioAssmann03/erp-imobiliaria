@@ -32,8 +32,8 @@ Thumbs.db
 # Celery beat (arquivo local de agendamento)
 celerybeat-schedule*
 
-# Celery beat runtime state
-celerybeat-schedule*
+# Redis snapshot written next to the app when Redis runs from this folder
+dump.rdb
 
 # Tool caches (never versioned)
 .mypy_cache/

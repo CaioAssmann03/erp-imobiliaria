@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-metri-white.svg">
-    <img src="docs/assets/logo-metri.svg" alt="METRI" width="260">
+    <source media="(prefers-color-scheme: dark)" srcset="frontend/public/brand/logo-metri-white.svg">
+    <img src="frontend/public/brand/logo-metri.svg" alt="METRI" width="260">
   </picture>
 </p>
 

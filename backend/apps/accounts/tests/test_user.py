@@ -2,6 +2,7 @@ import uuid
 
 import pytest
 from django.db import IntegrityError, transaction
+from django.http import HttpRequest
 from django.contrib.auth import get_user_model
 from django.test import Client
 from django.urls import reverse
@@ -103,12 +104,12 @@ class TestAdminLogin:
     def test_staff_can_log_into_admin(self, client: Client) -> None:
         _ = User.objects.create_superuser("root", password="x")
 
-        assert client.login(username="root", password="x")
+        assert client.login(request=HttpRequest(), username="root", password="x")
         assert client.get("/admin/").status_code == status.HTTP_200_OK
 
     def test_user_admin_and_group_admin_pages_load(self, client: Client) -> None:
         _ = User.objects.create_superuser("root", password="x")
-        _ = client.login(username="root", password="x")
+        _ = client.login(request=HttpRequest(), username="root", password="x")
 
         assert client.get("/admin/accounts/user/").status_code == status.HTTP_200_OK
         assert client.get("/admin/auth/group/").status_code == status.HTTP_200_OK

@@ -1,4 +1,4 @@
-"""The unit sheet: a unit's data, people, boletos and entries in a period (spec 057, R1–R5, R7)."""
+"""The unit sheet: a unit's data, people, boletos and entries in a period (spec 071, R1–R5, R7)."""
 
 from datetime import date, timedelta
 from decimal import Decimal

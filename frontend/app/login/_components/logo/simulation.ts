@@ -1,5 +1,5 @@
 import { random } from "@/app/(marketing)/_components/hero/skyline-scene";
-import { brandRamp } from "@/lib/brand-ramp";
+import { brandRamp } from "@/lib/theme/brand-ramp";
 
 import type { ParticleSet } from "./particles";
 import { SCENE } from "./scene";

@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { Unit } from './unit';
+import type { Unit } from './unit.ts';
 
 export interface PaginatedUnitList {
   count: number;

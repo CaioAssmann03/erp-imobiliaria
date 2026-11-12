@@ -4,11 +4,11 @@ from django.utils import timezone
 from apps.core.infrastructure.storage import object_storage
 from apps.finance.errors import PaymentReceiptError
 from apps.finance.models import PaymentReceipt
-from apps.finance.validators import MAX_RECEIPT_SIZE_BYTES
+from apps.finance.validators import MAX_RECEIPT_SIZE_BYTES, RECEIPT_SIGNATURE_LENGTH, receipt_signature_matches
 
 
 def confirm_payment_receipt(receipt: PaymentReceipt) -> PaymentReceipt:
-    """Check the uploaded file in the bucket; a missing or wrong-sized file is deleted and refused.
+    """Check the uploaded file in the bucket; a missing, wrong-sized or wrong-typed file is deleted and refused.
 
     The refusal is raised after the transaction ends, so the deletion of the row is kept.
     """
@@ -23,6 +23,10 @@ def confirm_payment_receipt(receipt: PaymentReceipt) -> PaymentReceipt:
             refusal = PaymentReceiptError.FILE_MISSING_IN_STORAGE
         elif actual_size != locked.size_bytes or actual_size > MAX_RECEIPT_SIZE_BYTES:
             refusal = PaymentReceiptError.FILE_SIZE_MISMATCH
+        elif not receipt_signature_matches(
+            locked.content_type, storage.read_head(locked.file_key, RECEIPT_SIGNATURE_LENGTH)
+        ):
+            refusal = PaymentReceiptError.FILE_CONTENT_MISMATCH
         if refusal is None:
             locked.confirmed_at = timezone.now()
             locked.save(update_fields=("confirmed_at", "updated_at"))

@@ -1,12 +1,13 @@
-from typing import final
+from typing import final, override
 
 from django.contrib import admin
 from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group
-from unfold.admin import ModelAdmin
+from django.http import HttpRequest
 from unfold.forms import AdminPasswordChangeForm, UserChangeForm, UserCreationForm
 
+from apps.core.infrastructure.admin_base import MetriModelAdmin
 from apps.core.infrastructure.scoping import CompanyScopedAdminMixin
 
 from .models import User
@@ -16,7 +17,7 @@ admin.site.unregister(Group)
 
 @final
 @admin.register(User)
-class UserAdmin(CompanyScopedAdminMixin, BaseUserAdmin, ModelAdmin):  # type: ignore[type-arg]
+class UserAdmin(CompanyScopedAdminMixin, BaseUserAdmin, MetriModelAdmin):  # type: ignore[type-arg]
     fieldsets = (*(BaseUserAdmin.fieldsets or ()), ("Company", {"fields": ("company",)}))
     add_fieldsets = (
         *(BaseUserAdmin.add_fieldsets or ()),
@@ -27,8 +28,13 @@ class UserAdmin(CompanyScopedAdminMixin, BaseUserAdmin, ModelAdmin):  # type: ig
     add_form = UserCreationForm
     change_password_form = AdminPasswordChangeForm
 
+    @override
+    def get_readonly_fields(self, request: HttpRequest, obj: User | None = None) -> tuple[str, ...]:
+        """The company is chosen when the user is created and never changes."""
+        return (*super().get_readonly_fields(request, obj), "company") if obj is not None else ()
+
 
 @final
 @admin.register(Group)
-class GroupAdmin(BaseGroupAdmin, ModelAdmin):
+class GroupAdmin(BaseGroupAdmin, MetriModelAdmin):
     pass

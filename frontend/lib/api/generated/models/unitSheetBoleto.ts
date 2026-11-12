@@ -5,8 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { Kind1dcEnum } from './kind1dcEnum';
-import type { Status297Enum } from './status297Enum';
+import type { Kind1dcEnum } from './kind1dcEnum.ts';
+import type { Status297Enum } from './status297Enum.ts';
 
 export interface UnitSheetBoleto {
   id: string;

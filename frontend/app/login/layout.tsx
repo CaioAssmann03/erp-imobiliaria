@@ -1,4 +1,4 @@
-import { SiteHeader } from "@/app/(marketing)/_components/SiteHeader";
+import { SiteHeader } from "@/app/(marketing)/_components/layout/SiteHeader";
 
 /**
  * O login é uma página pública: usa o mesmo cabeçalho e o mesmo tema das páginas da home (claro com o laranja), então o

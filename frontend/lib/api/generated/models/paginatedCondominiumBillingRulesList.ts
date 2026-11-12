@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { CondominiumBillingRules } from './condominiumBillingRules';
+import type { CondominiumBillingRules } from './condominiumBillingRules.ts';
 
 export interface PaginatedCondominiumBillingRulesList {
   count: number;

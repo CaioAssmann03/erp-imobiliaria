@@ -1,6 +1,5 @@
 """What the draft boleto template prints: Brazilian formats and the payment-terms sentences (spec 027)."""
 
-from datetime import date
 from decimal import Decimal
 from typing import Any
 

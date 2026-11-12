@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from apps.core.infrastructure.api.filters import QuerySearchFilter
 from apps.core.infrastructure.scoping import CompanyScopedViewSetMixin
 
+from ..filters import CompanyEntryFilter
 from ..models import CompanyEntry
 from ..serializers import CompanyBalanceSerializer, CompanyEntrySerializer
 
@@ -23,7 +24,7 @@ class CompanyEntryViewSet(CompanyScopedViewSetMixin, viewsets.ReadOnlyModelViewS
     serializer_class = CompanyEntrySerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)
     search_fields = ("description",)
-    filterset_fields = {"entry_date": ["gte", "lte"]}
+    filterset_class = CompanyEntryFilter
 
     @extend_schema(responses=CompanyBalanceSerializer, operation_id="company_entries_balance")
     @action(detail=False, methods=["get"])

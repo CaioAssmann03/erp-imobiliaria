@@ -5,10 +5,10 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { AllocationEnum } from './allocationEnum';
-import type { BillingEntryMonth } from './billingEntryMonth';
-import type { BillingEntryUnit } from './billingEntryUnit';
-import type { RecurrenceEnum } from './recurrenceEnum';
+import type { AllocationEnum } from './allocationEnum.ts';
+import type { BillingEntryMonth } from './billingEntryMonth.ts';
+import type { BillingEntryUnit } from './billingEntryUnit.ts';
+import type { RecurrenceEnum } from './recurrenceEnum.ts';
 
 /**
  * A launch with its units. Sending `units` replaces the whole selection. `?reference_month=` adds the month's values.
@@ -47,6 +47,7 @@ export interface PatchedBillingEntry {
   /** @pattern ^-?\d{0,10}(?:\.\d{0,2})?$ */
   amount?: string;
   units?: BillingEntryUnit[];
+  /** The list annotates it for the whole page; a record just created, or one outside the list, asks the database. */
   readonly is_used?: boolean;
   readonly month?: BillingEntryMonth | null;
   readonly created_at?: string;

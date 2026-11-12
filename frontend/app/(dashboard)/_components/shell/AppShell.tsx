@@ -1,9 +1,10 @@
 import Link from "next/link";
 
-import { Brand } from "@/components/Brand";
-import { GlobalSearch } from "./GlobalSearch";
-import { MobileMenu } from "./MobileMenu";
-import { Rail } from "./Rail";
+import { AssistantChat } from "@/components/assistant/AssistantChat";
+import { Brand } from "@/components/brand/Brand";
+import { GlobalSearch } from "./search/GlobalSearch";
+import { MobileMenu } from "./menu/MobileMenu";
+import { Rail } from "./rail/Rail";
 
 /**
  * Server Component sem dados nem cookies (o mesmo HTML para todos): monta o esqueleto. O tema vem de atributos do <html>
@@ -19,7 +20,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Rail />
 
       <div className="flex min-h-screen min-w-0 flex-1 flex-col bg-shell">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-2 bg-shell/90 px-4 backdrop-blur-md lg:h-16 lg:justify-center lg:px-8">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-2 bg-shell/90 px-4 backdrop-blur-md lite:bg-shell lg:h-16 lg:justify-center lg:px-8">
           <MobileMenu />
           <Link href="/dashboard" className="lg:hidden">
             <Brand />
@@ -31,8 +32,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="min-w-0 flex-1 px-4 pt-2 pb-8 lg:px-8 lg:pt-6">{children}</main>
+        <main className="min-w-0 flex-1 px-4 pt-2 pb-8 lg:px-8 lg:pt-1">{children}</main>
       </div>
+
+      <AssistantChat />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 from typing import TYPE_CHECKING, final, override
 
 from django.db import models
@@ -84,6 +85,10 @@ class UnitPerson(BaseModel):
     @override
     def clean(self) -> None:
         UnitPersonRules(self).validate()
+
+    def is_current(self, reference_date: date) -> bool:
+        """No end date, or ending on `reference_date` or later (the same rule as `UnitPersonQuerySet.current`)."""
+        return self.end_date is None or self.end_date >= reference_date
 
     @override
     def __str__(self) -> str:

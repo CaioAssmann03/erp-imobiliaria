@@ -65,7 +65,21 @@ One row per spec; update it in the same change that creates or closes the spec.
 | [053](053-cost-center-catalog.md) | Cost center catalog (sub-contas of the administradora) | full | in-progress | none |
 | [054](054-extra-billing-document.md) | Extra billing document (boleto extra) | full | in-progress | none |
 | [055](055-discounts-negative-values.md) | Discounts: negative values in the launches | full | in-progress | none |
-| [056](056-administration-fee-report.md) | Administration fee report (Taxa de administração) | full | in-progress | none |
-| [057](057-unit-sheet-report.md) | Unit sheet report (Ficha da unidade) | full | in-progress | none |
+| [056](056-billing-month-summary.md) | Billing month summary (dashboard) | lite | done | none |
+| [057](057-delinquency-pagination.md) | Delinquency report pagination | lite | done | none |
+| [058](058-accountability-pagination.md) | Accountability report pagination | lite | done | none |
+| [059](059-entry-batch-condominium-filter.md) | Entry batch filter by condominium | lite | done | none |
+| [060](060-catalog-item-condominiums.md) | Condominiums of a catalog item | lite | done | none |
+| [061](061-code-ordering.md) | Code ordering | lite | done | none |
+| [062](062-soft-delete-archiving.md) | Soft delete (archiving) of registry records | full | done | none |
+| [063](063-admin-organization-and-archived-page.md) | Admin organization and the Arquivados page | lite | done | none |
+| [064](064-server-side-list-filters.md) | Server-side list filters | full | done | none |
+| [065](065-security-hardening.md) | Security hardening | full | done | none |
+| [066](066-server-side-ordering-and-roles.md) | Server-side ordering and roles | lite | done | none |
+| [067](067-api-scope-without-superuser-bypass.md) | API scope without superuser bypass | full | done | none |
+| [068](068-dashboard-focus-lists.md) | Dashboard focus lists | lite | done | none |
+| [069](069-help-assistant.md) | Help assistant (free AI chat over curated texts) | full | in-progress | none |
+| [070](070-administration-fee-report.md) | Administration fee report (Taxa de administração) | full | in-progress | none |
+| [071](071-unit-sheet-report.md) | Unit sheet report (Ficha da unidade) | full | in-progress | none |
 
 The finished specs (001–029 and 049–051) are condensed in [`history.md`](history.md): their decisions and numbered requirements. A spec that reaches `done` moves there and leaves this table.

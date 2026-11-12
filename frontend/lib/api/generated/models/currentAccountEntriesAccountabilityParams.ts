@@ -8,5 +8,18 @@
 
 export type CurrentAccountEntriesAccountabilityParams = {
 condominium: string;
+/**
+ * @minimum 1
+ */
+cost_centers_page?: number;
+/**
+ * @minimum 1
+ */
+entries_page?: number;
 month: string;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
 };

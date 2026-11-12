@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { ExtraBillingLine } from './extraBillingLine';
+import type { ExtraBillingLine } from './extraBillingLine.ts';
 
 /**
  * Request of `POST /billing-documents/extra/`. `validate` leaves the lines as unsaved launches, already validated.

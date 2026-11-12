@@ -1,4 +1,4 @@
-"""The administration fee report: what each condominium owes the administradora in a month (spec 056, R1, R3–R5, R7)."""
+"""The administration fee report: what each condominium owes the administradora in a month (spec 070, R1, R3–R5, R7)."""
 
 from datetime import date
 from decimal import Decimal

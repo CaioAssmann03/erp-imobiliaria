@@ -1,11 +1,12 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useLite } from "@/lib/theme/use-lite";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { HOUSE_LOGO_PATH } from "@/components/HouseLogo";
-import { onLoginTransition } from "@/lib/login-transition";
+import { HOUSE_LOGO_PATH } from "@/components/brand/HouseLogo";
+import { onLoginTransition } from "@/lib/auth/login-transition";
 
 const LOGO = { width: 1061.5, height: 1120.5 } as const;
 const BANDS = 16;
@@ -54,7 +55,7 @@ function BuildingLogo({ still }: { still: boolean }) {
  */
 export function LoginTransition() {
   const pathname = usePathname();
-  const still = useReducedMotion() ?? false;
+  const still = useLite();
   const [visible, setVisible] = useState(false);
   const shownAt = useRef(0);
 

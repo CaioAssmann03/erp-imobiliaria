@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
+import { DEFAULT_PAGE_SIZE } from "@/lib/api/pagination";
 
 /**
  * Estado de uma listagem paginada com busca: página, itens por página e termo.

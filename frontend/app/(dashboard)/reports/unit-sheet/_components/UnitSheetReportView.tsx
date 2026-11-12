@@ -4,6 +4,9 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { ListFallback } from "@/components/data-list";
+import { MonthSelect } from "@/components/dates/MonthSelect";
+import { ScopeDivider } from "@/components/filters/ScopeSearchCard";
+import { ScopeSelect } from "@/components/filters/ScopeSelect";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   currentAccountEntriesUnitSheetPdf,
@@ -11,14 +14,13 @@ import {
   useCurrentAccountEntriesUnitSheet,
   useUnitsList,
 } from "@/lib/api/generated";
-import { brl, formatDate, formatMonth, todayIso } from "@/lib/format";
-import { boletoNote, defaultSheetPeriod, reportMonths, unitSheetPdfName } from "@/lib/reports";
+import { unitListLabel } from "@/lib/condominiums/unit-workspace";
+import { brl, formatDate, formatMonth, todayIso } from "@/lib/format/format";
+import { boletoNote, defaultSheetPeriod, unitSheetPdfName } from "@/lib/reports/reports";
 import { unitTypeLabel } from "@/lib/schemas/unit";
-import { unitListLabel } from "@/lib/unit-workspace";
-import { inputClass } from "@/lib/ui";
+import { cn } from "@/lib/utils";
 
-import { ReportDownloadButton } from "../../_components/ReportDownloadButton";
-import { Stat } from "../../_components/Stat";
+import { ReportFilterBar } from "../../_components/ReportFilterBar";
 
 const STATUS_LABELS: Record<string, string> = { issued: "Emitido", registered: "Registrado", paid: "Pago", cancelled: "Cancelado" };
 const MAX_UNITS_IN_PICKER = 100;
@@ -34,85 +36,66 @@ export function UnitSheetReportView() {
   const { data: condominiums } = useCondominiumsList({ limit: 100 });
   const { data: units } = useUnitsList({ condominium, limit: MAX_UNITS_IN_PICKER }, { query: { enabled: Boolean(condominium) } });
   const { data: sheet, isLoading, isError } = useCurrentAccountEntriesUnitSheet(params, { query: { enabled: Boolean(unit) } });
-  const months = reportMonths(todayIso(), 36);
   const periodIsValid = period.from <= period.to;
   const unitOptions = units?.results ?? [];
+  const selectedCondominium = (condominiums?.results ?? []).find((item) => item.id === condominium);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-3 rounded-card bg-card p-4 shadow-card">
-        <label className="flex min-w-56 flex-1 flex-col gap-1 text-caption font-medium text-ink-soft">
-          Condomínio
-          <select
-            className={inputClass}
-            value={condominium}
-            onChange={(event) => {
-              setCondominium(event.target.value);
-              setUnit("");
-            }}
-          >
-            <option value="">Selecione</option>
-            {(condominiums?.results ?? []).map((item) => (
-              <option key={item.id} value={item.id}>
-                {String(item.code).padStart(4, "0")} · {item.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex min-w-44 flex-col gap-1 text-caption font-medium text-ink-soft">
-          Unidade
-          <select className={inputClass} value={unit} disabled={!condominium} onChange={(event) => setUnit(event.target.value)}>
-            <option value="">{condominium ? "Selecione" : "Escolha o condomínio"}</option>
-            {unitOptions.map((item) => (
-              <option key={item.id} value={item.id}>
-                {unitListLabel(unitTypeLabel(item.type), item.name)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex min-w-36 flex-col gap-1 text-caption font-medium text-ink-soft">
-          De
-          <select className={inputClass} value={period.from} onChange={(event) => setPeriod({ ...period, from: event.target.value })}>
-            {months.map((item) => (
-              <option key={item} value={item}>
-                {formatMonth(item)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex min-w-36 flex-col gap-1 text-caption font-medium text-ink-soft">
-          Até
-          <select className={inputClass} value={period.to} onChange={(event) => setPeriod({ ...period, to: event.target.value })}>
-            {months.map((item) => (
-              <option key={item} value={item}>
-                {formatMonth(item)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <div className="ml-auto">
-          <ReportDownloadButton
-            fileName={unitSheetPdfName(sheet?.condominium_code ?? 0, sheet?.unit_name ?? "")}
-            fetchPdf={() => currentAccountEntriesUnitSheetPdf(params)}
-            disabled={!sheet || !periodIsValid}
-          />
-        </div>
-      </div>
+    <div className="space-y-6">
+      <ReportFilterBar
+        fileName={unitSheetPdfName(sheet?.condominium_code ?? selectedCondominium?.code ?? 0, sheet?.unit_name ?? "")}
+        fetchPdf={() => currentAccountEntriesUnitSheetPdf(params)}
+        disabled={!sheet || !periodIsValid}
+        scopes={
+          <>
+            <ScopeSelect
+              variant="segment"
+              className="flex-1"
+              label="Condomínio"
+              value={condominium}
+              placeholder="Selecione o condomínio"
+              onChange={(value) => {
+                setCondominium(value);
+                setUnit("");
+              }}
+              options={(condominiums?.results ?? []).map((item) => ({
+                value: item.id,
+                label: `${String(item.code).padStart(4, "0")} · ${item.name}`,
+                title: item.name,
+              }))}
+            />
+            <ScopeDivider />
+            <ScopeSelect
+              variant="segment"
+              className="max-w-[28%] shrink-0"
+              label="Unidade"
+              value={unit}
+              placeholder={condominium ? "Unidade" : "—"}
+              onChange={setUnit}
+              options={unitOptions.map((item) => ({ value: item.id, label: unitListLabel(unitTypeLabel(item.type), item.name), title: item.name }))}
+            />
+            <ScopeDivider />
+            <MonthSelect className="max-w-[20%] shrink-0" label="De" value={period.from} today={todayIso()} onChange={(value) => setPeriod({ ...period, from: value })} />
+            <ScopeDivider />
+            <MonthSelect className="max-w-[20%] shrink-0" label="Até" value={period.to} today={todayIso()} onChange={(value) => setPeriod({ ...period, to: value })} />
+          </>
+        }
+      />
       {condominium && unitOptions.length > 0 && (units?.count ?? 0) > unitOptions.length && (
         <p className="text-caption text-ink-soft">A lista mostra as {MAX_UNITS_IN_PICKER} primeiras unidades do condomínio.</p>
       )}
 
       {!unit ? (
-        <p className="rounded-card bg-card p-8 text-center text-body text-ink-soft shadow-card">Escolha o condomínio e a unidade para ver a ficha.</p>
+        <p className="rounded-card bg-surface p-8 text-center text-body text-ink-soft">Escolha o condomínio e a unidade para ver a ficha.</p>
       ) : !periodIsValid ? (
-        <p className="rounded-card bg-card p-6 text-body text-danger shadow-card">O mês final não pode ser anterior ao inicial.</p>
+        <p className="rounded-card bg-surface p-6 text-body text-danger">O mês final não pode ser anterior ao inicial.</p>
       ) : isLoading ? (
         <ListFallback />
       ) : isError || !sheet ? (
-        <p className="rounded-card bg-card p-6 text-body text-ink-soft shadow-card">Não foi possível carregar a ficha (o período vai até 36 meses).</p>
+        <p className="rounded-card bg-surface p-6 text-body text-ink-soft">Não foi possível carregar a ficha (o período vai até 36 meses).</p>
       ) : (
         <>
-          <div className="rounded-card bg-card p-5 shadow-card">
+          <div className="rounded-card bg-surface p-6 sm:p-8">
             <h2 className="mb-3 text-heading">
               {String(sheet.condominium_code).padStart(4, "0")} · {sheet.condominium_name} — {sheet.block_name ? `${sheet.block_name} - ` : ""}
               {sheet.unit_name}
@@ -155,14 +138,16 @@ export function UnitSheetReportView() {
             )}
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Stat label="Emitido" value={brl(sheet.total_issued)} />
-            <Stat label="Pago" value={brl(sheet.total_paid)} />
-            <Stat label="Em aberto" value={brl(sheet.total_open)} />
-            <Stat label="Vencido" value={brl(sheet.total_overdue)} tone={Number(sheet.total_overdue) > 0 ? "danger" : undefined} />
+          <div className="rounded-card bg-surface p-6 sm:p-8">
+            <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
+              <Total label="Emitido" value={brl(sheet.total_issued)} />
+              <Total label="Pago" value={brl(sheet.total_paid)} />
+              <Total label="Em aberto" value={brl(sheet.total_open)} />
+              <Total label="Vencido" value={brl(sheet.total_overdue)} danger={Number(sheet.total_overdue) > 0} />
+            </dl>
           </div>
 
-          <div className="rounded-card bg-card p-5 shadow-card">
+          <div className="rounded-card bg-surface p-6 sm:p-8">
             <h2 className="mb-3 text-heading">Boletos</h2>
             {sheet.boletos_truncated && <Truncated what="boletos" />}
             {sheet.boletos.length === 0 ? (
@@ -196,7 +181,7 @@ export function UnitSheetReportView() {
             )}
           </div>
 
-          <div className="rounded-card bg-card p-5 shadow-card">
+          <div className="rounded-card bg-surface p-6 sm:p-8">
             <h2 className="mb-3 text-heading">Lançamentos do extrato</h2>
             {sheet.entries_truncated && <Truncated what="lançamentos" />}
             {sheet.entries.length === 0 ? (
@@ -243,6 +228,15 @@ function Info({ label, value }: { label: string; value: string }) {
     <div>
       <dt className="text-caption text-ink-soft">{label}</dt>
       <dd>{value}</dd>
+    </div>
+  );
+}
+
+function Total({ label, value, danger = false }: { label: string; value: string; danger?: boolean }) {
+  return (
+    <div>
+      <dt className="text-caption text-ink-soft">{label}</dt>
+      <dd className={cn("text-title tabular-nums", danger && "text-danger")}>{value}</dd>
     </div>
   );
 }

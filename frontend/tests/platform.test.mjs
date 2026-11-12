@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { isApplePlatform, matchesSearchShortcut, searchShortcutLabel } from "../lib/platform.ts";
+import { isApplePlatform, matchesSearchShortcut, searchShortcutLabel } from "../lib/navigation/platform.ts";
 
 const key = (overrides = {}) => ({ key: "k", code: "KeyK", metaKey: false, ctrlKey: false, altKey: false, shiftKey: false, ...overrides });
 

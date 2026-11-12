@@ -1,6 +1,7 @@
 """Dashboard counters and the global search cover only the user's company (spec 004, R9)."""
 
 import pytest
+from django.core.cache import cache
 from django.urls import reverse
 from rest_framework.test import APIClient
 
@@ -46,13 +47,13 @@ def test_counters_count_own_company_only(
     assert summary["pending"]["without_cost_centers"] == 1  # type: ignore[index]
 
 
-def test_superuser_dashboard_covers_every_company(
+def test_superuser_dashboard_covers_only_own_company(
     superuser_client: APIClient, company: Company, other_company: Company
 ) -> None:
     _ = build_company_data(company, seed=1)
     _ = build_company_data(other_company, seed=2)
 
-    assert dashboard(superuser_client)["condominiums"]["total"] == 2  # type: ignore[index]
+    assert dashboard(superuser_client)["condominiums"]["total"] == 1  # type: ignore[index]
 
 
 def test_accounts_payable_ignores_other_companies(
@@ -96,9 +97,23 @@ def test_search_finds_own_company_records(api_client: APIClient, company: Compan
     assert len(search(api_client, mine.person.name)["persons"]) == 1  # type: ignore[arg-type]
 
 
-def test_superuser_search_finds_other_company_records(
+def test_superuser_search_ignores_other_company_records(
     superuser_client: APIClient, other_company: Company
 ) -> None:
     other = build_company_data(other_company, seed=2)
 
-    assert len(search(superuser_client, other.condominium.name)["condominiums"]) == 1  # type: ignore[arg-type]
+    assert search(superuser_client, other.condominium.name)["condominiums"] == []
+
+
+def test_the_dashboard_is_kept_for_a_minute_per_company(
+    api_client: APIClient, other_api_client: APIClient, company: Company, other_company: Company
+) -> None:
+    first = dashboard(api_client)
+    _ = build_company_data(company, seed=1)
+
+    assert dashboard(api_client) == first, "served from the cache"
+    assert dashboard(other_api_client)["condominiums"]["total"] == 0, "another company never reads this key"  # type: ignore[index]
+
+    cache.clear()
+
+    assert dashboard(api_client)["condominiums"]["total"] > 0  # type: ignore[index,operator]

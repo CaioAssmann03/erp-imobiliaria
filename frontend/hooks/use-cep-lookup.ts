@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { onlyDigits } from "@/lib/masks";
+import { onlyDigits } from "@/lib/format/masks";
 
 export interface CepAddress {
   street: string;

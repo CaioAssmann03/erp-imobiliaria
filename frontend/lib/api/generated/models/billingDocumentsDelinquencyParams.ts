@@ -5,6 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
+import type { BillingDocumentsDelinquencyCondominiumsOrder } from './billingDocumentsDelinquencyCondominiumsOrder.ts';
+import type { BillingDocumentsDelinquencyRowsOrder } from './billingDocumentsDelinquencyRowsOrder.ts';
 
 export type BillingDocumentsDelinquencyParams = {
 /**
@@ -12,7 +14,32 @@ export type BillingDocumentsDelinquencyParams = {
  */
 condominium?: string;
 /**
+ * Order of `by_condominium`: `code`, or `amount` (the largest debt first).
+ *
+ * * `code` - code
+ * * `amount` - amount
+ * @minLength 1
+ */
+condominiums_order?: BillingDocumentsDelinquencyCondominiumsOrder;
+/**
+ * @minimum 1
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+page_size?: number;
+/**
  * Only the boletos of this reference month (first day)
  */
 reference_month?: string;
+/**
+ * `condominium`: by condominium code, then the oldest due date. `oldest`: the longest overdue first, across condominiums.
+ *
+ * * `condominium` - condominium
+ * * `oldest` - oldest
+ * @minLength 1
+ */
+rows_order?: BillingDocumentsDelinquencyRowsOrder;
 };

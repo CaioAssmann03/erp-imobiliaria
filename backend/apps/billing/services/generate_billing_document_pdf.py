@@ -1,4 +1,3 @@
-import logging
 import uuid
 
 from django.db import transaction
@@ -9,8 +8,6 @@ from apps.billing.services.render_billing_document_pdf import (
     render_billing_document_pdf,
 )
 from apps.core.infrastructure.storage import object_storage
-
-logger = logging.getLogger(__name__)
 
 PDF_CONTENT_TYPE = "application/pdf"
 
@@ -36,12 +33,5 @@ def generate_billing_document_pdf(document: BillingDocument) -> BillingDocumentP
         pdf.full_clean()
         pdf.save()
         if replaced_key:
-            transaction.on_commit(lambda: _delete_object(storage, replaced_key))
+            transaction.on_commit(lambda: storage.discard_object(replaced_key, "Replaced PDF"))
     return pdf
-
-
-def _delete_object(storage: object_storage.ObjectStorage, file_key: str) -> None:
-    try:
-        storage.delete_object(file_key)
-    except Exception:
-        logger.exception("Replaced PDF %s could not be deleted from the bucket; it is now an orphan.", file_key)

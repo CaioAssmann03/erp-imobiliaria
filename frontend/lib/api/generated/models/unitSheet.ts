@@ -5,11 +5,11 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { UnitSheetBoleto } from './unitSheetBoleto';
-import type { UnitSheetEntry } from './unitSheetEntry';
-import type { UnitSheetFraction } from './unitSheetFraction';
-import type { UnitSheetPerson } from './unitSheetPerson';
-import type { UnitTypeEnum } from './unitTypeEnum';
+import type { UnitSheetBoleto } from './unitSheetBoleto.ts';
+import type { UnitSheetEntry } from './unitSheetEntry.ts';
+import type { UnitSheetFraction } from './unitSheetFraction.ts';
+import type { UnitSheetPerson } from './unitSheetPerson.ts';
+import type { UnitTypeEnum } from './unitTypeEnum.ts';
 
 /**
  * One page about a unit: data, people, boletos with their totals and the entries of its account (at most 2000 each).

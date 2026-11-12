@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { canCancelDocument, documentStatusLabel, issuedNothing, runStatusLabel } from "../lib/billing-documents.ts";
-import { describeProblem, problemFix } from "../lib/billing-run-problems.ts";
+import { canCancelDocument, documentStatusLabel, issuedNothing, runStatusLabel } from "../lib/billing/billing-documents.ts";
+import { describeProblem, problemFix } from "../lib/billing/billing-run-problems.ts";
 
 const CODES = [
   "no_billing_rules",

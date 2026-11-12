@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
-import { FormPage } from "@/components/form/FormPage";
-import { SectionIndex } from "@/components/SectionIndex";
-import { PERSON_SECTIONS } from "@/lib/person-workspace";
 import { PersonForm } from "../_components/PersonForm";
 import { PersonHeader } from "../_components/PersonHeader";
 
@@ -12,9 +10,11 @@ export default async function EditPersonPage({ params }: { params: Promise<{ id:
   const { id } = await params;
 
   return (
-    <FormPage aside={<SectionIndex sections={PERSON_SECTIONS} label="Seções da pessoa" title="Nesta pessoa" />}>
-      <PersonHeader personId={id} />
+    <>
+      <Suspense fallback={null}>
+        <PersonHeader personId={id} />
+      </Suspense>
       <PersonForm personId={id} />
-    </FormPage>
+    </>
   );
 }

@@ -1,62 +1,62 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 
-import { FormActions } from "@/components/form/FormActions";
 import { FormSkeleton } from "@/components/form/FormSkeleton";
-import { Button } from "@/components/ui/button";
+
 import { useBillingPlansRetrieve } from "@/lib/api/generated";
-import { throwIfNotFound } from "@/lib/query/not-found";
-import {
-  BILLING_PLAN_DEFAULTS,
-  billingPlanSchema,
-  billingPlanToForm,
-  type BillingPlanFormInput,
-  type BillingPlanFormOutput,
-} from "@/lib/schemas/billing-plan";
+import { billingPlansUrl } from "@/lib/billing/billing-plan-workspace";
+import { throwIfPageError } from "@/lib/query/page-error";
+import { BILLING_PLAN_DEFAULTS, billingPlanSchema, billingPlanToForm } from "@/lib/schemas/billing-plan";
 
 import { IdentificationSection } from "./billing-plan-form/IdentificationSection";
 import { ItemsSection } from "./billing-plan-form/ItemsSection";
-import { BILLING_PLANS_URL, useBillingPlanSubmit } from "./billing-plan-form/use-billing-plan-submit";
-import { ValiditySection } from "./billing-plan-form/ValiditySection";
+import { useBillingPlanSubmit } from "./billing-plan-form/use-billing-plan-submit";
+import { usePlansScope } from "./use-plans-scope";
+import { RecordForm } from "@/components/form/RecordForm";
+import { SectionAnchor } from "@/components/form/SectionAnchor";
+import { useRecordForm } from "@/hooks/use-record-form";
 
-/** Cadastro e edição de um plano de cobrança com os seus itens (a lista inteira é enviada junto). */
+/** Cadastro e edição de um plano de cobrança com os seus itens (a lista inteira é enviada junto). No cadastro o condomínio da lista já vem escolhido. */
 export function BillingPlanForm({ billingPlanId }: { billingPlanId?: string }) {
-  const router = useRouter();
+  const scope = usePlansScope();
   const isEdit = billingPlanId !== undefined;
   const { data: plan, isLoading, error: loadError } = useBillingPlansRetrieve(billingPlanId ?? "", { query: { enabled: isEdit } });
-  throwIfNotFound(loadError);
+  throwIfPageError(loadError);
 
-  const methods = useForm<BillingPlanFormInput, unknown, BillingPlanFormOutput>({
-    resolver: zodResolver(billingPlanSchema),
-    defaultValues: BILLING_PLAN_DEFAULTS,
-    mode: "onTouched",
+  const methods = useRecordForm({
+    schema: billingPlanSchema,
+    defaults: { ...BILLING_PLAN_DEFAULTS, condominium: scope.condominium },
+    record: plan,
+    toForm: billingPlanToForm,
   });
-  const { handleSubmit, reset, setError } = methods;
-  const { submit, isSubmitting } = useBillingPlanSubmit(billingPlanId, setError);
-
-  useEffect(() => {
-    if (plan) reset(billingPlanToForm(plan));
-  }, [plan, reset]);
+  const { submit, remove, isSubmitting } = useBillingPlanSubmit(billingPlanId, scope, methods.setError);
 
   if (isEdit && isLoading) return <FormSkeleton sections={3} />;
 
   return (
-    <FormProvider {...methods}>
-      <form noValidate onSubmit={handleSubmit(submit, () => toast.error("Corrija os campos destacados."))} className="space-y-4">
+    <RecordForm
+      methods={methods}
+      onSubmit={submit}
+      isSubmitting={isSubmitting}
+      cancelHref={billingPlansUrl(scope)}
+      danger={
+        plan && (
+          <ConfirmDeleteButton
+            appearance="solid"
+            title="Excluir plano de cobrança?"
+            description={`O plano "${plan.name}" e os seus ${plan.items.length} itens serão excluídos. Esta ação não pode ser desfeita.`}
+            onConfirm={remove}
+          />
+        )
+      }
+    >
+      <SectionAnchor id="plano">
         <IdentificationSection isEdit={isEdit} />
-        <ValiditySection />
+      </SectionAnchor>
+      <SectionAnchor id="itens">
         <ItemsSection />
-        <FormActions isSubmitting={isSubmitting}>
-          <Button type="button" variant="secondary" onClick={() => router.push(BILLING_PLANS_URL)}>
-            Cancelar
-          </Button>
-        </FormActions>
-      </form>
-    </FormProvider>
+      </SectionAnchor>
+    </RecordForm>
   );
 }

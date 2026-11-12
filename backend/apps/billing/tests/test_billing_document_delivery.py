@@ -8,6 +8,7 @@ import time
 from typing import Any
 
 import pytest
+from django.core.exceptions import ValidationError
 from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
@@ -105,6 +106,19 @@ def test_a_payer_without_e_mail_is_a_failed_delivery_with_a_reason(
     assert delivery is not None
     assert (delivery.status, delivery.failure_reason) == (Status.FAILED, "payer_without_email")
     assert not sender.sent
+
+
+def test_a_sent_delivery_names_its_destination(
+    document: BillingDocument, registration: BillingDocumentRegistration
+) -> None:
+    delivery = BillingDocumentDelivery(
+        document=document, registration=registration, status=Status.SENT, provider_message_id="msg_1", destination=""
+    )
+
+    with pytest.raises(ValidationError) as error:
+        delivery.full_clean()
+
+    assert error.value.error_dict["__all__"][0].code == "billing_document_delivery.destination.blank"
 
 
 @pytest.mark.parametrize(

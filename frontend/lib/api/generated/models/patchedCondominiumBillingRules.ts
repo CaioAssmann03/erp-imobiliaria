@@ -5,9 +5,9 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { CompetenceMonthEnum } from './competenceMonthEnum';
-import type { DueMonthEnum } from './dueMonthEnum';
-import type { InterestCalculationEnum } from './interestCalculationEnum';
+import type { CompetenceMonthEnum } from './competenceMonthEnum.ts';
+import type { DueMonthEnum } from './dueMonthEnum.ts';
+import type { InterestCalculationEnum } from './interestCalculationEnum.ts';
 
 /**
  * Serializer mixin: input is validated by the model's rules, never by rules written here.

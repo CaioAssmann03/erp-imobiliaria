@@ -1,4 +1,4 @@
-import { HOUSE_LOGO_PATH } from "@/components/HouseLogo";
+import { HOUSE_LOGO_PATH } from "@/components/brand/HouseLogo";
 
 /**
  * Desenha o logo da casa em 3D num canvas 2D em tons de cinza: o canvas só serve de molde, o tom vira a cor da partícula

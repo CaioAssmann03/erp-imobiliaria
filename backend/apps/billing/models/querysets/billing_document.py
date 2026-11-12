@@ -26,13 +26,20 @@ class BillingDocumentQuerySet(models.QuerySet["BillingDocument"]):
         The best match comes first, and the latest reference month first among equals. A document has no
         ID, so a term that only asks for an ID (a single digit) finds none.
         """
-        conditions = name_matches(query, "payer__name", "unit__name")
+        from apps.condominiums.models import Unit
+        from apps.persons.models import Person
+
+        conditions = name_matches(query, "name")
         if conditions is None:
             return self.none()
         contains, starts_with = conditions
+        # The names are looked up in their own tables, where the trigram indexes are, and the documents come from the ids:
+        # filtering across the two joins instead reads every document. Deleted payers and units still count.
+        payers = Person.all_objects.filter(contains).values("pk")
+        units = Unit.all_objects.filter(contains).values("pk")
         return (
-            self.filter(contains)
-            .annotate(rank=relevance_rank([starts_with], None))
+            self.filter(models.Q(payer__in=payers) | models.Q(unit__in=units))
+            .annotate(rank=relevance_rank([models.Q(payer__name__istartswith=query.text) | models.Q(unit__name__istartswith=query.text)], None))
             .select_related("unit__condominium", "payer")
             .order_by("rank", "-reference_month")
         )

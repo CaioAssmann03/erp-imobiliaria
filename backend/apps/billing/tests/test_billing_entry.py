@@ -48,6 +48,15 @@ def units_of(*fractions: str) -> list[Unit]:
     return units
 
 
+def test_a_deleted_unit_is_not_charged_by_a_collective_entry(make_entry) -> None:  # type: ignore[no-untyped-def]
+    first, second = units_of("0.5", "0.5")
+    entry = make_entry(allocation=BillingEntry.Allocation.COLLECTIVE, amount=Decimal("100.00"))
+    _ = BillingEntryUnit.objects.bulk_create(BillingEntryUnit(entry=entry, unit=unit) for unit in (first, second))
+    _ = second.delete()
+
+    assert entry.amounts_for_selected_units() == {first.pk: Decimal("100.00")}
+
+
 # ----- R3: allocation -----
 
 

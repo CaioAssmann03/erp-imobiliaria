@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
-import { brandRamp } from "@/lib/brand-ramp";
+import { brandRamp } from "@/lib/theme/brand-ramp";
+import { isLite } from "@/lib/theme/use-lite";
 import { cn } from "@/lib/utils";
 
 import { LINE, PITCH } from "./skyline-layers";
@@ -75,7 +76,7 @@ export function SkyFlyers({ className }: { className?: string }) {
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
-    if (!canvas || !context || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!canvas || !context || isLite()) return;
 
     const ramp = brandRamp(canvas);
     const tones = [ramp(0.72), ramp(0.55), ramp(0.3)];

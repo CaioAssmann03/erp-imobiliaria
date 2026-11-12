@@ -6,7 +6,7 @@ import { CONTACT_HREF } from "@/app/(marketing)/_components/content";
 import { LoginForm } from "./_components/LoginForm";
 import { ParticleLogo } from "./_components/ParticleLogo";
 
-export const metadata: Metadata = { title: "Entrar" };
+export const metadata: Metadata = { title: "Entrar", robots: { index: false, follow: false } };
 
 /**
  * Server Component: só o conteúdo estático; a interação fica no `LoginForm`. O cabeçalho vem do `layout.tsx`. A tela é

@@ -18,12 +18,15 @@ import { FormErrorSummary } from "./FormErrorSummary";
 export function FormActions({
   isSubmitting,
   submitLabel = "Salvar",
+  submittingLabel = "Salvando…",
   formId,
   danger,
   children,
 }: {
   isSubmitting: boolean;
   submitLabel?: string;
+  /** O texto do botão enquanto envia (Emitindo…, Incluindo…). */
+  submittingLabel?: string;
   /** `id` de um `<form>` fora da barra (a barra não precisa estar dentro dele). */
   formId?: string;
   /** Ação destrutiva (Excluir) à esquerda da barra, longe do Salvar; só em quem já existe (edição). */
@@ -64,7 +67,7 @@ export function FormActions({
             {children}
             <Button type="submit" form={formId} disabled={isSubmitting} className="min-w-24">
               {isSubmitting && <Loader2 className="size-4 animate-spin" />}
-              {isSubmitting ? "Salvando…" : submitLabel}
+              {isSubmitting ? submittingLabel : submitLabel}
             </Button>
           </div>
         </div>

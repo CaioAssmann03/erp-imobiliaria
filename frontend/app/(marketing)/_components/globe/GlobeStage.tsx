@@ -3,8 +3,9 @@
 import { AnimatePresence } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
-import { brandRamp } from "@/lib/brand-ramp";
-import { subscribeMode } from "@/lib/mode";
+import { brandRamp } from "@/lib/theme/brand-ramp";
+import { subscribeMode } from "@/lib/theme/mode";
+import { isLite } from "@/lib/theme/use-lite";
 
 import { LINE, PITCH } from "../hero/skyline-layers";
 import { MASK, MASK_BASE64 } from "./brazil-mask";
@@ -174,7 +175,7 @@ export function GlobeStage({ children }: { children: React.ReactNode }) {
     const context = canvas?.getContext("2d");
     if (!stage || !area || !canvas || !context) return;
 
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduceMotion = isLite();
     const ramp = brandRamp(canvas);
     const tones = [ramp(0.76), ramp(0.65), ramp(0.54), ramp(0.42), ramp(0.3), ramp(0.16)];
     const slabColor = ramp(0.1);
@@ -203,7 +204,9 @@ export function GlobeStage({ children }: { children: React.ReactNode }) {
     let height = 0;
     let center: Point = { x: 0, y: 0 };
     let anchors: (Point | null)[] = [null, null];
-    let startedAt = -1;
+    // `started` e não `startedAt >= 0`: no modo leve `startedAt` recua 60 s para o mapa já nascer pronto, e numa página recém-aberta isso é negativo.
+    let started = false;
+    let startedAt = 0;
     let visible = false;
     let animation = 0;
     const cycles: Cycle[] = [0, 1].map(() => ({ index: null, pickedAt: 0, shown: false, endedAt: -1, nextAt: 0 }));
@@ -380,7 +383,7 @@ export function GlobeStage({ children }: { children: React.ReactNode }) {
     };
 
     const draw = (now: number) => {
-      if (startedAt < 0 || !width) return;
+      if (!started || !width) return;
       const elapsed = now - startedAt;
       const { sphere } = grid;
       // O balanço só começa depois que o mapa está construído.
@@ -452,7 +455,8 @@ export function GlobeStage({ children }: { children: React.ReactNode }) {
       draw(performance.now());
     });
     const reveal = () => {
-      if (startedAt >= 0) return;
+      if (started) return;
+      started = true;
       startedAt = reduceMotion ? performance.now() - 60000 : performance.now();
       // As fotos começam a baixar já, para estarem prontas quando os cartões entrarem.
       PHOTOS.forEach((photo) => (new window.Image().src = photo.src));

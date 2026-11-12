@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import type { Unit } from "@/lib/api/generated/models";
-import { decimalFromApi, moneyFromApi } from "@/lib/masks";
+import { decimalFromApi, moneyFromApi } from "@/lib/format/masks";
 
 import {
   dateField,

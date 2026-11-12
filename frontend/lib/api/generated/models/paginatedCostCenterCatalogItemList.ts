@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { CostCenterCatalogItem } from './costCenterCatalogItem';
+import type { CostCenterCatalogItem } from './costCenterCatalogItem.ts';
 
 export interface PaginatedCostCenterCatalogItemList {
   count: number;

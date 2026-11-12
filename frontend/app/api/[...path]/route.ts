@@ -1,11 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { errorResponse } from "@/lib/api-error";
-import { backendApiPath } from "@/lib/api-path";
-import { clearAuthCookies, setAuthCookies, type Tokens } from "@/lib/auth-cookies";
-import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/lib/auth";
-import { API_URL, backendHeaders, refreshTokens } from "@/lib/backend";
-import { isTokenExpiring } from "@/lib/jwt";
+import { errorResponse } from "@/lib/api/api-error";
+import { backendApiPath } from "@/lib/api/api-path";
+import { clearAuthCookies, setAuthCookies, type Tokens } from "@/lib/auth/auth-cookies";
+import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/lib/auth/auth";
+import { API_URL, backendHeaders, refreshTokens } from "@/lib/api/backend";
+import { retryRead } from "@/lib/api/retry-read";
+import { isTokenExpiring } from "@/lib/auth/jwt";
 
 /**
  * O navegador só fala com este servidor (`/api/...`, mesma origem). Aqui o token vive em cookie
@@ -43,13 +44,15 @@ async function callBackend(
   const headers = backendHeaders(request.headers);
   if (body) headers.set("Content-Type", "application/json");
   if (access) headers.set("Authorization", `Bearer ${access}`);
-  return fetch(`${API_URL}/api/${route}/${request.nextUrl.search}`, {
-    method: request.method,
-    headers,
-    body,
-    cache: "no-store",
-    redirect: "manual",
-  });
+  return retryRead(request.method, () =>
+    fetch(`${API_URL}/api/${route}/${request.nextUrl.search}`, {
+      method: request.method,
+      headers,
+      body,
+      cache: "no-store",
+      redirect: "manual",
+    })
+  );
 }
 
 /** Devolve status e corpo do Django como vieram (só o tipo do conteúdo é repassado). */

@@ -110,10 +110,10 @@ def create_demo_finance(context: SeedContext) -> None:
 
 def clear_demo_finance(condominiums: "models.QuerySet[Condominium]") -> None:
     """Remove the finance records of the demo (entries are deleted by queryset: they are never edited by hand)."""
-    supplier_persons = Person.objects.filter(
+    supplier_persons = Person.all_objects.filter(
         people_legal__cnpj__in=demo_supplier_documents()
     )
-    suppliers = Supplier.objects.filter(person__in=supplier_persons)
+    suppliers = Supplier.all_objects.filter(person__in=supplier_persons)
     accounts = CurrentAccount.objects.filter(condominium__in=condominiums)
     entries = CurrentAccountEntry.objects.filter(current_account__in=accounts)
     batch_ids = list(entries.values_list("batch_id", flat=True).distinct())
@@ -125,5 +125,5 @@ def clear_demo_finance(condominiums: "models.QuerySet[Condominium]") -> None:
     ).delete()
     _ = accounts.delete()
     _ = EntryTemplate.objects.filter(cost_center__condominium__in=condominiums).delete()
-    _ = suppliers.delete()
-    _ = supplier_persons.delete()
+    _ = suppliers.hard_delete()
+    _ = supplier_persons.hard_delete()

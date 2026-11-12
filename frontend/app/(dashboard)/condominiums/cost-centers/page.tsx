@@ -1,9 +1,15 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import { Suspense } from "react";
 
-import { condominiumPageUrl } from "@/lib/condominium-registry";
+import { CostCentersEmptyState } from "@/app/(dashboard)/condominiums/_components/cost-centers/CostCentersEmptyState";
 
-/** As sub-contas de um condomínio têm tela própria: um link antigo com `?condominium=` abre a dele; sem ele, a lista de condomínios. */
-export default async function CostCentersPage({ searchParams }: { searchParams: Promise<{ condominium?: string }> }) {
-  const { condominium } = await searchParams;
-  redirect(condominium ? condominiumPageUrl(condominium, "cost-centers") : "/condominiums");
+export const metadata: Metadata = { title: "Sub-contas" };
+
+/** `/condominiums/cost-centers` é o cadastro de sub-contas: escolhe-se o condomínio na coluna da esquerda (a moldura vem do layout). `?condominium=` o escolhe de saída. */
+export default function CostCentersPage() {
+  return (
+    <Suspense fallback={null}>
+      <CostCentersEmptyState />
+    </Suspense>
+  );
 }

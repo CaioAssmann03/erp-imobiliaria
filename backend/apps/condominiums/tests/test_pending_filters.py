@@ -97,3 +97,12 @@ def test_units_with_lease_ending(api_client: APIClient, company: Company) -> Non
         )
 
     assert unit_names(api_client, "lease_ending") == ["101"]
+
+
+def test_a_condominium_with_only_deleted_cost_centers_is_without_cost_centers(
+    api_client: APIClient, company: Company
+) -> None:
+    condominium = make_condominium(company, "So Arquivada", "11222333000181")
+    _ = CostCenter.objects.create(condominium=condominium, name="Geral").delete()
+
+    assert condominium_names(api_client, "without_cost_centers") == ["So Arquivada"]

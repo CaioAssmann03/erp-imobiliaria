@@ -1,4 +1,4 @@
-import { MIN_TEXT_LENGTH } from "@/lib/search-index";
+import { MIN_TEXT_LENGTH } from "@/lib/navigation/search-index";
 import { cn } from "@/lib/utils";
 
 import type { SearchResultItem } from "./types";

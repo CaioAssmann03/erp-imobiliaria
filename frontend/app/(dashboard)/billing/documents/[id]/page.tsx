@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 
-import { BillingDocumentDetail } from "../_components/BillingDocumentDetail";
-import { FormPage } from "@/components/form/FormPage";
-import { PageHeader } from "@/components/PageHeader";
+import { BillingDocumentDetail } from "@/app/(dashboard)/billing/documents/_components/detail/BillingDocumentDetail";
+import { DocumentPageHeader } from "@/app/(dashboard)/billing/documents/_components/detail/DocumentPageHeader";
 
 export const metadata: Metadata = { title: "Documento de cobrança" };
 
@@ -10,9 +9,9 @@ export default async function BillingDocumentPage({ params }: { params: Promise<
   const { id } = await params;
 
   return (
-    <FormPage>
-      <PageHeader back={{ href: "/billing/documents", label: "Documentos" }} title="Documento de cobrança" />
+    <>
+      <DocumentPageHeader documentId={id} />
       <BillingDocumentDetail documentId={id} />
-    </FormPage>
+    </>
   );
 }

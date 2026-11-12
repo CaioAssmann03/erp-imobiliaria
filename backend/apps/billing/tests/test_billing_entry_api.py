@@ -5,6 +5,8 @@ from decimal import Decimal
 from typing import Any
 
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -67,6 +69,57 @@ def test_event_crud_and_unique_code(api_client: APIClient, company: Company) -> 
     assert "billing_event.code.duplicate_in_company" in error_codes(duplicate)
     renamed = api_client.patch(reverse(EVENT, args=[body(created)["id"]]), {"name": "Limpeza"}, format="json")
     assert body(renamed)["name"] == "Limpeza"
+
+
+def test_an_event_left_without_code_gets_the_lowest_free_one_of_the_company(
+    api_client: APIClient, company: Company, other_company: Company
+) -> None:
+    _ = BillingEvent.objects.create(company=other_company, code=2, name="Alheio")
+
+    first = api_client.post(reverse(EVENTS), {"name": "Primeiro"}, format="json")
+    typed = api_client.post(reverse(EVENTS), {"code": 250, "name": "Limpeza"}, format="json")
+    second = api_client.post(reverse(EVENTS), {"name": "Segundo"}, format="json")
+    third = api_client.post(reverse(EVENTS), {"name": "Terceiro"}, format="json")
+
+    # 250 typed by hand does not move the sequence: 1, then 2, then 3. The other company's 2 does not count.
+    assert [body(response)["code"] for response in (first, typed, second, third)] == [1, 250, 2, 3]
+
+
+def test_the_sequence_skips_the_codes_taken_by_hand_and_fills_the_gaps(api_client: APIClient, company: Company) -> None:
+    for code in (1, 3, 4, 6):
+        _ = BillingEvent.objects.create(company=company, code=code, name=f"Evento {code}")
+
+    created = [body(api_client.post(reverse(EVENTS), {"name": f"Novo {n}"}, format="json"))["code"] for n in range(4)]
+
+    assert created == [2, 5, 7, 8]
+
+
+def test_a_code_freed_by_a_deletion_is_given_again(api_client: APIClient, company: Company) -> None:
+    for code in (1, 2, 3):
+        _ = BillingEvent.objects.create(company=company, code=code, name=f"Evento {code}")
+    _ = BillingEvent.objects.get(code=2).delete()
+
+    assert BillingEvent.next_code_in(company.pk) == 2
+    assert body(api_client.post(reverse(EVENTS), {"name": "Volta o 2"}, format="json"))["code"] == 2
+
+
+def test_a_null_code_is_refused_so_a_patch_never_changes_it_by_accident(api_client: APIClient, company: Company) -> None:
+    event = BillingEvent.objects.create(company=company, code=7, name="Taxa")
+
+    response = api_client.patch(reverse(EVENT, args=[event.pk]), {"code": None}, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    event.refresh_from_db()
+    assert event.code == 7
+
+
+def test_a_typed_code_still_has_to_be_free(api_client: APIClient, company: Company) -> None:
+    _ = BillingEvent.objects.create(company=company, code=5, name="TARIFA BANCO")
+
+    duplicate = api_client.post(reverse(EVENTS), {"code": 5, "name": "Outro"}, format="json")
+
+    assert duplicate.status_code == status.HTTP_400_BAD_REQUEST
+    assert "billing_event.code.duplicate_in_company" in error_codes(duplicate)
 
 
 def test_events_of_another_company_are_invisible(api_client: APIClient, other_company: Company) -> None:
@@ -177,6 +230,30 @@ def test_the_list_of_a_month_carries_the_values_of_that_month(
     assert january == []
 
 
+def test_the_list_of_a_month_does_not_query_once_per_entry(
+    api_client: APIClient, condominium: Condominium, cost_center: CostCenter, entry_template: EntryTemplate
+) -> None:
+    units = make_units(condominium)
+    criterion = str(criterion_at(condominium).pk)
+
+    def add_entries(count: int) -> None:
+        for _ in range(count):
+            payload = entry_payload(condominium, cost_center, units, allocation="fraction", apportionment_criterion=criterion)
+            assert api_client.post(reverse(ENTRIES), payload, format="json").status_code == status.HTTP_201_CREATED
+
+    def queries_of_the_month_list() -> int:
+        with CaptureQueriesContext(connection) as captured:
+            response = api_client.get(reverse(ENTRIES), {"reference_month": "2026-10-01"})
+        assert len(results(response)) > 0
+        return len(captured)
+
+    add_entries(2)
+    with_two_entries = queries_of_the_month_list()
+    add_entries(4)
+
+    assert queries_of_the_month_list() == with_two_entries
+
+
 # ----- R8: freeze, end -----
 
 
@@ -231,3 +308,32 @@ def test_entries_of_another_company_are_invisible(
     foreign_client.force_authenticate(user=User.objects.create_user(username="other", password="x", company=other_company))
 
     assert results(foreign_client.get(reverse(ENTRIES))) == []
+
+
+@pytest.mark.usefixtures("entry_template")
+def test_query_searches_event_description_and_cost_center(api_client: APIClient, condominium: Condominium, cost_center: CostCenter) -> None:
+    units = make_units(condominium)
+    event = BillingEvent.objects.create(company=condominium.company, code=250, name="Limpeza do condomínio")
+    for overrides in ({"event": str(event.pk), "description": "10/2026"}, {"description": "Reparo do portão"}):
+        created = api_client.post(reverse(ENTRIES), entry_payload(condominium, cost_center, units, **overrides), format="json")
+        assert created.status_code == status.HTTP_201_CREATED, created.data
+
+    def found(term: str) -> list[str]:
+        listed = results(api_client.get(reverse(ENTRIES), {"condominium": str(condominium.pk), "query": term}))
+        return sorted(row["description"] for row in listed)
+
+    assert found("limpeza") == ["10/2026"]
+    assert found("portão") == ["Reparo do portão"]
+    assert found(cost_center.name) == ["10/2026", "Reparo do portão"]
+    assert found("zzz") == []
+
+
+def test_events_filter_by_credits_company(api_client: APIClient, company: Company) -> None:
+    _ = BillingEvent.objects.create(company=company, code=1, name="Taxa do condomínio")
+    _ = BillingEvent.objects.create(company=company, code=5, name="TARIFA BANCO", credits_company=True)
+
+    def names(value: str) -> list[str]:
+        return [row["name"] for row in results(api_client.get(reverse(EVENTS), {"credits_company": value}))]
+
+    assert names("true") == ["TARIFA BANCO"]
+    assert names("false") == ["Taxa do condomínio"]

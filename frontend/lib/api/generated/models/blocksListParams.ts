@@ -16,4 +16,8 @@ limit?: number;
  * Um número de página dentro do conjunto de resultados paginado.
  */
 page?: number;
+/**
+ * Termo de busca (nome, documento, ID…).
+ */
+query?: string;
 };

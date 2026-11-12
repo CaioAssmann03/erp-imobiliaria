@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
-import { PageHeader } from "@/components/PageHeader";
+import { PhoneBackLink } from "@/components/layout/BackLink";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 import { AccountabilityReportView } from "./_components/AccountabilityReportView";
 
@@ -10,7 +11,9 @@ export default function AccountabilityReportPage() {
   return (
     <div>
       <PageHeader
-        back={{ href: "/reports", label: "Relatórios" }}
+        backSlot={
+          <PhoneBackLink href="/reports" label="Relatórios" />
+        }
         title="Prestação de contas"
         description="O mês de um condomínio na conta corrente: saldo anterior, créditos, débitos e saldo final, por sub-conta."
       />

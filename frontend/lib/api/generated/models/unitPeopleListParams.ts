@@ -5,9 +5,11 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { UnitPeopleListRole } from './unitPeopleListRole';
+import type { UnitPeopleListRole } from './unitPeopleListRole.ts';
 
 export type UnitPeopleListParams = {
+condominium?: string;
+is_current?: boolean;
 /**
  * Número de resultados a serem retornados por página.
  */
@@ -17,6 +19,10 @@ limit?: number;
  */
 page?: number;
 person?: string;
+/**
+ * Termo de busca (nome, documento, ID…).
+ */
+query?: string;
 /**
  * * `owner` - Owner
  * * `tenant` - Tenant

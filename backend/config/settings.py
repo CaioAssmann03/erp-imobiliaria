@@ -7,17 +7,22 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from django.core.exceptions import ImproperlyConfigured
+from django.templatetags.static import static
+from django.urls import reverse_lazy
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEBUG = os.environ.get("DEBUG", "true").lower() == "true"
+# Off unless asked: a missing variable must mean production, never a debug server (spec 065). Development sets DEBUG=true in `.env`.
+DEBUG = os.environ.get("DEBUG", "false").strip().lower() == "true"
 
 # The insecure fallback exists only for local development; production must provide SECRET_KEY.
-SECRET_KEY = os.environ.get("SECRET_KEY") or (
-    "django-insecure-change-me-in-production" if DEBUG else None
-)
+DEVELOPMENT_SECRET_KEY = "django-insecure-change-me-in-production"
+MINIMUM_SECRET_KEY_LENGTH = 32
+SECRET_KEY = os.environ.get("SECRET_KEY") or (DEVELOPMENT_SECRET_KEY if DEBUG else None)
 if SECRET_KEY is None:
-    raise ImproperlyConfigured("SECRET_KEY must be set when DEBUG is false.")
+    raise ImproperlyConfigured("SECRET_KEY must be set when DEBUG is false (DEBUG=true is for local development only).")
+if not DEBUG and (len(SECRET_KEY) < MINIMUM_SECRET_KEY_LENGTH or SECRET_KEY == DEVELOPMENT_SECRET_KEY):
+    raise ImproperlyConfigured(f"SECRET_KEY must have at least {MINIMUM_SECRET_KEY_LENGTH} characters when DEBUG is false.")
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
@@ -39,6 +44,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_filters",
     "auditlog",
+    "axes",
     "apps.accounts",
     "apps.core",
     "apps.persons",
@@ -48,6 +54,7 @@ INSTALLED_APPS = [
     "apps.rentals",
     "apps.sales",
     "apps.seed",
+    "apps.assistant",
 ]
 
 MIDDLEWARE = [
@@ -64,6 +71,8 @@ MIDDLEWARE = [
     "auditlog.middleware.AuditlogMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Last: answers the lockout of the Admin login (spec 065).
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -71,7 +80,10 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "apps" / "billing" / "infrastructure" / "rendering" / "templates"],
+        "DIRS": [
+            BASE_DIR / "config" / "templates",
+            BASE_DIR / "apps" / "billing" / "infrastructure" / "rendering" / "templates",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -103,6 +115,10 @@ DATABASES = {
         "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
         "HOST": os.environ.get("POSTGRES_HOST", "db"),
         "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+        # A gunicorn thread keeps its connection for a minute instead of opening one per request (9 ms
+        # against 0.1 ms on the VPS); the health check replaces one that Postgres closed meanwhile.
+        "CONN_MAX_AGE": 60,
+        "CONN_HEALTH_CHECKS": True,
     }
 }
 
@@ -114,6 +130,21 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
 ]
+
+# Login lockout (spec 065): a username that fails 10 times is locked for 15 minutes, in the API login and in the Admin.
+# Keyed by username only: the per-address throttle already exists and, behind the Next server, an address is not a reliable key.
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+AXES_FAILURE_LIMIT = 10
+AXES_COOLOFF_TIME = timedelta(minutes=15)
+AXES_LOCKOUT_PARAMETERS = ["username"]
+AXES_RESET_ON_SUCCESS = True
+# Successful logins are not logged: the table would only grow.
+AXES_DISABLE_ACCESS_LOG = True
+# W006 asks for the address; the lockout is deliberately per username (see above).
+SILENCED_SYSTEM_CHECKS = ["axes.W006"]
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -151,12 +182,18 @@ REST_FRAMEWORK = {
         "apps.accounts.authentication.AuditedJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    # Every authenticated call counts against the user (spec 065); the views that need another limit set their own throttle.
+    "DEFAULT_THROTTLE_CLASSES": ("rest_framework.throttling.UserRateThrottle",),
     "DEFAULT_PAGINATION_CLASS": "apps.core.infrastructure.api.pagination.StandardPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_THROTTLE_RATES": {
         "auth_login": "5/min",
         "auth_refresh": "30/min",
         "auth_logout": "30/min",
+        "user": "600/min",
+        "webhook_asaas": "1000/min",
+        "webhook_resend": "300/min",
+        "assistant_erp": "30/hour",
     },
 }
 
@@ -169,6 +206,11 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API do sistema de administração de condomínios, locações, vendas e financeiro.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # The schema maps every endpoint: open in development (the frontend client is generated from it), superuser-only otherwise (spec 065).
+    "SERVE_PERMISSIONS": (
+        ["rest_framework.permissions.AllowAny"] if DEBUG else ["apps.core.infrastructure.api.permissions.IsSuperuser"]
+    ),
+    "SERVE_AUTHENTICATION": ["apps.accounts.authentication.AuditedJWTAuthentication"],
     # Two models have a `kind` choice: name them, or the client gets hash-suffixed enum names.
     "ENUM_NAME_OVERRIDES": {
         "AccountKindEnum": "apps.finance.models.AccountKind",
@@ -298,7 +340,16 @@ RESEND_FROM = os.environ.get("RESEND_FROM", "")
 RESEND_WEBHOOK_SECRET = os.environ.get("RESEND_WEBHOOK_SECRET", "")
 # Days back the daily reconciliation looks for received payments (Asaas keeps undelivered events for 14 days).
 GATEWAY_RECONCILIATION_WINDOW_DAYS = int(os.environ.get("GATEWAY_RECONCILIATION_WINDOW_DAYS", "3"))
+# Days (today included) the daily issuance looks back for a condominium whose day was missed; 1 turns the catch-up off.
+BILLING_ISSUANCE_CATCH_UP_DAYS = int(os.environ.get("BILLING_ISSUANCE_CATCH_UP_DAYS", "3"))
 ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS = int(os.environ.get("ASAAS_REGISTRATION_LIFETIME_BUSINESS_DAYS", "60"))
+
+# Help assistant (spec 069). Free hosted models, tried in this order; a provider without a key is skipped. The models are
+# settings because free models are retired over time. The assistant never receives data from the database.
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
 
 CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL", "redis://redis:6379/0")
@@ -315,7 +366,144 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
+def _sidebar_group(
+    title: str, description: str, items: list[tuple[str, str, str]], collapsible: bool = True
+) -> dict[str, object]:
+    """One group of the Admin sidebar and of its home page; an item is (title, icon, `app_label_model_name` of its list, or the name of a URL).
+
+    A collapsible group opens by itself when the page being shown belongs to it.
+    """
+    return {
+        "title": title,
+        "description": description,
+        "collapsible": collapsible,
+        "items": [
+            {"title": item_title, "icon": icon, "link": reverse_lazy(target if target == "admin_archived" else f"admin:{target}_changelist")}
+            for item_title, icon, target in items
+        ],
+    }
+
+
+# Every model registered in the Admin has an item here (a guard test fails when one is missing).
 UNFOLD = {
     "SITE_TITLE": "METRI",
     "SITE_HEADER": "METRI",
+    "DASHBOARD_CALLBACK": "apps.core.infrastructure.admin_home.dashboard_callback",
+    "STYLES": [lambda request: static("admin/metri.css")],
+    # The colors of the site (frontend/app/globals.css): the orange as the main color and the warm neutrals as the base,
+    # so the light and dark modes of the Admin match the ones of the app.
+    "COLORS": {
+        "primary": {
+            "50": "#fff4ef",
+            "100": "#ffe7dc",
+            "200": "#ffcdb8",
+            "300": "#ffab86",
+            "400": "#ff7a45",
+            "500": "#f56a35",
+            "600": "#f05a28",
+            "700": "#d9481a",
+            "800": "#b13b15",
+            "900": "#8a2f12",
+            "950": "#4d1807",
+        },
+        "base": {
+            "50": "#f6f6f5",
+            "100": "#f2f2f0",
+            "200": "#e4e4e1",
+            "300": "#d2d2ce",
+            "400": "#a5a49e",
+            "500": "#8a8983",
+            "600": "#6e6d68",
+            "700": "#4a4945",
+            "800": "#2a2a27",
+            "900": "#21211f",
+            "950": "#181817",
+        },
+        "font": {
+            "subtle-light": "var(--color-base-500)",
+            "subtle-dark": "var(--color-base-400)",
+            "default-light": "var(--color-base-600)",
+            "default-dark": "var(--color-base-300)",
+            "important-light": "#1c1b19",
+            "important-dark": "#f2f2ef",
+        },
+    },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation": [
+            _sidebar_group(
+                "Cadastros",
+                "Condomínios, unidades, pessoas e fornecedores.",
+                [
+                    ("Condomínios", "apartment", "condominiums_condominium"),
+                    ("Blocos", "domain", "condominiums_block"),
+                    ("Unidades", "meeting_room", "condominiums_unit"),
+                    ("Pessoas", "group", "persons_person"),
+                    ("Fornecedores", "local_shipping", "finance_supplier"),
+                    ("Endereços", "location_on", "core_address"),
+                    ("Arquivados", "inventory_2", "admin_archived"),
+                ],
+                collapsible=False,
+            ),
+            _sidebar_group(
+                "Financeiro",
+                "Contas a pagar, sub-contas, extrato e comprovantes.",
+                [
+                    ("Contas a pagar", "receipt_long", "finance_accountpayable"),
+                    ("Sub-contas", "account_tree", "finance_costcenter"),
+                    ("Catálogo de sub-contas", "list_alt", "finance_costcentercatalogitem"),
+                    ("Modelos de lançamento", "description", "finance_entrytemplate"),
+                    ("Contas bancárias", "account_balance", "finance_bankaccount"),
+                    ("Contas correntes", "savings", "finance_currentaccount"),
+                    ("Lotes de lançamentos", "inventory", "finance_entrybatch"),
+                    ("Extrato (lançamentos)", "swap_vert", "finance_currentaccountentry"),
+                    ("Conta da imobiliária", "business_center", "finance_companyentry"),
+                    ("Comprovantes", "attach_file", "finance_paymentreceipt"),
+                ],
+            ),
+            _sidebar_group(
+                "Cobrança",
+                "Planos, inclusão de valores, emissão e boletos.",
+                [
+                    ("Planos de cobrança", "event_repeat", "billing_billingplan"),
+                    ("Eventos", "bolt", "billing_billingevent"),
+                    ("Regras de cobrança", "rule", "billing_condominiumbillingrules"),
+                    ("Taxas de juros", "percent", "billing_lateinterestrate"),
+                    ("Inclusão de valores", "add_card", "billing_billingentry"),
+                    ("Emissões do mês", "play_circle", "billing_billingrun"),
+                    ("Boletos", "request_quote", "billing_billingdocument"),
+                ],
+            ),
+            _sidebar_group(
+                "Gateway e boletos (técnico)",
+                "Registros, entregas, pagamentos e eventos do gateway; só para conferência.",
+                [
+                    ("Registros no gateway", "how_to_reg", "billing_billingdocumentregistration"),
+                    ("Entregas por e-mail", "mail", "billing_billingdocumentdelivery"),
+                    ("Pagamentos de boletos", "paid", "billing_billingdocumentpayment"),
+                    ("PDFs dos boletos", "picture_as_pdf", "billing_billingdocumentpdf"),
+                    ("Conta do gateway", "key", "billing_gatewayaccount"),
+                    ("Clientes do gateway", "badge", "billing_gatewaycustomer"),
+                    ("Eventos do gateway", "webhook", "billing_gatewayevent"),
+                    ("Conciliações", "sync", "billing_gatewayreconciliationrun"),
+                ],
+            ),
+            _sidebar_group(
+                "Sistema",
+                "Usuários, empresas, log de auditoria e tokens.",
+                [
+                    ("Usuários", "person", "accounts_user"),
+                    ("Grupos", "shield_person", "auth_group"),
+                    ("Empresas", "corporate_fare", "core_company"),
+                    ("Log de auditoria", "history", "auditlog_logentry"),
+                    ("Tokens pendentes", "key_vertical", "token_blacklist_outstandingtoken"),
+                    ("Tokens na lista negra", "block", "token_blacklist_blacklistedtoken"),
+                    ("Tentativas de acesso (bloqueios)", "lock", "axes_accessattempt"),
+                    ("Falhas de acesso", "report", "axes_accessfailurelog"),
+                    ("Registros de acesso", "login", "axes_accesslog"),
+                ],
+            ),
+        ],
+    },
 }

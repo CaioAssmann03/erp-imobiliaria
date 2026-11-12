@@ -1,6 +1,6 @@
 "use client";
 
-import { describeField } from "@/lib/form-labels";
+import { describeField } from "@/lib/errors/form-labels";
 import {
   useFormContext,
   type FieldErrors,

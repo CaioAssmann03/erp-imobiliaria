@@ -77,8 +77,21 @@ class ObjectStorage:
             raise
         return int(head["ContentLength"])
 
+    def read_head(self, key: str, length: int) -> bytes:
+        """The first `length` bytes of the stored object (a ranged read: the file is never downloaded whole)."""
+        response: dict[str, Any] = self._client.get_object(Bucket=self._bucket, Key=key, Range=f"bytes=0-{length - 1}")
+        content: bytes = response["Body"].read()
+        return content
+
     def delete_object(self, key: str) -> None:
         self._client.delete_object(Bucket=self._bucket, Key=key)
+
+    def discard_object(self, key: str, description: str) -> None:
+        """Delete a file nothing points at any more; a failure is logged and leaves an orphan, never an error."""
+        try:
+            self.delete_object(key)
+        except Exception:
+            logger.exception("%s %s could not be deleted from the bucket; it is now an orphan.", description, key)
 
 
 def get_object_storage() -> ObjectStorage:

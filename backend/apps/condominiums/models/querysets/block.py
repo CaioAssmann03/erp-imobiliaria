@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
-from django.db import models
-
+from apps.core.models import SoftDeleteQuerySet
 from apps.core.infrastructure.search.ranking import relevance_rank
 from apps.core.infrastructure.search.text_match import name_matches
 
@@ -10,7 +9,7 @@ if TYPE_CHECKING:
     from apps.core.infrastructure.search.term import ClassifiedTerm
 
 
-class BlockQuerySet(models.QuerySet["Block"]):
+class BlockQuerySet(SoftDeleteQuerySet["Block"]):
     def search(self, query: "ClassifiedTerm") -> "BlockQuerySet":
         """Blocks whose name matches the global search term, the best match first.
 

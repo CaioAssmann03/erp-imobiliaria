@@ -5,8 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { PeopleIndividual } from './peopleIndividual';
-import type { PeopleLegal } from './peopleLegal';
+import type { PeopleIndividual } from './peopleIndividual.ts';
+import type { PeopleLegal } from './peopleLegal.ts';
 
 /**
  * Serializer mixin: input is validated by the model's rules, never by rules written here.

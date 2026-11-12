@@ -8,6 +8,7 @@
 
 export type BillingEventsListParams = {
 active?: boolean;
+credits_company?: boolean;
 /**
  * Número de resultados a serem retornados por página.
  */

@@ -5,7 +5,7 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { AdministrationFeeRow } from './administrationFeeRow';
+import type { AdministrationFeeRow } from './administrationFeeRow.ts';
 
 /**
  * What the administradora has to charge each active condominium in a month; only `due` rows are counted and totalled.

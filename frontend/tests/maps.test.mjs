@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { addressQuery, isAddressMappable, mapsEmbedUrl, mapsKeylessEmbedUrl, mapsSearchUrl } from "../lib/maps.ts";
+import { addressQuery, isAddressMappable, mapsEmbedUrl, mapsKeylessEmbedUrl, mapsSearchUrl } from "../lib/condominiums/maps.ts";
 
 const full = {
   zip_code: "80010-000",

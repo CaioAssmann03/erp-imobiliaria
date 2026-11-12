@@ -1,17 +1,25 @@
+import { keepPreviousData } from "@tanstack/react-query";
 import Link from "next/link";
+import { useState } from "react";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useDashboardAdjustmentsList } from "@/lib/api/generated";
 import type { Dashboard } from "@/lib/api/generated/models";
 
-import { Late } from "../../Late";
-import { formatDate, relativeDays } from "../../relative-days";
-import { SimpleBarChart } from "../../SimpleBarChart";
+import { Late } from "@/app/(dashboard)/_components/home/shared/Late";
+import { formatDate, relativeDays } from "@/app/(dashboard)/_components/home/shared/relative-days";
+import { SimpleBarChart } from "@/components/charts/SimpleBarChart";
 import { longMonthLabel, shortMonthLabel } from "../format";
-import { FocusSection, FocusStat } from "./parts";
+import { FOCUS_PAGE_SIZE, FocusPager, FocusSection, FocusStat } from "./parts";
 
-/** Visão completa dos reajustes: os números, o gráfico dos próximos meses e a lista dos condomínios por data. */
+/** Visão completa dos reajustes: os números, o gráfico dos próximos meses e a lista dos condomínios por data, 10 por página. */
 export function AdjustmentsFocus({ dash }: { dash: Dashboard | undefined }) {
-  const upcoming = dash?.upcoming_adjustments ?? [];
+  const [page, setPage] = useState(1);
+  const { data: list } = useDashboardAdjustmentsList(
+    { limit: FOCUS_PAGE_SIZE, ...(page > 1 ? { page } : {}) },
+    { query: { placeholderData: keepPreviousData } }
+  );
+  const upcoming = list?.results ?? [];
   const byMonth = dash?.adjustments_by_month ?? [];
   const planned = byMonth.filter((item) => item.month !== "overdue").reduce((sum, item) => sum + item.total, 0);
 
@@ -41,35 +49,38 @@ export function AdjustmentsFocus({ dash }: { dash: Dashboard | undefined }) {
       </FocusSection>
 
       <FocusSection title="Próximos reajustes">
-        {upcoming.length === 0 ? (
+        {list && list.count === 0 ? (
           <p className="text-ink-soft">Nenhum condomínio com reajuste configurado.</p>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead>Condomínio</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead className="hidden sm:table-cell">Índice</TableHead>
-                <TableHead className="text-right">Prazo</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {upcoming.map((adjustment) => (
-                <TableRow key={adjustment.id}>
-                  <TableCell>
-                    <Link href={`/condominiums/${adjustment.id}`} className="font-medium hover:underline">
-                      {adjustment.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="tabular-nums">{formatDate(adjustment.date)}</TableCell>
-                  <TableCell className="hidden text-ink-soft sm:table-cell">{adjustment.adjustment_index || "–"}</TableCell>
-                  <TableCell className="text-right">
-                    {adjustment.overdue ? <Late>{relativeDays(adjustment.date)}</Late> : relativeDays(adjustment.date)}
-                  </TableCell>
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead>Condomínio</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead className="hidden sm:table-cell">Índice</TableHead>
+                  <TableHead className="text-right">Prazo</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {upcoming.map((adjustment) => (
+                  <TableRow key={adjustment.id}>
+                    <TableCell>
+                      <Link href={`/condominiums/${adjustment.id}`} className="font-medium hover:underline">
+                        {adjustment.name}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="tabular-nums">{formatDate(adjustment.date)}</TableCell>
+                    <TableCell className="hidden text-ink-soft sm:table-cell">{adjustment.adjustment_index || "–"}</TableCell>
+                    <TableCell className="text-right">
+                      {adjustment.overdue ? <Late>{relativeDays(adjustment.date)}</Late> : relativeDays(adjustment.date)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <FocusPager page={page} count={list?.count ?? 0} noun={list?.count === 1 ? "condomínio" : "condomínios"} onPage={setPage} />
+          </>
         )}
       </FocusSection>
     </div>

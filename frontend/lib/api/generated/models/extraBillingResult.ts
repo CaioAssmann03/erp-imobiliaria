@@ -5,8 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BillingDocument } from './billingDocument';
-import type { SkippedUnit } from './skippedUnit';
+import type { BillingDocument } from './billingDocument.ts';
+import type { SkippedUnit } from './skippedUnit.ts';
 
 export interface ExtraBillingResult {
   issued: BillingDocument[];

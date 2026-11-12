@@ -30,9 +30,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
+          // Cores contrárias ao modo: escuro no claro e claro no escuro (o `ink` e o texto sobre ele se invertem com o modo).
+          "--normal-bg": "var(--color-ink)",
+          "--normal-text": "var(--color-ink-foreground)",
+          "--normal-border": "var(--color-ink)",
           "--border-radius": "var(--radius)",
         } as React.CSSProperties
       }

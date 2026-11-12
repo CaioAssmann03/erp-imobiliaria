@@ -32,7 +32,7 @@ import type {
   PaymentReceiptsListParams
 } from '../models';
 
-import { customInstance } from '../../mutator';
+import { customInstance } from '../../mutator.ts';
 
 
 

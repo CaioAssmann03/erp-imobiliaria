@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, final, override
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.db.models.functions import Lower
 
 from apps.condominiums.errors import CondominiumApportionmentCriterionError
 from apps.condominiums.models.condominium import Condominium
@@ -47,10 +48,11 @@ class CondominiumApportionmentCriterion(BaseModel):
     class Meta:
         verbose_name = "Apportionment criterion"
         verbose_name_plural = "Apportionment criteria"
-        ordering = ("condominium__name", "position")
+        ordering = ("condominium__code", "position")
         constraints = (
             models.UniqueConstraint(
-                fields=("condominium", "name"),
+                "condominium",
+                Lower("name"),
                 name="apportionment_criterion_unique_name",
                 violation_error_message=CondominiumApportionmentCriterionError.NAME_DUPLICATE.message,
                 violation_error_code=CondominiumApportionmentCriterionError.NAME_DUPLICATE.value,

@@ -18,4 +18,4 @@ class BillingEventViewSet(CompanyScopedViewSetMixin, viewsets.ModelViewSet[Billi
     serializer_class = BillingEventSerializer
     filter_backends = (DjangoFilterBackend, QuerySearchFilter)
     search_fields = ("name",)
-    filterset_fields = ("active",)
+    filterset_fields = ("active", "credits_company")

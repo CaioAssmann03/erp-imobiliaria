@@ -5,10 +5,10 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BlankEnum } from './blankEnum';
-import type { FeeBasisEnum } from './feeBasisEnum';
-import type { FeeTypeEnum } from './feeTypeEnum';
-import type { NullEnum } from './nullEnum';
+import type { BlankEnum } from './blankEnum.ts';
+import type { FeeBasisEnum } from './feeBasisEnum.ts';
+import type { FeeTypeEnum } from './feeTypeEnum.ts';
+import type { NullEnum } from './nullEnum.ts';
 
 /**
  * Serializer mixin: input is validated by the model's rules, never by rules written here.

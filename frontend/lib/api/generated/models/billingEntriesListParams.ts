@@ -5,8 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BillingEntriesListAllocation } from './billingEntriesListAllocation';
-import type { BillingEntriesListRecurrence } from './billingEntriesListRecurrence';
+import type { BillingEntriesListAllocation } from './billingEntriesListAllocation.ts';
+import type { BillingEntriesListRecurrence } from './billingEntriesListRecurrence.ts';
 
 export type BillingEntriesListParams = {
 /**
@@ -26,6 +26,10 @@ limit?: number;
  * Um número de página dentro do conjunto de resultados paginado.
  */
 page?: number;
+/**
+ * Termo de busca (nome, documento, ID…).
+ */
+query?: string;
 /**
  * * `once` - Once
  * * `installments` - Installments

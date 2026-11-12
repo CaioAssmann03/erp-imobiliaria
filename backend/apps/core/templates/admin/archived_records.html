@@ -1,0 +1,76 @@
+{% extends "admin/base_site.html" %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+    <div class="flex flex-col gap-4">
+        <div>
+            <h1 class="font-semibold text-xl text-font-important-light tracking-tight dark:text-font-important-dark">Arquivados</h1>
+            <p class="mt-1">Os registros excluídos continuam guardados. Restaure aqui o que foi excluído por engano.</p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+            {% for tab in tabs %}
+                <a href="{{ page_url }}?type={{ tab.key }}"
+                   class="border flex font-medium gap-2 items-center px-3 py-2 rounded-default text-sm {% if tab.selected %}bg-primary-600 border-primary-600 text-white{% else %}bg-white border-base-200 hover:text-primary-600 dark:bg-base-900 dark:border-base-800{% endif %}">
+                    {{ tab.label }}
+                    <span class="font-normal opacity-70">{{ tab.count }}</span>
+                </a>
+            {% endfor %}
+        </div>
+
+        {% if selected %}
+            <form method="get" action="{{ page_url }}" class="flex gap-2">
+                <input type="hidden" name="type" value="{{ selected }}">
+                <input type="search" name="q" value="{{ query }}" placeholder="Buscar entre os arquivados"
+                       class="border border-base-200 bg-white px-3 py-2 rounded-default text-sm w-full max-w-sm dark:bg-base-900 dark:border-base-800">
+                <button type="submit" class="border border-base-200 font-medium px-3 py-2 rounded-default text-sm hover:text-primary-600 dark:border-base-800">Buscar</button>
+            </form>
+
+            {% if rows %}
+                <div class="border border-base-200 bg-white overflow-x-auto rounded-default shadow-xs dark:bg-base-900 dark:border-base-800">
+                    <table class="border-separate border-spacing-none w-full">
+                        <thead>
+                            <tr class="text-left text-sm">
+                                <th class="font-medium px-3 py-2">Registro</th>
+                                <th class="font-medium px-3 py-2">Excluído em</th>
+                                <th class="px-3 py-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rows %}
+                                <tr>
+                                    <td class="border-t border-base-200 px-3 py-2 dark:border-base-800">{{ row.label }}</td>
+                                    <td class="border-t border-base-200 px-3 py-2 whitespace-nowrap dark:border-base-800">{{ row.deleted_at|date:"d/m/Y H:i" }}</td>
+                                    <td class="border-t border-base-200 px-3 py-2 text-right whitespace-nowrap dark:border-base-800">
+                                        <form method="post" class="inline-flex gap-2">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="model" value="{{ selected }}">
+                                            <input type="hidden" name="pk" value="{{ row.pk }}">
+                                            <button type="submit" name="action" value="restore"
+                                                    class="bg-primary-600 font-medium px-3 py-1.5 rounded-default text-sm text-white">Restaurar</button>
+                                            {% for action in row.actions %}
+                                                <button type="submit" name="action" value="{{ action.name }}"
+                                                        class="border border-base-200 font-medium px-3 py-1.5 rounded-default text-sm hover:text-red-600 dark:border-base-700"
+                                                        onclick="return confirm('{{ action.label }}? Esta ação não pode ser desfeita.')">{{ action.label }}</button>
+                                            {% endfor %}
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if total > page_size %}
+                    <p class="text-sm">Mostrando {{ page_size }} de {{ total }}. Use a busca para achar os demais.</p>
+                {% endif %}
+            {% else %}
+                <div class="border border-base-200 bg-white px-8 py-12 rounded-default text-center dark:bg-base-900 dark:border-base-800">
+                    {% if query %}Nenhum registro arquivado com essa busca.{% else %}Nada arquivado aqui.{% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <p>Você não tem permissão para restaurar nenhum tipo de registro.</p>
+        {% endif %}
+    </div>
+{% endblock %}

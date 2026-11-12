@@ -34,3 +34,7 @@ class CostCenterError(RuleError):
         "cost_center.catalog_item.immutable",
         "The catalog sub-conta of a cost center cannot be changed.",
     )
+    ARCHIVE_IN_ACTIVE_BILLING_PLAN = (
+        "cost_center.archive.in_active_billing_plan",
+        "This cost center is used by an active billing plan; change the plan first.",
+    )

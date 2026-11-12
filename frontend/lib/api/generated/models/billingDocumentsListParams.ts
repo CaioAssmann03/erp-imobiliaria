@@ -5,8 +5,8 @@
  * API do sistema de administração de condomínios, locações, vendas e financeiro.
  * OpenAPI spec version: 1.0.0
  */
-import type { BillingDocumentsListKind } from './billingDocumentsListKind';
-import type { BillingDocumentsListStatus } from './billingDocumentsListStatus';
+import type { BillingDocumentsListKind } from './billingDocumentsListKind.ts';
+import type { BillingDocumentsListStatus } from './billingDocumentsListStatus.ts';
 
 export type BillingDocumentsListParams = {
 competence_month?: string;

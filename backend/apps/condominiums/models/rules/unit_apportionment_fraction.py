@@ -40,7 +40,7 @@ class UnitApportionmentFractionRules(ModelRules["UnitApportionmentFraction"]):
             return False
         other_units_total: Decimal = (
             type(fraction)
-            .objects.filter(criterion_id=fraction.criterion_id, unit__active=True)
+            .objects.filter(criterion_id=fraction.criterion_id, unit__active=True, unit__deleted_at__isnull=True)
             .exclude(unit_id=fraction.unit_id)
             .aggregate(total=Coalesce(Sum("value"), Decimal(0)))["total"]
         )

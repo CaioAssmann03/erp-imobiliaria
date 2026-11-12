@@ -3,33 +3,40 @@ summary: Task → files routing table for the frontend docs.
 read-when: you start any frontend task
 skip-if: you already know the file → open it directly
 ---
-# Frontend docs (REASONS)
+# Frontend docs
 
-Organized by the SPDD REASONS canvas. Find your task, open **only** the listed files (usually 2–3). **Read the header first** (first 6 lines of any doc:
-`summary` / `read-when` / `skip-if`); if `skip-if` matches or the summary is not what you need, follow its pointer without reading the rest.
+Find your task, open **only** the listed files (usually 2–3). Read the header first (first 6 lines of any doc: `summary` / `read-when` / `skip-if`); if `skip-if` matches, follow its pointer without reading the rest.
 
 | Task | Open |
 |---|---|
-| New CRUD resource / page | `operations/new-resource-page.md` → `structure/component-patterns.md` |
-| Change a form or field | `norms/forms.md` · `entities/domain-model.md` |
-| Change a list / table / filter | `structure/component-patterns.md` · `norms/data-and-cache.md` |
-| Create or move a component | `norms/components.md` · `structure/folders-and-routes.md` |
-| Call the API, fetch on the client, invalidate | `norms/data-and-cache.md` (+ `norms/tanstack-query.md` for advanced use) |
-| Styling, colors, theme, accent | `norms/design-system.md` |
-| Public pages (landing, features, how-it-works) | `norms/marketing.md` · `structure/folders-and-routes.md` |
-| Login, token, cookie, `proxy.ts` | `safeguards/auth-and-tokens.md` (+ `safeguards/http-hardening.md`) |
-| Input, URLs, redirects, PII | `safeguards/secure-coding.md` |
-| Speed, bundle, re-renders | `safeguards/performance.md` |
-| Widget, nav item, accent, small recurring job | `operations/recipes.md` |
-| Naming, language, imports, code style | `norms/language-and-naming.md` · `norms/code-style.md` |
-| Libraries (Tailwind, shadcn, sonner, recharts) | `norms/ui-libraries.md` |
-| Titles, accessibility, SEO | `safeguards/accessibility-and-seo.md` |
-| Finishing any change | `safeguards/checklist.md` |
-| Product or stack | `requirements/product-scope.md` · `approach/architecture.md` |
+| The big picture, modules, stack, why pages render this way | `overview.md` |
+| A registry module or screen (list \| content \| right menu), back button, scope filters, sub-screens | `structure/registry-layout.md` · `structure/routes.md` |
+| Which file serves a URL; where a new file goes | `structure/routes.md` · `structure/folders.md` |
+| New CRUD resource / page | `guides/recipes.md` → `conventions/components.md` |
+| A server page vs a client component; list, form or widget anatomy | `conventions/components.md` |
+| Change a form or field | `conventions/forms.md` · `domain-model.md` |
+| Call the API, cache, invalidate, filter or paginate a list | `conventions/data-and-cache.md` |
+| Styling, colors, theme, accent, a UI library | `conventions/design-system.md` |
+| Naming, language (EN code / PT UI), imports, code style | `conventions/code.md` |
+| Entity fields, enums, business rules | `domain-model.md` |
+| Public pages (landing, features, how-it-works, contato), sitemap, Open Graph | `features/marketing.md` · `quality/accessibility-and-seo.md` |
+| The help chat in the ERP header | `features/assistant.md` |
+| Login, token, cookie, `proxy.ts`, the `/api` handler | `quality/auth-and-tokens.md` |
+| Input, URLs, redirects, PII, headers, CSP | `quality/secure-coding.md` |
+| Speed, bundle, re-renders | `quality/performance.md` |
+| Titles, accessibility, SEO | `quality/accessibility-and-seo.md` |
+| Regenerate the client, add a field/accent/nav item, finish a change (checklist) | `guides/recipes.md` |
 
 ## Folder map
-`requirements/` scope · `entities/` domain model · `approach/` architecture and decisions · `structure/` folders, routes, patterns · `operations/` recipes ·
-`norms/` conventions · `safeguards/` security, performance, a11y, checklist.
 
-Always true: code English, UI text Portuguese · every page renders on the client (static shell + client queries) · tokens only · never edit `lib/api/generated/` · docs and `AGENTS.md` in English ·
-update the doc you changed in the same change.
+`overview.md` and `domain-model.md` (what and why) · `structure/` (folders, routes, the registry layout) · `conventions/` (how to write code: components, data, forms, design, style) · `features/` (the public site and the assistant) · `guides/` (recipes and the finish checklist) · `quality/` (auth, security, accessibility, performance).
+
+## Rules that always hold
+
+- Code in English, UI text in Portuguese; docs and `AGENTS.md` in English.
+- **Pages are server shells** (no API call, not even the home); everything that fetches or interacts is a **small client component** under them.
+- **The backend owns the logic**: filtering, search, ordering, pagination, totals and rules are API params and endpoints; the client never filters, sorts or aggregates a list, and keeps its filter UI small. Missing something? Add it to the backend, regenerate, send the param.
+- **Cache**: generated hooks only, no prefetch or `initialData`, invalidate with the generated key functions after every mutation, never copy query data into state.
+- Registry screens use the 3-column layout, drawn by frames (pages render only their content).
+- Tokens only; never edit `lib/api/generated/`.
+- Update the doc you changed in the same change.
