@@ -5,6 +5,7 @@ PostgreSQL join, hash and sort every row of the company before it can cut the pa
 page needs only the filters and the ordering; the joins are needed for the 20 rows shown.
 """
 
+from collections.abc import Sequence
 from typing import Any
 
 from django.db.models import QuerySet
@@ -17,7 +18,9 @@ class DeferredJoinPaginationMixin:
     queryset (same filters, same ordering, same count); only the cost changes.
     """
 
-    def paginate_queryset(self, queryset: QuerySet[Any]) -> list[Any] | None:
+    def paginate_queryset(self, queryset: QuerySet[Any, Any] | Sequence[Any]) -> list[Any] | None:
+        if not isinstance(queryset, QuerySet):  # the DRF signature also takes a sequence; a viewset's list is always a queryset
+            return super().paginate_queryset(queryset)  # type: ignore[misc,no-any-return]
         page_ids = super().paginate_queryset(  # type: ignore[misc]
             queryset.prefetch_related(None).values_list("pk", flat=True)
         )

@@ -116,4 +116,4 @@ def test_the_dashboard_is_kept_for_a_minute_per_company(
 
     cache.clear()
 
-    assert dashboard(api_client)["condominiums"]["total"] > 0  # type: ignore[index,operator]
+    assert dashboard(api_client)["condominiums"]["total"] > 0  # type: ignore[index]

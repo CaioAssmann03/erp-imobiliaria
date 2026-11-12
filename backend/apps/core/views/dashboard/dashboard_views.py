@@ -31,7 +31,9 @@ class DashboardView(APIView):
     @extend_schema(responses=DashboardSerializer, operation_id="dashboard_retrieve")
     def get(self, request: Request) -> Response:
         reference_date = timezone.localdate()
-        cache_key = f"dashboard:{request.user.company_id}:{reference_date.isoformat()}"
+        user: Any = request.user  # IsAuthenticated: never anonymous here, and `core` does not import `accounts`
+        company_id = user.company_id
+        cache_key = f"dashboard:{company_id}:{reference_date.isoformat()}"
         body = cache.get(cache_key)
         if body is None:
             body = self._build(request, reference_date)
