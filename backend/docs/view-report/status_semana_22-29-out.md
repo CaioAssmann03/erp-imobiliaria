@@ -5,7 +5,7 @@ skip-if: you need the report in the sprint template → view-report/status_sprin
 ---
 # Status report — semana de 22 a 29/10/2026
 
-ERP da EVE Administradora de Imóveis. Relatório feito a partir do histórico do git (`origin/dev` e `origin/main`), dos testes rodados hoje e das specs.
+ERP Imobiliária. Relatório feito a partir do histórico do git (`origin/dev` e `origin/main`), dos testes rodados hoje e das specs.
 
 ## Resumo em cinco linhas
 
