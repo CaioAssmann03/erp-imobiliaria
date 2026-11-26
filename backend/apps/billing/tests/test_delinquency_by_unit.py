@@ -5,6 +5,7 @@ from decimal import Decimal
 
 import pytest
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -108,9 +109,10 @@ def test_another_companys_unit_gives_an_empty_report(other_api_client: APIClient
 
 def test_the_pdf_service_keeps_the_whole_summary_and_can_drop_the_months(document: BillingDocument, debts: dict[str, Unit]) -> None:
     documents = BillingDocument.objects.all()
+    today = timezone.localdate()  # `_due` sets the due dates relative to today, so the report is as of today
 
-    with_months = build_delinquency_report(documents, date(2026, 11, 12))
-    without = build_delinquency_report(documents, date(2026, 11, 12), include_months=False)
+    with_months = build_delinquency_report(documents, today)
+    without = build_delinquency_report(documents, today, include_months=False)
 
     assert len(with_months.by_unit) == without.unit_count == 3 and ROW_LIMIT > 3
     assert len(with_months.rows) == 4 and without.rows == []
