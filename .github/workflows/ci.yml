@@ -106,9 +106,17 @@ jobs:
         run: pytest apps -q
 
       # The nightly backup (spec 040): retention, failures and a real pg_dump / openssl / pg_restore round trip.
+      # It runs in the backup image itself (`postgres:16`, the major of the `db` service, so the client matches the
+      # server as in production). The runner's own client is newer (ubuntu-latest is 26.04, PostgreSQL 18) and a 17+
+      # pg_restore writes `SET transaction_timeout`, which a PostgreSQL 16 server refuses. `--network host` reaches
+      # the postgres service above.
       - name: Backup tests
-        working-directory: backend
-        run: python -m unittest discover -s backup/tests -v
+        run: |
+          docker build --tag erp-backup backend/backup
+          docker run --rm --network host \
+            -e PYTHONDONTWRITEBYTECODE=1 -e POSTGRES_HOST -e POSTGRES_PORT -e POSTGRES_USER -e POSTGRES_PASSWORD \
+            --volume "$PWD/backend/backup:/backup" \
+            erp-backup python3 -m unittest discover -s tests -v
 
   frontend:
     runs-on: ubuntu-latest
