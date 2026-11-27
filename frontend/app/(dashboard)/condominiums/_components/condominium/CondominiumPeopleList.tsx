@@ -34,7 +34,7 @@ export function CondominiumPeopleList({ condominiumId }: { condominiumId: string
       label="Pessoas"
       title="Pessoas"
       actions={<RegistryCreate href={newPersonUrl({ condominium: condominiumId, from: here })} label="Nova pessoa" />}
-      search={{ label: "Buscar pessoa", placeholder: "Nome ou CPF/CNPJ", value: search, onChange: setSearch }}
+      search={{ label: "Buscar pessoa por nome, CPF/CNPJ ou e-mail", placeholder: "Nome, CPF/CNPJ ou e-mail", value: search, onChange: setSearch }}
       navLabel="Lista de pessoas do condomínio"
       isLoading={isLoading}
       isEmpty={results.length === 0}

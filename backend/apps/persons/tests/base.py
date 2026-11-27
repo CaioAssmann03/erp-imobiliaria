@@ -40,9 +40,10 @@ def make_individual(
     cpf: str = CPF_A,
     job: str | None = None,
     company: Company | None = None,
+    email: str = "",
 ) -> Person:
     owner = company or seeded_company()
-    person = Person.objects.create(company=owner, name=name)
+    person = Person.objects.create(company=owner, name=name, email=email)
     _ = PeopleIndividual.objects.create(person=person, company=owner, cpf=cpf, job=job)
     return person
 
