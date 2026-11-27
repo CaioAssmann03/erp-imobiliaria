@@ -76,7 +76,6 @@ export const condominiumSchema = z
     city: optionalText("Cidade", 120),
     state: ufField,
     water_meter: optionalText("Hidrômetro", 30),
-    electricity_meter: optionalText("Relógio de luz", 30),
 
     fee_type: enumField(["fixed", "variable"]),
     fee_amount: decimalField("Valor da taxa", { max: MAX_MONEY }),
@@ -150,7 +149,6 @@ export const CONDOMINIUM_DEFAULTS: CondominiumFormInput = {
   city: "",
   state: "",
   water_meter: "",
-  electricity_meter: "",
   fee_type: "fixed",
   fee_amount: "",
   fee_percentage: "",
@@ -198,7 +196,6 @@ export function condominiumToForm(c: Condominium, billing?: CondominiumBillingRu
     city: address?.city ?? "",
     state: address?.state ?? "",
     water_meter: c.water_meter ?? "",
-    electricity_meter: c.electricity_meter ?? "",
     fee_type: contract?.fee_type ?? "fixed",
     fee_amount: moneyFromApi(contract?.fee_amount),
     fee_percentage: decimalFromApi(contract?.fee_percentage, 2),
@@ -266,7 +263,6 @@ export function condominiumToPayload(
     cnpj: values.cnpj,
     municipal_registration: orEmpty(values.municipal_registration),
     water_meter: orEmpty(values.water_meter),
-    electricity_meter: orEmpty(values.electricity_meter),
     active: values.active,
     ...(hasAddress ? { address } : {}),
     administration_contract: {
