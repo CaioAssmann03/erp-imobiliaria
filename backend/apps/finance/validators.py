@@ -1,6 +1,7 @@
 import re
 from decimal import Decimal
 
+from apps.finance.errors.entry_batch import EntryBatchError
 from apps.finance.errors.payment_receipt import PaymentReceiptError
 from apps.finance.errors.validators import FinanceValidatorError
 
@@ -41,6 +42,11 @@ def validate_non_zero_amount(amount: Decimal) -> None:
 def validate_positive_cash_number(cash_number: int) -> None:
     if cash_number <= 0:
         raise FinanceValidatorError.CASH_NUMBER_NOT_POSITIVE.to_validation_error()
+
+
+def validate_positive_batch_number(number: int) -> None:
+    if number <= 0:
+        raise EntryBatchError.NUMBER_NOT_POSITIVE.to_validation_error()
 
 
 def validate_receipt_content_type(content_type: str) -> None:

@@ -112,8 +112,9 @@ class CurrentAccountAdmin(CompanyScopedAdminMixin, MetriModelAdmin):
 @final
 @admin.register(EntryBatch)
 class EntryBatchAdmin(CompanyScopedAdminMixin, MetriModelAdmin):
-    list_display = ("batch_date", "origin", "cash_number")
+    list_display = ("number", "batch_date", "origin", "cash_number")
     list_filter = ("origin",)
+    search_fields = ("number",)
     date_hierarchy = "batch_date"
 
 
