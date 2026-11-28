@@ -62,7 +62,7 @@ None (no table, no migration).
 ## Test plan
 | Criterion | Test |
 |---|---|
-| R1, R2, R6 | `backend/backup/tests/test_backup.py::DumpAndRestoreTest` (a real `pg_dump`, `openssl` and `pg_restore` round trip on a scratch PostgreSQL database; skipped when no server is reachable) |
+| R1, R2, R6 | `backend/backup/tests/test_backup.py::DumpAndRestoreTest` (a real `pg_dump`, `openssl` and `pg_restore` round trip on a scratch PostgreSQL database; skipped when no server is reachable; CI runs the file inside the backup image, whose client is PostgreSQL 16 like the server) |
 | R3 | `backend/backup/tests/test_backup.py::RetentionTest` |
 | R4 | `backend/backup/tests/test_backup.py::FailureTest` (nothing is deleted when the dump or the upload fails) |
 | R5 | `backend/backup/tests/test_backup.py::StatusTest` |

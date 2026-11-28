@@ -120,7 +120,7 @@ export function PersonsList({ openPersonId, className }: { openPersonId: string 
             </>
           }
         >
-          <RegistrySearch label="Buscar pessoa por nome, CPF/CNPJ ou e-mail" placeholder="Nome ou CPF/CNPJ" value={search} onChange={setSearch}>
+          <RegistrySearch label="Buscar pessoa por nome, CPF/CNPJ ou e-mail" placeholder="Nome, CPF/CNPJ ou e-mail" value={search} onChange={setSearch}>
             <CompactFilter groups={groups} onClear={clearFilters} columns={2} />
           </RegistrySearch>
         </ScopeSearchCard>

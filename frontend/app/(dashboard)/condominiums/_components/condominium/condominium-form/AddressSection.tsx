@@ -42,7 +42,6 @@ export function AddressSection({ mapsEmbedKey }: { mapsEmbedKey?: string }) {
       <AddressMap apiKey={mapsEmbedKey} />
       <FieldRow>
         <TextField name="water_meter" label="Hidrômetro" maxLength={30} />
-        <TextField name="electricity_meter" label="Relógio de luz" maxLength={30} />
       </FieldRow>
     </FormSection>
   );

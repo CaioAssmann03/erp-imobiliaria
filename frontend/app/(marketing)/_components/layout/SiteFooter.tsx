@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Brand } from "@/components/brand/Brand";
+import { SITE_NAME } from "@/lib/site/site";
 
 import { CONTACT_HREF, MODULE_LINKS } from "@/app/(marketing)/_components/content";
 import { MarketingButton } from "@/app/(marketing)/_components/MarketingButton";
@@ -81,11 +82,10 @@ export function SiteFooter() {
           </FooterColumn>
         </div>
 
-        <div className="mt-16 flex flex-col gap-2 border-t border-ink-foreground/15 pt-6 md:flex-row md:items-center md:justify-between">
+        <div className="mt-16 border-t border-ink-foreground/15 pt-6">
           <p className="text-label text-ink-foreground/50">
-            © {new Date().getFullYear()} EVE Administradora de Imóveis
+            © {new Date().getFullYear()} {SITE_NAME}
           </p>
-          <p className="text-label text-ink-foreground/50">METRI</p>
         </div>
       </div>
     </footer>

@@ -20,8 +20,17 @@ Add it to the production Compose project next to `db` (the repository does not v
 ```
 
 Copy this folder next to that compose file (`scp -r backend/backup root@<vps>:/root/erp-imobiliaria/`).
-The tests (stdlib `unittest`; the dump round trip needs a reachable PostgreSQL and is skipped without one):
+The tests are stdlib `unittest`; the dump round trip needs a reachable PostgreSQL and is skipped without one. Run them
+in the backup image, as CI does: `pg_dump` and `pg_restore` must be the same major as the server (PostgreSQL 16), because
+a 17+ client writes `SET transaction_timeout`, which a 16 server refuses (the round trip then fails with
+`Command was: SET transaction_timeout = 0;`).
 
 ```bash
-cd backend && python -m unittest discover -s backup/tests -v
+docker build --tag erp-backup backend/backup
+docker run --rm --network host -e PYTHONDONTWRITEBYTECODE=1 -e POSTGRES_HOST=localhost -e POSTGRES_PASSWORD=postgres \
+  --volume "$PWD/backend/backup:/backup" erp-backup python3 -m unittest discover -s tests -v
 ```
+
+`--network host` reaches a PostgreSQL published on port 5432 of the machine; on Docker Desktop use
+`-e POSTGRES_HOST=host.docker.internal` instead. With a PostgreSQL 16 client installed you can also run
+`cd backend && python -m unittest discover -s backup/tests -v`.

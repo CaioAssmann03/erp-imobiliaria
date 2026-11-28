@@ -21,7 +21,7 @@ def _migrate(targets: list[tuple[str, str]]) -> Any:
 def _seed_company_with_condominiums(apps: Any, count: int) -> list[Any]:
     Company = apps.get_model("core", "Company")
     Condominium = apps.get_model("condominiums", "Condominium")
-    company = Company.objects.create(legal_name="Eve", cnpj="11222333000181")
+    company = Company.objects.create(legal_name="ACME", cnpj="11222333000181")
     cnpjs = ("45723174000110", "11444777000161")
     return [Condominium.objects.create(company=company, name=f"C{i}", cnpj=cnpjs[i]) for i in range(count)]
 
