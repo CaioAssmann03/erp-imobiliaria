@@ -5,14 +5,15 @@ skip-if: the ledger and its rules → apps/finance.md; the catalog of entry temp
 ---
 # 073 — Manual entries workspace
 
-**Status:** draft · **Level:** full · **Roadmap:** none · **Apps:** finance, frontend · **Frontend impact:** client regeneration, changed screens
+**Status:** ready · **Level:** full · **Roadmap:** none · **Apps:** finance, frontend · **Frontend impact:** client regeneration, changed screens
 
 ## Open questions
-None. The agent's decisions below are to be confirmed by the user when this spec is approved.
+None.
 
 ## Decisions
 | Date | Decision | Decided by |
 |---|---|---|
+| 2026-11-28 | The spec is **approved** ("APROVADO"), including every decision the agent marked below; implementation order: this spec (backend, then frontend), then 075, then 074 | the user |
 | 2026-11-26 | Before the entry part opens, the left column asks for a typed **date** (in place of the condominium select) and, below it, the typed **batch number**; with both, the entry screen opens | the user |
 | 2026-11-26 | A batch has **one date** and its **number is unique**: a number cannot repeat and a batch cannot have several days | the user |
 | 2026-11-26 | The number of the batch is new in **every** batch (bank, cash and extra cash), unique in the company; the origin stays (Banco by default) and the *número do caixa* stays only for the cash origins; the batches that exist get numbers in order | the user |
@@ -22,16 +23,16 @@ None. The agent's decisions below are to be confirmed by the user when this spec
 | 2026-11-26 | A batch takes entries of **several condominiums, as many times as wanted**: no limit of one entry per batch | the user |
 | 2026-11-26 | An entry can be **edited** or **deleted**. Only the **manual** ones (those made on this screen); the automatic ones (a paid account payable, a paid boleto) keep only the reversal | the user |
 | 2026-11-26 | **Deleting** marks the entry as deleted: it leaves the screens, the reports and the balance, but the row stays, with its registry number, who deleted it and when | the user |
-| 2026-11-26 | The templates become one **catalog of the administradora** with a unique number (spec 074). This spec does not wait for it: until it lands the template is chosen by name from the condominium's templates, whatever their sub-conta | the user (the catalog); agent, to be confirmed (the order) |
+| 2026-11-26 | The templates become one **catalog of the administradora** with a unique number (spec 074). This spec does not wait for it: until it lands the template is chosen by name from the condominium's templates, whatever their sub-conta | the user (the catalog); agent, confirmed by the user on 2026-11-28 (the order) |
 | 2026-11-27 | The sub-contas are the **administradora's standard model**: the **Conta Normal** is the same in every condominium and always there, and nothing has to be "activated" for a condominium. A manual entry names the sub-conta by its number; if the condominium does not have it yet, the system creates it when the entry is posted, and the statement shows the sub-conta with the value | the user |
-| 2026-11-26 | The date of a manual entry is its **batch's date** and its competence is the first day of that month; the server sets both (the form does not send them) | agent, to be confirmed |
-| 2026-11-26 | A blank description stores the **name of the template**, so every statement and report still shows a text | agent, to be confirmed |
-| 2026-11-27 | The Conta Normal keeps the number **0**, as in the system today and as the user wrote ("0 - Normal"; the later "01 / 0001, whichever" asks only that it be the same everywhere); it is created with every new condominium and, by a data migration, for the existing ones | agent, to be confirmed |
-| 2026-11-27 | The "Nova sub-conta" button of the condominium page stays (optional); billing plans and the other screens that list a condominium's sub-contas keep reading the ones that exist, which now include those created by use | agent, to be confirmed |
-| 2026-11-26 | The batch is **created with its first entries**, as today (no empty batch is left by a number that was only typed); a typed number that exists opens that batch, and with another date than the typed one it says "O lote N é do dia …" | agent, to be confirmed |
-| 2026-11-26 | The list of batches stays under the two fields, narrowed by the typed date (and by the origin filter); the condominium scope leaves the screen (the API filter stays) | agent, to be confirmed |
-| 2026-11-26 | Editing changes the **kind, amount, template, sub-conta and description**; not the condominium, the batch or the date (to move an entry: delete it and post it again) | agent, to be confirmed |
-| 2026-11-26 | An entry that has a reversal, that is a reversal, or is already deleted cannot be edited or deleted (the reversal pair would stop matching) | agent, to be confirmed |
+| 2026-11-26 | The date of a manual entry is its **batch's date** and its competence is the first day of that month; the server sets both (the form does not send them) | agent, confirmed by the user on 2026-11-28 |
+| 2026-11-26 | A blank description stores the **name of the template**, so every statement and report still shows a text | agent, confirmed by the user on 2026-11-28 |
+| 2026-11-28 | The Conta Normal is number **0** ("CONTA NORMAL 00"), as in the system today; it is the same in every condominium, created with every new condominium and, by a data migration, for the existing ones | the user |
+| 2026-11-27 | The "Nova sub-conta" button of the condominium page stays (optional); billing plans and the other screens that list a condominium's sub-contas keep reading the ones that exist, which now include those created by use | agent, confirmed by the user on 2026-11-28 |
+| 2026-11-26 | The batch is **created with its first entries**, as today (no empty batch is left by a number that was only typed); a typed number that exists opens that batch, and with another date than the typed one it says "O lote N é do dia …" | agent, confirmed by the user on 2026-11-28 |
+| 2026-11-26 | The list of batches stays under the two fields, narrowed by the typed date (and by the origin filter); the condominium scope leaves the screen (the API filter stays) | agent, confirmed by the user on 2026-11-28 |
+| 2026-11-26 | Editing changes the **kind, amount, template, sub-conta and description**; not the condominium, the batch or the date (to move an entry: delete it and post it again) | agent, confirmed by the user on 2026-11-28 |
+| 2026-11-26 | An entry that has a reversal, that is a reversal, or is already deleted cannot be edited or deleted (the reversal pair would stop matching) | agent, confirmed by the user on 2026-11-28 |
 
 ## R — Requirements
 The staff post entries in batches the way the administradora already works: a day, a batch number, and then as many entries as the batch holds, of any condominium, which they can still correct.
