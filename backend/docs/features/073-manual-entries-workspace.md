@@ -5,7 +5,7 @@ skip-if: the ledger and its rules → apps/finance.md; the catalog of entry temp
 ---
 # 073 — Manual entries workspace
 
-**Status:** ready · **Level:** full · **Roadmap:** none · **Apps:** finance, frontend · **Frontend impact:** client regeneration, changed screens
+**Status:** in-progress · **Level:** full · **Roadmap:** none · **Apps:** finance, frontend · **Frontend impact:** client regeneration, changed screens
 
 ## Open questions
 None.
@@ -33,11 +33,12 @@ None.
 | 2026-11-26 | The list of batches stays under the two fields, narrowed by the typed date (and by the origin filter); the condominium scope leaves the screen (the API filter stays) | agent, confirmed by the user on 2026-11-28 |
 | 2026-11-26 | Editing changes the **kind, amount, template, sub-conta and description**; not the condominium, the batch or the date (to move an entry: delete it and post it again) | agent, confirmed by the user on 2026-11-28 |
 | 2026-11-26 | An entry that has a reversal, that is a reversal, or is already deleted cannot be edited or deleted (the reversal pair would stop matching) | agent, confirmed by the user on 2026-11-28 |
+| 2026-11-28 | `number` is **optional** on `POST /api/entry-batches/`: left out, the batch takes the next free number (the one after the highest of the company, under a lock on the company row), which is how the batches of the automatic postings (a paid account payable, a paid boleto) are numbered; so the screen of today keeps working until the new one lands. The new screen always sends the typed number | agent, to be confirmed |
 
 ## R — Requirements
 The staff post entries in batches the way the administradora already works: a day, a batch number, and then as many entries as the batch holds, of any condominium, which they can still correct.
 - [ ] R1 — The left column of *Lançamento manual* has a **date** field and, below it, a **batch number** field instead of the condominium select; the list of batches follows the typed date; the entry screen opens only with both
-- [ ] R2 — `EntryBatch.number`: required, a positive integer, **unique in the company**, never changes; the existing batches get 1, 2, 3… per company by date and creation; `GET /api/entry-batches/?number=`; a repeated number is a coded 400
+- [x] R2 — `EntryBatch.number`: a positive integer, **unique in the company**, never changes (the next free one when left out); the existing batches get 1, 2, 3… per company by date and creation; `GET /api/entry-batches/?number=`; a repeated number is a coded 400
 - [ ] R3 — A batch's `batch_date` never changes; typing the number of a batch that has another date does not open a form for the typed date and says which day the batch belongs to; a manual entry's `entry_date` is its batch's date (rule in the model)
 - [ ] R4 — A number that does not exist opens the entry form for a new batch with that date and number (origin Banco by default, the *número do caixa* only for the cash origins); the batch is created together with its first entries
 - [ ] R5 — A line of the form has condominium, template, sub-conta, kind, amount and description only. The server sets `entry_date` (the batch's) and `competence_month` (the first day of its month) for a manual entry; a blank description becomes the template's name
@@ -54,7 +55,7 @@ The staff post entries in batches the way the administradora already works: a da
 ## E — Entities
 | Entity | Change | Fields / rules |
 |---|---|---|
-| `finance.EntryBatch` | `number` | `PositiveIntegerField`, required, validator ≥ 1; `UniqueConstraint(company, number)` (`entry_batch_unique_number_per_company`, coded message); rule `EntryBatchRules`: `number` and `batch_date` cannot change once saved |
+| `finance.EntryBatch` | `number` | `PositiveIntegerField` (blank: `save()` takes the next free number), validator ≥ 1; `UniqueConstraint(company, number)` (`entry_batch_unique_number_per_company`, coded message); rule `EntryBatchRules`: `number` and `batch_date` cannot change once saved |
 | `finance.CurrentAccountEntry` | soft delete | `SoftDeleteMixin` (`deleted_at`): `objects` hides the deleted ones, `all_objects` shows them; `delete()` stays refused (a deletion goes through `delete_entry`); `save()` of a saved entry stays refused except through `update_entry` |
 | `finance.CurrentAccountEntryRules` | rules | a manual entry's `entry_date` equals its batch's `batch_date`; new `EntryChangeRules`: only `origin=manual`, no `reversal_of`, no `reversal`, not deleted (coded errors) |
 | `finance.CostCenter` | created on use | `ensure_cost_center(condominium, catalog_item)`: finds the condominium's sub-conta of that item or creates it (unique `(condominium, catalog_item)` already exists); `create_condominium` creates the Conta Normal; a data migration adds it to the existing condominiums |
@@ -84,7 +85,7 @@ Frontend (`app/(dashboard)/finance/entries/`, `lib/finance/entry-batch-workspace
 | Method | URL | Request | Response | Notes |
 |---|---|---|---|---|
 | GET | `/api/entry-batches/` | `?number=`, `?batch_date=`, `?origin=`, `?condominium=` | page of batches | `number` in each row |
-| POST | `/api/entry-batches/` | `batch_date`, `number`, `origin`, `cash_number?` | the batch | repeated `number` → 400 |
+| POST | `/api/entry-batches/` | `batch_date`, `number?`, `origin`, `cash_number?` | the batch | repeated `number` → 400; left out, the next free one |
 | POST | `/api/entry-batches/{id}/entries/` | `lines: [{current_account, entry_template, catalog_item, kind, amount, description?}]` | the entries | all or none; date and competence from the batch |
 | PATCH | `/api/current-account-entries/{id}/` | any of `kind, amount, entry_template, catalog_item, description` | the entry | manual only; balance adjusted |
 | DELETE | `/api/current-account-entries/{id}/` | — | 204 | marks as deleted; manual only |
@@ -103,10 +104,10 @@ Rules in the models, services orchestrate (`conventions/practices.md` §2, §3b)
 ## S — Safeguards
 - **Sub-conta on use:** `ensure_cost_center` runs inside the posting transaction and relies on the unique `(condominium, catalog_item)` constraint, so two simultaneous postings create one sub-conta; the catalog item must belong to the condominium's company and be active.
 - **Company scoping:** the new endpoints use the existing company-scoped viewset; another company's entry or batch is a 404; the number is unique per company, not global.
-- **Integrity:** one transaction per change, the account row locked, the balance moved by the exact difference; `recalculated_balance()` still equals the cached balance after any sequence of post, edit, delete and reverse (a test). Two users typing the same new number: the second gets the unique-constraint error as a coded 400.
+- **Integrity:** one transaction per change, the account row locked, the balance moved by the exact difference; `recalculated_balance()` still equals the cached balance after any sequence of post, edit, delete and reverse (a test). Two users typing the same new number: the second submit gets the model rule's coded 400, and the unique constraint closes the race of a few milliseconds between the check and the insert.
 - **Closed months:** closings do not exist yet (phase 6). When they do, editing and deleting an entry of a closed month must be refused; recorded in `known-gaps.md`.
 - **Audit:** who changed or deleted what, and when, is in the audit log; the deleted row stays in the table.
-- **Compatibility:** `number` is required to create a batch (only our screen calls it); `entry_date` and `competence_month` become optional on the batch entries endpoint and are ignored for a manual entry; the automatic postings do not change.
+- **Compatibility:** `number` may be left out when a batch is created (it takes the next free one), so the screen of today and the automatic postings keep working; `entry_date` and `competence_month` become optional on the batch entries endpoint and are ignored for a manual entry; the automatic postings do not change.
 - **Performance:** index on `(company, number)` through the constraint; the opening check is one `?number=` query.
 
 ## Test plan

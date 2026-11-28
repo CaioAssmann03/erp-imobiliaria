@@ -12,8 +12,11 @@ class EntryBatchSerializer(ModelRulesMixin, serializers.ModelSerializer[EntryBat
     @final
     class Meta:
         model = EntryBatch
-        fields = ("id", "company", "batch_date", "origin", "cash_number", "created_at", "updated_at")
+        fields = ("id", "company", "number", "batch_date", "origin", "cash_number", "created_at", "updated_at")
         read_only_fields = ("id", "company", "created_at", "updated_at")
+        extra_kwargs = {"number": {"required": False}}
+        # DRF would require `number` for its own unique-together check; the model constraints run in `ModelRulesMixin`.
+        validators = ()
 
     @override
     def create(self, validated_data: dict[str, Any]) -> EntryBatch:

@@ -57,13 +57,13 @@ class CurrentAccountEntryFilter(django_filters.FilterSet):
 
 @final
 class EntryBatchFilter(django_filters.FilterSet):
-    """`?origin=`, `?batch_date=` and `?condominium=<id>`: the batches that have at least one entry of that condominium (a batch may cover several)."""
+    """`?number=`, `?origin=`, `?batch_date=` and `?condominium=<id>`: the batches that have at least one entry of that condominium (a batch may cover several)."""
 
     condominium = django_filters.UUIDFilter(field_name="entries__current_account__condominium", distinct=True)
 
     class Meta:
         model = EntryBatch
-        fields = ("origin", "batch_date")
+        fields = ("number", "origin", "batch_date")
 
 
 @final
