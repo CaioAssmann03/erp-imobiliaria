@@ -135,7 +135,7 @@ docker compose exec db psql -U "$POSTGRES_USER" -d erp_restore_drill -c "select 
 docker compose exec db dropdb -U "$POSTGRES_USER" erp_restore_drill
 ```
 
-**Disaster restore with standard tools only** (no code of this project needed; any machine with `openssl` and PostgreSQL 16 client tools): download the `db/erp-….dump.enc` file from the bucket, create an empty database, and
+**Disaster restore with standard tools only** (no code of this project needed; any machine with `openssl` and PostgreSQL 16 client tools: a newer `pg_restore` writes `SET transaction_timeout`, which a 16 server refuses, so on a machine with a 17+ client run the command inside the `backup` container or a `postgres:16` image): download the `db/erp-….dump.enc` file from the bucket, create an empty database, and
 ```bash
 openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -pass env:BACKUP_PASSPHRASE -in erp-YYYYMMDD-HHMMSS.dump.enc \
   | pg_restore --no-owner --no-acl --dbname <the empty database>
