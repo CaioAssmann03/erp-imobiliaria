@@ -281,12 +281,21 @@ test("every public-page file that animates with motion/react honors the lite mod
   assert.deepEqual(animated.map((file) => relative(ROOT, file)), []);
 });
 
-// The rail expands and collapses (click on the logo), but the choice lives only in the browser (`localStorage`): the server renders the
+// The rail expands and collapses (the "Recolher menu" button, or a click on the logo), but the choice lives only in the browser (`localStorage`): the server renders the
 // same HTML for everyone, so there is no <html> attribute, no cookie and no CSS variant for it.
 test("the rail state is not on <html>: no attribute, cookie or variant", () => {
   assert.equal(Object.hasOwn(runInitScript(""), "sidebar"), false);
   const css = readFileSync(join(ROOT, "app", "globals.css"), "utf8");
   assert.doesNotMatch(css, /sidebar-closed/);
+});
+
+test("the rail has a visible button that collapses and expands it, with an icon and a label", () => {
+  const rail = readFileSync(join(DASHBOARD, "_components", "shell", "rail", "Rail.tsx"), "utf8");
+
+  assert.match(rail, /PanelLeftClose/);
+  assert.match(rail, /PanelLeftOpen/);
+  // The text is part of the expanded rail, not only a tooltip: that is what people look for.
+  assert.match(rail, /<RailLabel>Recolher menu<\/RailLabel>/);
 });
 
 test("the extra boleto is in the 3 columns, with the frame as the layout", () => {

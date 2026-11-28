@@ -1,5 +1,6 @@
 "use client";
 
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -16,14 +17,20 @@ import { useRailExpanded } from "./use-rail-expanded";
 
 /**
  * Client Component: a lateral (só em telas grandes; no celular a navegação é o `MobileMenu`). Recolhida é uma faixa de ícones; expandida, os
- * ícones com o nome ao lado. Clicar no logo alterna os dois, e a escolha fica lembrada neste navegador. Um módulo com grupos abre o cartão
- * `ModuleMenu`; sem grupos (Painel, Pessoas) é um link direto. Embaixo ficam a busca (`SearchRailButton`), as configurações e o sair. Precisa do pathname para marcar o módulo ativo.
+ * ícones com o nome ao lado. O botão "Recolher menu" / "Expandir menu" (com ícone e, expandida, o texto) alterna os dois, e a escolha fica lembrada
+ * neste navegador; clicar no logo faz o mesmo, só para quem usa o mouse. Um módulo com grupos abre o cartão `ModuleMenu`; sem grupos (Painel, Pessoas) é um
+ * link direto. Embaixo ficam a busca (`SearchRailButton`), as configurações, o botão de recolher e o sair. Precisa do pathname para marcar o módulo ativo.
  */
 export function Rail() {
   const current = activeModule(usePathname());
   const [expanded, toggle] = useRailExpanded();
   // A largura só anima depois de um clique: quem abre a página já com a rail expandida não a vê "abrir" a cada carga.
   const [animated, setAnimated] = useState(false);
+  const toggleLabel = expanded ? "Recolher menu" : "Expandir menu";
+  const toggleRail = () => {
+    setAnimated(true);
+    toggle();
+  };
 
   return (
     <aside
@@ -35,16 +42,14 @@ export function Rail() {
         animated && "transition-[width] duration-200 ease-out",
       )}
     >
+      {/* O logo também alterna a rail, um atalho para o mouse: quem usa teclado ou leitor de tela tem o botão "Recolher menu" lá embaixo. */}
       <button
         type="button"
-        onClick={() => {
-          setAnimated(true);
-          toggle();
-        }}
-        aria-label={expanded ? "Recolher menu" : "Expandir menu"}
-        aria-expanded={expanded}
-        title={expanded ? "Recolher menu" : "Expandir menu"}
-        className="mb-8 flex h-11 items-center rounded-control px-2 outline-none transition-opacity hover:opacity-75 focus-visible:ring-2 focus-visible:ring-ring"
+        onClick={toggleRail}
+        title={toggleLabel}
+        tabIndex={-1}
+        aria-hidden="true"
+        className="mb-8 flex h-11 items-center rounded-control px-2 outline-none transition-opacity hover:opacity-75"
       >
         <Brand compact={!expanded} />
       </button>
@@ -75,6 +80,17 @@ export function Rail() {
       <div className="mt-auto flex flex-col gap-1.5">
         <SearchRailButton expanded={expanded} />
         <SettingsDialog expanded={expanded} />
+        <button
+          type="button"
+          onClick={toggleRail}
+          title={toggleLabel}
+          aria-label={toggleLabel}
+          aria-expanded={expanded}
+          className={railButtonClass(false, false, expanded)}
+        >
+          {expanded ? <PanelLeftClose className="size-5 shrink-0" /> : <PanelLeftOpen className="size-5 shrink-0" />}
+          {expanded && <RailLabel>Recolher menu</RailLabel>}
+        </button>
         <LogoutButton rail expanded={expanded} />
       </div>
     </aside>
