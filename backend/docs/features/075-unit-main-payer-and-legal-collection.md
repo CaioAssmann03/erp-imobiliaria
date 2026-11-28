@@ -1,28 +1,30 @@
 ---
-summary: Spec 075 (draft) — each unit has one main owner and one main tenant (the boleto goes to the main one of the role chosen, in that person's CPF or CNPJ), a Cobrança jurídica part with the process number, and observation fields.
+summary: Spec 075 — each unit has one main owner and one main tenant (the boleto goes to the main one of the role chosen, in that person's CPF or CNPJ), a Cobrança jurídica part with the process number, and observation fields.
 read-when: you change who receives a unit's boleto, the owner and tenant links of a unit, or the legal collection and notes fields of a unit
 skip-if: the unit page layout and its sections → features/history.md (spec 050); issuing the boleto itself → apps/billing.md; the person's data → apps/persons.md
 ---
 # 075 — Unit: main owner and tenant, legal collection and notes
 
-**Status:** draft · **Level:** full · **Roadmap:** none · **Apps:** condominiums, billing, frontend · **Frontend impact:** client regeneration, changed screens
+**Status:** ready · **Level:** full · **Roadmap:** none · **Apps:** condominiums, billing, finance, frontend · **Frontend impact:** client regeneration, changed screens
 
 ## Open questions
-- [ ] When the **main link ends** (or is removed) and other current links of that role remain, does another one become main by itself? (recommended: no; until someone chooses, the payer keeps the rule of today, the largest share and then the earliest start, and the unit page says "Sem principal: escolha um", so a boleto never stops by surprise)
-- [ ] Should the **process number** also appear in the *Ficha da unidade* report (spec 071)? (recommended: yes, one line under the unit's data)
-- [ ] Does a unit in legal collection stop its boletos? (recommended: no; the unit already has "Bloquear lançamentos", which is a separate choice)
-- [ ] The process number is free text up to 40 characters (recommended, the courts use more than one format) or the unified CNJ number, validated (`0000000-00.0000.0.00.0000`)?
+None.
 
 ## Decisions
 | Date | Decision | Decided by |
 |---|---|---|
+| 2026-11-28 | The spec is **approved** ("APROVADO") with the recommended answers to its four open questions, which are the next four rows | the user |
+| 2026-11-28 | When the **main link ends** (or is removed) and other current links of that role remain, **no other one becomes main by itself**: until someone chooses, the payer keeps the rule of today (the largest share, then the earliest start) and the unit page says "Sem principal: escolha um", so a boleto never stops by surprise | the user (recommended answer, approved) |
+| 2026-11-28 | The **process number** also appears in the *Ficha da unidade* report (spec 071), in one line under the unit's data | the user (recommended answer, approved) |
+| 2026-11-28 | A unit in legal collection **does not stop its boletos**; "Bloquear lançamentos", which the unit already has, stays a separate choice | the user (recommended answer, approved) |
+| 2026-11-28 | The process number is **free text up to 40 characters** (the courts use more than one format); it is not validated as a CNJ number | the user (recommended answer, approved) |
 | 2026-11-27 | The unit page gets a part for **legal collection** (*cobrança jurídica*) with the **process number**, and **observation** fields | the user |
 | 2026-11-27 | The owners keep the percentage of each one, but **one owner is the main one** and the boleto is issued in his or her CPF or CNPJ; **the same for the tenants**: one main tenant | the user |
-| 2026-11-27 | A link has `is_primary`. Among the links of a unit with the same role and **no end date**, at most one is main (a partial unique constraint and a model rule) | agent, to be confirmed |
-| 2026-11-27 | The **first** link of a role in a unit is created as the main one; a later link is created as main only if the role has none; **Tornar principal** moves it from one to another in one step | agent, to be confirmed |
-| 2026-11-27 | The boleto payer is the **main link of the role** the unit sends the boleto to (`billing_recipient`); with the tenant chosen and no current tenant it falls back to the main owner, as today; with no main link the rule of today applies | agent, to be confirmed |
-| 2026-11-27 | The links that exist are not left without a main one: a data migration marks, in each unit and role with current links, the one that today's rule would choose | agent, to be confirmed |
-| 2026-11-27 | Three optional text fields on the unit: `legal_process_number` (up to 40), `legal_notes` and `notes`. **Observações** sits in *Dados gerais* and **Cobrança jurídica** is its own part with the process number and its observations; the notes are plain text, not a place for passwords (a hint says so) | agent, to be confirmed |
+| 2026-11-27 | A link has `is_primary`. Among the links of a unit with the same role and **no end date**, at most one is main (a partial unique constraint and a model rule) | agent, confirmed by the user on 2026-11-28 |
+| 2026-11-27 | The **first** link of a role in a unit is created as the main one; a later link is created as main only if the role has none; **Tornar principal** moves it from one to another in one step | agent, confirmed by the user on 2026-11-28 |
+| 2026-11-27 | The boleto payer is the **main link of the role** the unit sends the boleto to (`billing_recipient`); with the tenant chosen and no current tenant it falls back to the main owner, as today; with no main link the rule of today applies | agent, confirmed by the user on 2026-11-28 |
+| 2026-11-27 | The links that exist are not left without a main one: a data migration marks, in each unit and role with current links, the one that today's rule would choose | agent, confirmed by the user on 2026-11-28 |
+| 2026-11-27 | Three optional text fields on the unit: `legal_process_number` (up to 40), `legal_notes` and `notes`. **Observações** sits in *Dados gerais* and **Cobrança jurídica** is its own part with the process number and its observations; the notes are plain text, not a place for passwords (a hint says so) | agent, confirmed by the user on 2026-11-28 |
 
 ## R — Requirements
 The boleto of a unit with two owners (80% and 20%) must go to the one the staff chose, not to whoever happens to have the larger share, and the same for tenants; and the unit must carry what the staff need about a legal collection.
@@ -33,6 +35,7 @@ The boleto of a unit with two owners (80% and 20%) must go to the one the staff 
 - [ ] R5 — The *Proprietário* and *Inquilino* parts show a **Principal** tag on the main link and **Tornar principal** on the other current ones; the add form has **Principal (recebe o boleto)**, checked when the role has none; a role with links and no main one says so
 - [ ] R6 — `Unit.legal_process_number`, `Unit.legal_notes` and `Unit.notes` exist, are optional and come and go through the unit API; they are audited with the unit
 - [ ] R7 — The unit page has the **Cobrança jurídica** part (process number and observations) in its menu and an **Observações** field in *Dados gerais*; nothing in them changes what is billed
+- [ ] R8 — The *Ficha da unidade* (spec 071, on screen and as PDF) shows the process number in one line under the unit's data when the unit has one, and nothing when it has none
 
 ## E — Entities
 | Entity | Change | Fields / rules |
@@ -50,8 +53,8 @@ The boleto of a unit with two owners (80% and 20%) must go to the one the staff 
 - Rejected: the highest share as the main one by definition (the staff asked to choose); one flag on the unit pointing to a person (it would not survive the end of that link or the change of the role).
 
 ## S — Structure
-Backend (`apps/condominiums/`): `models/unit_person.py`, `models/rules/unit_person.py`, `errors/`, `models/unit.py` (`billing_payer`, the three fields), `services/make_primary_unit_person.py`, `serializers/unit_person_serializers.py` and `unit_serializers.py`, `views/unit_person_views.py` (the action), `admin.py`, migrations (the fields, then the data migration of R4); `billing` calls `billing_payer` as before.
-Frontend: `unit-people/UnitPeopleList.tsx`, `UnitPersonForm.tsx`, `unit-link-summary.ts`, a new `LegalCollectionSection`, `IdentificationSection` (Observações), `lib/schemas/unit.ts`, `lib/condominiums/unit-workspace.ts` (the section index), the client.
+Backend (`apps/condominiums/`): `models/unit_person.py`, `models/rules/unit_person.py`, `errors/`, `models/unit.py` (`billing_payer`, the three fields), `services/make_primary_unit_person.py`, `serializers/unit_person_serializers.py` and `unit_serializers.py`, `views/unit_person_views.py` (the action), `admin.py`, migrations (the fields, then the data migration of R4); `billing` calls `billing_payer` as before. `apps/finance/` for R8: `services/build_unit_sheet.py`, `serializers/unit_sheet_serializers.py`, `services/render_unit_sheet_pdf.py` (one more field, escaped like the others).
+Frontend: `unit-people/UnitPeopleList.tsx`, `UnitPersonForm.tsx`, `unit-link-summary.ts`, a new `LegalCollectionSection`, `IdentificationSection` (Observações), `lib/schemas/unit.ts`, `lib/condominiums/unit-workspace.ts` (the section index), the unit sheet screen (one line), the client.
 
 | Method | URL | Request | Response | Notes |
 |---|---|---|---|---|
@@ -84,6 +87,7 @@ Rules in the models, services orchestrate; names in English; Portuguese on the s
 | R5 | `frontend/tests/unit-link-summary.test.mjs` (the tag and the empty-main message); the buttons driven in a browser |
 | R6 | `apps/condominiums/tests/test_unit_legal_collection.py` (fields, API, audit) |
 | R7 | none automated: the unit page driven in a browser (a written gap) |
+| R8 | `apps/finance/tests/test_unit_sheet.py` (the process number in the data and in the PDF, absent when empty); the sheet driven in a browser |
 
 ## Definition of done
 - [ ] Every criterion R1… has a passing test in the Test plan, or a written gap

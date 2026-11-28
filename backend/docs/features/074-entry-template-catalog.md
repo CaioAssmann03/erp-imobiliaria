@@ -10,24 +10,26 @@ skip-if: the manual entry screen that uses it → features/073-manual-entries-wo
 The user chose this on 2026-11-26 while answering the questions of spec 073. It is bigger than it looks, so it is a spec of its own and comes **after** 073, which does not wait for it.
 
 ## Open questions
-- [ ] **Billing launches** (*Inclusão de valores*) take their template today by themselves: the only active template of the chosen sub-conta (`BillingEntry.clean`, and a rule that refuses a sub-conta with none or several). Without the link to the sub-conta, how does a launch get its template? (recommended: an explicit **Modelo** field on the launch, chosen from the catalog and required)
-- [ ] **Plan items, boleto items and accounts payable** require today that the template belong to the item's sub-conta, and a payable fills its template from its sub-conta. (recommended: the template is chosen from the whole catalog, not filtered by sub-conta; those three rules go away)
-- [ ] Two templates with the **same name in different sub-contas** become one catalog item. When their attributes differ (accumulation history, accumulates to the balance, social security, administration fee percentage), which values win? (recommended: those of the template that has the most entries, the oldest on a tie; the data is demo data)
-- [ ] Where are catalog templates **maintained**? (recommended: the Django Admin, as today, in this spec; a *Financeiro → Modelos de lançamento* screen like the sub-conta catalog in a later spec)
-- [ ] The first number: 1 (recommended), as the billing events, or 0?
-- [ ] The staging: spec 073 first, with the template chosen **by name** in the new entry screen and the typed number arriving with this spec. (recommended: yes, so the screen is not blocked by a change of this size)
+None. The six questions were answered on 2026-11-28 (the rows of *Decisions* below); the sections after the requirements are completed before the implementation starts.
 
 ## Decisions
 | Date | Decision | Decided by |
 |---|---|---|
 | 2026-11-26 | The entry templates become **one catalog of the administradora**, each with a **unique number**, valid for **all** the condominiums (like the sub-contas catalog of spec 053) | the user |
+| 2026-11-28 | The spec is **approved** ("APROVADO") with the recommended answers to its six open questions, which are the next six rows; it stays `draft` until its structure, operations and test plan are written, and it is implemented after 073 and 075 | the user |
+| 2026-11-28 | **Billing launches** (*Inclusão de valores*) get an explicit **Modelo** field, chosen from the catalog and required; the automatic "only active template of the sub-conta" (`BillingEntry.clean`) and the rule that refuses a sub-conta with none or several go away | the user (recommended answer, approved) |
+| 2026-11-28 | **Plan items, boleto items and accounts payable** choose the template from the **whole catalog**, not filtered by sub-conta; the three rules "the template belongs to the item's sub-conta" go away, and a payable no longer fills its template from its sub-conta | the user (recommended answer, approved) |
+| 2026-11-28 | Templates with the **same name in different sub-contas** become one catalog item; when their attributes (accumulation history, accumulates to the balance, social security, administration fee percentage) differ, those of the template that has **the most entries** win, the oldest on a tie | the user (recommended answer, approved) |
+| 2026-11-28 | The catalog templates are **maintained in the Django Admin**, as today; a *Financeiro → Modelos de lançamento* screen like the sub-conta catalog is a later spec | the user (recommended answer, approved) |
+| 2026-11-28 | The first template number is **1**, as the billing events | the user (recommended answer, approved) |
+| 2026-11-28 | **Staging:** spec 073 comes first, with the template chosen **by name** in the new entry screen; the typed template number arrives with this spec | the user (recommended answer, approved) |
 
 ## R — Requirements
-Draft; to be written when the questions are answered. What is already clear:
-- [ ] R1 — A template has a number, unique in the company, and a name, unique in the company (case-insensitive); it carries the attributes it has today (accumulation history, accumulates to the balance, social security, administration fee percentage) and `active`
+The questions are answered; the rest of the spec (structure, operations, norms, test plan, the migration's reverse) is written before the implementation starts. What is already clear:
+- [ ] R1 — A template has a number (from 1), unique in the company, and a name, unique in the company (case-insensitive); it carries the attributes it has today (accumulation history, accumulates to the balance, social security, administration fee percentage) and `active`
 - [ ] R2 — A template no longer belongs to a sub-conta: any template of the company can be used with any sub-conta of any condominium of the company
 - [ ] R3 — The templates that exist are merged by name into the catalog and every record that points to a template (ledger entries, accounts payable, plan items, boleto items, billing launches) points to the merged one; the migration reverses
-- [ ] R4 — Billing launches, plan items, boleto items and accounts payable ask for the template explicitly (the answers above)
+- [ ] R4 — Billing launches ask for an explicit, required **Modelo**; plan items, boleto items and accounts payable take any template of the catalog, with no filter by sub-conta (the answers above)
 - [ ] R5 — Every screen that picks a template shows `number - name` and accepts the number typed; the entry screen of spec 073 starts using the typed number
 - [ ] R6 — The `entry-templates` API is company-wide: no `condominium` or `cost_center` filter, `?query=` matches the name and the number
 
