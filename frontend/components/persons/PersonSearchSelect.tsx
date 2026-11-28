@@ -11,7 +11,7 @@ import { formattedPersonDocument } from "@/lib/persons/person-document";
 import { CONDOMINIUMS_MODULE } from "@/lib/persons/person-module";
 
 /**
- * O campo para escolher uma pessoa: o próprio campo é digitável (nome, CPF/CNPJ ou ID), a busca vai ao servidor e a lista mostra poucas por vez
+ * O campo para escolher uma pessoa: o próprio campo é digitável (nome, CPF/CNPJ, e-mail ou ID), a busca vai ao servidor e a lista mostra poucas por vez
  * (`SearchCombobox`). A pessoa já escolhida entra sempre na lista, para o campo mostrar o nome dela. `onChange` recebe o id (vazio ao limpar) e a pessoa.
  */
 export function PersonSearchSelect({
@@ -19,7 +19,7 @@ export function PersonSearchSelect({
   label,
   value,
   onChange,
-  placeholder = "Busque por nome ou CPF/CNPJ",
+  placeholder = "Busque por nome, CPF/CNPJ ou e-mail",
   invalid,
   describedBy,
   clearable,

@@ -49,6 +49,17 @@ def test_search_by_cpf_and_cnpj(api_client: APIClient, list_url: str) -> None:
     assert [person["name"] for person in results(by_cnpj)] == ["Empresa"]
 
 
+def test_search_by_email(api_client: APIClient, list_url: str) -> None:
+    _ = make_individual(name="Maria Silva", cpf=CPF_A, email="maria.silva@exemplo.com.br")
+    _ = make_legal(name="Empresa LTDA", cnpj=CNPJ_A)
+
+    by_address = api_client.get(list_url, {"query": "maria.silva@exemplo.com.br"})
+    by_domain = api_client.get(list_url, {"query": "@exemplo.com.br"})
+
+    assert [person["name"] for person in results(by_address)] == ["Maria Silva"]
+    assert [person["name"] for person in results(by_domain)] == ["Maria Silva"]
+
+
 def test_filter_by_active(api_client: APIClient, list_url: str) -> None:
     _ = Person.objects.create(company=seeded_company(), name="Ativa", active=True)
     _ = Person.objects.create(company=seeded_company(), name="Inativa", active=False)
